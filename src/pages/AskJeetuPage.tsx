@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Mic, MicOff, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { getResponseForQuery, getGreetingByLanguage } from '@/lib/jeetuBhaiya';
+import { getGreetingByLanguage } from '@/lib/jeetuBhaiya';
+import { useJeetuChat } from '@/hooks/useJeetuChat';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -17,6 +19,7 @@ interface Message {
 const AskJeetuPage: React.FC = () => {
   const { language } = useLanguage();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { sendMessage, isLoading, error } = useJeetuChat();
   
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -28,7 +31,6 @@ const AskJeetuPage: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -37,6 +39,13 @@ const AskJeetuPage: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Show error toast
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   // Update greeting when language changes
   useEffect(() => {
@@ -57,8 +66,8 @@ const AskJeetuPage: React.FC = () => {
     "JEE Advanced Physics kaise prepare karein?"
   ];
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -68,25 +77,46 @@ const AskJeetuPage: React.FC = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const userInput = input;
     setInput('');
-    setIsTyping(true);
 
-    // Simulate typing delay for natural feel
-    const typingDelay = 800 + Math.random() * 700;
+    // Build message history for AI (excluding the greeting if it's the only message)
+    const chatHistory = messages
+      .filter(m => m.role !== 'assistant' || messages.indexOf(m) > 0 || messages.length > 1)
+      .map(m => ({ role: m.role, content: m.content }));
     
-    setTimeout(() => {
-      const response = getResponseForQuery(input);
-      
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response.message,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, aiResponse]);
-      setIsTyping(false);
-    }, typingDelay);
+    chatHistory.push({ role: 'user', content: userInput });
+
+    let assistantContent = '';
+    
+    const updateAssistant = (chunk: string) => {
+      assistantContent += chunk;
+      setMessages(prev => {
+        const last = prev[prev.length - 1];
+        if (last?.role === 'assistant' && last.id.startsWith('streaming-')) {
+          return prev.map((m, i) => 
+            i === prev.length - 1 ? { ...m, content: assistantContent } : m
+          );
+        }
+        return [...prev, {
+          id: 'streaming-' + Date.now(),
+          role: 'assistant' as const,
+          content: assistantContent,
+          timestamp: new Date()
+        }];
+      });
+    };
+
+    await sendMessage(chatHistory, updateAssistant, () => {
+      // Finalize the message ID
+      setMessages(prev => 
+        prev.map(m => 
+          m.id.startsWith('streaming-') 
+            ? { ...m, id: Date.now().toString() } 
+            : m
+        )
+      );
+    });
   };
 
   const handleQuickQuestion = (question: string) => {
@@ -98,7 +128,6 @@ const AskJeetuPage: React.FC = () => {
   };
 
   const formatMessage = (content: string) => {
-    // Convert **text** to bold
     return content.split('\n').map((line, i) => {
       const parts = line.split(/(\*\*.*?\*\*)/g);
       return (
@@ -134,7 +163,7 @@ const AskJeetuPage: React.FC = () => {
             </p>
           </div>
           <div className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
-            PCM Only
+            AI-Powered
           </div>
         </div>
 
@@ -173,7 +202,7 @@ const AskJeetuPage: React.FC = () => {
           ))}
 
           {/* Typing Indicator */}
-          {isTyping && (
+          {isLoading && messages[messages.length - 1]?.role === 'user' && (
             <div className="flex justify-start animate-fade-in">
               <div className="w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0">
                 <span className="text-setu-saffron font-bold text-xs">JB</span>
@@ -189,7 +218,7 @@ const AskJeetuPage: React.FC = () => {
           )}
 
           {/* Quick Questions - Show only at start */}
-          {messages.length === 1 && !isTyping && (
+          {messages.length === 1 && !isLoading && (
             <div className="space-y-3 pt-4">
               <p className="text-xs text-muted-foreground font-medium">
                 💡 Quick doubts to get started:
@@ -245,7 +274,7 @@ const AskJeetuPage: React.FC = () => {
             
             <Button
               onClick={handleSend}
-              disabled={!input.trim() || isTyping}
+              disabled={!input.trim() || isLoading}
               className="btn-hero flex-shrink-0 rounded-xl px-4"
             >
               <Send className="w-5 h-5" />
