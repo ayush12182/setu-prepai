@@ -13,7 +13,10 @@ import {
   Lightbulb,
   Target,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  TrendingUp,
+  Clock,
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -39,60 +42,77 @@ const ChapterPage: React.FC = () => {
 
   return (
     <MainLayout title={chapter.name}>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex items-start gap-4">
           <Button 
             variant="ghost" 
             size="icon"
             onClick={() => navigate(-1)}
+            className="mt-1"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className={cn(
-                'text-xs font-medium px-2 py-0.5 rounded-full',
-                chapter.weightage === 'High' ? 'bg-setu-saffron/10 text-setu-saffron' :
-                chapter.weightage === 'Medium' ? 'bg-setu-warning/10 text-setu-warning' :
-                'bg-muted text-muted-foreground'
+                'text-xs font-medium px-2 py-0.5 rounded-full border',
+                chapter.weightage === 'High' ? 'bg-setu-saffron/10 text-setu-saffron border-setu-saffron/30' :
+                chapter.weightage === 'Medium' ? 'bg-setu-warning/10 text-setu-warning border-setu-warning/30' :
+                'bg-muted text-muted-foreground border-border'
               )}>
                 {chapter.weightage} Weightage
               </span>
-              <span className="text-xs text-muted-foreground">
-                PYQ Frequency: {chapter.pyqFrequency}/10
+              <span className={cn(
+                'text-xs font-medium px-2 py-0.5 rounded-full',
+                chapter.difficulty === 'Hard' ? 'text-setu-error' :
+                chapter.difficulty === 'Medium' ? 'text-setu-warning' :
+                'text-setu-success'
+              )}>
+                {chapter.difficulty}
               </span>
+              {chapter.chemistryType && (
+                <span className="text-xs bg-secondary px-2 py-0.5 rounded-full">
+                  {chapter.chemistryType}
+                </span>
+              )}
             </div>
             <h1 className="text-2xl font-display font-bold text-foreground">
               {chapter.name}
             </h1>
-            <p className="text-muted-foreground capitalize">{chapter.subject}</p>
+            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              <span className="capitalize">{chapter.subject}</span>
+              <span>•</span>
+              <span>PYQ (2020+): {chapter.pyqData.postCovid}</span>
+              <span>•</span>
+              <span>Total PYQ: {chapter.pyqData.total}</span>
+            </div>
           </div>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-secondary">
-            <TabsTrigger value="learn" className="gap-2">
+          <TabsList className="grid w-full grid-cols-4 bg-secondary h-12">
+            <TabsTrigger value="learn" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <BookOpen className="w-4 h-4" />
               <span className="hidden sm:inline">Learn</span>
             </TabsTrigger>
-            <TabsTrigger value="practice" className="gap-2">
+            <TabsTrigger value="practice" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <PenTool className="w-4 h-4" />
               <span className="hidden sm:inline">Practice</span>
             </TabsTrigger>
-            <TabsTrigger value="test" className="gap-2">
+            <TabsTrigger value="test" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ClipboardCheck className="w-4 h-4" />
               <span className="hidden sm:inline">Test</span>
             </TabsTrigger>
-            <TabsTrigger value="analyze" className="gap-2">
+            <TabsTrigger value="analyze" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Analyze</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* LEARN Tab */}
+          {/* ==================== LEARN TAB ==================== */}
           <TabsContent value="learn" className="mt-6 space-y-6">
             {/* Topics Overview */}
             <div className="bg-card border border-border rounded-xl p-6">
@@ -112,16 +132,53 @@ const ChapterPage: React.FC = () => {
               </div>
             </div>
 
+            {/* PYQ Insights */}
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-physics" />
+                PYQ Analysis
+              </h3>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="text-center p-3 bg-setu-saffron/10 rounded-lg">
+                  <p className="text-2xl font-bold text-setu-saffron">{chapter.pyqData.postCovid}</p>
+                  <p className="text-xs text-muted-foreground">2020-2025</p>
+                  <p className="text-xs text-setu-saffron font-medium">HIGH PRIORITY</p>
+                </div>
+                <div className="text-center p-3 bg-secondary rounded-lg">
+                  <p className="text-2xl font-bold text-foreground">{chapter.pyqData.preCovid}</p>
+                  <p className="text-xs text-muted-foreground">2010-2019</p>
+                </div>
+                <div className="text-center p-3 bg-secondary rounded-lg">
+                  <p className="text-2xl font-bold text-muted-foreground">{chapter.pyqData.legacy}</p>
+                  <p className="text-xs text-muted-foreground">Before 2010</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-sm font-medium mb-2">Trending Concepts:</p>
+                <div className="flex flex-wrap gap-2">
+                  {chapter.pyqData.trendingConcepts.map((concept) => (
+                    <span 
+                      key={concept}
+                      className="px-3 py-1 bg-physics/10 text-physics text-xs rounded-full"
+                    >
+                      {concept}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Mentor Tip */}
             <div className="mentor-tip">
               <div className="flex items-start gap-3">
-                <Lightbulb className="w-5 h-5 text-setu-saffron mt-0.5" />
+                <Lightbulb className="w-5 h-5 text-setu-saffron mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium text-foreground mb-1">Jeetu Bhaiya's Tip</p>
                   <p className="text-muted-foreground text-sm">
                     Beta, {chapter.name} mein concept clarity sabse important hai. 
-                    Pehle theory samjho, phir formulas, phir PYQs solve karo. 
-                    Ye chapter {chapter.weightage.toLowerCase()} weightage ka hai, so isko seriously lo!
+                    {chapter.weightage === 'High' && ' Yeh HIGH weightage chapter hai — har saal question aata hai.'}
+                    {chapter.difficulty === 'Hard' && ' Thoda tough hai, but step-by-step karo toh easy ho jaata hai.'}
+                    {' '}Pehle theory samjho, phir formulas, phir PYQs solve karo.
                   </p>
                 </div>
               </div>
@@ -129,41 +186,59 @@ const ChapterPage: React.FC = () => {
 
             {/* Key Formulas */}
             <div className="bg-card border border-border rounded-xl p-6">
-              <h3 className="font-semibold text-lg mb-4">Key Formulas</h3>
-              <div className="space-y-3">
-                <div className="p-3 bg-secondary rounded-lg font-mono text-sm">
-                  v = u + at
-                </div>
-                <div className="p-3 bg-secondary rounded-lg font-mono text-sm">
-                  s = ut + (1/2)at²
-                </div>
-                <div className="p-3 bg-secondary rounded-lg font-mono text-sm">
-                  v² = u² + 2as
-                </div>
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <Zap className="w-5 h-5 text-setu-warning" />
+                Key Formulas
+              </h3>
+              <div className="space-y-2">
+                {chapter.keyFormulas.map((formula, i) => (
+                  <div key={i} className="p-3 bg-secondary rounded-lg font-mono text-sm">
+                    {formula}
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Common Traps */}
+            {/* Exam Tips / Common Traps */}
             <div className="bg-card border border-border rounded-xl p-6">
               <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-setu-warning" />
-                Common Traps to Avoid
+                Exam Tips & Traps
               </h3>
-              <ul className="space-y-2">
-                <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="text-setu-error">✗</span>
-                  Mixing up scalar and vector quantities
-                </li>
-                <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="text-setu-error">✗</span>
-                  Forgetting to consider direction in projectile motion
-                </li>
-                <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <span className="text-setu-error">✗</span>
-                  Using wrong sign convention for acceleration
-                </li>
+              <ul className="space-y-3">
+                {chapter.examTips.map((tip, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 className="w-4 h-4 text-setu-success mt-0.5 flex-shrink-0" />
+                    <span className="text-foreground">{tip}</span>
+                  </li>
+                ))}
               </ul>
             </div>
+
+            {/* Prerequisites */}
+            {chapter.prerequisites.length > 0 && (
+              <div className="bg-secondary/50 border border-border rounded-xl p-6">
+                <h3 className="font-semibold mb-3">Prerequisites</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Complete these chapters first for better understanding:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {chapter.prerequisites.map((prereq) => {
+                    const prereqChapter = getChapterById(prereq);
+                    return prereqChapter ? (
+                      <Button
+                        key={prereq}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/chapter/${prereq}`)}
+                      >
+                        {prereqChapter.name}
+                      </Button>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Generate Notes Button */}
             <Button className="w-full btn-hero py-6 text-lg">
@@ -171,134 +246,213 @@ const ChapterPage: React.FC = () => {
             </Button>
           </TabsContent>
 
-          {/* PRACTICE Tab */}
+          {/* ==================== PRACTICE TAB ==================== */}
           <TabsContent value="practice" className="mt-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
-                <div className="w-12 h-12 rounded-lg bg-setu-success/10 flex items-center justify-center mb-4">
+              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group">
+                <div className="w-12 h-12 rounded-lg bg-setu-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">🌱</span>
                 </div>
                 <h4 className="font-semibold mb-1">Level 1: Concept MCQs</h4>
-                <p className="text-sm text-muted-foreground">Basic understanding check</p>
-                <p className="text-xs text-setu-success mt-2">20 Questions</p>
+                <p className="text-sm text-muted-foreground mb-2">Basic understanding check</p>
+                <p className="text-xs text-setu-success font-medium">20 Questions • Easy</p>
               </div>
 
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
-                <div className="w-12 h-12 rounded-lg bg-setu-warning/10 flex items-center justify-center mb-4">
+              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group">
+                <div className="w-12 h-12 rounded-lg bg-setu-warning/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">🎯</span>
                 </div>
                 <h4 className="font-semibold mb-1">Level 2: JEE Main</h4>
-                <p className="text-sm text-muted-foreground">Previous year pattern</p>
-                <p className="text-xs text-setu-warning mt-2">25 Questions</p>
+                <p className="text-sm text-muted-foreground mb-2">Previous year pattern</p>
+                <p className="text-xs text-setu-warning font-medium">25 Questions • Medium</p>
               </div>
 
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
-                <div className="w-12 h-12 rounded-lg bg-setu-error/10 flex items-center justify-center mb-4">
+              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group">
+                <div className="w-12 h-12 rounded-lg bg-setu-error/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">🔥</span>
                 </div>
-                <h4 className="font-semibold mb-1">Level 3: Advanced</h4>
-                <p className="text-sm text-muted-foreground">JEE Advanced level</p>
-                <p className="text-xs text-setu-error mt-2">15 Questions</p>
+                <h4 className="font-semibold mb-1">Level 3: JEE Advanced</h4>
+                <p className="text-sm text-muted-foreground mb-2">Advanced thinking</p>
+                <p className="text-xs text-setu-error font-medium">15 Questions • Hard</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
-                <h4 className="font-semibold mb-1">Integer Type Questions</h4>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-xl">🔢</span>
+                  <h4 className="font-semibold">Integer Type</h4>
+                </div>
                 <p className="text-sm text-muted-foreground">Numerical answer practice</p>
               </div>
               <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
-                <h4 className="font-semibold mb-1">Match the Following</h4>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-xl">🔗</span>
+                  <h4 className="font-semibold">Match the Following</h4>
+                </div>
                 <p className="text-sm text-muted-foreground">Matrix match questions</p>
               </div>
             </div>
+
+            {/* Mentor Tip for Practice */}
+            <div className="mentor-tip">
+              <p className="text-sm">
+                <strong>Jeetu Bhaiya:</strong> Beta, Level 1 skip mat karna. 
+                Concept clear nahi toh Level 2-3 mein galti hogi. 
+                Pehle foundation, phir speed.
+              </p>
+            </div>
           </TabsContent>
 
-          {/* TEST Tab */}
+          {/* ==================== TEST TAB ==================== */}
           <TabsContent value="test" className="mt-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
-                <h4 className="font-semibold mb-2">Chapter Test</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  30 questions • 60 minutes • All topics covered
-                </p>
+              <div className="bg-card border border-border rounded-xl p-6 card-hover">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <ClipboardCheck className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Chapter Test</h4>
+                    <p className="text-xs text-muted-foreground">Full chapter coverage</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 text-xs text-muted-foreground mb-4">
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 60 min</span>
+                  <span>30 Questions</span>
+                </div>
                 <Button className="w-full">Start Test</Button>
               </div>
 
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
-                <h4 className="font-semibold mb-2">PYQ-Only Test</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  20 questions • Previous year questions only
-                </p>
-                <Button variant="outline" className="w-full">Start Test</Button>
+              <div className="bg-card border border-setu-saffron/30 rounded-xl p-6 card-hover bg-setu-saffron/5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-setu-saffron/20 flex items-center justify-center">
+                    <TrendingUp className="w-5 h-5 text-setu-saffron" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">PYQ Test (2020+)</h4>
+                    <p className="text-xs text-setu-saffron font-medium">HIGH PRIORITY</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 text-xs text-muted-foreground mb-4">
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 45 min</span>
+                  <span>{chapter.pyqData.postCovid} Questions</span>
+                </div>
+                <Button className="w-full btn-hero">Start PYQ Test</Button>
               </div>
 
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
-                <h4 className="font-semibold mb-2">Mixed Test</h4>
+              <div className="bg-card border border-border rounded-xl p-6 card-hover">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+                    <span className="text-lg">🔀</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Mixed Test</h4>
+                    <p className="text-xs text-muted-foreground">With related chapters</p>
+                  </div>
+                </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Combines multiple chapters for revision
+                  Combines with prerequisite chapters for revision
                 </p>
                 <Button variant="outline" className="w-full">Configure Test</Button>
               </div>
 
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
-                <h4 className="font-semibold mb-2">Adaptive Test</h4>
+              <div className="bg-card border border-border rounded-xl p-6 card-hover">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">Adaptive Test</h4>
+                    <p className="text-xs text-muted-foreground">Based on your weak areas</p>
+                  </div>
+                </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  AI picks questions based on your weak areas
+                  AI picks questions you struggle with
                 </p>
                 <Button variant="outline" className="w-full">Start Adaptive</Button>
               </div>
             </div>
           </TabsContent>
 
-          {/* ANALYZE Tab */}
+          {/* ==================== ANALYZE TAB ==================== */}
           <TabsContent value="analyze" className="mt-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-card border border-border rounded-xl p-6 text-center">
-                <p className="text-4xl font-bold text-setu-saffron mb-2">68%</p>
-                <p className="text-sm text-muted-foreground">Overall Accuracy</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-card border border-border rounded-xl p-5 text-center">
+                <p className="text-3xl font-bold text-setu-saffron mb-1">68%</p>
+                <p className="text-xs text-muted-foreground">Accuracy</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-6 text-center">
-                <p className="text-4xl font-bold text-foreground mb-2">42</p>
-                <p className="text-sm text-muted-foreground">Questions Attempted</p>
+              <div className="bg-card border border-border rounded-xl p-5 text-center">
+                <p className="text-3xl font-bold text-foreground mb-1">42</p>
+                <p className="text-xs text-muted-foreground">Attempted</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-6 text-center">
-                <p className="text-4xl font-bold text-setu-success mb-2">1.2 min</p>
-                <p className="text-sm text-muted-foreground">Avg. Time/Question</p>
+              <div className="bg-card border border-border rounded-xl p-5 text-center">
+                <p className="text-3xl font-bold text-setu-success mb-1">1.2m</p>
+                <p className="text-xs text-muted-foreground">Avg Time</p>
+              </div>
+              <div className="bg-card border border-border rounded-xl p-5 text-center">
+                <p className="text-3xl font-bold text-physics mb-1">B+</p>
+                <p className="text-xs text-muted-foreground">Chapter Status</p>
               </div>
             </div>
 
+            {/* Mistake Analysis */}
             <div className="bg-card border border-border rounded-xl p-6">
-              <h4 className="font-semibold mb-4">Mistake Analysis</h4>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Conceptual Errors</span>
-                  <span className="text-sm font-medium text-setu-error">35%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Calculation Mistakes</span>
-                  <span className="text-sm font-medium text-setu-warning">25%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Silly Mistakes</span>
-                  <span className="text-sm font-medium text-setu-success">20%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Time Pressure</span>
-                  <span className="text-sm font-medium text-muted-foreground">20%</span>
-                </div>
+              <h4 className="font-semibold mb-4">Mistake Patterns</h4>
+              <div className="space-y-4">
+                {[
+                  { type: 'Conceptual Errors', percent: 35, color: 'bg-setu-error' },
+                  { type: 'Calculation Mistakes', percent: 25, color: 'bg-setu-warning' },
+                  { type: 'Silly Mistakes', percent: 20, color: 'bg-setu-success' },
+                  { type: 'Time Pressure', percent: 20, color: 'bg-muted-foreground' }
+                ].map((item) => (
+                  <div key={item.type}>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm">{item.type}</span>
+                      <span className="text-sm font-medium">{item.percent}%</span>
+                    </div>
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${item.color} rounded-full transition-all duration-500`}
+                        style={{ width: `${item.percent}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
+            {/* Concept Gaps */}
+            <div className="bg-setu-warning/10 border border-setu-warning/30 rounded-xl p-6">
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-setu-warning" />
+                Concept Gaps Identified
+              </h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-setu-warning rounded-full"></span>
+                  {chapter.topics[0]} — 45% accuracy
+                </li>
+                {chapter.topics[1] && (
+                  <li className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-setu-warning rounded-full"></span>
+                    {chapter.topics[1]} — 52% accuracy
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Mentor Improvement Suggestion */}
             <div className="mentor-tip">
               <div className="flex items-start gap-3">
-                <Lightbulb className="w-5 h-5 text-setu-saffron mt-0.5" />
+                <Lightbulb className="w-5 h-5 text-setu-saffron mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-foreground mb-1">Improvement Suggestion</p>
+                  <p className="font-medium text-foreground mb-1">Improvement Plan</p>
                   <p className="text-muted-foreground text-sm">
-                    Beta, conceptual errors zyada hain. Pehle theory dobara padho, 
-                    especially {chapter.topics[0]} aur {chapter.topics[1]}. 
-                    Phir Level 1 MCQs se start karo.
+                    Beta, conceptual errors zyada hain. 
+                    {chapter.topics[0]} dobara padho. 
+                    Theory clear karo, phir Level 1 MCQs se start karo. 
+                    Speed baad mein aayegi, pehle accuracy badhao.
                   </p>
                 </div>
               </div>
