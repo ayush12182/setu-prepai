@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Loader2, Sparkles } from 'lucide-react';
-import { physicsChapters, chemistryChapters, mathsChapters, Subject, Chapter } from '@/data/syllabus';
+import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -9,24 +9,40 @@ interface OnePageNotesProps {
   onBack: () => void;
 }
 
+type SubjectFilter = 'all' | 'physics' | 'chemistry' | 'maths';
+
 const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
-  const [activeSubject, setActiveSubject] = useState<Subject>('physics');
+  const [activeFilter, setActiveFilter] = useState<SubjectFilter>('all');
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [notes, setNotes] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const getChapters = () => {
-    switch (activeSubject) {
-      case 'physics': return physicsChapters;
-      case 'chemistry': return chemistryChapters;
-      case 'maths': return mathsChapters;
-    }
+  const allChapters = {
+    physics: physicsChapters,
+    chemistry: chemistryChapters,
+    maths: mathsChapters
   };
 
-  const subjectColors = {
-    physics: 'bg-physics text-white',
-    chemistry: 'bg-chemistry text-white',
-    maths: 'bg-maths text-white'
+  const getFilteredChapters = () => {
+    if (activeFilter === 'all') {
+      return [
+        { subject: 'Physics', chapters: physicsChapters, color: 'border-physics' },
+        { subject: 'Chemistry', chapters: chemistryChapters, color: 'border-chemistry' },
+        { subject: 'Maths', chapters: mathsChapters, color: 'border-maths' }
+      ];
+    }
+    const subjectMap = {
+      physics: { subject: 'Physics', chapters: physicsChapters, color: 'border-physics' },
+      chemistry: { subject: 'Chemistry', chapters: chemistryChapters, color: 'border-chemistry' },
+      maths: { subject: 'Maths', chapters: mathsChapters, color: 'border-maths' }
+    };
+    return [subjectMap[activeFilter]];
+  };
+
+  const subjectBadgeColors: Record<string, string> = {
+    physics: 'bg-physics/10 text-physics',
+    chemistry: 'bg-chemistry/10 text-chemistry',
+    maths: 'bg-maths/10 text-maths'
   };
 
   const generateNotes = async (chapter: Chapter) => {
@@ -46,7 +62,8 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
           subject: chapter.subject,
           topics: chapter.topics,
           formulas: chapter.keyFormulas,
-          examTips: chapter.examTips
+          examTips: chapter.examTips,
+          pyqData: chapter.pyqData
         }),
       });
 
@@ -86,7 +103,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       }
     } catch (error) {
       console.error('Error generating notes:', error);
-      toast.error('Failed to generate notes. Please try again.');
+      toast.error('Failed to generate notes. Showing offline version.');
       
       // Fallback to local notes
       const fallbackNotes = generateFallbackNotes(chapter);
@@ -117,101 +134,141 @@ ${chapter.examTips.map(t => `⚡ ${t}`).join('\n')}
 💡 Focus on post-2020 PYQs for exam pattern!`;
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={selectedChapter ? () => setSelectedChapter(null) : onBack}>
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <h2 className="text-xl font-bold">
-          {selectedChapter ? selectedChapter.name : '1-Page Notes'}
-        </h2>
-      </div>
+  const renderNotes = (content: string) => {
+    return content.split('\n').map((line, i) => {
+      if (line.startsWith('# ')) {
+        return <h1 key={i} className="text-xl font-bold mt-0 mb-4">{line.slice(2)}</h1>;
+      }
+      if (line.startsWith('## ')) {
+        return <h2 key={i} className="text-lg font-semibold mt-6 mb-3 text-primary">{line.slice(3)}</h2>;
+      }
+      if (line.startsWith('### ')) {
+        return <h3 key={i} className="text-base font-medium mt-4 mb-2">{line.slice(4)}</h3>;
+      }
+      if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) {
+        return <p key={i} className="ml-4 my-1">• {line.slice(2)}</p>;
+      }
+      if (line.startsWith('⚡') || line.startsWith('💡')) {
+        return <p key={i} className="ml-4 my-1 text-setu-saffron font-medium">{line}</p>;
+      }
+      if (line.startsWith('---')) {
+        return <hr key={i} className="my-4 border-border" />;
+      }
+      if (line.match(/^\d+\./)) {
+        return <p key={i} className="ml-4 my-1">{line}</p>;
+      }
+      if (line.trim()) {
+        return <p key={i} className="my-2">{line}</p>;
+      }
+      return <br key={i} />;
+    });
+  };
 
-      {!selectedChapter ? (
-        <>
-          {/* Subject Tabs */}
-          <div className="flex gap-2">
-            {(['physics', 'chemistry', 'maths'] as Subject[]).map((subject) => (
-              <Button
-                key={subject}
-                variant={activeSubject === subject ? 'default' : 'outline'}
-                onClick={() => setActiveSubject(subject)}
-                className={cn(
-                  'capitalize',
-                  activeSubject === subject && subjectColors[subject]
-                )}
-              >
-                {subject}
-              </Button>
-            ))}
+  // Viewing generated notes for a chapter
+  if (selectedChapter) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => { setSelectedChapter(null); setNotes(''); }}>
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          <div>
+            <h2 className="text-xl font-bold">{selectedChapter.name}</h2>
+            <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize', subjectBadgeColors[selectedChapter.subject])}>
+              {selectedChapter.subject}
+            </span>
           </div>
+        </div>
 
-          {/* Chapter List */}
-          <div className="grid gap-3 max-h-[55vh] overflow-y-auto pr-2">
-            {getChapters().map((chapter) => (
-              <button
-                key={chapter.id}
-                onClick={() => generateNotes(chapter)}
-                className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary transition-colors group"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium">{chapter.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {chapter.topics.length} topics • {chapter.keyFormulas.length} formulas
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Sparkles className="w-4 h-4" />
-                    Generate
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </>
-      ) : (
-        /* Generated Notes */
-        <div className="bg-card border border-border rounded-xl p-6 max-h-[65vh] overflow-y-auto">
+        <div className="bg-card border border-border rounded-xl p-6 max-h-[70vh] overflow-y-auto">
           {isGenerating && notes === '' ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <span className="ml-3 text-muted-foreground">Generating notes...</span>
+              <span className="ml-3 text-muted-foreground">Generating comprehensive notes...</span>
             </div>
           ) : (
             <div className="prose prose-sm dark:prose-invert max-w-none">
-              {notes.split('\n').map((line, i) => {
-                if (line.startsWith('# ')) {
-                  return <h1 key={i} className="text-xl font-bold mt-0 mb-4">{line.slice(2)}</h1>;
-                }
-                if (line.startsWith('## ')) {
-                  return <h2 key={i} className="text-lg font-semibold mt-6 mb-3 text-primary">{line.slice(3)}</h2>;
-                }
-                if (line.startsWith('### ')) {
-                  return <h3 key={i} className="text-base font-medium mt-4 mb-2">{line.slice(4)}</h3>;
-                }
-                if (line.startsWith('• ') || line.startsWith('- ')) {
-                  return <p key={i} className="ml-4 my-1">• {line.slice(2)}</p>;
-                }
-                if (line.startsWith('⚡')) {
-                  return <p key={i} className="ml-4 my-1 text-setu-saffron">{line}</p>;
-                }
-                if (line.startsWith('---')) {
-                  return <hr key={i} className="my-4 border-border" />;
-                }
-                if (line.trim()) {
-                  return <p key={i} className="my-2">{line}</p>;
-                }
-                return null;
-              })}
+              {renderNotes(notes)}
               {isGenerating && (
                 <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />
               )}
             </div>
           )}
         </div>
-      )}
+      </div>
+    );
+  }
+
+  // Chapter selection view
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={onBack}>
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+        <h2 className="text-xl font-bold">1-Page Notes</h2>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex gap-2 flex-wrap">
+        {(['all', 'physics', 'chemistry', 'maths'] as SubjectFilter[]).map((filter) => (
+          <Button
+            key={filter}
+            variant={activeFilter === filter ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveFilter(filter)}
+            className="capitalize"
+          >
+            {filter === 'all' ? 'All Chapters' : filter}
+          </Button>
+        ))}
+      </div>
+
+      {/* Chapters by Subject */}
+      <div className="space-y-8 max-h-[60vh] overflow-y-auto pr-2">
+        {getFilteredChapters().map((group) => (
+          <div key={group.subject}>
+            <h3 className={cn(
+              'font-semibold text-lg mb-4 pb-2 border-b-2',
+              group.color
+            )}>
+              {group.subject} ({group.chapters.length} chapters)
+            </h3>
+            <div className="grid gap-3">
+              {group.chapters.map((chapter) => (
+                <button
+                  key={chapter.id}
+                  onClick={() => generateNotes(chapter)}
+                  className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary transition-all group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium">{chapter.name}</h4>
+                        <span className={cn(
+                          'text-xs px-2 py-0.5 rounded-full',
+                          chapter.weightage === 'High' ? 'bg-red-500/10 text-red-500' :
+                          chapter.weightage === 'Medium' ? 'bg-yellow-500/10 text-yellow-500' :
+                          'bg-green-500/10 text-green-500'
+                        )}>
+                          {chapter.weightage}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {chapter.topics.length} topics • {chapter.keyFormulas.length} formulas • {chapter.pyqData.postCovid} recent PYQs
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Sparkles className="w-4 h-4" />
+                      Generate
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
