@@ -59,7 +59,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             </span>
             <span className="flex items-center gap-1">
               <TrendingUp className="w-3.5 h-3.5" />
-              PYQ: {chapter.pyqFrequency}/10
+              PYQ: {chapter.pyqData.postCovid} (2020+)
             </span>
           </div>
         </div>
