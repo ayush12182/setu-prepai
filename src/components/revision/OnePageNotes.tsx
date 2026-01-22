@@ -114,24 +114,55 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
   };
 
   const generateFallbackNotes = (chapter: Chapter): string => {
-    return `# ${chapter.name} - Quick Revision Notes
+    const plainFormulas = chapter.keyFormulas.map(f => {
+      return f
+        .replace(/=/g, ' = ')
+        .replace(/\*/g, ' multiplied by ')
+        .replace(/\//g, ' divided by ')
+        .replace(/\^2/g, ' squared')
+        .replace(/\^3/g, ' cubed')
+        .replace(/sqrt/gi, 'square root of')
+        .replace(/λ/g, 'lambda')
+        .replace(/ν/g, 'nu')
+        .replace(/Δ/g, 'change in ')
+        .replace(/→/g, 'gives')
+        .replace(/≥/g, 'greater than or equal to')
+        .replace(/≤/g, 'less than or equal to');
+    });
 
-## Key Topics
-${chapter.topics.map(t => `• ${t}`).join('\n')}
+    return `${chapter.name.toUpperCase()}
 
-## Important Formulas
-${chapter.keyFormulas.map(f => `• ${f}`).join('\n')}
+What this chapter is about
+${chapter.subject === 'physics' ? 'Yeh chapter physics ke core concepts cover karta hai. JEE mein direct questions aate hain, especially numerical type.' :
+  chapter.subject === 'chemistry' ? 'Is chapter mein important reactions aur concepts hain jo JEE mein regularly pooche jaate hain.' :
+  'Mathematics ka yeh chapter problem solving ke liye bahut important hai. Formulas yaad karo aur practice karo.'}
 
-## Exam Tips
-${chapter.examTips.map(t => `⚡ ${t}`).join('\n')}
+Chapter syllabus (exam-oriented)
+${chapter.topics.map(t => `- ${t}`).join('\n')}
 
-## PYQ Analysis
-- Total questions asked: ${chapter.pyqData.total}
-- Post-2020 (HIGH PRIORITY): ${chapter.pyqData.postCovid}
-- Trending concepts: ${chapter.pyqData.trendingConcepts.join(', ')}
+What JEE actually asks from this chapter
+Post-2020 mein ${chapter.pyqData.postCovid} questions aaye hain is chapter se. Trending concepts: ${chapter.pyqData.trendingConcepts.join(', ')}.
 
----
-💡 Focus on post-2020 PYQs for exam pattern!`;
+Core ideas you must remember
+${chapter.topics.slice(0, 5).map(t => `- ${t} ka basic concept samjho`).join('\n')}
+
+Key formulas (PLAIN TEXT)
+${plainFormulas.map(f => `- ${f}`).join('\n')}
+
+Common mistakes students make
+${chapter.examTips.map(t => `- ${t}`).join('\n')}
+
+PYQ focus (Post-COVID priority)
+- 2020-2025: ${chapter.pyqData.postCovid} questions (HIGH PRIORITY)
+- Total questions: ${chapter.pyqData.total}
+- Focus areas: ${chapter.pyqData.trendingConcepts.join(', ')}
+
+How to revise in last 24 hours
+1. Pehle saare formulas ek baar likh ke dekho
+2. Previous 5 years ke PYQs solve karo
+3. Common mistakes wali list dekh lo
+
+Beta, itna clear ho gaya na? Ab PYQs lagao, bas wahi exam hai.`;
   };
 
   const renderNotes = (content: string) => {
