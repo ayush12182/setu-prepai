@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
   FileText, 
@@ -10,17 +10,27 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import FormulaSheet from '@/components/revision/FormulaSheet';
+import DifferenceTables from '@/components/revision/DifferenceTables';
+import QuickQuiz from '@/components/revision/QuickQuiz';
+import OnePageNotes from '@/components/revision/OnePageNotes';
+
+type RevisionMode = 'home' | 'notes' | 'formulas' | 'tables' | 'quiz';
 
 const RevisionPage: React.FC = () => {
+  const [activeMode, setActiveMode] = useState<RevisionMode>('home');
+
   const revisionModes = [
     {
+      id: 'notes' as RevisionMode,
       icon: FileText,
       title: '1-Page Notes',
-      description: 'Condensed chapter notes for quick revision',
+      description: 'AI-generated condensed chapter notes',
       action: 'Generate Notes',
       color: 'bg-physics/10 text-physics'
     },
     {
+      id: 'formulas' as RevisionMode,
       icon: ListChecks,
       title: 'Formula Sheets',
       description: 'All important formulas in one place',
@@ -28,6 +38,7 @@ const RevisionPage: React.FC = () => {
       color: 'bg-chemistry/10 text-chemistry'
     },
     {
+      id: 'tables' as RevisionMode,
       icon: Table,
       title: 'Difference Tables',
       description: 'Compare similar concepts side by side',
@@ -35,6 +46,7 @@ const RevisionPage: React.FC = () => {
       color: 'bg-maths/10 text-maths'
     },
     {
+      id: 'quiz' as RevisionMode,
       icon: Zap,
       title: '1-Mark Questions',
       description: 'Quick questions for rapid revision',
@@ -48,6 +60,31 @@ const RevisionPage: React.FC = () => {
     { subject: 'Chemistry', items: ['Reactions', 'Named Reactions', 'Periodic Table', 'Organic Mechanisms'] },
     { subject: 'Maths', items: ['Integration', 'Limits', 'Coordinate Geometry', 'Vectors'] }
   ];
+
+  const renderContent = () => {
+    switch (activeMode) {
+      case 'notes':
+        return <OnePageNotes onBack={() => setActiveMode('home')} />;
+      case 'formulas':
+        return <FormulaSheet onBack={() => setActiveMode('home')} />;
+      case 'tables':
+        return <DifferenceTables onBack={() => setActiveMode('home')} />;
+      case 'quiz':
+        return <QuickQuiz onBack={() => setActiveMode('home')} />;
+      default:
+        return null;
+    }
+  };
+
+  if (activeMode !== 'home') {
+    return (
+      <MainLayout title="Revision">
+        <div className="max-w-4xl mx-auto">
+          {renderContent()}
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout title="Revision">
@@ -64,9 +101,10 @@ const RevisionPage: React.FC = () => {
 
         {/* Revision Modes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {revisionModes.map((mode, i) => (
+          {revisionModes.map((mode) => (
             <div 
-              key={i}
+              key={mode.id}
+              onClick={() => setActiveMode(mode.id)}
               className="bg-card border border-border rounded-xl p-6 card-hover cursor-pointer group"
             >
               <div className={cn(
