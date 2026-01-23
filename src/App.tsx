@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import LearnPage from "./pages/LearnPage";
 import ChapterPage from "./pages/ChapterPage";
+import SubchapterPage from "./pages/SubchapterPage";
 import PracticePage from "./pages/PracticePage";
 import TestPage from "./pages/TestPage";
 import RevisionPage from "./pages/RevisionPage";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/learn" element={<LearnPage />} />
             <Route path="/chapter/:chapterId" element={<ChapterPage />} />
+            <Route path="/subchapter/:subchapterId" element={<SubchapterPage />} />
             <Route path="/practice" element={<PracticePage />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="/revision" element={<RevisionPage />} />
