@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import html2pdf from 'html2pdf.js';
+import { jsPDF } from 'jspdf';
 
 const ChapterPage: React.FC = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
@@ -34,7 +34,6 @@ const ChapterPage: React.FC = () => {
   const [notes, setNotes] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const notesRef = useRef<HTMLDivElement>(null);
 
   const chapter = chapterId ? getChapterById(chapterId) : null;
 
@@ -156,22 +155,90 @@ Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
   };
 
   const downloadAsPdf = async () => {
-    if (!notesRef.current || !chapter) return;
+    if (!notes || !chapter) return;
     
     setIsDownloading(true);
     toast.info('Preparing PDF...');
     
     try {
-      const element = notesRef.current;
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `${chapter.name.replace(/\s+/g, '_')}_Notes.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
       
-      await html2pdf().set(opt).from(element).save();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      const maxWidth = pageWidth - (margin * 2);
+      let yPosition = margin;
+      
+      // Title
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(chapter.name, margin, yPosition);
+      yPosition += 10;
+      
+      // Subject badge
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Subject: ${chapter.subject.toUpperCase()}`, margin, yPosition);
+      yPosition += 10;
+      
+      // Separator line
+      doc.setLineWidth(0.5);
+      doc.line(margin, yPosition, pageWidth - margin, yPosition);
+      yPosition += 8;
+      
+      // Notes content
+      doc.setFontSize(11);
+      const lines = notes.split('\n');
+      
+      for (const line of lines) {
+        if (yPosition > pageHeight - margin) {
+          doc.addPage();
+          yPosition = margin;
+        }
+        
+        if (line.match(/^\d+\.\s/)) {
+          // Section headers
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(12);
+          yPosition += 3;
+        } else if (line.toUpperCase() === line && line.trim().length > 0 && !line.startsWith('-')) {
+          // Chapter title in content
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(14);
+        } else {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+        }
+        
+        if (line.trim()) {
+          const textLines = doc.splitTextToSize(line, maxWidth);
+          for (const textLine of textLines) {
+            if (yPosition > pageHeight - margin) {
+              doc.addPage();
+              yPosition = margin;
+            }
+            doc.text(textLine, margin, yPosition);
+            yPosition += 5;
+          }
+        } else {
+          yPosition += 3;
+        }
+      }
+      
+      // Footer
+      const totalPages = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`SETU JEE Prep - ${chapter.name} | Page ${i} of ${totalPages}`, margin, pageHeight - 8);
+      }
+      
+      doc.save(`${chapter.name.replace(/\s+/g, '_')}_Notes.pdf`);
       toast.success('PDF downloaded successfully!');
     } catch (error) {
       console.error('PDF download error:', error);
@@ -260,7 +327,7 @@ Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
                 <span className="ml-3 text-muted-foreground">Generating notes...</span>
               </div>
             ) : (
-              <div ref={notesRef} className="prose prose-sm dark:prose-invert max-w-none bg-card p-4">
+              <div className="prose prose-sm dark:prose-invert max-w-none bg-card p-4">
                 {renderNotes(notes)}
                 {isGenerating && (
                   <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />
