@@ -1,5 +1,6 @@
 // SubchapterPage - Smallest learning unit in SETU
 // Follows: Subject → Chapter → Subchapter → Learn/Practice/Test/Analyze
+// With Jeetu Bhaiya-style notes generation and PDF download
 
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -8,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getSubchapterById } from '@/data/subchapters';
 import { getChapterById } from '@/data/syllabus';
+import { useSubchapterNotes } from '@/hooks/useSubchapterNotes';
+import { NotesSection } from '@/components/subchapter/NotesSection';
 import { toast } from 'sonner';
 import { 
   BookOpen, 
@@ -19,16 +22,19 @@ import {
   TrendingUp,
   CheckCircle2,
   XCircle,
-  MessageCircle
+  MessageCircle,
+  Sparkles
 } from 'lucide-react';
 
 const SubchapterPage: React.FC = () => {
   const { subchapterId } = useParams<{ subchapterId: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('learn');
-
+  
   const subchapter = subchapterId ? getSubchapterById(subchapterId) : undefined;
   const chapter = subchapter ? getChapterById(subchapter.chapterId) : undefined;
+  
+  const { notes, isLoading, error, generateNotes } = useSubchapterNotes();
 
   if (!subchapter || !chapter) {
     return (
@@ -40,6 +46,10 @@ const SubchapterPage: React.FC = () => {
       </MainLayout>
     );
   }
+
+  const handleGenerateNotes = () => {
+    generateNotes(subchapter, chapter.name, chapter.subject);
+  };
 
   const subjectColors: Record<string, string> = {
     physics: 'from-physics/20 to-physics/5 border-physics/30',
@@ -96,6 +106,17 @@ const SubchapterPage: React.FC = () => {
                 {subchapter.name}
               </h1>
             </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={handleGenerateNotes}
+                disabled={isLoading}
+                className="bg-gradient-to-r from-setu-saffron to-setu-saffron/80 text-white"
+                size="sm"
+              >
+                <Sparkles className="w-4 h-4 mr-1" />
+                {isLoading ? 'Generating...' : 'Get Notes'}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -123,36 +144,65 @@ const SubchapterPage: React.FC = () => {
           {/* ==================== LEARN TAB ==================== */}
           <TabsContent value="learn" className="mt-6 space-y-6">
             
-            {/* A. What JEE Asks */}
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className={`w-10 h-10 rounded-lg ${subjectTextColors[chapter.subject]} bg-current/10 flex items-center justify-center`}>
-                  <Target className="w-5 h-5" />
+            {/* AI Generated Notes Section */}
+            <NotesSection
+              notes={notes}
+              isLoading={isLoading}
+              error={error}
+              subchapterName={subchapter.name}
+              chapterName={chapter.name}
+              subject={chapter.subject}
+              onGenerate={handleGenerateNotes}
+            />
+
+            {/* Quick Reference Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* A. What JEE Asks */}
+              <div className="bg-card border border-border rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-8 h-8 rounded-lg ${subjectTextColors[chapter.subject]} bg-current/10 flex items-center justify-center`}>
+                    <Target className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-semibold text-foreground text-sm">What JEE Asks</h3>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">What JEE Asks</h3>
-                  <p className="text-sm text-muted-foreground">Key focus areas from this subchapter</p>
-                </div>
+                <ul className="space-y-1.5">
+                  {subchapter.jeeAsks.map((item, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-setu-success mt-0.5 flex-shrink-0" />
+                      <span className="text-xs text-foreground">{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-2">
-                {subchapter.jeeAsks.map((item, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-setu-success mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
+
+              {/* C. Common Mistakes */}
+              <div className="bg-card border border-border rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-setu-error/10 flex items-center justify-center">
+                    <AlertTriangle className="w-4 h-4 text-setu-error" />
+                  </div>
+                  <h3 className="font-semibold text-foreground text-sm">Common Mistakes</h3>
+                </div>
+                <ul className="space-y-1.5">
+                  {subchapter.commonMistakes.map((mistake, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <XCircle className="w-3.5 h-3.5 text-setu-error mt-0.5 flex-shrink-0" />
+                      <span className="text-xs text-foreground">{mistake}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             {/* B. Post-2020 PYQ Focus */}
-            <div className="bg-card border border-border rounded-xl p-6">
+            <div className="bg-card border border-border rounded-xl p-5">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-setu-saffron/10 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-setu-saffron" />
+                <div className="w-8 h-8 rounded-lg bg-setu-saffron/10 flex items-center justify-center">
+                  <TrendingUp className="w-4 h-4 text-setu-saffron" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-foreground">Post-2020 PYQ Focus</h3>
-                  <p className="text-sm text-muted-foreground">Recent exam trends</p>
+                  <h3 className="font-semibold text-foreground text-sm">Post-2020 PYQ Focus</h3>
+                  <p className="text-xs text-muted-foreground">Recent exam trends</p>
                 </div>
               </div>
               
@@ -161,7 +211,7 @@ const SubchapterPage: React.FC = () => {
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Trends</h4>
                   <ul className="space-y-1">
                     {subchapter.pyqFocus.trends.map((item, index) => (
-                      <li key={index} className="text-sm text-foreground">• {item}</li>
+                      <li key={index} className="text-xs text-foreground">• {item}</li>
                     ))}
                   </ul>
                 </div>
@@ -169,7 +219,7 @@ const SubchapterPage: React.FC = () => {
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Patterns</h4>
                   <ul className="space-y-1">
                     {subchapter.pyqFocus.patterns.map((item, index) => (
-                      <li key={index} className="text-sm text-foreground">• {item}</li>
+                      <li key={index} className="text-xs text-foreground">• {item}</li>
                     ))}
                   </ul>
                 </div>
@@ -177,41 +227,20 @@ const SubchapterPage: React.FC = () => {
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Traps</h4>
                   <ul className="space-y-1">
                     {subchapter.pyqFocus.traps.map((item, index) => (
-                      <li key={index} className="text-sm text-setu-error">⚠ {item}</li>
+                      <li key={index} className="text-xs text-setu-error">⚠ {item}</li>
                     ))}
                   </ul>
                 </div>
               </div>
             </div>
 
-            {/* C. Common Mistakes */}
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-setu-error/10 flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-setu-error" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Common Mistakes</h3>
-                  <p className="text-sm text-muted-foreground">Avoid these errors</p>
-                </div>
-              </div>
-              <ul className="space-y-2">
-                {subchapter.commonMistakes.map((mistake, index) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <XCircle className="w-4 h-4 text-setu-error mt-0.5 flex-shrink-0" />
-                    <span className="text-sm text-foreground">{mistake}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
             {/* E. Jeetu Bhaiya Line */}
-            <div className="bg-gradient-to-r from-setu-saffron/10 to-setu-green/10 border border-setu-saffron/20 rounded-xl p-6">
+            <div className="bg-gradient-to-r from-setu-saffron/10 to-setu-green/10 border border-setu-saffron/20 rounded-xl p-5">
               <div className="flex items-start gap-3">
                 <MessageCircle className="w-5 h-5 text-setu-saffron mt-0.5" />
                 <div>
                   <p className="text-sm font-medium text-setu-saffron mb-1">Jeetu Bhaiya Says:</p>
-                  <p className="text-foreground italic">"{subchapter.jeetuLine}"</p>
+                  <p className="text-foreground italic text-sm">"{subchapter.jeetuLine}"</p>
                 </div>
               </div>
             </div>
