@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getChapterById } from '@/data/syllabus';
+import { getChapterById, Chapter } from '@/data/syllabus';
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -16,16 +16,158 @@ import {
   CheckCircle2,
   TrendingUp,
   Clock,
-  Zap
+  Zap,
+  Sparkles,
+  Loader2,
+  ChevronLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const ChapterPage: React.FC = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('learn');
+  const [showNotes, setShowNotes] = useState(false);
+  const [notes, setNotes] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const chapter = chapterId ? getChapterById(chapterId) : null;
+
+  const generateNotes = async (chapterData: Chapter) => {
+    setShowNotes(true);
+    setIsGenerating(true);
+    setNotes('');
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          chapterName: chapterData.name,
+          subject: chapterData.subject,
+          topics: chapterData.topics,
+          formulas: chapterData.keyFormulas,
+          examTips: chapterData.examTips,
+          pyqData: chapterData.pyqData
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          toast.error('Rate limit exceeded. Please try again later.');
+          throw new Error('Rate limit exceeded');
+        }
+        if (response.status === 402) {
+          toast.error('Credits exhausted. Please add credits.');
+          throw new Error('Credits exhausted');
+        }
+        throw new Error('Failed to generate notes');
+      }
+
+      if (!response.body) {
+        throw new Error('No response body');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let fullNotes = '';
+      let textBuffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        textBuffer += decoder.decode(value, { stream: true });
+        
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          if (line.startsWith(':') || line.trim() === '') continue;
+          if (!line.startsWith('data: ')) continue;
+          
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') break;
+          
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) {
+              fullNotes += content;
+              setNotes(fullNotes);
+            }
+          } catch {
+            textBuffer = line + '\n' + textBuffer;
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error generating notes:', error);
+      if (!notes) {
+        toast.error('Failed to generate notes. Showing offline version.');
+        const fallbackNotes = generateFallbackNotes(chapterData);
+        setNotes(fallbackNotes);
+      }
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const generateFallbackNotes = (chapterData: Chapter): string => {
+    return `${chapterData.name.toUpperCase()}
+
+1. Chapter ka matlab
+Yeh chapter ${chapterData.subject} ke important concepts cover karta hai. JEE mein isse regularly questions aate hain.
+
+2. Exam syllabus (JEE focused)
+${chapterData.topics.map(t => `- ${t}`).join('\n')}
+
+3. Important formulas (PLAIN TEXT ONLY)
+${chapterData.keyFormulas.map(f => `- ${f}`).join('\n')}
+
+4. Important results / facts
+- Post-2020: ${chapterData.pyqData.postCovid} questions aaye hain
+- Trending: ${chapterData.pyqData.trendingConcepts.join(', ')}
+
+5. Common mistakes
+${chapterData.examTips.map(t => `- ${t}`).join('\n')}
+
+6. Post-COVID PYQ focus
+- 2020-2025: ${chapterData.pyqData.postCovid} questions (HIGH PRIORITY)
+- Total: ${chapterData.pyqData.total} questions
+
+7. Last-day revision plan
+- Step 1: Saare formulas ek baar likh ke dekho
+- Step 2: Previous 5 years ke PYQs solve karo
+- Step 3: Common mistakes list check karo
+
+Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
+  };
+
+  const renderNotes = (content: string) => {
+    return content.split('\n').map((line, i) => {
+      if (line.match(/^\d+\.\s/)) {
+        return <h3 key={i} className="text-base font-semibold mt-4 mb-2 text-primary">{line}</h3>;
+      }
+      if (line.startsWith('- ')) {
+        return <p key={i} className="ml-4 my-1">• {line.slice(2)}</p>;
+      }
+      if (line.toUpperCase() === line && line.trim().length > 0 && !line.startsWith('-')) {
+        return <h2 key={i} className="text-lg font-bold mt-0 mb-3">{line}</h2>;
+      }
+      if (line.trim()) {
+        return <p key={i} className="my-1 text-muted-foreground">{line}</p>;
+      }
+      return <br key={i} />;
+    });
+  };
 
   if (!chapter) {
     return (
@@ -35,6 +177,47 @@ const ChapterPage: React.FC = () => {
           <Button onClick={() => navigate('/learn')} className="mt-4">
             Back to Learn
           </Button>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // Show generated notes view
+  if (showNotes) {
+    return (
+      <MainLayout title={`${chapter.name} - Notes`}>
+        <div className="space-y-6 max-w-4xl mx-auto">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => { setShowNotes(false); setNotes(''); }}>
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h2 className="text-xl font-bold">{chapter.name}</h2>
+              <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize',
+                chapter.subject === 'physics' ? 'bg-physics/10 text-physics' :
+                chapter.subject === 'chemistry' ? 'bg-chemistry/10 text-chemistry' :
+                'bg-maths/10 text-maths'
+              )}>
+                {chapter.subject}
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-6 max-h-[70vh] overflow-y-auto">
+            {isGenerating && notes === '' ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <span className="ml-3 text-muted-foreground">Generating notes...</span>
+              </div>
+            ) : (
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                {renderNotes(notes)}
+                {isGenerating && (
+                  <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </MainLayout>
     );
@@ -241,7 +424,11 @@ const ChapterPage: React.FC = () => {
             )}
 
             {/* Generate Notes Button */}
-            <Button className="w-full btn-hero py-6 text-lg">
+            <Button 
+              className="w-full btn-hero py-6 text-lg gap-2"
+              onClick={() => generateNotes(chapter)}
+            >
+              <Sparkles className="w-5 h-5" />
               Generate AI Notes for this Chapter
             </Button>
           </TabsContent>
