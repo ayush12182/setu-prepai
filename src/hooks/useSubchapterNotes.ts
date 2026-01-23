@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Subchapter } from '@/data/subchapters';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 interface UseSubchapterNotesResult {
   notes: string;
@@ -24,23 +26,32 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
     setNotes('');
 
     try {
-      const response = await supabase.functions.invoke('generate-subchapter-notes', {
-        body: {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-subchapter-notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'apikey': SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({
           subchapterName: subchapter.name,
           chapterName,
           subject,
           jeeAsks: subchapter.jeeAsks,
           pyqFocus: subchapter.pyqFocus,
           commonMistakes: subchapter.commonMistakes,
-        },
+        }),
       });
 
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to generate notes');
+      if (!response.ok) {
+        throw new Error(`Failed to generate notes: ${response.status}`);
       }
 
-      // Handle streaming response
-      const reader = response.data.getReader();
+      if (!response.body) {
+        throw new Error('No response body');
+      }
+
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulatedNotes = '';
 
