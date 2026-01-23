@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -19,10 +19,12 @@ import {
   Zap,
   Sparkles,
   Loader2,
-  ChevronLeft
+  ChevronLeft,
+  Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import html2pdf from 'html2pdf.js';
 
 const ChapterPage: React.FC = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
@@ -31,6 +33,8 @@ const ChapterPage: React.FC = () => {
   const [showNotes, setShowNotes] = useState(false);
   const [notes, setNotes] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const notesRef = useRef<HTMLDivElement>(null);
 
   const chapter = chapterId ? getChapterById(chapterId) : null;
 
@@ -151,6 +155,32 @@ ${chapterData.examTips.map(t => `- ${t}`).join('\n')}
 Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
   };
 
+  const downloadAsPdf = async () => {
+    if (!notesRef.current || !chapter) return;
+    
+    setIsDownloading(true);
+    toast.info('Preparing PDF...');
+    
+    try {
+      const element = notesRef.current;
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `${chapter.name.replace(/\s+/g, '_')}_Notes.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      
+      await html2pdf().set(opt).from(element).save();
+      toast.success('PDF downloaded successfully!');
+    } catch (error) {
+      console.error('PDF download error:', error);
+      toast.error('Failed to download PDF');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const renderNotes = (content: string) => {
     return content.split('\n').map((line, i) => {
       if (line.match(/^\d+\.\s/)) {
@@ -187,20 +217,40 @@ Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
     return (
       <MainLayout title={`${chapter.name} - Notes`}>
         <div className="space-y-6 max-w-4xl mx-auto">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => { setShowNotes(false); setNotes(''); }}>
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h2 className="text-xl font-bold">{chapter.name}</h2>
-              <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize',
-                chapter.subject === 'physics' ? 'bg-physics/10 text-physics' :
-                chapter.subject === 'chemistry' ? 'bg-chemistry/10 text-chemistry' :
-                'bg-maths/10 text-maths'
-              )}>
-                {chapter.subject}
-              </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" onClick={() => { setShowNotes(false); setNotes(''); }}>
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+              <div>
+                <h2 className="text-xl font-bold">{chapter.name}</h2>
+                <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize',
+                  chapter.subject === 'physics' ? 'bg-physics/10 text-physics' :
+                  chapter.subject === 'chemistry' ? 'bg-chemistry/10 text-chemistry' :
+                  'bg-maths/10 text-maths'
+                )}>
+                  {chapter.subject}
+                </span>
+              </div>
             </div>
+            
+            {/* Download PDF Button */}
+            {notes && !isGenerating && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={downloadAsPdf}
+                disabled={isDownloading}
+                className="gap-2"
+              >
+                {isDownloading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                {isDownloading ? 'Downloading...' : 'Download PDF'}
+              </Button>
+            )}
           </div>
 
           <div className="bg-card border border-border rounded-xl p-6 max-h-[70vh] overflow-y-auto">
@@ -210,7 +260,7 @@ Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
                 <span className="ml-3 text-muted-foreground">Generating notes...</span>
               </div>
             ) : (
-              <div className="prose prose-sm dark:prose-invert max-w-none">
+              <div ref={notesRef} className="prose prose-sm dark:prose-invert max-w-none bg-card p-4">
                 {renderNotes(notes)}
                 {isGenerating && (
                   <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />
