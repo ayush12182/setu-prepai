@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Mic, MicOff, Sparkles } from 'lucide-react';
+import { Send, Mic, MicOff, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getGreetingByLanguage } from '@/lib/jeetuBhaiya';
 import { useJeetuChat } from '@/hooks/useJeetuChat';
+import { useVoiceChat } from '@/hooks/useVoiceChat';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -30,7 +31,33 @@ const AskJeetuPage: React.FC = () => {
     }
   ]);
   const [input, setInput] = useState('');
-  const [isListening, setIsListening] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  const [liveTranscript, setLiveTranscript] = useState('');
+  
+  // Voice chat hook
+  const {
+    isListening,
+    isSpeaking,
+    startListening,
+    stopListening,
+    speak,
+    stopSpeaking,
+    isSupported: voiceSupported,
+  } = useVoiceChat({
+    onTranscript: (text) => {
+      setLiveTranscript(text);
+    },
+    onFinalTranscript: (text) => {
+      setLiveTranscript('');
+      setInput(text);
+      // Auto-send after voice input
+      setTimeout(() => {
+        handleSendWithText(text);
+      }, 100);
+    },
+    onSpeakStart: () => {},
+    onSpeakEnd: () => {},
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -66,26 +93,25 @@ const AskJeetuPage: React.FC = () => {
     "JEE Advanced Physics kaise prepare karein?"
   ];
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSendWithText = async (textToSend: string) => {
+    if (!textToSend.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input,
+      content: textToSend,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const userInput = input;
     setInput('');
 
-    // Build message history for AI (excluding the greeting if it's the only message)
+    // Build message history for AI
     const chatHistory = messages
       .filter(m => m.role !== 'assistant' || messages.indexOf(m) > 0 || messages.length > 1)
       .map(m => ({ role: m.role, content: m.content }));
     
-    chatHistory.push({ role: 'user', content: userInput });
+    chatHistory.push({ role: 'user', content: textToSend });
 
     let assistantContent = '';
     
@@ -116,7 +142,16 @@ const AskJeetuPage: React.FC = () => {
             : m
         )
       );
+      
+      // Auto-speak response if enabled
+      if (autoSpeak && assistantContent) {
+        setTimeout(() => speak(assistantContent), 300);
+      }
     });
+  };
+
+  const handleSend = async () => {
+    await handleSendWithText(input);
   };
 
   const handleQuickQuestion = (question: string) => {
@@ -124,7 +159,19 @@ const AskJeetuPage: React.FC = () => {
   };
 
   const toggleVoice = () => {
-    setIsListening(!isListening);
+    if (isListening) {
+      stopListening();
+      setLiveTranscript('');
+    } else {
+      startListening();
+    }
+  };
+
+  const toggleAutoSpeak = () => {
+    if (isSpeaking) {
+      stopSpeaking();
+    }
+    setAutoSpeak(!autoSpeak);
   };
 
   const formatMessage = (content: string) => {
@@ -150,18 +197,53 @@ const AskJeetuPage: React.FC = () => {
         {/* Chat Header */}
         <div className="bg-card border border-border rounded-t-2xl p-4 flex items-center gap-4">
           <div className="relative">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center shadow-lg">
+            <div className={cn(
+              "w-14 h-14 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center shadow-lg transition-all",
+              isSpeaking && "ring-4 ring-setu-saffron/30 animate-pulse"
+            )}>
               <span className="text-white font-bold text-xl">JB</span>
             </div>
-            <span className="absolute bottom-0 right-0 w-4 h-4 bg-setu-success rounded-full border-2 border-card"></span>
+            <span className={cn(
+              "absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-card transition-colors",
+              isSpeaking ? "bg-setu-saffron animate-pulse" : "bg-setu-success"
+            )}></span>
           </div>
           <div className="flex-1">
             <h2 className="font-display font-bold text-lg text-foreground">Jeetu Bhaiya</h2>
-            <p className="text-sm text-setu-success flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              Online • Your JEE Mentor
-            </p>
+            {isSpeaking ? (
+              <p className="text-sm text-setu-saffron flex items-center gap-1 animate-pulse">
+                <Volume2 className="w-3 h-3" />
+                Jeetu Bhaiya bol rahe hain...
+              </p>
+            ) : isListening ? (
+              <p className="text-sm text-red-500 flex items-center gap-1 animate-pulse">
+                <Mic className="w-3 h-3" />
+                Sun raha hoon...
+              </p>
+            ) : (
+              <p className="text-sm text-setu-success flex items-center gap-1">
+                <Sparkles className="w-3 h-3" />
+                Online • Your JEE Mentor
+              </p>
+            )}
           </div>
+          
+          {/* Auto-speak toggle */}
+          {voiceSupported && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleAutoSpeak}
+              className={cn(
+                "rounded-full",
+                autoSpeak ? "text-setu-saffron" : "text-muted-foreground"
+              )}
+              title={autoSpeak ? "Voice on" : "Voice off"}
+            >
+              {autoSpeak ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+            </Button>
+          )}
+          
           <div className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
             AI-Powered
           </div>
@@ -179,7 +261,10 @@ const AskJeetuPage: React.FC = () => {
               style={{ animationDelay: `${index * 50}ms` }}
             >
               {message.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
+                <div className={cn(
+                  "w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1",
+                  isSpeaking && messages[messages.length - 1]?.id === message.id && "ring-2 ring-setu-saffron/50"
+                )}>
                   <span className="text-setu-saffron font-bold text-xs">JB</span>
                 </div>
               )}
@@ -197,9 +282,33 @@ const AskJeetuPage: React.FC = () => {
                 )}>
                   {message.role === 'assistant' ? formatMessage(message.content) : message.content}
                 </div>
+                
+                {/* Speak button for assistant messages */}
+                {message.role === 'assistant' && voiceSupported && message.content && !message.id.startsWith('streaming-') && (
+                  <button
+                    onClick={() => speak(message.content)}
+                    className="mt-2 text-xs text-muted-foreground hover:text-setu-saffron flex items-center gap-1 transition-colors"
+                  >
+                    <Volume2 className="w-3 h-3" />
+                    Suniye
+                  </button>
+                )}
               </div>
             </div>
           ))}
+
+          {/* Live Transcript */}
+          {isListening && liveTranscript && (
+            <div className="flex justify-end animate-fade-in">
+              <div className="max-w-[85%] rounded-2xl px-4 py-3 bg-primary/50 text-primary-foreground rounded-br-md border-2 border-dashed border-primary">
+                <div className="text-sm leading-relaxed flex items-center gap-2">
+                  <Mic className="w-4 h-4 animate-pulse text-red-400" />
+                  {liveTranscript}
+                  <span className="animate-pulse">...</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Typing Indicator */}
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
@@ -246,35 +355,50 @@ const AskJeetuPage: React.FC = () => {
 
         {/* Input Area */}
         <div className="bg-card border border-border rounded-b-2xl p-4">
+          {/* Voice listening indicator */}
+          {isListening && (
+            <div className="mb-3 flex items-center justify-center gap-2 text-sm text-red-500 animate-pulse">
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+              <span>Bol raha hai... (chup hone pe auto-send)</span>
+            </div>
+          )}
+          
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleVoice}
-              className={cn(
-                'flex-shrink-0 rounded-xl',
-                isListening && 'bg-setu-saffron text-white border-setu-saffron hover:bg-setu-saffron/90'
-              )}
-            >
-              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-            </Button>
+            {voiceSupported && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleVoice}
+                className={cn(
+                  'flex-shrink-0 rounded-xl transition-all',
+                  isListening && 'bg-red-500 text-white border-red-500 hover:bg-red-600 animate-pulse'
+                )}
+                disabled={isLoading}
+              >
+                {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </Button>
+            )}
             
             <Textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Apna doubt yahan likho..."
-              className="min-h-[48px] max-h-32 resize-none rounded-xl"
+              value={isListening ? liveTranscript : input}
+              onChange={(e) => !isListening && setInput(e.target.value)}
+              placeholder={isListening ? "Sun raha hoon..." : "Apna doubt yahan likho ya mic use karo..."}
+              className={cn(
+                "min-h-[48px] max-h-32 resize-none rounded-xl",
+                isListening && "bg-red-50 dark:bg-red-950/20 border-red-200"
+              )}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === 'Enter' && !e.shiftKey && !isListening) {
                   e.preventDefault();
                   handleSend();
                 }
               }}
+              readOnly={isListening}
             />
             
             <Button
               onClick={handleSend}
-              disabled={!input.trim() || isLoading}
+              disabled={(!input.trim() && !isListening) || isLoading}
               className="btn-hero flex-shrink-0 rounded-xl px-4"
             >
               <Send className="w-5 h-5" />
@@ -282,7 +406,7 @@ const AskJeetuPage: React.FC = () => {
           </div>
           
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            Press Enter to send • Shift+Enter for new line
+            {voiceSupported ? 'Mic click karo ya type karo • Enter to send' : 'Press Enter to send • Shift+Enter for new line'}
           </p>
         </div>
       </div>
