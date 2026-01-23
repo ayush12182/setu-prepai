@@ -554,7 +554,10 @@ Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
           {/* ==================== PRACTICE TAB ==================== */}
           <TabsContent value="practice" className="mt-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group">
+              <div 
+                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
+                onClick={() => toast.info('Level 1: Concept MCQs coming soon! 🌱', { description: 'Practice questions are being prepared.' })}
+              >
                 <div className="w-12 h-12 rounded-lg bg-setu-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">🌱</span>
                 </div>
@@ -563,7 +566,10 @@ Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
                 <p className="text-xs text-setu-success font-medium">20 Questions • Easy</p>
               </div>
 
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group">
+              <div 
+                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
+                onClick={() => toast.info('Level 2: JEE Main coming soon! 🎯', { description: 'Practice questions are being prepared.' })}
+              >
                 <div className="w-12 h-12 rounded-lg bg-setu-warning/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">🎯</span>
                 </div>
@@ -572,7 +578,10 @@ Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
                 <p className="text-xs text-setu-warning font-medium">25 Questions • Medium</p>
               </div>
 
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group">
+              <div 
+                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
+                onClick={() => toast.info('Level 3: JEE Advanced coming soon! 🔥', { description: 'Practice questions are being prepared.' })}
+              >
                 <div className="w-12 h-12 rounded-lg bg-setu-error/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">🔥</span>
                 </div>
@@ -583,14 +592,20 @@ Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.`;
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
+              <div 
+                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                onClick={() => toast.info('Integer Type coming soon! 🔢', { description: 'Numerical practice questions are being prepared.' })}
+              >
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-xl">🔢</span>
                   <h4 className="font-semibold">Integer Type</h4>
                 </div>
                 <p className="text-sm text-muted-foreground">Numerical answer practice</p>
               </div>
-              <div className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover">
+              <div 
+                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                onClick={() => toast.info('Match the Following coming soon! 🔗', { description: 'Matrix match questions are being prepared.' })}
+              >
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-xl">🔗</span>
                   <h4 className="font-semibold">Match the Following</h4>
