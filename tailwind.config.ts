@@ -15,7 +15,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+        serif: ['Source Serif 4', 'Georgia', 'serif'],
+        display: ['Source Serif 4', 'Georgia', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -65,15 +66,25 @@ export default {
         setu: {
           navy: "hsl(var(--setu-navy))",
           "navy-light": "hsl(var(--setu-navy-light))",
+          "navy-dark": "hsl(var(--setu-navy-dark))",
           saffron: "hsl(var(--setu-saffron))",
           "saffron-light": "hsl(var(--setu-saffron-light))",
+          "saffron-dark": "hsl(var(--setu-saffron-dark))",
           success: "hsl(var(--setu-success))",
           warning: "hsl(var(--setu-warning))",
           error: "hsl(var(--setu-error))",
+          info: "hsl(var(--setu-info))",
         },
+        // Subject Colors
         physics: "hsl(var(--physics-color))",
         chemistry: "hsl(var(--chemistry-color))",
         maths: "hsl(var(--maths-color))",
+        // Text hierarchy
+        text: {
+          primary: "hsl(var(--text-primary))",
+          secondary: "hsl(var(--text-secondary))",
+          muted: "hsl(var(--text-muted))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -81,8 +92,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
+        'xs': 'var(--shadow-xs)',
         'card': 'var(--shadow-card)',
-        'glow': 'var(--shadow-glow)',
+        'elevated': 'var(--shadow-md)',
       },
       keyframes: {
         "accordion-down": {
@@ -101,12 +113,17 @@ export default {
           from: { opacity: "0", transform: "translateX(-20px)" },
           to: { opacity: "1", transform: "translateX(0)" },
         },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.4s ease-out forwards",
         "slide-in": "slide-in 0.4s ease-out forwards",
+        "pulse-soft": "pulse-soft 2s ease-in-out infinite",
       },
     },
   },

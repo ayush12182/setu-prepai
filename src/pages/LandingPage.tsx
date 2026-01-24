@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Check, AlertTriangle, HelpCircle } from 'lucide-react';
+import { ArrowRight, Check, AlertTriangle, HelpCircle, BookOpen, Target, Clock, TrendingUp } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,37 +29,41 @@ const LandingPage: React.FC = () => {
     {
       title: 'Plans your study',
       desc: 'Daily + weekly realistic plan based on your capacity',
+      icon: Clock,
     },
     {
       title: 'Breaks syllabus into priorities',
       desc: 'Clear roadmap, not overwhelming lists',
+      icon: Target,
     },
     {
       title: 'Tells you what matters',
       desc: 'High weightage topics first, low priority later',
+      icon: TrendingUp,
     },
     {
       title: 'Keeps you accountable',
       desc: 'No fake motivation, just honest tracking',
+      icon: BookOpen,
     },
   ];
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">S</span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+              <span className="text-primary-foreground font-bold text-base">S</span>
             </div>
-            <span className="font-serif font-semibold text-lg text-foreground">SETU</span>
+            <span className="font-serif font-semibold text-xl text-foreground">SETU</span>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate('/auth')}
-            className="gap-2"
+            className="gap-2 font-medium border-2 hover:bg-secondary"
           >
             Login
           </Button>
@@ -70,19 +74,19 @@ const LandingPage: React.FC = () => {
       <section className="pt-32 pb-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
-          <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm font-medium">
+          <Badge className="mb-6 px-4 py-1.5 text-sm font-semibold bg-accent/15 text-accent hover:bg-accent/20 border-0">
             SETU — Bridge to Exam Success
           </Badge>
 
           {/* Main Heading */}
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold text-foreground leading-tight mb-6">
+          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
             Content is everywhere.
             <br />
-            <span className="text-muted-foreground">Mentorship is not.</span>
+            <span className="text-primary">Mentorship is not.</span>
           </h1>
 
           {/* Subtext */}
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg sm:text-xl text-secondary-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             Competitive exams are cracked by clarity, discipline and right direction — not more videos.
           </p>
 
@@ -91,15 +95,15 @@ const LandingPage: React.FC = () => {
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
-              className="h-12 px-8 text-base gap-2 bg-primary hover:bg-primary/90"
+              className="h-14 px-10 text-base font-semibold gap-2 bg-primary hover:bg-setu-navy-light shadow-md hover:shadow-lg transition-all"
             >
               Start with Jeetu Bhaiya
-              <ArrowRight className="h-4 w-4" />
+              <ArrowRight className="h-5 w-5" />
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="lg"
-              className="h-12 px-8 text-base text-muted-foreground"
+              className="h-14 px-10 text-base font-medium border-2 text-foreground hover:bg-secondary"
               onClick={() => {
                 document.getElementById('mentor-section')?.scrollIntoView({ behavior: 'smooth' });
               }}
@@ -113,7 +117,7 @@ const LandingPage: React.FC = () => {
             {examPills.map((exam) => (
               <span
                 key={exam}
-                className="px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground text-sm font-medium"
+                className="px-4 py-2 rounded-full bg-card text-foreground text-sm font-medium shadow-xs border border-border"
               >
                 {exam}
               </span>
@@ -123,48 +127,48 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Problem Section */}
-      <section className="py-20 px-4 sm:px-6 bg-secondary/50">
+      <section className="py-20 px-4 sm:px-6 bg-secondary/60">
         <div className="max-w-5xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
+          <div className="grid md:grid-cols-2 gap-6 lg:gap-10">
             {/* Left Column - Problems */}
-            <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border shadow-card">
+            <div className="bg-card rounded-2xl p-6 sm:p-8 shadow-card border border-border">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                <div className="w-12 h-12 rounded-xl bg-destructive/15 flex items-center justify-center">
+                  <AlertTriangle className="h-6 w-6 text-destructive" />
                 </div>
-                <h3 className="font-serif text-xl font-semibold text-foreground">
+                <h3 className="font-serif text-xl font-bold text-foreground">
                   Students have too much of...
                 </h3>
               </div>
               <ul className="space-y-4">
                 {problemsLeft.map((problem, i) => (
-                  <li key={i} className="flex items-center gap-3 text-muted-foreground">
-                    <span className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center text-xs text-destructive font-medium">
+                  <li key={i} className="flex items-center gap-3">
+                    <span className="w-7 h-7 rounded-full bg-destructive/15 flex items-center justify-center text-sm text-destructive font-bold">
                       ×
                     </span>
-                    {problem}
+                    <span className="text-foreground font-medium">{problem}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* Right Column - Questions */}
-            <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border shadow-card">
+            <div className="bg-card rounded-2xl p-6 sm:p-8 shadow-card border border-border">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-                  <HelpCircle className="h-5 w-5 text-accent" />
+                <div className="w-12 h-12 rounded-xl bg-accent/15 flex items-center justify-center">
+                  <HelpCircle className="h-6 w-6 text-accent" />
                 </div>
-                <h3 className="font-serif text-xl font-semibold text-foreground">
+                <h3 className="font-serif text-xl font-bold text-foreground">
                   But they don't know...
                 </h3>
               </div>
               <ul className="space-y-4">
                 {problemsRight.map((problem, i) => (
-                  <li key={i} className="flex items-center gap-3 text-muted-foreground">
-                    <span className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center text-xs text-accent font-medium">
+                  <li key={i} className="flex items-center gap-3">
+                    <span className="w-7 h-7 rounded-full bg-accent/15 flex items-center justify-center text-sm text-accent font-bold">
                       ?
                     </span>
-                    {problem}
+                    <span className="text-foreground font-medium">{problem}</span>
                   </li>
                 ))}
               </ul>
@@ -178,10 +182,10 @@ const LandingPage: React.FC = () => {
         <div className="max-w-5xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-12">
-            <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-foreground mb-4">
               Meet Jeetu Bhaiya
             </h2>
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+            <p className="text-lg text-secondary-foreground max-w-xl mx-auto">
               Not a chatbot. Not a teacher. A mentor who thinks with you.
             </p>
 
@@ -190,7 +194,7 @@ const LandingPage: React.FC = () => {
               {mentorPills.map((pill) => (
                 <span
                   key={pill}
-                  className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium"
+                  className="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold"
                 >
                   {pill}
                 </span>
@@ -203,15 +207,15 @@ const LandingPage: React.FC = () => {
             {mentorCards.map((card, i) => (
               <div
                 key={i}
-                className="bg-card rounded-xl p-6 border border-border shadow-card hover:shadow-md transition-shadow"
+                className="jeetu-card hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Check className="h-4 w-4 text-accent" />
+                  <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
+                    <card.icon className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-foreground mb-1">{card.title}</h4>
-                    <p className="text-sm text-muted-foreground">{card.desc}</p>
+                    <h4 className="font-semibold text-foreground text-lg mb-1">{card.title}</h4>
+                    <p className="text-secondary-foreground">{card.desc}</p>
                   </div>
                 </div>
               </div>
@@ -220,7 +224,7 @@ const LandingPage: React.FC = () => {
 
           {/* Quote */}
           <div className="text-center">
-            <blockquote className="font-serif text-xl sm:text-2xl text-muted-foreground italic max-w-2xl mx-auto">
+            <blockquote className="font-serif text-xl sm:text-2xl text-primary italic max-w-2xl mx-auto">
               "Focused on results, not motivation quotes."
             </blockquote>
           </div>
@@ -228,38 +232,37 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 bg-primary text-primary-foreground">
+      <section className="py-20 px-4 sm:px-6 bg-primary">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-serif text-3xl sm:text-4xl font-semibold mb-4">
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-primary-foreground mb-4">
             Ready to start the right way?
           </h2>
-          <p className="text-lg opacity-80 mb-8">
+          <p className="text-lg text-primary-foreground/80 mb-8">
             No spam. No distractions. Only study.
           </p>
           <Button
             size="lg"
-            variant="secondary"
             onClick={() => navigate('/auth')}
-            className="h-12 px-8 text-base gap-2"
+            className="h-14 px-10 text-base font-semibold gap-2 bg-accent text-accent-foreground hover:bg-setu-saffron-dark shadow-lg"
           >
             Start with Jeetu Bhaiya
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-5 w-5" />
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 sm:px-6 border-t border-border">
+      <footer className="py-8 px-4 sm:px-6 border-t border-border bg-card">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded bg-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-xs">S</span>
             </div>
-            <span className="font-serif text-sm text-muted-foreground">
+            <span className="font-serif text-sm text-foreground">
               SETU — Bridge to Exam Success
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-secondary-foreground">
             Built for serious students, by serious mentors.
           </p>
         </div>

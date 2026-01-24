@@ -2,108 +2,145 @@
 @tailwind components;
 @tailwind utilities;
 
-/* SETU Design System - Kota Mentorship Aesthetic */
-/* Calm, Minimal, Mentor-first feeling */
+/* SETU Design System - Kota Coaching Institute Aesthetic */
+/* Premium, Calm, Focused - Like Allen classroom / PW notes */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* Calm Beige/Off-white Theme - Mentorship Vibe */
-    --background: 40 33% 96%;
-    --foreground: 30 10% 15%;
+    /* ═══════════════════════════════════════════════════════
+       SETU COLOR SYSTEM - Kota Coaching Vibe
+       Premium • Calm • Focused • Sharp
+       ═══════════════════════════════════════════════════════ */
 
-    --card: 40 30% 98%;
-    --card-foreground: 30 10% 15%;
+    /* Background - Warm Off-White (like study table) */
+    --background: 40 23% 97%;
+    --foreground: 0 0% 11%;
 
-    --popover: 40 30% 98%;
-    --popover-foreground: 30 10% 15%;
+    /* Cards - Pure White with separation */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 11%;
 
-    /* Primary - Deep Brown (Trust & Wisdom) */
-    --primary: 30 25% 20%;
-    --primary-foreground: 40 33% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 11%;
 
-    /* Secondary - Warm Gray */
-    --secondary: 40 15% 92%;
-    --secondary-foreground: 30 10% 25%;
+    /* Primary - Deep Navy Blue (Mentor color - trust & authority) */
+    --primary: 213 31% 17%;
+    --primary-foreground: 40 23% 97%;
 
-    /* Accent - Warm Terracotta (Subtle Energy) */
-    --accent: 20 60% 50%;
-    --accent-foreground: 40 33% 96%;
+    /* Secondary - Light warm gray */
+    --secondary: 40 15% 94%;
+    --secondary-foreground: 0 0% 11%;
 
-    --muted: 40 15% 90%;
-    --muted-foreground: 30 10% 45%;
+    /* Accent - Soft Saffron (SETU identity - warmth & energy) */
+    --accent: 26 87% 67%;
+    --accent-foreground: 0 0% 11%;
 
-    --destructive: 0 65% 50%;
-    --destructive-foreground: 40 33% 96%;
+    --muted: 40 10% 90%;
+    --muted-foreground: 0 0% 33%;
 
-    --border: 40 20% 88%;
-    --input: 40 20% 88%;
-    --ring: 20 60% 50%;
+    /* Destructive - Soft Red */
+    --destructive: 0 65% 48%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & Inputs - Clear separation */
+    --border: 40 15% 85%;
+    --input: 40 15% 85%;
+    --ring: 26 87% 67%;
 
     --radius: 0.5rem;
 
-    /* SETU Custom Colors */
-    --setu-brown: 30 25% 20%;
-    --setu-brown-light: 30 20% 35%;
-    --setu-terracotta: 20 60% 50%;
-    --setu-terracotta-light: 20 55% 60%;
-    --setu-success: 145 50% 40%;
-    --setu-warning: 40 80% 50%;
-    --setu-error: 0 65% 50%;
-    --setu-beige: 40 33% 96%;
-    --setu-cream: 40 30% 92%;
+    /* ═══════════════════════════════════════════════════════
+       SETU CUSTOM TOKENS
+       ═══════════════════════════════════════════════════════ */
     
-    /* Subject Colors - Muted for calm feel */
-    --physics-color: 210 50% 50%;
-    --chemistry-color: 145 45% 42%;
-    --maths-color: 270 40% 50%;
+    /* Navy palette */
+    --setu-navy: 213 31% 17%;
+    --setu-navy-light: 213 25% 30%;
+    --setu-navy-dark: 213 35% 12%;
+    
+    /* Saffron palette */
+    --setu-saffron: 26 87% 67%;
+    --setu-saffron-light: 26 85% 75%;
+    --setu-saffron-dark: 26 90% 55%;
+    
+    /* Text hierarchy - High contrast */
+    --text-primary: 0 0% 11%;
+    --text-secondary: 0 0% 33%;
+    --text-muted: 0 0% 47%;
 
-    /* Shadows - Soft */
-    --shadow-sm: 0 1px 2px 0 hsl(30 10% 15% / 0.04);
-    --shadow-md: 0 4px 12px -2px hsl(30 10% 15% / 0.06);
-    --shadow-lg: 0 8px 24px -4px hsl(30 10% 15% / 0.08);
-    --shadow-card: 0 2px 16px -2px hsl(30 10% 15% / 0.05);
+    /* Action Colors - Calm but clear */
+    --setu-success: 122 39% 34%;
+    --setu-warning: 27 98% 47%;
+    --setu-error: 0 65% 48%;
+    --setu-info: 213 74% 43%;
+    
+    /* Subject Colors - Distinct & clear */
+    --physics-color: 213 60% 50%;
+    --chemistry-color: 145 50% 38%;
+    --maths-color: 280 50% 55%;
 
-    /* Sidebar - Dark for contrast */
-    --sidebar-background: 30 25% 18%;
-    --sidebar-foreground: 40 30% 95%;
-    --sidebar-primary: 20 60% 50%;
-    --sidebar-primary-foreground: 40 33% 96%;
-    --sidebar-accent: 30 20% 25%;
-    --sidebar-accent-foreground: 40 30% 95%;
-    --sidebar-border: 30 20% 25%;
-    --sidebar-ring: 20 60% 50%;
+    /* Shadows - Soft but visible card separation */
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.03);
+    --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.08), 0 4px 6px -4px hsl(0 0% 0% / 0.06);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.08), 0 8px 10px -6px hsl(0 0% 0% / 0.06);
+    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.08), 0 0 0 1px hsl(0 0% 0% / 0.02);
+
+    /* Sidebar - Deep Navy for contrast */
+    --sidebar-background: 213 31% 17%;
+    --sidebar-foreground: 40 23% 95%;
+    --sidebar-primary: 26 87% 67%;
+    --sidebar-primary-foreground: 0 0% 11%;
+    --sidebar-accent: 213 25% 25%;
+    --sidebar-accent-foreground: 40 23% 95%;
+    --sidebar-border: 213 25% 25%;
+    --sidebar-ring: 26 87% 67%;
   }
 
   .dark {
-    --background: 30 15% 10%;
-    --foreground: 40 30% 95%;
+    /* Dark mode - Deep study night vibe */
+    --background: 213 25% 10%;
+    --foreground: 40 15% 95%;
 
-    --card: 30 15% 14%;
-    --card-foreground: 40 30% 95%;
+    --card: 213 20% 14%;
+    --card-foreground: 40 15% 95%;
 
-    --popover: 30 15% 14%;
-    --popover-foreground: 40 30% 95%;
+    --popover: 213 20% 14%;
+    --popover-foreground: 40 15% 95%;
 
-    --primary: 20 60% 55%;
-    --primary-foreground: 30 15% 10%;
+    --primary: 26 87% 67%;
+    --primary-foreground: 213 25% 10%;
 
-    --secondary: 30 15% 18%;
-    --secondary-foreground: 40 30% 95%;
+    --secondary: 213 20% 18%;
+    --secondary-foreground: 40 15% 95%;
 
-    --accent: 20 60% 55%;
-    --accent-foreground: 30 15% 10%;
+    --accent: 26 87% 67%;
+    --accent-foreground: 213 25% 10%;
 
-    --muted: 30 15% 20%;
-    --muted-foreground: 40 20% 60%;
+    --muted: 213 15% 22%;
+    --muted-foreground: 40 10% 60%;
 
-    --destructive: 0 55% 45%;
-    --destructive-foreground: 40 33% 96%;
+    --destructive: 0 55% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 30 15% 22%;
-    --input: 30 15% 22%;
-    --ring: 20 60% 55%;
+    --border: 213 15% 25%;
+    --input: 213 15% 25%;
+    --ring: 26 87% 67%;
+
+    --setu-navy: 213 25% 20%;
+    --setu-navy-light: 213 20% 35%;
+    --setu-saffron: 26 87% 67%;
+    --setu-saffron-light: 26 80% 75%;
+
+    --text-primary: 40 15% 95%;
+    --text-secondary: 40 10% 70%;
+    --text-muted: 40 5% 55%;
+
+    --sidebar-background: 213 30% 8%;
+    --sidebar-foreground: 40 15% 95%;
   }
 }
 
@@ -124,18 +161,58 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Source Serif 4', Georgia, serif;
+    @apply text-foreground;
+  }
+
+  /* Ensure high contrast text */
+  p, span, li {
+    @apply text-foreground;
   }
 }
 
 @layer components {
-  /* Hero Button Variant - Calm style */
-  .btn-hero {
+  /* ═══════════════════════════════════════════════════════
+     BUTTON VARIANTS
+     ═══════════════════════════════════════════════════════ */
+  
+  /* Primary Button - Deep Navy, clearly clickable */
+  .btn-primary {
     @apply bg-primary text-primary-foreground font-medium;
-    @apply shadow-md hover:shadow-lg transition-all duration-200;
-    @apply hover:bg-primary/90 active:scale-[0.98];
+    @apply shadow-sm hover:shadow-md transition-all duration-200;
+    @apply hover:bg-[hsl(213_31%_22%)] active:scale-[0.98];
   }
 
-  /* Subject Cards */
+  /* Accent Button - Saffron highlight */
+  .btn-accent {
+    @apply bg-accent text-accent-foreground font-medium;
+    @apply shadow-sm hover:shadow-md transition-all duration-200;
+    @apply hover:bg-[hsl(26_90%_60%)] active:scale-[0.98];
+  }
+
+  /* Ghost Button - Subtle but visible */
+  .btn-ghost {
+    @apply bg-transparent text-foreground font-medium;
+    @apply hover:bg-secondary transition-all duration-200;
+    @apply border border-border hover:border-primary/30;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     CARD STYLES
+     ═══════════════════════════════════════════════════════ */
+  
+  /* Card with clear separation from background */
+  .card-elevated {
+    @apply bg-card rounded-lg;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Card Hover Effect - Noticeable lift */
+  .card-hover {
+    @apply transition-all duration-200;
+    @apply hover:shadow-lg hover:-translate-y-1;
+  }
+
+  /* Subject Cards - Distinct colors */
   .subject-physics {
     @apply bg-[hsl(var(--physics-color))];
   }
@@ -146,38 +223,75 @@
     @apply bg-[hsl(var(--maths-color))];
   }
 
-  /* Card Hover Effect - Subtle */
-  .card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
-  }
-
-  /* Mentor Tip Box */
+  /* ═══════════════════════════════════════════════════════
+     MENTOR / JEETU BHAIYA SECTIONS
+     ═══════════════════════════════════════════════════════ */
+  
+  /* Mentor Tip Box - Saffron accent */
   .mentor-tip {
-    @apply bg-accent/5;
+    @apply bg-accent/10;
     @apply border-l-4 border-accent p-4 rounded-r-lg;
   }
 
+  /* Jeetu Card - Special styling */
+  .jeetu-card {
+    @apply bg-card rounded-xl p-6;
+    @apply border border-accent/20;
+    box-shadow: var(--shadow-md), 0 0 0 1px hsl(var(--accent) / 0.1);
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     TAB & NAVIGATION STYLES
+     ═══════════════════════════════════════════════════════ */
+  
+  /* Active Tab - Clear indicator */
+  .tab-active {
+    @apply border-b-2 border-primary text-primary font-semibold;
+  }
+
+  /* Tab Hover */
+  .tab-item {
+    @apply text-muted-foreground hover:text-foreground transition-colors;
+    @apply py-2 px-4 cursor-pointer;
+  }
+
+  /* ═══════════════════════════════════════════════════════
+     PROGRESS & STATUS
+     ═══════════════════════════════════════════════════════ */
+  
   /* Progress Bar */
   .progress-setu {
-    @apply h-1.5 bg-secondary rounded-full overflow-hidden;
+    @apply h-2 bg-secondary rounded-full overflow-hidden;
   }
   .progress-setu-fill {
-    @apply h-full bg-accent rounded-full;
+    @apply h-full bg-primary rounded-full;
     @apply transition-all duration-500 ease-out;
   }
 
-  /* Tab Active State */
-  .tab-active {
-    @apply border-b-2 border-accent text-foreground font-medium;
+  /* Status badges */
+  .badge-success {
+    @apply bg-[hsl(var(--setu-success)/0.15)] text-[hsl(var(--setu-success))] font-medium;
+  }
+  .badge-warning {
+    @apply bg-[hsl(var(--setu-warning)/0.15)] text-[hsl(var(--setu-warning))] font-medium;
+  }
+  .badge-error {
+    @apply bg-[hsl(var(--setu-error)/0.15)] text-[hsl(var(--setu-error))] font-medium;
+  }
+  .badge-info {
+    @apply bg-[hsl(var(--setu-info)/0.15)] text-[hsl(var(--setu-info))] font-medium;
   }
 
-  /* MCQ Option Styles */
+  /* ═══════════════════════════════════════════════════════
+     MCQ & TEST STYLES
+     ═══════════════════════════════════════════════════════ */
+  
   .mcq-option {
     @apply border-2 border-border rounded-lg p-4 cursor-pointer transition-all duration-200;
-    @apply hover:border-accent/50 hover:bg-secondary/50;
+    @apply hover:border-primary/40 hover:bg-secondary/50;
   }
   .mcq-option-selected {
-    @apply border-accent bg-accent/5;
+    @apply border-primary bg-primary/5;
   }
   .mcq-option-correct {
     @apply border-[hsl(var(--setu-success))] bg-[hsl(var(--setu-success)/0.1)];
@@ -185,9 +299,23 @@
   .mcq-option-wrong {
     @apply border-[hsl(var(--setu-error))] bg-[hsl(var(--setu-error)/0.1)];
   }
+
+  /* ═══════════════════════════════════════════════════════
+     FORM INPUTS
+     ═══════════════════════════════════════════════════════ */
+  
+  .input-setu {
+    @apply bg-card border-2 border-border rounded-lg px-4 py-3;
+    @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
+    @apply placeholder:text-muted-foreground;
+    @apply transition-all duration-200;
+  }
 }
 
-/* Animations - Subtle */
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -198,12 +326,21 @@
   to { opacity: 1; transform: translateX(0); }
 }
 
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
 .animate-slide-in {
   animation: slideIn 0.3s ease-out forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
 }
 
 /* Stagger animations for lists */
