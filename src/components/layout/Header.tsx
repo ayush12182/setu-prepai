@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
+    <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-lg border-b border-border">
       <div className="container flex items-center justify-between h-16 px-4">
         <div className="flex items-center gap-3">
           <Button
@@ -59,11 +59,11 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
             <Menu className="w-5 h-5" />
           </Button>
           
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+              <span className="text-white font-semibold text-sm">S</span>
             </div>
-            <h1 className="font-display font-bold text-xl text-foreground">
+            <h1 className="font-semibold text-xl text-foreground">
               {title}
             </h1>
           </div>
@@ -74,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">
                 <Globe className="w-4 h-4" />
-                <span className="hidden sm:inline">{languageLabels[language]}</span>
+                <span className="hidden sm:inline text-sm font-medium">{languageLabels[language]}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
                 <DropdownMenuItem
                   key={lang}
                   onClick={() => setLanguage(lang)}
-                  className={language === lang ? 'bg-secondary' : ''}
+                  className={language === lang ? 'bg-secondary font-medium' : ''}
                 >
                   {languageLabels[lang]}
                 </DropdownMenuItem>
@@ -100,28 +100,28 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={profile?.avatar_url || undefined} />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                    <AvatarFallback className="bg-primary text-white text-xs font-medium">
                       {getInitials()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium">{profile?.full_name || 'Student'}</p>
+                <div className="px-3 py-2">
+                  <p className="text-sm font-medium text-foreground">{profile?.full_name || 'Student'}</p>
                   <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem className="font-medium">
                   <User className="w-4 h-4 mr-2" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem className="font-medium">
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive font-medium">
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </DropdownMenuItem>
@@ -129,7 +129,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
             </DropdownMenu>
           ) : (
             <Link to="/auth">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 font-medium">
                 <LogIn className="w-4 h-4" />
                 <span className="hidden sm:inline">Login</span>
               </Button>

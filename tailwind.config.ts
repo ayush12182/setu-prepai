@@ -14,9 +14,18 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
         serif: ['Source Serif 4', 'Georgia', 'serif'],
-        display: ['Source Serif 4', 'Georgia', 'serif'],
+        display: ['Inter', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        // Heading sizes with proper line-height
+        'h1': ['2.25rem', { lineHeight: '1.25', fontWeight: '600' }],
+        'h2': ['1.875rem', { lineHeight: '1.25', fontWeight: '600' }],
+        'h3': ['1.5rem', { lineHeight: '1.3', fontWeight: '500' }],
+        'h4': ['1.25rem', { lineHeight: '1.35', fontWeight: '500' }],
+        'body': ['1rem', { lineHeight: '1.5', fontWeight: '400' }],
+        'small': ['0.875rem', { lineHeight: '1.4', fontWeight: '400' }],
       },
       colors: {
         border: "hsl(var(--border))",

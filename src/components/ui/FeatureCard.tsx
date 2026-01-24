@@ -23,8 +23,29 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
 }) => {
   const variants = {
     default: 'bg-card hover:bg-secondary/50',
-    primary: 'bg-primary text-primary-foreground',
-    accent: 'bg-gradient-to-br from-setu-saffron to-setu-saffron-light text-white'
+    primary: 'bg-primary',
+    accent: 'bg-gradient-to-br from-accent to-setu-saffron-light'
+  };
+
+  // Text colors based on variant
+  const getTitleColor = () => {
+    if (variant === 'default') return 'text-foreground';
+    return 'text-white';
+  };
+
+  const getDescColor = () => {
+    if (variant === 'default') return 'text-secondary-foreground';
+    return 'text-white/90';
+  };
+
+  const getIconBg = () => {
+    if (variant === 'default') return 'bg-primary/10';
+    return 'bg-white/20';
+  };
+
+  const getIconColor = () => {
+    if (variant === 'default') return 'text-primary';
+    return 'text-white';
   };
 
   return (
@@ -38,33 +59,24 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
       )}
     >
       {badge && (
-        <span className="absolute top-3 right-3 px-2 py-0.5 text-xs font-medium rounded-full bg-setu-saffron text-white">
+        <span className="absolute top-3 right-3 px-2.5 py-1 text-xs font-semibold rounded-full bg-accent text-white">
           {badge}
         </span>
       )}
       
       <div className={cn(
-        'w-12 h-12 rounded-lg flex items-center justify-center mb-4',
+        'w-12 h-12 rounded-xl flex items-center justify-center mb-4',
         'transition-transform duration-300 group-hover:scale-110',
-        variant === 'default' ? 'bg-primary/10' : 'bg-white/20'
+        getIconBg()
       )}>
-        <Icon className={cn(
-          'w-6 h-6',
-          variant === 'default' ? 'text-primary' : 'text-current'
-        )} />
+        <Icon className={cn('w-6 h-6', getIconColor())} />
       </div>
       
-      <h3 className={cn(
-        'font-semibold text-lg mb-1',
-        variant === 'default' ? 'text-foreground' : 'text-current'
-      )}>
+      <h3 className={cn('font-medium text-lg mb-1.5 leading-tight', getTitleColor())}>
         {title}
       </h3>
       
-      <p className={cn(
-        'text-sm',
-        variant === 'default' ? 'text-muted-foreground' : 'text-current/80'
-      )}>
+      <p className={cn('text-sm leading-relaxed', getDescColor())}>
         {description}
       </p>
     </div>
