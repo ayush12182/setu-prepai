@@ -27,10 +27,10 @@ export const SyllabusTracker: React.FC = () => {
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-foreground">Syllabus Tracker</h2>
+        <h2 className="text-xl font-semibold text-foreground">Syllabus Tracker</h2>
         <button 
           onClick={() => navigate('/learn')}
-          className="text-sm text-setu-saffron hover:underline font-medium"
+          className="text-sm text-accent hover:text-setu-saffron-dark font-medium transition-colors"
         >
           View All
         </button>

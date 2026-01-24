@@ -45,8 +45,7 @@ export const SubjectCard: React.FC<SubjectCardProps> = ({
       onClick={onClick}
       className={cn(
         'relative overflow-hidden rounded-xl p-6 cursor-pointer card-hover',
-        'bg-gradient-to-br', config.gradient,
-        'text-white'
+        'bg-gradient-to-br', config.gradient
       )}
     >
       {/* Background Pattern */}
@@ -58,19 +57,19 @@ export const SubjectCard: React.FC<SubjectCardProps> = ({
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
           <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-            <Icon className="w-7 h-7" />
+            <Icon className="w-7 h-7 text-white" />
           </div>
-          <span className="text-xs font-medium bg-white/20 px-2 py-1 rounded-full backdrop-blur-sm">
+          <span className="text-xs font-semibold bg-white/20 text-white px-2.5 py-1 rounded-full backdrop-blur-sm">
             {chaptersCount} Chapters
           </span>
         </div>
 
-        <h3 className="text-xl font-bold mb-2">{config.label}</h3>
+        <h3 className="text-xl font-semibold text-white mb-3">{config.label}</h3>
         
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-white/80">Progress</span>
-            <span className="font-semibold">{progress}%</span>
+            <span className="text-white/80 font-medium">Progress</span>
+            <span className="font-semibold text-white">{progress}%</span>
           </div>
           <div className="h-2 bg-white/20 rounded-full overflow-hidden">
             <div 

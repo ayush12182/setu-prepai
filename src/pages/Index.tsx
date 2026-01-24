@@ -19,8 +19,10 @@ const Index: React.FC = () => {
         <div className="animate-fade-in" style={{ opacity: 0 }}>
           {user ? (
             <div className="bg-card rounded-xl p-6 shadow-card border border-border">
-              <p className="text-secondary-foreground mb-1">Welcome back, {displayName}! 👋</p>
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground">
+              <p className="text-secondary-foreground text-sm font-medium mb-1">
+                Welcome back, {displayName}! 👋
+              </p>
+              <h1 className="text-2xl font-semibold text-foreground leading-tight">
                 {getMentorName()} ready hai tumhari help ke liye
               </h1>
             </div>
@@ -34,7 +36,7 @@ const Index: React.FC = () => {
 
         {/* Quick Actions */}
         <section>
-          <h2 className="text-xl font-serif font-bold text-foreground mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
           <QuickActions />
         </section>
 
