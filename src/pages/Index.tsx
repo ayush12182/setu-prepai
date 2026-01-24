@@ -27,20 +27,7 @@ const Index: React.FC = () => {
                 {getMentorName()} ready hai tumhari help ke liye
               </h1>
             </>
-          ) : (
-            <>
-              <p className="text-muted-foreground mb-1">Welcome to Study Setu!</p>
-              <h1 className="text-3xl font-display font-bold text-foreground mb-4">
-                {getMentorName()} is here to help
-              </h1>
-              <Link to="/auth">
-                <Button className="btn-hero gap-2">
-                  <LogIn className="h-4 w-4" />
-                  Login kar lo bhai
-                </Button>
-              </Link>
-            </>
-          )}
+          ) : null}
         </div>
 
         {/* Today's Focus */}

@@ -4,10 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Mail, Phone, Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
+import { Mail, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -16,11 +15,18 @@ const emailSchema = z.string().email('Please enter a valid email');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 const phoneSchema = z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid phone number');
 
-type AuthMode = 'login' | 'signup' | 'phone' | 'otp' | 'forgot';
+type AuthMode = 'login' | 'signup' | 'phone' | 'otp';
+type OnboardingStep = 0 | 1 | 2 | 3;
+
+interface OnboardingData {
+  exam: string;
+  class: string;
+  weakSubject: string;
+}
 
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithPhone, verifyOTP, loading: authLoading } = useAuth();
+  const { user, profile, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithPhone, verifyOTP, updateProfile, loading: authLoading } = useAuth();
   
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
@@ -29,16 +35,29 @@ const AuthPage: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(1);
+  const [onboardingData, setOnboardingData] = useState<OnboardingData>({
+    exam: '',
+    class: '',
+    weakSubject: '',
+  });
 
-  // Redirect if already logged in
+  // Check if user needs onboarding
   useEffect(() => {
     if (user && !authLoading) {
-      navigate('/');
+      // Check if profile is complete
+      if (profile && !profile.target_exam) {
+        setShowOnboarding(true);
+      } else if (profile?.target_exam) {
+        navigate('/dashboard');
+      }
     }
-  }, [user, authLoading, navigate]);
+  }, [user, profile, authLoading, navigate]);
 
   const validateEmail = (value: string) => {
     try {
@@ -88,11 +107,11 @@ const AuthPage: React.FC = () => {
     try {
       if (mode === 'signup') {
         await signUpWithEmail(email, password, fullName);
-        toast.success('Account ban gaya! 🎉 Ab login kar lo.');
-        setMode('login');
+        toast.success('Account ban gaya! Ab thoda apne baare mein batao.');
+        setShowOnboarding(true);
+        setOnboardingStep(1);
       } else {
         await signInWithEmail(email, password);
-        navigate('/');
       }
     } catch (error: any) {
       toast.error(error.message || 'Kuch gadbad ho gayi, phir try karo');
@@ -119,7 +138,7 @@ const AuthPage: React.FC = () => {
     setLoading(true);
     try {
       await signInWithPhone(phone);
-      toast.success('OTP bhej diya! 📱 Check karo.');
+      toast.success('OTP bhej diya! Check karo.');
       setMode('otp');
     } catch (error: any) {
       toast.error(error.message || 'OTP bhejne mein problem hui');
@@ -130,14 +149,13 @@ const AuthPage: React.FC = () => {
 
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) {
-      toast.error('Poora OTP daalo bhai');
+      toast.error('Poora OTP daalo');
       return;
     }
 
     setLoading(true);
     try {
       await verifyOTP(phone, otp);
-      navigate('/');
     } catch (error: any) {
       toast.error(error.message || 'OTP galat hai, check karo');
     } finally {
@@ -145,15 +163,232 @@ const AuthPage: React.FC = () => {
     }
   };
 
-  const handleContinueAsGuest = () => {
-    toast.info('Guest mode mein limited access milega');
-    navigate('/');
+  const handleOnboardingComplete = async () => {
+    setLoading(true);
+    try {
+      await updateProfile({
+        target_exam: onboardingData.exam,
+        class: onboardingData.class as '11' | '12' | 'dropper',
+      });
+      toast.success('Chalo shuru karte hain! 🎯');
+      navigate('/dashboard');
+    } catch (error: any) {
+      toast.error('Profile update mein problem hui');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOnboardingNext = () => {
+    if (onboardingStep === 1 && !onboardingData.exam) {
+      toast.error('Exam select karo');
+      return;
+    }
+    if (onboardingStep === 2 && !onboardingData.class) {
+      toast.error('Class select karo');
+      return;
+    }
+    if (onboardingStep === 3 && !onboardingData.weakSubject) {
+      toast.error('Weak subject batao');
+      return;
+    }
+    
+    if (onboardingStep < 3) {
+      setOnboardingStep((prev) => (prev + 1) as OnboardingStep);
+    } else {
+      handleOnboardingComplete();
+    }
   };
 
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    );
+  }
+
+  // Onboarding Flow
+  if (showOnboarding && user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Header */}
+        <header className="p-4 sm:p-6">
+          <div className="max-w-md mx-auto flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">S</span>
+            </div>
+            <span className="font-serif font-semibold text-foreground">SETU</span>
+          </div>
+        </header>
+
+        {/* Onboarding Content */}
+        <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+          <div className="w-full max-w-md">
+            {/* Progress */}
+            <div className="flex items-center gap-2 mb-8">
+              {[1, 2, 3].map((step) => (
+                <div
+                  key={step}
+                  className={`flex-1 h-1.5 rounded-full transition-colors ${
+                    step <= onboardingStep ? 'bg-accent' : 'bg-border'
+                  }`}
+                />
+              ))}
+            </div>
+
+            <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border shadow-card">
+              {/* Step 1: Exam */}
+              {onboardingStep === 1 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                      Konsa exam de rahe ho?
+                    </h2>
+                    <p className="text-muted-foreground">
+                      Isse hum tumhara syllabus aur strategy set karenge.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {['JEE Main', 'JEE Advanced', 'Both'].map((exam) => (
+                      <button
+                        key={exam}
+                        onClick={() => setOnboardingData(prev => ({ ...prev, exam }))}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                          onboardingData.exam === exam
+                            ? 'border-accent bg-accent/5'
+                            : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-foreground">{exam}</span>
+                          {onboardingData.exam === exam && (
+                            <Check className="h-5 w-5 text-accent" />
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Class */}
+              {onboardingStep === 2 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                      Konsi class mein ho?
+                    </h2>
+                    <p className="text-muted-foreground">
+                      Time management iske according hoga.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { value: '11', label: 'Class 11' },
+                      { value: '12', label: 'Class 12' },
+                      { value: 'dropper', label: 'Dropper' },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setOnboardingData(prev => ({ ...prev, class: option.value }))}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                          onboardingData.class === option.value
+                            ? 'border-accent bg-accent/5'
+                            : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-foreground">{option.label}</span>
+                          {onboardingData.class === option.value && (
+                            <Check className="h-5 w-5 text-accent" />
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Weak Subject */}
+              {onboardingStep === 3 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                      Sabse weak subject?
+                    </h2>
+                    <p className="text-muted-foreground">
+                      Koi baat nahi, usko fix karenge pehle.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { value: 'physics', label: 'Physics', color: 'hsl(var(--physics-color))' },
+                      { value: 'chemistry', label: 'Chemistry', color: 'hsl(var(--chemistry-color))' },
+                      { value: 'maths', label: 'Mathematics', color: 'hsl(var(--maths-color))' },
+                    ].map((subject) => (
+                      <button
+                        key={subject.value}
+                        onClick={() => setOnboardingData(prev => ({ ...prev, weakSubject: subject.value }))}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                          onboardingData.weakSubject === subject.value
+                            ? 'border-accent bg-accent/5'
+                            : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: subject.color }}
+                            />
+                            <span className="font-medium text-foreground">{subject.label}</span>
+                          </div>
+                          {onboardingData.weakSubject === subject.value && (
+                            <Check className="h-5 w-5 text-accent" />
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation */}
+              <div className="flex items-center gap-3 mt-8">
+                {onboardingStep > 1 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setOnboardingStep((prev) => (prev - 1) as OnboardingStep)}
+                    className="flex-1 h-12"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                )}
+                <Button
+                  onClick={handleOnboardingNext}
+                  disabled={loading}
+                  className="flex-1 h-12 bg-primary hover:bg-primary/90"
+                >
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : onboardingStep === 3 ? (
+                    'Chalo shuru karte hain'
+                  ) : (
+                    <>
+                      Next
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -161,78 +396,94 @@ const AuthPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="p-4 md:p-6">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-display font-bold text-lg">S</span>
+      <header className="p-4 sm:p-6">
+        <div className="max-w-md mx-auto flex items-center gap-2">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 hover:opacity-70 transition-opacity"
+          >
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-sm">S</span>
             </div>
-            <div>
-              <h1 className="font-display font-bold text-xl text-foreground">Study Setu</h1>
-              <p className="text-xs text-muted-foreground">JEE Prep with Jeetu Bhaiya</p>
-            </div>
-          </div>
+            <span className="font-serif font-semibold text-foreground">SETU</span>
+          </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-4 md:p-6">
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md">
           {/* Welcome Text */}
           <div className="text-center mb-8">
-            {mode === 'login' && (
-              <>
-                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">
-                  Wapas aa gaye? 🙂
-                </h2>
-                <p className="text-muted-foreground">
-                  Chalo continue karte hain preparation.
-                </p>
-              </>
-            )}
-            {mode === 'signup' && (
-              <>
-                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">
-                  Welcome to Study Setu 📚
-                </h2>
-                <p className="text-muted-foreground">
-                  Jeetu Bhaiya ready hai tumhari help ke liye.
-                </p>
-              </>
-            )}
-            {mode === 'phone' && (
-              <>
-                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">
-                  Phone se login karo 📱
-                </h2>
-                <p className="text-muted-foreground">
-                  OTP aayega, bas verify kar lena.
-                </p>
-              </>
-            )}
-            {mode === 'otp' && (
-              <>
-                <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground mb-2">
-                  OTP daalo 🔐
-                </h2>
-                <p className="text-muted-foreground">
-                  {phone} pe OTP bheja hai
-                </p>
-              </>
-            )}
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground mb-2">
+              Start your preparation the right way
+            </h2>
+            <p className="text-muted-foreground">
+              No spam. No distractions. Only study.
+            </p>
           </div>
 
           {/* Auth Card */}
-          <div className="bg-card rounded-2xl shadow-card p-6 md:p-8 border border-border">
+          <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border shadow-card">
             {/* Back button for phone/otp modes */}
             {(mode === 'phone' || mode === 'otp') && (
               <button
                 onClick={() => setMode('login')}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="text-sm">Back</span>
               </button>
+            )}
+
+            {/* Social Login Buttons */}
+            {(mode === 'login' || mode === 'signup') && (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 text-base gap-3 mb-3"
+                  onClick={handleGoogleAuth}
+                  disabled={loading}
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 24 24">
+                    <path
+                      fill="currentColor"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    />
+                  </svg>
+                  Continue with Google
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 text-base gap-3"
+                  onClick={() => setMode('phone')}
+                  disabled={loading}
+                >
+                  <Phone className="h-5 w-5" />
+                  Continue with Phone
+                </Button>
+
+                <div className="my-6 flex items-center gap-4">
+                  <Separator className="flex-1" />
+                  <span className="text-sm text-muted-foreground">or</span>
+                  <Separator className="flex-1" />
+                </div>
+              </>
             )}
 
             {/* Email/Password Form */}
@@ -259,13 +510,13 @@ const AuthPage: React.FC = () => {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="tumhara@email.com"
+                      placeholder="email@example.com"
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
                         if (errors.email) validateEmail(e.target.value);
                       }}
-                      onBlur={() => validateEmail(email)}
+                      onBlur={() => email && validateEmail(email)}
                       className="h-12 pl-10"
                     />
                   </div>
@@ -286,7 +537,7 @@ const AuthPage: React.FC = () => {
                         setPassword(e.target.value);
                         if (errors.password) validatePassword(e.target.value);
                       }}
-                      onBlur={() => validatePassword(password)}
+                      onBlur={() => password && validatePassword(password)}
                       className="h-12 pr-10"
                     />
                     <button
@@ -302,31 +553,9 @@ const AuthPage: React.FC = () => {
                   )}
                 </div>
 
-                {mode === 'login' && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id="remember"
-                        checked={rememberMe}
-                        onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                      />
-                      <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
-                        Remember me
-                      </Label>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setMode('forgot')}
-                      className="text-sm text-accent hover:underline"
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
-                )}
-
                 <Button
                   type="submit"
-                  className="w-full h-12 btn-hero text-base"
+                  className="w-full h-12 text-base bg-primary hover:bg-primary/90"
                   disabled={loading}
                 >
                   {loading ? (
@@ -334,9 +563,36 @@ const AuthPage: React.FC = () => {
                   ) : mode === 'signup' ? (
                     'Create Account'
                   ) : (
-                    'Login'
+                    'Continue with Email'
                   )}
                 </Button>
+
+                {/* Toggle Login/Signup */}
+                <p className="text-center text-sm text-muted-foreground pt-2">
+                  {mode === 'login' ? (
+                    <>
+                      New here?{' '}
+                      <button
+                        type="button"
+                        onClick={() => setMode('signup')}
+                        className="text-accent font-medium hover:underline"
+                      >
+                        Create account
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      Already have an account?{' '}
+                      <button
+                        type="button"
+                        onClick={() => setMode('login')}
+                        className="text-accent font-medium hover:underline"
+                      >
+                        Login
+                      </button>
+                    </>
+                  )}
+                </p>
               </form>
             )}
 
@@ -356,7 +612,7 @@ const AuthPage: React.FC = () => {
                         setPhone(e.target.value);
                         if (errors.phone) validatePhone(e.target.value);
                       }}
-                      onBlur={() => validatePhone(phone)}
+                      onBlur={() => phone && validatePhone(phone)}
                       className="h-12 pl-10"
                     />
                   </div>
@@ -367,7 +623,7 @@ const AuthPage: React.FC = () => {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 btn-hero text-base"
+                  className="w-full h-12 text-base bg-primary hover:bg-primary/90"
                   disabled={loading}
                 >
                   {loading ? (
@@ -382,6 +638,12 @@ const AuthPage: React.FC = () => {
             {/* OTP Form */}
             {mode === 'otp' && (
               <div className="space-y-6">
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Enter the 6-digit code sent to {phone}
+                  </p>
+                </div>
+                
                 <div className="flex justify-center">
                   <InputOTP
                     maxLength={6}
@@ -401,7 +663,7 @@ const AuthPage: React.FC = () => {
 
                 <Button
                   onClick={handleVerifyOTP}
-                  className="w-full h-12 btn-hero text-base"
+                  className="w-full h-12 text-base bg-primary hover:bg-primary/90"
                   disabled={loading || otp.length !== 6}
                 >
                   {loading ? (
@@ -412,9 +674,9 @@ const AuthPage: React.FC = () => {
                 </Button>
 
                 <p className="text-center text-sm text-muted-foreground">
-                  OTP nahi aaya?{' '}
+                  Didn't receive it?{' '}
                   <button
-                    onClick={handlePhoneAuth}
+                    onClick={() => handlePhoneAuth({ preventDefault: () => {} } as React.FormEvent)}
                     className="text-accent hover:underline"
                     disabled={loading}
                   >
@@ -423,93 +685,6 @@ const AuthPage: React.FC = () => {
                 </p>
               </div>
             )}
-
-            {/* Divider and alternate options */}
-            {(mode === 'login' || mode === 'signup') && (
-              <>
-                <div className="my-6 flex items-center gap-4">
-                  <Separator className="flex-1" />
-                  <span className="text-sm text-muted-foreground">ya phir</span>
-                  <Separator className="flex-1" />
-                </div>
-
-                {/* Google Login */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-12 text-base gap-3"
-                  onClick={handleGoogleAuth}
-                  disabled={loading}
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24">
-                    <path
-                      fill="currentColor"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
-                  </svg>
-                  Continue with Google
-                </Button>
-
-                {/* Phone Login */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-12 text-base gap-3 mt-3"
-                  onClick={() => setMode('phone')}
-                  disabled={loading}
-                >
-                  <Phone className="h-5 w-5" />
-                  Continue with Phone
-                </Button>
-
-                {/* Toggle Login/Signup */}
-                <p className="text-center text-sm text-muted-foreground mt-6">
-                  {mode === 'login' ? (
-                    <>
-                      Naya hai?{' '}
-                      <button
-                        onClick={() => setMode('signup')}
-                        className="text-accent font-medium hover:underline"
-                      >
-                        Create account
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      Pehle se account hai?{' '}
-                      <button
-                        onClick={() => setMode('login')}
-                        className="text-accent font-medium hover:underline"
-                      >
-                        Login karo
-                      </button>
-                    </>
-                  )}
-                </p>
-              </>
-            )}
-          </div>
-
-          {/* Guest Mode */}
-          <div className="text-center mt-6">
-            <button
-              onClick={handleContinueAsGuest}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Continue as guest (limited access)
-            </button>
           </div>
         </div>
       </main>
