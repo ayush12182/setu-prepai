@@ -5,9 +5,6 @@ import { QuickActions } from '@/components/home/QuickActions';
 import { SyllabusTracker } from '@/components/home/SyllabusTracker';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { LogIn } from 'lucide-react';
 
 const Index: React.FC = () => {
   const { getGreeting, getMentorName } = useLanguage();
@@ -21,12 +18,12 @@ const Index: React.FC = () => {
         {/* Welcome Section */}
         <div className="animate-fade-in" style={{ opacity: 0 }}>
           {user ? (
-            <>
-              <p className="text-muted-foreground mb-1">Welcome back, {displayName}! 👋</p>
-              <h1 className="text-3xl font-display font-bold text-foreground">
+            <div className="bg-card rounded-xl p-6 shadow-card border border-border">
+              <p className="text-secondary-foreground mb-1">Welcome back, {displayName}! 👋</p>
+              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-foreground">
                 {getMentorName()} ready hai tumhari help ke liye
               </h1>
-            </>
+            </div>
           ) : null}
         </div>
 
@@ -37,7 +34,7 @@ const Index: React.FC = () => {
 
         {/* Quick Actions */}
         <section>
-          <h2 className="text-xl font-bold text-foreground mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-serif font-bold text-foreground mb-4">Quick Actions</h2>
           <QuickActions />
         </section>
 

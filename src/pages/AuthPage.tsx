@@ -517,11 +517,11 @@ const AuthPage: React.FC = () => {
                         if (errors.email) validateEmail(e.target.value);
                       }}
                       onBlur={() => email && validateEmail(email)}
-                      className="h-12 pl-10"
+                    className="h-12 pl-10 border-2 focus:border-primary"
                     />
                   </div>
                   {errors.email && (
-                    <p className="text-sm text-muted-foreground">{errors.email}</p>
+                    <p className="text-sm text-destructive">{errors.email}</p>
                   )}
                 </div>
 
@@ -555,7 +555,7 @@ const AuthPage: React.FC = () => {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base bg-primary hover:bg-primary/90"
+                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-setu-navy-light shadow-sm"
                   disabled={loading}
                 >
                   {loading ? (
@@ -613,17 +613,17 @@ const AuthPage: React.FC = () => {
                         if (errors.phone) validatePhone(e.target.value);
                       }}
                       onBlur={() => phone && validatePhone(phone)}
-                      className="h-12 pl-10"
+                      className="h-12 pl-10 border-2 focus:border-primary"
                     />
                   </div>
                   {errors.phone && (
-                    <p className="text-sm text-muted-foreground">{errors.phone}</p>
+                    <p className="text-sm text-destructive">{errors.phone}</p>
                   )}
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base bg-primary hover:bg-primary/90"
+                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-setu-navy-light shadow-sm"
                   disabled={loading}
                 >
                   {loading ? (
@@ -663,7 +663,7 @@ const AuthPage: React.FC = () => {
 
                 <Button
                   onClick={handleVerifyOTP}
-                  className="w-full h-12 text-base bg-primary hover:bg-primary/90"
+                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-setu-navy-light shadow-sm"
                   disabled={loading || otp.length !== 6}
                 >
                   {loading ? (
