@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import LearnPage from "./pages/LearnPage";
@@ -30,8 +30,9 @@ const App = () => (
             <Toaster />
             <Sonner />
             <Routes>
+              <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<AuthPage />} />
-              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Index />} />
               <Route path="/learn" element={<LearnPage />} />
               <Route path="/chapter/:chapterId" element={<ChapterPage />} />
               <Route path="/subchapter/:subchapterId" element={<SubchapterPage />} />
