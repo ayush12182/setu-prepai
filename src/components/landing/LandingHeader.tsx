@@ -1,25 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 export const LandingHeader: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/50"
-    >
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 animate-fade-in">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className="flex items-center"
-        >
+        <div className="flex items-center hover:scale-[1.02] transition-transform">
           <img src="/setu-logo.png" alt="SETU" className="h-12 w-auto rounded-lg shadow-sm" />
-        </motion.div>
+        </div>
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -38,6 +29,6 @@ export const LandingHeader: React.FC = () => {
           </Button>
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 };
