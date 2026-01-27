@@ -132,10 +132,16 @@ const LandingPage: React.FC = () => {
             {/* Right - Video */}
             <div className="flex flex-col items-center lg:items-end gap-4">
               {/* Lead-in Message */}
-              <div className="text-center lg:text-right max-w-[320px]">
-                <p className="text-sm font-medium text-secondary-foreground mb-1">Before you start, we need your</p>
-                <p className="font-serif text-2xl sm:text-3xl font-bold text-primary">21 Days</p>
-                <p className="text-sm text-secondary-foreground mt-1">Watch why 👇</p>
+              <div className="text-center lg:text-right max-w-[340px] animate-fade-in">
+                <p className="font-serif text-xl sm:text-2xl font-bold text-foreground leading-snug">
+                  Before you start, we just need{' '}
+                  <span className="text-primary">21 days</span> from you.
+                </p>
+                <p className="text-base text-secondary-foreground mt-3 leading-relaxed">
+                  Give these 21 days honestly —<br />
+                  and you'll finally feel <span className="font-medium text-foreground">clarity</span> instead of confusion.
+                </p>
+                <p className="text-sm text-accent font-medium mt-4">👇 Watch this first. Then we begin.</p>
               </div>
               
               <div className="relative w-[280px] sm:w-[320px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border-4 border-card bg-card">
