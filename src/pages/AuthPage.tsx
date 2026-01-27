@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +16,7 @@ const emailSchema = z.string().email('Please enter a valid email');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 const phoneSchema = z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid phone number');
 
-type AuthMode = 'login' | 'signup' | 'phone' | 'otp';
+type AuthMode = 'login' | 'signup' | 'phone' | 'otp' | 'forgot-password';
 type OnboardingStep = 0 | 1 | 2 | 3 | 4 | 5;
 
 interface OnboardingData {
@@ -162,6 +163,26 @@ const AuthPage: React.FC = () => {
       await verifyOTP(phone, otp);
     } catch (error: any) {
       toast.error(error.message || 'OTP galat hai, check karo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateEmail(email)) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      if (error) throw error;
+      toast.success('Password reset link sent! Check your email.');
+      setMode('login');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send reset link');
     } finally {
       setLoading(false);
     }
@@ -532,14 +553,14 @@ const AuthPage: React.FC = () => {
 
           {/* Auth Card */}
           <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border shadow-card">
-            {/* Back button for phone/otp modes */}
-            {(mode === 'phone' || mode === 'otp') && (
+            {/* Back button for phone/otp/forgot-password modes */}
+            {(mode === 'phone' || mode === 'otp' || mode === 'forgot-password') && (
               <button
                 onClick={() => setMode('login')}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
-                <span className="text-sm">Back</span>
+                <span className="text-sm">Back to login</span>
               </button>
             )}
 
@@ -659,6 +680,18 @@ const AuthPage: React.FC = () => {
                     <p className="text-sm text-muted-foreground">{errors.password}</p>
                   )}
                 </div>
+
+                {mode === 'login' && (
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => setMode('forgot-password')}
+                      className="text-sm text-accent hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
 
                 <Button
                   type="submit"
@@ -791,6 +824,65 @@ const AuthPage: React.FC = () => {
                   </button>
                 </p>
               </div>
+            )}
+
+            {/* Forgot Password Form */}
+            {mode === 'forgot-password' && (
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div className="text-center mb-4">
+                  <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
+                    Reset your password
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Enter your email and we'll send you a reset link
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="reset-email">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="email@example.com"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errors.email) validateEmail(e.target.value);
+                      }}
+                      onBlur={() => email && validateEmail(email)}
+                      className="h-12 pl-10 border-2 focus:border-primary"
+                    />
+                  </div>
+                  {errors.email && (
+                    <p className="text-sm text-destructive">{errors.email}</p>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-setu-navy-light shadow-sm"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    'Send Reset Link'
+                  )}
+                </Button>
+
+                <p className="text-center text-sm text-muted-foreground pt-2">
+                  Remember your password?{' '}
+                  <button
+                    type="button"
+                    onClick={() => setMode('login')}
+                    className="text-accent font-medium hover:underline"
+                  >
+                    Login
+                  </button>
+                </p>
+              </form>
             )}
           </div>
         </div>
