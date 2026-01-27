@@ -60,12 +60,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
           </Button>
           
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-              <span className="text-white font-semibold text-sm">S</span>
-            </div>
-            <h1 className="font-semibold text-xl text-foreground">
-              {title}
-            </h1>
+            <img src="/setu-logo.png" alt="SETU" className="h-8 w-auto" />
           </div>
         </div>
 
