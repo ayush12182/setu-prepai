@@ -4,6 +4,7 @@ import { ChevronLeft, Copy, Check } from 'lucide-react';
 import { getFormulasBySubject, ChapterFormulas } from '@/data/cleanFormulas';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { renderFormula } from '@/lib/formulaRenderer';
 
 interface FormulaSheetProps {
   onBack: () => void;
@@ -104,8 +105,8 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <p className="text-xs text-muted-foreground mb-1">Formula:</p>
-                        <code className="text-sm font-mono text-foreground font-medium">
-                          {item.formula}
+                        <code className="text-base font-mono text-foreground font-medium">
+                          {renderFormula(item.formula)}
                         </code>
                       </div>
                       <Button
