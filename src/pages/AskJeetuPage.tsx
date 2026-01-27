@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Mic, MicOff, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { Send, Mic, MicOff, Sparkles, Volume2, VolumeX, Camera, ImagePlus, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getGreetingByLanguage } from '@/lib/jeetuBhaiya';
 import { useJeetuChat } from '@/hooks/useJeetuChat';
@@ -15,6 +15,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  image?: string;
 }
 
 const AskJeetuPage: React.FC = () => {
@@ -33,6 +34,9 @@ const AskJeetuPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [liveTranscript, setLiveTranscript] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   
   // Voice chat hook
   const {
@@ -93,18 +97,36 @@ const AskJeetuPage: React.FC = () => {
     "JEE Advanced Physics kaise prepare karein?"
   ];
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setSelectedImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
+  };
+
   const handleSendWithText = async (textToSend: string) => {
-    if (!textToSend.trim() || isLoading) return;
+    if ((!textToSend.trim() && !selectedImage) || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: textToSend,
-      timestamp: new Date()
+      content: textToSend || (selectedImage ? '📷 Image shared' : ''),
+      timestamp: new Date(),
+      image: selectedImage || undefined
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setSelectedImage(null);
 
     // Build message history for AI
     const chatHistory = messages
@@ -276,6 +298,15 @@ const AskJeetuPage: React.FC = () => {
                     : 'bg-card border border-border rounded-bl-md shadow-sm'
                 )}
               >
+                {/* Display attached image */}
+                {message.image && (
+                  <img 
+                    src={message.image} 
+                    alt="Attached" 
+                    className="max-w-full rounded-lg mb-2 max-h-48 object-contain"
+                  />
+                )}
+                
                 <div className={cn(
                   'text-sm leading-relaxed whitespace-pre-wrap',
                   message.role === 'assistant' && 'text-foreground'
@@ -363,7 +394,65 @@ const AskJeetuPage: React.FC = () => {
             </div>
           )}
           
-          <div className="flex gap-3">
+          {/* Image Preview */}
+          {selectedImage && (
+            <div className="mb-3 relative inline-block">
+              <img 
+                src={selectedImage} 
+                alt="Selected" 
+                className="max-h-32 rounded-lg border border-border"
+              />
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center shadow-md hover:bg-destructive/90"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          
+          {/* Hidden file inputs */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept="image/*"
+            className="hidden"
+          />
+          <input
+            type="file"
+            ref={cameraInputRef}
+            onChange={handleFileSelect}
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+          />
+          
+          <div className="flex gap-2">
+            {/* Media Upload Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-shrink-0 rounded-xl"
+              disabled={isLoading}
+              title="Upload from gallery"
+            >
+              <ImagePlus className="w-5 h-5" />
+            </Button>
+            
+            {/* Camera Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => cameraInputRef.current?.click()}
+              className="flex-shrink-0 rounded-xl"
+              disabled={isLoading}
+              title="Take photo"
+            >
+              <Camera className="w-5 h-5" />
+            </Button>
+            
             {voiceSupported && (
               <Button
                 variant="outline"
@@ -382,9 +471,9 @@ const AskJeetuPage: React.FC = () => {
             <Textarea
               value={isListening ? liveTranscript : input}
               onChange={(e) => !isListening && setInput(e.target.value)}
-              placeholder={isListening ? "Sun raha hoon..." : "Apna doubt yahan likho ya mic use karo..."}
+              placeholder={isListening ? "Sun raha hoon..." : "Apna doubt yahan likho..."}
               className={cn(
-                "min-h-[48px] max-h-32 resize-none rounded-xl",
+                "min-h-[48px] max-h-32 resize-none rounded-xl flex-1",
                 isListening && "bg-red-50 dark:bg-red-950/20 border-red-200"
               )}
               onKeyDown={(e) => {
@@ -398,7 +487,7 @@ const AskJeetuPage: React.FC = () => {
             
             <Button
               onClick={handleSend}
-              disabled={(!input.trim() && !isListening) || isLoading}
+              disabled={(!input.trim() && !selectedImage && !isListening) || isLoading}
               className="btn-hero flex-shrink-0 rounded-xl px-4"
             >
               <Send className="w-5 h-5" />
@@ -406,7 +495,7 @@ const AskJeetuPage: React.FC = () => {
           </div>
           
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            {voiceSupported ? 'Mic click karo ya type karo • Enter to send' : 'Press Enter to send • Shift+Enter for new line'}
+            📷 Photo upload • 🎤 Voice input • ⌨️ Type your doubt
           </p>
         </div>
       </div>
