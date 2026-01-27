@@ -82,7 +82,7 @@ const ChapterPage: React.FC = () => {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/dashboard')}
             className="mt-1"
           >
             <ArrowLeft className="w-5 h-5" />
