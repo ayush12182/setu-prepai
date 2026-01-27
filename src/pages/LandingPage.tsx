@@ -148,8 +148,8 @@ const LandingPage: React.FC = () => {
               </div>
               
               {/* Video Frame */}
-              <div className="relative">
-                <div className="w-[260px] sm:w-[280px] aspect-[9/16] rounded-xl overflow-hidden bg-gray-900 shadow-xl border border-gray-200">
+              <div className="relative w-full max-w-[480px]">
+                <div className="w-full aspect-video rounded-xl overflow-hidden bg-gray-900 shadow-xl border border-gray-200">
                   <iframe
                     src={`https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`}
                     title="SETU Preview"
