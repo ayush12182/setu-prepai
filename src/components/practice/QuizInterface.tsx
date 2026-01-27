@@ -274,10 +274,25 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
             </div>
           )}
 
-          {/* Similar Questions (for wrong answers) */}
+          {/* Re-attempt & Similar Questions (for wrong answers) */}
           {!isCorrect && (
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
+              {/* Re-attempt Button */}
+              <button
+                onClick={() => {
+                  setSelectedOption(null);
+                  setHasSubmitted(false);
+                  setShowExplanation(false);
+                  setSimilarQuestions(null);
+                  setQuestionStartTime(Date.now());
+                }}
+                className="w-full flex items-center justify-center gap-2 p-4 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-xl transition-colors"
+              >
+                <RefreshCw className="w-4 h-4 text-primary" />
+                <span className="font-medium text-primary">Re-attempt This Question</span>
+              </button>
+
+              <div className="flex items-center gap-2 mt-4">
                 <RefreshCw className={cn('w-4 h-4', loadingSimilar && 'animate-spin')} />
                 <span className="text-sm font-medium">Practice Similar Questions</span>
               </div>
@@ -289,7 +304,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
               ) : similarQuestions && similarQuestions.length > 0 ? (
                 <div className="space-y-2">
                   {similarQuestions.map((sq, idx) => (
-                    <div key={idx} className="bg-card border border-border rounded-lg p-4">
+                    <div key={idx} className="bg-card border border-border rounded-lg p-4 hover:border-primary/30 transition-colors cursor-pointer">
                       <p className="text-sm font-medium mb-2">{sq.question_text}</p>
                       <p className="text-xs text-muted-foreground">
                         Answer: {sq.correct_option} • {sq.difficulty_note}
