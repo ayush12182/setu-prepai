@@ -51,8 +51,8 @@ const LandingPage: React.FC = () => {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 bg-black rounded-lg p-1.5">
-            <img src="/setu-logo.png" alt="SETU" className="h-10 w-auto" />
+          <div className="flex items-center">
+            <img src="/setu-logo.png" alt="SETU" className="h-12 w-auto rounded-lg shadow-sm" />
           </div>
           <div className="flex items-center gap-3">
             <Button
@@ -349,8 +349,8 @@ const LandingPage: React.FC = () => {
       {/* Footer */}
       <footer className="py-8 px-4 sm:px-6 border-t border-gray-100">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 bg-black rounded-lg p-1">
-            <img src="/setu-logo.png" alt="SETU" className="h-8 w-auto" />
+          <div className="flex items-center">
+            <img src="/setu-logo.png" alt="SETU" className="h-10 w-auto rounded-lg" />
           </div>
           <p className="text-sm text-gray-400">
             © 2024 SETU. Built for serious students.
