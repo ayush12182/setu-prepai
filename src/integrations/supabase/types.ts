@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      practice_sessions: {
+        Row: {
+          completed_at: string | null
+          correct_answers: number
+          difficulty: string
+          id: string
+          started_at: string
+          subchapter_id: string
+          total_questions: number
+          total_time_seconds: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          correct_answers?: number
+          difficulty: string
+          id?: string
+          started_at?: string
+          subchapter_id: string
+          total_questions?: number
+          total_time_seconds?: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          correct_answers?: number
+          difficulty?: string
+          id?: string
+          started_at?: string
+          subchapter_id?: string
+          total_questions?: number
+          total_time_seconds?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -45,6 +81,137 @@ export type Database = {
           id?: string
           phone?: string | null
           target_exam?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      question_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          is_correct: boolean
+          question_id: string
+          selected_option: string
+          time_taken_seconds: number
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          is_correct: boolean
+          question_id: string
+          selected_option: string
+          time_taken_seconds?: number
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          is_correct?: boolean
+          question_id?: string
+          selected_option?: string
+          time_taken_seconds?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_attempts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          chapter_id: string
+          common_mistake: string | null
+          concept_tested: string
+          correct_option: string
+          created_at: string
+          difficulty: string
+          explanation: string
+          id: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          pyq_year: number | null
+          question_text: string
+          source: string | null
+          subchapter_id: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          chapter_id: string
+          common_mistake?: string | null
+          concept_tested: string
+          correct_option: string
+          created_at?: string
+          difficulty: string
+          explanation: string
+          id?: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          pyq_year?: number | null
+          question_text: string
+          source?: string | null
+          subchapter_id: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          chapter_id?: string
+          common_mistake?: string | null
+          concept_tested?: string
+          correct_option?: string
+          created_at?: string
+          difficulty?: string
+          explanation?: string
+          id?: string
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          pyq_year?: number | null
+          question_text?: string
+          source?: string | null
+          subchapter_id?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_practice_stats: {
+        Row: {
+          chapters_practiced: string[] | null
+          id: string
+          total_correct: number
+          total_questions_solved: number
+          total_time_seconds: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chapters_practiced?: string[] | null
+          id?: string
+          total_correct?: number
+          total_questions_solved?: number
+          total_time_seconds?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chapters_practiced?: string[] | null
+          id?: string
+          total_correct?: number
+          total_questions_solved?: number
+          total_time_seconds?: number
           updated_at?: string
           user_id?: string
         }
