@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Check, AlertTriangle, HelpCircle, BookOpen, Target, Clock, TrendingUp } from 'lucide-react';
+import { ArrowRight, Check, AlertTriangle, HelpCircle, BookOpen, Target, Clock, TrendingUp, Volume2, VolumeX } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const [isMuted, setIsMuted] = useState(true);
 
   const examPills = ['JEE Main', 'JEE Advanced', 'NEET', 'UCEED', 'CA Foundation'];
 
@@ -132,12 +133,20 @@ const LandingPage: React.FC = () => {
             <div className="flex justify-center lg:justify-end">
               <div className="relative w-[280px] sm:w-[320px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border-4 border-card bg-card">
                 <iframe
-                  src="https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=1&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1"
+                  src={`https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`}
                   title="SETU Preview"
                   className="absolute inset-0 w-full h-full"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
+                {/* Mute/Unmute Button */}
+                <button
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center text-foreground hover:bg-background transition-colors shadow-lg border border-border"
+                  aria-label={isMuted ? "Unmute video" : "Mute video"}
+                >
+                  {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                </button>
               </div>
             </div>
           </div>
