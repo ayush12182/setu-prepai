@@ -251,7 +251,7 @@ const SubchapterPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div 
                 className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
-                onClick={() => toast.info('Level 1: Concept MCQs coming soon! 🌱', { description: 'Practice questions are being prepared.' })}
+                onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=easy`)}
               >
                 <div className="w-12 h-12 rounded-lg bg-setu-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">🌱</span>
@@ -263,7 +263,7 @@ const SubchapterPage: React.FC = () => {
 
               <div 
                 className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
-                onClick={() => toast.info('Level 2: JEE Main coming soon! 🎯', { description: 'Practice questions are being prepared.' })}
+                onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=medium`)}
               >
                 <div className="w-12 h-12 rounded-lg bg-setu-warning/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">🎯</span>
@@ -275,7 +275,7 @@ const SubchapterPage: React.FC = () => {
 
               <div 
                 className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
-                onClick={() => toast.info('Level 3: JEE Advanced coming soon! 🔥', { description: 'Practice questions are being prepared.' })}
+                onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=hard`)}
               >
                 <div className="w-12 h-12 rounded-lg bg-setu-error/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <span className="text-2xl">🔥</span>

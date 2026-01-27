@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Chapter } from '@/data/syllabus';
-import { Subchapter } from '@/data/subchapters';
+import { Chapter, getChapterById } from '@/data/syllabus';
+import { Subchapter, getSubchapterById } from '@/data/subchapters';
 import { usePracticeQuestions, usePracticeStats } from '@/hooks/usePracticeQuestions';
 import SubchapterSelector from '@/components/practice/SubchapterSelector';
 import DifficultySelector from '@/components/practice/DifficultySelector';
@@ -19,8 +19,10 @@ type PracticeState =
 
 const PracticePage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [state, setState] = useState<PracticeState>({ step: 'select-topic' });
+  const [initialized, setInitialized] = useState(false);
   
   const { 
     questions, 
@@ -38,6 +40,40 @@ const PracticePage: React.FC = () => {
       fetchStats();
     }
   }, [user]);
+
+  // Handle URL parameters for direct navigation from subchapter page
+  useEffect(() => {
+    if (initialized) return;
+    
+    const subchapterId = searchParams.get('subchapter');
+    const difficulty = searchParams.get('difficulty') as 'easy' | 'medium' | 'hard' | null;
+    
+    if (subchapterId) {
+      const subchapter = getSubchapterById(subchapterId);
+      if (subchapter) {
+        const chapter = getChapterById(subchapter.chapterId);
+        if (chapter) {
+          if (difficulty && ['easy', 'medium', 'hard'].includes(difficulty)) {
+            // Auto-start quiz with selected difficulty
+            setState({ step: 'quiz', subchapter, chapter, subject: chapter.subject, difficulty });
+            generateQuestions(
+              subchapter.id,
+              subchapter.name,
+              chapter.id,
+              chapter.name,
+              chapter.subject,
+              difficulty,
+              5
+            );
+          } else {
+            // Show difficulty selector
+            setState({ step: 'select-difficulty', subchapter, chapter, subject: chapter.subject });
+          }
+        }
+      }
+    }
+    setInitialized(true);
+  }, [searchParams, initialized]);
 
   const handleSubchapterSelect = (subchapter: Subchapter, chapter: Chapter, subject: string) => {
     setState({ step: 'select-difficulty', subchapter, chapter, subject });
