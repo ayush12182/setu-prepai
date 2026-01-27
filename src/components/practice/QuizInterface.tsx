@@ -53,8 +53,21 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
     correct: 0,
     wrong: []
   });
+  const [practiceQuestion, setPracticeQuestion] = useState<SimilarQuestion | null>(null);
+  const [similarQueueIndex, setSimilarQueueIndex] = useState(0);
 
-  const currentQuestion = questions[currentIndex];
+  const baseQuestion = questions[currentIndex];
+  // Use practice question if available, otherwise use the base question
+  const currentQuestion = practiceQuestion ? {
+    ...baseQuestion,
+    question_text: practiceQuestion.question_text,
+    option_a: practiceQuestion.option_a,
+    option_b: practiceQuestion.option_b,
+    option_c: practiceQuestion.option_c,
+    option_d: practiceQuestion.option_d,
+    correct_option: practiceQuestion.correct_option as 'A' | 'B' | 'C' | 'D',
+    explanation: practiceQuestion.explanation
+  } : baseQuestion;
   const isCorrect = selectedOption === currentQuestion?.correct_option;
 
   useEffect(() => {
@@ -97,6 +110,8 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
       setHasSubmitted(false);
       setShowExplanation(false);
       setSimilarQuestions(null);
+      setPracticeQuestion(null);
+      setSimilarQueueIndex(0);
     } else {
       // Quiz complete
       onComplete({
@@ -277,19 +292,27 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
           {/* Re-attempt & Similar Questions (for wrong answers) */}
           {!isCorrect && (
             <div className="space-y-3">
-              {/* Re-attempt Button */}
+              {/* Try New Question Button */}
               <button
                 onClick={() => {
+                  // Pick next similar question from the queue
+                  if (similarQuestions && similarQuestions.length > 0) {
+                    const nextIndex = similarQueueIndex % similarQuestions.length;
+                    setPracticeQuestion(similarQuestions[nextIndex]);
+                    setSimilarQueueIndex(prev => prev + 1);
+                  }
                   setSelectedOption(null);
                   setHasSubmitted(false);
                   setShowExplanation(false);
-                  setSimilarQuestions(null);
                   setQuestionStartTime(Date.now());
                 }}
-                className="w-full flex items-center justify-center gap-2 p-4 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-xl transition-colors"
+                disabled={!similarQuestions || similarQuestions.length === 0}
+                className="w-full flex items-center justify-center gap-2 p-4 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <RefreshCw className="w-4 h-4 text-primary" />
-                <span className="font-medium text-primary">Re-attempt This Question</span>
+                <RefreshCw className={cn('w-4 h-4 text-primary', loadingSimilar && 'animate-spin')} />
+                <span className="font-medium text-primary">
+                  {loadingSimilar ? 'Loading new question...' : 'Try Similar Question'}
+                </span>
               </button>
 
               <div className="flex items-center gap-2 mt-4">
