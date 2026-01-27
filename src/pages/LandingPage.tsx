@@ -72,56 +72,74 @@ const LandingPage: React.FC = () => {
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <Badge className="mb-6 px-4 py-1.5 text-sm font-semibold bg-accent/15 text-accent hover:bg-accent/20 border-0">
-            SETU — Bridge to Exam Success
-          </Badge>
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left - Text Content */}
+            <div className="text-center lg:text-left">
+              {/* Badge */}
+              <Badge className="mb-6 px-4 py-1.5 text-sm font-semibold bg-accent/15 text-accent hover:bg-accent/20 border-0">
+                SETU — Bridge to Exam Success
+              </Badge>
 
-          {/* Main Heading */}
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
-            Content is everywhere.
-            <br />
-            <span className="text-primary">Mentorship is not.</span>
-          </h1>
+              {/* Main Heading */}
+              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6">
+                Content is everywhere.
+                <br />
+                <span className="text-primary">Mentorship is not.</span>
+              </h1>
 
-          {/* Subtext */}
-          <p className="text-lg sm:text-xl text-secondary-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            Competitive exams are cracked by clarity, discipline and right direction — not more videos.
-          </p>
+              {/* Subtext */}
+              <p className="text-lg sm:text-xl text-secondary-foreground max-w-2xl mx-auto lg:mx-0 mb-10 leading-relaxed">
+                Competitive exams are cracked by clarity, discipline and right direction — not more videos.
+              </p>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <Button
-              size="lg"
-              onClick={() => navigate('/auth')}
-              className="h-14 px-10 text-base font-semibold gap-2 bg-primary hover:bg-setu-navy-light shadow-md hover:shadow-lg transition-all"
-            >
-              Start with Jeetu Bhaiya
-              <ArrowRight className="h-5 w-5" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-14 px-10 text-base font-medium border-2 text-foreground hover:bg-secondary"
-              onClick={() => {
-                document.getElementById('mentor-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              See how it works
-            </Button>
-          </div>
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-12">
+                <Button
+                  size="lg"
+                  onClick={() => navigate('/auth')}
+                  className="h-14 px-10 text-base font-semibold gap-2 bg-primary hover:bg-setu-navy-light shadow-md hover:shadow-lg transition-all"
+                >
+                  Start with Jeetu Bhaiya
+                  <ArrowRight className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="h-14 px-10 text-base font-medium border-2 text-foreground hover:bg-secondary"
+                  onClick={() => {
+                    document.getElementById('mentor-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  See how it works
+                </Button>
+              </div>
 
-          {/* Exam Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {examPills.map((exam) => (
-              <span
-                key={exam}
-                className="px-4 py-2 rounded-full bg-card text-foreground text-sm font-medium shadow-xs border border-border"
-              >
-                {exam}
-              </span>
-            ))}
+              {/* Exam Pills */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                {examPills.map((exam) => (
+                  <span
+                    key={exam}
+                    className="px-4 py-2 rounded-full bg-card text-foreground text-sm font-medium shadow-xs border border-border"
+                  >
+                    {exam}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Right - Video */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative w-[280px] sm:w-[320px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border-4 border-card bg-card">
+                <iframe
+                  src="https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=1&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1"
+                  title="SETU Preview"
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
