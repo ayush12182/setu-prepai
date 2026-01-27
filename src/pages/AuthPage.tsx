@@ -16,12 +16,14 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 const phoneSchema = z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid phone number');
 
 type AuthMode = 'login' | 'signup' | 'phone' | 'otp';
-type OnboardingStep = 0 | 1 | 2 | 3;
+type OnboardingStep = 0 | 1 | 2 | 3 | 4 | 5;
 
 interface OnboardingData {
   exam: string;
   class: string;
   weakSubject: string;
+  dailyHours: string;
+  coaching: string;
 }
 
 const AuthPage: React.FC = () => {
@@ -45,6 +47,8 @@ const AuthPage: React.FC = () => {
     exam: '',
     class: '',
     weakSubject: '',
+    dailyHours: '',
+    coaching: '',
   });
 
   // Check if user needs onboarding
@@ -181,19 +185,27 @@ const AuthPage: React.FC = () => {
 
   const handleOnboardingNext = () => {
     if (onboardingStep === 1 && !onboardingData.exam) {
-      toast.error('Exam select karo');
+      toast.error('Please select your target exam');
       return;
     }
     if (onboardingStep === 2 && !onboardingData.class) {
-      toast.error('Class select karo');
+      toast.error('Please select your class');
       return;
     }
-    if (onboardingStep === 3 && !onboardingData.weakSubject) {
-      toast.error('Weak subject batao');
+    if (onboardingStep === 3 && !onboardingData.dailyHours) {
+      toast.error('Please select study hours');
+      return;
+    }
+    if (onboardingStep === 4 && !onboardingData.coaching) {
+      toast.error('Please select coaching status');
+      return;
+    }
+    if (onboardingStep === 5 && !onboardingData.weakSubject) {
+      toast.error('Please select your weak subject');
       return;
     }
     
-    if (onboardingStep < 3) {
+    if (onboardingStep < 5) {
       setOnboardingStep((prev) => (prev + 1) as OnboardingStep);
     } else {
       handleOnboardingComplete();
@@ -227,7 +239,7 @@ const AuthPage: React.FC = () => {
           <div className="w-full max-w-md">
             {/* Progress */}
             <div className="flex items-center gap-2 mb-8">
-              {[1, 2, 3].map((step) => (
+              {[1, 2, 3, 4, 5].map((step) => (
                 <div
                   key={step}
                   className={`flex-1 h-1.5 rounded-full transition-colors ${
@@ -243,27 +255,34 @@ const AuthPage: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
-                      Konsa exam de rahe ho?
+                      Which exam are you preparing for?
                     </h2>
-                    <p className="text-muted-foreground">
-                      Isse hum tumhara syllabus aur strategy set karenge.
+                    <p className="text-text-secondary">
+                      This helps us customize your syllabus and strategy.
                     </p>
                   </div>
 
                   <div className="space-y-3">
-                    {['JEE Main', 'JEE Advanced', 'Both'].map((exam) => (
+                    {[
+                      { value: 'JEE Main', label: 'JEE Main', desc: 'NIT, IIIT, GFTI admissions' },
+                      { value: 'JEE Advanced', label: 'JEE Advanced', desc: 'IIT admissions' },
+                      { value: 'Both', label: 'Both Main + Advanced', desc: 'Complete JEE preparation' },
+                    ].map((exam) => (
                       <button
-                        key={exam}
-                        onClick={() => setOnboardingData(prev => ({ ...prev, exam }))}
+                        key={exam.value}
+                        onClick={() => setOnboardingData(prev => ({ ...prev, exam: exam.value }))}
                         className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                          onboardingData.exam === exam
+                          onboardingData.exam === exam.value
                             ? 'border-accent bg-accent/5'
                             : 'border-border hover:border-muted-foreground/30'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-foreground">{exam}</span>
-                          {onboardingData.exam === exam && (
+                          <div>
+                            <span className="font-medium text-foreground">{exam.label}</span>
+                            <p className="text-sm text-text-muted">{exam.desc}</p>
+                          </div>
+                          {onboardingData.exam === exam.value && (
                             <Check className="h-5 w-5 text-accent" />
                           )}
                         </div>
@@ -278,18 +297,18 @@ const AuthPage: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
-                      Konsi class mein ho?
+                      Which class are you in?
                     </h2>
-                    <p className="text-muted-foreground">
-                      Time management iske according hoga.
+                    <p className="text-text-secondary">
+                      Your study plan will be adjusted accordingly.
                     </p>
                   </div>
 
                   <div className="space-y-3">
                     {[
-                      { value: '11', label: 'Class 11' },
-                      { value: '12', label: 'Class 12' },
-                      { value: 'dropper', label: 'Dropper' },
+                      { value: '11', label: 'Class 11', desc: '2 years for complete preparation' },
+                      { value: '12', label: 'Class 12', desc: 'Board + JEE balance mode' },
+                      { value: 'dropper', label: 'Dropper', desc: 'Full focus on JEE' },
                     ].map((option) => (
                       <button
                         key={option.value}
@@ -301,7 +320,10 @@ const AuthPage: React.FC = () => {
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-foreground">{option.label}</span>
+                          <div>
+                            <span className="font-medium text-foreground">{option.label}</span>
+                            <p className="text-sm text-text-muted">{option.desc}</p>
+                          </div>
                           {onboardingData.class === option.value && (
                             <Check className="h-5 w-5 text-accent" />
                           )}
@@ -312,23 +334,108 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 3: Weak Subject */}
+              {/* Step 3: Daily Study Hours */}
               {onboardingStep === 3 && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
-                      Sabse weak subject?
+                      How many hours can you study daily?
                     </h2>
-                    <p className="text-muted-foreground">
-                      Koi baat nahi, usko fix karenge pehle.
+                    <p className="text-text-secondary">
+                      Be honest - we'll plan realistically.
                     </p>
                   </div>
 
                   <div className="space-y-3">
                     {[
-                      { value: 'physics', label: 'Physics', color: 'hsl(var(--physics-color))' },
-                      { value: 'chemistry', label: 'Chemistry', color: 'hsl(var(--chemistry-color))' },
-                      { value: 'maths', label: 'Mathematics', color: 'hsl(var(--maths-color))' },
+                      { value: '2-4', label: '2-4 hours', desc: 'Part-time preparation' },
+                      { value: '4-6', label: '4-6 hours', desc: 'Balanced schedule' },
+                      { value: '6-8', label: '6-8 hours', desc: 'Serious preparation' },
+                      { value: '8+', label: '8+ hours', desc: 'Full-time dedication' },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setOnboardingData(prev => ({ ...prev, dailyHours: option.value }))}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                          onboardingData.dailyHours === option.value
+                            ? 'border-accent bg-accent/5'
+                            : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-medium text-foreground">{option.label}</span>
+                            <p className="text-sm text-text-muted">{option.desc}</p>
+                          </div>
+                          {onboardingData.dailyHours === option.value && (
+                            <Check className="h-5 w-5 text-accent" />
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Coaching Status */}
+              {onboardingStep === 4 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                      Are you enrolled in any coaching?
+                    </h2>
+                    <p className="text-text-secondary">
+                      This helps us complement your learning.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { value: 'offline', label: 'Offline Coaching', desc: 'Allen, Resonance, FIITJEE, etc.' },
+                      { value: 'online', label: 'Online Coaching', desc: 'PW, Unacademy, Vedantu, etc.' },
+                      { value: 'self', label: 'Self Study', desc: 'Books + YouTube + SETU' },
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setOnboardingData(prev => ({ ...prev, coaching: option.value }))}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                          onboardingData.coaching === option.value
+                            ? 'border-accent bg-accent/5'
+                            : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-medium text-foreground">{option.label}</span>
+                            <p className="text-sm text-text-muted">{option.desc}</p>
+                          </div>
+                          {onboardingData.coaching === option.value && (
+                            <Check className="h-5 w-5 text-accent" />
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 5: Weak Subject */}
+              {onboardingStep === 5 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                      Which subject needs the most work?
+                    </h2>
+                    <p className="text-text-secondary">
+                      We'll prioritize this in your dashboard.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
+                      { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
+                      { value: 'maths', label: 'Mathematics', desc: 'Calculus, Algebra, Coordinate', color: 'bg-amber-500' },
                     ].map((subject) => (
                       <button
                         key={subject.value}
@@ -341,11 +448,11 @@ const AuthPage: React.FC = () => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: subject.color }}
-                            />
-                            <span className="font-medium text-foreground">{subject.label}</span>
+                            <div className={`w-3 h-3 rounded-full ${subject.color}`} />
+                            <div>
+                              <span className="font-medium text-foreground">{subject.label}</span>
+                              <p className="text-sm text-text-muted">{subject.desc}</p>
+                            </div>
                           </div>
                           {onboardingData.weakSubject === subject.value && (
                             <Check className="h-5 w-5 text-accent" />
@@ -376,8 +483,8 @@ const AuthPage: React.FC = () => {
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : onboardingStep === 3 ? (
-                    'Chalo shuru karte hain'
+                  ) : onboardingStep === 5 ? (
+                    "Let's Start"
                   ) : (
                     <>
                       Next
@@ -495,7 +602,7 @@ const AuthPage: React.FC = () => {
                     <Input
                       id="fullName"
                       type="text"
-                      placeholder="Tumhara naam"
+                      placeholder="Your name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       className="h-12"
