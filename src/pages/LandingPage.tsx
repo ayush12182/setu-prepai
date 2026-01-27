@@ -67,7 +67,7 @@ const LandingPage: React.FC = () => {
             variant="ghost"
             size="sm"
             onClick={() => navigate('/auth')}
-            className="font-medium text-[#1a1a1a] hover:bg-gray-100"
+            className="font-medium text-[#1a1a1a] hover:bg-gray-100 transition-all duration-200 hover:scale-105"
           >
             Login
           </Button>
@@ -100,9 +100,9 @@ const LandingPage: React.FC = () => {
               {/* Trust Points */}
               <div className="flex items-center justify-center lg:justify-start gap-6 mb-10">
                 {trustPoints.map((point, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#e07a3a]" />
-                    <span className="text-sm text-[#444] font-medium">{point}</span>
+                  <div key={i} className="flex items-center gap-2 group cursor-default">
+                    <CheckCircle2 className="w-4 h-4 text-[#e07a3a] transition-transform duration-200 group-hover:scale-110" />
+                    <span className="text-sm text-[#444] font-medium transition-colors duration-200 group-hover:text-[#1a1a1a]">{point}</span>
                   </div>
                 ))}
               </div>
@@ -112,15 +112,15 @@ const LandingPage: React.FC = () => {
                 <Button
                   size="lg"
                   onClick={() => navigate('/auth')}
-                  className="h-12 px-8 text-base font-medium gap-2 bg-[#1a1a1a] text-white hover:bg-[#333] rounded-lg"
+                  className="h-12 px-8 text-base font-medium gap-2 bg-[#1a1a1a] text-white hover:bg-[#333] rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] group"
                 >
                   Start with Jeetu Bhaiya
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="lg"
-                  className="h-12 px-8 text-base font-medium text-[#555] hover:text-[#1a1a1a] hover:bg-gray-100 rounded-lg"
+                  className="h-12 px-8 text-base font-medium text-[#555] hover:text-[#1a1a1a] hover:bg-gray-100 rounded-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   onClick={() => {
                     document.getElementById('mentor-section')?.scrollIntoView({ behavior: 'smooth' });
                   }}
@@ -134,7 +134,7 @@ const LandingPage: React.FC = () => {
                 {examPills.map((exam) => (
                   <span
                     key={exam}
-                    className="px-3 py-1.5 rounded-full bg-gray-100 text-[#444] text-sm font-medium"
+                    className="px-3 py-1.5 rounded-full bg-gray-100 text-[#444] text-sm font-medium transition-all duration-200 hover:bg-[#1a1a1a] hover:text-white cursor-default"
                   >
                     {exam}
                   </span>
@@ -155,8 +155,8 @@ const LandingPage: React.FC = () => {
               </div>
               
               {/* Video Frame */}
-              <div className="relative">
-                <div className="w-[280px] sm:w-[300px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl bg-[#1a1a1a]">
+              <div className="relative group">
+                <div className="w-[280px] sm:w-[300px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl bg-[#1a1a1a] transition-all duration-300 group-hover:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.4)] group-hover:scale-[1.02]">
                   <iframe
                     src={`https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`}
                     title="SETU Preview"
@@ -166,7 +166,7 @@ const LandingPage: React.FC = () => {
                   />
                   <button
                     onClick={() => setIsMuted(!isMuted)}
-                    className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#1a1a1a] hover:bg-white transition-colors shadow-lg"
+                    className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#1a1a1a] hover:bg-white transition-all duration-200 shadow-lg hover:scale-110 active:scale-95"
                     aria-label={isMuted ? "Unmute video" : "Mute video"}
                   >
                     {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -193,9 +193,9 @@ const LandingPage: React.FC = () => {
 
           <div className="grid md:grid-cols-2 gap-8">
             {/* Left Column */}
-            <div className="bg-[#fafafa] rounded-xl p-8 border border-gray-100">
+            <div className="bg-[#fafafa] rounded-xl p-8 border border-gray-100 transition-all duration-300 hover:border-gray-200 hover:shadow-lg hover:-translate-y-1">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center transition-transform duration-200 hover:scale-110">
                   <AlertTriangle className="h-5 w-5 text-red-500" />
                 </div>
                 <h3 className="text-lg font-semibold text-[#1a1a1a]">
@@ -215,9 +215,9 @@ const LandingPage: React.FC = () => {
             </div>
 
             {/* Right Column */}
-            <div className="bg-[#fafafa] rounded-xl p-8 border border-gray-100">
+            <div className="bg-[#fafafa] rounded-xl p-8 border border-gray-100 transition-all duration-300 hover:border-gray-200 hover:shadow-lg hover:-translate-y-1">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center transition-transform duration-200 hover:scale-110">
                   <HelpCircle className="h-5 w-5 text-amber-500" />
                 </div>
                 <h3 className="text-lg font-semibold text-[#1a1a1a]">
@@ -256,19 +256,19 @@ const LandingPage: React.FC = () => {
 
             {/* Stats */}
             <div className="flex flex-wrap items-center justify-center gap-8 mt-10">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">9/10</div>
-                <div className="text-white/50 text-sm mt-1">Teacher</div>
+              <div className="text-center group cursor-default">
+                <div className="text-3xl font-bold text-white transition-transform duration-200 group-hover:scale-110">9/10</div>
+                <div className="text-white/50 text-sm mt-1 transition-colors duration-200 group-hover:text-white/70">Teacher</div>
               </div>
               <div className="w-px h-10 bg-white/20" />
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white">10/10</div>
-                <div className="text-white/50 text-sm mt-1">Human</div>
+              <div className="text-center group cursor-default">
+                <div className="text-3xl font-bold text-white transition-transform duration-200 group-hover:scale-110">10/10</div>
+                <div className="text-white/50 text-sm mt-1 transition-colors duration-200 group-hover:text-white/70">Human</div>
               </div>
               <div className="w-px h-10 bg-white/20" />
-              <div className="text-center">
-                <div className="text-3xl font-bold text-[#e07a3a]">11/10</div>
-                <div className="text-white/50 text-sm mt-1">Agony Aunt</div>
+              <div className="text-center group cursor-default">
+                <div className="text-3xl font-bold text-[#e07a3a] transition-transform duration-200 group-hover:scale-110">11/10</div>
+                <div className="text-white/50 text-sm mt-1 transition-colors duration-200 group-hover:text-white/70">Agony Aunt</div>
               </div>
             </div>
           </div>
@@ -278,14 +278,14 @@ const LandingPage: React.FC = () => {
             {mentorCards.map((card, i) => (
               <div
                 key={i}
-                className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/[0.08] transition-colors"
+                className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/[0.08] hover:border-[#e07a3a]/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group cursor-default"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#e07a3a]/20 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-[#e07a3a]/20 flex items-center justify-center flex-shrink-0 transition-all duration-200 group-hover:scale-110 group-hover:bg-[#e07a3a]/30">
                     <card.icon className="h-5 w-5 text-[#e07a3a]" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-white mb-1">{card.title}</h4>
+                    <h4 className="font-semibold text-white mb-1 transition-colors duration-200 group-hover:text-[#e07a3a]">{card.title}</h4>
                     <p className="text-white/50 text-sm">{card.desc}</p>
                   </div>
                 </div>
@@ -294,8 +294,8 @@ const LandingPage: React.FC = () => {
           </div>
 
           {/* Quote */}
-          <div className="text-center mt-14">
-            <blockquote className="text-xl text-white/80 italic">
+          <div className="text-center mt-14 group cursor-default">
+            <blockquote className="text-xl text-white/80 italic transition-all duration-300 group-hover:text-white group-hover:scale-105">
               "Focused on results, not motivation quotes."
             </blockquote>
           </div>
@@ -314,10 +314,10 @@ const LandingPage: React.FC = () => {
           <Button
             size="lg"
             onClick={() => navigate('/auth')}
-            className="h-12 px-8 text-base font-medium gap-2 bg-[#1a1a1a] text-white hover:bg-[#333] rounded-lg"
+            className="h-12 px-8 text-base font-medium gap-2 bg-[#1a1a1a] text-white hover:bg-[#333] rounded-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] group"
           >
             Start with Jeetu Bhaiya
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
           </Button>
           <p className="text-sm text-[#999] mt-6">
             No spam. No distractions. Only study.
