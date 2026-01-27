@@ -137,15 +137,24 @@ Make sure:
     // Parse the JSON from AI response
     let questions;
     try {
-      // Extract JSON from potential markdown code blocks
-      const jsonMatch = content.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        questions = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error("No JSON array found in response");
+      // Remove markdown code fences if present
+      let jsonContent = content.trim();
+      
+      // Handle ```json ... ``` or ``` ... ``` format
+      const codeBlockMatch = jsonContent.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        jsonContent = codeBlockMatch[1].trim();
+      }
+      
+      // Parse the JSON array
+      questions = JSON.parse(jsonContent);
+      
+      if (!Array.isArray(questions)) {
+        throw new Error("Response is not an array");
       }
     } catch (parseError) {
-      console.error("Failed to parse AI response:", content);
+      console.error("Failed to parse AI response. Error:", parseError);
+      console.error("Content received:", content.substring(0, 500));
       throw new Error("Failed to parse questions from AI");
     }
 
