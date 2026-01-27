@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ArrowRight, AlertTriangle, HelpCircle, BookOpen, Target, Clock, TrendingUp, Volume2, VolumeX, CheckCircle2 } from 'lucide-react';
 
 const LandingPage: React.FC = () => {
@@ -23,8 +22,6 @@ const LandingPage: React.FC = () => {
     'How deeply to study a topic',
     'Whether they are on the right track',
   ];
-
-  const mentorPills = ['Calm', 'Honest', 'Disciplined', 'Supportive'];
 
   const mentorCards = [
     {
@@ -50,118 +47,80 @@ const LandingPage: React.FC = () => {
   ];
 
   const trustPoints = [
-    'No distractions, only study',
-    'Structured daily guidance',
-    'Real exam-focused approach',
-  ];
-
-  const ratings = [
-    { label: 'TEACHER', score: '9/10' },
-    { label: 'HUMAN', score: '10/10' },
-    { label: 'AGONY AUNT', score: '11/10' },
+    'No distractions',
+    'Daily guidance',
+    'Exam-focused',
   ];
 
   return (
-    <div className="min-h-screen bg-[#f5f5f0]">
+    <div className="min-h-screen bg-[#fafafa]">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#f5f5f0]/95 backdrop-blur-sm border-b border-gray-300">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-[#2d2d2d] flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-base">S</span>
+            <div className="w-8 h-8 rounded-md bg-[#1a1a1a] flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">S</span>
             </div>
-            <span className="font-serif font-semibold text-xl text-[#2d2d2d]">SETU</span>
+            <span className="font-semibold text-lg text-[#1a1a1a] tracking-tight">SETU</span>
           </div>
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => navigate('/auth')}
-            className="gap-2 font-medium border-2 border-[#2d2d2d] text-[#2d2d2d] hover:bg-[#2d2d2d] hover:text-white"
+            className="font-medium text-[#1a1a1a] hover:bg-gray-100"
           >
             Login
           </Button>
         </div>
       </header>
 
-      {/* Hero Section - Notebook Paper Style */}
-      <section className="relative pt-24 pb-24 px-4 sm:px-6 overflow-hidden">
-        {/* Notebook grid background */}
-        <div className="absolute inset-0 opacity-[0.08]" style={{
-          backgroundImage: `
-            linear-gradient(#2d2d2d 1px, transparent 1px),
-            linear-gradient(90deg, #2d2d2d 1px, transparent 1px)
-          `,
-          backgroundSize: '24px 24px',
-        }} />
-        
-        {/* Scattered formulas - decorative */}
-        <div className="absolute top-32 left-8 text-[#2d2d2d]/20 font-mono text-sm rotate-[-8deg] hidden lg:block">
-          E = mc²
-        </div>
-        <div className="absolute top-48 right-12 text-[#2d2d2d]/15 font-mono text-xs rotate-[5deg] hidden lg:block">
-          F = ma
-        </div>
-        <div className="absolute bottom-32 left-16 text-[#2d2d2d]/15 font-mono text-xs rotate-[-3deg] hidden lg:block">
-          ∫ f(x)dx
-        </div>
-        <div className="absolute top-64 left-1/4 text-[#2d2d2d]/10 font-mono text-sm rotate-[12deg] hidden lg:block">
-          PV = nRT
-        </div>
-        <div className="absolute bottom-48 right-1/4 text-[#2d2d2d]/15 font-mono text-xs rotate-[-6deg] hidden lg:block">
-          Δ = b² - 4ac
-        </div>
-        
-        <div className="relative max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      {/* Hero Section */}
+      <section className="pt-32 pb-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Left - Text Content */}
             <div className="text-center lg:text-left">
-              {/* Handwritten-style badge */}
-              <div className="inline-block mb-6 px-4 py-2 bg-[#fff9c4] border-2 border-[#2d2d2d]/20 rotate-[-1deg] shadow-sm">
-                <span className="font-mono text-sm text-[#2d2d2d] font-medium">SETU — Bridge to Exam Success</span>
-              </div>
+              {/* Eyebrow */}
+              <p className="text-sm font-medium text-[#666] mb-4 tracking-wide uppercase">
+                Bridge to Exam Success
+              </p>
 
               {/* Main Heading */}
-              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-[#2d2d2d] leading-tight mb-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-[#1a1a1a] leading-[1.1] mb-6 tracking-tight">
                 Content is everywhere.
                 <br />
-                <span className="relative">
-                  <span className="text-[#2d2d2d]">Mentorship is not.</span>
-                  {/* Underline decoration */}
-                  <svg className="absolute -bottom-2 left-0 w-full h-3 text-accent" viewBox="0 0 200 12" preserveAspectRatio="none">
-                    <path d="M0,8 Q50,0 100,8 T200,8" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-                  </svg>
-                </span>
+                <span className="text-[#e07a3a]">Mentorship is not.</span>
               </h1>
 
               {/* Subtext */}
-              <p className="text-lg sm:text-xl text-[#4a4a4a] max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed">
+              <p className="text-lg text-[#555] max-w-lg mx-auto lg:mx-0 mb-8 leading-relaxed">
                 Competitive exams are cracked by clarity, discipline and right direction — not more videos.
               </p>
 
               {/* Trust Points */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-10">
+              <div className="flex items-center justify-center lg:justify-start gap-6 mb-10">
                 {trustPoints.map((point, i) => (
-                  <div key={i} className="flex items-center gap-2 text-[#2d2d2d]">
-                    <CheckCircle2 className="w-4 h-4 text-accent" />
-                    <span className="text-sm font-medium">{point}</span>
+                  <div key={i} className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-[#e07a3a]" />
+                    <span className="text-sm text-[#444] font-medium">{point}</span>
                   </div>
                 ))}
               </div>
 
               {/* CTAs */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-10">
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 mb-12">
                 <Button
                   size="lg"
                   onClick={() => navigate('/auth')}
-                  className="h-14 px-10 text-base font-semibold gap-2 bg-[#2d2d2d] text-white hover:bg-[#1a1a1a] shadow-lg hover:shadow-xl transition-all"
+                  className="h-12 px-8 text-base font-medium gap-2 bg-[#1a1a1a] text-white hover:bg-[#333] rounded-lg"
                 >
                   Start with Jeetu Bhaiya
-                  <ArrowRight className="h-5 w-5" />
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="lg"
-                  className="h-14 px-10 text-base font-medium border-2 border-[#2d2d2d] text-[#2d2d2d] hover:bg-[#2d2d2d] hover:text-white"
+                  className="h-12 px-8 text-base font-medium text-[#555] hover:text-[#1a1a1a] hover:bg-gray-100 rounded-lg"
                   onClick={() => {
                     document.getElementById('mentor-section')?.scrollIntoView({ behavior: 'smooth' });
                   }}
@@ -172,11 +131,10 @@ const LandingPage: React.FC = () => {
 
               {/* Exam Pills */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
-                <span className="text-sm text-[#6a6a6a] mr-2">Preparing for:</span>
                 {examPills.map((exam) => (
                   <span
                     key={exam}
-                    className="px-3 py-1.5 rounded-sm bg-white text-[#2d2d2d] text-sm font-medium border border-[#2d2d2d]/20 shadow-xs"
+                    className="px-3 py-1.5 rounded-full bg-gray-100 text-[#444] text-sm font-medium"
                   >
                     {exam}
                   </span>
@@ -184,46 +142,35 @@ const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right - Video with Lead-in */}
-            <div className="flex flex-col items-center lg:items-end gap-6">
-              {/* Sticky note style lead-in */}
-              <div className="relative bg-[#fff9c4] p-5 rotate-[2deg] shadow-md max-w-[320px] border-b-4 border-[#e6d85c]">
-                <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-4 bg-[#f0e68c]/60 rounded-sm" />
-                <p className="font-mono text-base font-medium text-[#2d2d2d] leading-snug">
-                  Before you start, we just need{' '}
-                  <span className="underline decoration-2 decoration-accent">21 days</span> from you.
+            {/* Right - Video */}
+            <div className="flex flex-col items-center lg:items-end gap-5">
+              {/* Lead-in text */}
+              <div className="text-center lg:text-right max-w-[320px]">
+                <p className="text-xl font-semibold text-[#1a1a1a] leading-snug">
+                  Before you start, we just need <span className="text-[#e07a3a]">21 days</span> from you.
                 </p>
-                <p className="font-mono text-sm text-[#4a4a4a] mt-2 leading-relaxed">
-                  Give these 21 days honestly —
-                  and you'll finally feel <strong>clarity</strong> instead of confusion.
+                <p className="text-[#666] mt-2 text-sm">
+                  Give these 21 days honestly — and you'll finally feel clarity instead of confusion.
                 </p>
-                <p className="font-mono text-sm text-accent font-bold mt-3">👇 Watch this first.</p>
               </div>
               
-              {/* Video Frame - Polaroid style */}
-              <div className="relative group rotate-[-1deg]">
-                <div className="bg-white p-3 pb-12 shadow-xl border border-gray-200">
-                  <div className="relative w-[260px] sm:w-[300px] aspect-[9/16] overflow-hidden bg-[#2d2d2d]">
-                    <iframe
-                      src={`https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`}
-                      title="SETU Preview"
-                      className="absolute inset-0 w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                    {/* Mute/Unmute Button */}
-                    <button
-                      onClick={() => setIsMuted(!isMuted)}
-                      className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-[#2d2d2d] hover:bg-white transition-colors shadow-lg"
-                      aria-label={isMuted ? "Unmute video" : "Mute video"}
-                    >
-                      {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                    </button>
-                  </div>
-                  {/* Polaroid caption */}
-                  <p className="absolute bottom-3 left-0 right-0 text-center font-mono text-xs text-[#6a6a6a]">
-                    21 Days Challenge
-                  </p>
+              {/* Video Frame */}
+              <div className="relative">
+                <div className="w-[280px] sm:w-[300px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl bg-[#1a1a1a]">
+                  <iframe
+                    src={`https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`}
+                    title="SETU Preview"
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                  <button
+                    onClick={() => setIsMuted(!isMuted)}
+                    className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#1a1a1a] hover:bg-white transition-colors shadow-lg"
+                    aria-label={isMuted ? "Unmute video" : "Mute video"}
+                  >
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </button>
                 </div>
               </div>
             </div>
@@ -232,71 +179,58 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Problem Section */}
-      <section className="py-20 px-4 sm:px-6 bg-white relative">
-        {/* Notebook holes decoration */}
-        <div className="absolute left-4 top-0 bottom-0 hidden lg:flex flex-col justify-center gap-8">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="w-4 h-4 rounded-full border-2 border-gray-300 bg-[#f5f5f0]" />
-          ))}
-        </div>
-        
+      <section className="py-20 px-4 sm:px-6 bg-white border-y border-gray-100">
         <div className="max-w-5xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-12">
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#2d2d2d] mb-4">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-3 tracking-tight">
               The Real Problem
             </h2>
-            <p className="text-lg text-[#4a4a4a] max-w-2xl mx-auto font-mono">
-              It's not about studying more. It's about studying <span className="underline decoration-accent decoration-2">right</span>.
+            <p className="text-[#666] text-lg">
+              It's not about studying more. It's about studying right.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 lg:gap-10">
-            {/* Left Column - Problems */}
-            <div className="bg-[#f5f5f0] rounded-none p-6 sm:p-8 border-2 border-[#2d2d2d]/10 relative">
-              {/* Tape decoration */}
-              <div className="absolute -top-3 left-8 w-16 h-6 bg-[#e8d4a8]/80 rotate-[-2deg]" />
-              
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Left Column */}
+            <div className="bg-[#fafafa] rounded-xl p-8 border border-gray-100">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-none bg-red-100 flex items-center justify-center border border-red-200">
-                  <AlertTriangle className="h-6 w-6 text-red-500" />
+                <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center">
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
                 </div>
-                <h3 className="font-mono text-lg font-bold text-[#2d2d2d]">
+                <h3 className="text-lg font-semibold text-[#1a1a1a]">
                   Students have too much of...
                 </h3>
               </div>
               <ul className="space-y-4">
                 {problemsLeft.map((problem, i) => (
                   <li key={i} className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-none bg-red-100 flex items-center justify-center text-sm text-red-500 font-bold font-mono flex-shrink-0">
-                      ✗
+                    <span className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-xs text-red-500 font-medium flex-shrink-0">
+                      ×
                     </span>
-                    <span className="text-[#2d2d2d] font-mono">{problem}</span>
+                    <span className="text-[#444]">{problem}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Right Column - Questions */}
-            <div className="bg-[#f5f5f0] rounded-none p-6 sm:p-8 border-2 border-[#2d2d2d]/10 relative">
-              {/* Tape decoration */}
-              <div className="absolute -top-3 right-8 w-16 h-6 bg-[#e8d4a8]/80 rotate-[2deg]" />
-              
+            {/* Right Column */}
+            <div className="bg-[#fafafa] rounded-xl p-8 border border-gray-100">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-none bg-amber-100 flex items-center justify-center border border-amber-200">
-                  <HelpCircle className="h-6 w-6 text-amber-600" />
+                <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+                  <HelpCircle className="h-5 w-5 text-amber-500" />
                 </div>
-                <h3 className="font-mono text-lg font-bold text-[#2d2d2d]">
+                <h3 className="text-lg font-semibold text-[#1a1a1a]">
                   But they don't know...
                 </h3>
               </div>
               <ul className="space-y-4">
                 {problemsRight.map((problem, i) => (
                   <li key={i} className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-none bg-amber-100 flex items-center justify-center text-sm text-amber-600 font-bold font-mono flex-shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-xs text-amber-600 font-medium flex-shrink-0">
                       ?
                     </span>
-                    <span className="text-[#2d2d2d] font-mono">{problem}</span>
+                    <span className="text-[#444]">{problem}</span>
                   </li>
                 ))}
               </ul>
@@ -305,135 +239,102 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Mentor Section - Chalkboard Style */}
-      <section id="mentor-section" className="py-20 px-4 sm:px-6 bg-[#2d2d2d] relative overflow-hidden">
-        {/* Chalk dust texture */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-        }} />
-        
-        {/* Chalk formulas decoration */}
-        <div className="absolute top-20 left-8 text-white/10 font-mono text-sm rotate-[-5deg] hidden lg:block">
-          ∮ B·dl = μ₀I
-        </div>
-        <div className="absolute bottom-32 right-12 text-white/10 font-mono text-xs rotate-[8deg] hidden lg:block">
-          λ = h/mv
-        </div>
-        
-        <div className="relative max-w-5xl mx-auto">
+      {/* Mentor Section */}
+      <section id="mentor-section" className="py-20 px-4 sm:px-6 bg-[#1a1a1a]">
+        <div className="max-w-5xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-12">
-            {/* Chalk-style badge */}
-            <div className="inline-block mb-4 px-4 py-2 border-2 border-dashed border-white/30">
-              <span className="font-mono text-sm text-white/80">Your Personal Mentor</span>
-            </div>
-            
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white mb-4">
+          <div className="text-center mb-14">
+            <p className="text-[#e07a3a] text-sm font-medium uppercase tracking-wide mb-3">
+              Your Personal Mentor
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 tracking-tight">
               Meet Jeetu Bhaiya
             </h2>
-            <p className="text-lg text-white/60 max-w-xl mx-auto font-mono">
+            <p className="text-white/60 text-lg max-w-lg mx-auto">
               Not a chatbot. Not a teacher. A mentor who thinks with you.
             </p>
 
-            {/* Ratings - Kota Factory style */}
-            <div className="flex flex-wrap items-center justify-center gap-6 mt-8">
-              {ratings.map((rating, i) => (
-                <div key={i} className="text-left">
-                  <span className="font-mono text-white/90 font-bold text-lg">{rating.label}</span>
-                  <span className="font-mono text-accent font-bold text-lg ml-2">— {rating.score}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Mentor Pills */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-6">
-              {mentorPills.map((pill) => (
-                <span
-                  key={pill}
-                  className="px-4 py-2 bg-white/10 text-white text-sm font-mono border border-white/20"
-                >
-                  {pill}
-                </span>
-              ))}
+            {/* Stats */}
+            <div className="flex flex-wrap items-center justify-center gap-8 mt-10">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">9/10</div>
+                <div className="text-white/50 text-sm mt-1">Teacher</div>
+              </div>
+              <div className="w-px h-10 bg-white/20" />
+              <div className="text-center">
+                <div className="text-3xl font-bold text-white">10/10</div>
+                <div className="text-white/50 text-sm mt-1">Human</div>
+              </div>
+              <div className="w-px h-10 bg-white/20" />
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#e07a3a]">11/10</div>
+                <div className="text-white/50 text-sm mt-1">Agony Aunt</div>
+              </div>
             </div>
           </div>
 
           {/* Mentor Cards */}
-          <div className="grid sm:grid-cols-2 gap-4 mb-12">
+          <div className="grid sm:grid-cols-2 gap-4">
             {mentorCards.map((card, i) => (
               <div
                 key={i}
-                className="bg-white/5 p-6 border border-white/10 hover:bg-white/10 hover:border-accent/30 transition-all duration-300 group"
+                className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/[0.08] transition-colors"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-accent/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <card.icon className="h-6 w-6 text-accent" />
+                  <div className="w-10 h-10 rounded-lg bg-[#e07a3a]/20 flex items-center justify-center flex-shrink-0">
+                    <card.icon className="h-5 w-5 text-[#e07a3a]" />
                   </div>
                   <div>
-                    <h4 className="font-mono font-bold text-white text-lg mb-1">{card.title}</h4>
-                    <p className="text-white/60 font-mono text-sm">{card.desc}</p>
+                    <h4 className="font-semibold text-white mb-1">{card.title}</h4>
+                    <p className="text-white/50 text-sm">{card.desc}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Quote - Sticky note style */}
-          <div className="flex justify-center">
-            <div className="bg-[#fff9c4] p-6 rotate-[1deg] shadow-lg max-w-md border-b-4 border-[#e6d85c]">
-              <blockquote className="font-mono text-lg text-[#2d2d2d] italic text-center">
-                "Focused on results, not motivation quotes."
-              </blockquote>
-            </div>
+          {/* Quote */}
+          <div className="text-center mt-14">
+            <blockquote className="text-xl text-white/80 italic">
+              "Focused on results, not motivation quotes."
+            </blockquote>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 bg-[#f5f5f0] relative overflow-hidden">
-        {/* Grid background */}
-        <div className="absolute inset-0 opacity-[0.05]" style={{
-          backgroundImage: `
-            linear-gradient(#2d2d2d 1px, transparent 1px),
-            linear-gradient(90deg, #2d2d2d 1px, transparent 1px)
-          `,
-          backgroundSize: '24px 24px',
-        }} />
-        
-        <div className="relative max-w-3xl mx-auto text-center">
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#2d2d2d] mb-4">
+      <section className="py-20 px-4 sm:px-6 bg-[#fafafa]">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#1a1a1a] mb-4 tracking-tight">
             Ready to start the right way?
           </h2>
-          <p className="text-lg text-[#4a4a4a] mb-8 font-mono">
+          <p className="text-[#666] text-lg mb-8">
             21 days. One mentor. Complete clarity.
           </p>
           <Button
             size="lg"
             onClick={() => navigate('/auth')}
-            className="h-14 px-10 text-base font-semibold gap-2 bg-[#2d2d2d] text-white hover:bg-[#1a1a1a] shadow-lg hover:shadow-xl transition-all"
+            className="h-12 px-8 text-base font-medium gap-2 bg-[#1a1a1a] text-white hover:bg-[#333] rounded-lg"
           >
             Start with Jeetu Bhaiya
-            <ArrowRight className="h-5 w-5" />
+            <ArrowRight className="h-4 w-4" />
           </Button>
-          
-          <p className="text-sm text-[#6a6a6a] mt-6 font-mono">
+          <p className="text-sm text-[#999] mt-6">
             No spam. No distractions. Only study.
           </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 sm:px-6 border-t border-gray-300 bg-white">
+      <footer className="py-6 px-4 sm:px-6 border-t border-gray-100 bg-white">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-[#2d2d2d] flex items-center justify-center">
-              <span className="text-white font-bold text-xs">S</span>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-[#1a1a1a] flex items-center justify-center">
+              <span className="text-white font-medium text-xs">S</span>
             </div>
-            <span className="font-mono text-sm text-[#2d2d2d]">
-              SETU — Bridge to Exam Success
-            </span>
+            <span className="text-sm text-[#444]">SETU</span>
           </div>
-          <p className="text-sm text-[#6a6a6a] font-mono">
+          <p className="text-sm text-[#999]">
             Built for serious students, by serious mentors.
           </p>
         </div>
