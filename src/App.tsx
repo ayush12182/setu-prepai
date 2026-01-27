@@ -8,7 +8,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import LandingPage from "./pages/LandingPage";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
-import LearnPage from "./pages/LearnPage";
+import PreparationPage from "./pages/PreparationPage";
+import TutorialSessionsPage from "./pages/TutorialSessionsPage";
 import ChapterPage from "./pages/ChapterPage";
 import SubchapterPage from "./pages/SubchapterPage";
 import PracticePage from "./pages/PracticePage";
@@ -33,7 +34,9 @@ const App = () => (
               <Route path="/" element={<LandingPage />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/dashboard" element={<Index />} />
-              <Route path="/learn" element={<LearnPage />} />
+              <Route path="/learn" element={<PreparationPage />} />
+              <Route path="/preparation" element={<PreparationPage />} />
+              <Route path="/tutorial-sessions" element={<TutorialSessionsPage />} />
               <Route path="/chapter/:chapterId" element={<ChapterPage />} />
               <Route path="/subchapter/:subchapterId" element={<SubchapterPage />} />
               <Route path="/practice" element={<PracticePage />} />
