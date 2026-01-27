@@ -130,7 +130,14 @@ const LandingPage: React.FC = () => {
             </div>
 
             {/* Right - Video */}
-            <div className="flex justify-center lg:justify-end">
+            <div className="flex flex-col items-center lg:items-end gap-4">
+              {/* Lead-in Message */}
+              <div className="text-center lg:text-right max-w-[320px]">
+                <p className="text-sm font-medium text-secondary-foreground mb-1">Before you start, we need your</p>
+                <p className="font-serif text-2xl sm:text-3xl font-bold text-primary">21 Days</p>
+                <p className="text-sm text-secondary-foreground mt-1">Watch why 👇</p>
+              </div>
+              
               <div className="relative w-[280px] sm:w-[320px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl border-4 border-card bg-card">
                 <iframe
                   src={`https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`}
