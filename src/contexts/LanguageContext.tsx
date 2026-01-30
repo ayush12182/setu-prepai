@@ -20,7 +20,7 @@ const greetings: Record<LanguageMode, string> = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<LanguageMode>('hinglish');
+  const [language, setLanguage] = useState<LanguageMode>('english');
 
   const getGreeting = () => greetings[language];
   const getMentorName = () => 'Jeetu Bhaiya';
