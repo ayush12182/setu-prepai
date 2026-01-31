@@ -14,6 +14,7 @@ import ChapterPage from "./pages/ChapterPage";
 import SubchapterPage from "./pages/SubchapterPage";
 import PracticePage from "./pages/PracticePage";
 import TestPage from "./pages/TestPage";
+import MajorTestPage from "./pages/MajorTestPage";
 import RevisionPage from "./pages/RevisionPage";
 import LectureSetu from "./pages/LectureSetu";
 import AskJeetuPage from "./pages/AskJeetuPage";
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/subchapter/:subchapterId" element={<SubchapterPage />} />
               <Route path="/practice" element={<PracticePage />} />
               <Route path="/test" element={<TestPage />} />
+              <Route path="/major-test" element={<MajorTestPage />} />
               <Route path="/revision" element={<RevisionPage />} />
               <Route path="/lecture-setu" element={<LectureSetu />} />
               <Route path="/ask-jeetu" element={<AskJeetuPage />} />
