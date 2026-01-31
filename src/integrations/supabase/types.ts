@@ -14,6 +14,234 @@ export type Database = {
   }
   public: {
     Tables: {
+      major_test_answers: {
+        Row: {
+          answered_at: string | null
+          attempt_id: string
+          correct_option: string
+          created_at: string
+          id: string
+          is_correct: boolean | null
+          is_marked_review: boolean | null
+          question_id: string
+          question_number: number
+          selected_option: string | null
+          subject: string
+          time_spent_seconds: number
+        }
+        Insert: {
+          answered_at?: string | null
+          attempt_id: string
+          correct_option: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          is_marked_review?: boolean | null
+          question_id: string
+          question_number: number
+          selected_option?: string | null
+          subject: string
+          time_spent_seconds?: number
+        }
+        Update: {
+          answered_at?: string | null
+          attempt_id?: string
+          correct_option?: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          is_marked_review?: boolean | null
+          question_id?: string
+          question_number?: number
+          selected_option?: string | null
+          subject?: string
+          time_spent_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "major_test_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "major_test_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      major_test_attempts: {
+        Row: {
+          chemistry_correct: number | null
+          chemistry_incorrect: number | null
+          chemistry_score: number | null
+          chemistry_unattempted: number | null
+          completed_at: string | null
+          created_at: string
+          cycle_id: string | null
+          id: string
+          maths_correct: number | null
+          maths_incorrect: number | null
+          maths_score: number | null
+          maths_unattempted: number | null
+          max_score: number | null
+          percentile_estimate: number | null
+          physics_correct: number | null
+          physics_incorrect: number | null
+          physics_score: number | null
+          physics_unattempted: number | null
+          score: number | null
+          started_at: string
+          status: string
+          tab_switch_count: number
+          total_time_seconds: number
+          user_id: string
+        }
+        Insert: {
+          chemistry_correct?: number | null
+          chemistry_incorrect?: number | null
+          chemistry_score?: number | null
+          chemistry_unattempted?: number | null
+          completed_at?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          id?: string
+          maths_correct?: number | null
+          maths_incorrect?: number | null
+          maths_score?: number | null
+          maths_unattempted?: number | null
+          max_score?: number | null
+          percentile_estimate?: number | null
+          physics_correct?: number | null
+          physics_incorrect?: number | null
+          physics_score?: number | null
+          physics_unattempted?: number | null
+          score?: number | null
+          started_at?: string
+          status?: string
+          tab_switch_count?: number
+          total_time_seconds?: number
+          user_id: string
+        }
+        Update: {
+          chemistry_correct?: number | null
+          chemistry_incorrect?: number | null
+          chemistry_score?: number | null
+          chemistry_unattempted?: number | null
+          completed_at?: string | null
+          created_at?: string
+          cycle_id?: string | null
+          id?: string
+          maths_correct?: number | null
+          maths_incorrect?: number | null
+          maths_score?: number | null
+          maths_unattempted?: number | null
+          max_score?: number | null
+          percentile_estimate?: number | null
+          physics_correct?: number | null
+          physics_incorrect?: number | null
+          physics_score?: number | null
+          physics_unattempted?: number | null
+          score?: number | null
+          started_at?: string
+          status?: string
+          tab_switch_count?: number
+          total_time_seconds?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "major_test_attempts_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "major_test_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      major_test_chapter_analysis: {
+        Row: {
+          accuracy: number | null
+          attempt_id: string
+          avg_time_seconds: number | null
+          chapter_id: string
+          chapter_name: string
+          correct: number
+          created_at: string
+          id: string
+          incorrect: number
+          strength_level: string | null
+          subject: string
+          total_questions: number
+          unattempted: number
+        }
+        Insert: {
+          accuracy?: number | null
+          attempt_id: string
+          avg_time_seconds?: number | null
+          chapter_id: string
+          chapter_name: string
+          correct?: number
+          created_at?: string
+          id?: string
+          incorrect?: number
+          strength_level?: string | null
+          subject: string
+          total_questions?: number
+          unattempted?: number
+        }
+        Update: {
+          accuracy?: number | null
+          attempt_id?: string
+          avg_time_seconds?: number | null
+          chapter_id?: string
+          chapter_name?: string
+          correct?: number
+          created_at?: string
+          id?: string
+          incorrect?: number
+          strength_level?: string | null
+          subject?: string
+          total_questions?: number
+          unattempted?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "major_test_chapter_analysis_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "major_test_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      major_test_cycles: {
+        Row: {
+          created_at: string
+          cycle_number: number
+          end_date: string
+          id: string
+          is_active: boolean
+          start_date: string
+          test_date: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_number: number
+          end_date: string
+          id?: string
+          is_active?: boolean
+          start_date: string
+          test_date: string
+        }
+        Update: {
+          created_at?: string
+          cycle_number?: number
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          test_date?: string
+        }
+        Relationships: []
+      }
       practice_sessions: {
         Row: {
           completed_at: string | null
