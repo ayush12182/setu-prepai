@@ -9,6 +9,11 @@ import { useJeetuChat } from '@/hooks/useJeetuChat';
 import { useVoiceChat } from '@/hooks/useVoiceChat';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+
+// Configure your YouTube video ID here (the part after v= in YouTube URL)
+// Example: For https://www.youtube.com/watch?v=ABC123, use "ABC123"
+const WELCOME_VIDEO_ID = "YOUR_YOUTUBE_VIDEO_ID"; // Replace with your video ID
 
 interface Message {
   id: string;
@@ -35,6 +40,8 @@ const AskJeetuPage: React.FC = () => {
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showWelcomeVideo, setShowWelcomeVideo] = useState(true);
+  const [videoMuted, setVideoMuted] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   
@@ -215,6 +222,67 @@ const AskJeetuPage: React.FC = () => {
 
   return (
     <MainLayout title="Ask Jeetu Bhaiya">
+      {/* Welcome Video Modal */}
+      <Dialog open={showWelcomeVideo && WELCOME_VIDEO_ID !== "YOUR_YOUTUBE_VIDEO_ID"} onOpenChange={setShowWelcomeVideo}>
+        <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-black border-none">
+          <div className="relative">
+            {/* YouTube Embed */}
+            <div className="aspect-video">
+              <iframe
+                src={`https://www.youtube.com/embed/${WELCOME_VIDEO_ID}?autoplay=1&mute=${videoMuted ? 1 : 0}&rel=0&modestbranding=1`}
+                title="Jeetu Bhaiya Welcome"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+            
+            {/* Controls Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">JB</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold">Jeetu Bhaiya</h3>
+                    <p className="text-white/70 text-sm">Welcome Message</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  {/* Mute Toggle */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setVideoMuted(!videoMuted)}
+                    className="text-white hover:bg-white/20 rounded-full"
+                  >
+                    {videoMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </Button>
+                  
+                  {/* Skip Button */}
+                  <Button
+                    onClick={() => setShowWelcomeVideo(false)}
+                    className="bg-setu-saffron hover:bg-setu-saffron/90 text-white rounded-full px-4"
+                  >
+                    Start Chatting
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Close Button */}
+            <button
+              onClick={() => setShowWelcomeVideo(false)}
+              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="h-[calc(100vh-8rem)] flex flex-col max-w-4xl mx-auto">
         {/* Chat Header */}
         <div className="bg-card border border-border rounded-t-2xl p-4 flex items-center gap-4">
