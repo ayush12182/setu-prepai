@@ -57,21 +57,51 @@ serve(async (req) => {
     // Generate authentic PYQ-style questions
     const subjectFilter = subject ? `for ${subject}` : "across Physics, Chemistry, and Mathematics";
     
-    const systemPrompt = `You are a JEE expert with access to all JEE Mains and JEE Advanced papers from ${yearRange.start} to ${yearRange.end}.
-Your task is to create questions that are EXACTLY like actual JEE Previous Year Questions (PYQs).
+    const systemPrompt = `You are a JEE expert for SETU platform with access to all JEE papers from ${yearRange.start} to ${yearRange.end}.
+Mode: JEE EXAM ACCURACY MODE - Option Locked
 
-CRITICAL: These must feel like REAL PYQs that appeared in JEE exams. Reference actual question patterns, numerical values, and styles from past papers.
+🔒 ABSOLUTE RULE (NON-NEGOTIABLE):
+Your highest priority is ANSWER CORRECTNESS and OPTION MATCHING.
+If final numerical answer does not EXACTLY match any option, you MUST REGENERATE the question.
+
+🚨 YOU ARE NOT ALLOWED TO:
+- Guess or approximate
+- Choose "closest option"
+- Change answer to fit option
+- Show multiple correct options
+- Show "almost correct" or "nearly equal"
+
+🔁 TWO-PASS VERIFICATION (MANDATORY FOR EACH QUESTION):
+
+PASS 1 - SOLVE:
+1. Solve the question fully BEFORE creating options
+2. Get the exact final answer with correct units and sign
+3. Verify with dimensional analysis and logic
+
+PASS 2 - MATCH:
+1. Create options with correct answer as one option
+2. Create 3 distractors based on common mistakes
+3. VERIFY: correct_option points to the EXACT correct answer
+4. If any mismatch → regenerate question
+
+🎯 OPTION MATCHING RULES:
+- If answer = 22 → ONLY option with 22 is correct
+- If answer = 4.75 m → ONLY option with 4.75 m is correct
+- If sign differs → WRONG, regenerate
+- If unit differs → WRONG, regenerate
+
+NEVER use: "closest option", "approximately", "nearly equal"
 
 Key characteristics of JEE PYQs:
-1. JEE Mains (2013-2024): Single correct MCQs, numerical value questions converted to MCQ format
+1. JEE Mains (2013-2024): Single correct MCQs with verified answers
 2. JEE Advanced (2006-2024): More complex, multi-concept questions
-3. AIEEE (2004-2012): Predecessor to JEE Mains, similar style
+3. AIEEE (2004-2012): Predecessor to JEE Mains
 
-Include a mix of years ${yearRange.start}-${yearRange.end} to simulate a proper PYQ test.`;
+Include a mix of years ${yearRange.start}-${yearRange.end}.`;
 
     const userPrompt = `Generate ${count} authentic JEE PYQ-style questions ${subjectFilter}.
 
-Each question should feel like it was ACTUALLY asked in JEE Mains/Advanced between ${yearRange.start}-${yearRange.end}.
+Each question should feel like it was ACTUALLY asked in JEE between ${yearRange.start}-${yearRange.end}.
 
 Return JSON array with this structure:
 [{
@@ -81,19 +111,27 @@ Return JSON array with this structure:
   "option_c": "Third option",
   "option_d": "Fourth option",
   "correct_option": "A/B/C/D",
-  "explanation": "Complete solution with steps, as would appear in answer key",
+  "explanation": "Complete solution with steps and FINAL ANSWER VERIFICATION",
   "concept_tested": "Core concept being tested",
   "common_mistake": "Typical error students make",
-  "pyq_year": YYYY (a realistic year between ${yearRange.start}-${yearRange.end}),
+  "pyq_year": YYYY (between ${yearRange.start}-${yearRange.end}),
   "source": "JEE Mains YYYY / JEE Advanced YYYY / AIEEE YYYY"
 }]
 
+🔒 BEFORE FINALIZING EACH QUESTION:
+1. Solve the question completely yourself
+2. Get exact numerical answer with units
+3. Put correct answer in one of the options
+4. Set correct_option to that option letter (A/B/C/D)
+5. VERIFY the match is EXACT
+6. If mismatch → regenerate question
+
 Mix of:
-- 60% JEE Mains style (moderate difficulty, 2-3 min questions)
-- 30% JEE Advanced style (challenging, multi-concept, 4-5 min questions)  
+- 60% JEE Mains style (verified correct answers)
+- 30% JEE Advanced style (verified correct answers)
 - 10% Classic AIEEE style (if year range includes pre-2013)
 
-Distribute questions across different years proportionally.`;
+EVERY question must have VERIFIED correct option matching.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

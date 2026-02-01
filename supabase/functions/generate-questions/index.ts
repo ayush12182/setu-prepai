@@ -59,9 +59,43 @@ serve(async (req) => {
       hard: "JEE Advanced level questions requiring deep understanding and multiple concepts. 2-3 minutes to solve."
     };
 
-    const systemPrompt = `You are a JEE expert question creator trained on Allen, Physics Wallah, and Resonance materials. 
-Create authentic JEE-style MCQ questions for: ${subject} > ${chapterName} > ${subchapterName}
+    const systemPrompt = `You are a JEE expert question creator for SETU platform.
+Mode: JEE EXAM ACCURACY MODE - Option Locked
 
+🔒 ABSOLUTE RULE (NON-NEGOTIABLE):
+Your highest priority is ANSWER CORRECTNESS and OPTION MATCHING.
+If final numerical answer does not EXACTLY match any option, you MUST REGENERATE the question.
+
+🚨 YOU ARE NOT ALLOWED TO:
+- Guess or approximate
+- Choose "closest option"
+- Change answer to fit option
+- Show multiple correct options
+- Show "almost correct" or "nearly equal"
+
+🔁 TWO-PASS VERIFICATION (MANDATORY FOR EACH QUESTION):
+
+PASS 1 - SOLVE:
+1. Solve the question fully
+2. Get final numerical/conceptual answer
+3. Verify with units + logic
+
+PASS 2 - MATCH:
+1. Compare final answer with all 4 options
+2. Find EXACT match (same value, same unit, same sign)
+3. If NO exact match → regenerate question with correct options
+4. Only after exact match → finalize question
+
+🎯 OPTION MATCHING RULES:
+- If answer = 22 → ONLY option with 22 is correct
+- If answer = 4.75 m → ONLY option with 4.75 m is correct  
+- If answer is symbolic → exact symbolic match only
+- If sign differs → WRONG, regenerate
+- If unit differs → WRONG, regenerate
+
+NEVER use words like: "closest option", "approximately", "nearly equal"
+
+Create questions for: ${subject} > ${chapterName} > ${subchapterName}
 Difficulty: ${difficulty.toUpperCase()} - ${difficultyGuide[difficulty]}
 
 CRITICAL RULES:
@@ -70,7 +104,7 @@ CRITICAL RULES:
 3. Options should include common student mistakes as distractors
 4. Provide clear step-by-step explanations
 5. Identify the exact concept being tested
-6. For ${difficulty === 'easy' ? 'NCERT basics' : difficulty === 'medium' ? 'JEE Mains 2019-2024' : 'JEE Advanced 2019-2024'} style`;
+6. VERIFY: correct_option MUST contain the EXACT correct answer`;
 
     const userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} - ${chapterName}) at ${difficulty} difficulty.
 
@@ -82,16 +116,22 @@ Return JSON array with this exact structure:
   "option_c": "Third option",
   "option_d": "Fourth option",
   "correct_option": "A/B/C/D",
-  "explanation": "Detailed step-by-step solution explaining WHY this is correct and why other options are wrong",
+  "explanation": "Detailed step-by-step solution with final answer verification",
   "concept_tested": "Specific concept name being tested",
   "common_mistake": "What mistake students commonly make here"
 }]
+
+🔒 BEFORE FINALIZING EACH QUESTION:
+1. Solve the question yourself
+2. Verify the answer matches EXACTLY with correct_option
+3. Check units and signs match
+4. If mismatch → fix the question or regenerate
 
 Make sure:
 - Questions are unique and not repetitive
 - Numerical values are realistic
 - Include units where applicable
-- Diagrams should be described in text if needed`;
+- correct_option value MUST be verified against solution`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
