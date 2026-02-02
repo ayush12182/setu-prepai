@@ -59,9 +59,9 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
             <Menu className="w-5 h-5" />
           </Button>
           
-          <div className="flex items-center">
-            <img src="/setu-logo.png" alt="SETU" className="h-12 w-auto rounded-lg shadow-sm" />
-          </div>
+          <Link to="/" className="flex items-center">
+            <img src="/setu-logo.png" alt="SETU" className="h-12 w-auto rounded-lg shadow-sm hover:opacity-80 transition-opacity" />
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">
