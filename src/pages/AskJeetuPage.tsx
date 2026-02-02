@@ -11,9 +11,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
-// Configure your YouTube video ID here (the part after v= in YouTube URL)
-// Example: For https://www.youtube.com/watch?v=ABC123, use "ABC123"
-const WELCOME_VIDEO_ID = "YOUR_YOUTUBE_VIDEO_ID"; // Replace with your video ID
+// Welcome video path
+const WELCOME_VIDEO_PATH = "/videos/jeetu-welcome.mp4";
 
 interface Message {
   id: string;
@@ -223,17 +222,18 @@ const AskJeetuPage: React.FC = () => {
   return (
     <MainLayout title="Ask Jeetu Bhaiya">
       {/* Welcome Video Modal */}
-      <Dialog open={showWelcomeVideo && WELCOME_VIDEO_ID !== "YOUR_YOUTUBE_VIDEO_ID"} onOpenChange={setShowWelcomeVideo}>
+      <Dialog open={showWelcomeVideo} onOpenChange={setShowWelcomeVideo}>
         <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-black border-none">
           <div className="relative">
-            {/* YouTube Embed */}
+            {/* Local Video Player */}
             <div className="aspect-video">
-              <iframe
-                src={`https://www.youtube.com/embed/${WELCOME_VIDEO_ID}?autoplay=1&mute=${videoMuted ? 1 : 0}&rel=0&modestbranding=1`}
-                title="Jeetu Bhaiya Welcome"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
+              <video
+                src={WELCOME_VIDEO_PATH}
+                autoPlay
+                muted={videoMuted}
+                playsInline
+                className="w-full h-full object-cover"
+                onEnded={() => setShowWelcomeVideo(false)}
               />
             </div>
             
