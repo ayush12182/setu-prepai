@@ -1,28 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SubjectCard } from '@/components/ui/SubjectCard';
-import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
+import { useSyllabusProgress } from '@/hooks/useSyllabusProgress';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const SyllabusTracker: React.FC = () => {
   const navigate = useNavigate();
+  const { progress, isLoading } = useSyllabusProgress();
 
-  const subjects = [
-    {
-      subject: 'physics' as const,
-      chaptersCount: physicsChapters.length,
-      progress: 35
-    },
-    {
-      subject: 'chemistry' as const,
-      chaptersCount: chemistryChapters.length,
-      progress: 42
-    },
-    {
-      subject: 'maths' as const,
-      chaptersCount: mathsChapters.length,
-      progress: 28
-    }
-  ];
+  if (isLoading) {
+    return (
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-foreground">Syllabus Tracker</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section>
@@ -37,13 +36,13 @@ export const SyllabusTracker: React.FC = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {subjects.map((subject) => (
+        {progress.map((subjectData) => (
           <SubjectCard
-            key={subject.subject}
-            subject={subject.subject}
-            chaptersCount={subject.chaptersCount}
-            progress={subject.progress}
-            onClick={() => navigate(`/learn?subject=${subject.subject}`)}
+            key={subjectData.subject}
+            subject={subjectData.subject}
+            chaptersCount={subjectData.chaptersCount}
+            progress={subjectData.progress}
+            onClick={() => navigate(`/learn?subject=${subjectData.subject}`)}
           />
         ))}
       </div>
