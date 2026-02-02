@@ -9,10 +9,12 @@ import { useJeetuChat } from '@/hooks/useJeetuChat';
 import { useVoiceChat } from '@/hooks/useVoiceChat';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 // Welcome video path
 const WELCOME_VIDEO_PATH = "/videos/jeetu-welcome.mp4";
+const WELCOME_VIDEO_STORAGE_KEY = "jeetu-welcome-video-seen";
 
 interface Message {
   id: string;
@@ -39,8 +41,12 @@ const AskJeetuPage: React.FC = () => {
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [showWelcomeVideo, setShowWelcomeVideo] = useState(true);
+  const [showWelcomeVideo, setShowWelcomeVideo] = useState(() => {
+    // Check if user has already seen the welcome video
+    return !localStorage.getItem(WELCOME_VIDEO_STORAGE_KEY);
+  });
   const [videoMuted, setVideoMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   
@@ -222,23 +228,39 @@ const AskJeetuPage: React.FC = () => {
   return (
     <MainLayout title="Ask Jeetu Bhaiya">
       {/* Welcome Video Modal */}
-      <Dialog open={showWelcomeVideo} onOpenChange={setShowWelcomeVideo}>
-        <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-black border-none">
+      <Dialog 
+        open={showWelcomeVideo} 
+        onOpenChange={(open) => {
+          if (!open) {
+            localStorage.setItem(WELCOME_VIDEO_STORAGE_KEY, 'true');
+          }
+          setShowWelcomeVideo(open);
+        }}
+      >
+        <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-black border-none" aria-describedby={undefined}>
+          <VisuallyHidden>
+            <DialogTitle>Jeetu Bhaiya Welcome Message</DialogTitle>
+          </VisuallyHidden>
           <div className="relative">
             {/* Local Video Player */}
             <div className="aspect-video">
               <video
+                ref={videoRef}
                 src={WELCOME_VIDEO_PATH}
                 autoPlay
                 muted={videoMuted}
                 playsInline
+                controls
                 className="w-full h-full object-cover"
-                onEnded={() => setShowWelcomeVideo(false)}
+                onEnded={() => {
+                  localStorage.setItem(WELCOME_VIDEO_STORAGE_KEY, 'true');
+                  setShowWelcomeVideo(false);
+                }}
               />
             </div>
             
             {/* Controls Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+            <div className="absolute bottom-14 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center">
@@ -251,19 +273,12 @@ const AskJeetuPage: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  {/* Mute Toggle */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setVideoMuted(!videoMuted)}
-                    className="text-white hover:bg-white/20 rounded-full"
-                  >
-                    {videoMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-                  </Button>
-                  
                   {/* Skip Button */}
                   <Button
-                    onClick={() => setShowWelcomeVideo(false)}
+                    onClick={() => {
+                      localStorage.setItem(WELCOME_VIDEO_STORAGE_KEY, 'true');
+                      setShowWelcomeVideo(false);
+                    }}
                     className="bg-setu-saffron hover:bg-setu-saffron/90 text-white rounded-full px-4"
                   >
                     Start Chatting
@@ -274,7 +289,10 @@ const AskJeetuPage: React.FC = () => {
             
             {/* Close Button */}
             <button
-              onClick={() => setShowWelcomeVideo(false)}
+              onClick={() => {
+                localStorage.setItem(WELCOME_VIDEO_STORAGE_KEY, 'true');
+                setShowWelcomeVideo(false);
+              }}
               className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
             >
               <X className="w-4 h-4" />
