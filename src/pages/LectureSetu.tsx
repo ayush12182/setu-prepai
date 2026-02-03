@@ -1,18 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Video, FileText, Clock, Bookmark, Sparkles, ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Video, 
+  FileText, 
+  Clock, 
+  Bookmark, 
+  Sparkles, 
+  ArrowRight, 
+  Loader2,
+  Calculator,
+  History,
+  BookOpen,
+  ChevronRight
+} from 'lucide-react';
+import { useLectureNotes, LectureNote } from '@/hooks/useLectureNotes';
 
 const LectureSetu: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { isProcessing, currentNote, notes, processLecture, fetchUserNotes } = useLectureNotes();
 
-  const handleProcess = () => {
+  useEffect(() => {
+    fetchUserNotes();
+  }, []);
+
+  const handleProcess = async () => {
     if (!videoUrl) return;
-    setIsProcessing(true);
-    // Processing would happen here
-    setTimeout(() => setIsProcessing(false), 3000);
+    await processLecture(videoUrl);
+    setVideoUrl('');
   };
 
   const features = [
@@ -23,12 +42,12 @@ const LectureSetu: React.FC = () => {
 
   return (
     <MainLayout title="Lecture SETU">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="inline-flex items-center gap-2 bg-setu-saffron/10 text-setu-saffron px-4 py-2 rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full text-sm font-medium mb-4">
             <Sparkles className="w-4 h-4" />
-            New Feature
+            AI-Powered Notes
           </div>
           <h1 className="text-3xl font-display font-bold text-foreground mb-2">
             Lecture SETU
@@ -39,89 +58,313 @@ const LectureSetu: React.FC = () => {
         </div>
 
         {/* Input Section */}
-        <div className="bg-card border border-border rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Video className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-semibold">Paste Lecture Link</h3>
-              <p className="text-sm text-muted-foreground">YouTube, Google Drive, or any video URL</p>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <Input
-              value={videoUrl}
-              onChange={(e) => setVideoUrl(e.target.value)}
-              placeholder="https://youtube.com/watch?v=..."
-              className="flex-1"
-            />
-            <Button 
-              onClick={handleProcess}
-              disabled={!videoUrl || isProcessing}
-              className="btn-hero gap-2"
-            >
-              {isProcessing ? (
-                <>Processing...</>
-              ) : (
-                <>
-                  Process
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {features.map((feature, i) => (
-            <div 
-              key={i}
-              className="bg-card border border-border rounded-xl p-5 text-center"
-            >
-              <div className="w-12 h-12 rounded-xl bg-secondary mx-auto mb-4 flex items-center justify-center">
-                <feature.icon className="w-6 h-6 text-primary" />
+        <Card className="border-border">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Video className="w-6 h-6 text-primary" />
               </div>
-              <h4 className="font-semibold mb-1">{feature.title}</h4>
-              <p className="text-sm text-muted-foreground">{feature.desc}</p>
+              <div>
+                <h3 className="font-semibold">Paste Lecture Link</h3>
+                <p className="text-sm text-muted-foreground">YouTube video URL</p>
+              </div>
             </div>
-          ))}
-        </div>
 
-        {/* What You Get */}
-        <div className="bg-gradient-to-br from-primary to-setu-navy-light rounded-2xl p-6 text-white">
-          <h3 className="text-xl font-bold mb-4">What You Get</h3>
-          <ul className="space-y-3">
-            <li className="flex items-start gap-3">
-              <span className="text-setu-saffron">✓</span>
-              <span>Structured notes with key concepts highlighted</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-setu-saffron">✓</span>
-              <span>Important timestamps for quick revision</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-setu-saffron">✓</span>
-              <span>All formulas extracted in one place</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-setu-saffron">✓</span>
-              <span>PYQ connections - which questions relate to this topic</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-setu-saffron">✓</span>
-              <span>1-page revision summary</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-setu-saffron">✓</span>
-              <span>Auto-generated flashcards for spaced repetition</span>
-            </li>
-          </ul>
-        </div>
+            <div className="flex gap-3">
+              <Input
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://youtube.com/watch?v=..."
+                className="flex-1"
+                disabled={isProcessing}
+              />
+              <Button 
+                onClick={handleProcess}
+                disabled={!videoUrl || isProcessing}
+                className="gap-2"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    Process
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Results Section */}
+        {currentNote && (
+          <LectureResults note={currentNote} />
+        )}
+
+        {/* Features Grid (shown when no results) */}
+        {!currentNote && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {features.map((feature, i) => (
+              <Card key={i} className="border-border">
+                <CardContent className="p-5 text-center">
+                  <div className="w-12 h-12 rounded-xl bg-secondary mx-auto mb-4 flex items-center justify-center">
+                    <feature.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h4 className="font-semibold mb-1">{feature.title}</h4>
+                  <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Previous Notes */}
+        {notes.length > 0 && !currentNote && (
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <History className="w-5 h-5" />
+                Previous Lectures
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {notes.slice(0, 5).map((note) => (
+                <button
+                  key={note.id}
+                  onClick={() => {
+                    // This would show the note details
+                  }}
+                  className="w-full flex items-center gap-4 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors text-left"
+                >
+                  {note.thumbnail_url && (
+                    <img 
+                      src={note.thumbnail_url} 
+                      alt="" 
+                      className="w-20 h-14 object-cover rounded"
+                    />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{note.video_title || 'Untitled'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(note.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* What You Get (shown when no results) */}
+        {!currentNote && (
+          <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-0">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold mb-4">What You Get</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3">
+                  <span className="text-accent">✓</span>
+                  <span>Structured notes with key concepts highlighted</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-accent">✓</span>
+                  <span>Important timestamps for quick revision</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-accent">✓</span>
+                  <span>All formulas extracted in one place</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-accent">✓</span>
+                  <span>PYQ connections - which questions relate to this topic</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-accent">✓</span>
+                  <span>1-page revision summary</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-accent">✓</span>
+                  <span>Auto-generated flashcards for spaced repetition</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </MainLayout>
+  );
+};
+
+// Separate component for showing results
+const LectureResults: React.FC<{ note: LectureNote }> = ({ note }) => {
+  const [activeFlashcard, setActiveFlashcard] = useState(0);
+  const [showBack, setShowBack] = useState(false);
+
+  return (
+    <div className="space-y-6">
+      {/* Video Header */}
+      <Card className="border-border overflow-hidden">
+        <div className="flex flex-col md:flex-row">
+          {note.thumbnail_url && (
+            <img 
+              src={note.thumbnail_url} 
+              alt="" 
+              className="w-full md:w-64 h-40 object-cover"
+            />
+          )}
+          <CardContent className="p-4 flex-1">
+            <h2 className="text-xl font-semibold mb-2">{note.video_title || 'Processed Lecture'}</h2>
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              ✓ Notes Generated
+            </Badge>
+          </CardContent>
+        </div>
+      </Card>
+
+      {/* Tabbed Content */}
+      <Tabs defaultValue="notes" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 mb-4">
+          <TabsTrigger value="notes" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            Notes
+          </TabsTrigger>
+          <TabsTrigger value="formulas" className="flex items-center gap-2">
+            <Calculator className="w-4 h-4" />
+            Formulas
+          </TabsTrigger>
+          <TabsTrigger value="flashcards" className="flex items-center gap-2">
+            <Bookmark className="w-4 h-4" />
+            Flashcards
+          </TabsTrigger>
+          <TabsTrigger value="summary" className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4" />
+            Summary
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="notes">
+          <Card className="border-border">
+            <CardContent className="p-6 prose prose-sm max-w-none dark:prose-invert">
+              {note.structured_notes ? (
+                <div className="whitespace-pre-wrap">{note.structured_notes}</div>
+              ) : (
+                <p className="text-muted-foreground">No notes generated</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="formulas">
+          <div className="grid gap-4">
+            {note.formulas && note.formulas.length > 0 ? (
+              note.formulas.map((formula, i) => (
+                <Card key={i} className="border-border">
+                  <CardContent className="p-4">
+                    <div className="font-mono text-lg mb-2 text-primary">{formula.formula}</div>
+                    <div className="font-semibold">{formula.name}</div>
+                    <div className="text-sm text-muted-foreground">{formula.usage}</div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="border-border">
+                <CardContent className="p-6 text-center text-muted-foreground">
+                  No formulas extracted from this lecture
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="flashcards">
+          {note.flashcards && note.flashcards.length > 0 ? (
+            <div className="space-y-4">
+              <Card 
+                className="border-border cursor-pointer min-h-[200px] flex items-center justify-center"
+                onClick={() => setShowBack(!showBack)}
+              >
+                <CardContent className="p-6 text-center">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Card {activeFlashcard + 1} of {note.flashcards.length}
+                  </p>
+                  <p className="text-lg font-medium">
+                    {showBack 
+                      ? note.flashcards[activeFlashcard]?.back 
+                      : note.flashcards[activeFlashcard]?.front}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Click to {showBack ? 'see question' : 'reveal answer'}
+                  </p>
+                </CardContent>
+              </Card>
+              <div className="flex justify-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setActiveFlashcard(Math.max(0, activeFlashcard - 1));
+                    setShowBack(false);
+                  }}
+                  disabled={activeFlashcard === 0}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setActiveFlashcard(Math.min(note.flashcards.length - 1, activeFlashcard + 1));
+                    setShowBack(false);
+                  }}
+                  disabled={activeFlashcard === note.flashcards.length - 1}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Card className="border-border">
+              <CardContent className="p-6 text-center text-muted-foreground">
+                No flashcards generated from this lecture
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="summary">
+          <Card className="border-border">
+            <CardContent className="p-6">
+              {note.one_page_summary ? (
+                <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
+                  {note.one_page_summary}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center">No summary generated</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* PYQ Connections */}
+      {note.pyq_connections && note.pyq_connections.length > 0 && (
+        <Card className="border-border">
+          <CardHeader>
+            <CardTitle className="text-lg">PYQ Connections</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {note.pyq_connections.map((pyq, i) => (
+              <div key={i} className="flex items-center gap-3 p-2 rounded bg-muted/50">
+                <Badge variant="outline">{pyq.year}</Badge>
+                <Badge variant="secondary">{pyq.exam}</Badge>
+                <span className="text-sm">{pyq.topic}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 
