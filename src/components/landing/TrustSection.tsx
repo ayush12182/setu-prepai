@@ -8,25 +8,25 @@ const trustStats = [
 
 export const TrustSection: React.FC = () => {
   return (
-    <section className="relative py-20 px-4 sm:px-6 overflow-hidden">
+    <section className="relative py-16 px-4 sm:px-6 overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white" />
+      <div className="absolute inset-0 bg-gradient-to-b from-secondary/30 to-white" />
       
       {/* Decorative lines */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
       <div className="relative max-w-4xl mx-auto">
         <div className="grid sm:grid-cols-3 gap-8">
-          {trustStats.map((stat, i) => (
+          {trustStats.map((stat) => (
             <div
               key={stat.label}
               className="text-center group hover:scale-105 transition-transform duration-300"
             >
-              <div className="text-4xl sm:text-5xl font-bold text-[#1e3a5f] mb-2 group-hover:text-[#e07a3a] transition-colors duration-300">
+              <div className="text-4xl sm:text-5xl font-bold text-primary mb-2 group-hover:text-accent transition-colors duration-300">
                 {stat.value}
               </div>
-              <p className="text-gray-500 text-sm font-medium">{stat.label}</p>
+              <p className="text-muted-foreground text-sm font-medium">{stat.label}</p>
             </div>
           ))}
         </div>

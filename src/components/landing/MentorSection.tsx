@@ -33,26 +33,21 @@ const stats = [
 export const MentorSection: React.FC = () => {
   return (
     <section id="mentor-section" className="relative py-24 px-4 sm:px-6 overflow-hidden">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1e3a5f] via-[#1a3355] to-[#162a45]" />
+      {/* Gradient background - Deep Navy */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-[hsl(213_31%_15%)] to-[hsl(213_35%_12%)]" />
       
-      {/* Static decorative orbs */}
-      <div className="absolute top-20 left-20 w-64 h-64 bg-[#e07a3a]/10 rounded-full blur-3xl" />
+      {/* Subtle decorative orbs */}
+      <div className="absolute top-20 left-20 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
       <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl" />
-
-      {/* Geometric patterns */}
-      <div className="absolute top-32 right-40 w-3 h-3 bg-[#e07a3a]/40 rotate-45" />
-      <div className="absolute top-48 right-60 w-2 h-2 bg-white/20 rotate-45" />
-      <div className="absolute bottom-40 left-32 w-4 h-4 bg-[#e07a3a]/30 rotate-45" />
 
       <div className="relative max-w-5xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-14">
-          <p className="inline-block px-4 py-1.5 rounded-full bg-[#e07a3a]/20 text-[#e07a3a] text-sm font-semibold uppercase tracking-wide mb-4">
+          <p className="inline-block px-4 py-1.5 rounded-full bg-accent/20 text-accent text-sm font-semibold uppercase tracking-wide mb-4">
             Your Personal Mentor
           </p>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Meet <span className="bg-gradient-to-r from-[#e07a3a] to-[#f09a5a] bg-clip-text text-transparent">Jeetu Bhaiya</span>
+            Meet <span className="bg-gradient-to-r from-accent to-[hsl(26_85%_75%)] bg-clip-text text-transparent">Jeetu Bhaiya</span>
           </h2>
           <p className="text-white/60 text-lg max-w-md mx-auto">
             Not a chatbot. Not a teacher. A mentor who thinks with you.
@@ -63,7 +58,7 @@ export const MentorSection: React.FC = () => {
             {stats.map((stat, i) => (
               <React.Fragment key={stat.label}>
                 <div className="text-center hover:scale-105 transition-transform">
-                  <div className={`text-4xl font-bold mb-1 ${stat.highlight ? 'text-[#e07a3a]' : 'text-white'}`}>
+                  <div className={`text-4xl font-bold mb-1 ${stat.highlight ? 'text-accent' : 'text-white'}`}>
                     {stat.value}
                   </div>
                   <div className="text-white/50 text-sm font-medium">{stat.label}</div>
@@ -84,11 +79,11 @@ export const MentorSection: React.FC = () => {
               className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:-translate-y-1 transition-all duration-300"
             >
               <div className="relative flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#e07a3a] to-[#d06a2a] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#e07a3a]/20 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-[hsl(26_90%_55%)] flex items-center justify-center flex-shrink-0 shadow-lg shadow-accent/20 group-hover:scale-105 transition-transform">
                   <card.icon className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white text-lg mb-1 group-hover:text-[#e07a3a] transition-colors">
+                  <h4 className="font-bold text-white text-lg mb-1 group-hover:text-accent transition-colors">
                     {card.title}
                   </h4>
                   <p className="text-white/50 text-sm leading-relaxed group-hover:text-white/70 transition-colors">
@@ -100,9 +95,9 @@ export const MentorSection: React.FC = () => {
           ))}
         </div>
 
-        {/* Quote */}
+        {/* Final Tagline */}
         <div className="text-center mt-14">
-          <blockquote className="text-xl text-white/60 italic font-medium">
+          <blockquote className="text-xl text-white/60 font-medium italic">
             "Focused on results, not motivation quotes."
           </blockquote>
         </div>
