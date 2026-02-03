@@ -6,24 +6,24 @@ export const LandingHeader: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100/50 animate-fade-in">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border animate-fade-in">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center hover:scale-[1.02] transition-transform">
-          <img src="/setu-logo.png" alt="SETU" className="h-12 w-auto rounded-lg shadow-sm" />
+          <img src="/setu-logo.png" alt="SETU" className="h-12 w-auto rounded-lg" />
         </div>
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate('/auth')}
-            className="text-gray-600 hover:text-[#1e3a5f] font-medium"
+            className="text-primary hover:text-primary hover:bg-primary/5 font-medium"
           >
             Login
           </Button>
           <Button
             size="sm"
             onClick={() => navigate('/auth')}
-            className="bg-gradient-to-r from-[#1e3a5f] to-[#2a4a6f] text-white hover:from-[#2a4a6f] hover:to-[#3a5a7f] shadow-lg shadow-[#1e3a5f]/20 hover:shadow-xl transition-all duration-300 font-medium"
+            className="bg-primary text-primary-foreground hover:bg-[hsl(213_32%_14%)] shadow-[0_4px_12px_rgba(30,42,58,0.2)] hover:shadow-[0_6px_16px_rgba(30,42,58,0.3)] transition-all duration-300 font-medium"
           >
             Get Started
           </Button>

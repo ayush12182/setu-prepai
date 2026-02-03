@@ -10,7 +10,7 @@ export const TrustSection: React.FC = () => {
   return (
     <section className="relative py-16 px-4 sm:px-6 overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary/30 to-white" />
+      <div className="absolute inset-0 bg-background" />
       
       {/* Decorative lines */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />

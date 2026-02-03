@@ -33,12 +33,12 @@ const stats = [
 export const MentorSection: React.FC = () => {
   return (
     <section id="mentor-section" className="relative py-24 px-4 sm:px-6 overflow-hidden">
-      {/* Gradient background - Deep Navy */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary via-[hsl(213_31%_15%)] to-[hsl(213_35%_12%)]" />
+      {/* Deep Navy Background */}
+      <div className="absolute inset-0 bg-primary" />
       
       {/* Subtle decorative orbs */}
       <div className="absolute top-20 left-20 w-64 h-64 bg-accent/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-400/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 right-20 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
 
       <div className="relative max-w-5xl mx-auto">
         {/* Section Header */}
@@ -47,7 +47,7 @@ export const MentorSection: React.FC = () => {
             Your Personal Mentor
           </p>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">
-            Meet <span className="bg-gradient-to-r from-accent to-[hsl(26_85%_75%)] bg-clip-text text-transparent">Jeetu Bhaiya</span>
+            Meet <span className="text-accent">Jeetu Bhaiya</span>
           </h2>
           <p className="text-white/60 text-lg max-w-md mx-auto">
             Not a chatbot. Not a teacher. A mentor who thinks with you.
@@ -79,7 +79,7 @@ export const MentorSection: React.FC = () => {
               className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:-translate-y-1 transition-all duration-300"
             >
               <div className="relative flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-[hsl(26_90%_55%)] flex items-center justify-center flex-shrink-0 shadow-lg shadow-accent/20 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center flex-shrink-0 shadow-lg shadow-accent/20 group-hover:scale-105 transition-transform">
                   <card.icon className="h-6 w-6 text-white" />
                 </div>
                 <div>

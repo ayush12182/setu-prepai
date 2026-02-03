@@ -12,82 +12,82 @@
 @layer base {
   :root {
     /* ═══════════════════════════════════════════════════════
-       CORE COLOR SYSTEM
+       CORE COLOR SYSTEM - Premium Kota Coaching Palette
        ═══════════════════════════════════════════════════════ */
 
-    /* Background - Warm Off-White */
-    --background: 40 23% 97%;
-    --foreground: 0 0% 11%;
+    /* Background - Soft Off-White (#F7F8FA) */
+    --background: 220 20% 97%;
+    --foreground: 213 32% 17%;
 
-    /* Cards - Pure White with clear separation */
+    /* Cards - Pure White with premium shadows */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 11%;
+    --card-foreground: 213 32% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 11%;
+    --popover-foreground: 213 32% 17%;
 
-    /* Primary - Deep Navy Blue (Mentor authority) */
-    --primary: 213 31% 17%;
+    /* Primary - Deep Navy Blue (#1E2A3A) */
+    --primary: 213 32% 17%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Light warm gray */
-    --secondary: 40 15% 94%;
-    --secondary-foreground: 0 0% 29%;
+    /* Secondary - Soft neutral */
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 216 10% 40%;
 
-    /* Accent - Soft Saffron (SETU identity) */
-    --accent: 26 87% 67%;
-    --accent-foreground: 0 0% 11%;
+    /* Accent - Warm Saffron (#E89A3C) */
+    --accent: 32 79% 57%;
+    --accent-foreground: 213 32% 17%;
 
-    --muted: 40 10% 90%;
-    --muted-foreground: 0 0% 42%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 215 8% 58%;
 
     /* Destructive - Soft Red */
     --destructive: 0 65% 48%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders & Inputs */
-    --border: 40 15% 85%;
-    --input: 40 15% 85%;
-    --ring: 26 87% 67%;
+    --border: 220 14% 88%;
+    --input: 220 14% 88%;
+    --ring: 32 79% 57%;
 
     --radius: 0.5rem;
 
     /* ═══════════════════════════════════════════════════════
-       TEXT COLOR HIERARCHY (High Contrast)
+       TEXT COLOR HIERARCHY - Premium Contrast
        ═══════════════════════════════════════════════════════ */
     
     /* On Light Background */
-    --text-primary: 0 0% 11%;
-    --text-secondary: 0 0% 29%;
-    --text-muted: 0 0% 42%;
+    --text-primary: 213 32% 17%;      /* #1E2A3A - Deep Navy */
+    --text-secondary: 216 10% 40%;    /* #5A6472 - Calm Grey */
+    --text-muted: 215 8% 58%;         /* #8A919C - Muted Labels */
 
     /* On Dark Background (Navy) */
     --text-on-dark: 0 0% 100%;
-    --text-on-dark-secondary: 0 0% 90%;
-    --text-on-dark-muted: 0 0% 81%;
+    --text-on-dark-secondary: 0 0% 92%;
+    --text-on-dark-muted: 0 0% 75%;
     
     /* Tip/Highlight on Dark */
-    --text-tip-on-dark: 35 100% 83%;
+    --text-tip-on-dark: 32 100% 80%;
 
     /* ═══════════════════════════════════════════════════════
-       SETU CUSTOM TOKENS
+       SETU CUSTOM TOKENS - Kota Coaching Palette
        ═══════════════════════════════════════════════════════ */
     
-    /* Navy palette */
-    --setu-navy: 213 31% 17%;
-    --setu-navy-light: 213 25% 28%;
+    /* Navy palette (#1E2A3A) */
+    --setu-navy: 213 32% 17%;
+    --setu-navy-light: 213 28% 25%;
     --setu-navy-dark: 213 35% 12%;
     
-    /* Saffron palette */
-    --setu-saffron: 26 87% 67%;
-    --setu-saffron-light: 26 85% 75%;
-    --setu-saffron-dark: 26 90% 55%;
+    /* Saffron palette (#E89A3C) */
+    --setu-saffron: 32 79% 57%;
+    --setu-saffron-light: 32 100% 96%;  /* #FFF6EB - Light tint for cards */
+    --setu-saffron-dark: 32 85% 50%;
 
     /* Action Colors */
-    --setu-success: 122 39% 34%;
-    --setu-warning: 27 98% 47%;
+    --setu-success: 145 50% 38%;
+    --setu-warning: 32 79% 57%;
     --setu-error: 0 65% 48%;
-    --setu-info: 213 74% 43%;
+    --setu-info: 213 60% 50%;
     
     /* Subject Colors */
     --physics-color: 213 60% 50%;
