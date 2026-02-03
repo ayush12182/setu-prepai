@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      lecture_notes: {
+        Row: {
+          chapter: string | null
+          created_at: string
+          duration_seconds: number | null
+          error_message: string | null
+          flashcards: Json | null
+          formulas: Json | null
+          id: string
+          key_timestamps: Json | null
+          one_page_summary: string | null
+          processing_status: string | null
+          pyq_connections: Json | null
+          structured_notes: string | null
+          subject: string | null
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+          video_title: string | null
+          video_url: string
+        }
+        Insert: {
+          chapter?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          error_message?: string | null
+          flashcards?: Json | null
+          formulas?: Json | null
+          id?: string
+          key_timestamps?: Json | null
+          one_page_summary?: string | null
+          processing_status?: string | null
+          pyq_connections?: Json | null
+          structured_notes?: string | null
+          subject?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+          video_title?: string | null
+          video_url: string
+        }
+        Update: {
+          chapter?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          error_message?: string | null
+          flashcards?: Json | null
+          formulas?: Json | null
+          id?: string
+          key_timestamps?: Json | null
+          one_page_summary?: string | null
+          processing_status?: string | null
+          pyq_connections?: Json | null
+          structured_notes?: string | null
+          subject?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+          video_title?: string | null
+          video_url?: string
+        }
+        Relationships: []
+      }
       major_test_answers: {
         Row: {
           answered_at: string | null
