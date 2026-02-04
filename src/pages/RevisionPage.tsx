@@ -6,7 +6,8 @@ import {
   Table, 
   Zap, 
   BookOpen,
-  ArrowRight
+  ArrowRight,
+  PenTool
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -14,8 +15,9 @@ import FormulaSheet from '@/components/revision/FormulaSheet';
 import DifferenceTables from '@/components/revision/DifferenceTables';
 import QuickQuiz from '@/components/revision/QuickQuiz';
 import OnePageNotes from '@/components/revision/OnePageNotes';
+import HandwrittenNotesAnalysis from '@/components/revision/HandwrittenNotesAnalysis';
 
-type RevisionMode = 'home' | 'notes' | 'formulas' | 'tables' | 'quiz';
+type RevisionMode = 'home' | 'notes' | 'formulas' | 'tables' | 'quiz' | 'handwritten';
 
 const RevisionPage: React.FC = () => {
   const [activeMode, setActiveMode] = useState<RevisionMode>('home');
@@ -28,6 +30,14 @@ const RevisionPage: React.FC = () => {
       description: 'AI-generated condensed chapter notes',
       action: 'Generate Notes',
       color: 'bg-physics/10 text-physics'
+    },
+    {
+      id: 'handwritten' as RevisionMode,
+      icon: PenTool,
+      title: 'Analyze My Notes',
+      description: 'Upload handwritten notes for AI teaching',
+      action: 'Upload Notes',
+      color: 'bg-primary/10 text-primary'
     },
     {
       id: 'formulas' as RevisionMode,
@@ -65,6 +75,8 @@ const RevisionPage: React.FC = () => {
     switch (activeMode) {
       case 'notes':
         return <OnePageNotes onBack={() => setActiveMode('home')} />;
+      case 'handwritten':
+        return <HandwrittenNotesAnalysis onBack={() => setActiveMode('home')} />;
       case 'formulas':
         return <FormulaSheet onBack={() => setActiveMode('home')} />;
       case 'tables':
