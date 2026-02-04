@@ -17,6 +17,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { JeeQuestion, JeeOption, JeeSolution } from '@/lib/jeeMathRenderer';
 
 interface TestResultsProps {
   answers: TestAnswer[];
@@ -171,9 +172,10 @@ const TestResults: React.FC<TestResultsProps> = ({
                       {idx + 1}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground line-clamp-2">
-                        {q.question_text}
-                      </p>
+                      <JeeQuestion 
+                        question={q.question_text}
+                        className="font-medium text-foreground line-clamp-2"
+                      />
                       <div className="flex flex-wrap gap-2 mt-2">
                         {answer.selectedOption ? (
                           <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">
@@ -223,7 +225,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                               )}
                             >
                               <span className="font-semibold">{opt}.</span>
-                              <span className="flex-1">{optionText}</span>
+                              <JeeOption option={optionText} className="flex-1" />
                               {isCorrectOpt && <CheckCircle className="w-4 h-4 text-setu-success" />}
                               {isSelected && !isCorrectOpt && <XCircle className="w-4 h-4 text-destructive" />}
                             </div>
@@ -235,9 +237,9 @@ const TestResults: React.FC<TestResultsProps> = ({
                       <div className="space-y-3">
                         <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
                           <Lightbulb className="w-5 h-5 text-setu-saffron mt-0.5 flex-shrink-0" />
-                          <div>
+                          <div className="flex-1">
                             <p className="text-sm font-medium mb-1">Solution</p>
-                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{q.explanation}</p>
+                            <JeeSolution solution={q.explanation} className="text-muted-foreground" />
                           </div>
                         </div>
 

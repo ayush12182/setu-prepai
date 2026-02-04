@@ -16,6 +16,86 @@ interface QuestionRequest {
   count?: number;
 }
 
+// JEE Clean-Syntax Format Instructions
+const JEE_SYNTAX_RULES = `
+==============================
+STRICT JEE CLEAN-SYNTAX FORMAT (MANDATORY)
+==============================
+
+Every question, solution, and equation MUST follow clean, exam-style mathematical/chemical syntax exactly like JEE papers.
+
+❌ NO:
+- No inline words inside equations
+- No informal spacing
+- No LaTeX-like backslashes (\\frac, \\sqrt, etc.)
+- No AI-style math writing
+- No explanatory text inside expressions
+- No dollar signs or markdown math
+
+✅ YES:
+- Standard textbook/JEE notation only
+- Proper brackets: (x − k)/2
+- Proper subscripts: v₁, v₂, R₁, R₂ (use Unicode: ₀₁₂₃₄₅₆₇₈₉ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ)
+- Proper superscripts: x², x³, xⁿ (use Unicode: ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿⁱˣʸ)
+- Greek letters: α, β, γ, δ, θ, λ, μ, ω, etc.
+- Proper arrows: → for reactions and implies
+- Proper vector notation: vec notation with →
+
+==============================
+QUESTION FORMAT RULES
+==============================
+
+MATHS:
+- Direction ratios: d₁ = (2, 1, 4)
+- Fractions: (x − k)/2 = (y − 3)/1 = (z − 1)/4
+- Cross product: d₁ × d₂
+- Determinant format for matrix operations
+
+PHYSICS:
+- Clean formulas: v = u + at, s = ut + (1/2)at²
+- Energy: E = mc², KE = (1/2)mv²
+- Subscripts for variables: v₀, v₁, T₁, T₂
+
+CHEMISTRY:
+- Reactions: Fe + CuSO₄ → FeSO₄ + Cu
+- No arrow explanations inside equation
+- Proper subscripts for molecular formulas: H₂O, CO₂, H₂SO₄
+
+==============================
+SOLUTION FORMAT (MANDATORY)
+==============================
+
+Step 1: Given/Asked (short)
+What is given, what is asked
+
+Step 2: Concept (1-2 lines)
+The principle being used
+
+Step 3: Calculation (line-by-line)
+One step per line:
+d₁ × d₂ = (−3, 2, 1)
+P₂ − P₁ = (2k, k − 3, 2)
+⇒ −6k + 2(k − 3) + 2 = 0
+⇒ −4k − 4 = 0
+⇒ k = −1
+
+Step 4: Final Answer
+5k = 5(−1) = −5
+
+Step 5: Answer Match
+Final Answer: (C) −5
+
+==============================
+NO TEXT IN EQUATIONS RULE
+==============================
+
+WRONG: "Substituting k = −1 in equation gives 5k = −5"
+RIGHT:
+Substitute k = −1:
+5k = 5(−1)
+   = −5
+`;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -62,6 +142,8 @@ serve(async (req) => {
     const systemPrompt = `You are a JEE expert question creator for SETU platform.
 Mode: JEE EXAM ACCURACY MODE - Option Locked
 
+${JEE_SYNTAX_RULES}
+
 🔒 ABSOLUTE RULE (NON-NEGOTIABLE):
 Your highest priority is ANSWER CORRECTNESS and OPTION MATCHING.
 If final numerical answer does not EXACTLY match any option, you MUST REGENERATE the question.
@@ -86,15 +168,6 @@ PASS 2 - MATCH:
 3. If NO exact match → regenerate question with correct options
 4. Only after exact match → finalize question
 
-🎯 OPTION MATCHING RULES:
-- If answer = 22 → ONLY option with 22 is correct
-- If answer = 4.75 m → ONLY option with 4.75 m is correct  
-- If answer is symbolic → exact symbolic match only
-- If sign differs → WRONG, regenerate
-- If unit differs → WRONG, regenerate
-
-NEVER use words like: "closest option", "approximately", "nearly equal"
-
 Create questions for: ${subject} > ${chapterName} > ${subchapterName}
 Difficulty: ${difficulty.toUpperCase()} - ${difficultyGuide[difficulty]}
 
@@ -102,35 +175,39 @@ CRITICAL RULES:
 1. Questions must be EXACTLY like JEE Mains/Advanced papers
 2. Each question must test a specific concept
 3. Options should include common student mistakes as distractors
-4. Provide clear step-by-step explanations
+4. Provide clear step-by-step explanations in JEE CLEAN-SYNTAX format
 5. Identify the exact concept being tested
 6. VERIFY: correct_option MUST contain the EXACT correct answer`;
 
     const userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} - ${chapterName}) at ${difficulty} difficulty.
 
+Use STRICT JEE CLEAN-SYNTAX FORMAT for all questions, options, and explanations.
+
 Return JSON array with this exact structure:
 [{
-  "question_text": "The question with all necessary data",
-  "option_a": "First option",
-  "option_b": "Second option", 
-  "option_c": "Third option",
-  "option_d": "Fourth option",
+  "question_text": "The question with proper JEE notation (subscripts: v₁, v₂; fractions: (a−b)/c; Greek: θ, α, ω)",
+  "option_a": "Option with proper notation",
+  "option_b": "Option with proper notation", 
+  "option_c": "Option with proper notation",
+  "option_d": "Option with proper notation",
   "correct_option": "A/B/C/D",
-  "explanation": "Detailed step-by-step solution with final answer verification",
+  "explanation": "Step-by-step solution in JEE clean-syntax format with line-by-line calculations",
   "concept_tested": "Specific concept name being tested",
   "common_mistake": "What mistake students commonly make here"
 }]
 
 🔒 BEFORE FINALIZING EACH QUESTION:
-1. Solve the question yourself
+1. Solve the question yourself with line-by-line calculation
 2. Verify the answer matches EXACTLY with correct_option
 3. Check units and signs match
-4. If mismatch → fix the question or regenerate
+4. Ensure all math uses clean JEE notation (no LaTeX, no backslashes)
+5. If mismatch → fix the question or regenerate
 
 Make sure:
 - Questions are unique and not repetitive
 - Numerical values are realistic
 - Include units where applicable
+- Use Unicode subscripts (₀₁₂₃) and superscripts (⁰¹²³) appropriately
 - correct_option value MUST be verified against solution`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

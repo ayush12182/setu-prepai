@@ -10,6 +10,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { JeeQuestion, JeeOption } from '@/lib/jeeMathRenderer';
 
 interface TestModeQuizProps {
   questions: Question[];
@@ -187,9 +188,10 @@ const TestModeQuiz: React.FC<TestModeQuizProps> = ({
             <Flag className="w-4 h-4" />
           </button>
         </div>
-        <h3 className="text-lg font-medium text-foreground leading-relaxed">
-          {currentQuestion.question_text}
-        </h3>
+        <JeeQuestion 
+          question={currentQuestion.question_text}
+          className="text-lg font-medium text-foreground"
+        />
       </div>
 
       {/* Options */}
@@ -219,7 +221,7 @@ const TestModeQuiz: React.FC<TestModeQuizProps> = ({
               )}>
                 {opt}
               </span>
-              <span className="pt-1">{optionText}</span>
+              <JeeOption option={optionText} className="pt-1 flex-1" />
               {selectedOption === opt && (
                 <CheckCircle className="w-5 h-5 text-primary ml-auto flex-shrink-0" />
               )}

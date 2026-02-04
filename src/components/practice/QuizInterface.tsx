@@ -15,6 +15,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { JeeQuestion, JeeOption, JeeSolution } from '@/lib/jeeMathRenderer';
 
 interface QuizInterfaceProps {
   questions: Question[];
@@ -169,9 +170,10 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
 
       {/* Question */}
       <div className="bg-card border border-border rounded-xl p-6">
-        <h3 className="text-lg font-medium text-foreground leading-relaxed">
-          {currentQuestion.question_text}
-        </h3>
+        <JeeQuestion 
+          question={currentQuestion.question_text}
+          className="text-lg font-medium text-foreground"
+        />
       </div>
 
       {/* Options */}
@@ -201,7 +203,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
               )}>
                 {opt}
               </span>
-              <span className="pt-1">{optionText}</span>
+              <JeeOption option={optionText} className="pt-1" />
               {hasSubmitted && opt === currentQuestion.correct_option && (
                 <CheckCircle className="w-5 h-5 text-setu-success ml-auto flex-shrink-0" />
               )}
@@ -266,7 +268,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
             <div className="bg-secondary/50 border border-border rounded-xl p-4 space-y-4">
               <div>
                 <h4 className="font-semibold text-sm text-muted-foreground mb-2">STEP-BY-STEP SOLUTION</h4>
-                <p className="text-foreground whitespace-pre-wrap">{currentQuestion.explanation}</p>
+                <JeeSolution solution={currentQuestion.explanation} className="text-foreground" />
               </div>
               
               <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
