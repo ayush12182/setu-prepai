@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { MajorTestQuestion, MajorTestAnswer } from '@/hooks/useMajorTest';
 import { cn } from '@/lib/utils';
+import { JeeQuestion, JeeOption } from '@/lib/jeeMathRenderer';
 
 interface MajorTestExamProps {
   questions: MajorTestQuestion[];
@@ -331,7 +332,10 @@ const MajorTestExam: React.FC<MajorTestExamProps> = ({
             </div>
 
             <div className="prose prose-lg max-w-none mb-6">
-              <p className="text-foreground whitespace-pre-wrap">{currentQuestion.questionText}</p>
+              <JeeQuestion 
+                question={currentQuestion.questionText}
+                className="text-foreground"
+              />
             </div>
 
             {/* Options */}
@@ -359,7 +363,7 @@ const MajorTestExam: React.FC<MajorTestExamProps> = ({
                     )}>
                       {option}
                     </div>
-                    <span className="flex-1 pt-1">{optionText}</span>
+                    <JeeOption option={optionText} className="flex-1 pt-1" />
                   </button>
                 );
               })}

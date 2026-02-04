@@ -13,6 +13,30 @@ interface SimilarQuestionsRequest {
   count?: number;
 }
 
+// JEE Clean-Syntax Format Instructions
+const JEE_SYNTAX_RULES = `
+==============================
+STRICT JEE CLEAN-SYNTAX FORMAT (MANDATORY)
+==============================
+
+Every question, solution, and equation MUST follow clean, exam-style notation.
+
+❌ NO:
+- No LaTeX-like backslashes (\\frac, \\sqrt, etc.)
+- No dollar signs or markdown math
+- No inline words inside equations
+
+✅ YES:
+- Proper subscripts: v₁, v₂, R₁, R₂ (Unicode: ₀₁₂₃₄₅₆₇₈₉ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ)
+- Proper superscripts: x², x³, xⁿ (Unicode: ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿⁱˣʸ)
+- Greek letters: α, β, γ, δ, θ, λ, μ, ω
+- Fractions: (a − b)/c
+- Arrows: → for reactions
+
+SOLUTION FORMAT:
+Line-by-line calculation, one step per line, final answer clearly stated.
+`;
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -30,8 +54,18 @@ serve(async (req) => {
 The student just answered a question incorrectly about: "${conceptTested}"
 Topic: ${subject} > ${subchapterName}
 
+${JEE_SYNTAX_RULES}
+
 Create ${count} similar but simpler questions that help build understanding progressively.
-Start with easier variations and gradually increase complexity.`;
+Start with easier variations and gradually increase complexity.
+
+Mode: JEE EXAM ACCURACY MODE - Option Locked
+
+🔒 ABSOLUTE RULE:
+1. Solve each question BEFORE creating options
+2. Get exact final answer
+3. Put correct answer as one option
+4. VERIFY correct_option matches exactly`;
 
     const userPrompt = `The student got this question wrong:
 "${originalQuestion}"
@@ -39,17 +73,27 @@ Start with easier variations and gradually increase complexity.`;
 They need to practice the concept: "${conceptTested}"
 
 Generate ${count} progressively harder questions on the same concept.
+
+Use STRICT JEE CLEAN-SYNTAX FORMAT:
+- Unicode subscripts (v₁, v₂, T₁, T₂)
+- Unicode superscripts (x², x³)
+- Greek letters (θ, α, ω)
+- Proper fractions: (a − b)/c
+- Line-by-line solutions
+
 Return JSON array:
 [{
-  "question_text": "Question text",
-  "option_a": "Option A",
-  "option_b": "Option B",
-  "option_c": "Option C", 
-  "option_d": "Option D",
+  "question_text": "Question in JEE clean-syntax format",
+  "option_a": "Option A with proper notation",
+  "option_b": "Option B with proper notation",
+  "option_c": "Option C with proper notation", 
+  "option_d": "Option D with proper notation",
   "correct_option": "A/B/C/D",
-  "explanation": "Brief explanation",
+  "explanation": "Line-by-line solution:\\n\\nGiven: ...\\n\\nSolution:\\nStep 1: ...\\n⇒ Step 2: ...\\n\\nFinal Answer: ...\\n\\nAnswer: (X)",
   "difficulty_note": "Why this helps understand the concept"
-}]`;
+}]
+
+🔒 VERIFY: Each question's correct_option must match the solved answer EXACTLY.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
