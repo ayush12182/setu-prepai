@@ -9,6 +9,7 @@ import {
   Video,
   MessageCircle,
   BarChart3,
+  User,
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,7 @@ const navItems = [
   { path: '/lecture-setu', icon: Video, label: 'Lecture SETU' },
   { path: '/ask-jeetu', icon: MessageCircle, label: 'Ask Jeetu Bhaiya' },
   { path: '/analytics', icon: BarChart3, label: 'Analytics' },
+  { path: '/profile', icon: User, label: 'My Profile' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
