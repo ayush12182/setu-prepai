@@ -19,6 +19,7 @@ import RevisionPage from "./pages/RevisionPage";
 import LectureSetu from "./pages/LectureSetu";
 import AskJeetuPage from "./pages/AskJeetuPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/lecture-setu" element={<LectureSetu />} />
               <Route path="/ask-jeetu" element={<AskJeetuPage />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>

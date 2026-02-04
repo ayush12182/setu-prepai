@@ -107,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
                   <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="font-medium">
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="font-medium cursor-pointer">
                   <User className="w-4 h-4 mr-2" />
                   Profile
                 </DropdownMenuItem>
