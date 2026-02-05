@@ -3,6 +3,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { TodaysFocus } from '@/components/home/TodaysFocus';
 import { QuickActions } from '@/components/home/QuickActions';
 import { SyllabusTracker } from '@/components/home/SyllabusTracker';
+import { ExamReminders } from '@/components/home/ExamReminders';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -29,8 +30,13 @@ const Index: React.FC = () => {
           ) : null}
         </div>
 
-        {/* Today's Focus */}
+        {/* Exam Reminders */}
         <div className="animate-fade-in stagger-1" style={{ opacity: 0 }}>
+          <ExamReminders />
+        </div>
+
+        {/* Today's Focus */}
+        <div className="animate-fade-in stagger-2" style={{ opacity: 0 }}>
           <TodaysFocus />
         </div>
 
@@ -41,7 +47,7 @@ const Index: React.FC = () => {
         </section>
 
         {/* Syllabus Tracker */}
-        <div className="animate-fade-in stagger-2" style={{ opacity: 0 }}>
+        <div className="animate-fade-in stagger-3" style={{ opacity: 0 }}>
           <SyllabusTracker />
         </div>
       </div>
