@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import setuLogo from '@/assets/setu-logo.png';
 
 export const LandingHeader: React.FC = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export const LandingHeader: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-12 flex items-center justify-between">
         <div className="flex items-center hover:scale-[1.02] transition-transform">
-          <img src="/setu-logo.png" alt="SETU" className="h-10 sm:h-12 w-auto rounded-lg brightness-0 invert" />
+          <img src={setuLogo} alt="SETU" className="h-10 sm:h-12 w-auto rounded-lg brightness-0 invert" />
         </div>
         
         {/* Nav Links - Desktop */}
