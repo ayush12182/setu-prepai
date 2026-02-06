@@ -1,53 +1,78 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const CTASection: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative py-24 px-4 sm:px-6 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-background" />
-      
-      {/* Subtle decorative orbs */}
-      <div className="absolute top-1/4 left-1/4 w-48 h-48 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent/8 rounded-full blur-3xl" />
+    <section className="relative py-32 px-6 sm:px-12 overflow-hidden bg-primary">
+      {/* Animated Background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px]">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-0 bg-gradient-conic from-accent via-transparent to-accent opacity-20 rounded-full blur-3xl"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-primary via-transparent to-primary" />
+      </div>
 
-      <div className="relative max-w-2xl mx-auto text-center">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary mb-4">
-          Ready to start the <span className="text-accent">right way</span>?
-        </h2>
-        <p className="text-secondary-foreground text-lg mb-10 max-w-md mx-auto">
-          Join thousands of students who found clarity with SETU.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+      {/* Grid */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `linear-gradient(white 1px, transparent 1px),
+                            linear-gradient(90deg, white 1px, transparent 1px)`,
+          backgroundSize: '60px 60px',
+        }} />
+      </div>
+
+      <div className="relative max-w-3xl mx-auto text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/20 text-accent text-sm font-medium mb-8">
+            <Sparkles className="w-4 h-4" />
+            Start your journey today
+          </div>
+
+          {/* Headline */}
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+            Ready to start the
+            <br />
+            <span className="text-accent">right way?</span>
+          </h2>
+
+          {/* Subtext */}
+          <p className="text-white/70 text-lg sm:text-xl max-w-lg mx-auto mb-10">
+            Join thousands of students who found clarity with SETU.
+            Your 21-day transformation starts now.
+          </p>
+
+          {/* CTA Button */}
           <Button
             size="lg"
             onClick={() => navigate('/auth')}
-            className="group h-14 px-8 text-lg font-semibold bg-primary text-primary-foreground hover:bg-[hsl(213_32%_14%)] rounded-xl shadow-[0_6px_18px_rgba(30,42,58,0.25)] hover:shadow-[0_8px_24px_rgba(30,42,58,0.35)] transition-all duration-300 hover:-translate-y-1"
+            className="group h-16 px-10 text-lg font-semibold bg-accent text-primary hover:bg-accent/90 rounded-2xl shadow-[0_0_60px_rgba(232,154,60,0.4)] hover:shadow-[0_0_80px_rgba(232,154,60,0.5)] transition-all duration-300 hover:-translate-y-1"
           >
-            Start Free Trial
-            <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            Start Free Trial — No Card Required
+            <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-2 transition-transform" />
           </Button>
-        </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-secondary-foreground">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-[hsl(var(--setu-success)/0.15)] flex items-center justify-center">
-              <Check className="w-3 h-3 text-[hsl(var(--setu-success))]" />
-            </div>
-            <span className="font-medium">No credit card required</span>
+          {/* Trust Points */}
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-white/50 text-sm">
+            <span>✓ Free for 7 days</span>
+            <span>✓ No credit card</span>
+            <span>✓ Cancel anytime</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-[hsl(var(--setu-success)/0.15)] flex items-center justify-center">
-              <Check className="w-3 h-3 text-[hsl(var(--setu-success))]" />
-            </div>
-            <span className="font-medium">Cancel anytime</span>
-          </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

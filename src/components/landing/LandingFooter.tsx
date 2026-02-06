@@ -1,15 +1,43 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 export const LandingFooter: React.FC = () => {
   return (
-    <footer className="relative py-10 px-4 sm:px-6 border-t border-gray-100 bg-white">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center hover:scale-[1.02] transition-transform">
-          <img src="/setu-logo.png" alt="SETU" className="h-10 w-auto rounded-lg shadow-sm" />
+    <footer className="relative py-12 px-6 sm:px-12 bg-primary border-t border-white/10">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            className="flex items-center"
+          >
+            <img 
+              src="/setu-logo.png" 
+              alt="SETU" 
+              className="h-10 w-auto rounded-lg brightness-0 invert" 
+            />
+          </motion.div>
+
+          {/* Links */}
+          <div className="flex items-center gap-8">
+            {['Privacy', 'Terms', 'Contact'].map((link) => (
+              <a
+                key={link}
+                href={`#${link.toLowerCase()}`}
+                className="text-white/50 hover:text-white text-sm font-medium transition-colors"
+              >
+                {link}
+              </a>
+            ))}
+          </div>
+
+          {/* Copyright */}
+          <p className="text-sm text-white/40">
+            © 2024 SETU. Built for serious students.
+          </p>
         </div>
-        <p className="text-sm text-gray-400 font-medium">
-          © 2024 SETU. Built for serious students.
-        </p>
       </div>
     </footer>
   );
