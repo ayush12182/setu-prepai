@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import setuLogo from '@/assets/setu-logo.png';
 
 export const LandingFooter: React.FC = () => {
   return (
@@ -13,8 +14,8 @@ export const LandingFooter: React.FC = () => {
             viewport={{ once: true }}
             className="flex items-center"
           >
-            <img 
-              src="/setu-logo.png" 
+<img 
+              src={setuLogo} 
               alt="SETU" 
               className="h-10 w-auto rounded-lg brightness-0 invert" 
             />
