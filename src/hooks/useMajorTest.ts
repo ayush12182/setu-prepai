@@ -82,7 +82,7 @@ export const useMajorTest = () => {
       .from('major_test_cycles')
       .select('*')
       .eq('is_active', true)
-      .single();
+      .maybeSingle();
     
     if (data) {
       setActiveCycle({
@@ -104,7 +104,7 @@ export const useMajorTest = () => {
       .select('*')
       .eq('user_id', userId)
       .eq('status', 'in_progress')
-      .single();
+      .maybeSingle();
     
     return data;
   };
