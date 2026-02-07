@@ -1,53 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Volume2, VolumeX, BookOpen, Brain, Target, Sparkles } from 'lucide-react';
+import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Floating education elements
-const FloatingElement: React.FC<{
-  children: React.ReactNode;
-  delay?: number;
-  duration?: number;
-  className?: string;
-  style?: React.CSSProperties;
-}> = ({ children, delay = 0, duration = 6, className, style }) => (
-  <motion.div
-    className={className}
-    style={style}
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ 
-      opacity: [0.4, 0.8, 0.4],
-      y: [0, -30, 0],
-    }}
-    transition={{
-      duration,
-      delay,
-      repeat: Infinity,
-      ease: "easeInOut"
-    }}
-  >
-    {children}
-  </motion.div>
-);
+const formulas = ['E = mc²', 'F = ma', '∫ dx', 'Σ n²', 'λ = h/p', 'PV = nRT', 'd/dx', '∇ × B'];
 
-// Animated formulas floating in background
-const formulas = [
-  'E = mc²',
-  'F = ma',
-  '∫ dx',
-  'Σ n²',
-  'λ = h/p',
-  'PV = nRT',
-  'd/dx',
-  '∇ × B',
+const formulaPositions = [
+  { left: '10%', top: '15%' }, { left: '22%', top: '70%' },
+  { left: '75%', top: '20%' }, { left: '85%', top: '65%' },
+  { left: '50%', top: '80%' }, { left: '60%', top: '12%' },
+  { left: '35%', top: '45%' }, { left: '90%', top: '40%' },
 ];
 
 export const HeroSection: React.FC = () => {
   const navigate = useNavigate();
   const [isMuted, setIsMuted] = useState(true);
   const [currentWord, setCurrentWord] = useState(0);
-  
+
   const words = ['Mentor', 'Guide', 'Coach', 'Teacher'];
 
   useEffect(() => {
@@ -70,7 +40,7 @@ export const HeroSection: React.FC = () => {
         />
       </div>
 
-      {/* Animated Grid Pattern */}
+      {/* Static Grid Pattern */}
       <div className="absolute inset-0 z-[5] opacity-10">
         <div className="absolute inset-0" style={{
           backgroundImage: `linear-gradient(hsl(var(--accent)/0.3) 1px, transparent 1px),
@@ -79,51 +49,25 @@ export const HeroSection: React.FC = () => {
         }} />
       </div>
 
-      {/* Floating Formulas */}
+      {/* CSS-only Floating Formulas */}
       <div className="absolute inset-0 z-[6] overflow-hidden pointer-events-none">
         {formulas.map((formula, i) => (
-          <FloatingElement
+          <div
             key={formula}
-            delay={i * 0.8}
-            duration={8 + i}
-            className={`absolute text-white/20 font-mono text-lg sm:text-2xl`}
+            className="absolute text-white/15 font-mono text-lg sm:text-2xl animate-float-slow"
             style={{
-              left: `${10 + (i * 12) % 80}%`,
-              top: `${15 + (i * 15) % 70}%`,
-            } as React.CSSProperties}
+              ...formulaPositions[i],
+              animationDelay: `${i * 1.2}s`,
+            }}
           >
             {formula}
-          </FloatingElement>
+          </div>
         ))}
       </div>
 
-      {/* Floating Education Icons */}
-      <div className="absolute inset-0 z-[6] overflow-hidden pointer-events-none">
-        <FloatingElement delay={0} duration={7} className="absolute top-[20%] left-[8%]">
-          <div className="w-16 h-16 rounded-2xl bg-accent/20 backdrop-blur-sm flex items-center justify-center border border-accent/30">
-            <BookOpen className="w-8 h-8 text-accent" />
-          </div>
-        </FloatingElement>
-        <FloatingElement delay={1.5} duration={8} className="absolute top-[30%] right-[10%]">
-          <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
-            <Brain className="w-7 h-7 text-white" />
-          </div>
-        </FloatingElement>
-        <FloatingElement delay={2.5} duration={9} className="absolute bottom-[25%] left-[15%]">
-          <div className="w-12 h-12 rounded-xl bg-accent/30 backdrop-blur-sm flex items-center justify-center border border-accent/40">
-            <Target className="w-6 h-6 text-white" />
-          </div>
-        </FloatingElement>
-        <FloatingElement delay={3} duration={6} className="absolute top-[60%] right-[20%]">
-          <div className="w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/25">
-            <Sparkles className="w-5 h-5 text-accent" />
-          </div>
-        </FloatingElement>
-      </div>
-
-      {/* Gradient Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent/20 rounded-full blur-[150px] z-[2]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/10 rounded-full blur-[120px] z-[2]" />
+      {/* Static Gradient Orbs */}
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent/15 rounded-full blur-[150px] z-[2]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/8 rounded-full blur-[120px] z-[2]" />
 
       {/* Main Content */}
       <div className="relative z-20 min-h-screen flex flex-col justify-center px-6 sm:px-12 lg:px-20 pt-20">
@@ -153,10 +97,10 @@ export const HeroSection: React.FC = () => {
               <AnimatePresence mode="wait">
                 <motion.span
                   key={currentWord}
-                  initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                  exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-                  transition={{ duration: 0.4 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
                   className="inline-block text-accent"
                 >
                   {words[currentWord]}
@@ -216,7 +160,7 @@ export const HeroSection: React.FC = () => {
               { value: '21', label: 'Day Cycles' },
               { value: '50K+', label: 'PYQs Covered' },
               { value: '3', label: 'Hour Tests' },
-            ].map((stat, i) => (
+            ].map((stat) => (
               <div key={stat.label} className="text-center sm:text-left">
                 <div className="text-3xl sm:text-4xl font-bold text-white">{stat.value}</div>
                 <div className="text-sm text-white/50 mt-1">{stat.label}</div>
@@ -227,32 +171,20 @@ export const HeroSection: React.FC = () => {
       </div>
 
       {/* Sound Toggle */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
+      <button
         onClick={() => setIsMuted(!isMuted)}
         className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all border border-white/20"
         aria-label={isMuted ? "Unmute" : "Mute"}
       >
         {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-      </motion.button>
+      </button>
 
       {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
-      >
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2"
-        >
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
+        <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2 animate-bounce" style={{ animationDuration: '2s' }}>
           <div className="w-1 h-2 bg-white/50 rounded-full" />
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 };
