@@ -134,81 +134,116 @@ serve(async (req) => {
 
     // Generate new questions using AI
     const difficultyGuide = {
-      easy: "Basic conceptual questions testing fundamental understanding. NCERT level. Should be solvable in 30-60 seconds.",
-      medium: "JEE Mains level questions requiring application of concepts. Multi-step problems. 1-2 minutes to solve.",
-      hard: "JEE Advanced level questions requiring deep understanding and multiple concepts. 2-3 minutes to solve."
+      easy: `NCERT + NCERT Exemplar level. Single-concept, direct application. Solvable in 30-60 seconds.
+Focus: Definition recall, single-formula plug-in, basic graph reading, simple unit conversion.
+Traps to include: Sign errors, unit mismatch, confusing similar formulas (e.g., v=u+at vs v²=u²+2as).`,
+      medium: `JEE Mains level. Multi-step, 2-3 concept integration. Solvable in 1-2 minutes.
+Focus: Application problems, concept linking (e.g., energy + momentum), graph interpretation with calculation, multi-variable problems.
+Traps to include: Partial calculation errors, wrong frame of reference, forgetting boundary conditions, incorrect sign conventions, misreading graphs.`,
+      hard: `JEE Advanced level. Multi-concept fusion, non-obvious approach needed. Solvable in 2-4 minutes.
+Focus: Paragraph-based reasoning, uncommon applications of standard formulas, edge cases, problems requiring trick substitutions or symmetry arguments.
+Traps to include: Over-simplification, missing edge cases, applying wrong theorem, dimensional traps, calculation shortcuts that lead to wrong answers.`
     };
 
-    const systemPrompt = `You are a JEE expert question creator for SETU platform.
-Mode: JEE EXAM ACCURACY MODE - Option Locked
+    const systemPrompt = `You are an elite JEE question designer for SETU — India's #1 AI mentor platform.
+Mode: JEE EXAM ACCURACY MODE — Option Locked
 
 ${JEE_SYNTAX_RULES}
 
-🔒 ABSOLUTE RULE (NON-NEGOTIABLE):
-Your highest priority is ANSWER CORRECTNESS and OPTION MATCHING.
-If final numerical answer does not EXACTLY match any option, you MUST REGENERATE the question.
+═══════════════════════════════════
+QUESTION DESIGN PHILOSOPHY
+═══════════════════════════════════
 
-🚨 YOU ARE NOT ALLOWED TO:
-- Guess or approximate
-- Choose "closest option"
-- Change answer to fit option
-- Show multiple correct options
-- Show "almost correct" or "nearly equal"
+You are NOT just generating MCQs. You are crafting exam-grade questions that:
+1. Test EXACTLY ONE core concept per question (stated in concept_tested)
+2. Have 3 distractors designed from REAL student mistakes (not random values)
+3. Are numerically clean — no ugly decimals unless intentional
+4. Match the cognitive level of actual NTA/IIT papers
 
-🔁 TWO-PASS VERIFICATION (MANDATORY FOR EACH QUESTION):
+═══════════════════════════════════
+SUBJECT-SPECIFIC MASTERY RULES
+═══════════════════════════════════
 
-PASS 1 - SOLVE:
-1. Solve the question fully
-2. Get final numerical/conceptual answer
-3. Verify with units + logic
+PHYSICS:
+- Always specify reference frame, sign convention, and coordinate system when relevant
+- Use standard SI units; mention CGS only when the question specifically tests unit conversion
+- Include diagram descriptions in text when spatial reasoning is needed: "A block of mass m on an inclined plane at angle θ..."
+- Common trap patterns to use: centripetal vs centrifugal, real vs apparent weight, relative velocity signs, direction of induced EMF (Lenz's law), sign of work done
+- For Electrostatics/Magnetism: Always specify medium (vacuum/dielectric), charge signs, current direction
+- For Optics: Specify sign convention (Cartesian), real/virtual distinction
+- For Modern Physics: Use proper decay notation, energy-mass equivalence with correct c² factors
+- For Thermodynamics: Clearly state process type (isothermal/adiabatic/isobaric/isochoric), system boundaries
 
-PASS 2 - MATCH:
-1. Compare final answer with all 4 options
-2. Find EXACT match (same value, same unit, same sign)
-3. If NO exact match → regenerate question with correct options
-4. Only after exact match → finalize question
+CHEMISTRY:
+- Physical Chemistry: Calculations must be dimensionally consistent. Use proper equilibrium expressions, rate laws, and thermodynamic relations. Include units in all numerical answers.
+- Organic Chemistry: Use IUPAC naming. Specify stereochemistry (R/S, E/Z, cis/trans) when relevant. Include reagent conditions (temperature, solvent, catalyst). Test: reaction mechanisms, rearrangements, named reactions, functional group interconversions.
+- Inorganic Chemistry: Test periodic trends with exceptions. Include coordination chemistry (CFSE, isomerism, magnetic properties). Use proper oxidation state notation. Cover: metallurgy, qualitative analysis, p-block/d-block/f-block properties.
+- Common trap patterns: forgetting to balance equations, wrong hybridization, ignoring steric effects, confusing kinetic vs thermodynamic control
+
+MATHEMATICS:
+- Always specify domain/range restrictions when relevant
+- For Calculus: Test limits (L'Hôpital, squeeze theorem, standard limits), continuity/differentiability at specific points, definite integrals with substitution traps, area/volume applications
+- For Algebra: Complex numbers (modulus, argument, Euler form), matrices/determinants (properties, rank), sequences & series (convergence, telescoping, partial fractions)
+- For Coordinate Geometry: Conic sections (eccentricity, focal chord, tangent/normal), 3D geometry (direction cosines, shortest distance between lines, plane equations)
+- For Trigonometry: Multiple angle formulas, conditional identities, inverse trig domains
+- For Probability: Bayes' theorem, conditional probability traps, distinguishable vs indistinguishable counting
+- For Vectors: Cross product direction (right-hand rule), scalar triple product applications, projection formulas
+- Common trap patterns: domain errors, sign mistakes in complex number arguments, forgetting ±, wrong formula for nth term vs sum
+
+═══════════════════════════════════
+DISTRACTOR DESIGN (CRITICAL)
+═══════════════════════════════════
+
+Each wrong option MUST come from a SPECIFIC, DOCUMENTED student mistake:
+- Option from forgetting a factor (like 2, π, or ½)
+- Option from wrong sign convention
+- Option from using wrong formula
+- Option from incomplete calculation (stopping one step early)
+
+In common_mistake field, document WHICH specific error produces WHICH wrong option.
+
+═══════════════════════════════════
+🔒 ABSOLUTE RULES (NON-NEGOTIABLE)
+═══════════════════════════════════
+1. ANSWER CORRECTNESS > everything else
+2. If final answer doesn't EXACTLY match an option → REGENERATE
+3. No approximations, no "closest option", no rounding unless explicitly required
+4. Each question MUST be solvable with standard JEE syllabus knowledge
+5. No ambiguous questions — exactly ONE correct answer always
+
+🔁 TWO-PASS VERIFICATION (MANDATORY):
+PASS 1 — SOLVE: Solve completely. Get exact answer with units.
+PASS 2 — MATCH: Verify exact match with correct_option. If no match → regenerate.
 
 Create questions for: ${subject} > ${chapterName} > ${subchapterName}
-Difficulty: ${difficulty.toUpperCase()} - ${difficultyGuide[difficulty]}
+Difficulty: ${difficulty.toUpperCase()} — ${difficultyGuide[difficulty]}`;
 
-CRITICAL RULES:
-1. Questions must be EXACTLY like JEE Mains/Advanced papers
-2. Each question must test a specific concept
-3. Options should include common student mistakes as distractors
-4. Provide clear step-by-step explanations in JEE CLEAN-SYNTAX format
-5. Identify the exact concept being tested
-6. VERIFY: correct_option MUST contain the EXACT correct answer`;
+    const userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} — ${chapterName}) at ${difficulty} difficulty.
 
-    const userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} - ${chapterName}) at ${difficulty} difficulty.
+STRICT JEE CLEAN-SYNTAX FORMAT for all content.
 
-Use STRICT JEE CLEAN-SYNTAX FORMAT for all questions, options, and explanations.
-
-Return JSON array with this exact structure:
+Return JSON array:
 [{
-  "question_text": "The question with proper JEE notation (subscripts: v₁, v₂; fractions: (a−b)/c; Greek: θ, α, ω)",
-  "option_a": "Option with proper notation",
-  "option_b": "Option with proper notation", 
-  "option_c": "Option with proper notation",
-  "option_d": "Option with proper notation",
+  "question_text": "Question with proper JEE notation (subscripts: v₁, v₂; fractions: (a−b)/c; Greek: θ, α, ω; superscripts: x², eⁿ)",
+  "option_a": "Option with proper notation and units",
+  "option_b": "Option with proper notation and units",
+  "option_c": "Option with proper notation and units",
+  "option_d": "Option with proper notation and units",
   "correct_option": "A/B/C/D",
-  "explanation": "Step-by-step solution in JEE clean-syntax format with line-by-line calculations",
-  "concept_tested": "Specific concept name being tested",
-  "common_mistake": "What mistake students commonly make here"
+  "explanation": "Step-by-step solution in JEE clean-syntax:\\n\\nGiven:\\n...\\n\\nConcept:\\n...\\n\\nSolution:\\nStep 1: [formula/substitution]\\n⇒ Step 2: [calculation]\\n⇒ Step 3: [simplification]\\n\\nFinal Answer: [value with unit]\\n\\nAnswer: (X)\\n\\nWhy other options are wrong:\\n(A/B/C/D): [specific mistake that leads to this value]",
+  "concept_tested": "Exact concept name (e.g., 'Conservation of Linear Momentum in 2D Collision')",
+  "common_mistake": "Specific error → which wrong option it produces. E.g., 'Forgetting factor of 2 in KE formula gives option (B)'"
 }]
 
-🔒 BEFORE FINALIZING EACH QUESTION:
-1. Solve the question yourself with line-by-line calculation
-2. Verify the answer matches EXACTLY with correct_option
-3. Check units and signs match
-4. Ensure all math uses clean JEE notation (no LaTeX, no backslashes)
-5. If mismatch → fix the question or regenerate
-
-Make sure:
-- Questions are unique and not repetitive
-- Numerical values are realistic
-- Include units where applicable
-- Use Unicode subscripts (₀₁₂₃) and superscripts (⁰¹²³) appropriately
-- correct_option value MUST be verified against solution`;
+QUALITY CHECKLIST (mandatory before output):
+✅ Each question tests exactly ONE concept from the subchapter
+✅ All 4 options are dimensionally consistent
+✅ Numerical values are realistic (no absurd magnitudes)
+✅ correct_option verified against full solution
+✅ common_mistake maps to a specific wrong option
+✅ No two questions test the same concept
+✅ Unicode subscripts/superscripts used (no LaTeX)
+✅ Units included where applicable`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -217,12 +252,12 @@ Make sure:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.7,
+        temperature: 0.5,
       }),
     });
 

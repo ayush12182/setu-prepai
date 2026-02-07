@@ -50,50 +50,79 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are a JEE expert creating practice questions to help students master a specific concept they got wrong.
-The student just answered a question incorrectly about: "${conceptTested}"
+    const systemPrompt = `You are an elite JEE remediation specialist for SETU — India's #1 AI mentor platform.
+A student just failed a question. Your job is to BUILD their understanding from the ground up with scaffolded practice.
+
+Failed concept: "${conceptTested}"
 Topic: ${subject} > ${subchapterName}
 
 ${JEE_SYNTAX_RULES}
 
-Create ${count} similar but simpler questions that help build understanding progressively.
-Start with easier variations and gradually increase complexity.
+═══════════════════════════════════
+SCAFFOLDED LEARNING DESIGN
+═══════════════════════════════════
 
-Mode: JEE EXAM ACCURACY MODE - Option Locked
+Question 1 (Foundation): Tests the SAME concept in its simplest form.
+- Direct formula application, single step
+- Builds confidence that the core idea is understood
+- Example: If they failed on projectile range, ask basic range formula with θ = 45°
 
-🔒 ABSOLUTE RULE:
-1. Solve each question BEFORE creating options
-2. Get exact final answer
-3. Put correct answer as one option
-4. VERIFY correct_option matches exactly`;
+Question 2 (Application): Same concept, slight twist.
+- Requires one additional step or a minor variation
+- Tests if they can TRANSFER the concept
+- Example: Projectile range but on inclined plane, or with air resistance mentioned (but negligible)
+
+Question 3 (Exam-Ready): Same concept at JEE Mains level.
+- Full exam-style question combining this concept with one related idea
+- This is the "graduation" question — if they get this right, they've mastered it
+- Example: Projectile + relative motion, or projectile with constraint
+
+═══════════════════════════════════
+MISTAKE-AWARE DISTRACTOR DESIGN
+═══════════════════════════════════
+
+Since the student already made a mistake on this concept, your distractors MUST target:
+1. The EXACT mistake they likely made (inferred from the original question)
+2. The next most common mistake for this concept
+3. A "looks right but wrong" option that tests careful reading
+
+═══════════════════════════════════
+🔒 ABSOLUTE RULES
+═══════════════════════════════════
+1. Solve each question FULLY before creating options
+2. Exact match between solution and correct_option
+3. Progressive difficulty: Q1 < Q2 < Q3
+4. All questions test the SAME core concept (not tangential topics)
+
+Mode: JEE EXAM ACCURACY MODE — Option Locked`;
 
     const userPrompt = `The student got this question wrong:
 "${originalQuestion}"
 
-They need to practice the concept: "${conceptTested}"
+Failed concept: "${conceptTested}"
 
-Generate ${count} progressively harder questions on the same concept.
+Generate ${count} scaffolded practice questions (easy → medium → exam-ready) on this EXACT concept.
 
-Use STRICT JEE CLEAN-SYNTAX FORMAT:
-- Unicode subscripts (v₁, v₂, T₁, T₂)
-- Unicode superscripts (x², x³)
-- Greek letters (θ, α, ω)
-- Proper fractions: (a − b)/c
-- Line-by-line solutions
+STRICT JEE CLEAN-SYNTAX FORMAT.
 
 Return JSON array:
 [{
-  "question_text": "Question in JEE clean-syntax format",
-  "option_a": "Option A with proper notation",
-  "option_b": "Option B with proper notation",
-  "option_c": "Option C with proper notation", 
-  "option_d": "Option D with proper notation",
+  "question_text": "Question in JEE clean-syntax",
+  "option_a": "Option with proper notation and units",
+  "option_b": "Option with proper notation and units",
+  "option_c": "Option with proper notation and units",
+  "option_d": "Option with proper notation and units",
   "correct_option": "A/B/C/D",
-  "explanation": "Line-by-line solution:\\n\\nGiven: ...\\n\\nSolution:\\nStep 1: ...\\n⇒ Step 2: ...\\n\\nFinal Answer: ...\\n\\nAnswer: (X)",
-  "difficulty_note": "Why this helps understand the concept"
+  "explanation": "Step-by-step solution:\\n\\nGiven:\\n...\\n\\nConcept:\\n[Why this builds on the failed question]\\n\\nSolution:\\nStep 1: ...\\n⇒ Step 2: ...\\n\\nFinal Answer: [value]\\n\\nAnswer: (X)\\n\\nKey Insight: [What the student should learn from this]",
+  "difficulty_note": "Foundation / Application / Exam-Ready — [how this connects to the original mistake]"
 }]
 
-🔒 VERIFY: Each question's correct_option must match the solved answer EXACTLY.`;
+QUALITY CHECKLIST:
+✅ All questions test "${conceptTested}" specifically
+✅ Progressive difficulty (Q1 easiest, Q${count} hardest)
+✅ Distractors target the student's likely mistake pattern
+✅ correct_option verified against solution
+✅ Each explanation includes a "Key Insight" connecting back to the original error`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -102,12 +131,12 @@ Return JSON array:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.6,
+        temperature: 0.4,
       }),
     });
 

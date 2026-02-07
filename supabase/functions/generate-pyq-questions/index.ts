@@ -130,78 +130,108 @@ serve(async (req) => {
     // Generate authentic PYQ-style questions
     const subjectFilter = subject ? `for ${subject}` : "across Physics, Chemistry, and Mathematics";
     
-    const systemPrompt = `You are a JEE expert for SETU platform with access to all JEE papers from ${yearRange.start} to ${yearRange.end}.
-Mode: JEE EXAM ACCURACY MODE - Option Locked
+    const systemPrompt = `You are an elite JEE PYQ specialist for SETU — India's #1 AI mentor platform.
+You have deep expertise in every JEE paper from ${yearRange.start} to ${yearRange.end}.
+Mode: JEE EXAM ACCURACY MODE — Option Locked
 
 ${JEE_SYNTAX_RULES}
 
-🔒 ABSOLUTE RULE (NON-NEGOTIABLE):
-Your highest priority is ANSWER CORRECTNESS and OPTION MATCHING.
-If final numerical answer does not EXACTLY match any option, you MUST REGENERATE the question.
+═══════════════════════════════════
+PYQ AUTHENTICITY STANDARDS
+═══════════════════════════════════
 
-🚨 YOU ARE NOT ALLOWED TO:
-- Guess or approximate
-- Choose "closest option"
-- Change answer to fit option
-- Show multiple correct options
-- Show "almost correct" or "nearly equal"
+Your questions must be INDISTINGUISHABLE from real JEE papers. Follow these era-specific patterns:
 
-🔁 TWO-PASS VERIFICATION (MANDATORY FOR EACH QUESTION):
+POST-NTA ERA (2019-2024 JEE Mains):
+- 4 options, single correct, +4/−1 marking
+- Numerical value type (integer answer, no options) — for these, still create 4 options but make them close integers
+- Focus: Application-heavy, less rote, more conceptual traps
+- Shift toward: Data interpretation, assertion-reason, statement-based
+- Physics: More modern physics, semiconductor, EM waves emphasis
+- Chemistry: More GOC, biomolecules, environmental chemistry
+- Maths: More statistics, probability, 3D geometry
 
-PASS 1 - SOLVE:
-1. Solve the question fully BEFORE creating options
-2. Get the exact final answer with correct units and sign
-3. Verify with dimensional analysis and logic
+JEE ADVANCED ERA (2013-2024):
+- Multi-correct possible (but generate single-correct for our format)
+- Paragraph-based, matrix-match style adapted to MCQ
+- High difficulty: 2-3 concepts fused, non-obvious approach required
+- Tests: Deep understanding over computation speed
+- Signature patterns: "Trick" questions that test whether you READ carefully
 
-PASS 2 - MATCH:
-1. Create options with correct answer as one option
-2. Create 3 distractors based on common mistakes
-3. VERIFY: correct_option points to the EXACT correct answer
-4. If any mismatch → regenerate question
+AIEEE/OLDER ERA (2004-2012):
+- More straightforward, formula-driven
+- Clean computation, less tricky
+- Standard problems from Irodov, DC Pandey, Cengage level
 
-Key characteristics of JEE PYQs:
-1. JEE Mains (2013-2024): Single correct MCQs with verified answers
-2. JEE Advanced (2006-2024): More complex, multi-concept questions
-3. AIEEE (2004-2012): Predecessor to JEE Mains
+═══════════════════════════════════
+SUBJECT DISTRIBUTION & TOPICS
+═══════════════════════════════════
 
-Include a mix of years ${yearRange.start}-${yearRange.end}.`;
+PHYSICS (weightage-based question distribution):
+- Mechanics (20%): NLM, WEP, Rotational, Gravitation, SHM
+- Electrodynamics (25%): Electrostatics, Capacitance, Current Electricity, EMI, AC
+- Optics & Modern (20%): Ray Optics, Wave Optics, Photoelectric, Atoms, Nuclei
+- Waves & Thermo (15%): Wave Motion, Sound, KTG, Thermodynamics
+- Properties of Matter (10%): Elasticity, Fluid Mechanics, Surface Tension
+- Magnetism (10%): Moving Charges, Magnetism, Magnetic Properties
+
+CHEMISTRY:
+- Physical (35%): Equilibrium, Thermodynamics, Electrochemistry, Kinetics, Solutions
+- Organic (30%): GOC, Hydrocarbons, Halides, Alcohols/Phenols, Carbonyl, Amines, Biomolecules
+- Inorganic (35%): Periodic Table, Chemical Bonding, Coordination, p-block, d-block, Metallurgy, Qualitative Analysis
+
+MATHEMATICS:
+- Calculus (35%): Limits, Continuity, Differentiation, Integration, Differential Equations, Area
+- Algebra (30%): Complex Numbers, Quadratics, P&C, Probability, Matrices, Binomial, Sequences
+- Coordinate (20%): Straight Lines, Circles, Conics, 3D Geometry
+- Trigonometry (10%): Trig equations, Inverse Trig, Properties of Triangles
+- Vectors (5%): Vector algebra, Scalar/Vector triple products
+
+═══════════════════════════════════
+🔒 ABSOLUTE RULES
+═══════════════════════════════════
+1. ANSWER CORRECTNESS > everything else
+2. Solve BEFORE creating options
+3. No approximations unless explicitly required by question
+4. Exact match between solution and correct_option
+5. Each question MUST feel authentic to its claimed year/exam
+
+🔁 TWO-PASS VERIFICATION:
+PASS 1 — SOLVE fully, get exact answer
+PASS 2 — VERIFY correct_option matches exactly. If not → regenerate.`;
 
     const userPrompt = `Generate ${count} authentic JEE PYQ-style questions ${subjectFilter}.
 
-Each question should feel like it was ACTUALLY asked in JEE between ${yearRange.start}-${yearRange.end}.
+Each question must feel EXACTLY like it appeared in a real JEE paper from ${yearRange.start}-${yearRange.end}.
 
-Use STRICT JEE CLEAN-SYNTAX FORMAT for all questions, options, and explanations.
+STRICT JEE CLEAN-SYNTAX FORMAT for all content.
 
-Return JSON array with this structure:
+Return JSON array:
 [{
   "question_text": "Question with proper JEE notation (subscripts: v₁, v₂; fractions: (a−b)/c; Greek: θ, α, ω)",
-  "option_a": "Option with proper notation",
-  "option_b": "Option with proper notation",
-  "option_c": "Option with proper notation",
-  "option_d": "Option with proper notation",
+  "option_a": "Option with proper notation and units",
+  "option_b": "Option with proper notation and units",
+  "option_c": "Option with proper notation and units",
+  "option_d": "Option with proper notation and units",
   "correct_option": "A/B/C/D",
-  "explanation": "Step-by-step solution in JEE clean-syntax format:\\n\\nGiven:\\n...\\n\\nSolution:\\nStep 1: ...\\nStep 2: ...\\n\\nFinal Answer: ...\\n\\nAnswer: (X)",
-  "concept_tested": "Core concept being tested",
-  "common_mistake": "Typical error students make",
-  "pyq_year": YYYY (between ${yearRange.start}-${yearRange.end}),
-  "source": "JEE Mains YYYY / JEE Advanced YYYY / AIEEE YYYY"
+  "explanation": "Step-by-step solution:\\n\\nGiven:\\n...\\n\\nConcept:\\n[Core principle]\\n\\nSolution:\\nStep 1: ...\\n⇒ Step 2: ...\\n\\nFinal Answer: [value with unit]\\n\\nAnswer: (X)\\n\\nWhy other options are wrong:\\n(Y): [specific mistake]",
+  "concept_tested": "Exact concept (e.g., 'Faraday's Law with changing area')",
+  "common_mistake": "Specific error → wrong option mapping",
+  "pyq_year": YYYY,
+  "source": "JEE Mains YYYY / JEE Advanced YYYY / AIEEE YYYY",
+  "subject": "${subject || 'physics/chemistry/maths'}"
 }]
 
-🔒 BEFORE FINALIZING EACH QUESTION:
-1. Solve the question completely yourself with line-by-line calculation
-2. Get exact numerical answer with units
-3. Put correct answer in one of the options
-4. Set correct_option to that option letter (A/B/C/D)
-5. VERIFY the match is EXACT
-6. Ensure clean JEE notation (Unicode subscripts/superscripts, no LaTeX)
-7. If mismatch → regenerate question
+Year distribution: Spread questions across ${yearRange.start}-${yearRange.end}, with 50% from recent 5 years.
+Mix: 60% JEE Mains, 30% JEE Advanced, 10% AIEEE (if year range allows).
 
-Mix of:
-- 60% JEE Mains style (verified correct answers)
-- 30% JEE Advanced style (verified correct answers)
-- 10% Classic AIEEE style (if year range includes pre-2013)
-
-EVERY question must have VERIFIED correct option matching.`;
+QUALITY CHECKLIST:
+✅ Each question authentic to its claimed exam and year
+✅ Difficulty matches the exam type (Advanced > Mains > AIEEE)
+✅ correct_option verified against full solution
+✅ Distractors from real student mistakes
+✅ No two questions test the same concept
+✅ Unicode notation only (no LaTeX)`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -210,12 +240,12 @@ EVERY question must have VERIFIED correct option matching.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.8,
+        temperature: 0.5,
       }),
     });
 
