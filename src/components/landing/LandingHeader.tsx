@@ -29,7 +29,7 @@ export const LandingHeader: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-12 flex items-center justify-between">
         <div className="flex items-center hover:scale-[1.02] transition-transform">
-          <img src={setuLogo} alt="SETU" className="h-10 sm:h-12 w-auto rounded-lg brightness-0 invert" />
+          <img src={setuLogo} alt="SETU" className="h-10 sm:h-12 w-auto rounded-lg" />
         </div>
         
         {/* Nav Links - Desktop */}
