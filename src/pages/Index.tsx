@@ -6,6 +6,7 @@ import { SyllabusTracker } from '@/components/home/SyllabusTracker';
 import { ExamReminders } from '@/components/home/ExamReminders';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { Sparkles, Flame } from 'lucide-react';
 
 const Index: React.FC = () => {
   const { getGreeting, getMentorName } = useLanguage();
@@ -16,40 +17,50 @@ const Index: React.FC = () => {
   return (
     <MainLayout title="SETU">
       <div className="space-y-8">
-        {/* Welcome Section */}
-        <div className="animate-fade-in" style={{ opacity: 0 }}>
-          {user ? (
-            <div className="bg-card rounded-xl p-6 shadow-card border border-border">
-              <p className="text-secondary-foreground text-sm font-medium mb-1">
+        {/* Welcome Hero */}
+        {user && (
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--setu-navy-light))] p-8 sm:p-10">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
+            <div className="absolute inset-0 opacity-5" style={{
+              backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }} />
+            
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider">
+                  <Flame className="w-3.5 h-3.5" />
+                  Dashboard
+                </span>
+              </div>
+              <p className="text-white/60 text-sm font-medium mb-1">
                 Welcome back, {displayName}! 👋
               </p>
-              <h1 className="text-2xl font-semibold text-foreground leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
                 {getMentorName()} ready hai tumhari help ke liye
               </h1>
             </div>
-          ) : null}
-        </div>
+          </div>
+        )}
 
         {/* Exam Reminders */}
-        <div className="animate-fade-in stagger-1" style={{ opacity: 0 }}>
-          <ExamReminders />
-        </div>
+        <ExamReminders />
 
         {/* Today's Focus */}
-        <div className="animate-fade-in stagger-2" style={{ opacity: 0 }}>
-          <TodaysFocus />
-        </div>
+        <TodaysFocus />
 
         {/* Quick Actions */}
         <section>
-          <h2 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-accent" />
+            Quick Actions
+          </h2>
           <QuickActions />
         </section>
 
         {/* Syllabus Tracker */}
-        <div className="animate-fade-in stagger-3" style={{ opacity: 0 }}>
-          <SyllabusTracker />
-        </div>
+        <SyllabusTracker />
       </div>
     </MainLayout>
   );
