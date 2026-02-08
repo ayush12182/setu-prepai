@@ -34,6 +34,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
     error,
     fetchMixedTestQuestions,
     fetchPYQQuestions,
+    fetchAdaptiveQuestions,
     recordAttempt
   } = useTestQuestions();
 
@@ -58,6 +59,9 @@ const TestExecution: React.FC<TestExecutionProps> = ({
           config.yearRange,
           config.questionCount || 25
         );
+        break;
+      case 'adaptive':
+        result = await fetchAdaptiveQuestions(config.questionCount || 15);
         break;
     }
 

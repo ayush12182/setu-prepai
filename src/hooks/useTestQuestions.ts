@@ -166,6 +166,48 @@ export const useTestQuestions = () => {
     }
   };
 
+  // Fetch adaptive questions based on user's weak areas
+  const fetchAdaptiveQuestions = async (count: number = 15) => {
+    setLoading(true);
+    setError(null);
+    setQuestions([]);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('generate-adaptive-test', {
+        body: { count }
+      });
+
+      if (fnError) throw fnError;
+
+      if (data?.error) {
+        if (data.error.includes('Rate limit')) {
+          toast.error('Too many requests. Please wait a moment.');
+        } else if (data.error.includes('credits')) {
+          toast.error('AI credits exhausted. Please try again later.');
+        } else {
+          toast.error(data.error);
+        }
+        setError(data.error);
+        return null;
+      }
+
+      if (data?.questions && data.questions.length > 0) {
+        setQuestions(data.questions as Question[]);
+        return data.questions as Question[];
+      }
+
+      toast.error('No questions generated');
+      return null;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to generate adaptive test';
+      setError(message);
+      toast.error(message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const recordAttempt = async (
     questionId: string,
     selectedOption: 'A' | 'B' | 'C' | 'D',
@@ -194,6 +236,7 @@ export const useTestQuestions = () => {
     error,
     fetchMixedTestQuestions,
     fetchPYQQuestions,
+    fetchAdaptiveQuestions,
     recordAttempt,
     setQuestions
   };
