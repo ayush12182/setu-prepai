@@ -3,7 +3,7 @@
 // With Jeetu Bhaiya-style notes generation and PDF download
 
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,6 +11,7 @@ import { getSubchapterById } from '@/data/subchapters';
 import { getChapterById } from '@/data/syllabus';
 import { useSubchapterNotes } from '@/hooks/useSubchapterNotes';
 import { NotesSection } from '@/components/subchapter/NotesSection';
+import TestExecution from '@/components/test/TestExecution';
 import { toast } from 'sonner';
 import { 
   BookOpen, 
@@ -29,7 +30,10 @@ import {
 const SubchapterPage: React.FC = () => {
   const { subchapterId } = useParams<{ subchapterId: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('learn');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'learn';
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [activeTest, setActiveTest] = useState<{ type: 'chapter' | 'pyq' } | null>(null);
   
   const subchapter = subchapterId ? getSubchapterById(subchapterId) : undefined;
   const chapter = subchapter ? getChapterById(subchapter.chapterId) : undefined;
@@ -319,43 +323,62 @@ const SubchapterPage: React.FC = () => {
 
           {/* ==================== TEST TAB ==================== */}
           <TabsContent value="test" className="mt-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div 
-                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
-                onClick={() => toast.info('Subchapter Test coming soon!', { description: 'Timed tests are being prepared.' })}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-lg bg-physics/10 flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-physics" />
+            {activeTest ? (
+              <TestExecution
+                config={{
+                  type: activeTest.type === 'pyq' ? 'pyq' : 'chapter',
+                  chapters: activeTest.type === 'chapter' ? [{
+                    chapterId: chapter.id,
+                    chapterName: chapter.name,
+                    subject: chapter.subject,
+                    subchapterId: subchapter.id,
+                    subchapterName: subchapter.name
+                  }] : undefined,
+                  subject: activeTest.type === 'pyq' ? chapter.subject : undefined,
+                  questionCount: activeTest.type === 'pyq' ? 10 : undefined,
+                }}
+                onComplete={() => setActiveTest(null)}
+                onExit={() => setActiveTest(null)}
+              />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div 
+                  className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                  onClick={() => setActiveTest({ type: 'chapter' })}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-lg bg-physics/10 flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-physics" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Subchapter Test</h4>
+                      <p className="text-sm text-muted-foreground">15 mins • 10 Questions</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold">Subchapter Test</h4>
-                    <p className="text-sm text-muted-foreground">15 mins • 10 Questions</p>
-                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Quick test covering all concepts from {subchapter.name}
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Quick test covering all concepts from {subchapter.name}
-                </p>
-              </div>
 
-              <div 
-                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
-                onClick={() => toast.info('PYQ Test coming soon!', { description: 'Previous year questions test.' })}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-lg bg-setu-saffron/10 flex items-center justify-center">
-                    <Target className="w-6 h-6 text-setu-saffron" />
+                <div 
+                  className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                  onClick={() => setActiveTest({ type: 'pyq' })}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-lg bg-setu-saffron/10 flex items-center justify-center">
+                      <Target className="w-6 h-6 text-setu-saffron" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">PYQ Test</h4>
+                      <p className="text-sm text-muted-foreground">20 mins • Past Year Questions</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold">PYQ Test</h4>
-                    <p className="text-sm text-muted-foreground">20 mins • Past Year Questions</p>
-                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Real JEE questions from this topic
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Real JEE questions from this topic
-                </p>
               </div>
-            </div>
+            )}
           </TabsContent>
 
           {/* ==================== ANALYZE TAB ==================== */}

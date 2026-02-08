@@ -120,7 +120,11 @@ const TestPage: React.FC = () => {
   const handleTestComplete = () => setActiveTest(null);
 
   if (activeTest) {
-    return <TestExecution config={activeTest} onComplete={handleTestComplete} onExit={handleTestComplete} />;
+    return (
+      <MainLayout title="Test">
+        <TestExecution config={activeTest} onComplete={handleTestComplete} onExit={handleTestComplete} />
+      </MainLayout>
+    );
   }
 
   return (
