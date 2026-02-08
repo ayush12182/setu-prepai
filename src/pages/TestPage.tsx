@@ -95,9 +95,7 @@ const TestPage: React.FC = () => {
       case 'mixed': setShowMixedSelect(true); break;
       case 'pyq': setShowPYQSelect(true); break;
       case 'adaptive':
-        import('sonner').then(({ toast }) => {
-          toast.info('Adaptive Test coming soon! We\'re analyzing your weak areas.');
-        });
+        setActiveTest({ type: 'adaptive', questionCount: 15 });
         break;
     }
   };
