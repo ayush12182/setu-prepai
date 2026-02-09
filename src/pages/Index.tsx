@@ -4,20 +4,21 @@ import { TodaysFocus } from '@/components/home/TodaysFocus';
 import { QuickActions } from '@/components/home/QuickActions';
 import { SyllabusTracker } from '@/components/home/SyllabusTracker';
 import { ExamReminders } from '@/components/home/ExamReminders';
+import { TwentyOneDayPlan } from '@/components/home/TwentyOneDayPlan';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { Sparkles, Flame, Trophy, Zap, BookOpen } from 'lucide-react';
+import { Sparkles, Flame, Trophy, Zap } from 'lucide-react';
 
 const Index: React.FC = () => {
-  const { getGreeting, getMentorName } = useLanguage();
+  const { getMentorName } = useLanguage();
   const { user, profile } = useAuth();
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Bhai';
 
   return (
     <MainLayout title="SETU">
-      <div className="space-y-8">
-        {/* Welcome Hero */}
+      <div className="space-y-10">
+        {/* ── Section 1: Welcome Hero ── */}
         {user && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--setu-navy-light))] p-8 sm:p-10">
             <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
@@ -26,7 +27,7 @@ const Index: React.FC = () => {
               backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
               backgroundSize: '24px 24px',
             }} />
-            
+
             <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -43,7 +44,6 @@ const Index: React.FC = () => {
                 </h1>
               </div>
 
-              {/* Quick Stats */}
               <div className="flex gap-3">
                 {[
                   { icon: Trophy, label: 'Streak', value: '🔥 3 days' },
@@ -59,13 +59,20 @@ const Index: React.FC = () => {
           </div>
         )}
 
-        {/* Exam Reminders */}
-        <ExamReminders />
+        {/* ── Section 2: Today's Focus + Exam Countdown ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-3">
+            <TodaysFocus />
+          </div>
+          <div className="lg:col-span-2">
+            <ExamReminders />
+          </div>
+        </div>
 
-        {/* Today's Focus */}
-        <TodaysFocus />
+        {/* ── Section 3: 21-Day Cycle Plan ── */}
+        <TwentyOneDayPlan />
 
-        {/* Quick Actions */}
+        {/* ── Section 4: Quick Actions ── */}
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-accent" />
@@ -74,7 +81,7 @@ const Index: React.FC = () => {
           <QuickActions />
         </section>
 
-        {/* Syllabus Tracker */}
+        {/* ── Section 5: Syllabus Tracker ── */}
         <SyllabusTracker />
       </div>
     </MainLayout>
