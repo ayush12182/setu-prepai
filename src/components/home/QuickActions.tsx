@@ -18,7 +18,7 @@ interface ActionItem {
   description: string;
   path: string;
   gradient: string;
-  bgGlow: string;
+  iconBg: string;
   emoji: string;
   badge?: string;
   span?: boolean;
@@ -33,8 +33,8 @@ export const QuickActions: React.FC = () => {
       title: 'Learn',
       description: 'AI-generated notes, concepts & visual explanations',
       path: '/learn',
-      gradient: 'from-blue-500 to-cyan-500',
-      bgGlow: 'bg-blue-500/10',
+      gradient: 'from-[hsl(213_60%_50%)] to-[hsl(200_70%_55%)]',
+      iconBg: 'bg-[hsl(213_60%_50%/0.12)]',
       emoji: '📖',
     },
     {
@@ -42,8 +42,8 @@ export const QuickActions: React.FC = () => {
       title: 'Practice',
       description: 'MCQs by difficulty — easy, medium, hard',
       path: '/practice',
-      gradient: 'from-emerald-500 to-green-500',
-      bgGlow: 'bg-emerald-500/10',
+      gradient: 'from-[hsl(145_50%_38%)] to-[hsl(160_50%_45%)]',
+      iconBg: 'bg-[hsl(145_50%_38%/0.12)]',
       emoji: '✍️',
     },
     {
@@ -51,8 +51,8 @@ export const QuickActions: React.FC = () => {
       title: 'Test',
       description: 'Chapter, Mixed, PYQ & Adaptive tests',
       path: '/test',
-      gradient: 'from-violet-500 to-purple-500',
-      bgGlow: 'bg-violet-500/10',
+      gradient: 'from-[hsl(280_50%_55%)] to-[hsl(260_55%_60%)]',
+      iconBg: 'bg-[hsl(280_50%_55%/0.12)]',
       emoji: '📋',
     },
     {
@@ -60,8 +60,8 @@ export const QuickActions: React.FC = () => {
       title: 'Revision',
       description: 'Quick notes, formula sheets & flashcards',
       path: '/revision',
-      gradient: 'from-amber-500 to-orange-500',
-      bgGlow: 'bg-amber-500/10',
+      gradient: 'from-[hsl(32_79%_57%)] to-[hsl(25_85%_55%)]',
+      iconBg: 'bg-[hsl(32_79%_57%/0.12)]',
       emoji: '🔄',
     },
     {
@@ -69,8 +69,8 @@ export const QuickActions: React.FC = () => {
       title: 'Lecture SETU',
       description: 'Convert any lecture video into structured notes',
       path: '/lecture-setu',
-      gradient: 'from-rose-500 to-pink-500',
-      bgGlow: 'bg-rose-500/10',
+      gradient: 'from-[hsl(350_65%_55%)] to-[hsl(330_60%_55%)]',
+      iconBg: 'bg-[hsl(350_65%_55%/0.12)]',
       emoji: '🎬',
       badge: 'New',
     },
@@ -80,7 +80,7 @@ export const QuickActions: React.FC = () => {
       description: 'Your personal AI mentor — doubts, strategy & motivation',
       path: '/ask-jeetu',
       gradient: 'from-primary to-[hsl(213_28%_25%)]',
-      bgGlow: 'bg-primary/10',
+      iconBg: 'bg-primary/10',
       emoji: '💬',
       span: true,
     },
@@ -89,57 +89,71 @@ export const QuickActions: React.FC = () => {
       title: 'Analytics',
       description: 'Track progress, accuracy & time trends',
       path: '/analytics',
-      gradient: 'from-teal-500 to-cyan-600',
-      bgGlow: 'bg-teal-500/10',
+      gradient: 'from-[hsl(180_50%_40%)] to-[hsl(195_60%_45%)]',
+      iconBg: 'bg-[hsl(180_50%_40%/0.12)]',
       emoji: '📊',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       {actions.map((action, i) => (
         <div
           key={action.path + action.title}
           className={cn(
-            "relative group bg-card border border-border rounded-2xl p-5 cursor-pointer transition-all duration-300",
-            "hover:shadow-lg hover:-translate-y-1 overflow-hidden animate-fade-in",
-            action.span && "sm:col-span-2 lg:col-span-2",
+            "relative group cursor-pointer overflow-hidden animate-fade-in",
+            "rounded-2xl border border-border bg-card",
+            "transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
+            action.span && "col-span-2",
             `stagger-${i + 1}`
           )}
           onClick={() => navigate(action.path)}
           style={{ opacity: 0 }}
         >
+          {/* Colored top accent bar */}
+          <div className={cn("h-1 w-full bg-gradient-to-r", action.gradient)} />
+
           {/* Hover glow */}
           <div className={cn(
-            "absolute -top-16 -right-16 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500",
-            action.bgGlow
+            "absolute -top-12 -right-12 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 bg-gradient-to-br",
+            action.gradient
           )} />
 
           {badge(action)}
 
-          <div className="relative flex items-start gap-4">
-            <div className={cn(
-              "w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md shrink-0",
-              "transition-transform duration-300 group-hover:scale-110",
-              action.gradient
-            )}>
-              <action.icon className="w-5 h-5 text-white" />
+          <div className="relative p-4 sm:p-5 flex flex-col gap-3">
+            {/* Icon + Emoji row */}
+            <div className="flex items-center justify-between">
+              <div className={cn(
+                "w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-sm",
+                "transition-transform duration-300 group-hover:scale-110 group-hover:shadow-md",
+                action.gradient
+              )}>
+                <action.icon className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-2xl opacity-30 group-hover:opacity-80 group-hover:scale-110 transition-all duration-300">
+                {action.emoji}
+              </span>
             </div>
 
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-base text-foreground group-hover:text-accent transition-colors leading-tight mb-1">
+            {/* Text */}
+            <div>
+              <h3 className="font-semibold text-sm sm:text-base text-foreground group-hover:text-accent transition-colors leading-tight">
                 {action.title}
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">
                 {action.description}
               </p>
             </div>
 
-            <div className="flex items-center self-center">
-              <span className="text-2xl opacity-40 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 hidden sm:block mr-1">
-                {action.emoji}
-              </span>
-              <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all duration-300" />
+            {/* Bottom arrow */}
+            <div className="flex items-center justify-end mt-auto">
+              <div className={cn(
+                "w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300",
+                "bg-secondary group-hover:bg-accent/15"
+              )}>
+                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all duration-300" />
+              </div>
             </div>
           </div>
         </div>
@@ -151,7 +165,7 @@ export const QuickActions: React.FC = () => {
 function badge(action: ActionItem) {
   if (!action.badge) return null;
   return (
-    <span className="absolute top-3 right-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-accent text-white z-10">
+    <span className="absolute top-4 right-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-accent text-white z-10">
       {action.badge}
     </span>
   );
