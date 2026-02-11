@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { subchapterName, chapterName, subject, jeeAsks, pyqFocus, commonMistakes } = await req.json();
+    const { subchapterName, chapterName, subject, jeeAsks = [], pyqFocus = {}, commonMistakes = [] } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -78,20 +78,27 @@ CLOSING LINE (ALWAYS):
 
 🎯 FINAL CHECK: Before sending, verify all formulas and facts are CORRECT.`;
 
+    const jeeAsksText = Array.isArray(jeeAsks) && jeeAsks.length > 0 
+      ? `\nWhat JEE asks from this topic: ${jeeAsks.join(', ')}` : '';
+    const pyqTrends = pyqFocus?.trends && Array.isArray(pyqFocus.trends) ? pyqFocus.trends.join(', ') : 'General concepts';
+    const pyqPatterns = pyqFocus?.patterns && Array.isArray(pyqFocus.patterns) ? pyqFocus.patterns.join(', ') : 'Standard problems';
+    const pyqTraps = pyqFocus?.traps && Array.isArray(pyqFocus.traps) ? pyqFocus.traps.join(', ') : 'Common calculation errors';
+    const mistakesText = Array.isArray(commonMistakes) && commonMistakes.length > 0 
+      ? commonMistakes.join(', ') : 'Standard student errors for this topic';
+
     const userPrompt = `Generate Kota-style exam notes for:
 
 Subchapter: ${subchapterName}
 Chapter: ${chapterName}
 Subject: ${subject}
-
-What JEE asks from this topic: ${jeeAsks.join(', ')}
+${jeeAsksText}
 
 Recent PYQ Focus:
-- Trends: ${pyqFocus.trends.join(', ')}
-- Patterns: ${pyqFocus.patterns.join(', ')}
-- Traps: ${pyqFocus.traps.join(', ')}
+- Trends: ${pyqTrends}
+- Patterns: ${pyqPatterns}
+- Traps: ${pyqTraps}
 
-Known common mistakes: ${commonMistakes.join(', ')}
+Known common mistakes: ${mistakesText}
 
 REMEMBER:
 - Hinglish coaching style (Jeetu Bhaiya tone)
