@@ -1,16 +1,38 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
 import { getAllSubchapters } from '@/data/subchapters';
 import {
   Calendar, Target, ChevronRight, Clock,
-  Flame, CheckCircle2, Zap, Brain, Video, ArrowRight
+  Flame, CheckCircle2, Zap, Brain, Video, ArrowRight, Quote
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+const jeetuQuotes = {
+  english: [
+    "Success is not about being the smartest — it's about being the most consistent.",
+    "Don't study to score marks. Study to understand. Marks will follow.",
+    "The difference between toppers and average students? Toppers revise. Again and again.",
+    "Fear of failure is normal. But letting it stop you? That's the real failure.",
+    "One chapter a day, one concept at a time. That's how JEE is cracked.",
+    "Your competition is not others. It's the version of you that gave up yesterday.",
+    "Shortcuts don't work in JEE. Honest effort does. Always.",
+  ],
+  hinglish: [
+    "Success smart hone se nahi aata — consistent hone se aata hai.",
+    "Marks ke liye mat padho. Samajhne ke liye padho. Marks khud aa jayenge.",
+    "Toppers aur average students mein fark? Toppers revise karte hain. Baar baar.",
+    "Failure ka darr normal hai. Par usse rukna? Yeh asli failure hai.",
+    "Ek chapter roz, ek concept at a time. JEE aise crack hota hai.",
+    "Tumhara competition dusre nahi hain. Wo tum ho jo kal haar maan gaye the.",
+    "JEE mein shortcuts nahi chalte. Honest effort chalta hai. Hamesha.",
+  ],
+};
 
 interface DayPlan {
   day: number;
@@ -142,7 +164,12 @@ function isPastDay(cycleStart: Date, day: number, today: Date): boolean {
 export const TwentyOneDayPlan: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { language } = useLanguage();
   const [selectedWeek, setSelectedWeek] = useState<number>(0);
+
+  const isHinglish = language === 'hinglish' || language === 'hindi' || language === 'crisp';
+  const quotes = isHinglish ? jeetuQuotes.hinglish : jeetuQuotes.english;
+  const todayQuote = quotes[new Date().getDate() % quotes.length];
 
   const { data: activeCycle } = useQuery({
     queryKey: ['active-major-test-cycle'],
@@ -211,11 +238,20 @@ export const TwentyOneDayPlan: React.FC = () => {
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
-            Give us 21 honest days.
+            {isHinglish ? 'Hume 21 honest din do.' : 'Give us 21 honest days.'}
           </h2>
-          <p className="text-base sm:text-lg font-medium text-white/90 mb-6">
-            We'll give you direction for your exam.
+          <p className="text-base sm:text-lg font-medium text-white/90 mb-4">
+            {isHinglish ? 'Hum tumhe direction denge exam ke liye.' : "We'll give you direction for your exam."}
           </p>
+
+          {/* Jeetu Bhaiya motivational quote */}
+          <div className="flex items-start gap-3 mb-6 bg-white/[0.06] backdrop-blur-sm rounded-xl p-4 border border-white/10">
+            <Quote className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm text-white/90 italic leading-relaxed">"{todayQuote}"</p>
+              <p className="text-xs text-accent font-semibold mt-1.5">— Jeetu Bhaiya</p>
+            </div>
+          </div>
 
           <div className="grid sm:grid-cols-3 gap-4 mb-6">
             {[
