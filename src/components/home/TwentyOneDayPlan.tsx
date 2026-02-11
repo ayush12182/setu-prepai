@@ -4,10 +4,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
-import { getAllSubchapters, Subchapter } from '@/data/subchapters';
+import { getAllSubchapters } from '@/data/subchapters';
 import {
-  Calendar, Target, ChevronRight, Clock, BookOpen,
-  Flame, CheckCircle2, Circle, Zap, Brain
+  Calendar, Target, ChevronRight, Clock,
+  Flame, CheckCircle2, Zap, Brain, Video, ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -49,8 +49,6 @@ const generateSchedule = (
   completedSubchapters: Set<string>
 ): DayPlan[] => {
   const allSubs = getAllSubchapters();
-
-  // Prioritize: high-weightage incomplete chapters
   const weightageOrder: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
   const incomplete = allSubs.filter(s => !completedSubchapters.has(s.id));
   const pool = incomplete.length > 0 ? incomplete : allSubs;
@@ -61,7 +59,6 @@ const generateSchedule = (
     return (weightageOrder[ca?.weightage || 'Low'] || 2) - (weightageOrder[cb?.weightage || 'Low'] || 2);
   });
 
-  // Distribute across 21 days, rotating subjects
   const subjects = ['Physics', 'Chemistry', 'Maths'];
   const bySubject: Record<string, typeof sorted> = {
     Physics: sorted.filter(s => allChapters.find(c => c.id === s.chapterId)?.subjectName === 'Physics'),
@@ -76,16 +73,11 @@ const generateSchedule = (
   const plans: DayPlan[] = [];
 
   for (let day = 1; day <= 21; day++) {
-    // Day 7, 14 = revision; Day 21 = Major Test
     if (day === 21) {
       plans.push({
-        day,
-        subject: 'All',
-        subjectId: 'all',
-        chapter: 'Major Test',
-        chapterId: 'major-test',
-        subchapter: '3-Hour Full JEE Simulation',
-        subchapterId: 'major-test',
+        day, subject: 'All', subjectId: 'all',
+        chapter: 'Major Test', chapterId: 'major-test',
+        subchapter: '3-Hour Full JEE Simulation', subchapterId: 'major-test',
         task: 'Full-length JEE Main test — 90 questions, 180 minutes',
         difficulty: 'Hard',
         isToday: isSameDay(cycleStart, day, today),
@@ -96,11 +88,8 @@ const generateSchedule = (
 
     if (day === 7 || day === 14) {
       plans.push({
-        day,
-        subject: 'All',
-        subjectId: 'all',
-        chapter: 'Revision Day',
-        chapterId: 'revision',
+        day, subject: 'All', subjectId: 'all',
+        chapter: 'Revision Day', chapterId: 'revision',
         subchapter: 'Revise Week ' + (day === 7 ? '1' : '2') + ' topics',
         subchapterId: 'revision',
         task: 'Quick quiz + formula review for all topics covered this week',
@@ -111,7 +100,6 @@ const generateSchedule = (
       continue;
     }
 
-    // Rotate subjects: P, C, M, P, C, M...
     const subjectIdx = (day - 1) % 3;
     const subjectName = subjects[subjectIdx];
     const subPool = bySubject[subjectName];
@@ -120,18 +108,13 @@ const generateSchedule = (
     counters[subjectName]++;
 
     if (!sub) continue;
-
     const chapter = allChapters.find(c => c.id === sub.chapterId);
     if (!chapter) continue;
 
     plans.push({
-      day,
-      subject: subjectName,
-      subjectId: chapter.subject,
-      chapter: chapter.name,
-      chapterId: chapter.id,
-      subchapter: sub.name,
-      subchapterId: sub.id,
+      day, subject: subjectName, subjectId: chapter.subject,
+      chapter: chapter.name, chapterId: chapter.id,
+      subchapter: sub.name, subchapterId: sub.id,
       task: sub.jeetuLine || `Focus on ${sub.name}`,
       difficulty: chapter.difficulty,
       isToday: isSameDay(cycleStart, day, today),
@@ -159,6 +142,7 @@ function isPastDay(cycleStart: Date, day: number, today: Date): boolean {
 export const TwentyOneDayPlan: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [selectedWeek, setSelectedWeek] = useState<number>(0);
 
   const { data: activeCycle } = useQuery({
     queryKey: ['active-major-test-cycle'],
@@ -202,12 +186,6 @@ export const TwentyOneDayPlan: React.FC = () => {
     [activeCycle, completedIds]
   );
 
-  const todayIndex = schedule.findIndex(d => d.isToday);
-  const autoWeek = todayIndex >= 0 ? Math.floor(todayIndex / 7) : 0;
-  const [selectedWeek, setSelectedWeek] = useState<number>(0);
-  const currentWeek = todayIndex >= 0 ? autoWeek : selectedWeek;
-
-  // Show selected week
   const weekStart = selectedWeek * 7;
   const visibleDays = schedule.slice(weekStart, weekStart + 7);
 
@@ -216,101 +194,136 @@ export const TwentyOneDayPlan: React.FC = () => {
 
   return (
     <section className="space-y-6">
-      {/* Why 21 Days Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-[hsl(213_28%_22%)] to-primary p-8 border border-white/5">
-        <div className="absolute inset-0 opacity-5" style={{
+      {/* Hero Banner — high contrast text */}
+      <div className="relative overflow-hidden rounded-2xl bg-[hsl(213_40%_12%)] p-8 border border-white/10">
+        <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
           backgroundSize: '20px 20px',
         }} />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/8 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
 
         <div className="relative">
           <div className="flex items-center gap-2 mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold uppercase tracking-wider">
               <Target className="w-3.5 h-3.5" />
               21-Day Cycle {cycleNumber}
             </span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-            Why 21 Days?
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+            Give us 21 honest days.
           </h2>
+          <p className="text-base sm:text-lg font-medium text-white/90 mb-6">
+            We'll give you direction for your exam.
+          </p>
 
           <div className="grid sm:grid-cols-3 gap-4 mb-6">
             {[
               {
                 icon: Brain,
                 title: 'Science-Backed',
-                desc: '21 days is the minimum time to build a habit. Consistent daily practice rewires your brain for exam success.',
+                desc: '21 days builds a habit. Daily practice rewires your brain for exam success.',
               },
               {
                 icon: Target,
-                title: 'Focused Cycles',
-                desc: 'Each cycle covers all 3 subjects systematically. No topic left behind, no random studying.',
+                title: 'All 3 Subjects Covered',
+                desc: 'Physics, Chemistry, Maths — systematically. No topic left behind.',
               },
               {
                 icon: Zap,
                 title: 'Test → Improve → Repeat',
-                desc: 'Every cycle ends with a full JEE simulation. Your weak areas become next cycle\'s focus.',
+                desc: 'Every cycle ends with a full JEE simulation. Weak areas become next cycle\'s focus.',
               },
             ].map((item) => (
-              <div key={item.title} className="bg-white/8 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+              <div key={item.title} className="bg-white/[0.06] backdrop-blur-sm rounded-xl p-4 border border-white/10">
                 <item.icon className="w-5 h-5 text-accent mb-2" />
-                <h3 className="text-sm font-semibold text-white mb-1">{item.title}</h3>
-                <p className="text-xs text-white/60 leading-relaxed">{item.desc}</p>
+                <h3 className="text-sm font-bold text-white mb-1">{item.title}</h3>
+                <p className="text-xs text-white/70 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
 
           {/* Progress Bar */}
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+            <div className="flex-1 h-2.5 bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-accent to-yellow-400 rounded-full transition-all duration-700"
+                className="h-full bg-gradient-to-r from-accent to-[hsl(45_90%_55%)] rounded-full transition-all duration-700"
                 style={{ width: `${(daysCompleted / 21) * 100}%` }}
               />
             </div>
-            <span className="text-sm font-semibold text-white/80">
+            <span className="text-sm font-bold text-white">
               {daysCompleted}/21 days
             </span>
           </div>
         </div>
       </div>
 
-      {/* Weekly Schedule */}
+      {/* Lecture SETU Highlight */}
+      <div
+        className="flex items-center gap-4 p-4 rounded-xl bg-accent/10 border border-accent/25 cursor-pointer group hover:bg-accent/15 transition-colors"
+        onClick={() => navigate('/lecture-setu')}
+      >
+        <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+          <Video className="w-5 h-5 text-accent" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-bold text-foreground">
+            Don't waste time watching full lectures
+          </h4>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Use <span className="font-semibold text-accent">Lecture SETU</span> — paste any YouTube link, get crisp notes in seconds. Study smarter, not longer.
+          </p>
+        </div>
+        <ArrowRight className="w-4 h-4 text-accent shrink-0 group-hover:translate-x-1 transition-transform" />
+      </div>
+
+      {/* Full 21-Day Timetable */}
       <div className="bg-card border border-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
               <Calendar className="w-5 h-5 text-accent" />
-              Week {currentWeek + 1} Schedule
+              Your Complete 21-Day Timetable
             </h3>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Your personalized daily topics
+              Every day planned — just follow the schedule
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 text-xs"
-            onClick={() => navigate('/major-test')}
-          >
-            Full Plan
-            <ChevronRight className="w-3.5 h-3.5" />
-          </Button>
         </div>
 
+        {/* Week Navigation */}
+        <div className="flex gap-2 mb-5">
+          {[0, 1, 2].map((week) => (
+            <button
+              key={week}
+              onClick={() => setSelectedWeek(week)}
+              className={cn(
+                'flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all border',
+                selectedWeek === week
+                  ? 'bg-primary text-primary-foreground border-primary shadow-md'
+                  : 'bg-secondary text-muted-foreground border-border hover:text-foreground hover:border-primary/30'
+              )}
+            >
+              Week {week + 1}
+              <span className="block text-[10px] font-normal opacity-70 mt-0.5">
+                Day {week * 7 + 1}–{week * 7 + 7}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Day Cards */}
         <div className="space-y-2">
           {visibleDays.map((plan) => (
             <div
               key={plan.day}
               className={cn(
-                'flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 cursor-pointer group',
+                'flex items-center gap-4 p-3.5 rounded-xl transition-all duration-200 cursor-pointer group border',
                 plan.isToday
-                  ? 'bg-accent/10 border border-accent/30 shadow-sm'
+                  ? 'bg-accent/10 border-accent/30 shadow-sm'
                   : plan.isPast
-                    ? 'bg-muted/50 opacity-70'
-                    : 'hover:bg-secondary/60 border border-transparent'
+                    ? 'bg-muted/40 border-transparent opacity-60'
+                    : 'border-transparent hover:bg-secondary/60 hover:border-border'
               )}
               onClick={() => {
                 if (plan.subchapterId === 'major-test') navigate('/major-test');
@@ -339,7 +352,7 @@ export const TwentyOneDayPlan: React.FC = () => {
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="font-medium text-sm text-foreground truncate">
+                  <span className="font-semibold text-sm text-foreground truncate">
                     {plan.subchapter}
                   </span>
                   {plan.isToday && (
@@ -355,7 +368,7 @@ export const TwentyOneDayPlan: React.FC = () => {
 
               {/* Subject Badge */}
               <div className={cn(
-                'shrink-0 hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border',
+                'shrink-0 hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border',
                 subjectColors[plan.subject] || 'bg-muted text-muted-foreground'
               )}>
                 <div className={cn('w-1.5 h-1.5 rounded-full', subjectDotColors[plan.subject] || 'bg-muted-foreground')} />
@@ -367,22 +380,24 @@ export const TwentyOneDayPlan: React.FC = () => {
           ))}
         </div>
 
-        {/* Week Navigation */}
-        <div className="flex justify-center gap-2 mt-5">
-          {[0, 1, 2].map((week) => (
-            <button
-              key={week}
-              onClick={() => setSelectedWeek(week)}
-              className={cn(
-                'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                selectedWeek === week
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-secondary text-muted-foreground hover:text-foreground'
-              )}
+        {/* Week summary */}
+        <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" />
+              ~2 hrs/day recommended
+            </span>
+          </div>
+          {selectedWeek === 2 && (
+            <Button
+              size="sm"
+              className="gap-1.5 text-xs bg-accent text-primary hover:bg-accent/90"
+              onClick={() => navigate('/major-test')}
             >
-              Week {week + 1}
-            </button>
-          ))}
+              <Target className="w-3.5 h-3.5" />
+              Day 21: Major Test
+            </Button>
+          )}
         </div>
       </div>
     </section>
