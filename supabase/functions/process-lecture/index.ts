@@ -28,52 +28,28 @@ SECTION FORMAT FOR structuredNotes:
 
 SECTION 1 – SHORT THEORY (EXAM-READY)
 - 5-8 crisp bullet points only
-- No storytelling, no motivation, no paragraphs
 - Pure JEE-relevant explanation
-- Write in English
 
 SECTION 2 – KEY FORMULAS (CLEAN EXAM FORMAT)
-⚠️ DO NOT WRITE FORMULAS IN WORDS. EVER.
-⚠️ NO: "C = Q divided by V" — NOT ALLOWED
-
-Use standard physics notation like NCERT/Allen/PhysicsWallah:
-C = Q/V
-E = F/q
-U = ½CV²
-C_series = 1/(1/C₁ + 1/C₂)
-C_parallel = C₁ + C₂
-F = Q²/(2ε₀A)
-
-Rules:
-- One formula per line
-- No extra explanation
-- Plain, clean, textbook-like formulas only
-- Use subscripts like ₁, ₂, ₃ and superscripts like ², ³
-- Use Greek letters like ε, θ, λ, ω directly
+Use standard physics notation. One formula per line. No LaTeX.
+Use subscripts ₁₂₃ and superscripts ²³. Use Greek letters ε, θ, λ, ω directly.
 
 SECTION 3 – WHEN TO USE IN EXAM
-3-4 bullet points only. Example:
-- Use series formula when capacitors connected end to end
-- Use parallel formula when connected across same potential
+3-4 bullet points only.
 
 SECTION 4 – COMMON MISTAKES (JEE TRAPS)
-3-4 crisp points. Example:
-- Forgetting battery state before inserting dielectric
-- Mixing series/parallel rules with resistors
+3-4 crisp points.
 
 SECTION 5 – JEETU BHAIYA LINE
-ONE line only, Hinglish, calm mentor tone:
-"Bhai, capacitor ke sawaal mein pehle dekh lo battery connected hai ya nahi."
+ONE line only, Hinglish, calm mentor tone.
 
-For formulas array: Use proper notation like "F = kq₁q₂/r²" NOT "F = k q1 q2 divided by r squared"`;
+For formulas array: Use proper notation like "F = kq₁q₂/r²" NOT words.`;
 
-// Extract YouTube video ID from various URL formats
 function extractYouTubeVideoId(url: string): string | null {
   const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
     /^([a-zA-Z0-9_-]{11})$/
   ];
-  
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match) return match[1];
@@ -81,26 +57,83 @@ function extractYouTubeVideoId(url: string): string | null {
   return null;
 }
 
-// Fetch transcript using a public transcript API
-async function fetchTranscript(videoId: string): Promise<string | null> {
+// Get video title via oEmbed (reliable, no parsing needed)
+async function getVideoTitle(videoId: string): Promise<string> {
   try {
-    // Using YouTube transcript API (innertube)
-    const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`);
-    const html = await response.text();
-    
-    // Extract video title
-    const titleMatch = html.match(/<title>([^<]*)<\/title>/);
-    const videoTitle = titleMatch ? titleMatch[1].replace(' - YouTube', '') : 'Unknown Video';
-    
-    // For now, we'll simulate transcript since YouTube requires complex auth
-    // In production, you'd use a proper transcript service
-    return JSON.stringify({
-      title: videoTitle,
-      transcript: `This is a JEE preparation lecture covering important concepts. The video discusses key formulas and problem-solving techniques that are commonly tested in JEE Main and JEE Advanced examinations.`
+    const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+    if (res.ok) {
+      const data = await res.json();
+      return data.title || '';
+    }
+  } catch (e) {
+    console.error('oEmbed failed:', e);
+  }
+  return '';
+}
+
+// Fetch transcript using YouTube's innertube API
+async function getTranscript(videoId: string): Promise<string> {
+  try {
+    // Step 1: Get the video page to find serialized player response with caption tracks
+    const pageRes = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml',
+      },
     });
-  } catch (error) {
-    console.error('Error fetching transcript:', error);
-    return null;
+    const html = await pageRes.text();
+
+    // Find caption track URL from ytInitialPlayerResponse
+    const captionUrlMatch = html.match(/"captionTracks":\[.*?"baseUrl":"(.*?)"/);
+    if (!captionUrlMatch) {
+      console.log('No caption tracks found in player response');
+      
+      // Fallback: try to get description
+      const descMatch = html.match(/"shortDescription":"((?:[^"\\]|\\.)*)"/);
+      if (descMatch) {
+        const desc = descMatch[1].replace(/\\n/g, '\n').replace(/\\u0026/g, '&').replace(/\\"/g, '"');
+        console.log('Using description as fallback context, length:', desc.length);
+        return desc;
+      }
+      return '';
+    }
+
+    // Decode the caption URL
+    const captionUrl = captionUrlMatch[1].replace(/\\u0026/g, '&').replace(/\\\//g, '/');
+    console.log('Fetching captions from URL');
+
+    // Step 2: Fetch the caption XML
+    const captionRes = await fetch(captionUrl);
+    const captionXml = await captionRes.text();
+
+    // Parse text from XML
+    const textSegments = captionXml.match(/<text[^>]*>([\s\S]*?)<\/text>/g);
+    if (!textSegments || textSegments.length === 0) {
+      console.log('No text segments in caption XML');
+      return '';
+    }
+
+    const transcript = textSegments
+      .map((seg: string) => {
+        const m = seg.match(/<text[^>]*>([\s\S]*?)<\/text>/);
+        return m ? m[1]
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/\n/g, ' ')
+          .trim() : '';
+      })
+      .filter(Boolean)
+      .join(' ');
+
+    console.log('Got transcript, length:', transcript.length, 'chars');
+    return transcript;
+  } catch (e) {
+    console.error('Transcript fetch error:', e);
+    return '';
   }
 }
 
@@ -127,11 +160,10 @@ serve(async (req) => {
       );
     }
 
-    // Get API keys
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    
+
     if (!LOVABLE_API_KEY) {
       return new Response(
         JSON.stringify({ success: false, error: 'AI service not configured' }),
@@ -139,28 +171,31 @@ serve(async (req) => {
       );
     }
 
-    // Create Supabase client
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+    const supabaseClient = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-    // Fetch video info
-    const transcriptData = await fetchTranscript(videoId);
-    const { title: videoTitle } = transcriptData ? JSON.parse(transcriptData) : { title: 'Unknown Video' };
+    // Fetch real video data in parallel
+    const [videoTitle, transcript] = await Promise.all([
+      getVideoTitle(videoId),
+      getTranscript(videoId),
+    ]);
 
-    console.log('Processing video:', videoTitle);
+    const displayTitle = videoTitle || `Video ${videoId}`;
+    console.log('Processing:', displayTitle);
+    console.log('Has transcript:', transcript.length > 0, 'length:', transcript.length);
 
-    // Generate structured notes using AI
-    const userPrompt = `Create Kota-style JEE-focused study materials for this lecture topic: "${videoTitle}"
+    // Build prompt with real content
+    const transcriptSection = transcript
+      ? `\n\nACTUAL VIDEO TRANSCRIPT:\n"""\n${transcript.substring(0, 12000)}\n"""`
+      : '';
 
-Generate notes following the exact Kota Edition format with:
-1. Short Theory (5-8 crisp one-line points in English)
-2. Key Formulas in proper physics notation (like F = kq₁q₂/r², E = F/q, U = ½CV²)
-3. When to Use in Exam (3-4 triggers)
-4. Common Mistakes (3-4 JEE traps)
-5. One Jeetu Bhaiya style Hinglish mentor line
-6. 5-8 flashcards
-7. PYQ connections from JEE Main/Advanced
+    const userPrompt = `Create Kota-style JEE-focused study materials for this lecture: "${displayTitle}"${transcriptSection}
 
-IMPORTANT: Write formulas in proper notation (C = Q/V, not "C = Q divided by V"). Use subscripts ₁₂₃ and superscripts ²³. No LaTeX.`;
+CRITICAL: Generate notes STRICTLY based on the video title${transcript ? ' and transcript' : ''} above.
+- Every point must relate to what is taught in THIS specific video.
+- Do NOT generate generic or unrelated content.
+- Write formulas in proper notation (C = Q/V). Use subscripts ₁₂₃ and superscripts ²³. No LaTeX.
+- Include 5-8 flashcards from the concepts in this lecture.
+- Connect to real PYQ years where this topic appeared in JEE Main/Advanced.`;
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -186,7 +221,7 @@ IMPORTANT: Write formulas in proper notation (C = Q/V, not "C = Q divided by V")
       }
       if (aiResponse.status === 402) {
         return new Response(
-          JSON.stringify({ success: false, error: 'AI credits exhausted. Please add funds to continue.' }),
+          JSON.stringify({ success: false, error: 'AI credits exhausted.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
@@ -196,16 +231,13 @@ IMPORTANT: Write formulas in proper notation (C = Q/V, not "C = Q divided by V")
     const aiData = await aiResponse.json();
     const content = aiData.choices?.[0]?.message?.content || '';
 
-    // Parse the AI response
     let parsedContent;
     try {
-      // Extract JSON from markdown code blocks if present
       const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
       const jsonStr = jsonMatch ? jsonMatch[1].trim() : content.trim();
       parsedContent = JSON.parse(jsonStr);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', parseError);
-      // Fallback structure
+    } catch {
+      console.error('Failed to parse AI JSON, using raw content');
       parsedContent = {
         structuredNotes: content,
         keyTimestamps: [],
@@ -216,13 +248,12 @@ IMPORTANT: Write formulas in proper notation (C = Q/V, not "C = Q divided by V")
       };
     }
 
-    // Save to database
-    const { data: savedNote, error: dbError } = await supabase
+    const { data: savedNote, error: dbError } = await supabaseClient
       .from('lecture_notes')
       .insert({
         user_id: userId,
         video_url: videoUrl,
-        video_title: videoTitle,
+        video_title: displayTitle,
         thumbnail_url: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
         structured_notes: parsedContent.structuredNotes,
         key_timestamps: parsedContent.keyTimestamps,
@@ -244,21 +275,17 @@ IMPORTANT: Write formulas in proper notation (C = Q/V, not "C = Q divided by V")
     }
 
     console.log('Lecture processed successfully:', savedNote.id);
-
     return new Response(
-      JSON.stringify({
-        success: true,
-        data: savedNote
-      }),
+      JSON.stringify({ success: true, data: savedNote }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error) {
     console.error('Error processing lecture:', error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to process lecture' 
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to process lecture'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
