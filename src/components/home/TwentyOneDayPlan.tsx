@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -203,10 +203,12 @@ export const TwentyOneDayPlan: React.FC = () => {
   );
 
   const todayIndex = schedule.findIndex(d => d.isToday);
-  const currentWeek = todayIndex >= 0 ? Math.floor(todayIndex / 7) : 0;
+  const autoWeek = todayIndex >= 0 ? Math.floor(todayIndex / 7) : 0;
+  const [selectedWeek, setSelectedWeek] = useState<number>(0);
+  const currentWeek = todayIndex >= 0 ? autoWeek : selectedWeek;
 
-  // Show current week + peek into next
-  const weekStart = currentWeek * 7;
+  // Show selected week
+  const weekStart = selectedWeek * 7;
   const visibleDays = schedule.slice(weekStart, weekStart + 7);
 
   const cycleNumber = activeCycle?.cycle_number || 1;
@@ -370,9 +372,10 @@ export const TwentyOneDayPlan: React.FC = () => {
           {[0, 1, 2].map((week) => (
             <button
               key={week}
+              onClick={() => setSelectedWeek(week)}
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                currentWeek === week
+                selectedWeek === week
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-secondary text-muted-foreground hover:text-foreground'
               )}
