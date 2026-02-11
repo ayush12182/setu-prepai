@@ -48,7 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <aside
         className={cn(
           'fixed top-0 left-0 h-full w-72 z-50 transition-transform duration-300',
-          'lg:translate-x-0 lg:static lg:z-auto lg:h-screen lg:sticky lg:top-0',
+          'lg:translate-x-0 lg:static lg:z-auto lg:h-screen lg:sticky lg:top-0 lg:shrink-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
         style={{
@@ -92,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 className={({ isActive }) =>
                   cn(
                     'group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative',
-                    'text-white/60 hover:text-white',
+                    'text-white/80 hover:text-white font-medium',
                     isActive
                       ? 'bg-gradient-to-r from-[hsl(36_80%_55%)] to-[hsl(36_90%_48%)] text-white font-semibold shadow-lg shadow-[hsl(36_80%_55%)/0.25]'
                       : 'hover:bg-white/[0.06]'
