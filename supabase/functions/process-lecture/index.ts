@@ -143,7 +143,7 @@ serve(async (req) => {
   }
 
   try {
-    const { videoUrl, userId } = await req.json();
+    const { videoUrl, userId, language = 'english' } = await req.json();
 
     if (!videoUrl) {
       return new Response(
@@ -188,7 +188,14 @@ serve(async (req) => {
       ? `\n\nACTUAL VIDEO TRANSCRIPT:\n"""\n${transcript.substring(0, 12000)}\n"""`
       : '';
 
+    const isHinglish = language === 'hinglish' || language === 'hindi' || language === 'crisp';
+    const langInstruction = isHinglish
+      ? `LANGUAGE: Write ALL notes in natural Hinglish (Hindi + English mix). Example: "Bhai, capacitance ka matlab hai charge store karne ki capacity." Formulas stay in universal math notation.`
+      : `LANGUAGE: Write ALL notes in clean English. Only the Jeetu Bhaiya signature line should be in Hinglish. Formulas stay in universal math notation.`;
+
     const userPrompt = `Create Kota-style JEE-focused study materials for this lecture: "${displayTitle}"${transcriptSection}
+
+${langInstruction}
 
 CRITICAL: Generate notes STRICTLY based on the video title${transcript ? ' and transcript' : ''} above.
 - Every point must relate to what is taught in THIS specific video.

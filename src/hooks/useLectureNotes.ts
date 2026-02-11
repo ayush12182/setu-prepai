@@ -25,7 +25,7 @@ export function useLectureNotes() {
   const [notes, setNotes] = useState<LectureNote[]>([]);
   const { toast } = useToast();
 
-  const processLecture = async (videoUrl: string): Promise<LectureNote | null> => {
+  const processLecture = async (videoUrl: string, language: string = 'english'): Promise<LectureNote | null> => {
     setIsProcessing(true);
     setCurrentNote(null);
 
@@ -49,7 +49,7 @@ export function useLectureNotes() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
           },
-          body: JSON.stringify({ videoUrl, userId: user.id }),
+          body: JSON.stringify({ videoUrl, userId: user.id, language }),
         }
       );
 
