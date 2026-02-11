@@ -48,6 +48,20 @@ export const usePracticeQuestions = () => {
     setError(null);
 
     try {
+      // First try to get cached questions from the database
+      const { data: cachedQuestions } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('subchapter_id', subchapterId)
+        .eq('difficulty', difficulty)
+        .limit(count);
+
+      if (cachedQuestions && cachedQuestions.length >= count) {
+        setQuestions(cachedQuestions.slice(0, count) as Question[]);
+        return cachedQuestions.slice(0, count) as Question[];
+      }
+
+      // If not enough cached, try generating via edge function
       const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
         body: {
           subchapterId,
@@ -60,17 +74,30 @@ export const usePracticeQuestions = () => {
         }
       });
 
-      if (fnError) throw fnError;
-      
-      if (data.error) {
-        if (data.error.includes('Rate limit')) {
-          toast.error('Too many requests. Please wait a moment.');
-        } else if (data.error.includes('credits')) {
-          toast.error('AI credits exhausted. Please try again later.');
-        } else {
-          toast.error(data.error);
+      if (fnError) {
+        // If generation fails but we have SOME cached questions, use them
+        if (cachedQuestions && cachedQuestions.length > 0) {
+          setQuestions(cachedQuestions as Question[]);
+          toast.info(`Loaded ${cachedQuestions.length} available questions.`);
+          return cachedQuestions as Question[];
         }
-        setError(data.error);
+        throw new Error('Failed to generate questions. Please check your AI credits in Settings → Workspace → Usage.');
+      }
+      
+      if (data?.error) {
+        // If AI error but we have some cached questions, use them
+        if (cachedQuestions && cachedQuestions.length > 0) {
+          setQuestions(cachedQuestions as Question[]);
+          toast.info(`Loaded ${cachedQuestions.length} available questions.`);
+          return cachedQuestions as Question[];
+        }
+        const errMsg = data.error.includes('credits') 
+          ? 'AI credits exhausted. Add credits in Settings → Workspace → Usage.'
+          : data.error.includes('Rate limit')
+            ? 'Too many requests. Please wait a moment.'
+            : data.error;
+        setError(errMsg);
+        toast.error(errMsg);
         return null;
       }
 
