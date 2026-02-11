@@ -23,16 +23,18 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLectureNotes, LectureNote } from '@/hooks/useLectureNotes';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const LectureSetu: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState('');
+  const { language } = useLanguage();
   const { isProcessing, currentNote, notes, processLecture, fetchUserNotes } = useLectureNotes();
 
   useEffect(() => { fetchUserNotes(); }, []);
 
   const handleProcess = async () => {
     if (!videoUrl) return;
-    await processLecture(videoUrl);
+    await processLecture(videoUrl, language);
     setVideoUrl('');
   };
 
