@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { chapterName, subject, topics, formulas, examTips } = await req.json();
+    const { chapterName, subject, topics = [], formulas = [], examTips = [] } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -106,13 +106,17 @@ SPECIAL INSTRUCTION:
 If chapter has formulas, show them in plain text words.
 If chapter has no formulas, write "Is chapter me zyada formulas nahi, concepts important hain".`;
 
+    const topicsText = Array.isArray(topics) && topics.length > 0 ? topics.join(', ') : 'All key topics';
+    const formulasText = Array.isArray(formulas) && formulas.length > 0 ? formulas.join(' | ') : 'All important formulas for this chapter';
+    const tipsText = Array.isArray(examTips) && examTips.length > 0 ? examTips.join(' | ') : 'Standard JEE exam strategies';
+
     const userPrompt = `Create 1-page revision notes for: ${chapterName} (${subject})
 
-Chapter topics: ${topics.join(', ')}
+Chapter topics: ${topicsText}
 
-Formulas to include (rewrite in plain text words, NO symbols): ${formulas.join(' | ')}
+Formulas to include (rewrite in plain text words, NO symbols): ${formulasText}
 
-Exam tips: ${examTips.join(' | ')}
+Exam tips: ${tipsText}
 
 STRICT REMINDERS:
 - Write formulas like "F = ma" or "KE = half mv squared" - NO LaTeX, NO Greek, NO subscripts
