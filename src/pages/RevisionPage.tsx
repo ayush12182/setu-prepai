@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
   FileText, 
@@ -25,6 +26,7 @@ type RevisionMode = 'home' | 'notes' | 'formulas' | 'tables' | 'quiz' | 'handwri
 
 const RevisionPage: React.FC = () => {
   const [activeMode, setActiveMode] = useState<RevisionMode>('home');
+  const navigate = useNavigate();
 
   const revisionModes = [
     {
@@ -80,9 +82,24 @@ const RevisionPage: React.FC = () => {
   ];
 
   const lastDayChecklist = [
-    { subject: 'Physics', icon: '⚛️', items: ['Formulas', 'Derivations', 'PYQ Patterns', 'Numerical Tips'] },
-    { subject: 'Chemistry', icon: '🧪', items: ['Reactions', 'Named Reactions', 'Periodic Table', 'Organic Mechanisms'] },
-    { subject: 'Maths', icon: '📊', items: ['Integration', 'Limits', 'Coordinate Geometry', 'Vectors'] }
+    { subject: 'physics', label: 'Physics', icon: '⚛️', items: [
+      { name: 'Formulas', slug: 'formulas' },
+      { name: 'Derivations', slug: 'derivations' },
+      { name: 'PYQ Patterns', slug: 'pyq-patterns' },
+      { name: 'Numerical Tips', slug: 'numerical-tips' },
+    ]},
+    { subject: 'chemistry', label: 'Chemistry', icon: '🧪', items: [
+      { name: 'Reactions', slug: 'reactions' },
+      { name: 'Named Reactions', slug: 'named-reactions' },
+      { name: 'Periodic Table', slug: 'periodic-table' },
+      { name: 'Organic Mechanisms', slug: 'organic-mechanisms' },
+    ]},
+    { subject: 'maths', label: 'Maths', icon: '📊', items: [
+      { name: 'Integration', slug: 'integration' },
+      { name: 'Limits', slug: 'limits' },
+      { name: 'Coordinate Geometry', slug: 'coordinate-geometry' },
+      { name: 'Vectors', slug: 'vectors' },
+    ]},
   ];
 
   const renderContent = () => {
@@ -220,20 +237,21 @@ const RevisionPage: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {lastDayChecklist.map((subject) => (
-                <div key={subject.subject} className="bg-white/[0.06] backdrop-blur-sm rounded-xl p-5 border border-white/10">
+              {lastDayChecklist.map((subj) => (
+                <div key={subj.subject} className="bg-white/[0.06] backdrop-blur-sm rounded-xl p-5 border border-white/10">
                   <h4 className="font-semibold mb-3 text-accent flex items-center gap-2">
-                    <span className="text-lg">{subject.icon}</span>
-                    {subject.subject}
+                    <span className="text-lg">{subj.icon}</span>
+                    {subj.label}
                   </h4>
                   <ul className="space-y-2.5">
-                    {subject.items.map((item, i) => (
-                      <li key={i} className="flex items-center gap-3 text-sm text-white/70 group/item cursor-pointer hover:text-white/90 transition-colors">
-                        <input 
-                          type="checkbox" 
-                          className="w-4 h-4 rounded border-white/30 bg-transparent accent-accent cursor-pointer"
-                        />
-                        <span>{item}</span>
+                    {subj.items.map((item, i) => (
+                      <li
+                        key={i}
+                        onClick={() => navigate(`/revision/${subj.subject}/${item.slug}`)}
+                        className="flex items-center gap-3 text-sm text-white/70 group/item cursor-pointer hover:text-accent hover:bg-white/5 rounded-lg px-2 py-1.5 -mx-2 transition-all"
+                      >
+                        <ArrowRight className="w-3.5 h-3.5 text-accent/60 group-hover/item:translate-x-0.5 transition-transform" />
+                        <span className="font-medium">{item.name}</span>
                       </li>
                     ))}
                   </ul>
