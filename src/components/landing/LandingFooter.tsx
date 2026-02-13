@@ -21,17 +21,11 @@ export const LandingFooter: React.FC = () => {
             />
           </motion.div>
 
-          {/* Links */}
+        {/* Links */}
           <div className="flex items-center gap-8">
-            {['Privacy', 'Terms', 'Contact'].map((link) => (
-              <a
-                key={link}
-                href={`#${link.toLowerCase()}`}
-                className="text-white/50 hover:text-white text-sm font-medium transition-colors"
-              >
-                {link}
-              </a>
-            ))}
+            <a href="/privacy" className="text-white/50 hover:text-white text-sm font-medium transition-colors">Privacy</a>
+            <a href="/terms" className="text-white/50 hover:text-white text-sm font-medium transition-colors">Terms</a>
+            <a href="mailto:support@setu.app" className="text-white/50 hover:text-white text-sm font-medium transition-colors">Contact</a>
           </div>
 
           {/* Copyright */}
