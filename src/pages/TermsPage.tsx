@@ -49,7 +49,7 @@ const TermsPage: React.FC = () => {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">7. Contact</h2>
-            <p>For any questions about these terms, contact us at <span className="text-accent font-medium">support@setu.app</span>.</p>
+            <p>For any questions about these terms, contact us at <span className="text-accent font-medium">setu.edu.1925@gmail.com</span>.</p>
           </section>
         </div>
       </div>

@@ -25,7 +25,7 @@ export const LandingFooter: React.FC = () => {
           <div className="flex items-center gap-8">
             <a href="/privacy" className="text-white/50 hover:text-white text-sm font-medium transition-colors">Privacy</a>
             <a href="/terms" className="text-white/50 hover:text-white text-sm font-medium transition-colors">Terms</a>
-            <a href="mailto:support@setu.app" className="text-white/50 hover:text-white text-sm font-medium transition-colors">Contact</a>
+            <a href="mailto:setu.edu.1925@gmail.com" className="text-white/50 hover:text-white text-sm font-medium transition-colors">Contact</a>
           </div>
 
           {/* Copyright */}
