@@ -96,69 +96,75 @@ export const QuickActions: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-      {actions.map((action, i) => (
-        <div
-          key={action.path + action.title}
-          className={cn(
-            "relative group cursor-pointer overflow-hidden animate-fade-in",
-            "rounded-2xl border border-border bg-card",
-            "transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
-            action.span && "col-span-2",
-            `stagger-${i + 1}`
-          )}
-          onClick={() => navigate(action.path)}
-          style={{ opacity: 0 }}
-        >
-          {/* Colored top accent bar */}
-          <div className={cn("h-1 w-full bg-gradient-to-r", action.gradient)} />
+    <section>
+      <div className="flex items-center gap-2 mb-4">
+        <h2 className="text-xl font-semibold text-foreground">Quick Actions</h2>
+        <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">{actions.length} tools</span>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {actions.map((action, i) => (
+          <div
+            key={action.path + action.title}
+            className={cn(
+              "relative group cursor-pointer overflow-hidden animate-fade-in",
+              "rounded-2xl border border-border/80 bg-card shadow-[0_2px_12px_rgba(0,0,0,0.06)]",
+              "transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-accent/30",
+              action.span && "col-span-2",
+              `stagger-${i + 1}`
+            )}
+            onClick={() => navigate(action.path)}
+            style={{ opacity: 0 }}
+          >
+            {/* Colored top accent bar */}
+            <div className={cn("h-1.5 w-full bg-gradient-to-r", action.gradient)} />
 
-          {/* Hover glow */}
-          <div className={cn(
-            "absolute -top-12 -right-12 w-28 h-28 rounded-full blur-3xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 bg-gradient-to-br",
-            action.gradient
-          )} />
+            {/* Hover glow */}
+            <div className={cn(
+              "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-70 transition-opacity duration-500 bg-gradient-to-br",
+              action.gradient
+            )} />
 
-          {badge(action)}
+            {badge(action)}
 
-          <div className="relative p-4 sm:p-5 flex flex-col gap-3">
-            {/* Icon + Emoji row */}
-            <div className="flex items-center justify-between">
-              <div className={cn(
-                "w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-sm",
-                "transition-transform duration-300 group-hover:scale-110 group-hover:shadow-md",
-                action.gradient
-              )}>
-                <action.icon className="w-5 h-5 text-white" />
+            <div className="relative p-4 sm:p-5 flex flex-col gap-3">
+              {/* Icon + Emoji row */}
+              <div className="flex items-center justify-between">
+                <div className={cn(
+                  "w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md",
+                  "transition-transform duration-300 group-hover:scale-110 group-hover:shadow-lg",
+                  action.gradient
+                )}>
+                  <action.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <span className="text-2xl sm:text-3xl opacity-40 group-hover:opacity-90 group-hover:scale-110 transition-all duration-300">
+                  {action.emoji}
+                </span>
               </div>
-              <span className="text-2xl opacity-30 group-hover:opacity-80 group-hover:scale-110 transition-all duration-300">
-                {action.emoji}
-              </span>
-            </div>
 
-            {/* Text */}
-            <div>
-              <h3 className="font-semibold text-sm sm:text-base text-foreground group-hover:text-accent transition-colors leading-tight">
-                {action.title}
-              </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">
-                {action.description}
-              </p>
-            </div>
+              {/* Text */}
+              <div>
+                <h3 className="font-bold text-sm sm:text-base text-foreground group-hover:text-accent transition-colors leading-tight">
+                  {action.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mt-1 line-clamp-2">
+                  {action.description}
+                </p>
+              </div>
 
-            {/* Bottom arrow */}
-            <div className="flex items-center justify-end mt-auto">
-              <div className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center transition-all duration-300",
-                "bg-secondary group-hover:bg-accent/15"
-              )}>
-                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all duration-300" />
+              {/* Bottom arrow */}
+              <div className="flex items-center justify-end mt-auto">
+                <div className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300",
+                  "bg-secondary/80 group-hover:bg-accent/20"
+                )}>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-0.5 transition-all duration-300" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </section>
   );
 };
 
