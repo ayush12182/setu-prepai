@@ -8,7 +8,7 @@ import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/da
 import { getAllSubchapters } from '@/data/subchapters';
 import {
   Calendar, Target, ChevronRight, Clock,
-  Flame, CheckCircle2, Zap, Brain, Video, ArrowRight, Quote
+  Flame, CheckCircle2, Zap, Brain, Video, ArrowRight, Quote, RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -166,6 +166,8 @@ export const TwentyOneDayPlan: React.FC = () => {
   const { user } = useAuth();
   const { language } = useLanguage();
   const [selectedWeek, setSelectedWeek] = useState<number>(0);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const isHinglish = language === 'hinglish' || language === 'hindi' || language === 'crisp';
   const quotes = isHinglish ? jeetuQuotes.hinglish : jeetuQuotes.english;
@@ -218,6 +220,31 @@ export const TwentyOneDayPlan: React.FC = () => {
 
   const cycleNumber = activeCycle?.cycle_number || 1;
   const daysCompleted = schedule.filter(d => d.isPast).length;
+
+  const handleResetCycle = async () => {
+    if (!user) return;
+    setIsResetting(true);
+    try {
+      // Delete all practice sessions for this user
+      await supabase.from('practice_sessions').delete().eq('user_id', user.id);
+      // Reset user practice stats
+      await supabase.from('user_practice_stats').update({
+        total_questions_solved: 0,
+        total_correct: 0,
+        total_time_seconds: 0,
+        chapters_practiced: [],
+      }).eq('user_id', user.id);
+      // Reset selected week
+      setSelectedWeek(0);
+      setShowResetConfirm(false);
+      // Reload to refresh all data
+      window.location.reload();
+    } catch (err) {
+      console.error('Reset cycle error:', err);
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   return (
     <section className="space-y-6">
@@ -324,6 +351,24 @@ export const TwentyOneDayPlan: React.FC = () => {
             <p className="text-sm text-muted-foreground mt-0.5">
               Every day planned — just follow the schedule
             </p>
+          </div>
+          <div className="relative">
+            {showResetConfirm ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-destructive font-medium">Reset all progress?</span>
+                <Button size="sm" variant="destructive" className="h-8 text-xs" onClick={handleResetCycle} disabled={isResetting}>
+                  {isResetting ? 'Resetting...' : 'Yes, Reset'}
+                </Button>
+                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setShowResetConfirm(false)}>
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <Button size="sm" variant="ghost" className="h-8 text-xs text-muted-foreground hover:text-destructive gap-1.5" onClick={() => setShowResetConfirm(true)}>
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset Cycle
+              </Button>
+            )}
           </div>
         </div>
 
