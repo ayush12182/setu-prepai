@@ -55,13 +55,16 @@ const pillars = [
 
 export const PillarsSection: React.FC = () => {
   return (
-    <section id="features" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-background">
-      {/* Subtle background accents */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-accent/8 rounded-full blur-[100px]" />
-        <div className="absolute bottom-10 right-20 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
+    <section id="features" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-primary">
+      {/* Background */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-accent rounded-full blur-[200px]" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-white rounded-full blur-[150px]" />
       </div>
-      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: `radial-gradient(circle, hsl(var(--accent)) 1px, transparent 1px)`,
+        backgroundSize: '32px 32px',
+      }} />
 
       <div className="relative max-w-7xl mx-auto">
         {/* Section Header */}
@@ -72,15 +75,15 @@ export const PillarsSection: React.FC = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-20"
         >
-          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-5 tracking-wide">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-accent/20 text-accent text-sm font-medium mb-5 tracking-wide">
             Why SETU Works
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary mb-5 leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
             Six pillars that make
             <br />
             <span className="text-accent">preparation actually work</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+          <p className="text-white/50 text-lg max-w-xl mx-auto">
             Not random features. A system designed for results.
           </p>
         </motion.div>
@@ -94,26 +97,26 @@ export const PillarsSection: React.FC = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="group relative bg-card border border-border rounded-2xl p-7 hover:border-accent/40 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-all duration-500 overflow-hidden"
+              className="group relative bg-white/[0.04] backdrop-blur-sm border border-white/[0.08] rounded-2xl p-7 hover:bg-white/[0.08] hover:border-white/[0.15] transition-all duration-500 overflow-hidden"
             >
               {/* Hover Glow */}
-              <div className={`absolute -bottom-20 -right-20 w-40 h-40 ${pillar.bgGlow} rounded-full opacity-0 group-hover:opacity-[0.06] blur-3xl transition-all duration-500`} />
+              <div className={`absolute -bottom-20 -right-20 w-40 h-40 ${pillar.bgGlow} rounded-full opacity-0 group-hover:opacity-[0.08] blur-3xl transition-all duration-500`} />
 
               {/* Number watermark */}
-              <span className="absolute top-5 right-6 text-6xl font-black text-primary/[0.04] group-hover:text-accent/[0.08] transition-all duration-500 select-none">
+              <span className="absolute top-5 right-6 text-6xl font-black text-white/[0.03] group-hover:text-white/[0.06] transition-all duration-500 select-none">
                 {pillar.number}
               </span>
 
               {/* Icon */}
-              <div className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${pillar.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+              <div className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${pillar.gradient} flex items-center justify-center mb-5 shadow-lg shadow-white/5 group-hover:scale-110 group-hover:shadow-xl transition-all duration-300`}>
                 <pillar.icon className="h-6 w-6 text-white" />
               </div>
 
               {/* Content */}
-              <h3 className="relative text-lg font-semibold text-primary mb-2 group-hover:text-accent transition-colors duration-300">
+              <h3 className="relative text-lg font-semibold text-white mb-2 group-hover:text-accent transition-colors duration-300">
                 {pillar.title}
               </h3>
-              <p className="relative text-muted-foreground text-sm leading-relaxed">
+              <p className="relative text-white/50 text-sm leading-relaxed group-hover:text-white/65 transition-colors duration-300">
                 {pillar.description}
               </p>
             </motion.div>
