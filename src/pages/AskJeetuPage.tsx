@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,6 +6,7 @@ import { Send, Sparkles, Camera, ImagePlus, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getGreetingByLanguage } from '@/lib/jeetuBhaiya';
 import { useJeetuChat } from '@/hooks/useJeetuChat';
+import { VoiceChatButton } from '@/components/voice/VoiceChatButton';
 
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -161,6 +162,48 @@ const AskJeetuPage: React.FC = () => {
   const handleQuickQuestion = (question: string) => {
     setInput(question);
   };
+
+  // Voice chat callbacks
+  const voiceChatHistory = messages
+    .filter((_, i) => i > 0)
+    .map(m => ({ role: m.role, content: m.content }));
+
+  const handleVoiceTranscript = useCallback((text: string) => {
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: text,
+      timestamp: new Date()
+    };
+    setMessages(prev => [...prev, userMessage]);
+  }, []);
+
+  const handleVoiceAssistantDelta = useCallback((chunk: string) => {
+    setMessages(prev => {
+      const last = prev[prev.length - 1];
+      if (last?.role === 'assistant' && last.id.startsWith('streaming-')) {
+        return prev.map((m, i) => 
+          i === prev.length - 1 ? { ...m, content: m.content + chunk } : m
+        );
+      }
+      return [...prev, {
+        id: 'streaming-' + Date.now(),
+        role: 'assistant' as const,
+        content: chunk,
+        timestamp: new Date()
+      }];
+    });
+  }, []);
+
+  const handleVoiceAssistantDone = useCallback((_fullText: string) => {
+    setMessages(prev => 
+      prev.map(m => 
+        m.id.startsWith('streaming-') 
+          ? { ...m, id: Date.now().toString() } 
+          : m
+      )
+    );
+  }, []);
 
 
   const formatMessage = (content: string) => {
@@ -372,6 +415,16 @@ const AskJeetuPage: React.FC = () => {
         {/* Input Area */}
         <div className="bg-card border border-border rounded-b-2xl p-4">
           
+          {/* Voice Chat Panel */}
+          <div className="mb-3">
+            <VoiceChatButton
+              chatHistory={voiceChatHistory}
+              onUserMessage={handleVoiceTranscript}
+              onAssistantDelta={handleVoiceAssistantDelta}
+              onAssistantDone={handleVoiceAssistantDone}
+            />
+          </div>
+
           {/* Image Preview */}
           {selectedImage && (
             <div className="mb-3 relative inline-block">
@@ -454,7 +507,7 @@ const AskJeetuPage: React.FC = () => {
           </div>
           
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            📷 Photo upload • ⌨️ Type your doubt
+            🎙️ Voice chat • 📷 Photo upload • ⌨️ Type your doubt
           </p>
         </div>
       </div>
