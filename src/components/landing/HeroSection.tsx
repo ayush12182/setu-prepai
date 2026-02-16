@@ -167,6 +167,16 @@ export const HeroSection: React.FC = () => {
               </div>
             ))}
           </motion.div>
+
+          {/* Trust Line */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="mt-8 text-sm text-white/40 max-w-2xl leading-relaxed"
+          >
+            Built with insights from aspirants across India's leading coaching institutes — guided by experienced faculty mentors.
+          </motion.p>
         </div>
       </div>
 
