@@ -110,16 +110,36 @@ export const HeroSection: React.FC = () => {
             <span className="block mt-2 text-white/90">for Exam Success</span>
           </motion.h1>
 
+          {/* Value Tagline */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl mb-4 leading-relaxed"
+          >
+            Don't spend <span className="text-accent font-semibold">₹1,00,000</span> on JEE preparation when smart guidance can start at just <span className="text-accent font-semibold">₹149</span>.
+          </motion.p>
+
           {/* Subheading */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-lg sm:text-xl lg:text-2xl text-white/70 max-w-2xl mb-10 leading-relaxed"
+            className="text-lg sm:text-xl lg:text-2xl text-white/70 max-w-2xl mb-3 leading-relaxed"
           >
             Not random AI. A mentor who understands your syllabus,
             <br className="hidden sm:block" />
             tracks your progress, and guides like <span className="text-accent font-semibold">Jeetu Bhaiya</span>.
+          </motion.p>
+
+          {/* Supporting line */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="text-sm sm:text-base text-white/50 max-w-2xl mb-10 leading-relaxed"
+          >
+            High-quality exam mentorship shouldn't be expensive. SETU brings structured guidance at a price every aspirant can afford.
           </motion.p>
 
           {/* CTAs */}
@@ -127,14 +147,14 @@ export const HeroSection: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-start gap-4 mb-16"
+            className="flex flex-col sm:flex-row items-start gap-4 mb-4"
           >
             <Button
               size="lg"
               onClick={() => navigate('/auth')}
               className="group h-14 px-8 text-lg font-semibold bg-accent text-primary hover:bg-accent/90 rounded-xl shadow-[0_0_40px_rgba(232,154,60,0.4)] hover:shadow-[0_0_60px_rgba(232,154,60,0.5)] transition-all duration-300 hover:-translate-y-1"
             >
-              Start Free Trial
+              Start Learning for ₹149
               <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button
@@ -147,6 +167,19 @@ export const HeroSection: React.FC = () => {
             >
               Watch Demo
             </Button>
+          </motion.div>
+
+          {/* Trust subtext + badge */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex flex-wrap items-center gap-3 mb-16"
+          >
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold">
+              Student-Friendly Pricing
+            </span>
+            <span className="text-white/50 text-sm">Affordable AI mentorship designed for serious aspirants.</span>
           </motion.div>
 
           {/* Stats */}

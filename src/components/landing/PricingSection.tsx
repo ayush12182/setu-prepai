@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, PartyPopper } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -26,21 +26,27 @@ export const PricingSection: React.FC = () => {
           </span>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary mb-6">
-            Pricing Coming Soon
+            Smart Mentorship,{' '}
+            <span className="text-accent">Affordable Price</span>
           </h2>
 
           <div className="bg-card border border-border rounded-2xl p-8 sm:p-10 mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <PartyPopper className="h-8 w-8 text-accent" />
-              <span className="text-2xl sm:text-3xl font-bold text-primary">FREE</span>
-              <PartyPopper className="h-8 w-8 text-accent" />
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs font-semibold">
+                Student-Friendly Pricing
+              </span>
+            </div>
+
+            <div className="flex items-baseline justify-center gap-1 mb-4">
+              <span className="text-5xl sm:text-6xl font-bold text-accent">₹149</span>
+              <span className="text-muted-foreground text-lg">/ month</span>
             </div>
 
             <p className="text-secondary-foreground text-lg mb-2">
-              Enjoy the <span className="text-accent font-semibold">complete free plan</span> until then!
+              Complete AI mentorship for your exam journey
             </p>
             <p className="text-muted-foreground text-sm mb-8">
-              All features. No credit card. No limits. Just start preparing.
+              Affordable AI mentorship designed for serious aspirants.
             </p>
 
             <Button
@@ -49,12 +55,12 @@ export const PricingSection: React.FC = () => {
               className="h-14 px-8 text-base font-semibold bg-accent text-primary hover:bg-accent/90 rounded-xl shadow-[0_0_30px_rgba(232,154,60,0.3)] hover:shadow-[0_0_40px_rgba(232,154,60,0.4)] transition-all duration-300"
             >
               <Sparkles className="h-5 w-5 mr-2" />
-              Start Free — No Card Required
+              Start Learning for ₹149
             </Button>
           </div>
 
           <p className="text-muted-foreground text-sm">
-            We'll notify you when pricing plans are ready. No surprises.
+            Cancel anytime. No hidden charges. Just focused preparation.
           </p>
         </motion.div>
       </div>
