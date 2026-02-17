@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
 import { getAllSubchapters } from '@/data/subchapters';
@@ -165,6 +165,7 @@ export const TwentyOneDayPlan: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
+  const queryClient = useQueryClient();
   const [selectedWeek, setSelectedWeek] = useState<number>(0);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
@@ -237,8 +238,12 @@ export const TwentyOneDayPlan: React.FC = () => {
       // Reset selected week
       setSelectedWeek(0);
       setShowResetConfirm(false);
-      // Reload to refresh all data
-      window.location.reload();
+      // Invalidate all relevant queries to refresh UI
+      await queryClient.invalidateQueries({ queryKey: ['completed-subchapters'] });
+      await queryClient.invalidateQueries({ queryKey: ['syllabus-progress'] });
+      await queryClient.invalidateQueries({ queryKey: ['practice-sessions'] });
+      await queryClient.invalidateQueries({ queryKey: ['todays-focus'] });
+      await queryClient.invalidateQueries({ queryKey: ['user-practice-stats'] });
     } catch (err) {
       console.error('Reset cycle error:', err);
     } finally {
