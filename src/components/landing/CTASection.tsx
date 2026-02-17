@@ -62,15 +62,15 @@ export const CTASection: React.FC = () => {
             onClick={() => navigate('/auth')}
             className="group h-16 px-10 text-lg font-semibold bg-accent text-primary hover:bg-accent/90 rounded-2xl shadow-[0_0_60px_rgba(232,154,60,0.4)] hover:shadow-[0_0_80px_rgba(232,154,60,0.5)] transition-all duration-300 hover:-translate-y-1"
           >
-            Start Free Trial — No Card Required
+            Start Learning for ₹149
             <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-2 transition-transform" />
           </Button>
 
           {/* Trust Points */}
           <div className="flex flex-wrap items-center justify-center gap-6 mt-10 text-white/50 text-sm">
-            <span>✓ Free for 7 days</span>
-            <span>✓ No credit card</span>
+            <span>✓ ₹149/month</span>
             <span>✓ Cancel anytime</span>
+            <span>✓ No hidden charges</span>
           </div>
         </motion.div>
       </div>
