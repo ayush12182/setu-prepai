@@ -7,7 +7,7 @@ import { useExamMode } from '@/contexts/ExamModeContext';
 import { useSyllabusProgress } from '@/hooks/useSyllabusProgress';
 import { getAllSubchapters } from '@/data/subchapters';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
-import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/biologySyllabus';
+import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface AnalyticsData {

@@ -17,7 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
-import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/biologySyllabus';
+import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
 import { ChapterSelection } from '@/hooks/useTestQuestions';
 import { toast } from 'sonner';
 import { useExamMode } from '@/contexts/ExamModeContext';

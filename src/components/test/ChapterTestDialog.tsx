@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
-import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/biologySyllabus';
+import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
 import { getSubchaptersByChapterId } from '@/data/subchapters';
 import { ChapterSelection } from '@/hooks/useTestQuestions';
 import { toast } from 'sonner';
