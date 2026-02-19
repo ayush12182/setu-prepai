@@ -191,12 +191,16 @@ const AuthPage: React.FC = () => {
   const handleOnboardingComplete = async () => {
     setLoading(true);
     try {
+      // Set exam mode based on selection
+      const isNeet = onboardingData.exam === 'NEET';
+      localStorage.setItem('examMode', isNeet ? 'neet' : 'jee');
+      
       await updateProfile({
         target_exam: onboardingData.exam,
         class: onboardingData.class as '11' | '12' | 'dropper',
       });
       toast.success('Chalo shuru karte hain! 🎯');
-      navigate('/dashboard');
+      navigate(isNeet ? '/dashboard' : '/dashboard');
     } catch (error: any) {
       toast.error('Profile update mein problem hui');
     } finally {
@@ -288,6 +292,7 @@ const AuthPage: React.FC = () => {
                       { value: 'JEE Main', label: 'JEE Main', desc: 'NIT, IIIT, GFTI admissions' },
                       { value: 'JEE Advanced', label: 'JEE Advanced', desc: 'IIT admissions' },
                       { value: 'Both', label: 'Both Main + Advanced', desc: 'Complete JEE preparation' },
+                      { value: 'NEET', label: 'NEET UG', desc: 'Medical college admissions' },
                     ].map((exam) => (
                       <button
                         key={exam.value}
@@ -328,8 +333,8 @@ const AuthPage: React.FC = () => {
                   <div className="space-y-3">
                     {[
                       { value: '11', label: 'Class 11', desc: '2 years for complete preparation' },
-                      { value: '12', label: 'Class 12', desc: 'Board + JEE balance mode' },
-                      { value: 'dropper', label: 'Dropper', desc: 'Full focus on JEE' },
+                      { value: '12', label: 'Class 12', desc: onboardingData.exam === 'NEET' ? 'Board + NEET balance mode' : 'Board + JEE balance mode' },
+                      { value: 'dropper', label: 'Dropper', desc: onboardingData.exam === 'NEET' ? 'Full focus on NEET' : 'Full focus on JEE' },
                     ].map((option) => (
                       <button
                         key={option.value}
@@ -453,11 +458,18 @@ const AuthPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-3">
-                    {[
-                      { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
-                      { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
-                      { value: 'maths', label: 'Mathematics', desc: 'Calculus, Algebra, Coordinate', color: 'bg-amber-500' },
-                    ].map((subject) => (
+                    {(onboardingData.exam === 'NEET'
+                      ? [
+                          { value: 'biology', label: 'Biology', desc: 'Botany, Zoology, NCERT-based', color: 'bg-green-500' },
+                          { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
+                          { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
+                        ]
+                      : [
+                          { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
+                          { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
+                          { value: 'maths', label: 'Mathematics', desc: 'Calculus, Algebra, Coordinate', color: 'bg-amber-500' },
+                        ]
+                    ).map((subject) => (
                       <button
                         key={subject.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, weakSubject: subject.value }))}

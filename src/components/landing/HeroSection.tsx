@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const formulas = ['E = mc²', 'F = ma', '∫ dx', 'Σ n²', 'λ = h/p', 'PV = nRT', 'd/dx', '∇ × B'];
+const formulas = ['E = mc²', 'F = ma', '∫ dx', 'Σ n²', 'λ = h/p', 'PV = nRT', 'DNA 🧬', '∇ × B'];
 
 const formulaPositions = [
   { left: '10%', top: '15%' }, { left: '22%', top: '70%' },
@@ -117,7 +117,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl mb-4 leading-relaxed"
           >
-            Don't spend <span className="text-accent font-semibold">₹1,00,000</span> on JEE preparation when smart guidance can start at just <span className="text-accent font-semibold">₹149</span>.
+            Don't spend <span className="text-accent font-semibold">₹1,00,000</span> on JEE/NEET preparation when smart guidance can start at just <span className="text-accent font-semibold">₹149</span>.
           </motion.p>
 
           {/* Subheading */}
@@ -129,7 +129,7 @@ export const HeroSection: React.FC = () => {
           >
             Not random AI. A mentor who understands your syllabus,
             <br className="hidden sm:block" />
-            tracks your progress, and guides like <span className="text-accent font-semibold">Jeetu Bhaiya</span>.
+            tracks your progress, and guides like <span className="text-accent font-semibold">a real teacher</span>.
           </motion.p>
 
           {/* Supporting line */}
