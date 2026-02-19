@@ -13,9 +13,10 @@ import {
   TrendingUp,
   Clock,
   BookOpen,
-  Brain
+  Dna
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import { 
   physicsChapters, 
   chemistryChapters, 
@@ -28,10 +29,15 @@ import {
   getMathsChapterIdsByClass,
   type ClassLevel
 } from '@/data/syllabusClass';
+import {
+  neetBiologyChapters,
+  neetChemistryChapters,
+  neetPhysicsChapters,
+} from '@/data/neetSyllabus';
 
-type SubjectKey = 'physics' | 'chemistry' | 'maths';
+type SubjectKey = 'physics' | 'chemistry' | 'maths' | 'biology';
 
-const subjectConfig = {
+const jeeSubjectConfig = {
   physics: {
     icon: Atom,
     label: 'Physics',
@@ -39,8 +45,6 @@ const subjectConfig = {
     bgGlow: 'bg-blue-500/10',
     dotColor: 'bg-blue-500',
     emoji: '⚛️',
-    chapters: physicsChapters,
-    getByClass: getPhysicsChapterIdsByClass,
   },
   chemistry: {
     icon: FlaskConical,
@@ -49,8 +53,6 @@ const subjectConfig = {
     bgGlow: 'bg-emerald-500/10',
     dotColor: 'bg-emerald-500',
     emoji: '🧪',
-    chapters: chemistryChapters,
-    getByClass: getChemistryChapterIdsByClass,
   },
   maths: {
     icon: Calculator,
@@ -59,31 +61,57 @@ const subjectConfig = {
     bgGlow: 'bg-violet-500/10',
     dotColor: 'bg-violet-500',
     emoji: '📐',
-    chapters: mathsChapters,
-    getByClass: getMathsChapterIdsByClass,
+  },
+};
+
+const neetSubjectConfig = {
+  biology: {
+    icon: Dna,
+    label: 'Biology',
+    gradient: 'from-green-500 to-emerald-600',
+    bgGlow: 'bg-green-500/10',
+    dotColor: 'bg-green-500',
+    emoji: '🧬',
+  },
+  chemistry: {
+    icon: FlaskConical,
+    label: 'Chemistry',
+    gradient: 'from-amber-500 to-orange-500',
+    bgGlow: 'bg-amber-500/10',
+    dotColor: 'bg-amber-500',
+    emoji: '🧪',
+  },
+  physics: {
+    icon: Atom,
+    label: 'Physics',
+    gradient: 'from-blue-500 to-cyan-500',
+    bgGlow: 'bg-blue-500/10',
+    dotColor: 'bg-blue-500',
+    emoji: '⚛️',
   },
 };
 
 const PreparationPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isNeet, config: examConfig } = useExamMode();
   const [selectedClass, setSelectedClass] = useState<ClassLevel>('11');
 
-  const getChaptersForSubject = (subject: SubjectKey, classLevel: ClassLevel) => {
-    const config = subjectConfig[subject];
-    const chapterIds = config.getByClass(classLevel);
-    return chapterIds.map(id => getChapterById(id)).filter(Boolean);
+  // JEE chapters by class
+  const getJeeChapters = (subject: 'physics' | 'chemistry' | 'maths', cls: ClassLevel) => {
+    const getByClass = { physics: getPhysicsChapterIdsByClass, chemistry: getChemistryChapterIdsByClass, maths: getMathsChapterIdsByClass }[subject];
+    return getByClass(cls).map(id => getChapterById(id)).filter(Boolean);
   };
 
-  const SubjectSection = ({ subject }: { subject: SubjectKey }) => {
-    const config = subjectConfig[subject];
-    const Icon = config.icon;
-    const chapters = getChaptersForSubject(subject, selectedClass);
+  // NEET chapters (no class split for now, show all)
+  const getNeetChapters = (subject: 'biology' | 'chemistry' | 'physics') => {
+    return { biology: neetBiologyChapters, chemistry: neetChemistryChapters, physics: neetPhysicsChapters }[subject];
+  };
 
+  const SubjectSection = ({ subject, chapters, config }: { subject: string; chapters: any[]; config: any }) => {
+    const Icon = config.icon;
     return (
       <div className="relative bg-card border border-border rounded-2xl overflow-hidden group">
-        {/* Hover glow */}
         <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500", config.bgGlow)} />
-
         <div className="relative p-5 pb-3 border-b border-border">
           <div className="flex items-center gap-3">
             <div className={cn("w-10 h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md", config.gradient)}>
@@ -91,14 +119,13 @@ const PreparationPage: React.FC = () => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-foreground">{config.label}</h3>
-              <p className="text-xs text-muted-foreground">{chapters.length} chapters in Class {selectedClass}</p>
+              <p className="text-xs text-muted-foreground">{chapters.length} chapters</p>
             </div>
             <span className="ml-auto text-xl opacity-60">{config.emoji}</span>
           </div>
         </div>
-
         <div className="p-3 space-y-1.5 max-h-[400px] overflow-y-auto">
-          {chapters.map((chapter) => (
+          {chapters.map((chapter: any) => (
             <button
               key={chapter?.id}
               onClick={() => navigate(`/chapter/${chapter?.id}`)}
@@ -140,46 +167,59 @@ const PreparationPage: React.FC = () => {
             backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }} />
-
           <div className="relative">
             <div className="flex items-center gap-2 mb-3">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider">
                 <BookOpen className="w-3.5 h-3.5" />
                 Full Syllabus
               </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-semibold">
+                {examConfig.emoji} {examConfig.label}
+              </span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-              JEE Preparation
+              {isNeet ? 'NEET' : 'JEE'} Preparation
             </h1>
             <p className="text-white/60 text-base max-w-lg">
-              Complete syllabus organized class-wise. Pick a topic, learn with AI notes, and track your progress.
+              {isNeet
+                ? 'Complete NEET syllabus with Biology, Chemistry & Physics. NCERT-aligned, diagram-focused.'
+                : 'Complete syllabus organized class-wise. Pick a topic, learn with AI notes, and track your progress.'}
             </p>
           </div>
         </div>
 
-        {/* Class Tabs */}
-        <Tabs defaultValue="11" onValueChange={(v) => setSelectedClass(v as ClassLevel)}>
-          <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted/50">
-            <TabsTrigger value="11" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2">
-              <GraduationCap className="w-4 h-4" />
-              Class 11
-            </TabsTrigger>
-            <TabsTrigger value="12" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2">
-              <GraduationCap className="w-4 h-4" />
-              Class 12
-            </TabsTrigger>
-          </TabsList>
-
-          {['11', '12'].map((cls) => (
-            <TabsContent key={cls} value={cls} className="mt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                <SubjectSection subject="physics" />
-                <SubjectSection subject="chemistry" />
-                <SubjectSection subject="maths" />
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+        {/* Content */}
+        {isNeet ? (
+          // NEET: No class tabs, show all subjects
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <SubjectSection subject="biology" chapters={getNeetChapters('biology')} config={neetSubjectConfig.biology} />
+            <SubjectSection subject="chemistry" chapters={getNeetChapters('chemistry')} config={neetSubjectConfig.chemistry} />
+            <SubjectSection subject="physics" chapters={getNeetChapters('physics')} config={neetSubjectConfig.physics} />
+          </div>
+        ) : (
+          // JEE: Class-wise tabs
+          <Tabs defaultValue="11" onValueChange={(v) => setSelectedClass(v as ClassLevel)}>
+            <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted/50">
+              <TabsTrigger value="11" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2">
+                <GraduationCap className="w-4 h-4" />
+                Class 11
+              </TabsTrigger>
+              <TabsTrigger value="12" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2">
+                <GraduationCap className="w-4 h-4" />
+                Class 12
+              </TabsTrigger>
+            </TabsList>
+            {['11', '12'].map((cls) => (
+              <TabsContent key={cls} value={cls} className="mt-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  <SubjectSection subject="physics" chapters={getJeeChapters('physics', cls as ClassLevel)} config={jeeSubjectConfig.physics} />
+                  <SubjectSection subject="chemistry" chapters={getJeeChapters('chemistry', cls as ClassLevel)} config={jeeSubjectConfig.chemistry} />
+                  <SubjectSection subject="maths" chapters={getJeeChapters('maths', cls as ClassLevel)} config={jeeSubjectConfig.maths} />
+                </div>
+              </TabsContent>
+            ))}
+          </Tabs>
+        )}
 
         {/* Quick Access Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -193,8 +233,12 @@ const PreparationPage: React.FC = () => {
                 <TrendingUp className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-accent transition-colors">JEE Previous Year Questions</h3>
-                <p className="text-sm text-muted-foreground mb-3">2015–2024 PYQs organized by chapter and difficulty</p>
+                <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-accent transition-colors">
+                  {isNeet ? 'NEET Previous Year Questions' : 'JEE Previous Year Questions'}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {isNeet ? 'NEET PYQs organized by chapter and NCERT alignment' : '2015–2024 PYQs organized by chapter and difficulty'}
+                </p>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-primary/10 text-primary border-0 text-xs">2000+ Questions</Badge>
                   <Badge variant="outline" className="text-xs">Topic-wise</Badge>
@@ -213,8 +257,12 @@ const PreparationPage: React.FC = () => {
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-accent transition-colors">JEE Tutorial Sessions</h3>
-                <p className="text-sm text-muted-foreground mb-3">Premium Kota-style notes curated by toppers and mentors</p>
+                <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-accent transition-colors">
+                  {isNeet ? 'NEET Tutorial Sessions' : 'JEE Tutorial Sessions'}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {isNeet ? 'NCERT-focused notes curated by top NEET educators' : 'Premium Kota-style notes curated by toppers and mentors'}
+                </p>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-accent/10 text-accent border-0 text-xs">Premium Notes</Badge>
                   <Badge variant="outline" className="text-xs flex items-center gap-1">
