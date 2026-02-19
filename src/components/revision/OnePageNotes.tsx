@@ -99,7 +99,6 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
           formulas: chapter.keyFormulas,
           examTips: chapter.examTips,
           pyqData: chapter.pyqData,
-          pyqData: chapter.pyqData,
           language,
           examMode: isNeet ? 'NEET' : 'JEE'
         }),
