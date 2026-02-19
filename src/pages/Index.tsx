@@ -7,11 +7,13 @@ import { ExamReminders } from '@/components/home/ExamReminders';
 import { TwentyOneDayPlan } from '@/components/home/TwentyOneDayPlan';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import { Sparkles, Flame, Trophy, Zap } from 'lucide-react';
 
 const Index: React.FC = () => {
   const { getMentorName } = useLanguage();
   const { user, profile } = useAuth();
+  const { config, isNeet } = useExamMode();
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Bhai';
 
@@ -35,12 +37,15 @@ const Index: React.FC = () => {
                     <Flame className="w-3.5 h-3.5" />
                     Dashboard
                   </span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-semibold">
+                    {config.emoji} {config.label} Mode
+                  </span>
                 </div>
                 <p className="text-white/60 text-sm font-medium mb-1">
                   Welcome back, {displayName}! 👋
                 </p>
                 <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
-                  {getMentorName()} ready hai tumhari help ke liye
+                  {isNeet ? 'Your NEET Mentor ready hai tumhari help ke liye' : `${getMentorName()} ready hai tumhari help ke liye`}
                 </h1>
               </div>
 

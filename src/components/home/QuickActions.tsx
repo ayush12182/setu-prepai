@@ -11,6 +11,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 interface ActionItem {
   icon: React.ElementType;
@@ -26,12 +27,15 @@ interface ActionItem {
 
 export const QuickActions: React.FC = () => {
   const navigate = useNavigate();
+  const { isNeet, config } = useExamMode();
 
   const actions: ActionItem[] = [
     {
       icon: BookOpen,
       title: 'Learn',
-      description: 'AI-generated notes, concepts & visual explanations',
+      description: isNeet
+        ? 'NCERT-aligned notes, Biology concepts & diagrams'
+        : 'AI-generated notes, concepts & visual explanations',
       path: '/learn',
       gradient: 'from-[hsl(213_60%_50%)] to-[hsl(200_70%_55%)]',
       iconBg: 'bg-[hsl(213_60%_50%/0.12)]',
@@ -40,7 +44,9 @@ export const QuickActions: React.FC = () => {
     {
       icon: PenTool,
       title: 'Practice',
-      description: 'MCQs by difficulty — easy, medium, hard',
+      description: isNeet
+        ? 'NCERT-based MCQs — conceptual & memory-based'
+        : 'MCQs by difficulty — easy, medium, hard',
       path: '/practice',
       gradient: 'from-[hsl(145_50%_38%)] to-[hsl(160_50%_45%)]',
       iconBg: 'bg-[hsl(145_50%_38%/0.12)]',
@@ -49,7 +55,9 @@ export const QuickActions: React.FC = () => {
     {
       icon: ClipboardCheck,
       title: 'Test',
-      description: 'Chapter, Mixed, PYQ & Adaptive tests',
+      description: isNeet
+        ? 'Biology-heavy tests, NCERT-focused & diagram-based'
+        : 'Chapter, Mixed, PYQ & Adaptive tests',
       path: '/test',
       gradient: 'from-[hsl(280_50%_55%)] to-[hsl(260_55%_60%)]',
       iconBg: 'bg-[hsl(280_50%_55%/0.12)]',
@@ -58,7 +66,9 @@ export const QuickActions: React.FC = () => {
     {
       icon: RotateCcw,
       title: 'Revision',
-      description: 'Quick notes, formula sheets & flashcards',
+      description: isNeet
+        ? 'NCERT quick notes, diagrams & biology flashcards'
+        : 'Quick notes, formula sheets & flashcards',
       path: '/revision',
       gradient: 'from-[hsl(32_79%_57%)] to-[hsl(25_85%_55%)]',
       iconBg: 'bg-[hsl(32_79%_57%/0.12)]',
@@ -76,8 +86,10 @@ export const QuickActions: React.FC = () => {
     },
     {
       icon: MessageCircle,
-      title: 'Ask Jeetu Bhaiya',
-      description: 'Your personal AI mentor — doubts, strategy & motivation',
+      title: isNeet ? 'Ask NEET Mentor' : 'Ask Jeetu Bhaiya',
+      description: isNeet
+        ? 'Your NEET AI mentor — Biology doubts, NCERT help & strategy'
+        : 'Your personal AI mentor — doubts, strategy & motivation',
       path: '/ask-jeetu',
       gradient: 'from-primary to-[hsl(213_28%_25%)]',
       iconBg: 'bg-primary/10',
@@ -115,19 +127,17 @@ export const QuickActions: React.FC = () => {
             onClick={() => navigate(action.path)}
             style={{ opacity: 0 }}
           >
-            {/* Colored top accent bar */}
             <div className={cn("h-1.5 w-full bg-gradient-to-r", action.gradient)} />
-
-            {/* Hover glow */}
             <div className={cn(
               "absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-70 transition-opacity duration-500 bg-gradient-to-br",
               action.gradient
             )} />
-
-            {badge(action)}
-
+            {action.badge && (
+              <span className="absolute top-4 right-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-accent text-white z-10">
+                {action.badge}
+              </span>
+            )}
             <div className="relative p-4 sm:p-5 flex flex-col gap-3">
-              {/* Icon + Emoji row */}
               <div className="flex items-center justify-between">
                 <div className={cn(
                   "w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md",
@@ -140,8 +150,6 @@ export const QuickActions: React.FC = () => {
                   {action.emoji}
                 </span>
               </div>
-
-              {/* Text */}
               <div>
                 <h3 className="font-bold text-sm sm:text-base text-foreground group-hover:text-accent transition-colors leading-tight">
                   {action.title}
@@ -150,8 +158,6 @@ export const QuickActions: React.FC = () => {
                   {action.description}
                 </p>
               </div>
-
-              {/* Bottom arrow */}
               <div className="flex items-center justify-end mt-auto">
                 <div className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300",
@@ -167,12 +173,3 @@ export const QuickActions: React.FC = () => {
     </section>
   );
 };
-
-function badge(action: ActionItem) {
-  if (!action.badge) return null;
-  return (
-    <span className="absolute top-4 right-3 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-accent text-white z-10">
-      {action.badge}
-    </span>
-  );
-}

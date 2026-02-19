@@ -112,6 +112,22 @@
     --sidebar-ring: 26 87% 67%;
   }
 
+  /* ═══════════════════════════════════════════════════════
+     NEET MODE - Medical Green Theme Override
+     ═══════════════════════════════════════════════════════ */
+  .neet-mode {
+    --accent: 145 50% 38%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 145 50% 38%;
+    --setu-saffron: 145 50% 38%;
+    --setu-saffron-light: 145 50% 96%;
+    --setu-saffron-dark: 145 55% 32%;
+    --sidebar-primary: 145 50% 45%;
+    --sidebar-ring: 145 50% 45%;
+    --text-tip-on-dark: 145 70% 70%;
+    --biology-color: 145 50% 38%;
+  }
+
   .dark {
     --background: 213 25% 10%;
     --foreground: 40 15% 95%;
