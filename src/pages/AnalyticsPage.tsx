@@ -3,9 +3,11 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { TrendingUp, Target, Clock, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import { useSyllabusProgress } from '@/hooks/useSyllabusProgress';
 import { getAllSubchapters } from '@/data/subchapters';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
+import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/biologySyllabus';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface AnalyticsData {
@@ -19,6 +21,7 @@ interface AnalyticsData {
 
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuth();
+  const { isNeet } = useExamMode();
   const { progress } = useSyllabusProgress();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +52,9 @@ const AnalyticsPage: React.FC = () => {
           .eq('status', 'completed');
 
         const allSubchapters = getAllSubchapters();
-        const allChapters = [...physicsChapters, ...chemistryChapters, ...mathsChapters];
+        const allChapters = isNeet
+          ? [...neetPhysicsChapters, ...neetChemistryChapters, ...neetBiologyChapters]
+          : [...physicsChapters, ...chemistryChapters, ...mathsChapters];
 
         // Build chapter-level accuracy from sessions
         const chapterStats: Record<string, { correct: number; total: number; name: string; subject: string }> = {};
@@ -67,25 +72,32 @@ const AnalyticsPage: React.FC = () => {
         });
 
         // Subject scores from practice sessions
+        const thirdSubject = isNeet ? 'biology' : 'maths';
         const subjectAgg: Record<string, { correct: number; total: number }> = {
           physics: { correct: 0, total: 0 },
           chemistry: { correct: 0, total: 0 },
-          maths: { correct: 0, total: 0 },
+          [thirdSubject]: { correct: 0, total: 0 },
         };
 
         Object.values(chapterStats).forEach(ch => {
-          const subj = physicsChapters.find(c => c.name === ch.name) ? 'physics'
-            : chemistryChapters.find(c => c.name === ch.name) ? 'chemistry'
-            : 'maths';
-          subjectAgg[subj].correct += ch.correct;
-          subjectAgg[subj].total += ch.total;
+          const subj = ch.subject || thirdSubject;
+          if (subjectAgg[subj] !== undefined) {
+            subjectAgg[subj].correct += ch.correct;
+            subjectAgg[subj].total += ch.total;
+          }
         });
 
-        const subjectScores = [
-          { name: 'Physics', score: subjectAgg.physics.total > 0 ? Math.round((subjectAgg.physics.correct / subjectAgg.physics.total) * 100) : 0, color: 'bg-physics' },
-          { name: 'Chemistry', score: subjectAgg.chemistry.total > 0 ? Math.round((subjectAgg.chemistry.correct / subjectAgg.chemistry.total) * 100) : 0, color: 'bg-chemistry' },
-          { name: 'Mathematics', score: subjectAgg.maths.total > 0 ? Math.round((subjectAgg.maths.correct / subjectAgg.maths.total) * 100) : 0, color: 'bg-maths' },
-        ];
+        const subjectScores = isNeet
+          ? [
+            { name: 'Physics', score: subjectAgg.physics.total > 0 ? Math.round((subjectAgg.physics.correct / subjectAgg.physics.total) * 100) : 0, color: 'bg-physics' },
+            { name: 'Chemistry', score: subjectAgg.chemistry.total > 0 ? Math.round((subjectAgg.chemistry.correct / subjectAgg.chemistry.total) * 100) : 0, color: 'bg-chemistry' },
+            { name: 'Biology', score: subjectAgg.biology?.total > 0 ? Math.round((subjectAgg.biology.correct / subjectAgg.biology.total) * 100) : 0, color: 'bg-green-500' },
+          ]
+          : [
+            { name: 'Physics', score: subjectAgg.physics.total > 0 ? Math.round((subjectAgg.physics.correct / subjectAgg.physics.total) * 100) : 0, color: 'bg-physics' },
+            { name: 'Chemistry', score: subjectAgg.chemistry.total > 0 ? Math.round((subjectAgg.chemistry.correct / subjectAgg.chemistry.total) * 100) : 0, color: 'bg-chemistry' },
+            { name: 'Mathematics', score: subjectAgg.maths?.total > 0 ? Math.round((subjectAgg.maths.correct / subjectAgg.maths.total) * 100) : 0, color: 'bg-maths' },
+          ];
 
         // Weak chapters: < 60% accuracy with at least some attempts
         const weakChaptersList = Object.values(chapterStats)
@@ -126,7 +138,7 @@ const AnalyticsPage: React.FC = () => {
         <div className="space-y-6">
           <Skeleton className="h-8 w-48" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1,2,3,4].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
           </div>
           <Skeleton className="h-48 rounded-xl" />
         </div>
@@ -181,7 +193,7 @@ const AnalyticsPage: React.FC = () => {
                   <span className="text-sm text-muted-foreground">{subject.score}%</span>
                 </div>
                 <div className="h-3 bg-secondary rounded-full overflow-hidden">
-                  <div 
+                  <div
                     className={`h-full ${subject.color} rounded-full transition-all duration-500`}
                     style={{ width: `${subject.score}%` }}
                   />

@@ -1,4 +1,4 @@
-import { Chapter } from './syllabus';
+import { Chapter, physicsChapters, chemistryChapters } from './syllabus';
 
 // ==================== BIOLOGY (NEET ONLY) ====================
 export const biologyChapters: Chapter[] = [
@@ -79,3 +79,9 @@ export const biologyChapters: Chapter[] = [
         ]
     }
 ];
+
+// Named re-exports for NEET subject arrays
+// Physics & Chemistry chapters are the same for NEET (overlapping syllabus)
+export const neetPhysicsChapters = physicsChapters;
+export const neetChemistryChapters = chemistryChapters;
+export const neetBiologyChapters = biologyChapters;

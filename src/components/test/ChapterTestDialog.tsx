@@ -16,15 +16,12 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
+import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/biologySyllabus';
 import { getSubchaptersByChapterId } from '@/data/subchapters';
 import { ChapterSelection } from '@/hooks/useTestQuestions';
 import { toast } from 'sonner';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
-const subjectsData = [
-  { id: 'physics', name: 'Physics', chapters: physicsChapters },
-  { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters },
-  { id: 'maths', name: 'Mathematics', chapters: mathsChapters }
-];
 
 interface ChapterTestDialogProps {
   open: boolean;
@@ -37,9 +34,20 @@ const ChapterTestDialog: React.FC<ChapterTestDialogProps> = ({
   onOpenChange,
   onStart
 }) => {
+  const { isNeet } = useExamMode();
+  const subjectsData = isNeet
+    ? [
+      { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters },
+      { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters },
+      { id: 'biology', name: 'Biology', chapters: neetBiologyChapters },
+    ]
+    : [
+      { id: 'physics', name: 'Physics', chapters: physicsChapters },
+      { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters },
+      { id: 'maths', name: 'Mathematics', chapters: mathsChapters },
+    ];
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [selectedChapter, setSelectedChapter] = useState<string>('');
-
   const selectedSubjectData = subjectsData.find(s => s.id === selectedSubject);
 
   const handleStart = () => {
@@ -82,7 +90,7 @@ const ChapterTestDialog: React.FC<ChapterTestDialogProps> = ({
             Choose a subject and chapter for your test
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Subject</label>
@@ -121,8 +129,8 @@ const ChapterTestDialog: React.FC<ChapterTestDialogProps> = ({
             </div>
           )}
 
-          <Button 
-            className="w-full mt-4" 
+          <Button
+            className="w-full mt-4"
             onClick={handleStart}
             disabled={!selectedSubject || !selectedChapter}
           >

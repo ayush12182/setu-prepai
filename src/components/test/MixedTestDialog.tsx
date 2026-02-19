@@ -17,14 +17,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
+import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/biologySyllabus';
 import { ChapterSelection } from '@/hooks/useTestQuestions';
 import { toast } from 'sonner';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
-const subjectsData = [
-  { id: 'physics', name: 'Physics', chapters: physicsChapters, color: 'bg-physics/20 text-physics' },
-  { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters, color: 'bg-chemistry/20 text-chemistry' },
-  { id: 'maths', name: 'Mathematics', chapters: mathsChapters, color: 'bg-maths/20 text-maths' }
-];
 
 interface MixedTestDialogProps {
   open: boolean;
@@ -37,10 +34,21 @@ const MixedTestDialog: React.FC<MixedTestDialogProps> = ({
   onOpenChange,
   onStart
 }) => {
+  const { isNeet } = useExamMode();
+  const subjectsData = isNeet
+    ? [
+      { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters, color: 'bg-physics/20 text-physics' },
+      { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters, color: 'bg-chemistry/20 text-chemistry' },
+      { id: 'biology', name: 'Biology', chapters: neetBiologyChapters, color: 'bg-green-500/20 text-green-700' },
+    ]
+    : [
+      { id: 'physics', name: 'Physics', chapters: physicsChapters, color: 'bg-physics/20 text-physics' },
+      { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters, color: 'bg-chemistry/20 text-chemistry' },
+      { id: 'maths', name: 'Mathematics', chapters: mathsChapters, color: 'bg-maths/20 text-maths' },
+    ];
   const [selectedChapters, setSelectedChapters] = useState<ChapterSelection[]>([]);
   const [currentSubject, setCurrentSubject] = useState<string>('');
   const [currentChapter, setCurrentChapter] = useState<string>('');
-
   const currentSubjectData = subjectsData.find(s => s.id === currentSubject);
 
   const handleAddChapter = () => {
@@ -98,7 +106,7 @@ const MixedTestDialog: React.FC<MixedTestDialogProps> = ({
             Select multiple chapters from any subject (minimum 2)
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-4">
           {/* Selected Chapters */}
           {selectedChapters.length > 0 && (
@@ -106,7 +114,7 @@ const MixedTestDialog: React.FC<MixedTestDialogProps> = ({
               <label className="text-sm font-medium">Selected Chapters ({selectedChapters.length})</label>
               <div className="flex flex-wrap gap-2">
                 {selectedChapters.map((chapter) => (
-                  <Badge 
+                  <Badge
                     key={chapter.chapterId}
                     variant="secondary"
                     className={`${getSubjectColor(chapter.subject)} flex items-center gap-1 pr-1`}
@@ -168,7 +176,7 @@ const MixedTestDialog: React.FC<MixedTestDialogProps> = ({
               </div>
             )}
 
-            <Button 
+            <Button
               variant="outline"
               className="w-full"
               onClick={handleAddChapter}
@@ -179,8 +187,8 @@ const MixedTestDialog: React.FC<MixedTestDialogProps> = ({
             </Button>
           </div>
 
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             onClick={handleStart}
             disabled={selectedChapters.length < 2}
           >

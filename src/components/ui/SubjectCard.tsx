@@ -1,5 +1,5 @@
 import React from 'react';
-import { Atom, FlaskConical, Calculator } from 'lucide-react';
+import { Atom, FlaskConical, Calculator, Dna } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Subject } from '@/data/syllabus';
 
@@ -28,6 +28,12 @@ const subjectConfig = {
     label: 'Mathematics',
     color: 'bg-maths',
     gradient: 'from-maths to-purple-400'
+  },
+  biology: {
+    icon: Dna,
+    label: 'Biology',
+    color: 'bg-green-600',
+    gradient: 'from-green-500 to-emerald-400'
   }
 };
 
@@ -65,14 +71,14 @@ export const SubjectCard: React.FC<SubjectCardProps> = ({
         </div>
 
         <h3 className="text-xl font-semibold text-white mb-3">{config.label}</h3>
-        
+
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-white/80 font-medium">Progress</span>
             <span className="font-semibold text-white">{progress}%</span>
           </div>
           <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-white rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />

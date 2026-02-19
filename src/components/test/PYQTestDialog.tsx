@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 interface PYQTestDialogProps {
   open: boolean;
@@ -23,12 +24,6 @@ interface PYQTestDialogProps {
   onStart: (config: { subject?: string; yearRange: { start: number; end: number }; count: number }) => void;
 }
 
-const subjectsData = [
-  { id: 'all', name: 'All Subjects (Mixed)' },
-  { id: 'physics', name: 'Physics' },
-  { id: 'chemistry', name: 'Chemistry' },
-  { id: 'maths', name: 'Mathematics' }
-];
 
 const yearPresets = [
   { label: 'Last 5 Years (2020-2024)', start: 2020, end: 2024 },
@@ -42,6 +37,20 @@ const PYQTestDialog: React.FC<PYQTestDialogProps> = ({
   onOpenChange,
   onStart
 }) => {
+  const { isNeet } = useExamMode();
+  const subjectsData = isNeet
+    ? [
+      { id: 'all', name: 'All Subjects (Mixed)' },
+      { id: 'physics', name: 'Physics' },
+      { id: 'chemistry', name: 'Chemistry' },
+      { id: 'biology', name: 'Biology' },
+    ]
+    : [
+      { id: 'all', name: 'All Subjects (Mixed)' },
+      { id: 'physics', name: 'Physics' },
+      { id: 'chemistry', name: 'Chemistry' },
+      { id: 'maths', name: 'Mathematics' },
+    ];
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [yearPreset, setYearPreset] = useState<number>(1); // Default to last 10 years
   const [questionCount, setQuestionCount] = useState<number>(25);
@@ -72,7 +81,7 @@ const PYQTestDialog: React.FC<PYQTestDialogProps> = ({
             Practice with actual JEE Mains & Advanced questions from 2004-2024
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-6 py-4">
           {/* Subject Selection */}
           <div className="space-y-2">
@@ -105,11 +114,10 @@ const PYQTestDialog: React.FC<PYQTestDialogProps> = ({
                 <button
                   key={idx}
                   onClick={() => setYearPreset(idx)}
-                  className={`p-3 rounded-lg border text-sm text-left transition-colors ${
-                    yearPreset === idx
+                  className={`p-3 rounded-lg border text-sm text-left transition-colors ${yearPreset === idx
                       ? 'border-primary bg-primary/10 text-primary'
                       : 'border-border hover:border-primary/50'
-                  }`}
+                    }`}
                 >
                   <span className="font-medium">{preset.start}-{preset.end}</span>
                   <p className="text-xs text-muted-foreground mt-0.5">
