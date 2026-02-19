@@ -1,14 +1,18 @@
 import React from "react";
-import { Target, Clock, Flame, ChevronRight } from "lucide-react";
+import { Target, Clock, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useTodaysFocus } from "@/hooks/useTodaysFocus";
+import { TodaysFocusData } from "@/hooks/useTodaysFocus";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 
-export const TodaysFocus: React.FC = () => {
+interface TodaysFocusProps {
+  data: TodaysFocusData | null;
+  isLoading?: boolean;
+}
+
+export const TodaysFocus: React.FC<TodaysFocusProps> = ({ data, isLoading = false }) => {
   const { language } = useLanguage();
-  const { focus, isLoading } = useTodaysFocus();
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -23,7 +27,7 @@ export const TodaysFocus: React.FC = () => {
     );
   }
 
-  if (!focus) {
+  if (!data) {
     return (
       <div className="bg-gradient-to-br from-primary to-setu-navy-light rounded-2xl p-6">
         <p className="text-white">No focus topic available. Start practicing to unlock personalized recommendations!</p>
@@ -32,12 +36,11 @@ export const TodaysFocus: React.FC = () => {
   }
 
   const handleStartNow = () => {
-    navigate(`/subchapter/${focus.subchapterId}`);
+    navigate(`/subchapter/${data.subchapterId}`);
   };
 
   return (
     <div className="bg-gradient-to-br from-primary to-setu-navy-light rounded-2xl p-6 relative overflow-hidden">
-      {/* Background decoration */}
       <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
       <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
 
@@ -48,33 +51,30 @@ export const TodaysFocus: React.FC = () => {
               <Target className="w-5 h-5 text-[hsl(35_100%_83%)]" />
               <span className="text-sm font-medium text-white/80">Today's Focus</span>
             </div>
-            <h2 className="text-2xl font-semibold text-white mb-1">{focus.subchapter}</h2>
-            <p className="text-white/70 text-sm font-medium">{focus.subject} • {focus.chapter}</p>
-          </div>
 
-          {focus.streak > 0 && (
-            <div className="flex items-center gap-1.5 bg-[hsl(35_100%_83%)/0.2] px-3 py-1.5 rounded-full">
-              <Flame className="w-4 h-4 text-[hsl(35_100%_83%)]" />
-              <span className="text-sm font-semibold text-white">{focus.streak} day streak</span>
-            </div>
-          )}
+            <h2 className="text-2xl font-semibold text-white mb-1">{data.subchapter}</h2>
+            <p className="text-white/70 text-sm font-medium">{data.subject} • {data.chapter}</p>
+          </div>
         </div>
 
-        {/* Mentor tip with proper contrast */}
+        {/* Mentor tip */}
         <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl mb-4 border border-white/10">
           <p className="text-[hsl(35_100%_83%)] text-sm font-medium leading-relaxed">
-            💡 {language === "hinglish" || language === "hindi" ? focus.taskHinglish : focus.task}
+            {`💡 ${language === "hinglish" || language === "hindi" ? data.taskHinglish : data.task}`}
           </p>
         </div>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-white/70 text-sm">
             <Clock className="w-4 h-4" />
-            <span>Suggested: {focus.suggestedTime}</span>
+            <span>Suggested: {data.suggestedTime}</span>
           </div>
 
-          <Button className="btn-hero gap-2 h-10 px-5" onClick={handleStartNow}>
-            <span className="font-medium">Start Now</span>
+          <Button
+            className="gap-2 h-10 px-5 btn-hero"
+            onClick={handleStartNow}
+          >
+            <span className="font-medium">Start Practice</span>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -82,3 +82,4 @@ export const TodaysFocus: React.FC = () => {
     </div>
   );
 };
+

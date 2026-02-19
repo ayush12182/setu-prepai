@@ -1,6 +1,7 @@
 import React from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { TodaysFocus } from "@/components/home/TodaysFocus";
+import { SmartSuggestion } from "@/components/home/SmartSuggestion";
 import { QuickActions } from "@/components/home/QuickActions";
 import { SyllabusTracker } from "@/components/home/SyllabusTracker";
 import { ExamReminders } from "@/components/home/ExamReminders";
@@ -9,13 +10,29 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExamMode } from "@/contexts/ExamModeContext";
 import { Sparkles, Flame, Trophy, Zap } from "lucide-react";
+import { useTodaysFocus } from "@/hooks/useTodaysFocus";
 
 const Index: React.FC = () => {
-  const { getMentorName } = useLanguage();
+  const { getMentorName, language } = useLanguage();
   const { user, profile } = useAuth();
   const { config, isNeet } = useExamMode();
 
+  // Use the refactored hook that returns both focus types
+  const { dailyFocus, smartFocus, isLoading, streak } = useTodaysFocus();
+
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "Bhai";
+
+  const getGreeting = () => {
+    if (language === 'english') {
+      return isNeet
+        ? "Your NEET Mentor is ready to help you."
+        : `${getMentorName()} is ready to help you.`;
+    }
+    // Hinglish/Hindi
+    return isNeet
+      ? "Your NEET Mentor ready hai tumhari help ke liye"
+      : `${getMentorName()} ready hai tumhari help ke liye`;
+  };
 
   return (
     <MainLayout title="SETU">
@@ -23,6 +40,7 @@ const Index: React.FC = () => {
         {/* ── Section 1: Welcome Hero ── */}
         {user && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--setu-navy-light))] p-8 sm:p-10">
+            {/* ... background elements ... */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
             <div
@@ -46,15 +64,13 @@ const Index: React.FC = () => {
                 </div>
                 <p className="text-white/60 text-sm font-medium mb-1">Welcome back, {displayName}! 👋</p>
                 <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
-                  {isNeet
-                    ? "Your NEET Mentor ready hai tumhari help ke liye"
-                    : `${getMentorName()} ready hai tumhari help ke liye`}
+                  {getGreeting()}
                 </h1>
               </div>
 
               <div className="flex gap-3">
                 {[
-                  { icon: Trophy, label: "Streak", value: "🔥 3 days" },
+                  { icon: Trophy, label: "Streak", value: `🔥 ${streak} days` },
                   { icon: Zap, label: "Today", value: "0 Qs" },
                 ].map((stat) => (
                   <div
@@ -70,11 +86,17 @@ const Index: React.FC = () => {
           </div>
         )}
 
-        {/* ── Section 2: Today's Focus + Exam Countdown ── */}
+        {/* ── Section 2: Smart Suggestion & Today's Focus ── */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3">
-            <TodaysFocus />
+          <div className="lg:col-span-3 flex flex-col gap-6">
+
+            {/* Show Smart Suggestion if available */}
+            {smartFocus && <SmartSuggestion data={smartFocus} />}
+
+            {/* Always show Daily Focus */}
+            <TodaysFocus data={dailyFocus} isLoading={isLoading} />
           </div>
+
           <div className="lg:col-span-2">
             <ExamReminders />
           </div>

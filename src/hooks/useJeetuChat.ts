@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -9,6 +10,7 @@ export const useJeetuChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { examMode } = useExamMode();
+  const { language } = useLanguage();
 
   const sendMessage = useCallback(async (
     messages: Message[],
@@ -25,7 +27,7 @@ export const useJeetuChat = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages, examMode }),
+        body: JSON.stringify({ messages, examMode, language }),
       });
 
       if (!resp.ok) {
@@ -102,7 +104,7 @@ export const useJeetuChat = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [examMode]);
+  }, [examMode, language]);
 
   return { sendMessage, isLoading, error };
 };

@@ -217,14 +217,37 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, examMode } = await req.json();
+    const { messages, examMode, language = 'english' } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
+
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = examMode === 'neet' ? NEET_MENTOR_SYSTEM_PROMPT : JEETU_BHAIYA_SYSTEM_PROMPT;
+    const getSystemPrompt = (mode: string, lang: string) => {
+      if (mode === 'neet') {
+        return lang === 'english'
+          ? NEET_MENTOR_SYSTEM_PROMPT.replace("Hinglish", "Strict English")
+            .replace("bhai / bhen", "friend")
+            .replace("Samajh aaya? NCERT padh ke revise karo. 💪", "Understood? Revise from NCERT now. 💪")
+            .replace("Bhai, dhyaan se samjho…", "Listen carefully...")
+            .replace("Bhai, ek baar NCERT se cross-check kar lete hain.", "Let's cross-check with NCERT once.")
+            .replace("Bhai, NCERT mein iska exact reference check karte hain…", "Let's check the exact reference in NCERT...")
+          : NEET_MENTOR_SYSTEM_PROMPT;
+      }
+
+      // Default Jeetu Bhaiya (JEE)
+      return lang === 'english'
+        ? JEETU_BHAIYA_SYSTEM_PROMPT.replace("Hinglish", "Strict English")
+          .replace("bhai / bhen", "friend")
+          .replace("Samajh aaya? Tension mat le, hum sahi ja rahe hain.", "Understood? Don't worry, we are on the right track.")
+          .replace("Bhai, dhyaan se sun…", "Listen carefully...")
+          .replace("Bhai, main ek baar re-check kar raha hoon. Galat answer dena allowed nahi hai.", "I am re-checking once. Giving a wrong answer is not allowed.")
+          .replace("Bhai, yahan assumption clear karte hain…", "Let's clarify the assumption here...")
+        : JEETU_BHAIYA_SYSTEM_PROMPT;
+    };
+
+    const systemPrompt = getSystemPrompt(examMode, language);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

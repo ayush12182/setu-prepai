@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Subchapter } from '@/data/subchapters';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -15,6 +16,7 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
   const [notes, setNotes] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { language } = useLanguage();
 
   const generateNotes = useCallback(async (
     subchapter: Subchapter,
@@ -25,6 +27,7 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
     setError(null);
     setNotes('');
 
+    console.log('Generating notes with language:', language);
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-subchapter-notes`, {
         method: 'POST',
@@ -40,6 +43,7 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
           jeeAsks: subchapter.jeeAsks,
           pyqFocus: subchapter.pyqFocus,
           commonMistakes: subchapter.commonMistakes,
+          language
         }),
       });
 
@@ -87,7 +91,7 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [language]);
 
   return { notes, isLoading, error, generateNotes };
 };

@@ -11,9 +11,10 @@ serve(async (req) => {
   }
 
   try {
-    const { subchapterName, chapterName, subject, jeeAsks = [], pyqFocus = {}, commonMistakes = [] } = await req.json();
+    const { subchapterName, chapterName, subject, jeeAsks = [], pyqFocus = {}, commonMistakes = [], language = 'english' } = await req.json();
+    console.log(`generate-subchapter-notes called with language: ${language}`);
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
+
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
@@ -39,22 +40,28 @@ ABSOLUTE BANS (NO EXCEPTIONS):
 - NO formal academic tone
 
 LANGUAGE (MANDATORY):
-- Hinglish only (simple English + Hindi mix)
+${language === 'english'
+        ? `- STRICT PROFESSIONAL ENGLISH ONLY
+- 100% English vocabulary only
+- NO Hinglish syntax or Hindi words
+- Tone: Professional, clear, academic mentor
+- Explain concepts simply but in proper English`
+        : `- Hinglish only (simple English + Hindi mix)
 - Short sentences (max 15 words)
 - Coaching style like Allen/PW notes
 - Calm, friendly mentor tone
-- Use words: bhai, bhen, sun, dhyaan de, yaad rakh, yahin fasate hain
+- Use words: bhai, bhen, sun, dhyaan de, yaad rakh, yahin fasate hain`}
 
 RESPONSE FORMAT (EXACTLY THIS ORDER):
 
 ## What JEE Actually Tests Here
 [3-5 bullet points, PYQ-based only, post-2020 priority, no theory]
 
-## Short Theory (Jeetu Bhaiya Style)
+## Short Theory (${language === 'english' ? 'Mental Model' : 'Jeetu Bhaiya Style'})
 [5-10 crisp lines ONLY. No paragraphs. Each line a separate point.
-Tone example: "Bhai sun, yahan galti tab hoti hai jab..."
-"Dhyaan de, graph mein slope ka matlab velocity hai."
-"Yahin 90% log fasate hain, direction ignore karke."]
+${language === 'english'
+        ? `Tone example: "Focus here, mistakes happen when..."`
+        : `Tone example: "Bhai sun, yahan galti tab hoti hai jab..."`}]
 
 ## Formulas (Exam Ready - VERIFIED)
 [Plain text only. Write like students write in copy.
@@ -74,16 +81,16 @@ One line explanation: Initial velocity + acceleration ka effect
 [5-7 bullet points to revise just before exam]
 
 CLOSING LINE (ALWAYS):
-"Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai."
+"${language === 'english' ? 'Remember this clearly. Now solve PYQs, that is the real exam.' : 'Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.'}"
 
 🎯 FINAL CHECK: Before sending, verify all formulas and facts are CORRECT.`;
 
-    const jeeAsksText = Array.isArray(jeeAsks) && jeeAsks.length > 0 
+    const jeeAsksText = Array.isArray(jeeAsks) && jeeAsks.length > 0
       ? `\nWhat JEE asks from this topic: ${jeeAsks.join(', ')}` : '';
     const pyqTrends = pyqFocus?.trends && Array.isArray(pyqFocus.trends) ? pyqFocus.trends.join(', ') : 'General concepts';
     const pyqPatterns = pyqFocus?.patterns && Array.isArray(pyqFocus.patterns) ? pyqFocus.patterns.join(', ') : 'Standard problems';
     const pyqTraps = pyqFocus?.traps && Array.isArray(pyqFocus.traps) ? pyqFocus.traps.join(', ') : 'Common calculation errors';
-    const mistakesText = Array.isArray(commonMistakes) && commonMistakes.length > 0 
+    const mistakesText = Array.isArray(commonMistakes) && commonMistakes.length > 0
       ? commonMistakes.join(', ') : 'Standard student errors for this topic';
 
     const userPrompt = `Generate Kota-style exam notes for:
@@ -101,10 +108,10 @@ Recent PYQ Focus:
 Known common mistakes: ${mistakesText}
 
 REMEMBER:
-- Hinglish coaching style (Jeetu Bhaiya tone)
+- ${language === 'english' ? 'Strict English professional style' : 'Hinglish coaching style (Jeetu Bhaiya tone)'}
 - No LaTeX, no symbols, plain text formulas
 - Short crisp lines, no paragraphs
-- End with: "Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai."`;
+- End with: "${language === 'english' ? 'Remember this clearly. Now solve PYQs, that is the real exam.' : 'Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.'}"`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

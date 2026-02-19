@@ -88,7 +88,7 @@ async function getTranscript(videoId: string): Promise<string> {
     const captionUrlMatch = html.match(/"captionTracks":\[.*?"baseUrl":"(.*?)"/);
     if (!captionUrlMatch) {
       console.log('No caption tracks found in player response');
-      
+
       // Fallback: try to get description
       const descMatch = html.match(/"shortDescription":"((?:[^"\\]|\\.)*)"/);
       if (descMatch) {
@@ -191,7 +191,12 @@ serve(async (req) => {
     const isHinglish = language === 'hinglish' || language === 'hindi' || language === 'crisp';
     const langInstruction = isHinglish
       ? `LANGUAGE: Write ALL notes in natural Hinglish (Hindi + English mix). Example: "Bhai, capacitance ka matlab hai charge store karne ki capacity." Formulas stay in universal math notation.`
-      : `LANGUAGE: Write ALL notes in clean English. Only the Jeetu Bhaiya signature line should be in Hinglish. Formulas stay in universal math notation.`;
+      : `LANGUAGE: Write ALL notes in STRICT PROFESSIONAL ENGLISH.
+      - 100% English vocabulary only.
+      - NO Hindi words (bhai, dekho, samjho, etc.).
+      - NO Hinglish syntax.
+      - Tone: Professional academic mentor.
+      - Formulas stay in universal math notation.`;
 
     const userPrompt = `Create Kota-style JEE-focused study materials for this lecture: "${displayTitle}"${transcriptSection}
 

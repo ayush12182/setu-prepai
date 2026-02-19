@@ -4,6 +4,7 @@ import { ChevronLeft, Loader2, Sparkles } from 'lucide-react';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface OnePageNotesProps {
   onBack: () => void;
@@ -16,6 +17,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [notes, setNotes] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const { language } = useLanguage();
 
   const allChapters = {
     physics: physicsChapters,
@@ -63,7 +65,8 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
           topics: chapter.topics,
           formulas: chapter.keyFormulas,
           examTips: chapter.examTips,
-          pyqData: chapter.pyqData
+          pyqData: chapter.pyqData,
+          language
         }),
       });
 
@@ -82,10 +85,10 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n');
-        
+
         for (const line of lines) {
           if (line.startsWith('data: ') && line !== 'data: [DONE]') {
             try {
@@ -104,7 +107,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
     } catch (error) {
       console.error('Error generating notes:', error);
       toast.error('Failed to generate notes. Showing offline version.');
-      
+
       // Fallback to local notes
       const fallbackNotes = generateFallbackNotes(chapter);
       setNotes(fallbackNotes);
@@ -114,28 +117,17 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
   };
 
   const generateFallbackNotes = (chapter: Chapter): string => {
-    const plainFormulas = chapter.keyFormulas.map(f => {
-      return f
-        .replace(/=/g, ' = ')
-        .replace(/\*/g, ' multiplied by ')
-        .replace(/\//g, ' divided by ')
-        .replace(/\^2/g, ' squared')
-        .replace(/\^3/g, ' cubed')
-        .replace(/sqrt/gi, 'square root of')
-        .replace(/λ/g, 'lambda')
-        .replace(/ν/g, 'nu')
-        .replace(/Δ/g, 'change in ')
-        .replace(/→/g, 'gives')
-        .replace(/≥/g, 'greater than or equal to')
-        .replace(/≤/g, 'less than or equal to');
+    // Keep formulas in standard notation, just ensure basic readability
+    const formattedFormulas = chapter.keyFormulas.map(f => {
+      return f.replace(/=/g, ' = '); // Just ensure spacing around equals
     });
 
     return `${chapter.name.toUpperCase()}
 
 What this chapter is about
 ${chapter.subject === 'physics' ? 'Yeh chapter physics ke core concepts cover karta hai. JEE mein direct questions aate hain, especially numerical type.' :
-  chapter.subject === 'chemistry' ? 'Is chapter mein important reactions aur concepts hain jo JEE mein regularly pooche jaate hain.' :
-  'Mathematics ka yeh chapter problem solving ke liye bahut important hai. Formulas yaad karo aur practice karo.'}
+        chapter.subject === 'chemistry' ? 'Is chapter mein important reactions aur concepts hain jo JEE mein regularly pooche jaate hain.' :
+          'Mathematics ka yeh chapter problem solving ke liye bahut important hai. Formulas yaad karo aur practice karo.'}
 
 Chapter syllabus (exam-oriented)
 ${chapter.topics.map(t => `- ${t}`).join('\n')}
@@ -146,8 +138,8 @@ Post-2020 mein ${chapter.pyqData.postCovid} questions aaye hain is chapter se. T
 Core ideas you must remember
 ${chapter.topics.slice(0, 5).map(t => `- ${t} ka basic concept samjho`).join('\n')}
 
-Key formulas (PLAIN TEXT)
-${plainFormulas.map(f => `- ${f}`).join('\n')}
+Key formulas (MATH NOTATION)
+${formattedFormulas.map(f => `- ${f}`).join('\n')}
 
 Common mistakes students make
 ${chapter.examTips.map(t => `- ${t}`).join('\n')}
@@ -279,8 +271,8 @@ Beta, itna clear ho gaya na? Ab PYQs lagao, bas wahi exam hai.`;
                         <span className={cn(
                           'text-xs px-2 py-0.5 rounded-full',
                           chapter.weightage === 'High' ? 'bg-red-500/10 text-red-500' :
-                          chapter.weightage === 'Medium' ? 'bg-yellow-500/10 text-yellow-500' :
-                          'bg-green-500/10 text-green-500'
+                            chapter.weightage === 'Medium' ? 'bg-yellow-500/10 text-yellow-500' :
+                              'bg-green-500/10 text-green-500'
                         )}>
                           {chapter.weightage}
                         </span>

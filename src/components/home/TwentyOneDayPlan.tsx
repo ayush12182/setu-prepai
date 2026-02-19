@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
 import { getAllSubchapters } from '@/data/subchapters';
 import {
@@ -210,10 +211,14 @@ export const TwentyOneDayPlan: React.FC = () => {
     },
   });
 
-  const cycleStart = activeCycle ? new Date(activeCycle.start_date) : new Date();
+  const userCycleStart = user?.user_metadata?.cycle_start_date;
+  const cycleStart = userCycleStart
+    ? new Date(userCycleStart)
+    : (activeCycle ? new Date(activeCycle.start_date) : new Date());
+
   const schedule = useMemo(
     () => generateSchedule(cycleStart, completedIds || new Set()),
-    [activeCycle, completedIds]
+    [activeCycle, completedIds, cycleStart]
   );
 
   const weekStart = selectedWeek * 7;
@@ -226,6 +231,12 @@ export const TwentyOneDayPlan: React.FC = () => {
     if (!user) return;
     setIsResetting(true);
     try {
+      // Update user metadata with new start date
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { cycle_start_date: new Date().toISOString() }
+      });
+      if (updateError) throw updateError;
+
       // Delete all practice sessions for this user
       await supabase.from('practice_sessions').delete().eq('user_id', user.id);
       // Reset user practice stats
@@ -244,8 +255,11 @@ export const TwentyOneDayPlan: React.FC = () => {
       await queryClient.invalidateQueries({ queryKey: ['practice-sessions'] });
       await queryClient.invalidateQueries({ queryKey: ['todays-focus'] });
       await queryClient.invalidateQueries({ queryKey: ['user-practice-stats'] });
+
+      toast.success("Cycle reset successfully! Good luck.");
     } catch (err) {
       console.error('Reset cycle error:', err);
+      toast.error('Failed to reset cycle');
     } finally {
       setIsResetting(false);
     }

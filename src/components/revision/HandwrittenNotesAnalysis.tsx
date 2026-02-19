@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { ChevronLeft, Upload, Camera, Loader2, Sparkles, Image as ImageIcon, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface HandwrittenNotesAnalysisProps {
   onBack: () => void;
@@ -20,6 +21,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
   const [analysis, setAnalysis] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const { language } = useLanguage();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -54,6 +56,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
     setAnalysis('');
 
     try {
+      console.log('Analyzing notes with language:', language);
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-handwritten-notes`, {
         method: 'POST',
         headers: {
@@ -64,6 +67,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
           imageBase64: selectedImage,
           subject: subject || undefined,
           topic: topic || undefined,
+          language
         }),
       });
 
@@ -164,9 +168,9 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
           {/* Image Preview or Upload Area */}
           {selectedImage ? (
             <div className="relative">
-              <img 
-                src={selectedImage} 
-                alt="Uploaded notes" 
+              <img
+                src={selectedImage}
+                alt="Uploaded notes"
                 className="w-full max-h-[400px] object-contain rounded-lg border border-border"
               />
               <Button
@@ -179,7 +183,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
               </Button>
             </div>
           ) : (
-            <div 
+            <div
               className="border-2 border-dashed border-border rounded-xl p-12 text-center cursor-pointer hover:border-primary transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
@@ -247,8 +251,8 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
           </div>
 
           {/* Analyze Button */}
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             size="lg"
             disabled={!selectedImage || isAnalyzing}
             onClick={handleAnalyze}
@@ -286,9 +290,9 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
           {/* Show uploaded image thumbnail */}
           {selectedImage && (
             <div className="mb-4">
-              <img 
-                src={selectedImage} 
-                alt="Analyzed notes" 
+              <img
+                src={selectedImage}
+                alt="Analyzed notes"
                 className="w-32 h-32 object-cover rounded-lg border border-border"
               />
             </div>

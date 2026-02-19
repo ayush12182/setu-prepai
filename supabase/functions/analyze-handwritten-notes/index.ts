@@ -11,9 +11,10 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, subject, topic } = await req.json();
+    const { imageBase64, subject, topic, language = 'english' } = await req.json();
+    console.log(`analyze-handwritten-notes called with language: ${language}`);
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
+
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
@@ -33,24 +34,30 @@ You are analyzing a student's handwritten notes. Your job is to:
 6. Give them EXAM TIPS for this topic
 
 YOUR TONE (MANDATORY):
-- Hinglish (Hindi + English mix)
+${language === 'english'
+        ? `- STRICT PROFESSIONAL ENGLISH ONLY
+- 100% English vocabulary only
+- NO Hinglish syntax or Hindi words
+- Tone: Professional, clear, academic mentor
+- Explain concepts simply but in proper English`
+        : `- Hinglish (Hindi + English mix)
 - Friendly, calm, supportive
 - Like an elder brother/senior teaching
-- Use phrases like: "Beta sun", "Dekh bhai", "Yaad rakh", "Simple hai"
+- Use phrases like: "Beta sun", "Dekh bhai", "Yaad rakh", "Simple hai"`}
 - NO formal textbook language
 - NO long paragraphs
 
 RESPONSE FORMAT (STRICT):
-Start with: "Acha beta, maine teri notes dekhi..."
+Start with: "${language === 'english' ? 'Okay friend, I reviewed your notes...' : 'Acha beta, maine teri notes dekhi...'}"
 
 Then cover these sections:
 📝 NOTES SUMMARY
 - What you understood from their notes (2-3 lines)
 
-✅ KYA SAHI HAI
+✅ ${language === 'english' ? 'WHAT IS CORRECT' : 'KYA SAHI HAI'}
 - What they wrote correctly (bullet points)
 
-❌ KYA GALAT HAI / MISSING HAI
+❌ ${language === 'english' ? 'WHAT IS WRONG / MISSING' : 'KYA GALAT HAI / MISSING HAI'}
 - Mistakes or missing points (bullet points with corrections)
 
 💡 IMPORTANT ADDITIONS
@@ -61,7 +68,7 @@ Then cover these sections:
 - 2-3 specific exam tips for this topic
 - Include PYQ patterns if relevant
 
-End with: "Bas beta, itni clarity ho gayi toh paper mein full marks pakke hain!"
+End with: "${language === 'english' ? 'Stay clear on this. Now solve PYQs, that is the real exam!' : 'Bas beta, itni clarity ho gayi toh paper mein full marks pakke hain!'}"
 
 FORMULA WRITING RULES:
 - Plain text only
@@ -87,15 +94,15 @@ Look at the image carefully, read what they have written, and teach them like a 
         model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          { 
-            role: "user", 
+          {
+            role: "user",
             content: [
               { type: "text", text: userPrompt },
-              { 
-                type: "image_url", 
-                image_url: { 
+              {
+                type: "image_url",
+                image_url: {
                   url: imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`
-                } 
+                }
               }
             ]
           },

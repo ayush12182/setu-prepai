@@ -13,6 +13,7 @@ interface QuestionRequest {
   chapterName: string;
   subject: string;
   difficulty: "easy" | "medium" | "hard";
+  type?: "MCQ" | "INTEGER" | "MATCH";
   count?: number;
 }
 
@@ -22,7 +23,7 @@ serve(async (req) => {
   }
 
   try {
-    const { subchapterId, subchapterName, chapterId, chapterName, subject, difficulty, count = 5 }: QuestionRequest = await req.json();
+    const { subchapterId, subchapterName, chapterId, chapterName, subject, difficulty, type = "MCQ", count = 5 }: QuestionRequest = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -39,6 +40,7 @@ serve(async (req) => {
       .select("*")
       .eq("subchapter_id", subchapterId)
       .eq("difficulty", difficulty)
+      .eq("type", type)
       .limit(count);
 
     if (fetchError) {
@@ -52,13 +54,55 @@ serve(async (req) => {
       });
     }
 
+    // Determine prompts based on question type
+    let systemPrompt = "";
+    let userPrompt = "";
+
     const difficultyMap: Record<string, string> = {
       easy: "NCERT level, single-concept, 30-60s solve time",
       medium: "JEE Mains level, 2-3 concepts, 1-2 min solve time",
       hard: "JEE Advanced level, multi-concept fusion, 2-4 min solve time"
     };
 
-    const systemPrompt = `You are a JEE question designer. Create exam-grade MCQs with:
+    if (type === "INTEGER") {
+      systemPrompt = `You are a JEE question designer. Create Integer Type numerical questions.
+- Answer MUST be a single integer (or decimal if specified, but stick to integer for now).
+- No options.
+- Difficulty: ${difficulty} (${difficultyMap[difficulty]})
+- Topic: ${subject} > ${chapterName} > ${subchapterName}`;
+
+      userPrompt = `Generate ${count} Integer Type questions for "${subchapterName}".
+Return JSON array:
+[{
+  "question_text": "...",
+  "integer_answer": 42,
+  "tolerance": 0,
+  "explanation": "Step-by-step solution...",
+  "concept_tested": "Concept",
+  "common_mistake": "Common error..."
+}]`;
+    } else if (type === "MATCH") {
+      systemPrompt = `You are a JEE question designer. Create Match the Following questions.
+- Two columns: Left (Items) and Right (Options).
+- Complexity suitable for ${difficulty} level.
+- Topic: ${subject} > ${chapterName} > ${subchapterName}`;
+
+      userPrompt = `Generate ${count} Match the Following questions for "${subchapterName}".
+Return JSON array:
+[{
+  "question_text": "Match the following items correctly:",
+  "match_pairs": {
+    "left": ["A", "B", "C", "D"],
+    "right": ["P", "Q", "R", "S"],
+    "mapping": { "A": "Q", "B": "R", "C": "S", "D": "P" }
+  },
+  "explanation": "Reasoning for each match...",
+  "concept_tested": "Concept",
+  "common_mistake": "Confusing similar items..."
+}]`;
+    } else {
+      // Default MCQ
+      systemPrompt = `You are a JEE question designer. Create exam-grade MCQs with:
 - Unicode math notation (subscripts: v₁, superscripts: x², Greek: θ, α, arrows: →). NO LaTeX.
 - Each wrong option from a real student mistake (sign error, missing factor, wrong formula).
 - Exactly ONE correct answer, verified by solving fully.
@@ -66,7 +110,7 @@ serve(async (req) => {
 Topic: ${subject} > ${chapterName} > ${subchapterName}
 Level: ${difficulty} — ${difficultyMap[difficulty]}`;
 
-    const userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} — ${chapterName}) at ${difficulty} difficulty.
+      userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} — ${chapterName}) at ${difficulty} difficulty.
 
 Return ONLY a JSON array (no markdown, no code fences):
 [{
@@ -79,6 +123,7 @@ Return ONLY a JSON array (no markdown, no code fences):
 }]
 
 Rules: Unicode notation (subscripts/superscripts), no LaTeX, keep explanations under 150 words each.`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -126,13 +171,13 @@ Rules: Unicode notation (subscripts/superscripts), no LaTeX, keep explanations u
     try {
       // Remove markdown code fences if present
       let jsonContent = content.trim();
-      
+
       // Handle ```json ... ``` or ``` ... ``` format
       const codeBlockMatch = jsonContent.match(/```(?:json)?\s*([\s\S]*?)```/);
       if (codeBlockMatch) {
         jsonContent = codeBlockMatch[1].trim();
       }
-      
+
       // Try parsing directly first
       try {
         questions = JSON.parse(jsonContent);
@@ -168,7 +213,7 @@ Rules: Unicode notation (subscripts/superscripts), no LaTeX, keep explanations u
         }
         questions = JSON.parse(sanitized);
       }
-      
+
       if (!Array.isArray(questions)) {
         throw new Error("Response is not an array");
       }
@@ -184,12 +229,20 @@ Rules: Unicode notation (subscripts/superscripts), no LaTeX, keep explanations u
       chapter_id: chapterId,
       subject: subject.toLowerCase(),
       difficulty,
+      type,
       question_text: q.question_text,
-      option_a: q.option_a,
-      option_b: q.option_b,
-      option_c: q.option_c,
-      option_d: q.option_d,
-      correct_option: q.correct_option.toUpperCase(),
+      // MCQ fields
+      option_a: q.option_a || null,
+      option_b: q.option_b || null,
+      option_c: q.option_c || null,
+      option_d: q.option_d || null,
+      correct_option: q.correct_option ? q.correct_option.toUpperCase() : null,
+      // Integer fields
+      integer_answer: q.integer_answer !== undefined ? q.integer_answer : null,
+      tolerance: q.tolerance !== undefined ? q.tolerance : 0,
+      // Match fields
+      match_pairs: q.match_pairs || null,
+
       explanation: q.explanation,
       concept_tested: q.concept_tested,
       common_mistake: q.common_mistake || null,

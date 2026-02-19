@@ -1,10 +1,13 @@
 // JEE Main & Advanced Syllabus - PCM Only (STRICT)
 // Referenced from Allen, PW, Resonance structure
 
-export type Subject = 'physics' | 'chemistry' | 'maths';
+export type Subject = 'physics' | 'chemistry' | 'maths' | 'biology';
 export type Weightage = 'High' | 'Medium' | 'Low';
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export type ChemistryType = 'Physical' | 'Organic' | 'Inorganic';
+
+export { biologyChapters } from './biologySyllabus';
+
 
 export interface PYQData {
   total: number;
@@ -39,7 +42,7 @@ export const physicsChapters: Chapter[] = [
     prerequisites: [],
     topics: [
       'Motion in 1D',
-      'Motion in 2D', 
+      'Motion in 2D',
       'Projectile Motion',
       'Relative Motion',
       'Graphs of Motion'
