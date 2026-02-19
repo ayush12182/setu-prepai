@@ -274,7 +274,6 @@ const RevisionTopicPage: React.FC = () => {
       case 'limits':
       case 'coordinate-geometry':
       case 'vectors':
-      case 'vectors':
         return renderTopics();
       // Biology specific topics
       case 'diagrams':
