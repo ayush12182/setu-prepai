@@ -12,12 +12,13 @@ import { getChapterById } from '@/data/syllabus';
 import { useSubchapterNotes } from '@/hooks/useSubchapterNotes';
 import { NotesSection } from '@/components/subchapter/NotesSection';
 import TestExecution from '@/components/test/TestExecution';
-import { toast } from 'sonner';
-import { 
-  BookOpen, 
-  Target, 
-  FileText, 
-  BarChart3, 
+import IntegerTypePractice from '@/components/practice/IntegerTypePractice';
+import MatchTheFollowing from '@/components/practice/MatchTheFollowing';
+import {
+  BookOpen,
+  Target,
+  FileText,
+  BarChart3,
   ArrowLeft,
   AlertTriangle,
   TrendingUp,
@@ -34,10 +35,11 @@ const SubchapterPage: React.FC = () => {
   const initialTab = searchParams.get('tab') || 'learn';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [activeTest, setActiveTest] = useState<{ type: 'chapter' | 'pyq' } | null>(null);
-  
+  const [activePracticeMode, setActivePracticeMode] = useState<'integer' | 'match' | null>(null);
+
   const subchapter = subchapterId ? getSubchapterById(subchapterId) : undefined;
   const chapter = subchapter ? getChapterById(subchapter.chapterId) : undefined;
-  
+
   const { notes, isLoading, error, generateNotes } = useSubchapterNotes();
 
   if (!subchapter || !chapter) {
@@ -72,14 +74,14 @@ const SubchapterPage: React.FC = () => {
       <div className="space-y-6">
         {/* Header with Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <button 
+          <button
             onClick={() => navigate('/learn')}
             className="hover:text-foreground transition-colors"
           >
             Learn
           </button>
           <span>/</span>
-          <button 
+          <button
             onClick={() => navigate(`/chapter/${chapter.id}`)}
             className="hover:text-foreground transition-colors capitalize"
           >
@@ -90,8 +92,8 @@ const SubchapterPage: React.FC = () => {
         </div>
 
         {/* Back Button */}
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => navigate(`/chapter/${chapter.id}`)}
           className="text-muted-foreground"
         >
@@ -111,7 +113,7 @@ const SubchapterPage: React.FC = () => {
               </h1>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
+              <Button
                 onClick={handleGenerateNotes}
                 disabled={isLoading}
                 className="bg-gradient-to-r from-setu-saffron to-setu-saffron/80 text-white"
@@ -147,7 +149,7 @@ const SubchapterPage: React.FC = () => {
 
           {/* ==================== LEARN TAB ==================== */}
           <TabsContent value="learn" className="mt-6 space-y-6">
-            
+
             {/* AI Generated Notes Section */}
             <NotesSection
               notes={notes}
@@ -209,7 +211,7 @@ const SubchapterPage: React.FC = () => {
                   <p className="text-xs text-muted-foreground">Recent exam trends</p>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Trends</h4>
@@ -252,73 +254,93 @@ const SubchapterPage: React.FC = () => {
 
           {/* ==================== PRACTICE TAB ==================== */}
           <TabsContent value="practice" className="mt-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div 
-                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
-                onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=easy`)}
-              >
-                <div className="w-12 h-12 rounded-lg bg-setu-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <span className="text-2xl">🌱</span>
-                </div>
-                <h4 className="font-semibold text-foreground">Level 1: Concept</h4>
-                <p className="text-sm text-muted-foreground mt-1">Basic understanding MCQs</p>
-                <p className="text-xs text-setu-success font-medium mt-2">15 Questions • Easy</p>
-              </div>
+            {activePracticeMode === 'integer' ? (
+              <IntegerTypePractice
+                subchapterName={subchapter.name}
+                chapterName={chapter.name}
+                subject={chapter.subject}
+                onBack={() => setActivePracticeMode(null)}
+              />
+            ) : activePracticeMode === 'match' ? (
+              <MatchTheFollowing
+                subchapterName={subchapter.name}
+                chapterName={chapter.name}
+                subject={chapter.subject}
+                onBack={() => setActivePracticeMode(null)}
+              />
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div
+                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
+                    onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=easy`)}
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-setu-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <span className="text-2xl">🌱</span>
+                    </div>
+                    <h4 className="font-semibold text-foreground">Level 1: Concept</h4>
+                    <p className="text-sm text-muted-foreground mt-1">Basic understanding MCQs</p>
+                    <p className="text-xs text-setu-success font-medium mt-2">15 Questions • Easy</p>
+                  </div>
 
-              <div 
-                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
-                onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=medium`)}
-              >
-                <div className="w-12 h-12 rounded-lg bg-setu-warning/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <span className="text-2xl">🎯</span>
-                </div>
-                <h4 className="font-semibold text-foreground">Level 2: JEE Main</h4>
-                <p className="text-sm text-muted-foreground mt-1">Previous year pattern</p>
-                <p className="text-xs text-setu-warning font-medium mt-2">20 Questions • Medium</p>
-              </div>
+                  <div
+                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
+                    onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=medium`)}
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-setu-warning/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <span className="text-2xl">🎯</span>
+                    </div>
+                    <h4 className="font-semibold text-foreground">Level 2: Exam Pattern</h4>
+                    <p className="text-sm text-muted-foreground mt-1">Previous year pattern</p>
+                    <p className="text-xs text-setu-warning font-medium mt-2">20 Questions • Medium</p>
+                  </div>
 
-              <div 
-                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
-                onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=hard`)}
-              >
-                <div className="w-12 h-12 rounded-lg bg-setu-error/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <span className="text-2xl">🔥</span>
+                  <div
+                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
+                    onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=hard`)}
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-setu-error/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <span className="text-2xl">🔥</span>
+                    </div>
+                    <h4 className="font-semibold text-foreground">Level 3: Advanced</h4>
+                    <p className="text-sm text-muted-foreground mt-1">Competition level</p>
+                    <p className="text-xs text-setu-error font-medium mt-2">15 Questions • Hard</p>
+                  </div>
                 </div>
-                <h4 className="font-semibold text-foreground">Level 3: Advanced</h4>
-                <p className="text-sm text-muted-foreground mt-1">Competition level</p>
-                <p className="text-xs text-setu-error font-medium mt-2">15 Questions • Hard</p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div 
-                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
-                onClick={() => toast.info('Integer Type coming soon! 🔢', { description: 'Numerical practice questions are being prepared.' })}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-xl">🔢</span>
-                  <h4 className="font-semibold">Integer Type</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div
+                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                    onClick={() => setActivePracticeMode('integer')}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xl">🔢</span>
+                      <h4 className="font-semibold">Integer Type</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Numerical answer practice</p>
+                    <p className="text-xs text-primary font-medium mt-2">5 Questions • Type your answer</p>
+                  </div>
+                  <div
+                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                    onClick={() => setActivePracticeMode('match')}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xl">🔗</span>
+                      <h4 className="font-semibold">Match the Following</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Matrix matching practice</p>
+                    <p className="text-xs text-primary font-medium mt-2">3 Sets • Click to match</p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground">Numerical answer practice</p>
-              </div>
-              <div 
-                className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
-                onClick={() => toast.info('Match the Following coming soon! 🔗', { description: 'Matrix match questions are being prepared.' })}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-xl">🔗</span>
-                  <h4 className="font-semibold">Match the Following</h4>
-                </div>
-                <p className="text-sm text-muted-foreground">Matrix matching practice</p>
-              </div>
-            </div>
 
-            {/* Mentor Tip */}
-            <div className="bg-muted/50 border border-border rounded-lg p-4 mt-4">
-              <p className="text-sm text-muted-foreground">
-                💡 <span className="font-medium">Jeetu Bhaiya's Tip:</span> Start with Level 1 to build foundation, then move to Level 2 for exam practice.
-              </p>
-            </div>
+                {/* Mentor Tip */}
+                <div className="bg-muted/50 border border-border rounded-lg p-4 mt-4">
+                  <p className="text-sm text-muted-foreground">
+                    💡 <span className="font-medium">Tip:</span> Start with Level 1 to build foundation, then tackle Integer Type and Match the Following for exam-pattern mastery.
+                  </p>
+                </div>
+              </>
+            )}
           </TabsContent>
 
           {/* ==================== TEST TAB ==================== */}
@@ -342,7 +364,7 @@ const SubchapterPage: React.FC = () => {
               />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div 
+                <div
                   className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
                   onClick={() => setActiveTest({ type: 'chapter' })}
                 >
@@ -360,7 +382,7 @@ const SubchapterPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div 
+                <div
                   className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
                   onClick={() => setActiveTest({ type: 'pyq' })}
                 >
