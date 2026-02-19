@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useAuth } from './AuthContext';
 
 export type ExamMode = 'jee' | 'neet';
 
@@ -79,6 +80,8 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return (localStorage.getItem('examMode') as ExamMode) || 'jee';
   });
 
+  const { profile } = useAuth();
+
   const setExamMode = useCallback((mode: ExamMode) => {
     localStorage.setItem('examMode', mode);
     setExamModeState(mode);
@@ -86,7 +89,20 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     document.documentElement.classList.toggle('neet-mode', mode === 'neet');
   }, []);
 
-  // Apply theme on mount
+  // Sync with profile whenever it changes
+  useEffect(() => {
+    if (profile?.target_exam) {
+      const isNeetProfile = profile.target_exam === 'NEET';
+      const newMode: ExamMode = isNeetProfile ? 'neet' : 'jee';
+
+      if (newMode !== examMode) {
+        setExamModeState(newMode);
+        localStorage.setItem('examMode', newMode);
+      }
+    }
+  }, [profile, examMode]);
+
+  // Apply theme on mount and whenever mode changes
   useEffect(() => {
     document.documentElement.classList.toggle('neet-mode', examMode === 'neet');
   }, [examMode]);

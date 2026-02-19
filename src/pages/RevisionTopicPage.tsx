@@ -7,26 +7,30 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getFormulasBySubject } from '@/data/cleanFormulas';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
+import { neetBiologyChapters } from '@/data/neetSyllabus';
 import { renderFormula } from '@/lib/formulaRenderer';
 
-type SubjectKey = 'physics' | 'chemistry' | 'maths';
+type SubjectKey = 'physics' | 'chemistry' | 'maths' | 'biology';
 
 const subjectLabels: Record<SubjectKey, string> = {
   physics: 'Physics',
   chemistry: 'Chemistry',
   maths: 'Maths',
+  biology: 'Biology',
 };
 
 const subjectIcons: Record<SubjectKey, string> = {
   physics: '⚛️',
   chemistry: '🧪',
   maths: '📊',
+  biology: '🧬',
 };
 
 const subjectGradients: Record<SubjectKey, string> = {
   physics: 'from-blue-600 to-cyan-500',
   chemistry: 'from-emerald-600 to-green-500',
   maths: 'from-orange-500 to-amber-500',
+  biology: 'from-green-600 to-emerald-500',
 };
 
 const getChapters = (subject: SubjectKey): Chapter[] => {
@@ -34,6 +38,7 @@ const getChapters = (subject: SubjectKey): Chapter[] => {
     case 'physics': return physicsChapters;
     case 'chemistry': return chemistryChapters;
     case 'maths': return mathsChapters;
+    case 'biology': return neetBiologyChapters;
   }
 };
 
@@ -185,6 +190,11 @@ const RevisionTopicPage: React.FC = () => {
       'named-reactions': ['chem-11', 'chem-12', 'chem-13', 'chem-14'],
       'periodic-table': ['chem-7', 'chem-8', 'chem-9', 'chem-10'],
       'organic-mechanisms': ['chem-11', 'chem-12', 'chem-13', 'chem-14'],
+      // Biology
+      'diagrams': ['neet-bio-1', 'neet-bio-2', 'neet-bio-6', 'neet-bio-9'],
+      'cycles': ['neet-bio-3', 'neet-bio-1', 'neet-bio-4'],
+      'examples': ['neet-bio-8', 'neet-bio-9', 'neet-bio-5'],
+      'scientists': ['neet-bio-1', 'neet-bio-4'],
     };
 
     const relevantIds = topicMap[topicSlug];
@@ -264,6 +274,13 @@ const RevisionTopicPage: React.FC = () => {
       case 'limits':
       case 'coordinate-geometry':
       case 'vectors':
+      case 'vectors':
+        return renderTopics();
+      // Biology specific topics
+      case 'diagrams':
+      case 'cycles':
+      case 'examples':
+      case 'scientists':
         return renderTopics();
       default:
         return renderTopics();

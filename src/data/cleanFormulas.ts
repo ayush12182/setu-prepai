@@ -9,7 +9,7 @@ export interface CleanFormula {
 
 export interface ChapterFormulas {
   chapter: string;
-  subject: 'physics' | 'chemistry' | 'maths';
+  subject: 'physics' | 'chemistry' | 'maths' | 'biology';
   formulas: CleanFormula[];
 }
 
@@ -953,16 +953,81 @@ export const mathsFormulas: ChapterFormulas[] = [
   }
 ];
 
+// ==================== BIOLOGY (NEET) ====================
+
+export const biologyFormulas: ChapterFormulas[] = [
+  {
+    chapter: 'Cell Biology',
+    subject: 'biology',
+    formulas: [
+      {
+        formula: 'Size: Mycoplasma = 0.3 micron, Bacteria = 3-5 micron',
+        explanation: 'Relative sizes of cells',
+        examTip: 'Human RBC = 7.0 diameter. Ostrich egg = largest isolated single cell'
+      },
+      {
+        formula: 'Ribosomes: Prokaryotic = 70S (50S + 30S)',
+        explanation: 'S = Svedberg unit (sedimentation coefficient)',
+        examTip: 'Eukaryotic = 80S (60S + 40S). Chloroplast/Mitochondria have 70S'
+      },
+      {
+        formula: 'Mitosis: Interphase (G1 -> S -> G2) -> M Phase',
+        explanation: 'Cell cycle sequence. DNA replication in S phase',
+        examTip: 'G0 phase is quiescent stage'
+      }
+    ]
+  },
+  {
+    chapter: 'Plant Physiology',
+    subject: 'biology',
+    formulas: [
+      {
+        formula: 'Water Potential = Solute Potential + Pressure Potential',
+        explanation: 'Psi(w) = Psi(s) + Psi(p)',
+        examTip: 'Pure water Psi(w) = 0 (max)'
+      },
+      {
+        formula: 'RQ = Vol CO2 evolved / Vol O2 consumed',
+        explanation: 'Respiratory Quotient',
+        examTip: 'Carbs = 1, Fats = 0.7, Proteins = 0.9'
+      }
+    ]
+  },
+  {
+    chapter: 'Genetics',
+    subject: 'biology',
+    formulas: [
+      {
+        formula: 'Phenotype Ratio (Monohybrid) = 3:1',
+        explanation: 'F2 generation dominant:recessive',
+        examTip: 'Genotype = 1:2:1'
+      },
+      {
+        formula: 'Dihybrid Ratio = 9:3:3:1',
+        explanation: 'Independent assortment',
+        examTip: 'Test cross = 1:1:1:1'
+      },
+      {
+        formula: 'Hardy-Weinberg: p^2 + 2pq + q^2 = 1',
+        explanation: 'Allele equilibrium',
+        examTip: 'p+q=1'
+      }
+    ]
+  }
+];
+
 // Get all formulas for a subject
-export const getFormulasBySubject = (subject: 'physics' | 'chemistry' | 'maths'): ChapterFormulas[] => {
+export const getFormulasBySubject = (subject: 'physics' | 'chemistry' | 'maths' | 'biology'): ChapterFormulas[] => {
   switch (subject) {
     case 'physics': return physicsFormulas;
     case 'chemistry': return chemistryFormulas;
     case 'maths': return mathsFormulas;
+    case 'biology': return biologyFormulas;
+    default: return [];
   }
 };
 
 // Get all formulas
 export const getAllFormulas = (): ChapterFormulas[] => {
-  return [...physicsFormulas, ...chemistryFormulas, ...mathsFormulas];
+  return [...physicsFormulas, ...chemistryFormulas, ...mathsFormulas, ...biologyFormulas];
 };

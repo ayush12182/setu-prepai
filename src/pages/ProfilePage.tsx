@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, User, BookOpen, Target, Phone, Save, Camera } from 'lucide-react';
@@ -22,6 +23,7 @@ interface ProfileData {
 
 const ProfilePage: React.FC = () => {
   const { user } = useAuth();
+  const { setExamMode } = useExamMode();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState<ProfileData>({
@@ -84,6 +86,10 @@ const ProfilePage: React.FC = () => {
 
       if (error) throw error;
 
+      // Update local exam mode immediately
+      const isNeet = profile.target_exam === 'NEET';
+      setExamMode(isNeet ? 'neet' : 'jee');
+
       toast.success('Profile updated successfully!');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -112,6 +118,7 @@ const ProfilePage: React.FC = () => {
     { value: 'JEE Main', label: 'JEE Main' },
     { value: 'JEE Advanced', label: 'JEE Advanced' },
     { value: 'Both', label: 'JEE Main + Advanced' },
+    { value: 'NEET', label: 'NEET UG' },
   ];
 
   if (loading) {
@@ -311,7 +318,7 @@ const ProfilePage: React.FC = () => {
         <div className="mentor-tip">
           <p className="font-medium text-foreground mb-1">💡 Jeetu Bhaiya's Advice</p>
           <p className="text-muted-foreground text-sm">
-            Beta, apna profile complete rakho. Isse hum tumhare liye better personalized 
+            Beta, apna profile complete rakho. Isse hum tumhare liye better personalized
             study plan bana sakte hain. Class aur target exam zaroor select karo!
           </p>
         </div>

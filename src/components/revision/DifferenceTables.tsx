@@ -2,12 +2,69 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 interface DifferenceTablesProps {
   onBack: () => void;
 }
 
-const differenceTables = [
+const jeeOnlyTables = [
+  {
+    title: 'Differentiation vs Integration',
+    subject: 'maths',
+    items: [
+      { aspect: 'Operation', left: 'Finding rate of change', right: 'Finding area under curve' },
+      { aspect: 'Symbol', left: 'd/dx or f\'(x)', right: '∫f(x)dx' },
+      { aspect: 'Power Rule', left: 'xⁿ → nxⁿ⁻¹', right: 'xⁿ → xⁿ⁺¹/(n+1)' },
+      { aspect: 'Relation', left: 'Inverse of integration', right: 'Inverse of differentiation' },
+    ]
+  },
+  {
+    title: 'Permutation vs Combination',
+    subject: 'maths',
+    items: [
+      { aspect: 'Order', left: 'Matters', right: 'Does not matter' },
+      { aspect: 'Formula', left: 'ⁿPᵣ = n!/(n-r)!', right: 'ⁿCᵣ = n!/[r!(n-r)!]' },
+      { aspect: 'Use case', left: 'Arrangements', right: 'Selections' },
+      { aspect: 'Example', left: 'Ranking 3 from 10', right: 'Choosing 3 from 10' },
+    ]
+  }
+];
+
+const neetOnlyTables = [
+  {
+    title: 'Mitosis vs Meiosis',
+    subject: 'biology',
+    items: [
+      { aspect: 'Occurs in', left: 'Somatic cells', right: 'Germ cells' },
+      { aspect: 'Divisions', left: '1 division', right: '2 divisions' },
+      { aspect: 'Daughter cells', left: '2 diploid cells', right: '4 haploid cells' },
+      { aspect: 'Purpose', left: 'Growth / repair', right: 'Sexual reproduction' },
+    ]
+  },
+  {
+    title: 'Arteries vs Veins',
+    subject: 'biology',
+    items: [
+      { aspect: 'Direction', left: 'Away from heart', right: 'Toward heart' },
+      { aspect: 'Blood type', left: 'Oxygenated (except pulmonary)', right: 'Deoxygenated (except pulmonary)' },
+      { aspect: 'Wall', left: 'Thick & elastic', right: 'Thin & less elastic' },
+      { aspect: 'Valves', left: 'Absent', right: 'Present' },
+    ]
+  },
+  {
+    title: 'C3 vs C4 Plants',
+    subject: 'biology',
+    items: [
+      { aspect: 'First stable product', left: '3-PGA (3 carbon)', right: 'OAA (4 carbon)' },
+      { aspect: 'CO₂ fixation enzyme', left: 'RuBisCO', right: 'PEP carboxylase' },
+      { aspect: 'Photorespiration', left: 'High', right: 'Negligible' },
+      { aspect: 'Example', left: 'Wheat, Rice, Oats', right: 'Sugarcane, Maize, Sorghum' },
+    ]
+  }
+];
+
+const commonTables = [
   {
     title: 'Rotation vs Revolution',
     subject: 'physics',
@@ -58,40 +115,30 @@ const differenceTables = [
       { aspect: 'Stereochemistry', left: 'Racemization', right: 'Inversion (Walden)' },
     ]
   },
-  {
-    title: 'Differentiation vs Integration',
-    subject: 'maths',
-    items: [
-      { aspect: 'Operation', left: 'Finding rate of change', right: 'Finding area under curve' },
-      { aspect: 'Symbol', left: 'd/dx or f\'(x)', right: '∫f(x)dx' },
-      { aspect: 'Power Rule', left: 'xⁿ → nxⁿ⁻¹', right: 'xⁿ → xⁿ⁺¹/(n+1)' },
-      { aspect: 'Relation', left: 'Inverse of integration', right: 'Inverse of differentiation' },
-    ]
-  },
-  {
-    title: 'Permutation vs Combination',
-    subject: 'maths',
-    items: [
-      { aspect: 'Order', left: 'Matters', right: 'Does not matter' },
-      { aspect: 'Formula', left: 'ⁿPᵣ = n!/(n-r)!', right: 'ⁿCᵣ = n!/[r!(n-r)!]' },
-      { aspect: 'Use case', left: 'Arrangements', right: 'Selections' },
-      { aspect: 'Example', left: 'Ranking 3 from 10', right: 'Choosing 3 from 10' },
-    ]
-  }
 ];
 
 const DifferenceTables: React.FC<DifferenceTablesProps> = ({ onBack }) => {
+  const { isNeet } = useExamMode();
   const [activeSubject, setActiveSubject] = useState<string>('all');
 
-  const filteredTables = activeSubject === 'all' 
-    ? differenceTables 
+  const differenceTables = isNeet
+    ? [...commonTables, ...neetOnlyTables]
+    : [...commonTables, ...jeeOnlyTables];
+
+  const filteredTables = activeSubject === 'all'
+    ? differenceTables
     : differenceTables.filter(t => t.subject === activeSubject);
 
   const subjectColors: Record<string, string> = {
     physics: 'border-physics',
     chemistry: 'border-chemistry',
-    maths: 'border-maths'
+    maths: 'border-maths',
+    biology: 'border-green-500',
   };
+
+  const subjects = isNeet
+    ? ['all', 'physics', 'chemistry', 'biology']
+    : ['all', 'physics', 'chemistry', 'maths'];
 
   return (
     <div className="space-y-6">
@@ -104,7 +151,7 @@ const DifferenceTables: React.FC<DifferenceTablesProps> = ({ onBack }) => {
 
       {/* Filter */}
       <div className="flex gap-2 flex-wrap">
-        {['all', 'physics', 'chemistry', 'maths'].map((subject) => (
+        {subjects.map((subject) => (
           <Button
             key={subject}
             variant={activeSubject === subject ? 'default' : 'outline'}
@@ -120,7 +167,7 @@ const DifferenceTables: React.FC<DifferenceTablesProps> = ({ onBack }) => {
       {/* Tables */}
       <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
         {filteredTables.map((table, idx) => (
-          <div 
+          <div
             key={idx}
             className={cn(
               'bg-card border-l-4 rounded-xl p-4',

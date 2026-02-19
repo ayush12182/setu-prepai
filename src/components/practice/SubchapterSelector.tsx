@@ -2,50 +2,86 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
 import { getSubchaptersByChapterId, Subchapter } from '@/data/subchapters';
-import { 
-  ChevronRight, 
+import {
+  ChevronRight,
   ChevronDown,
   Atom,
   FlaskConical,
   Calculator,
   Target
 } from 'lucide-react';
+import { useExamMode } from '@/contexts/ExamModeContext';
+import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
 import { cn } from '@/lib/utils';
+import { Dna } from 'lucide-react'; // Add Dna icon for Biology
 
 interface SubchapterSelectorProps {
   onSelect: (subchapter: Subchapter, chapter: Chapter, subject: string) => void;
 }
 
 const SubchapterSelector: React.FC<SubchapterSelectorProps> = ({ onSelect }) => {
-  const [selectedSubject, setSelectedSubject] = useState<'physics' | 'chemistry' | 'maths' | null>(null);
+  const { isNeet } = useExamMode();
+  const [selectedSubject, setSelectedSubject] = useState<'physics' | 'chemistry' | 'maths' | 'biology' | null>(null);
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
 
-  const subjects = [
-    { 
-      id: 'physics' as const, 
-      name: 'Physics', 
-      chapters: physicsChapters, 
-      icon: Atom,
-      color: 'bg-physics text-white',
-      hoverColor: 'hover:bg-physics/10 hover:border-physics/50'
-    },
-    { 
-      id: 'chemistry' as const, 
-      name: 'Chemistry', 
-      chapters: chemistryChapters, 
-      icon: FlaskConical,
-      color: 'bg-chemistry text-white',
-      hoverColor: 'hover:bg-chemistry/10 hover:border-chemistry/50'
-    },
-    { 
-      id: 'maths' as const, 
-      name: 'Mathematics', 
-      chapters: mathsChapters, 
-      icon: Calculator,
-      color: 'bg-maths text-white',
-      hoverColor: 'hover:bg-maths/10 hover:border-maths/50'
+  const getSubjects = () => {
+    if (isNeet) {
+      return [
+        {
+          id: 'biology' as const,
+          name: 'Biology',
+          chapters: neetBiologyChapters,
+          icon: Dna,
+          color: 'bg-emerald-500 text-white',
+          hoverColor: 'hover:bg-emerald-500/10 hover:border-emerald-500/50'
+        },
+        {
+          id: 'chemistry' as const,
+          name: 'Chemistry',
+          chapters: neetChemistryChapters,
+          icon: FlaskConical,
+          color: 'bg-chemistry text-white',
+          hoverColor: 'hover:bg-chemistry/10 hover:border-chemistry/50'
+        },
+        {
+          id: 'physics' as const,
+          name: 'Physics',
+          chapters: neetPhysicsChapters,
+          icon: Atom,
+          color: 'bg-physics text-white',
+          hoverColor: 'hover:bg-physics/10 hover:border-physics/50'
+        }
+      ];
     }
-  ];
+    return [
+      {
+        id: 'physics' as const,
+        name: 'Physics',
+        chapters: physicsChapters,
+        icon: Atom,
+        color: 'bg-physics text-white',
+        hoverColor: 'hover:bg-physics/10 hover:border-physics/50'
+      },
+      {
+        id: 'chemistry' as const,
+        name: 'Chemistry',
+        chapters: chemistryChapters,
+        icon: FlaskConical,
+        color: 'bg-chemistry text-white',
+        hoverColor: 'hover:bg-chemistry/10 hover:border-chemistry/50'
+      },
+      {
+        id: 'maths' as const,
+        name: 'Mathematics',
+        chapters: mathsChapters,
+        icon: Calculator,
+        color: 'bg-maths text-white',
+        hoverColor: 'hover:bg-maths/10 hover:border-maths/50'
+      }
+    ];
+  };
+
+  const subjects = getSubjects();
 
   const getChaptersForSubject = () => {
     if (!selectedSubject) return [];
@@ -89,8 +125,8 @@ const SubchapterSelector: React.FC<SubchapterSelectorProps> = ({ onSelect }) => 
       {selectedSubject && (
         <>
           <div className="flex items-center justify-between">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => {
                 setSelectedSubject(null);
                 setExpandedChapter(null);

@@ -1,6 +1,19 @@
 // JEE Subchapter (Topic) Structure - Coaching Grade
 // Each subchapter is the smallest clickable learning unit
 
+import {
+  cellBiologySubchapters,
+  humanPhysiologySubchapters,
+  plantPhysiologySubchapters,
+  geneticsSubchapters,
+  ecologySubchapters,
+  reproductionSubchapters,
+  biotechSubchapters,
+  animalKingdomSubchapters,
+  plantKingdomSubchapters,
+  humanHealthSubchapters
+} from './biologySubchapters';
+
 export interface Subchapter {
   id: string;
   chapterId: string;
@@ -2702,6 +2715,17 @@ export const subchaptersByChapter: Record<string, Subchapter[]> = {
   'math-10': coordinateGeomSubchapters,
   'math-11': vectors3DSubchapters,
   'math-12': trigonometrySubchapters,
+  // Biology
+  'neet-bio-1': cellBiologySubchapters,
+  'neet-bio-2': humanPhysiologySubchapters,
+  'neet-bio-3': plantPhysiologySubchapters,
+  'neet-bio-4': geneticsSubchapters,
+  'neet-bio-5': ecologySubchapters,
+  'neet-bio-6': reproductionSubchapters,
+  'neet-bio-7': biotechSubchapters,
+  'neet-bio-8': animalKingdomSubchapters,
+  'neet-bio-9': plantKingdomSubchapters,
+  'neet-bio-10': humanHealthSubchapters,
 };
 
 // Helper function to get subchapters by chapter ID

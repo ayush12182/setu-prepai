@@ -5,30 +5,77 @@ import { getFormulasBySubject, ChapterFormulas } from '@/data/cleanFormulas';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { renderFormula } from '@/lib/formulaRenderer';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 interface FormulaSheetProps {
   onBack: () => void;
 }
 
-type Subject = 'physics' | 'chemistry' | 'maths';
+type JeeSubject = 'physics' | 'chemistry' | 'maths';
+type NeetSubject = 'physics' | 'chemistry' | 'biology';
+type Subject = JeeSubject | NeetSubject;
+
+const neetBiologyFormulas: ChapterFormulas[] = [
+  {
+    chapter: 'Cell Biology',
+    formulas: [
+      { formula: 'Cell Theory: All living things = cells', explanation: 'Schleiden, Schwann & Virchow', examTip: 'Virchow added "cells from cells"' },
+      { formula: 'DNA → RNA → Protein (Central Dogma)', explanation: 'Flow of genetic information', examTip: 'Know exceptions: reverse transcriptase in retroviruses' },
+    ]
+  },
+  {
+    chapter: 'Genetics',
+    formulas: [
+      { formula: 'Genotypic ratio (monohybrid): 1:2:1', explanation: 'AA : Aa : aa from Aa × Aa cross', examTip: 'Phenotypic ratio is 3:1 for dominant/recessive' },
+      { formula: 'Phenotypic ratio (dihybrid): 9:3:3:1', explanation: 'From AaBb × AaBb', examTip: 'Classic Mendelian dihybrid ratio' },
+      { formula: 'Hardy-Weinberg: p² + 2pq + q² = 1', explanation: 'p + q = 1 where p = freq(A), q = freq(a)', examTip: 'Used to calculate allele/genotype frequencies' },
+    ]
+  },
+  {
+    chapter: 'Photosynthesis',
+    formulas: [
+      { formula: '6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂', explanation: 'Overall equation for photosynthesis', examTip: 'Light energy drives this reaction' },
+      { formula: 'Z-scheme: PS II → e⁻ transport → PS I', explanation: 'Electron flow in light reactions', examTip: 'Water splits at PS II, NADPH formed at PS I' },
+    ]
+  },
+  {
+    chapter: 'Human Physiology',
+    formulas: [
+      { formula: 'Cardiac Output = HR × SV', explanation: 'Heart Rate × Stroke Volume', examTip: 'Normal CO ≈ 5 L/min' },
+      { formula: 'GFR ≈ 125 mL/min', explanation: 'Glomerular Filtration Rate in humans', examTip: '180 L/day filtered, 1.5 L excreted as urine' },
+    ]
+  }
+];
 
 const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
-  const [activeSubject, setActiveSubject] = useState<Subject>('physics');
+  const { isNeet } = useExamMode();
+
+  const jeeSubjects: JeeSubject[] = ['physics', 'chemistry', 'maths'];
+  const neetSubjects: NeetSubject[] = ['physics', 'chemistry', 'biology'];
+
+  const [activeSubject, setActiveSubject] = useState<Subject>(isNeet ? 'biology' : 'physics');
   const [copiedFormula, setCopiedFormula] = useState<string | null>(null);
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
 
-  const chapters = getFormulasBySubject(activeSubject);
+  const getChapters = (): ChapterFormulas[] => {
+    if (activeSubject === 'biology') return neetBiologyFormulas;
+    return getFormulasBySubject(activeSubject as JeeSubject);
+  };
+
+  const chapters = getChapters();
 
   const subjectColors: Record<Subject, string> = {
     physics: 'bg-physics text-white',
     chemistry: 'bg-chemistry text-white',
-    maths: 'bg-maths text-white'
+    maths: 'bg-maths text-white',
+    biology: 'bg-green-600 text-white',
   };
 
   const subjectBorders: Record<Subject, string> = {
     physics: 'border-physics',
     chemistry: 'border-chemistry',
-    maths: 'border-maths'
+    maths: 'border-maths',
+    biology: 'border-green-500',
   };
 
   const copyFormula = (formula: string) => {
@@ -42,6 +89,8 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
     setExpandedChapter(expandedChapter === chapterName ? null : chapterName);
   };
 
+  const subjects = isNeet ? neetSubjects : jeeSubjects;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -53,7 +102,7 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
 
       {/* Subject Tabs */}
       <div className="flex gap-2">
-        {(['physics', 'chemistry', 'maths'] as Subject[]).map((subject) => (
+        {subjects.map((subject) => (
           <Button
             key={subject}
             variant={activeSubject === subject ? 'default' : 'outline'}
@@ -71,8 +120,8 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
       {/* Chapters */}
       <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-2">
         {chapters.map((chapter) => (
-          <div 
-            key={chapter.chapter} 
+          <div
+            key={chapter.chapter}
             className={cn(
               'bg-card border-l-4 rounded-xl overflow-hidden',
               subjectBorders[activeSubject]
@@ -97,7 +146,7 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
             {expandedChapter === chapter.chapter && (
               <div className="border-t border-border p-4 space-y-4">
                 {chapter.formulas.map((item, i) => (
-                  <div 
+                  <div
                     key={i}
                     className="bg-secondary/30 rounded-lg p-4 space-y-2"
                   >
@@ -147,6 +196,7 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
         {activeSubject === 'physics' && 'Physics: 12 chapters, 70+ formulas'}
         {activeSubject === 'chemistry' && 'Chemistry: 6 chapters, 30+ formulas'}
         {activeSubject === 'maths' && 'Maths: 12 chapters, 60+ formulas'}
+        {activeSubject === 'biology' && 'Biology: Key concepts, diagrams & mnemonics'}
       </div>
     </div>
   );

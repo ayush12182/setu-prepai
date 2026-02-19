@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +31,8 @@ interface OnboardingData {
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithPhone, verifyOTP, updateProfile, loading: authLoading } = useAuth();
-  
+  const { setExamMode } = useExamMode();
+
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,7 +42,7 @@ const AuthPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+
   // Onboarding state
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(1);
@@ -60,9 +62,7 @@ const AuthPage: React.FC = () => {
         setShowOnboarding(true);
       } else if (profile?.target_exam) {
         // Set exam mode from saved profile
-        const isNeet = profile.target_exam === 'NEET';
-        localStorage.setItem('examMode', isNeet ? 'neet' : 'jee');
-        document.documentElement.classList.toggle('neet-mode', isNeet);
+        // Exam mode will be synced by ExamModeContext
         navigate('/dashboard');
       }
       // If profile is null (still loading from trigger), wait for next render
@@ -110,7 +110,7 @@ const AuthPage: React.FC = () => {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateEmail(email) || !validatePassword(password)) return;
 
     setLoading(true);
@@ -142,7 +142,7 @@ const AuthPage: React.FC = () => {
 
   const handlePhoneAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validatePhone(phone)) return;
 
     setLoading(true);
@@ -175,7 +175,7 @@ const AuthPage: React.FC = () => {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateEmail(email)) return;
 
     setLoading(true);
@@ -197,14 +197,11 @@ const AuthPage: React.FC = () => {
     setLoading(true);
     try {
       const isNeet = onboardingData.exam === 'NEET';
-      localStorage.setItem('examMode', isNeet ? 'neet' : 'jee');
-      
-      // Apply NEET theme class immediately
-      document.documentElement.classList.toggle('neet-mode', isNeet);
-      
+      setExamMode(isNeet ? 'neet' : 'jee');
+
       // Small delay to ensure profile trigger has completed
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       await updateProfile({
         target_exam: onboardingData.exam,
         class: onboardingData.class as '11' | '12' | 'dropper',
@@ -240,7 +237,7 @@ const AuthPage: React.FC = () => {
       toast.error('Please select your weak subject');
       return;
     }
-    
+
     if (onboardingStep < 5) {
       setOnboardingStep((prev) => (prev + 1) as OnboardingStep);
     } else {
@@ -278,9 +275,8 @@ const AuthPage: React.FC = () => {
               {[1, 2, 3, 4, 5].map((step) => (
                 <div
                   key={step}
-                  className={`flex-1 h-1.5 rounded-full transition-colors ${
-                    step <= onboardingStep ? 'bg-accent' : 'bg-border'
-                  }`}
+                  className={`flex-1 h-1.5 rounded-full transition-colors ${step <= onboardingStep ? 'bg-accent' : 'bg-border'
+                    }`}
                 />
               ))}
             </div>
@@ -308,11 +304,10 @@ const AuthPage: React.FC = () => {
                       <button
                         key={exam.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, exam: exam.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                          onboardingData.exam === exam.value
-                            ? 'border-accent bg-accent/5'
-                            : 'border-border hover:border-muted-foreground/30'
-                        }`}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.exam === exam.value
+                          ? 'border-accent bg-accent/5'
+                          : 'border-border hover:border-muted-foreground/30'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -350,11 +345,10 @@ const AuthPage: React.FC = () => {
                       <button
                         key={option.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, class: option.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                          onboardingData.class === option.value
-                            ? 'border-accent bg-accent/5'
-                            : 'border-border hover:border-muted-foreground/30'
-                        }`}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.class === option.value
+                          ? 'border-accent bg-accent/5'
+                          : 'border-border hover:border-muted-foreground/30'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -393,11 +387,10 @@ const AuthPage: React.FC = () => {
                       <button
                         key={option.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, dailyHours: option.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                          onboardingData.dailyHours === option.value
-                            ? 'border-accent bg-accent/5'
-                            : 'border-border hover:border-muted-foreground/30'
-                        }`}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.dailyHours === option.value
+                          ? 'border-accent bg-accent/5'
+                          : 'border-border hover:border-muted-foreground/30'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -435,11 +428,10 @@ const AuthPage: React.FC = () => {
                       <button
                         key={option.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, coaching: option.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                          onboardingData.coaching === option.value
-                            ? 'border-accent bg-accent/5'
-                            : 'border-border hover:border-muted-foreground/30'
-                        }`}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.coaching === option.value
+                          ? 'border-accent bg-accent/5'
+                          : 'border-border hover:border-muted-foreground/30'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -471,24 +463,23 @@ const AuthPage: React.FC = () => {
                   <div className="space-y-3">
                     {(onboardingData.exam === 'NEET'
                       ? [
-                          { value: 'biology', label: 'Biology', desc: 'Botany, Zoology, NCERT-based', color: 'bg-green-500' },
-                          { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
-                          { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
-                        ]
+                        { value: 'biology', label: 'Biology', desc: 'Botany, Zoology, NCERT-based', color: 'bg-green-500' },
+                        { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
+                        { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
+                      ]
                       : [
-                          { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
-                          { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
-                          { value: 'maths', label: 'Mathematics', desc: 'Calculus, Algebra, Coordinate', color: 'bg-amber-500' },
-                        ]
+                        { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
+                        { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
+                        { value: 'maths', label: 'Mathematics', desc: 'Calculus, Algebra, Coordinate', color: 'bg-amber-500' },
+                      ]
                     ).map((subject) => (
                       <button
                         key={subject.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, weakSubject: subject.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                          onboardingData.weakSubject === subject.value
-                            ? 'border-accent bg-accent/5'
-                            : 'border-border hover:border-muted-foreground/30'
-                        }`}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.weakSubject === subject.value
+                          ? 'border-accent bg-accent/5'
+                          : 'border-border hover:border-muted-foreground/30'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -668,7 +659,7 @@ const AuthPage: React.FC = () => {
                         if (errors.email) validateEmail(e.target.value);
                       }}
                       onBlur={() => email && validateEmail(email)}
-                    className="h-12 pl-10 border-2 focus:border-primary"
+                      className="h-12 pl-10 border-2 focus:border-primary"
                     />
                   </div>
                   {errors.email && (
@@ -806,7 +797,7 @@ const AuthPage: React.FC = () => {
                     Enter the 6-digit code sent to {phone}
                   </p>
                 </div>
-                
+
                 <div className="flex justify-center">
                   <InputOTP
                     maxLength={6}
@@ -839,7 +830,7 @@ const AuthPage: React.FC = () => {
                 <p className="text-center text-sm text-muted-foreground">
                   Didn't receive it?{' '}
                   <button
-                    onClick={() => handlePhoneAuth({ preventDefault: () => {} } as React.FormEvent)}
+                    onClick={() => handlePhoneAuth({ preventDefault: () => { } } as React.FormEvent)}
                     className="text-accent hover:underline"
                     disabled={loading}
                   >

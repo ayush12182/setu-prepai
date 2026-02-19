@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 interface QuickQuizProps {
   onBack: () => void;
 }
 
-const quizQuestions = [
+const baseQuestions = [
   {
     question: 'At the highest point of projectile motion, what is the velocity?',
     options: ['Zero', 'Maximum', 'u cosθ', 'u sinθ'],
@@ -37,20 +38,6 @@ const quizQuestions = [
     explanation: 'Mg has stable 3s² configuration, removing electron needs more energy'
   },
   {
-    question: 'd/dx (tan x) = ?',
-    options: ['sec x', 'sec² x', 'cot x', 'cosec² x'],
-    correct: 1,
-    subject: 'maths',
-    explanation: 'd/dx (sin x/cos x) = (cos²x + sin²x)/cos²x = sec²x'
-  },
-  {
-    question: '∫(1/x) dx = ?',
-    options: ['x', 'ln x', 'ln|x| + C', '1/x²'],
-    correct: 2,
-    subject: 'maths',
-    explanation: 'Absolute value needed for negative x, and constant of integration'
-  },
-  {
     question: 'What is the SI unit of magnetic flux?',
     options: ['Tesla', 'Weber', 'Henry', 'Gauss'],
     correct: 1,
@@ -65,13 +52,6 @@ const quizQuestions = [
     explanation: 'In polar aprotic solvents, nucleophilicity follows basicity: F⁻ is strongest'
   },
   {
-    question: 'lim(x→0) sin x / x = ?',
-    options: ['0', '1', '∞', 'Does not exist'],
-    correct: 1,
-    subject: 'maths',
-    explanation: 'Standard limit. Use L\'Hospital or Taylor series: sin x ≈ x for small x'
-  },
-  {
     question: 'In photoelectric effect, if frequency is doubled:',
     options: ['KE doubles', 'KE more than doubles', 'Current doubles', 'No emission'],
     correct: 1,
@@ -80,7 +60,60 @@ const quizQuestions = [
   }
 ];
 
+const jeeQuestions = [
+  {
+    question: 'd/dx (tan x) = ?',
+    options: ['sec x', 'sec² x', 'cot x', 'cosec² x'],
+    correct: 1,
+    subject: 'maths',
+    explanation: 'd/dx (sin x/cos x) = (cos²x + sin²x)/cos²x = sec²x'
+  },
+  {
+    question: '∫(1/x) dx = ?',
+    options: ['x', 'ln x', 'ln|x| + C', '1/x²'],
+    correct: 2,
+    subject: 'maths',
+    explanation: 'Absolute value needed for negative x, and constant of integration'
+  },
+  {
+    question: 'lim(x→0) sin x / x = ?',
+    options: ['0', '1', '∞', 'Does not exist'],
+    correct: 1,
+    subject: 'maths',
+    explanation: 'Standard limit. Use L\'Hospital or Taylor series: sin x ≈ x for small x'
+  }
+];
+
+const neetQuestions = [
+  {
+    question: 'Which organelle is called the "powerhouse of the cell"?',
+    options: ['Nucleus', 'Ribosome', 'Mitochondria', 'Golgi body'],
+    correct: 2,
+    subject: 'biology',
+    explanation: 'Mitochondria produce ATP through cellular respiration — the main energy currency'
+  },
+  {
+    question: 'The process of producing RNA from DNA is called:',
+    options: ['Translation', 'Replication', 'Transcription', 'Transduction'],
+    correct: 2,
+    subject: 'biology',
+    explanation: 'Transcription = DNA → RNA, done by RNA polymerase in the nucleus'
+  },
+  {
+    question: 'Which part of the brain controls breathing and heartbeat?',
+    options: ['Cerebrum', 'Cerebellum', 'Medulla oblongata', 'Hypothalamus'],
+    correct: 2,
+    subject: 'biology',
+    explanation: 'Medulla oblongata (part of brainstem) regulates autonomic functions like respiration and heart rate'
+  }
+];
+
 const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
+  const { isNeet } = useExamMode();
+  const quizQuestions = isNeet
+    ? [...baseQuestions, ...neetQuestions]
+    : [...baseQuestions, ...jeeQuestions];
+
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
@@ -91,12 +124,12 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
 
   const handleSelect = (idx: number) => {
     if (answered[currentQ]) return;
-    
+
     setSelected(idx);
     const newAnswered = [...answered];
     newAnswered[currentQ] = true;
     setAnswered(newAnswered);
-    
+
     if (idx === question.correct) {
       setScore(s => s + 1);
     }
@@ -122,7 +155,8 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
   const subjectColors: Record<string, string> = {
     physics: 'bg-physics/10 text-physics',
     chemistry: 'bg-chemistry/10 text-chemistry',
-    maths: 'bg-maths/10 text-maths'
+    maths: 'bg-maths/10 text-maths',
+    biology: 'bg-green-500/10 text-green-600',
   };
 
   if (showResult) {
@@ -140,9 +174,9 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
             {score}/{quizQuestions.length}
           </div>
           <p className="text-muted-foreground mb-6">
-            {score >= 8 ? 'Excellent! Ready for exam.' : 
-             score >= 5 ? 'Good! Revise weak areas.' : 
-             'Need more practice. Review formulas.'}
+            {score >= 8 ? 'Excellent! Ready for exam.' :
+              score >= 5 ? 'Good! Revise weak areas.' :
+                'Need more practice. Review formulas.'}
           </p>
           <Button onClick={restart} className="gap-2">
             <RotateCcw className="w-4 h-4" />
@@ -170,12 +204,12 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
       {/* Progress */}
       <div className="flex gap-1">
         {quizQuestions.map((_, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className={cn(
               'h-1.5 flex-1 rounded-full transition-colors',
-              i === currentQ ? 'bg-primary' : 
-              i < currentQ ? 'bg-primary/50' : 'bg-secondary'
+              i === currentQ ? 'bg-primary' :
+                i < currentQ ? 'bg-primary/50' : 'bg-secondary'
             )}
           />
         ))}
@@ -188,7 +222,7 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
             {question.subject}
           </span>
         </div>
-        
+
         <p className="text-lg font-medium mb-6">{question.question}</p>
 
         <div className="space-y-3">
@@ -216,8 +250,8 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
                   showFeedback && isSelected && !isCorrect && 'bg-red-500 text-white border-red-500'
                 )}>
                   {showFeedback && isCorrect ? <CheckCircle className="w-4 h-4" /> :
-                   showFeedback && isSelected && !isCorrect ? <XCircle className="w-4 h-4" /> :
-                   String.fromCharCode(65 + i)}
+                    showFeedback && isSelected && !isCorrect ? <XCircle className="w-4 h-4" /> :
+                      String.fromCharCode(65 + i)}
                 </span>
                 {option}
               </button>

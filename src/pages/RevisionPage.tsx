@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { 
-  FileText, 
-  ListChecks, 
-  Table, 
-  Zap, 
+import {
+  FileText,
+  ListChecks,
+  Table,
+  Zap,
   BookOpen,
   ArrowRight,
   PenTool,
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import FormulaSheet from '@/components/revision/FormulaSheet';
 import DifferenceTables from '@/components/revision/DifferenceTables';
 import QuickQuiz from '@/components/revision/QuickQuiz';
@@ -81,25 +82,58 @@ const RevisionPage: React.FC = () => {
     }
   ];
 
-  const lastDayChecklist = [
-    { subject: 'physics', label: 'Physics', icon: '⚛️', items: [
-      { name: 'Formulas', slug: 'formulas' },
-      { name: 'Derivations', slug: 'derivations' },
-      { name: 'PYQ Patterns', slug: 'pyq-patterns' },
-      { name: 'Numerical Tips', slug: 'numerical-tips' },
-    ]},
-    { subject: 'chemistry', label: 'Chemistry', icon: '🧪', items: [
-      { name: 'Reactions', slug: 'reactions' },
-      { name: 'Named Reactions', slug: 'named-reactions' },
-      { name: 'Periodic Table', slug: 'periodic-table' },
-      { name: 'Organic Mechanisms', slug: 'organic-mechanisms' },
-    ]},
-    { subject: 'maths', label: 'Maths', icon: '📊', items: [
-      { name: 'Integration', slug: 'integration' },
-      { name: 'Limits', slug: 'limits' },
-      { name: 'Coordinate Geometry', slug: 'coordinate-geometry' },
-      { name: 'Vectors', slug: 'vectors' },
-    ]},
+  const { isNeet } = useExamMode(); // Get exam mode
+
+  const lastDayChecklist = isNeet ? [
+    {
+      subject: 'biology', label: 'Biology', icon: '🧬', items: [
+        { name: 'Diagrams', slug: 'diagrams' },
+        { name: 'Cycles & Pathways', slug: 'cycles' },
+        { name: 'Examples', slug: 'examples' },
+        { name: 'Scientist Names', slug: 'scientists' },
+      ]
+    },
+    {
+      subject: 'chemistry', label: 'Chemistry', icon: '🧪', items: [
+        { name: 'Reactions', slug: 'reactions' },
+        { name: 'Named Reactions', slug: 'named-reactions' },
+        { name: 'Periodic Table', slug: 'periodic-table' },
+        { name: 'Organic Mechanisms', slug: 'organic-mechanisms' },
+      ]
+    },
+    {
+      subject: 'physics', label: 'Physics', icon: '⚛️', items: [
+        { name: 'Formulas', slug: 'formulas' },
+        { name: 'Derivations', slug: 'derivations' },
+        { name: 'PYQ Patterns', slug: 'pyq-patterns' },
+        { name: 'Numerical Tips', slug: 'numerical-tips' },
+      ]
+    }
+  ] : [
+    {
+      subject: 'physics', label: 'Physics', icon: '⚛️', items: [
+        { name: 'Formulas', slug: 'formulas' },
+        { name: 'Derivations', slug: 'derivations' },
+        { name: 'PYQ Patterns', slug: 'pyq-patterns' },
+        { name: 'Numerical Tips', slug: 'numerical-tips' },
+      ]
+    },
+    {
+      subject: 'chemistry', label: 'Chemistry', icon: '🧪', items: [
+        { name: 'Reactions', slug: 'reactions' },
+        { name: 'Named Reactions', slug: 'named-reactions' },
+        { name: 'Periodic Table', slug: 'periodic-table' },
+        { name: 'Organic Mechanisms', slug: 'organic-mechanisms' },
+      ]
+    },
+    {
+      subject: 'maths', label: 'Maths', icon: '📊', items: [
+        { name: 'Integration', slug: 'integration' },
+        { name: 'Limits', slug: 'limits' },
+        { name: 'Coordinate Geometry', slug: 'coordinate-geometry' },
+        { name: 'Vectors', slug: 'vectors' },
+      ]
+    },
   ];
 
   const renderContent = () => {
@@ -135,7 +169,7 @@ const RevisionPage: React.FC = () => {
             backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
             backgroundSize: '24px 24px',
           }} />
-          
+
           <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -151,7 +185,7 @@ const RevisionPage: React.FC = () => {
                 Everything you need for last-minute revision — notes, formulas, quick tests, all in one place.
               </p>
             </div>
-            
+
             {/* Quick Stats */}
             <div className="flex gap-4">
               {[
@@ -176,7 +210,7 @@ const RevisionPage: React.FC = () => {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {revisionModes.map((mode, i) => (
-              <div 
+              <div
                 key={mode.id}
                 onClick={() => setActiveMode(mode.id)}
                 className={cn(
@@ -191,7 +225,7 @@ const RevisionPage: React.FC = () => {
                   "absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500",
                   mode.bgGlow
                 )} />
-                
+
                 <div className="relative">
                   {/* Icon + Emoji */}
                   <div className="flex items-center justify-between mb-4">
@@ -203,12 +237,12 @@ const RevisionPage: React.FC = () => {
                     </div>
                     <span className="text-2xl opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300">{mode.emoji}</span>
                   </div>
-                  
+
                   <h3 className="font-semibold text-lg text-foreground mb-1.5 group-hover:text-accent transition-colors">{mode.title}</h3>
                   <p className="text-sm text-muted-foreground mb-5 leading-relaxed">{mode.description}</p>
-                  
-                  <Button 
-                    variant="outline" 
+
+                  <Button
+                    variant="outline"
                     size="sm"
                     className="group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300"
                   >
@@ -224,7 +258,7 @@ const RevisionPage: React.FC = () => {
         {/* Last Day Checklist */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-[hsl(var(--setu-navy-light))] p-6 sm:p-8">
           <div className="absolute top-0 right-0 w-40 h-40 bg-accent/10 rounded-full blur-3xl" />
-          
+
           <div className="relative">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
@@ -271,8 +305,8 @@ const RevisionPage: React.FC = () => {
             <div>
               <p className="font-semibold text-foreground mb-1">Jeetu Bhaiya's Revision Strategy</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Beta, exam se 1 din pehle naya kuch mat padho. Sirf revision karo — 
-                formula sheets dekho, PYQ patterns yaad karo, aur confident raho. 
+                Beta, exam se 1 din pehle naya kuch mat padho. Sirf revision karo —
+                formula sheets dekho, PYQ patterns yaad karo, aur confident raho.
                 Sleep is important — kam se kam 6 ghante ki neend lo!
               </p>
             </div>

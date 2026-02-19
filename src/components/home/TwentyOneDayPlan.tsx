@@ -12,6 +12,8 @@ import {
   Flame, CheckCircle2, Zap, Brain, Video, ArrowRight, Quote, RotateCcw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useExamMode } from '@/contexts/ExamModeContext';
+import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
 import { cn } from '@/lib/utils';
 
 const jeetuQuotes = {
@@ -49,27 +51,34 @@ interface DayPlan {
   isPast: boolean;
 }
 
-const allChapters: (Chapter & { subjectName: string })[] = [
-  ...physicsChapters.map(c => ({ ...c, subjectName: 'Physics' })),
-  ...chemistryChapters.map(c => ({ ...c, subjectName: 'Chemistry' })),
-  ...mathsChapters.map(c => ({ ...c, subjectName: 'Maths' })),
-];
-
 const subjectColors: Record<string, string> = {
   Physics: 'bg-blue-500/15 text-blue-700 border-blue-200',
   Chemistry: 'bg-emerald-500/15 text-emerald-700 border-emerald-200',
   Maths: 'bg-violet-500/15 text-violet-700 border-violet-200',
+  Biology: 'bg-green-500/15 text-green-700 border-green-200',
 };
 
 const subjectDotColors: Record<string, string> = {
   Physics: 'bg-blue-500',
   Chemistry: 'bg-emerald-500',
   Maths: 'bg-violet-500',
+  Biology: 'bg-green-500',
 };
+
+// Combine all possible chapters for lookup
+const allChapters: (Chapter & { subjectName: string })[] = [
+  ...physicsChapters.map(c => ({ ...c, subjectName: 'Physics' })),
+  ...chemistryChapters.map(c => ({ ...c, subjectName: 'Chemistry' })),
+  ...mathsChapters.map(c => ({ ...c, subjectName: 'Maths' })),
+  ...neetBiologyChapters.map(c => ({ ...c, subjectName: 'Biology' })),
+  ...neetPhysicsChapters.map(c => ({ ...c, subjectName: 'Physics' })), // NEET Physics
+  ...neetChemistryChapters.map(c => ({ ...c, subjectName: 'Chemistry' })), // NEET Chemistry
+];
 
 const generateSchedule = (
   cycleStart: Date,
-  completedSubchapters: Set<string>
+  completedSubchapters: Set<string>,
+  mode: 'jee' | 'neet'
 ): DayPlan[] => {
   const allSubs = getAllSubchapters();
   const weightageOrder: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
@@ -82,14 +91,21 @@ const generateSchedule = (
     return (weightageOrder[ca?.weightage || 'Low'] || 2) - (weightageOrder[cb?.weightage || 'Low'] || 2);
   });
 
-  const subjects = ['Physics', 'Chemistry', 'Maths'];
+  const subjects = mode === 'neet' ? ['Biology', 'Chemistry', 'Physics'] : ['Physics', 'Chemistry', 'Maths'];
+
   const bySubject: Record<string, typeof sorted> = {
-    Physics: sorted.filter(s => allChapters.find(c => c.id === s.chapterId)?.subjectName === 'Physics'),
+    Physics: sorted.filter(s => {
+      const c = allChapters.find(ch => ch.id === s.chapterId);
+      // Filter by subject name AND check if chapter belongs to current mode
+      // This is a simplified check assuming IDs don't overlap or we prioritize based on mode
+      return c?.subjectName === 'Physics';
+    }),
     Chemistry: sorted.filter(s => allChapters.find(c => c.id === s.chapterId)?.subjectName === 'Chemistry'),
     Maths: sorted.filter(s => allChapters.find(c => c.id === s.chapterId)?.subjectName === 'Maths'),
+    Biology: sorted.filter(s => allChapters.find(c => c.id === s.chapterId)?.subjectName === 'Biology'),
   };
 
-  const counters = { Physics: 0, Chemistry: 0, Maths: 0 };
+  const counters = { Physics: 0, Chemistry: 0, Maths: 0, Biology: 0 };
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -100,8 +116,9 @@ const generateSchedule = (
       plans.push({
         day, subject: 'All', subjectId: 'all',
         chapter: 'Major Test', chapterId: 'major-test',
-        subchapter: '3-Hour Full JEE Simulation', subchapterId: 'major-test',
-        task: 'Full-length JEE Main test — 90 questions, 180 minutes',
+        subchapter: mode === 'neet' ? '3-Hour Full NEET Simulation' : '3-Hour Full JEE Simulation',
+        subchapterId: 'major-test',
+        task: mode === 'neet' ? 'Full-length NEET test — 200 questions, 200 minutes' : 'Full-length JEE Main test — 90 questions, 180 minutes',
         difficulty: 'Hard',
         isToday: isSameDay(cycleStart, day, today),
         isPast: isPastDay(cycleStart, day, today),
@@ -125,13 +142,24 @@ const generateSchedule = (
 
     const subjectIdx = (day - 1) % 3;
     const subjectName = subjects[subjectIdx];
-    const subPool = bySubject[subjectName];
-    const idx = counters[subjectName] % Math.max(subPool.length, 1);
+    const subPool = bySubject[subjectName] || [];
+
+    // Safety check if pool is empty
+    if (subPool.length === 0) continue;
+
+    const idx = counters[subjectName] % subPool.length;
     const sub = subPool[idx];
     counters[subjectName]++;
 
     if (!sub) continue;
+
+    // Find chapter for this subchapter
+    // We need to look up in the correct set of chapters for the current mode
+    // However, our allChapters array is mixed. 
+    // Since Subchapters link to ChapterIDs, and ChapterIDs should be unique enough or valid,
+    // we just find the chapter in allChapters.
     const chapter = allChapters.find(c => c.id === sub.chapterId);
+
     if (!chapter) continue;
 
     plans.push({
@@ -166,6 +194,7 @@ export const TwentyOneDayPlan: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
+  const { isNeet } = useExamMode();
   const queryClient = useQueryClient();
   const [selectedWeek, setSelectedWeek] = useState<number>(0);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -217,8 +246,8 @@ export const TwentyOneDayPlan: React.FC = () => {
     : (activeCycle ? new Date(activeCycle.start_date) : new Date());
 
   const schedule = useMemo(
-    () => generateSchedule(cycleStart, completedIds || new Set()),
-    [activeCycle, completedIds, cycleStart]
+    () => generateSchedule(cycleStart, completedIds || new Set(), isNeet ? 'neet' : 'jee'),
+    [activeCycle, completedIds, cycleStart, isNeet]
   );
 
   const weekStart = selectedWeek * 7;

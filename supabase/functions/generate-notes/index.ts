@@ -11,14 +11,14 @@ serve(async (req) => {
   }
 
   try {
-    const { chapterName, subject, topics = [], formulas = [], examTips = [], language = 'english' } = await req.json();
+    const { chapterName, subject, topics = [], formulas = [], examTips = [], language = 'english', examMode = 'JEE' } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are a Kota coaching senior making exam notes for JEE students at SETU.
+    const systemPrompt = `You are a Kota coaching senior making exam notes for ${examMode} students at SETU.
 
 You are NOT a teacher. You are NOT a textbook.
 You speak like sitting beside the student at night before exam.
@@ -131,10 +131,10 @@ CHAPTER NAME
 1. Chapter Overview (2-3 lines)
 Explain simply what this chapter teaches
 
-2. Exam Syllabus (JEE focused)
+2. Exam Syllabus (${examMode} focused)
 - Points here
 
-3. Important Formulas (STRICT MATH NOTATION)
+3. Key Formulas / Concepts
 Follow the structure: Formula -> Variables -> Explanation
 
 4. Important Results / Facts
@@ -154,7 +154,7 @@ END LINE (ALWAYS):
 
     const topicsText = Array.isArray(topics) && topics.length > 0 ? topics.join(', ') : 'All key topics';
     const formulasText = Array.isArray(formulas) && formulas.length > 0 ? formulas.join(' | ') : 'All important formulas';
-    const tipsText = Array.isArray(examTips) && examTips.length > 0 ? examTips.join(' | ') : 'Standard JEE exam strategies';
+    const tipsText = Array.isArray(examTips) && examTips.length > 0 ? examTips.join(' | ') : `Standard ${examMode} exam strategies`;
 
     const userPrompt = `Create 1-page revision notes for: ${chapterName} (${subject})
 
@@ -165,6 +165,7 @@ Formulas to include: ${formulasText}
 Exam tips: ${tipsText}
 
 STRICT REMINDERS:
+- If subject is Biology, focus on diagrams, examples, and NCERT lines.
 - Use STANDARD MATHEMATICAL NOTATION for formulas (e.g., "V = IR", not "V equals I times R").
 - Use symbols like ρ, θ, Δ, λ.
 - NO LaTeX code blocks, just plain text math.

@@ -5,23 +5,31 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
+import { useExamMode } from '@/contexts/ExamModeContext';
+import { cn } from '@/lib/utils';
 
-// JEE Mains 2026 Schedule (approximate dates)
-const JEE_MAINS_SESSIONS = [
-  { name: 'JEE Mains 2026 Session 1', date: new Date('2026-01-22'), endDate: new Date('2026-01-30') },
-  { name: 'JEE Mains 2026 Session 2', date: new Date('2026-04-01'), endDate: new Date('2026-04-15') },
-  { name: 'JEE Advanced 2026', date: new Date('2026-05-18'), endDate: new Date('2026-05-18') },
-  { name: 'JEE Mains 2027 Session 1', date: new Date('2027-01-20'), endDate: new Date('2027-01-28') },
-];
+// JEE & NEET Schedules
+const EXAM_SCHEDULE = {
+  jee: [
+    { name: 'JEE Mains 2026 Session 1', date: new Date('2026-01-22'), endDate: new Date('2026-01-30') },
+    { name: 'JEE Mains 2026 Session 2', date: new Date('2026-04-01'), endDate: new Date('2026-04-15') },
+    { name: 'JEE Advanced 2026', date: new Date('2026-05-18'), endDate: new Date('2026-05-18') },
+  ],
+  neet: [
+    { name: 'NEET UG 2026', date: new Date('2026-05-03'), endDate: new Date('2026-05-03') }, // First Sunday of May
+    { name: 'NEET UG 2027', date: new Date('2027-05-02'), endDate: new Date('2027-05-02') },
+  ]
+};
 
-const getNextJeeExam = () => {
+const getNextExam = (mode: 'jee' | 'neet') => {
   const now = new Date();
-  for (const exam of JEE_MAINS_SESSIONS) {
+  const sessions = EXAM_SCHEDULE[mode];
+  for (const exam of sessions) {
     if (exam.endDate > now) {
       return exam;
     }
   }
-  return JEE_MAINS_SESSIONS[JEE_MAINS_SESSIONS.length - 1];
+  return sessions[sessions.length - 1];
 };
 
 const getDaysRemaining = (targetDate: Date): number => {
@@ -30,31 +38,23 @@ const getDaysRemaining = (targetDate: Date): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-const getMotivationalMessage = (daysLeft: number, examType: 'jee' | 'major'): string => {
-  if (examType === 'jee') {
-    if (daysLeft <= 7) {
-      return "Bhai, ab final sprint hai. Revision pe focus, naya mat padho. You've got this! 💪";
-    } else if (daysLeft <= 30) {
-      return "Ek mahina hai, bhai. Daily 10 questions minimum. Consistency > Speed. Chal shuru karte hain!";
-    } else if (daysLeft <= 60) {
-      return "2 mahine hain abhi. Weak topics identify karo aur attack karo. Time hai!";
-    } else {
-      return "Bhai, preparation journey hai, destination nahi. Daily thoda karo, results automatic aayenge.";
-    }
-  } else {
-    if (daysLeft <= 3) {
-      return "Major Test aa raha hai! Revision mode on karo. Ye test tera real assessment hai. 🎯";
-    } else if (daysLeft <= 7) {
-      return "Ek hafte mein Major Test hai. Formula sheets revise karo, mock lagao!";
-    } else {
-      return "Major Test ke liye prepare ho raha hai? Daily practice karte raho, bhai!";
-    }
+const getMotivationalMessage = (daysLeft: number, examType: 'jee' | 'neet' | 'major'): string => {
+  if (examType === 'major') {
+    if (daysLeft <= 3) return "Major Test close! Revise high-weightage topics. 🎯";
+    return "Major Test preparation on track? Keep pushing!";
   }
+
+  // JEE/NEET messages
+  if (daysLeft <= 7) return "Final sprint! Focus on high-weightage topics only. You got this! 💪";
+  if (daysLeft <= 30) return "One month left. Daily Mock Test + Analysis is mandatory.";
+  return "Consistently stick to the plan. Daily improvement adds up.";
 };
 
 export const ExamReminders: React.FC = () => {
   const navigate = useNavigate();
-  
+  const { isNeet } = useExamMode();
+  const examModeKey = isNeet ? 'neet' : 'jee';
+
   // Fetch active major test cycle
   const { data: activeCycle } = useQuery({
     queryKey: ['active-major-test-cycle'],
@@ -64,48 +64,62 @@ export const ExamReminders: React.FC = () => {
         .select('*')
         .eq('is_active', true)
         .maybeSingle();
-      
       if (error) throw error;
       return data;
     }
   });
 
-  const nextJeeExam = getNextJeeExam();
-  const jeeDaysLeft = getDaysRemaining(nextJeeExam.date);
-  const jeeMessage = getMotivationalMessage(jeeDaysLeft, 'jee');
+  const nextExam = getNextExam(examModeKey);
+  const daysLeft = getDaysRemaining(nextExam.date);
+  const examMessage = getMotivationalMessage(daysLeft, examModeKey);
 
   const majorTestDate = activeCycle ? new Date(activeCycle.test_date) : null;
   const majorTestDaysLeft = majorTestDate ? getDaysRemaining(majorTestDate) : null;
   const majorTestMessage = majorTestDaysLeft !== null ? getMotivationalMessage(majorTestDaysLeft, 'major') : null;
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-IN', { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric' 
+    return date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
     });
   };
 
+  const themeColor = isNeet ? 'emerald' : 'amber';
+  const ThemeIcon = isNeet ? Calendar : Trophy;
+
   return (
     <div className="grid grid-cols-1 gap-4 h-full">
-      {/* JEE Mains Reminder */}
-      <Card className="bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 border-amber-500/20 overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+      {/* Exam Reminder Card */}
+      <Card className={cn(
+        "overflow-hidden relative border-opacity-20",
+        isNeet ? "bg-emerald-500/5 border-emerald-500/20" : "bg-amber-500/5 border-amber-500/20"
+      )}>
+        <div className={cn(
+          "absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 opacity-10",
+          isNeet ? "bg-emerald-500" : "bg-amber-500"
+        )} />
+
         <CardContent className="p-5 relative z-10">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <Trophy className="w-5 h-5 text-amber-500" />
+              <div className={cn(
+                "p-2 rounded-lg bg-opacity-20",
+                isNeet ? "bg-emerald-500/20" : "bg-amber-500/20"
+              )}>
+                <ThemeIcon className={cn("w-5 h-5", isNeet ? "text-emerald-500" : "text-amber-500")} />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground font-medium">UPCOMING EXAM</p>
-                <h3 className="font-semibold text-foreground">{nextJeeExam.name}</h3>
+                <h3 className="font-semibold text-foreground">{nextExam.name}</h3>
               </div>
             </div>
             <div className="text-right">
-              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+              <div className={cn("flex items-center gap-1 text-2xl font-bold",
+                isNeet ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"
+              )}>
                 <Flame className="w-4 h-4" />
-                <span className="text-2xl font-bold">{jeeDaysLeft}</span>
+                <span>{daysLeft}</span>
               </div>
               <p className="text-xs text-muted-foreground">days left</p>
             </div>
@@ -113,19 +127,25 @@ export const ExamReminders: React.FC = () => {
 
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
             <Calendar className="w-3 h-3" />
-            <span>{formatDate(nextJeeExam.date)} - {formatDate(nextJeeExam.endDate)}</span>
+            <span>{formatDate(nextExam.date)}{nextExam.date.getTime() !== nextExam.endDate.getTime() ? ` - ${formatDate(nextExam.endDate)}` : ''}</span>
           </div>
 
-          <div className="bg-amber-500/10 rounded-lg p-3 mb-3">
-            <p className="text-sm text-amber-700 dark:text-amber-300 font-medium leading-relaxed">
-              💡 {jeeMessage}
+          <div className={cn("rounded-lg p-3 mb-3",
+            isNeet ? "bg-emerald-500/10" : "bg-amber-500/10"
+          )}>
+            <p className={cn("text-sm font-medium leading-relaxed",
+              isNeet ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"
+            )}>
+              💡 {examMessage}
             </p>
           </div>
 
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full border-amber-500/30 hover:bg-amber-500/10 text-amber-700 dark:text-amber-300"
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn("w-full hover:bg-opacity-10",
+              isNeet ? "border-emerald-500/30 hover:bg-emerald-500 text-emerald-700 dark:text-emerald-300" : "border-amber-500/30 hover:bg-amber-500 text-amber-700 dark:text-amber-300"
+            )}
             onClick={() => navigate('/learn')}
           >
             Start Preparing
@@ -134,7 +154,7 @@ export const ExamReminders: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Major Test Reminder */}
+      {/* Major Test Reminder - Reusing existing generic styling or could adapt too */}
       <Card className="bg-gradient-to-br from-primary/10 via-blue-500/10 to-indigo-500/10 border-primary/20 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2" />
         <CardContent className="p-5 relative z-10">
@@ -164,11 +184,6 @@ export const ExamReminders: React.FC = () => {
               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
                 <Calendar className="w-3 h-3" />
                 <span>Test Date: {formatDate(majorTestDate)}</span>
-                {activeCycle && (
-                  <span className="bg-primary/20 text-primary text-[10px] px-2 py-0.5 rounded-full font-medium">
-                    Cycle {activeCycle.cycle_number}
-                  </span>
-                )}
               </div>
 
               <div className="bg-primary/10 rounded-lg p-3 mb-3">
@@ -177,8 +192,8 @@ export const ExamReminders: React.FC = () => {
                 </p>
               </div>
 
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 className="w-full"
                 onClick={() => navigate('/major-test')}
               >
@@ -194,8 +209,8 @@ export const ExamReminders: React.FC = () => {
                 </p>
               </div>
 
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant="outline"
                 className="w-full border-primary/30 hover:bg-primary/10"
                 onClick={() => navigate('/major-test')}

@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, Loader2, Sparkles } from 'lucide-react';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
+import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 interface OnePageNotesProps {
   onBack: () => void;
 }
 
-type SubjectFilter = 'all' | 'physics' | 'chemistry' | 'maths';
+type SubjectFilter = 'all' | 'physics' | 'chemistry' | 'maths' | 'botany' | 'zoology';
 
 const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
   const [activeFilter, setActiveFilter] = useState<SubjectFilter>('all');
@@ -25,26 +27,57 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
     maths: mathsChapters
   };
 
+  const { isNeet } = useExamMode();
+
+  const getSubSubjects = () => {
+    // Split NEET Biology into Botany and Zoology
+    const botanyChapters = neetBiologyChapters.filter(c =>
+      ['neet-bio-1', 'neet-bio-3', 'neet-bio-4', 'neet-bio-5', 'neet-bio-9'].includes(c.id)
+    );
+    const zoologyChapters = neetBiologyChapters.filter(c =>
+      ['neet-bio-2', 'neet-bio-6', 'neet-bio-7', 'neet-bio-8', 'neet-bio-10'].includes(c.id)
+    );
+    return { botanyChapters, zoologyChapters };
+  };
+
   const getFilteredChapters = () => {
     if (activeFilter === 'all') {
+      if (isNeet) {
+        const { botanyChapters, zoologyChapters } = getSubSubjects();
+        return [
+          { subject: 'Physics', chapters: neetPhysicsChapters, color: 'border-physics' },
+          { subject: 'Chemistry', chapters: neetChemistryChapters, color: 'border-chemistry' },
+          { subject: 'Botany', chapters: botanyChapters, color: 'border-emerald-500' },
+          { subject: 'Zoology', chapters: zoologyChapters, color: 'border-orange-500' }
+        ];
+      }
       return [
         { subject: 'Physics', chapters: physicsChapters, color: 'border-physics' },
         { subject: 'Chemistry', chapters: chemistryChapters, color: 'border-chemistry' },
         { subject: 'Maths', chapters: mathsChapters, color: 'border-maths' }
       ];
     }
-    const subjectMap = {
-      physics: { subject: 'Physics', chapters: physicsChapters, color: 'border-physics' },
-      chemistry: { subject: 'Chemistry', chapters: chemistryChapters, color: 'border-chemistry' },
-      maths: { subject: 'Maths', chapters: mathsChapters, color: 'border-maths' }
+
+    const { botanyChapters, zoologyChapters } = getSubSubjects();
+
+    const subjectMap: Record<string, any> = {
+      physics: { subject: 'Physics', chapters: isNeet ? neetPhysicsChapters : physicsChapters, color: 'border-physics' },
+      chemistry: { subject: 'Chemistry', chapters: isNeet ? neetChemistryChapters : chemistryChapters, color: 'border-chemistry' },
+      maths: { subject: 'Maths', chapters: mathsChapters, color: 'border-maths' },
+      botany: { subject: 'Botany', chapters: botanyChapters, color: 'border-emerald-500' },
+      zoology: { subject: 'Zoology', chapters: zoologyChapters, color: 'border-orange-500' }
     };
-    return [subjectMap[activeFilter]];
+
+    return subjectMap[activeFilter] ? [subjectMap[activeFilter]] : [];
   };
 
   const subjectBadgeColors: Record<string, string> = {
     physics: 'bg-physics/10 text-physics',
     chemistry: 'bg-chemistry/10 text-chemistry',
-    maths: 'bg-maths/10 text-maths'
+    maths: 'bg-maths/10 text-maths',
+    biology: 'bg-emerald-500/10 text-emerald-500', // Default fallback
+    botany: 'bg-emerald-500/10 text-emerald-500',
+    zoology: 'bg-orange-500/10 text-orange-500'
   };
 
   const generateNotes = async (chapter: Chapter) => {
@@ -66,7 +99,9 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
           formulas: chapter.keyFormulas,
           examTips: chapter.examTips,
           pyqData: chapter.pyqData,
-          language
+          pyqData: chapter.pyqData,
+          language,
+          examMode: isNeet ? 'NEET' : 'JEE'
         }),
       });
 
@@ -122,24 +157,36 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       return f.replace(/=/g, ' = '); // Just ensure spacing around equals
     });
 
+    const examName = isNeet ? 'NEET' : 'JEE';
+    const biologyContext = 'Yeh chapter biology ka foundation hai. NEET mein line-by-line NCERT se questions aate hain. Diagrams aur examples ratt lo.';
+
+    let subjectContext = '';
+    if (chapter.subject === 'physics') {
+      subjectContext = `Yeh chapter physics ke core concepts cover karta hai. ${examName} mein direct questions aate hain, especially numerical type.`;
+    } else if (chapter.subject === 'chemistry') {
+      subjectContext = `Is chapter mein important reactions aur concepts hain jo ${examName} mein regularly pooche jaate hain.`;
+    } else if (chapter.subject === 'maths') {
+      subjectContext = 'Mathematics ka yeh chapter problem solving ke liye bahut important hai. Formulas yaad karo aur practice karo.';
+    } else {
+      subjectContext = biologyContext;
+    }
+
     return `${chapter.name.toUpperCase()}
 
 What this chapter is about
-${chapter.subject === 'physics' ? 'Yeh chapter physics ke core concepts cover karta hai. JEE mein direct questions aate hain, especially numerical type.' :
-        chapter.subject === 'chemistry' ? 'Is chapter mein important reactions aur concepts hain jo JEE mein regularly pooche jaate hain.' :
-          'Mathematics ka yeh chapter problem solving ke liye bahut important hai. Formulas yaad karo aur practice karo.'}
+${subjectContext}
 
 Chapter syllabus (exam-oriented)
 ${chapter.topics.map(t => `- ${t}`).join('\n')}
 
-What JEE actually asks from this chapter
+What ${examName} actually asks from this chapter
 Post-2020 mein ${chapter.pyqData.postCovid} questions aaye hain is chapter se. Trending concepts: ${chapter.pyqData.trendingConcepts.join(', ')}.
 
 Core ideas you must remember
 ${chapter.topics.slice(0, 5).map(t => `- ${t} ka basic concept samjho`).join('\n')}
 
-Key formulas (MATH NOTATION)
-${formattedFormulas.map(f => `- ${f}`).join('\n')}
+Key formulas / Concepts
+${formattedFormulas.length > 0 ? formattedFormulas.map(f => `- ${f}`).join('\n') : 'No specific formulas. Focus on definitions and diagrams.'}
 
 Common mistakes students make
 ${chapter.examTips.map(t => `- ${t}`).join('\n')}
@@ -150,7 +197,7 @@ PYQ focus (Post-COVID priority)
 - Focus areas: ${chapter.pyqData.trendingConcepts.join(', ')}
 
 How to revise in last 24 hours
-1. Pehle saare formulas ek baar likh ke dekho
+1. Pehle saare concepts/formulas ek baar likh ke dekho
 2. Previous 5 years ke PYQs solve karo
 3. Common mistakes wali list dekh lo
 
@@ -197,7 +244,9 @@ Beta, itna clear ho gaya na? Ab PYQs lagao, bas wahi exam hai.`;
           </Button>
           <div>
             <h2 className="text-xl font-bold">{selectedChapter.name}</h2>
-            <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize', subjectBadgeColors[selectedChapter.subject])}>
+            <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize',
+              subjectBadgeColors[selectedChapter.subject] || subjectBadgeColors['biology']
+            )}>
               {selectedChapter.subject}
             </span>
           </div>
@@ -234,7 +283,10 @@ Beta, itna clear ho gaya na? Ab PYQs lagao, bas wahi exam hai.`;
 
       {/* Filter Tabs */}
       <div className="flex gap-2 flex-wrap">
-        {(['all', 'physics', 'chemistry', 'maths'] as SubjectFilter[]).map((filter) => (
+        {(isNeet
+          ? ['all', 'physics', 'chemistry', 'botany', 'zoology'] as SubjectFilter[]
+          : ['all', 'physics', 'chemistry', 'maths'] as SubjectFilter[]
+        ).map((filter) => (
           <Button
             key={filter}
             variant={activeFilter === filter ? 'default' : 'outline'}
