@@ -55,14 +55,19 @@ const AuthPage: React.FC = () => {
   // Check if user needs onboarding
   useEffect(() => {
     if (user && !authLoading) {
-      // Check if profile is complete
+      if (showOnboarding) return; // Already in onboarding, don't redirect
       if (profile && !profile.target_exam) {
         setShowOnboarding(true);
       } else if (profile?.target_exam) {
+        // Set exam mode from saved profile
+        const isNeet = profile.target_exam === 'NEET';
+        localStorage.setItem('examMode', isNeet ? 'neet' : 'jee');
+        document.documentElement.classList.toggle('neet-mode', isNeet);
         navigate('/dashboard');
       }
+      // If profile is null (still loading from trigger), wait for next render
     }
-  }, [user, profile, authLoading, navigate]);
+  }, [user, profile, authLoading, navigate, showOnboarding]);
 
   const validateEmail = (value: string) => {
     try {
@@ -191,18 +196,24 @@ const AuthPage: React.FC = () => {
   const handleOnboardingComplete = async () => {
     setLoading(true);
     try {
-      // Set exam mode based on selection
       const isNeet = onboardingData.exam === 'NEET';
       localStorage.setItem('examMode', isNeet ? 'neet' : 'jee');
+      
+      // Apply NEET theme class immediately
+      document.documentElement.classList.toggle('neet-mode', isNeet);
+      
+      // Small delay to ensure profile trigger has completed
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       await updateProfile({
         target_exam: onboardingData.exam,
         class: onboardingData.class as '11' | '12' | 'dropper',
       });
       toast.success('Chalo shuru karte hain! 🎯');
-      navigate(isNeet ? '/dashboard' : '/dashboard');
+      navigate('/dashboard');
     } catch (error: any) {
-      toast.error('Profile update mein problem hui');
+      console.error('Onboarding error:', error);
+      toast.error('Profile update mein problem hui, please try again');
     } finally {
       setLoading(false);
     }

@@ -77,7 +77,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setSubscription(prev => ({ ...prev, loading: true }));
       const { data, error } = await supabase.functions.invoke('check-subscription');
-      if (error) throw error;
+      if (error) {
+        // Silently handle - subscription check is non-critical
+        console.warn('Subscription check skipped:', error.message);
+        setSubscription(prev => ({ ...prev, loading: false }));
+        return;
+      }
       setSubscription({
         subscribed: data?.subscribed ?? false,
         productId: data?.product_id ?? null,
@@ -85,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading: false,
       });
     } catch (error) {
-      console.error('Error checking subscription:', error);
+      console.warn('Subscription check failed silently');
       setSubscription(prev => ({ ...prev, loading: false }));
     }
   }, []);
@@ -178,11 +183,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) throw new Error('No user logged in');
-    const { error } = await supabase
+    
+    // Try update first, if no rows affected, upsert
+    const { data, error } = await supabase
       .from('profiles')
       .update(updates)
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .select();
+    
     if (error) throw error;
+    
+    // If update matched no rows, insert instead
+    if (!data || data.length === 0) {
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert({ user_id: user.id, ...updates });
+      if (insertError) throw insertError;
+    }
+    
     await fetchProfile(user.id);
   };
 
