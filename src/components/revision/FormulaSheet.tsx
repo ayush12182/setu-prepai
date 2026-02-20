@@ -18,6 +18,7 @@ type Subject = JeeSubject | NeetSubject;
 const neetBiologyFormulas: ChapterFormulas[] = [
   {
     chapter: 'Cell Biology',
+    subject: 'biology',
     formulas: [
       { formula: 'Cell Theory: All living things = cells', explanation: 'Schleiden, Schwann & Virchow', examTip: 'Virchow added "cells from cells"' },
       { formula: 'DNA → RNA → Protein (Central Dogma)', explanation: 'Flow of genetic information', examTip: 'Know exceptions: reverse transcriptase in retroviruses' },
@@ -25,6 +26,7 @@ const neetBiologyFormulas: ChapterFormulas[] = [
   },
   {
     chapter: 'Genetics',
+    subject: 'biology',
     formulas: [
       { formula: 'Genotypic ratio (monohybrid): 1:2:1', explanation: 'AA : Aa : aa from Aa × Aa cross', examTip: 'Phenotypic ratio is 3:1 for dominant/recessive' },
       { formula: 'Phenotypic ratio (dihybrid): 9:3:3:1', explanation: 'From AaBb × AaBb', examTip: 'Classic Mendelian dihybrid ratio' },
@@ -33,6 +35,7 @@ const neetBiologyFormulas: ChapterFormulas[] = [
   },
   {
     chapter: 'Photosynthesis',
+    subject: 'biology',
     formulas: [
       { formula: '6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂', explanation: 'Overall equation for photosynthesis', examTip: 'Light energy drives this reaction' },
       { formula: 'Z-scheme: PS II → e⁻ transport → PS I', explanation: 'Electron flow in light reactions', examTip: 'Water splits at PS II, NADPH formed at PS I' },
@@ -40,6 +43,7 @@ const neetBiologyFormulas: ChapterFormulas[] = [
   },
   {
     chapter: 'Human Physiology',
+    subject: 'biology',
     formulas: [
       { formula: 'Cardiac Output = HR × SV', explanation: 'Heart Rate × Stroke Volume', examTip: 'Normal CO ≈ 5 L/min' },
       { formula: 'GFR ≈ 125 mL/min', explanation: 'Glomerular Filtration Rate in humans', examTip: '180 L/day filtered, 1.5 L excreted as urine' },
