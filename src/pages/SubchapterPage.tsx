@@ -256,14 +256,18 @@ const SubchapterPage: React.FC = () => {
           <TabsContent value="practice" className="mt-6 space-y-6">
             {activePracticeMode === 'integer' ? (
               <IntegerTypePractice
+                subchapterId={subchapter.id}
                 subchapterName={subchapter.name}
+                chapterId={chapter.id}
                 chapterName={chapter.name}
                 subject={chapter.subject}
                 onBack={() => setActivePracticeMode(null)}
               />
             ) : activePracticeMode === 'match' ? (
               <MatchTheFollowing
+                subchapterId={subchapter.id}
                 subchapterName={subchapter.name}
+                chapterId={chapter.id}
                 chapterName={chapter.name}
                 subject={chapter.subject}
                 onBack={() => setActivePracticeMode(null)}
