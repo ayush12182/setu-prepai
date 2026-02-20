@@ -20,6 +20,7 @@ interface IntegerTypePracticeProps {
     chapterId: string;
     chapterName: string;
     subject: string;
+    examMode?: 'JEE' | 'NEET';
     onBack: () => void;
 }
 
@@ -49,6 +50,7 @@ const IntegerTypePractice: React.FC<IntegerTypePracticeProps> = ({
     chapterId,
     chapterName,
     subject,
+    examMode = 'JEE',
     onBack,
 }) => {
     const [questions, setQuestions] = useState<AIIntegerQuestion[]>([]);
@@ -76,6 +78,7 @@ const IntegerTypePractice: React.FC<IntegerTypePracticeProps> = ({
                         difficulty: 'medium',
                         type: 'INTEGER',
                         count: 5,
+                        examMode,
                     },
                 });
 

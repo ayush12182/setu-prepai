@@ -21,6 +21,7 @@ interface MatchTheFollowingProps {
     chapterId: string;
     chapterName: string;
     subject: string;
+    examMode?: 'JEE' | 'NEET';
     onBack: () => void;
 }
 
@@ -76,6 +77,7 @@ const MatchTheFollowing: React.FC<MatchTheFollowingProps> = ({
     chapterId,
     chapterName,
     subject,
+    examMode = 'JEE',
     onBack,
 }) => {
     const [questions, setQuestions] = useState<AIMatchQuestion[]>([]);
@@ -108,6 +110,7 @@ const MatchTheFollowing: React.FC<MatchTheFollowingProps> = ({
                         difficulty: 'medium',
                         type: 'MATCH',
                         count: 3,
+                        examMode,
                     },
                 });
 

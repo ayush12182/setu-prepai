@@ -9,6 +9,7 @@ import MixedTestDialog from '@/components/test/MixedTestDialog';
 import PYQTestDialog from '@/components/test/PYQTestDialog';
 import TestExecution from '@/components/test/TestExecution';
 import { ChapterSelection } from '@/hooks/useTestQuestions';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 type TestType = 'chapter' | 'mixed' | 'pyq' | 'adaptive' | 'major';
 type ExecutableTestType = 'chapter' | 'mixed' | 'pyq' | 'adaptive';
@@ -23,18 +24,28 @@ interface TestConfig {
 
 const TestPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isNeet } = useExamMode();
   const [showChapterSelect, setShowChapterSelect] = useState(false);
   const [showMixedSelect, setShowMixedSelect] = useState(false);
   const [showPYQSelect, setShowPYQSelect] = useState(false);
   const [activeTest, setActiveTest] = useState<TestConfig | null>(null);
 
+  const examLabel = isNeet ? 'NEET' : 'JEE Main';
+  const majorTestDesc = isNeet
+    ? 'Full NEET UG simulation — 3 hours, 180 questions, no pause. The real deal.'
+    : 'Full JEE Main simulation — 3 hours, 90 questions, no pause. The real deal.';
+  const majorTestQuestions = isNeet ? '180' : '90';
+  const pyqDesc = isNeet
+    ? 'Real NEET previous year questions from 2005–2024'
+    : 'Real previous year questions from 2004–2024';
+
   const testTypes = [
     {
       title: 'Major Test',
-      description: 'Full JEE Main simulation — 3 hours, 90 questions, no pause. The real deal.',
+      description: majorTestDesc,
       icon: Trophy,
       time: '180 min',
-      questions: '90',
+      questions: majorTestQuestions,
       action: 'major' as TestType,
       highlight: true,
       gradient: 'from-amber-500 to-orange-600',
@@ -66,7 +77,7 @@ const TestPage: React.FC = () => {
     },
     {
       title: 'PYQ Test',
-      description: 'Real previous year questions from 2004–2024',
+      description: pyqDesc,
       icon: Clock,
       time: '45 min',
       questions: '25',

@@ -14,6 +14,7 @@ import { NotesSection } from '@/components/subchapter/NotesSection';
 import TestExecution from '@/components/test/TestExecution';
 import IntegerTypePractice from '@/components/practice/IntegerTypePractice';
 import MatchTheFollowing from '@/components/practice/MatchTheFollowing';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import {
   BookOpen,
   Target,
@@ -39,6 +40,8 @@ const SubchapterPage: React.FC = () => {
 
   const subchapter = subchapterId ? getSubchapterById(subchapterId) : undefined;
   const chapter = subchapter ? getChapterById(subchapter.chapterId) : undefined;
+  const { isNeet } = useExamMode();
+  const examMode = isNeet ? 'NEET' : 'JEE';
 
   const { notes, isLoading, error, generateNotes } = useSubchapterNotes();
 
@@ -261,6 +264,7 @@ const SubchapterPage: React.FC = () => {
                 chapterId={chapter.id}
                 chapterName={chapter.name}
                 subject={chapter.subject}
+                examMode={examMode}
                 onBack={() => setActivePracticeMode(null)}
               />
             ) : activePracticeMode === 'match' ? (
@@ -270,6 +274,7 @@ const SubchapterPage: React.FC = () => {
                 chapterId={chapter.id}
                 chapterName={chapter.name}
                 subject={chapter.subject}
+                examMode={examMode}
                 onBack={() => setActivePracticeMode(null)}
               />
             ) : (

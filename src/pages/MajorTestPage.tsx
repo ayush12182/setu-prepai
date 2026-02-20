@@ -6,6 +6,7 @@ import MajorTestExam from '@/components/major-test/MajorTestExam';
 import MajorTestResults from '@/components/major-test/MajorTestResults';
 import MajorTestMentorMessage from '@/components/major-test/MajorTestMentorMessage';
 import { Loader2 } from 'lucide-react';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 type TestPhase = 'warning' | 'loading' | 'exam' | 'results' | 'mentor';
 
@@ -21,6 +22,7 @@ interface TestResultsData {
 
 const MajorTestPage: React.FC = () => {
   const navigate = useNavigate();
+  const { isNeet } = useExamMode();
   const [phase, setPhase] = useState<TestPhase>('warning');
   const [results, setResults] = useState<TestResultsData | null>(null);
   const [totalTimeUsed, setTotalTimeUsed] = useState(0);
@@ -56,7 +58,7 @@ const MajorTestPage: React.FC = () => {
       setTotalTimeUsed((180 * 60) - timeRemaining);
       setResults(result);
       setPhase('results');
-      
+
       // Exit fullscreen
       if (document.fullscreenElement) {
         document.exitFullscreen();
@@ -87,12 +89,12 @@ const MajorTestPage: React.FC = () => {
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
           <p className="text-lg text-muted-foreground">
-            {phase === 'loading' && !questions.length 
-              ? 'Preparing your Major Test...' 
+            {phase === 'loading' && !questions.length
+              ? 'Preparing your Major Test...'
               : 'Submitting your test...'}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Generating 90 JEE-level questions
+            Generating {isNeet ? '180 NEET-level' : '90 JEE-level'} questions
           </p>
         </div>
       </div>
@@ -145,7 +147,7 @@ const MajorTestPage: React.FC = () => {
   if (phase === 'mentor' && results) {
     const weakChapters = results.chapterAnalysis.filter(c => c.strengthLevel === 'weak');
     const strongChapters = results.chapterAnalysis.filter(c => c.strengthLevel === 'strong');
-    
+
     return (
       <MajorTestMentorMessage
         score={results.totalScore}

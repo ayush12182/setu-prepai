@@ -15,6 +15,7 @@ interface QuestionRequest {
   difficulty: "easy" | "medium" | "hard";
   type?: "MCQ" | "INTEGER" | "MATCH";
   count?: number;
+  examMode?: "JEE" | "NEET";
 }
 
 serve(async (req) => {
@@ -23,7 +24,9 @@ serve(async (req) => {
   }
 
   try {
-    const { subchapterId, subchapterName, chapterId, chapterName, subject, difficulty, type = "MCQ", count = 5 }: QuestionRequest = await req.json();
+    const { subchapterId, subchapterName, chapterId, chapterName, subject, difficulty, type = "MCQ", count = 5, examMode = "JEE" }: QuestionRequest = await req.json();
+    const isNeet = examMode === "NEET";
+    const examLabel = isNeet ? "NEET UG" : "JEE";
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -59,19 +62,20 @@ serve(async (req) => {
     let userPrompt = "";
 
     const difficultyMap: Record<string, string> = {
-      easy: "NCERT level, single-concept, 30-60s solve time",
-      medium: "JEE Mains level, 2-3 concepts, 1-2 min solve time",
-      hard: "JEE Advanced level, multi-concept fusion, 2-4 min solve time"
+      easy: isNeet ? "NCERT level, single-concept, direct recall" : "NCERT level, single-concept, 30-60s solve time",
+      medium: isNeet ? "NEET UG level, 2-3 concepts, 1-2 min" : "JEE Mains level, 2-3 concepts, 1-2 min",
+      hard: isNeet ? "NEET advanced, multi-concept, 2-4 min" : "JEE Advanced level, multi-concept, 2-4 min"
     };
 
     if (type === "INTEGER") {
-      systemPrompt = `You are a JEE question designer. Create Integer Type numerical questions.
-- Answer MUST be a single integer (or decimal if specified, but stick to integer for now).
+      systemPrompt = `You are a ${examLabel} question designer. Create Integer Type numerical questions.
+- Answer MUST be a single integer.
 - No options.
 - Difficulty: ${difficulty} (${difficultyMap[difficulty]})
-- Topic: ${subject} > ${chapterName} > ${subchapterName}`;
+- Topic: ${subject} > ${chapterName} > ${subchapterName}
+${isNeet ? "- Focus on NCERT-based numericals for NEET UG. Do NOT use the word JEE anywhere." : ""}`;
 
-      userPrompt = `Generate ${count} Integer Type questions for "${subchapterName}".
+      userPrompt = `Generate ${count} Integer Type questions for "${subchapterName}" (${examLabel}).
 Return JSON array:
 [{
   "question_text": "...",
@@ -82,19 +86,20 @@ Return JSON array:
   "common_mistake": "Common error..."
 }]`;
     } else if (type === "MATCH") {
-      systemPrompt = `You are a JEE question designer. Create Match the Following questions.
+      systemPrompt = `You are a ${examLabel} question designer. Create Match the Following questions.
 - Two columns: Left (Items) and Right (Options).
 - Complexity suitable for ${difficulty} level.
-- Topic: ${subject} > ${chapterName} > ${subchapterName}`;
+- Topic: ${subject} > ${chapterName} > ${subchapterName}
+${isNeet ? "- Focus on NCERT-based matching: organisms, functions, diagrams, definitions. Do NOT use the word JEE." : ""}`;
 
-      userPrompt = `Generate ${count} Match the Following questions for "${subchapterName}".
+      userPrompt = `Generate ${count} Match the Following questions for "${subchapterName}" (${examLabel}).
 Return JSON array:
 [{
-  "question_text": "Match the following items correctly:",
+  "question_text": "Match the following:",
   "match_pairs": {
-    "left": ["A", "B", "C", "D"],
-    "right": ["P", "Q", "R", "S"],
-    "mapping": { "A": "Q", "B": "R", "C": "S", "D": "P" }
+    "left": ["Item A", "Item B", "Item C", "Item D"],
+    "right": ["Option P", "Option Q", "Option R", "Option S"],
+    "mapping": { "Item A": "Option Q", "Item B": "Option R", "Item C": "Option S", "Item D": "Option P" }
   },
   "explanation": "Reasoning for each match...",
   "concept_tested": "Concept",
@@ -102,13 +107,14 @@ Return JSON array:
 }]`;
     } else {
       // Default MCQ
-      systemPrompt = `You are a JEE question designer. Create exam-grade MCQs with:
+      systemPrompt = `You are a ${examLabel} question designer. Create exam-grade MCQs with:
 - Unicode math notation (subscripts: v₁, superscripts: x², Greek: θ, α, arrows: →). NO LaTeX.
-- Each wrong option from a real student mistake (sign error, missing factor, wrong formula).
-- Exactly ONE correct answer, verified by solving fully.
+- Each wrong option from a real student mistake.
+- Exactly ONE correct answer.
 - Brief explanation: Given → Formula → Steps → Answer.
 Topic: ${subject} > ${chapterName} > ${subchapterName}
-Level: ${difficulty} — ${difficultyMap[difficulty]}`;
+Level: ${difficulty} — ${difficultyMap[difficulty]}
+${isNeet ? "IMPORTANT: This is NEET UG, not JEE. Focus on NCERT conceptual/factual questions. Never write the word JEE." : ""}`;
 
       userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} — ${chapterName}) at ${difficulty} difficulty.
 
