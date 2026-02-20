@@ -14,6 +14,17 @@ import {
   humanHealthSubchapters
 } from './biologySubchapters';
 
+import {
+  neetChem1Subchapters, neetChem2Subchapters, neetChem3Subchapters,
+  neetChem4Subchapters, neetChem5Subchapters, neetChem6Subchapters,
+  neetChem7Subchapters, neetChem8Subchapters
+} from './neetChemistrySubchapters';
+
+import {
+  neetPhy1Subchapters, neetPhy2Subchapters, neetPhy3Subchapters,
+  neetPhy4Subchapters, neetPhy5Subchapters, neetPhy6Subchapters
+} from './neetPhysicsSubchapters';
+
 export interface Subchapter {
   id: string;
   chapterId: string;
@@ -2726,6 +2737,22 @@ export const subchaptersByChapter: Record<string, Subchapter[]> = {
   'neet-bio-8': animalKingdomSubchapters,
   'neet-bio-9': plantKingdomSubchapters,
   'neet-bio-10': humanHealthSubchapters,
+  // NEET Chemistry
+  'neet-chem-1': neetChem1Subchapters,
+  'neet-chem-2': neetChem2Subchapters,
+  'neet-chem-3': neetChem3Subchapters,
+  'neet-chem-4': neetChem4Subchapters,
+  'neet-chem-5': neetChem5Subchapters,
+  'neet-chem-6': neetChem6Subchapters,
+  'neet-chem-7': neetChem7Subchapters,
+  'neet-chem-8': neetChem8Subchapters,
+  // NEET Physics
+  'neet-phy-1': neetPhy1Subchapters,
+  'neet-phy-2': neetPhy2Subchapters,
+  'neet-phy-3': neetPhy3Subchapters,
+  'neet-phy-4': neetPhy4Subchapters,
+  'neet-phy-5': neetPhy5Subchapters,
+  'neet-phy-6': neetPhy6Subchapters,
 };
 
 // Helper function to get subchapters by chapter ID
