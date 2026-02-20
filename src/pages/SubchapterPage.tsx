@@ -57,7 +57,7 @@ const SubchapterPage: React.FC = () => {
   }
 
   const handleGenerateNotes = () => {
-    generateNotes(subchapter, chapter.name, chapter.subject);
+    generateNotes(subchapter, chapter.name, chapter.subject, examMode);
   };
 
   const subjectColors: Record<string, string> = {
@@ -172,7 +172,7 @@ const SubchapterPage: React.FC = () => {
                   <div className={`w-8 h-8 rounded-lg ${subjectTextColors[chapter.subject]} bg-current/10 flex items-center justify-center`}>
                     <Target className="w-4 h-4" />
                   </div>
-                  <h3 className="font-semibold text-foreground text-sm">What JEE Asks</h3>
+                  <h3 className="font-semibold text-foreground text-sm">What {isNeet ? 'NEET' : 'JEE'} Asks</h3>
                 </div>
                 <ul className="space-y-1.5">
                   {subchapter.jeeAsks.map((item, index) => (

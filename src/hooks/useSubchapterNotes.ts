@@ -9,7 +9,7 @@ interface UseSubchapterNotesResult {
   notes: string;
   isLoading: boolean;
   error: string | null;
-  generateNotes: (subchapter: Subchapter, chapterName: string, subject: string) => Promise<void>;
+  generateNotes: (subchapter: Subchapter, chapterName: string, subject: string, examMode?: string) => Promise<void>;
 }
 
 export const useSubchapterNotes = (): UseSubchapterNotesResult => {
@@ -21,7 +21,8 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
   const generateNotes = useCallback(async (
     subchapter: Subchapter,
     chapterName: string,
-    subject: string
+    subject: string,
+    examMode = 'JEE'
   ) => {
     setIsLoading(true);
     setError(null);
@@ -43,7 +44,8 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
           jeeAsks: subchapter.jeeAsks,
           pyqFocus: subchapter.pyqFocus,
           commonMistakes: subchapter.commonMistakes,
-          language
+          language,
+          examMode,
         }),
       });
 
