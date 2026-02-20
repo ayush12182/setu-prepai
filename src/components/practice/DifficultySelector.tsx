@@ -4,6 +4,7 @@ import { Subchapter } from '@/data/subchapters';
 import { Chapter } from '@/data/syllabus';
 import { ArrowLeft, Zap, Target, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 interface DifficultySelectorProps {
   subchapter: Subchapter;
@@ -20,6 +21,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
   onSelectDifficulty,
   onBack
 }) => {
+  const { isNeet } = useExamMode();
   const difficulties = [
     {
       level: 'easy' as const,
@@ -34,7 +36,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
     {
       level: 'medium' as const,
       name: 'Medium',
-      description: 'JEE Mains level',
+      description: isNeet ? 'NEET UG level' : 'JEE Mains level',
       timePerQ: '1-2 min',
       icon: Target,
       color: 'bg-setu-warning/10 border-setu-warning/30 hover:bg-setu-warning/20',
@@ -44,7 +46,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
     {
       level: 'hard' as const,
       name: 'Hard',
-      description: 'JEE Advanced level',
+      description: isNeet ? 'NEET Advanced level' : 'JEE Advanced level',
       timePerQ: '2-3 min',
       icon: Flame,
       color: 'bg-destructive/10 border-destructive/30 hover:bg-destructive/20',
@@ -100,7 +102,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
 
       {/* Topic Preview */}
       <div className="bg-secondary/50 rounded-xl p-4">
-        <h4 className="font-medium text-sm mb-2">What JEE asks in this topic:</h4>
+        <h4 className="font-medium text-sm mb-2">What {isNeet ? 'NEET' : 'JEE'} asks in this topic:</h4>
         <ul className="space-y-1">
           {subchapter.jeeAsks.slice(0, 3).map((point, idx) => (
             <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">

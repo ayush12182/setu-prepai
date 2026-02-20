@@ -12,6 +12,7 @@ import TestModeQuiz, { TestAnswer } from '@/components/practice/TestModeQuiz';
 import TestResults from '@/components/practice/TestResults';
 import { Loader2, Target, Zap, Clock, TrendingUp, Sparkles, Brain } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 type PracticeMode = 'practice' | 'test';
 
@@ -26,10 +27,11 @@ const PracticePage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
+  const { isNeet } = useExamMode();
   const [state, setState] = useState<PracticeState>({ step: 'select-topic' });
   const [initialized, setInitialized] = useState(false);
   const [mode, setMode] = useState<PracticeMode>('practice');
-  
+
   const { questions, loading, error, generateQuestions, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
   const { stats, fetchStats } = usePracticeStats();
 
@@ -130,7 +132,7 @@ const PracticePage: React.FC = () => {
                 </span>
               </div>
               <h1 className="text-3xl font-bold text-white mb-2">Practice Arena</h1>
-              <p className="text-white/50 text-sm mb-6 max-w-md">Select a topic, pick difficulty, and sharpen your skills with AI-generated JEE questions.</p>
+              <p className="text-white/50 text-sm mb-6 max-w-md">Select a topic, pick difficulty, and sharpen your skills with AI-generated {isNeet ? 'NEET' : 'JEE'} questions.</p>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
@@ -161,7 +163,7 @@ const PracticePage: React.FC = () => {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
-                <p className="text-muted-foreground">{mode === 'test' ? 'Preparing your test...' : 'Generating JEE-style questions...'}</p>
+                <p className="text-muted-foreground">{mode === 'test' ? 'Preparing your test...' : `Generating ${isNeet ? 'NEET' : 'JEE'}-style questions...`}</p>
                 <p className="text-sm text-muted-foreground mt-1">This may take a few seconds</p>
               </div>
             ) : error ? (
