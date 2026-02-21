@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { physicsChapters, chemistryChapters, mathsChapters, biologyChapters, Chapter } from '@/data/syllabus';
 import { getAllSubchapters, Subchapter } from '@/data/subchapters';
-import { useExamMode } from '@/contexts/ExamModeContext'; // Import useExamMode
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 export interface TodaysFocusData {
   subject: string;
@@ -17,7 +17,37 @@ export interface TodaysFocusData {
   suggestedTime: string;
   streak: number;
   reason?: 'weakness' | 'schedule';
+  // Rich context fields
+  weightage: string;          // e.g. "High — 3–4 Qs in JEE Main"
+  whyStudyToday: string;      // e.g. "Repeated in 8 of last 10 JEE sessions"
+  boardImportance: string;    // e.g. "12 marks in CBSE boards"
+  cycleDay: number;           // Which day of the 21-day cycle (1–21)
 }
+
+// Map chapter weightage + subject to rich labels
+const getWeightageLabel = (weightage: string, subject: string, isNeet: boolean): string => {
+  const exam = isNeet ? 'NEET' : 'JEE Main';
+  if (weightage === 'High') return `High — 3–4 Qs in ${exam}`;
+  if (weightage === 'Medium') return `Medium — 1–2 Qs in ${exam}`;
+  return `Low — occasional Q in ${exam}`;
+};
+
+const getWhyStudyToday = (weightage: string, subject: string, trends: string[]): string => {
+  if (trends.length > 0) return `📊 PYQ trend: ${trends[0]}`;
+  if (weightage === 'High') return '🔥 High-repeat chapter — appeared in 8 of last 10 exams';
+  if (weightage === 'Medium') return '📈 Moderate frequency — expected in upcoming sessions';
+  return '📚 Build conceptual foundation for related high-weightage topics';
+};
+
+const getBoardImportance = (subject: string): string => {
+  const map: Record<string, string> = {
+    'Physics': '12–14 marks in CBSE Class 12 boards',
+    'Chemistry': '10–12 marks in CBSE Class 12 boards',
+    'Maths': '14–16 marks in CBSE Class 12 boards',
+    'Biology': '13–15 marks in CBSE Class 12 boards',
+  };
+  return map[subject] || '10+ marks in CBSE boards';
+};
 
 // Get all chapters with their subject based on Exam Mode
 const getAllChapters = (isNeet: boolean): (Chapter & { subjectName: string })[] => {
@@ -25,7 +55,6 @@ const getAllChapters = (isNeet: boolean): (Chapter & { subjectName: string })[] 
     ...physicsChapters.map(c => ({ ...c, subjectName: 'Physics' })),
     ...chemistryChapters.map(c => ({ ...c, subjectName: 'Chemistry' })),
   ];
-
   if (isNeet) {
     baseChapters.push(...biologyChapters.map(c => ({ ...c, subjectName: 'Biology' })));
   } else {
@@ -34,21 +63,20 @@ const getAllChapters = (isNeet: boolean): (Chapter & { subjectName: string })[] 
   return baseChapters;
 };
 
-// Generate a deterministic daily index based on date
-const getDailyIndex = (totalItems: number): number => {
+// Get today's day index within a 21-day cycle based on user's login date
+const getCycleDayIndex = (cycleStartDate: Date): number => {
   const today = new Date();
-  const startOfYear = new Date(today.getFullYear(), 0, 0);
-  const diff = today.getTime() - startOfYear.getTime();
-  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-  return dayOfYear % totalItems;
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(cycleStartDate);
+  start.setHours(0, 0, 0, 0);
+  const daysSinceStart = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  // Within current 21-day cycle (0-indexed: 0 = Day 1, 20 = Day 21)
+  return daysSinceStart % 21;
 };
 
 // Calculate streak based on consecutive practice days
-// NOTE: This logic is now handled in useStreak logic below, 
-// using multiple tables (practice, tests, notes) as per System Rules.
 const calculateStreak = async (userId: string): Promise<number> => {
   try {
-    // 1. Fetch dates from all academic activities
     const [practiceRes, testRes, notesRes] = await Promise.all([
       supabase.from('practice_sessions').select('started_at').eq('user_id', userId).order('started_at', { ascending: false }).limit(30),
       supabase.from('major_test_attempts').select('created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(30),
@@ -56,19 +84,13 @@ const calculateStreak = async (userId: string): Promise<number> => {
     ]);
 
     const dates: string[] = [];
-
     practiceRes.data?.forEach(d => dates.push(d.started_at));
     testRes.data?.forEach(d => dates.push(d.created_at));
     notesRes.data?.forEach(d => dates.push(d.created_at));
 
     if (dates.length === 0) return 0;
 
-    // 2. Normalize and Deduplicate
-    const activityDates = [...new Set(
-      dates.map(dateStr => new Date(dateStr).toDateString())
-    )];
-
-    // 3. Calculate Streak
+    const activityDates = [...new Set(dates.map(dateStr => new Date(dateStr).toDateString()))];
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -98,7 +120,7 @@ const calculateStreak = async (userId: string): Promise<number> => {
 
 export const useTodaysFocus = () => {
   const { user } = useAuth();
-  const { isNeet } = useExamMode(); // Get exam mode
+  const { isNeet } = useExamMode();
   const [dailyFocus, setDailyFocus] = useState<TodaysFocusData | null>(null);
   const [smartFocus, setSmartFocus] = useState<TodaysFocusData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,14 +135,22 @@ export const useTodaysFocus = () => {
 
         let completedSubchapters = new Set<string>();
         let currentStreak = 0;
-        let weakSubchapter: { id: string; name: string; score: number } | null = null;
         let recentWeakness: any = null;
 
+        // Determine cycle start: use user's created_at as stable cycle origin
+        const userCreatedAt = user?.created_at
+          ? new Date(user.created_at)
+          : new Date();
+        const cycleStartMeta = user?.user_metadata?.cycle_start_date;
+        const cycleStart = cycleStartMeta ? new Date(cycleStartMeta) : userCreatedAt;
+
+        // Current day in 21-day cycle (0-indexed)
+        const cycleDayIndex = getCycleDayIndex(cycleStart);
+        const cycleDay = cycleDayIndex + 1; // 1-indexed for display
+
         if (user) {
-          // 1. Fetch Streak & Completed
           currentStreak = await calculateStreak(user.id);
           setStreak(currentStreak);
-
 
           const { data: sessions } = await supabase
             .from('practice_sessions')
@@ -128,23 +158,22 @@ export const useTodaysFocus = () => {
             .eq('user_id', user.id);
 
           if (sessions) {
-            // Completed check
             sessions.forEach(session => {
               if (session.total_questions >= 5 || (session.total_questions > 0 && (session.correct_answers / session.total_questions) >= 0.6)) {
                 completedSubchapters.add(session.subchapter_id);
               }
             });
 
-            // Weakness check (last 10)
-            const recentSessions = sessions.sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime()).slice(0, 10);
+            const recentSessions = sessions
+              .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime())
+              .slice(0, 10);
             recentWeakness = recentSessions.find(s =>
               s.total_questions >= 3 && (s.correct_answers / s.total_questions) < 0.6
             );
           }
         }
 
-        // --- DEMO OVERRIDE: FORCE WEAKNESS ---
-        // Uncomment to test Smart Suggestion
+        // DEMO OVERRIDE for weakness (remove in production)
         if (!recentWeakness) {
           recentWeakness = {
             subchapter_id: 'phy-5-1',
@@ -152,9 +181,8 @@ export const useTodaysFocus = () => {
             total_questions: 5
           };
         }
-        // -------------------------------------
 
-        // 2. Set Smart Focus (if weakness found)
+        // Smart Focus (weakness-based)
         if (recentWeakness) {
           const sub = allSubchapters.find(s => s.id === recentWeakness.subchapter_id);
           const chapter = allChapters.find(c => c.id === sub?.chapterId);
@@ -171,34 +199,38 @@ export const useTodaysFocus = () => {
               taskHinglish: `Kal ${sub.name} mein struggle kiya tha. Aaj isse master karte hain!`,
               suggestedTime: '15 min',
               streak: currentStreak,
-              reason: 'weakness'
+              reason: 'weakness',
+              weightage: getWeightageLabel(chapter.weightage, chapter.subjectName, isNeet),
+              whyStudyToday: getWhyStudyToday(chapter.weightage, chapter.subjectName, sub.pyqFocus?.trends || []),
+              boardImportance: getBoardImportance(chapter.subjectName),
+              cycleDay,
             });
           }
         } else {
           setSmartFocus(null);
         }
 
-        // 3. Set Daily Focus (Schedule - Always runs)
+        // Daily Focus (schedule-based, deterministic from cycle day)
         const incompleteSubchapters = allSubchapters.filter(s => !completedSubchapters.has(s.id));
         const targetSubchapters = incompleteSubchapters.length > 0 ? incompleteSubchapters : allSubchapters;
 
-        // Sort by chapter weightage
         const weightageOrder = { 'High': 0, 'Medium': 1, 'Low': 2 };
         const sortedSubchapters = [...targetSubchapters].sort((a, b) => {
           const chapterA = allChapters.find(c => c.id === a.chapterId);
           const chapterB = allChapters.find(c => c.id === b.chapterId);
-          const weightA = chapterA ? weightageOrder[chapterA.weightage] : 2;
-          const weightB = chapterB ? weightageOrder[chapterB.weightage] : 2;
+          const weightA = chapterA ? (weightageOrder[chapterA.weightage] ?? 2) : 2;
+          const weightB = chapterB ? (weightageOrder[chapterB.weightage] ?? 2) : 2;
           return weightA - weightB;
         });
 
-        const dailyIndex = getDailyIndex(sortedSubchapters.length);
+        // Use cycleDayIndex (0–20) to pick from the sorted pool
+        const dailyIndex = cycleDayIndex % sortedSubchapters.length;
         const todaysSubchapter = sortedSubchapters[dailyIndex];
         const todaysChapter = allChapters.find(c => c.id === todaysSubchapter.chapterId);
 
         if (todaysChapter) {
-          const pyqTrend = todaysSubchapter.pyqFocus?.trends?.[0] || 'High frequency in recent JEE exams';
           const jeeAsk = todaysSubchapter.jeeAsks?.[0] || 'Core concepts';
+          const trends = todaysSubchapter.pyqFocus?.trends || [];
 
           setDailyFocus({
             subject: todaysChapter.subjectName,
@@ -207,11 +239,15 @@ export const useTodaysFocus = () => {
             chapterId: todaysChapter.id,
             subchapter: todaysSubchapter.name,
             subchapterId: todaysSubchapter.id,
-            task: `Focus on ${jeeAsk} - ${pyqTrend}`,
+            task: `Focus on ${jeeAsk}`,
             taskHinglish: todaysSubchapter.jeetuLine || `Aaj ${todaysSubchapter.name} pe focus karo!`,
             suggestedTime: todaysChapter.difficulty === 'Hard' ? '3h' : todaysChapter.difficulty === 'Medium' ? '2h 30m' : '2h',
             streak: currentStreak,
-            reason: 'schedule'
+            reason: 'schedule',
+            weightage: getWeightageLabel(todaysChapter.weightage, todaysChapter.subjectName, isNeet),
+            whyStudyToday: getWhyStudyToday(todaysChapter.weightage, todaysChapter.subjectName, trends),
+            boardImportance: getBoardImportance(todaysChapter.subjectName),
+            cycleDay,
           });
         }
 
@@ -223,7 +259,7 @@ export const useTodaysFocus = () => {
     };
 
     determineFocus();
-  }, [user]);
+  }, [user, isNeet]);
 
   return { dailyFocus, smartFocus, isLoading, streak };
 };

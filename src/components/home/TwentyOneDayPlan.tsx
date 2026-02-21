@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -199,6 +199,7 @@ export const TwentyOneDayPlan: React.FC = () => {
   const [selectedWeek, setSelectedWeek] = useState<number>(0);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isStartingNextCycle, setIsStartingNextCycle] = useState(false);
 
   const isHinglish = language === 'hinglish' || language === 'hindi' || language === 'crisp';
   const quotes = isHinglish ? jeetuQuotes.hinglish : jeetuQuotes.english;
@@ -240,20 +241,59 @@ export const TwentyOneDayPlan: React.FC = () => {
     },
   });
 
-  const userCycleStart = user?.user_metadata?.cycle_start_date;
-  const cycleStart = userCycleStart
-    ? new Date(userCycleStart)
-    : (activeCycle ? new Date(activeCycle.start_date) : new Date());
+  // Stable cycle origin: prefer saved metadata, else user's account creation date
+  const userCreatedAt = user?.created_at ? new Date(user.created_at) : new Date();
+  const cycleStartMeta = user?.user_metadata?.cycle_start_date;
+  const cycleStart = cycleStartMeta
+    ? new Date(cycleStartMeta)
+    : (activeCycle ? new Date(activeCycle.start_date) : userCreatedAt);
+
+  // Compute current cycle number from elapsed days
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const cs = new Date(cycleStart);
+  cs.setHours(0, 0, 0, 0);
+  const daysSinceOrigin = Math.max(0, Math.floor((today.getTime() - cs.getTime()) / (1000 * 60 * 60 * 24)));
+  const computedCycleNumber = Math.floor(daysSinceOrigin / 21) + 1;
+
+  // Current 21-day window start
+  const currentCycleWindowStart = new Date(cs);
+  currentCycleWindowStart.setDate(cs.getDate() + (computedCycleNumber - 1) * 21);
+
+  // Is the current cycle complete? (day 21 has passed)
+  const isCycleComplete = daysSinceOrigin > 0 && (daysSinceOrigin % 21 === 0);
+
+  const handleStartNextCycle = useCallback(async () => {
+    if (!user) return;
+    setIsStartingNextCycle(true);
+    try {
+      // Advance cycle_start_date by 21 days
+      const nextStart = new Date(currentCycleWindowStart);
+      nextStart.setDate(nextStart.getDate() + 21);
+      await supabase.auth.updateUser({
+        data: { cycle_start_date: nextStart.toISOString() }
+      });
+      setSelectedWeek(0);
+      await queryClient.invalidateQueries({ queryKey: ['active-major-test-cycle'] });
+      await queryClient.invalidateQueries({ queryKey: ['completed-subchapters'] });
+      toast.success(`🎉 Cycle ${computedCycleNumber + 1} started! Keep going!`);
+    } catch (err) {
+      console.error('Start next cycle error:', err);
+      toast.error('Failed to start next cycle');
+    } finally {
+      setIsStartingNextCycle(false);
+    }
+  }, [user, currentCycleWindowStart, computedCycleNumber, queryClient]);
 
   const schedule = useMemo(
-    () => generateSchedule(cycleStart, completedIds || new Set(), isNeet ? 'neet' : 'jee'),
-    [activeCycle, completedIds, cycleStart, isNeet]
+    () => generateSchedule(currentCycleWindowStart, completedIds || new Set(), isNeet ? 'neet' : 'jee'),
+    [activeCycle, completedIds, currentCycleWindowStart, isNeet]
   );
 
   const weekStart = selectedWeek * 7;
   const visibleDays = schedule.slice(weekStart, weekStart + 7);
 
-  const cycleNumber = activeCycle?.cycle_number || 1;
+  const cycleNumber = computedCycleNumber;
   const daysCompleted = schedule.filter(d => d.isPast).length;
 
   const handleResetCycle = async () => {
@@ -296,6 +336,30 @@ export const TwentyOneDayPlan: React.FC = () => {
 
   return (
     <section className="space-y-6">
+      {/* Cycle Complete Banner — Auto-reset prompt */}
+      {isCycleComplete && (
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/30 p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Flame className="w-5 h-5 text-accent" />
+                <span className="text-sm font-bold text-accent uppercase tracking-wider">Cycle {cycleNumber} Complete! 🎉</span>
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-1">Major Test done — ready for Cycle {cycleNumber + 1}?</h3>
+              <p className="text-sm text-muted-foreground">Your weak areas from this cycle become the focus of the next one.</p>
+            </div>
+            <Button
+              onClick={handleStartNextCycle}
+              disabled={isStartingNextCycle}
+              className="shrink-0 bg-accent text-primary hover:bg-accent/90 gap-2"
+            >
+              <Zap className="w-4 h-4" />
+              {isStartingNextCycle ? 'Starting...' : `Start Cycle ${cycleNumber + 1}`}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Hero Banner — high contrast text */}
       <div className="relative overflow-hidden rounded-2xl bg-[hsl(213_40%_12%)] p-8 border border-white/10">
         <div className="absolute inset-0 opacity-[0.03]" style={{
