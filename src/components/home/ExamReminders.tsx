@@ -3,9 +3,8 @@ import { Calendar, Clock, Trophy, Flame, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 // JEE & NEET Schedules
@@ -53,29 +52,38 @@ const getMotivationalMessage = (daysLeft: number, examType: 'jee' | 'neet' | 'ma
 export const ExamReminders: React.FC = () => {
   const navigate = useNavigate();
   const { isNeet } = useExamMode();
+  const { user } = useAuth();
   const examModeKey = isNeet ? 'neet' : 'jee';
 
-  // Fetch active major test cycle
-  const { data: activeCycle } = useQuery({
-    queryKey: ['active-major-test-cycle'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('major_test_cycles')
-        .select('*')
-        .eq('is_active', true)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    }
-  });
+  // Compute major test date from user's account creation + 21 days
+  // (cycles forward: cycle_start_date metadata overrides created_at)
+  const getCycleMajorTestDate = (): Date => {
+    const cycleStartMeta = user?.user_metadata?.cycle_start_date;
+    const base = cycleStartMeta
+      ? new Date(cycleStartMeta)
+      : user?.created_at
+        ? new Date(user.created_at)
+        : new Date();
+    base.setHours(0, 0, 0, 0);
+    // Find how many complete 21-day cycles have elapsed
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysSince = Math.max(0, Math.floor((today.getTime() - base.getTime()) / (1000 * 60 * 60 * 24)));
+    const cycleIdx = Math.floor(daysSince / 21); // current cycle index (0-based)
+    // Major test is end of CURRENT cycle (day 21)
+    const testDate = new Date(base);
+    testDate.setDate(base.getDate() + cycleIdx * 21 + 21);
+    return testDate;
+  };
 
   const nextExam = getNextExam(examModeKey);
   const daysLeft = getDaysRemaining(nextExam.date);
   const examMessage = getMotivationalMessage(daysLeft, examModeKey);
 
-  const majorTestDate = activeCycle ? new Date(activeCycle.test_date) : null;
-  const majorTestDaysLeft = majorTestDate ? getDaysRemaining(majorTestDate) : null;
-  const majorTestMessage = majorTestDaysLeft !== null ? getMotivationalMessage(majorTestDaysLeft, 'major') : null;
+  const majorTestDate = getCycleMajorTestDate();
+  const majorTestDaysLeft = getDaysRemaining(majorTestDate);
+  // Keep days left >= 0 display logic, but compute from real cycle date
+  const majorTestMessage = getMotivationalMessage(majorTestDaysLeft, 'major');
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-IN', {
@@ -168,58 +176,35 @@ export const ExamReminders: React.FC = () => {
                 <h3 className="font-semibold text-foreground">Major Test</h3>
               </div>
             </div>
-            {majorTestDaysLeft !== null && (
-              <div className="text-right">
-                <div className="flex items-center gap-1 text-primary">
-                  <Flame className="w-4 h-4" />
-                  <span className="text-2xl font-bold">{majorTestDaysLeft}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">days left</p>
+            {/* Days left badge — always computed from cycle */}
+            <div className="text-right">
+              <div className="flex items-center gap-1 text-primary">
+                <Flame className="w-4 h-4" />
+                <span className="text-2xl font-bold">{Math.max(0, majorTestDaysLeft)}</span>
               </div>
-            )}
+              <p className="text-xs text-muted-foreground">days left</p>
+            </div>
           </div>
 
-          {majorTestDate ? (
-            <>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-                <Calendar className="w-3 h-3" />
-                <span>Test Date: {formatDate(majorTestDate)}</span>
-              </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+            <Calendar className="w-3 h-3" />
+            <span>Test Date: {formatDate(majorTestDate)}</span>
+          </div>
 
-              <div className="bg-primary/10 rounded-lg p-3 mb-3">
-                <p className="text-sm text-primary font-medium leading-relaxed">
-                  🎯 {majorTestMessage}
-                </p>
-              </div>
+          <div className="bg-primary/10 rounded-lg p-3 mb-3">
+            <p className="text-sm text-primary font-medium leading-relaxed">
+              🎯 {majorTestMessage}
+            </p>
+          </div>
 
-              <Button
-                size="sm"
-                className="w-full"
-                onClick={() => navigate('/major-test')}
-              >
-                {majorTestDaysLeft !== null && majorTestDaysLeft <= 0 ? 'Take Test Now' : 'View Details'}
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </>
-          ) : (
-            <>
-              <div className="bg-primary/10 rounded-lg p-3 mb-3">
-                <p className="text-sm text-primary font-medium leading-relaxed">
-                  🎯 Major Test abhi schedule nahi hai. Jaldi ek naya cycle start hoga!
-                </p>
-              </div>
-
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full border-primary/30 hover:bg-primary/10"
-                onClick={() => navigate('/major-test')}
-              >
-                Check Major Test
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </>
-          )}
+          <Button
+            size="sm"
+            className="w-full"
+            onClick={() => navigate('/major-test')}
+          >
+            {majorTestDaysLeft <= 0 ? 'Take Test Now' : 'View Schedule'}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
         </CardContent>
       </Card>
     </div>

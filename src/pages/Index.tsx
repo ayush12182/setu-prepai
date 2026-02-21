@@ -75,8 +75,8 @@ const Index: React.FC = () => {
 
               <div className="flex gap-3">
                 {[
-                  { icon: Trophy, label: "Streak", value: `🔥 ${streak} days` },
-                  { icon: Zap, label: "Today", value: "0 Qs" },
+                  { icon: Trophy, label: 'Day', value: `📅 Day ${dailyFocus?.cycleDay ?? 1} / 21` },
+                  { icon: Zap, label: 'Streak', value: streak > 0 ? `🔥 ${streak} days` : '🌱 Day 1' },
                 ].map((stat) => (
                   <div
                     key={stat.label}
