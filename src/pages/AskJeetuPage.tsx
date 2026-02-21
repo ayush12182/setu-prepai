@@ -17,21 +17,56 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 const WELCOME_VIDEO_PATH = "/videos/jeetu-welcome.mp4";
 const WELCOME_VIDEO_STORAGE_KEY = "jeetu-welcome-video-seen";
 
-const MOTIVATION_QUOTES = [
-  "Beta, ek baar man bana lo — JEE karna hai. Phir har roz uthna, padhna, practice karna automatic ho jayega. Consistency hi result deti hai, shortcut nahi.",
-  "Padhai mein struggle feel ho raha hai? Good. Matlab tu grow kar raha hai. Jis cheez mein struggle nahi, usme grow bhi nahi hota. Laga reh.",
-  "Topper wo nahi hota jo har cheez jaanta hai. Topper wo hota hai jo galti karta hai, samajhta hai, aur dobara galti nahi karta. PYQ solve karo, samjho, aage badho.",
-  "Aaj ka ek chapter, kal ka ek advantage. Sab kuch ek saath nahi hoga. Aaj jo padha, wo exam mein kuch na kuch kaam aayega. Trust the process.",
-  "Phone rakh. Sirf 25 minute — ek concept, ek focus. Phir break le. Tujhe poora syllabus aaj nahi khatam karna. Bas aaj ka kaam kar le.",
-  "JEE Main mein 89 marks ka weightage hai — Maths, Physics, Chemistry. Har chapter ek chance hai. Weak chapter chhodna matlab marks chhodna hai.",
-  "Failure se mat darna. PYQs mein dekh — same concept baar baar aata hai. Jo baar baar aata hai, use master kar le. Baaki khud ho jayega.",
-];
+const MOTIVATION_QUOTES: Record<string, string[]> = {
+  hinglish: [
+    "Abhi se thak gaye? Ek baar yeh sun lo 🔥",
+    "Woh din bhi dekhenge jab tum hase aur sab roye 💪",
+    "Haar ke baithne wale ko koi nahi puchta, uth aur laga reh!",
+    "Topper bhi ek time pe average tha, bas usne chhoda nahi 📚",
+    "Tera result tere mehnat ka receipt hai, likha ja raha hai ✍️",
+    "Phone rakh, kitaab utha — future khud shukr karega 🎯",
+    "Struggle temporary hai, regret permanent — choose wisely ⚡",
+  ],
+  english: [
+    "Tired already? Listen to this once 🔥",
+    "The day will come when you smile and others watch in awe 💪",
+    "Nobody remembers the one who gave up — get up and keep going!",
+    "Every topper was once average, they just never quit 📚",
+    "Your result is a receipt of your hard work — it's being written ✍️",
+    "Put the phone down, pick up the book — your future self will thank you 🎯",
+    "Struggle is temporary, regret is permanent — choose wisely ⚡",
+  ],
+  hindi: [
+    "अभी से थक गए? एक बार ये सुन लो 🔥",
+    "वो दिन भी देखेंगे जब तुम हँसे और सब रोए 💪",
+    "हार के बैठने वाले को कोई नहीं पूछता, उठ और लगा रह!",
+    "टॉपर भी एक टाइम पे average था, बस उसने छोड़ा नहीं 📚",
+    "तेरा रिज़ल्ट तेरी मेहनत की रसीद है, लिखा जा रहा है ✍️",
+    "फ़ोन रख, किताब उठा — भविष्य खुद शुक्र करेगा 🎯",
+    "संघर्ष अस्थायी है, पछतावा स्थायी — सोच-समझकर चुनो ⚡",
+  ],
+  kannada: [
+    "ಈಗಲೇ ಸುಸ್ತಾಯ್ತಾ? ಒಂದ್ಸಲ ಇದು ಕೇಳು 🔥",
+    "ಆ ದಿನ ಬರುತ್ತೆ — ನೀನು ನಗ್ತೀಯ, ಬಾಕಿಯವರು ನೋಡ್ತಾರೆ 💪",
+    "ಬಿಟ್ಟವನನ್ನ ಯಾರೂ ಕೇಳಲ್ಲ — ಎದ್ದು ಮುಂದುವರಿ!",
+    "ಪ್ರತಿ topper ಒಂದ್ಕಾಲದಲ್ಲಿ average ಇದ್ದ, ಆದ್ರೆ ಬಿಡಲಿಲ್ಲ 📚",
+  ],
+  telugu: [
+    "ఇప్పుడే అలసిపోయావా? ఒక్కసారి ఇది విను 🔥",
+    "ఆ రోజు వస్తుంది — నువ్వు నవ్వుతావ్, అందరూ చూస్తారు 💪",
+    "వదిలేసిన వాడిని ఎవరూ అడగరు — లే, కొనసాగు!",
+    "ప్రతి topper ఒకప్పుడు average — కానీ ఆగలేదు 📚",
+  ],
+  punjabi: [
+    "ਹੁਣੇ ਥੱਕ ਗਏ? ਇੱਕ ਵਾਰ ਇਹ ਸੁਣੋ 🔥",
+    "ਉਹ ਦਿਨ ਵੀ ਆਵੇਗਾ ਜਦੋਂ ਤੁਸੀਂ ਹੱਸੋਗੇ ਤੇ ਸਭ ਦੇਖਣਗੇ 💪",
+    "ਹਾਰ ਕੇ ਬੈਠਣ ਵਾਲੇ ਨੂੰ ਕੋਈ ਨਹੀਂ ਪੁੱਛਦਾ — ਉੱਠ ਤੇ ਲੱਗਾ ਰਹਿ!",
+    "ਹਰ topper ਇੱਕ ਟਾਈਮ ਤੇ average ਸੀ, ਬੱਸ ਉਸਨੇ ਛੱਡਿਆ ਨਹੀਂ 📚",
+  ],
+};
 
-// Local motivation audio file — place your recorded audio at public/audio/jeetu-motivation.mp3
+// Local motivation audio file
 const MOTIVATION_AUDIO_PATH = '/audio/jeetu-motivation.mp3';
-
-// Fallback text shown as a toast when audio is not yet uploaded
-const MOTIVATION_FALLBACK = 'Tum bahut acha kar rahe ho! Kabhi bhi koi secondary thought aaye — yaad karo ki tumhara ek goal hai. Focus karo, tum kar sakte ho! 💪';
 
 
 interface Message {
@@ -49,6 +84,18 @@ const AskJeetuPage: React.FC = () => {
   const { sendMessage, isLoading, error } = useJeetuChat();
   const [isPlayingMotivation, setIsPlayingMotivation] = useState(false);
   const motivAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+
+  // Rotate motivational quote every 5 seconds
+  useEffect(() => {
+    const quotes = MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish;
+    const interval = setInterval(() => {
+      setQuoteIndex(prev => (prev + 1) % quotes.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [language]);
+
+  const currentQuote = (MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish)[quoteIndex % (MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish).length];
 
   const playMotivation = useCallback(() => {
     // If already playing, stop
@@ -64,10 +111,10 @@ const AskJeetuPage: React.FC = () => {
     setIsPlayingMotivation(true);
     audio.onended = () => { setIsPlayingMotivation(false); motivAudioRef.current = null; };
     audio.onerror = () => {
-      // Audio file not uploaded yet — show message as fallback
       setIsPlayingMotivation(false);
       motivAudioRef.current = null;
-      import('sonner').then(({ toast }) => toast.info(MOTIVATION_FALLBACK, { duration: 8000 }));
+      const fallback = (MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish)[0];
+      import('sonner').then(({ toast }) => toast.info(fallback, { duration: 8000 }));
     };
     audio.play().catch(() => {
       setIsPlayingMotivation(false);
@@ -330,21 +377,20 @@ const AskJeetuPage: React.FC = () => {
           </div>
 
           {/* Motivation Sound Button */}
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={playMotivation}
             className={cn(
-              'gap-2 rounded-xl border-setu-saffron/40 text-setu-saffron hover:bg-setu-saffron/10 transition-all',
-              isPlayingMotivation && 'bg-setu-saffron/10 border-setu-saffron'
+              'flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-left max-w-xs',
+              'border-setu-saffron/30 hover:bg-setu-saffron/10',
+              isPlayingMotivation && 'bg-setu-saffron/10 border-setu-saffron animate-pulse'
             )}
-            title="Jeetu Bhaiya ka motivation suno"
+            title="Tap to hear Jeetu Bhaiya's motivation"
           >
-            <Volume2 className={cn('w-4 h-4', isPlayingMotivation && 'animate-pulse')} />
-            <span className="hidden sm:inline text-xs font-semibold">
-              {isPlayingMotivation ? 'Sun raha hai...' : 'Motivation 🔥'}
+            <Volume2 className={cn('w-4 h-4 flex-shrink-0 text-setu-saffron', isPlayingMotivation && 'animate-pulse')} />
+            <span className="text-xs font-medium text-setu-saffron line-clamp-1">
+              {currentQuote}
             </span>
-          </Button>
+          </button>
 
           <div className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
             AI-Powered
