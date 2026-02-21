@@ -19,6 +19,18 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 const WELCOME_VIDEO_PATH = "/videos/jeetu-welcome.mp4";
 const WELCOME_VIDEO_STORAGE_KEY = "jeetu-welcome-video-seen";
 
+const MOTIVATION_QUOTES = [
+  "Beta, ek baar man bana lo — JEE karna hai. Phir har roz uthna, padhna, practice karna automatic ho jayega. Consistency hi result deti hai, shortcut nahi.",
+  "Padhai mein struggle feel ho raha hai? Good. Matlab tu grow kar raha hai. Jis cheez mein struggle nahi, usme grow bhi nahi hota. Laga reh.",
+  "Topper wo nahi hota jo har cheez jaanta hai. Topper wo hota hai jo galti karta hai, samajhta hai, aur dobara galti nahi karta. PYQ solve karo, samjho, aage badho.",
+  "Aaj ka ek chapter, kal ka ek advantage. Sab kuch ek saath nahi hoga. Aaj jo padha, wo exam mein kuch na kuch kaam aayega. Trust the process.",
+  "Phone rakh. Sirf 25 minute — ek concept, ek focus. Phir break le. Tujhe poora syllabus aaj nahi khatam karna. Bas aaj ka kaam kar le.",
+  "JEE Main mein 89 marks ka weightage hai — Maths, Physics, Chemistry. Har chapter ek chance hai. Weak chapter chhodna matlab marks chhodna hai.",
+  "Failure se mat darna. PYQs mein dekh — same concept baar baar aata hai. Jo baar baar aata hai, use master kar le. Baaki khud ho jayega.",
+];
+
+const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts-stream`;
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -34,6 +46,41 @@ const AskJeetuPage: React.FC = () => {
   const { sendMessage, isLoading, error } = useJeetuChat();
   const { isListening, isSpeaking, isProcessing, liveTranscript, startListening, stopAndProcess, stopListening, stopAudio } = useVoiceAI();
   const [isVoiceActive, setIsVoiceActive] = useState(false);
+  const [isPlayingMotivation, setIsPlayingMotivation] = useState(false);
+  const motivAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playMotivation = useCallback(async () => {
+    // If already playing, stop
+    if (isPlayingMotivation && motivAudioRef.current) {
+      motivAudioRef.current.pause();
+      motivAudioRef.current = null;
+      setIsPlayingMotivation(false);
+      return;
+    }
+    const quote = MOTIVATION_QUOTES[Math.floor(Math.random() * MOTIVATION_QUOTES.length)];
+    setIsPlayingMotivation(true);
+    try {
+      const resp = await fetch(TTS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ text: quote }),
+      });
+      if (!resp.ok) throw new Error('TTS failed');
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      motivAudioRef.current = audio;
+      audio.onended = () => { setIsPlayingMotivation(false); URL.revokeObjectURL(url); motivAudioRef.current = null; };
+      audio.onerror = () => { setIsPlayingMotivation(false); URL.revokeObjectURL(url); motivAudioRef.current = null; };
+      await audio.play();
+    } catch {
+      setIsPlayingMotivation(false);
+    }
+  }, [isPlayingMotivation]);
+
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -342,6 +389,23 @@ const AskJeetuPage: React.FC = () => {
               Online • Your {isNeet ? 'NEET' : 'JEE'} Mentor
             </p>
           </div>
+
+          {/* Motivation Sound Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={playMotivation}
+            className={cn(
+              'gap-2 rounded-xl border-setu-saffron/40 text-setu-saffron hover:bg-setu-saffron/10 transition-all',
+              isPlayingMotivation && 'bg-setu-saffron/10 border-setu-saffron'
+            )}
+            title="Jeetu Bhaiya ka aaj ka message suno"
+          >
+            <Volume2 className={cn('w-4 h-4', isPlayingMotivation && 'animate-pulse')} />
+            <span className="hidden sm:inline text-xs font-semibold">
+              {isPlayingMotivation ? 'Bol raha hai...' : 'JB ka message 🎙️'}
+            </span>
+          </Button>
 
           <div className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
             AI-Powered
