@@ -201,7 +201,7 @@ export const TwentyOneDayPlan: React.FC = () => {
   const [isResetting, setIsResetting] = useState(false);
   const [isStartingNextCycle, setIsStartingNextCycle] = useState(false);
 
-  const isHinglish = language === 'hinglish' || language === 'hindi' || language === 'crisp';
+  const isHinglish = language === 'hinglish' || language === 'hindi' || language === 'punjabi';
   const quotes = isHinglish ? jeetuQuotes.hinglish : jeetuQuotes.english;
   const todayQuote = quotes[new Date().getDate() % quotes.length];
 
