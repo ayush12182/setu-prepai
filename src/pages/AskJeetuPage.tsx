@@ -2,11 +2,13 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Sparkles, Camera, ImagePlus, X } from 'lucide-react';
+import { Send, Sparkles, Camera, ImagePlus, X, Mic, Volume2, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import { getGreetingByLanguage } from '@/lib/jeetuBhaiya';
 import { useJeetuChat } from '@/hooks/useJeetuChat';
 import { VoiceChatButton } from '@/components/voice/VoiceChatButton';
+import { useVoiceAI } from '@/hooks/useVoiceAI';
 
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -27,9 +29,12 @@ interface Message {
 
 const AskJeetuPage: React.FC = () => {
   const { language } = useLanguage();
+  const { isNeet } = useExamMode();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { sendMessage, isLoading, error } = useJeetuChat();
-  
+  const { isListening, isSpeaking, isProcessing, liveTranscript, startListening, stopAndProcess, stopListening, stopAudio } = useVoiceAI();
+  const [isVoiceActive, setIsVoiceActive] = useState(false);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -48,7 +53,7 @@ const AskJeetuPage: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,12 +82,21 @@ const AskJeetuPage: React.FC = () => {
     }
   }, [language]);
 
-  const quickQuestions = [
+  const jeeQuickQuestions = [
     "Rotation vs Revolution kya difference hai?",
     "Integration by parts kab use karna chahiye?",
     "Organic reactions kaise yaad karein?",
     "JEE Advanced Physics kaise prepare karein?"
   ];
+
+  const neetQuickQuestions = [
+    "Cell aur Organism mein kya difference hai?",
+    "Krebs cycle explain karo simply",
+    "Genetics ki important topics kaunsi hain NEET ke liye?",
+    "NEET ke liye Biology kaise prepare karein?"
+  ];
+
+  const quickQuestions = isNeet ? neetQuickQuestions : jeeQuickQuestions;
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -119,17 +133,17 @@ const AskJeetuPage: React.FC = () => {
     const chatHistory = messages
       .filter(m => m.role !== 'assistant' || messages.indexOf(m) > 0 || messages.length > 1)
       .map(m => ({ role: m.role, content: m.content }));
-    
+
     chatHistory.push({ role: 'user', content: textToSend });
 
     let assistantContent = '';
-    
+
     const updateAssistant = (chunk: string) => {
       assistantContent += chunk;
       setMessages(prev => {
         const last = prev[prev.length - 1];
         if (last?.role === 'assistant' && last.id.startsWith('streaming-')) {
-          return prev.map((m, i) => 
+          return prev.map((m, i) =>
             i === prev.length - 1 ? { ...m, content: assistantContent } : m
           );
         }
@@ -144,14 +158,14 @@ const AskJeetuPage: React.FC = () => {
 
     await sendMessage(chatHistory, updateAssistant, () => {
       // Finalize the message ID
-      setMessages(prev => 
-        prev.map(m => 
-          m.id.startsWith('streaming-') 
-            ? { ...m, id: Date.now().toString() } 
+      setMessages(prev =>
+        prev.map(m =>
+          m.id.startsWith('streaming-')
+            ? { ...m, id: Date.now().toString() }
             : m
         )
       );
-      
+
     });
   };
 
@@ -163,7 +177,7 @@ const AskJeetuPage: React.FC = () => {
     setInput(question);
   };
 
-  // Voice chat callbacks
+  // Voice callbacks
   const voiceChatHistory = messages
     .filter((_, i) => i > 0)
     .map(m => ({ role: m.role, content: m.content }));
@@ -182,7 +196,7 @@ const AskJeetuPage: React.FC = () => {
     setMessages(prev => {
       const last = prev[prev.length - 1];
       if (last?.role === 'assistant' && last.id.startsWith('streaming-')) {
-        return prev.map((m, i) => 
+        return prev.map((m, i) =>
           i === prev.length - 1 ? { ...m, content: m.content + chunk } : m
         );
       }
@@ -196,14 +210,27 @@ const AskJeetuPage: React.FC = () => {
   }, []);
 
   const handleVoiceAssistantDone = useCallback((_fullText: string) => {
-    setMessages(prev => 
-      prev.map(m => 
-        m.id.startsWith('streaming-') 
-          ? { ...m, id: Date.now().toString() } 
+    setMessages(prev =>
+      prev.map(m =>
+        m.id.startsWith('streaming-')
+          ? { ...m, id: Date.now().toString() }
           : m
       )
     );
   }, []);
+
+  const handleMicClick = useCallback(async () => {
+    if (isListening) {
+      await stopAndProcess(voiceChatHistory, handleVoiceTranscript, handleVoiceAssistantDelta, handleVoiceAssistantDone);
+    } else {
+      try {
+        setIsVoiceActive(true);
+        await startListening(voiceChatHistory, handleVoiceTranscript, handleVoiceAssistantDelta, handleVoiceAssistantDone);
+      } catch {
+        setIsVoiceActive(false);
+      }
+    }
+  }, [isListening, voiceChatHistory, startListening, stopAndProcess, handleVoiceTranscript, handleVoiceAssistantDelta, handleVoiceAssistantDone]);
 
 
   const formatMessage = (content: string) => {
@@ -226,8 +253,8 @@ const AskJeetuPage: React.FC = () => {
   return (
     <MainLayout title="Ask Jeetu Bhaiya">
       {/* Welcome Video Modal */}
-      <Dialog 
-        open={showWelcomeVideo} 
+      <Dialog
+        open={showWelcomeVideo}
         onOpenChange={(open) => {
           if (!open) {
             localStorage.setItem(WELCOME_VIDEO_STORAGE_KEY, 'true');
@@ -256,7 +283,7 @@ const AskJeetuPage: React.FC = () => {
                 }}
               />
             </div>
-            
+
             {/* Controls Overlay */}
             <div className="absolute bottom-14 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
               <div className="flex items-center justify-between">
@@ -269,7 +296,7 @@ const AskJeetuPage: React.FC = () => {
                     <p className="text-white/70 text-sm">Welcome Message</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   {/* Skip Button */}
                   <Button
@@ -284,7 +311,7 @@ const AskJeetuPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Close Button */}
             <button
               onClick={() => {
@@ -312,10 +339,10 @@ const AskJeetuPage: React.FC = () => {
             <h2 className="font-display font-bold text-lg text-foreground">Jeetu Bhaiya</h2>
             <p className="text-sm text-setu-success flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Online • Your JEE Mentor
+              Online • Your {isNeet ? 'NEET' : 'JEE'} Mentor
             </p>
           </div>
-          
+
           <div className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
             AI-Powered
           </div>
@@ -347,20 +374,20 @@ const AskJeetuPage: React.FC = () => {
               >
                 {/* Display attached image */}
                 {message.image && (
-                  <img 
-                    src={message.image} 
-                    alt="Attached" 
+                  <img
+                    src={message.image}
+                    alt="Attached"
                     className="max-w-full rounded-lg mb-2 max-h-48 object-contain"
                   />
                 )}
-                
+
                 <div className={cn(
                   'text-sm leading-relaxed whitespace-pre-wrap',
                   message.role === 'assistant' && 'text-foreground'
                 )}>
                   {message.role === 'assistant' ? formatMessage(message.content) : message.content}
                 </div>
-                
+
                 {/* Speak button for assistant messages */}
               </div>
             </div>
@@ -414,23 +441,25 @@ const AskJeetuPage: React.FC = () => {
 
         {/* Input Area */}
         <div className="bg-card border border-border rounded-b-2xl p-4">
-          
-          {/* Voice Chat Panel */}
-          <div className="mb-3">
-            <VoiceChatButton
-              chatHistory={voiceChatHistory}
-              onUserMessage={handleVoiceTranscript}
-              onAssistantDelta={handleVoiceAssistantDelta}
-              onAssistantDone={handleVoiceAssistantDone}
-            />
-          </div>
+
+          {/* Voice Panel - only show when active */}
+          {isVoiceActive && (
+            <div className="mb-3">
+              <VoiceChatButton
+                chatHistory={voiceChatHistory}
+                onUserMessage={handleVoiceTranscript}
+                onAssistantDelta={handleVoiceAssistantDelta}
+                onAssistantDone={handleVoiceAssistantDone}
+              />
+            </div>
+          )}
 
           {/* Image Preview */}
           {selectedImage && (
             <div className="mb-3 relative inline-block">
-              <img 
-                src={selectedImage} 
-                alt="Selected" 
+              <img
+                src={selectedImage}
+                alt="Selected"
                 className="max-h-32 rounded-lg border border-border"
               />
               <button
@@ -441,7 +470,7 @@ const AskJeetuPage: React.FC = () => {
               </button>
             </div>
           )}
-          
+
           {/* Hidden file inputs */}
           <input
             type="file"
@@ -458,9 +487,27 @@ const AskJeetuPage: React.FC = () => {
             capture="environment"
             className="hidden"
           />
-          
+
           <div className="flex gap-2">
-            {/* Media Upload Button */}
+            {/* Mic Button - always visible */}
+            <Button
+              variant={isListening ? 'default' : 'outline'}
+              size="icon"
+              onClick={handleMicClick}
+              disabled={isProcessing}
+              className={cn('flex-shrink-0 rounded-xl relative', isListening && 'bg-red-500 hover:bg-red-600 border-red-500')}
+              title={isListening ? 'Tap to send voice' : isSpeaking ? 'Jeetu Bhaiya speaking...' : 'Start voice chat'}
+            >
+              {isProcessing ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : isSpeaking ? (
+                <Volume2 className="w-5 h-5 text-setu-saffron" onClick={(e) => { e.stopPropagation(); stopAudio(); }} />
+              ) : (
+                <Mic className={cn('w-5 h-5', isListening ? 'text-white' : 'text-setu-saffron')} />
+              )}
+              {isListening && <span className="absolute inset-0 rounded-xl bg-red-500/30 animate-ping" />}
+            </Button>
+
             <Button
               variant="outline"
               size="icon"
@@ -471,7 +518,7 @@ const AskJeetuPage: React.FC = () => {
             >
               <ImagePlus className="w-5 h-5" />
             </Button>
-            
+
             {/* Camera Button */}
             <Button
               variant="outline"
@@ -483,7 +530,7 @@ const AskJeetuPage: React.FC = () => {
             >
               <Camera className="w-5 h-5" />
             </Button>
-            
+
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -496,7 +543,7 @@ const AskJeetuPage: React.FC = () => {
                 }
               }}
             />
-            
+
             <Button
               onClick={handleSend}
               disabled={(!input.trim() && !selectedImage) || isLoading}
@@ -505,9 +552,9 @@ const AskJeetuPage: React.FC = () => {
               <Send className="w-5 h-5" />
             </Button>
           </div>
-          
+
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            🎙️ Voice chat • 📷 Photo upload • ⌨️ Type your doubt
+            {isListening ? '🎙️ Listening... tap mic to send' : isSpeaking ? '🔊 Playing voice response... tap speaker to stop' : '🎙️ Voice chat • 📷 Photo upload • ⌨️ Type your doubt'}
           </p>
         </div>
       </div>
