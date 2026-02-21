@@ -375,23 +375,6 @@ const AskJeetuPage: React.FC = () => {
               Online • Your {isNeet ? 'NEET' : 'JEE'} Mentor
             </p>
           </div>
-
-          {/* Motivation Sound Button */}
-          <button
-            onClick={playMotivation}
-            className={cn(
-              'flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-left max-w-xs',
-              'border-setu-saffron/30 hover:bg-setu-saffron/10',
-              isPlayingMotivation && 'bg-setu-saffron/10 border-setu-saffron animate-pulse'
-            )}
-            title="Tap to hear Jeetu Bhaiya's motivation"
-          >
-            <Volume2 className={cn('w-4 h-4 flex-shrink-0 text-setu-saffron', isPlayingMotivation && 'animate-pulse')} />
-            <span className="text-xs font-medium text-setu-saffron line-clamp-1">
-              {currentQuote}
-            </span>
-          </button>
-
           <div className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
             AI-Powered
           </div>
@@ -490,7 +473,20 @@ const AskJeetuPage: React.FC = () => {
 
         {/* Input Area */}
         <div className="bg-card border border-border rounded-b-2xl p-4">
-
+          {/* Motivation Quote Banner */}
+          <button
+            onClick={playMotivation}
+            className={cn(
+              'w-full flex items-center gap-2 px-3 py-2 mb-3 rounded-xl border transition-all text-left',
+              'border-setu-saffron/30 bg-gradient-to-r from-setu-saffron/5 to-transparent hover:from-setu-saffron/10',
+              isPlayingMotivation && 'bg-setu-saffron/10 border-setu-saffron'
+            )}
+          >
+            <Volume2 className={cn('w-4 h-4 flex-shrink-0 text-setu-saffron', isPlayingMotivation && 'animate-pulse')} />
+            <span className="text-xs font-medium text-setu-saffron truncate flex-1">
+              {currentQuote}
+            </span>
+          </button>
           {/* Image Preview */}
           {selectedImage && (
             <div className="mb-3 relative inline-block">
