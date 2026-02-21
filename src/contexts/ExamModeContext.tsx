@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useAuth } from './AuthContext';
 
 export type ExamMode = 'jee' | 'neet';
+export type JeeSubMode = 'main' | 'advanced' | 'both';
 
 interface ExamModeConfig {
   examMode: ExamMode;
@@ -11,7 +12,7 @@ interface ExamModeConfig {
   subjects: { key: string; label: string; icon: string }[];
   mentorName: string;
   mentorTag: string;
-  accentHue: number; // HSL hue for theming
+  accentHue: number;
   quickDoubts: string[];
 }
 
@@ -27,7 +28,7 @@ const JEE_CONFIG: ExamModeConfig = {
   ],
   mentorName: 'Jeetu Bhaiya',
   mentorTag: 'Your JEE Mentor',
-  accentHue: 32, // saffron
+  accentHue: 32,
   quickDoubts: [
     'Rotation vs Revolution explain karo',
     'Integration by Parts kaise kare?',
@@ -49,7 +50,7 @@ const NEET_CONFIG: ExamModeConfig = {
   ],
   mentorName: 'NEET Mentor',
   mentorTag: 'Your NEET AI Mentor',
-  accentHue: 145, // medical green
+  accentHue: 145,
   quickDoubts: [
     'Human Physiology explain karo',
     'Genetics & Mendelian inheritance',
@@ -59,12 +60,21 @@ const NEET_CONFIG: ExamModeConfig = {
   ],
 };
 
+export const JEE_SUB_MODE_LABELS: Record<JeeSubMode, string> = {
+  main: 'JEE Main',
+  advanced: 'JEE Advanced',
+  both: 'Main + Advanced',
+};
+
 interface ExamModeContextType {
   examMode: ExamMode;
   config: ExamModeConfig;
   setExamMode: (mode: ExamMode) => void;
   isNeet: boolean;
   isJee: boolean;
+  jeeSubMode: JeeSubMode;
+  setJeeSubMode: (mode: JeeSubMode) => void;
+  jeeSubModeLabel: string;
 }
 
 const ExamModeContext = createContext<ExamModeContextType | undefined>(undefined);
@@ -80,21 +90,27 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return (localStorage.getItem('examMode') as ExamMode) || 'jee';
   });
 
+  const [jeeSubMode, setJeeSubModeState] = useState<JeeSubMode>(() => {
+    return (localStorage.getItem('jeeSubMode') as JeeSubMode) || 'both';
+  });
+
   const { profile } = useAuth();
 
   const setExamMode = useCallback((mode: ExamMode) => {
     localStorage.setItem('examMode', mode);
     setExamModeState(mode);
-    // Apply NEET theme class to document
     document.documentElement.classList.toggle('neet-mode', mode === 'neet');
   }, []);
 
-  // Sync with profile whenever it changes
+  const setJeeSubMode = useCallback((mode: JeeSubMode) => {
+    localStorage.setItem('jeeSubMode', mode);
+    setJeeSubModeState(mode);
+  }, []);
+
   useEffect(() => {
     if (profile?.target_exam) {
       const isNeetProfile = profile.target_exam === 'NEET';
       const newMode: ExamMode = isNeetProfile ? 'neet' : 'jee';
-
       if (newMode !== examMode) {
         setExamModeState(newMode);
         localStorage.setItem('examMode', newMode);
@@ -102,7 +118,6 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [profile, examMode]);
 
-  // Apply theme on mount and whenever mode changes
   useEffect(() => {
     document.documentElement.classList.toggle('neet-mode', examMode === 'neet');
   }, [examMode]);
@@ -116,6 +131,9 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setExamMode,
       isNeet: examMode === 'neet',
       isJee: examMode === 'jee',
+      jeeSubMode,
+      setJeeSubMode,
+      jeeSubModeLabel: JEE_SUB_MODE_LABELS[jeeSubMode],
     }}>
       {children}
     </ExamModeContext.Provider>

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Subchapter } from '@/data/subchapters';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -17,6 +18,7 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { language } = useLanguage();
+  const { isNeet, jeeSubMode } = useExamMode();
 
   const generateNotes = useCallback(async (
     subchapter: Subchapter,
@@ -46,6 +48,7 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
           commonMistakes: subchapter.commonMistakes,
           language,
           examMode,
+          jeeSubMode: isNeet ? undefined : jeeSubMode,
         }),
       });
 

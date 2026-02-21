@@ -9,6 +9,7 @@ import { TwentyOneDayPlan } from "@/components/home/TwentyOneDayPlan";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExamMode } from "@/contexts/ExamModeContext";
+import { JeeSubModeSelector } from "@/components/ui/JeeSubModeSelector";
 import { Sparkles, Flame, Trophy, Zap } from "lucide-react";
 import { useTodaysFocus } from "@/hooks/useTodaysFocus";
 
@@ -53,7 +54,7 @@ const Index: React.FC = () => {
 
             <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider">
                     <Flame className="w-3.5 h-3.5" />
                     Dashboard
@@ -61,6 +62,10 @@ const Index: React.FC = () => {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-semibold">
                     {config.emoji} {config.label} Mode
                   </span>
+                  {/* JEE Sub-mode selector — only visible in JEE mode */}
+                  <div className="bg-white/10 rounded-xl p-0.5">
+                    <JeeSubModeSelector />
+                  </div>
                 </div>
                 <p className="text-white/60 text-sm font-medium mb-1">Welcome back, {displayName}! 👋</p>
                 <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">

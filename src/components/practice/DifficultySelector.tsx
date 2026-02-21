@@ -21,7 +21,19 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
   onSelectDifficulty,
   onBack
 }) => {
-  const { isNeet } = useExamMode();
+  const { isNeet, jeeSubMode } = useExamMode();
+
+  const getMediumDesc = () => {
+    if (isNeet) return 'NEET UG level';
+    if (jeeSubMode === 'advanced') return 'JEE Advanced level';
+    return 'JEE Main level';
+  };
+  const getHardDesc = () => {
+    if (isNeet) return 'NEET challenge level';
+    if (jeeSubMode === 'main') return 'JEE Main hard variant';
+    return 'JEE Advanced level';
+  };
+
   const difficulties = [
     {
       level: 'easy' as const,
@@ -36,7 +48,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
     {
       level: 'medium' as const,
       name: 'Medium',
-      description: isNeet ? 'NEET UG level' : 'JEE Mains level',
+      description: getMediumDesc(),
       timePerQ: '1-2 min',
       icon: Target,
       color: 'bg-setu-warning/10 border-setu-warning/30 hover:bg-setu-warning/20',
@@ -46,7 +58,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
     {
       level: 'hard' as const,
       name: 'Hard',
-      description: isNeet ? 'NEET Advanced level' : 'JEE Advanced level',
+      description: getHardDesc(),
       timePerQ: '2-3 min',
       icon: Flame,
       color: 'bg-destructive/10 border-destructive/30 hover:bg-destructive/20',

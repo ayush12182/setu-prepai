@@ -20,9 +20,10 @@ serve(async (req) => {
       commonMistakes = [],
       language = 'english',
       examMode = 'JEE',
+      jeeSubMode = 'both',
     } = await req.json();
 
-    console.log(`generate-subchapter-notes: language=${language}, examMode=${examMode}`);
+    console.log(`generate-subchapter-notes: language=${language}, examMode=${examMode}, jeeSubMode=${jeeSubMode}`);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -30,7 +31,19 @@ serve(async (req) => {
     }
 
     const isNeet = examMode === 'NEET';
-    const examLabel = isNeet ? 'NEET UG' : 'JEE';
+    const examLabel = isNeet ? 'NEET UG' : (
+      jeeSubMode === 'main' ? 'JEE Main' :
+        jeeSubMode === 'advanced' ? 'JEE Advanced' :
+          'JEE Main+Advanced'
+    );
+
+    const jeeStyleInstructions = isNeet ? '' : (
+      jeeSubMode === 'main'
+        ? `- Focus on NCERT-based concepts and direct MCQs\n- Mains-level difficulty (3-4 min per question)\n- Pattern: statement-based, formula substitution, simple conceptual\n- Include: Mains PYQ trends post-2020`
+        : jeeSubMode === 'advanced'
+          ? `- Deep conceptual and application-level content\n- Advanced-difficulty: integer type, match the column, paragraph-based\n- Include multi-step problems, edge cases, counter-examples\n- Include: Advanced PYQ trends, Kota-level depth`
+          : `- Cover BOTH Mains-level MCQs AND Advanced-level conceptual depth\n- Separate clearly: what Mains asks vs what Advanced demands\n- Include PYQ trends from both exams post-2020`
+    );
 
     const systemPrompt = `You are Jeetu Bhaiya from SETU, a calm senior mentor preparing exam notes for ${examLabel} students.
 Mode: ${examLabel} ACCURACY MODE - Content Verified
@@ -43,7 +56,7 @@ ACCURACY RULES (NON-NEGOTIABLE):
 2. Every numerical example must be SOLVED and CHECKED
 3. If uncertain about any fact, skip it
 4. NO wrong information allowed
-${isNeet ? '5. This is NEET UG, NOT JEE. Focus on NCERT-based content. NEVER use the word JEE in your response.' : ''}
+${isNeet ? '5. This is NEET UG, NOT JEE. Focus on NCERT-based content. NEVER use the word JEE in your response.' : `5. These notes are for ${examLabel}.\n${jeeStyleInstructions}`}
 
 ABSOLUTE BANS:
 - NO LaTeX or math symbols ($, ^, _, {}, \\)
@@ -110,7 +123,7 @@ REMEMBER:
 - ${language === 'english' ? 'Strict English professional style' : 'Hinglish coaching style (Jeetu Bhaiya tone)'}
 - No LaTeX, no symbols, plain text formulas
 - Short crisp lines, no paragraphs
-${isNeet ? '- This is NEET UG content. DO NOT write JEE anywhere.' : ''}
+${isNeet ? '- This is NEET UG content. DO NOT write JEE anywhere.' : `- Content level: ${examLabel}. Adjust depth accordingly.`}
 - End with: "${language === 'english' ? 'Remember this clearly. Now solve PYQs, that is the real exam.' : 'Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.'}"`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
