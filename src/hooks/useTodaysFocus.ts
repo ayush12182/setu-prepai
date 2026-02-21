@@ -39,14 +39,68 @@ const getWhyStudyToday = (weightage: string, subject: string, trends: string[]):
   return '📚 Build conceptual foundation for related high-weightage topics';
 };
 
-const getBoardImportance = (subject: string): string => {
+// Standard JEE/CBSE Class 11 chapter IDs (these do NOT appear in Class 12 boards)
+const CLASS_11_CHAPTER_IDS = new Set([
+  // Physics Class 11
+  'phy-1',  // Kinematics
+  'phy-2',  // Laws of Motion
+  'phy-3',  // Work, Energy & Power
+  'phy-4',  // Rotational Motion
+  'phy-5',  // Gravitation
+  'phy-6',  // Properties of Matter
+  'phy-7',  // Thermodynamics
+  'phy-8',  // SHM
+  'phy-9',  // Waves
+  // Chemistry Class 11
+  'chem-1', // Some Basics of Chemistry
+  'chem-2', // Atomic Structure
+  'chem-3', // Chemical Bonding
+  'chem-4', // States of Matter
+  'chem-5', // Thermodynamics (Chem)
+  'chem-6', // Equilibrium
+  'chem-7', // Redox Reactions
+  'chem-8', // Hydrogen
+  'chem-9', // s-Block Elements
+  // Maths Class 11
+  'math-1', // Sets & Relations
+  'math-2', // Trigonometry
+  'math-3', // Complex Numbers
+  'math-4', // Permutation & Combination
+  'math-5', // Binomial Theorem
+  'math-6', // Sequences & Series
+  'math-7', // Coordinate Geometry (straight lines, circles)
+  'math-8', // Conic Sections
+  'math-9', // Limits & Derivatives (intro)
+  'math-10', // Statistics
+  // NEET Class 11 Biology
+  'neet-bio-1', // Cell Biology
+  'neet-bio-2', // Biomolecules
+  'neet-bio-3', // Plant Kingdom
+  'neet-bio-4', // Animal Kingdom
+  'neet-bio-5', // Morphology of Plants
+  'neet-bio-6', // Anatomy of Plants
+  'neet-bio-7', // Animal Tissue
+  'neet-bio-8', // Animal Morphology
+  'neet-bio-9', // Digestion
+  'neet-bio-10', // Breathing
+  'neet-bio-11', // Body Fluids
+  'neet-bio-12', // Locomotion
+  'neet-bio-13', // Neural Control
+  'neet-bio-14', // Chemical Coordination
+]);
+
+const getBoardImportance = (subject: string, chapterId: string): string => {
+  // Class 11 topics don't appear in CBSE Class 12 board exams
+  if (CLASS_11_CHAPTER_IDS.has(chapterId)) {
+    return 'School / Internal Exam only (Class 11)';
+  }
   const map: Record<string, string> = {
     'Physics': '12–14 marks in CBSE Class 12 boards',
     'Chemistry': '10–12 marks in CBSE Class 12 boards',
     'Maths': '14–16 marks in CBSE Class 12 boards',
     'Biology': '13–15 marks in CBSE Class 12 boards',
   };
-  return map[subject] || '10+ marks in CBSE boards';
+  return map[subject] || '10+ marks in CBSE Class 12 boards';
 };
 
 // Get all chapters with their subject based on Exam Mode
@@ -202,7 +256,7 @@ export const useTodaysFocus = () => {
               reason: 'weakness',
               weightage: getWeightageLabel(chapter.weightage, chapter.subjectName, isNeet),
               whyStudyToday: getWhyStudyToday(chapter.weightage, chapter.subjectName, sub.pyqFocus?.trends || []),
-              boardImportance: getBoardImportance(chapter.subjectName),
+              boardImportance: getBoardImportance(chapter.subjectName, chapter.id),
               cycleDay,
             });
           }
@@ -246,7 +300,7 @@ export const useTodaysFocus = () => {
             reason: 'schedule',
             weightage: getWeightageLabel(todaysChapter.weightage, todaysChapter.subjectName, isNeet),
             whyStudyToday: getWhyStudyToday(todaysChapter.weightage, todaysChapter.subjectName, trends),
-            boardImportance: getBoardImportance(todaysChapter.subjectName),
+            boardImportance: getBoardImportance(todaysChapter.subjectName, todaysChapter.id),
             cycleDay,
           });
         }
