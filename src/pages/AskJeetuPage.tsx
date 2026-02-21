@@ -2,13 +2,11 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Sparkles, Camera, ImagePlus, X, Mic, Volume2, Loader2 } from 'lucide-react';
+import { Send, Sparkles, Camera, ImagePlus, X, Volume2, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { getGreetingByLanguage } from '@/lib/jeetuBhaiya';
 import { useJeetuChat } from '@/hooks/useJeetuChat';
-import { VoiceChatButton } from '@/components/voice/VoiceChatButton';
-import { useVoiceAI } from '@/hooks/useVoiceAI';
 
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -29,7 +27,12 @@ const MOTIVATION_QUOTES = [
   "Failure se mat darna. PYQs mein dekh — same concept baar baar aata hai. Jo baar baar aata hai, use master kar le. Baaki khud ho jayega.",
 ];
 
-const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts-stream`;
+// Local motivation audio file — place your recorded audio at public/audio/jeetu-motivation.mp3
+const MOTIVATION_AUDIO_PATH = '/audio/jeetu-motivation.mp3';
+
+// Fallback text shown as a toast when audio is not yet uploaded
+const MOTIVATION_FALLBACK = 'Tum bahut acha kar rahe ho! Kabhi bhi koi secondary thought aaye — yaad karo ki tumhara ek goal hai. Focus karo, tum kar sakte ho! 💪';
+
 
 interface Message {
   id: string;
@@ -44,41 +47,32 @@ const AskJeetuPage: React.FC = () => {
   const { isNeet } = useExamMode();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { sendMessage, isLoading, error } = useJeetuChat();
-  const { isListening, isSpeaking, isProcessing, liveTranscript, startListening, stopAndProcess, stopListening, stopAudio } = useVoiceAI();
-  const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [isPlayingMotivation, setIsPlayingMotivation] = useState(false);
   const motivAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  const playMotivation = useCallback(async () => {
+  const playMotivation = useCallback(() => {
     // If already playing, stop
     if (isPlayingMotivation && motivAudioRef.current) {
       motivAudioRef.current.pause();
+      motivAudioRef.current.currentTime = 0;
       motivAudioRef.current = null;
       setIsPlayingMotivation(false);
       return;
     }
-    const quote = MOTIVATION_QUOTES[Math.floor(Math.random() * MOTIVATION_QUOTES.length)];
+    const audio = new Audio(MOTIVATION_AUDIO_PATH);
+    motivAudioRef.current = audio;
     setIsPlayingMotivation(true);
-    try {
-      const resp = await fetch(TTS_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ text: quote }),
-      });
-      if (!resp.ok) throw new Error('TTS failed');
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      const audio = new Audio(url);
-      motivAudioRef.current = audio;
-      audio.onended = () => { setIsPlayingMotivation(false); URL.revokeObjectURL(url); motivAudioRef.current = null; };
-      audio.onerror = () => { setIsPlayingMotivation(false); URL.revokeObjectURL(url); motivAudioRef.current = null; };
-      await audio.play();
-    } catch {
+    audio.onended = () => { setIsPlayingMotivation(false); motivAudioRef.current = null; };
+    audio.onerror = () => {
+      // Audio file not uploaded yet — show message as fallback
       setIsPlayingMotivation(false);
-    }
+      motivAudioRef.current = null;
+      import('sonner').then(({ toast }) => toast.info(MOTIVATION_FALLBACK, { duration: 8000 }));
+    };
+    audio.play().catch(() => {
+      setIsPlayingMotivation(false);
+      motivAudioRef.current = null;
+    });
   }, [isPlayingMotivation]);
 
 
@@ -223,61 +217,6 @@ const AskJeetuPage: React.FC = () => {
   const handleQuickQuestion = (question: string) => {
     setInput(question);
   };
-
-  // Voice callbacks
-  const voiceChatHistory = messages
-    .filter((_, i) => i > 0)
-    .map(m => ({ role: m.role, content: m.content }));
-
-  const handleVoiceTranscript = useCallback((text: string) => {
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: text,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, userMessage]);
-  }, []);
-
-  const handleVoiceAssistantDelta = useCallback((chunk: string) => {
-    setMessages(prev => {
-      const last = prev[prev.length - 1];
-      if (last?.role === 'assistant' && last.id.startsWith('streaming-')) {
-        return prev.map((m, i) =>
-          i === prev.length - 1 ? { ...m, content: m.content + chunk } : m
-        );
-      }
-      return [...prev, {
-        id: 'streaming-' + Date.now(),
-        role: 'assistant' as const,
-        content: chunk,
-        timestamp: new Date()
-      }];
-    });
-  }, []);
-
-  const handleVoiceAssistantDone = useCallback((_fullText: string) => {
-    setMessages(prev =>
-      prev.map(m =>
-        m.id.startsWith('streaming-')
-          ? { ...m, id: Date.now().toString() }
-          : m
-      )
-    );
-  }, []);
-
-  const handleMicClick = useCallback(async () => {
-    if (isListening) {
-      await stopAndProcess(voiceChatHistory, handleVoiceTranscript, handleVoiceAssistantDelta, handleVoiceAssistantDone);
-    } else {
-      try {
-        setIsVoiceActive(true);
-        await startListening(voiceChatHistory, handleVoiceTranscript, handleVoiceAssistantDelta, handleVoiceAssistantDone);
-      } catch {
-        setIsVoiceActive(false);
-      }
-    }
-  }, [isListening, voiceChatHistory, startListening, stopAndProcess, handleVoiceTranscript, handleVoiceAssistantDelta, handleVoiceAssistantDone]);
 
 
   const formatMessage = (content: string) => {
@@ -506,18 +445,6 @@ const AskJeetuPage: React.FC = () => {
         {/* Input Area */}
         <div className="bg-card border border-border rounded-b-2xl p-4">
 
-          {/* Voice Panel - only show when active */}
-          {isVoiceActive && (
-            <div className="mb-3">
-              <VoiceChatButton
-                chatHistory={voiceChatHistory}
-                onUserMessage={handleVoiceTranscript}
-                onAssistantDelta={handleVoiceAssistantDelta}
-                onAssistantDone={handleVoiceAssistantDone}
-              />
-            </div>
-          )}
-
           {/* Image Preview */}
           {selectedImage && (
             <div className="mb-3 relative inline-block">
@@ -553,25 +480,7 @@ const AskJeetuPage: React.FC = () => {
           />
 
           <div className="flex gap-2">
-            {/* Mic Button - always visible */}
-            <Button
-              variant={isListening ? 'default' : 'outline'}
-              size="icon"
-              onClick={handleMicClick}
-              disabled={isProcessing}
-              className={cn('flex-shrink-0 rounded-xl relative', isListening && 'bg-red-500 hover:bg-red-600 border-red-500')}
-              title={isListening ? 'Tap to send voice' : isSpeaking ? 'Jeetu Bhaiya speaking...' : 'Start voice chat'}
-            >
-              {isProcessing ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : isSpeaking ? (
-                <Volume2 className="w-5 h-5 text-setu-saffron" onClick={(e) => { e.stopPropagation(); stopAudio(); }} />
-              ) : (
-                <Mic className={cn('w-5 h-5', isListening ? 'text-white' : 'text-setu-saffron')} />
-              )}
-              {isListening && <span className="absolute inset-0 rounded-xl bg-red-500/30 animate-ping" />}
-            </Button>
-
+            {/* Gallery Upload Button */}
             <Button
               variant="outline"
               size="icon"
@@ -618,7 +527,7 @@ const AskJeetuPage: React.FC = () => {
           </div>
 
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            {isListening ? '🎙️ Listening... tap mic to send' : isSpeaking ? '🔊 Playing voice response... tap speaker to stop' : '🎙️ Voice chat • 📷 Photo upload • ⌨️ Type your doubt'}
+            📷 Photo upload • ⌨️ Type your doubt
           </p>
         </div>
       </div>
