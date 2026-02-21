@@ -200,10 +200,12 @@ export const getGreetingByLanguage = (language: string): string => {
       return `बोलो, क्या doubt है?`;
     case 'english':
       return `Tell me your doubt. Be specific.`;
-    case 'formal':
-      return `State your doubt clearly. Subject and topic.`;
-    case 'crisp':
-      return `Doubt batao.`;
+    case 'kannada':
+      return `ಹೇಳಿ, ಏನು doubt ಇದೆ?`;
+    case 'telugu':
+      return `చెప్పండి, ఏం doubt ఉంది?`;
+    case 'punjabi':
+      return `ਦੱਸੋ, ਕੀ doubt ਹੈ?`;
     default:
       return `Bolo, kya doubt hai?`;
   }

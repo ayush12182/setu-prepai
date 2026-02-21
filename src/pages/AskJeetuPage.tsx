@@ -338,11 +338,11 @@ const AskJeetuPage: React.FC = () => {
               'gap-2 rounded-xl border-setu-saffron/40 text-setu-saffron hover:bg-setu-saffron/10 transition-all',
               isPlayingMotivation && 'bg-setu-saffron/10 border-setu-saffron'
             )}
-            title="Jeetu Bhaiya ka aaj ka message suno"
+            title="Jeetu Bhaiya ka motivation suno"
           >
             <Volume2 className={cn('w-4 h-4', isPlayingMotivation && 'animate-pulse')} />
             <span className="hidden sm:inline text-xs font-semibold">
-              {isPlayingMotivation ? 'Bol raha hai...' : 'JB ka message 🎙️'}
+              {isPlayingMotivation ? 'Sun raha hai...' : 'Motivation 🔥'}
             </span>
           </Button>
 
