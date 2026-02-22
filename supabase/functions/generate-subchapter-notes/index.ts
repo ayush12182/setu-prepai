@@ -69,6 +69,16 @@ ${isNeet ? '- NO mention of JEE anywhere in the response' : ''}
 LANGUAGE:
 ${language === 'english'
         ? `- STRICT PROFESSIONAL ENGLISH ONLY\n- Tone: Professional, clear, academic mentor`
+        : language === 'hindi'
+        ? `- STRICT HINDI (Devanagari script) ONLY\n- हिंदी में लिखो। No English except technical/scientific terms.\n- Tone: Calm mentor, use भाई/बहन`
+        : language === 'kannada'
+        ? `- STRICT KANNADA (ಕನ್ನಡ script) ONLY\n- ಕನ್ನಡದಲ್ಲಿ ಬರೆಯಿರಿ. No English except technical terms.\n- Tone: Calm mentor`
+        : language === 'telugu'
+        ? `- STRICT TELUGU (తెలుగు script) ONLY\n- తెలుగులో రాయండి. No English except technical terms.\n- Tone: Calm mentor`
+        : language === 'punjabi'
+        ? `- STRICT PUNJABI (ਗੁਰਮੁਖੀ script) ONLY\n- ਪੰਜਾਬੀ ਵਿੱਚ ਲਿਖੋ. No English except technical terms.\n- Tone: Calm mentor`
+        : language === 'marathi'
+        ? `- STRICT MARATHI (मराठी Devanagari) ONLY\n- मराठीत लिहा. No English except technical terms.\n- Tone: Calm mentor`
         : `- Hinglish only (simple English + Hindi mix)\n- Coaching style like Allen/PW notes\n- Calm, friendly mentor tone\n- Use words: bhai, sun, dhyaan de, yaad rakh`}
 
 RESPONSE FORMAT (EXACTLY THIS ORDER):
@@ -76,7 +86,7 @@ RESPONSE FORMAT (EXACTLY THIS ORDER):
 ## What ${examLabel} Actually Tests Here
 [3-5 bullet points, PYQ-based only, post-2020 priority, no theory]
 
-## Short Theory (${language === 'english' ? 'Mental Model' : 'Jeetu Bhaiya Style'})
+## Short Theory (${language === 'english' ? 'Mental Model' : language === 'hindi' ? 'मानसिक मॉडल' : language === 'marathi' ? 'मानसिक मॉडेल' : 'Jeetu Bhaiya Style'})
 [5-10 crisp lines ONLY. No paragraphs. Each line a separate point.]
 
 ## Formulas (Exam Ready - VERIFIED)
@@ -95,7 +105,7 @@ One line explanation: What it means]
 [5-7 bullet points to revise just before exam]
 
 CLOSING LINE (ALWAYS):
-"${language === 'english' ? 'Remember this clearly. Now solve PYQs, that is the real exam.' : 'Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.'}"`;
+"${language === 'english' ? 'Remember this clearly. Now solve PYQs, that is the real exam.' : language === 'hindi' ? 'बस भाई, इतना याद रखो। अब PYQ लगाओ, वही असली परीक्षा है।' : language === 'marathi' ? 'बस भाऊ, एवढं लक्षात ठेवा. आता PYQ सोडवा, तीच खरी परीक्षा आहे.' : 'Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.'}"`;
 
     const jeeAsksText = Array.isArray(jeeAsks) && jeeAsks.length > 0
       ? `\nWhat ${examLabel} asks from this topic: ${jeeAsks.join(', ')}` : '';
@@ -120,11 +130,11 @@ Recent PYQ Focus:
 Known common mistakes: ${mistakesText}
 
 REMEMBER:
-- ${language === 'english' ? 'Strict English professional style' : 'Hinglish coaching style (Jeetu Bhaiya tone)'}
+- ${language === 'english' ? 'Strict English professional style' : language === 'hindi' ? 'Strict Hindi (Devanagari) style' : language === 'kannada' ? 'Strict Kannada style' : language === 'telugu' ? 'Strict Telugu style' : language === 'punjabi' ? 'Strict Punjabi style' : language === 'marathi' ? 'Strict Marathi style' : 'Hinglish coaching style (Jeetu Bhaiya tone)'}
 - No LaTeX, no symbols, plain text formulas
 - Short crisp lines, no paragraphs
 ${isNeet ? '- This is NEET UG content. DO NOT write JEE anywhere.' : `- Content level: ${examLabel}. Adjust depth accordingly.`}
-- End with: "${language === 'english' ? 'Remember this clearly. Now solve PYQs, that is the real exam.' : 'Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.'}"`;
+- End with: "${language === 'english' ? 'Remember this clearly. Now solve PYQs, that is the real exam.' : language === 'hindi' ? 'बस भाई, इतना याद रखो। अब PYQ लगाओ, वही असली परीक्षा है।' : language === 'marathi' ? 'बस भाऊ, एवढं लक्षात ठेवा. आता PYQ सोडवा, तीच खरी परीक्षा आहे.' : 'Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.'}"`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

@@ -116,6 +116,19 @@ ${language === 'english'
 - NO Hindi words (bhai, dekho, samjho, etc.)
 - NO Hinglish syntax
 - Tone: Professional, clear, academic mentor`
+        : language === 'hindi'
+        ? `- STRICT HINDI (Devanagari) ONLY
+- हिंदी में लिखो
+- No English words except technical/scientific terms
+- Tone: Calm mentor, भाई/बहन style`
+        : language === 'kannada'
+        ? `- STRICT KANNADA ONLY\n- ಕನ್ನಡದಲ್ಲಿ ಬರೆಯಿರಿ\n- No English except technical terms`
+        : language === 'telugu'
+        ? `- STRICT TELUGU ONLY\n- తెలుగులో రాయండి\n- No English except technical terms`
+        : language === 'punjabi'
+        ? `- STRICT PUNJABI ONLY\n- ਪੰਜਾਬੀ ਵਿੱਚ ਲਿਖੋ\n- No English except technical terms`
+        : language === 'marathi'
+        ? `- STRICT MARATHI ONLY\n- मराठीत लिहा\n- No English except technical terms`
         : `- Hinglish only
 - Coaching style
 - Short lines
@@ -150,7 +163,7 @@ Follow the structure: Formula -> Variables -> Explanation
 - Steps
 
 END LINE (ALWAYS):
-"${language === 'english' ? 'Remember this. Now solve PYQs, that is the real exam.' : 'Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.'}"`;
+"${language === 'english' ? 'Remember this. Now solve PYQs, that is the real exam.' : language === 'hindi' ? 'बस भाई, इतना याद रखो। अब PYQ लगाओ, वही असली परीक्षा है।' : language === 'marathi' ? 'बस भाऊ, एवढं लक्षात ठेवा. आता PYQ सोडवा.' : 'Bas beta, itna yaad rakho. Ab PYQs lagao, wahi exam hai.'}"`;
 
     const topicsText = Array.isArray(topics) && topics.length > 0 ? topics.join(', ') : 'All key topics';
     const formulasText = Array.isArray(formulas) && formulas.length > 0 ? formulas.join(' | ') : 'All important formulas';
@@ -169,7 +182,7 @@ STRICT REMINDERS:
 - Use STANDARD MATHEMATICAL NOTATION for formulas (e.g., "V = IR", not "V equals I times R").
 - Use symbols like ρ, θ, Δ, λ.
 - NO LaTeX code blocks, just plain text math.
-- Language: ${language === 'english' ? 'Strict Professional English' : 'Hinglish coaching style'}.`;
+- Language: ${language === 'english' ? 'Strict Professional English' : language === 'hindi' ? 'Strict Hindi (Devanagari)' : language === 'kannada' ? 'Strict Kannada' : language === 'telugu' ? 'Strict Telugu' : language === 'punjabi' ? 'Strict Punjabi' : language === 'marathi' ? 'Strict Marathi' : 'Hinglish coaching style'}.`;
 
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
