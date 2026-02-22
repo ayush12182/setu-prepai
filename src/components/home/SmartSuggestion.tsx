@@ -18,9 +18,12 @@ export const SmartSuggestion: React.FC<SmartSuggestionProps> = ({ data }) => {
     };
 
     return (
-        <div className="bg-gradient-to-br from-orange-950 via-red-950 to-orange-950 text-white rounded-2xl p-6 relative overflow-hidden border border-orange-500/20 mb-6 shadow-lg shadow-orange-500/10">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-500/10 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl pointer-events-none" />
+        <div
+            className="bg-gradient-to-br from-orange-950 via-red-950 to-orange-950 text-white rounded-2xl p-6 relative overflow-hidden border border-orange-500/20 mb-6 shadow-lg shadow-orange-500/10 cursor-pointer group transition-all duration-300 hover:shadow-orange-500/20 hover:-translate-y-1 active:scale-[0.98] hover:border-orange-500/40"
+            onClick={handleStartNow}
+        >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl pointer-events-none group-hover:bg-red-500/15 transition-colors" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-orange-500/10 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl pointer-events-none group-hover:bg-orange-500/15 transition-colors" />
 
             <div className="relative z-10">
                 <div className="flex items-start justify-between mb-4">
@@ -32,7 +35,7 @@ export const SmartSuggestion: React.FC<SmartSuggestionProps> = ({ data }) => {
                             </span>
                         </div>
 
-                        <h2 className="text-2xl font-bold text-white mb-1 leading-tight">
+                        <h2 className="text-2xl font-bold text-white mb-1 leading-tight group-hover:text-orange-200 transition-colors">
                             You struggled with <span className="text-orange-200">{data.subchapter}</span> recently.
                         </h2>
 
@@ -43,7 +46,7 @@ export const SmartSuggestion: React.FC<SmartSuggestionProps> = ({ data }) => {
                 </div>
 
                 {/* Mentor tip with proper contrast */}
-                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl mb-4 border border-white/10">
+                <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl mb-4 border border-white/10 group-hover:bg-white/15 transition-colors">
                     <p className="text-[hsl(35_100%_83%)] text-sm font-medium leading-relaxed flex items-center gap-2">
                         <Target className="w-4 h-4 shrink-0" />
                         Try 5 targeted questions (3 min) to fix this gap.
@@ -57,8 +60,11 @@ export const SmartSuggestion: React.FC<SmartSuggestionProps> = ({ data }) => {
                     </div>
 
                     <Button
-                        className="gap-2 h-10 px-5 bg-orange-500 hover:bg-orange-600 text-white border-none shadow-lg shadow-orange-500/20"
-                        onClick={handleStartNow}
+                        className="gap-2 h-10 px-5 bg-orange-500 hover:bg-orange-600 text-white border-none shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleStartNow();
+                        }}
                     >
                         <span className="font-medium">Start Practice</span>
                         <ChevronRight className="w-4 h-4" />

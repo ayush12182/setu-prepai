@@ -498,6 +498,43 @@
 .stagger-5 { animation-delay: 0.25s; }
 .stagger-6 { animation-delay: 0.3s; }
 
+@keyframes breathing {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+@keyframes waveform {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+@keyframes glow-aura {
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(232, 154, 60, 0.1)); }
+  50% { filter: drop-shadow(0 0 25px rgba(232, 154, 60, 0.3)); }
+}
+
+@keyframes particle-drift {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.2; }
+  50% { transform: translate(15px, -15px) rotate(180deg); opacity: 0.4; }
+  100% { transform: translate(0, 0) rotate(360deg); opacity: 0.2; }
+}
+
+.animate-breathing {
+  animation: breathing 4s ease-in-out infinite;
+}
+
+.animate-waveform {
+  animation: waveform 0.8s ease-in-out infinite;
+}
+
+.animate-glow-aura {
+  animation: glow-aura 4s ease-in-out infinite;
+}
+
+.animate-particle {
+  animation: particle-drift 15s ease-in-out infinite;
+}
+
 /* Conic gradient for animated backgrounds */
 .bg-gradient-conic {
   background: conic-gradient(from 0deg, var(--tw-gradient-stops));

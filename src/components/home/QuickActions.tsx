@@ -8,6 +8,7 @@ import {
   Video,
   MessageCircle,
   BarChart3,
+  Users,
   ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -104,6 +105,18 @@ export const QuickActions: React.FC = () => {
       gradient: 'from-[hsl(180_50%_40%)] to-[hsl(195_60%_45%)]',
       iconBg: 'bg-[hsl(180_50%_40%/0.12)]',
       emoji: '📊',
+    },
+    {
+      icon: Users,
+      title: 'SETU Circles',
+      description: isNeet
+        ? 'Study rooms for NEET — Biology, Chemistry & Physics peers'
+        : 'Live study rooms — doubts, revision & strategy with JEE peers',
+      path: '/circles',
+      gradient: 'from-[hsl(32_79%_57%)] via-[hsl(350_65%_55%)] to-[hsl(280_50%_55%)]',
+      iconBg: 'bg-[hsl(32_79%_57%/0.12)]',
+      emoji: '🔥',
+      badge: 'Live',
     },
   ];
 

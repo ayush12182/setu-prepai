@@ -11,7 +11,8 @@ import {
   BarChart3,
   User,
   X,
-  Sparkles
+  Sparkles,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ const navItems = [
   { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄' },
   { path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬' },
   { path: '/ask-jeetu', icon: MessageCircle, label: { jee: 'Ask Jeetu Bhaiya', neet: 'Ask NEET Mentor' }, emoji: '💬' },
+  { path: '/circles', icon: Users, label: 'SETU Commune', emoji: '👥', badge: 'New' },
   { path: '/analytics', icon: BarChart3, label: 'Analytics', emoji: '📊' },
   { path: '/profile', icon: User, label: 'My Profile', emoji: '👤' },
 ];
@@ -108,7 +110,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               const label = typeof item.label === 'object'
                 ? (isNeet ? item.label.neet : item.label.jee)
                 : item.label;
-              
+
               return (
                 <NavLink
                   key={item.path}
@@ -120,11 +122,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       'text-white/80 hover:text-white font-medium',
                       isActive
                         ? cn(
-                            'text-white font-semibold shadow-lg',
-                            isNeet
-                              ? 'bg-gradient-to-r from-[hsl(145_50%_38%)] to-[hsl(145_60%_32%)] shadow-[hsl(145_50%_38%)/0.25]'
-                              : 'bg-gradient-to-r from-[hsl(36_80%_55%)] to-[hsl(36_90%_48%)] shadow-[hsl(36_80%_55%)/0.25]'
-                          )
+                          'text-white font-semibold shadow-lg',
+                          isNeet
+                            ? 'bg-gradient-to-r from-[hsl(145_50%_38%)] to-[hsl(145_60%_32%)] shadow-[hsl(145_50%_38%)/0.25]'
+                            : 'bg-gradient-to-r from-[hsl(36_80%_55%)] to-[hsl(36_90%_48%)] shadow-[hsl(36_80%_55%)/0.25]'
+                        )
                         : 'hover:bg-white/[0.06]'
                     )
                   }
@@ -138,6 +140,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         <item.icon className="w-4 h-4" />
                       </div>
                       <span className="text-sm">{label}</span>
+                      {item.badge && (
+                        <span className="ml-auto px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-accent text-accent-foreground shadow-sm">
+                          {item.badge}
+                        </span>
+                      )}
                       {isActive && (
                         <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white/80" />
                       )}

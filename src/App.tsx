@@ -26,6 +26,8 @@ import RevisionTopicPage from "./pages/RevisionTopicPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import NotFound from "./pages/NotFound";
+import SetuCirclesPage from "./pages/SetuCirclesPage";
+import CircleFocusRoomPage from "./pages/CircleFocusRoomPage";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +61,8 @@ const App = () => (
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/terms" element={<TermsPage />} />
+                <Route path="/circles" element={<SetuCirclesPage />} />
+                <Route path="/circles/:roomId" element={<CircleFocusRoomPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </TooltipProvider>

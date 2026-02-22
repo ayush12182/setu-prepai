@@ -12,6 +12,7 @@ import { useExamMode } from "@/contexts/ExamModeContext";
 import { JeeSubModeSelector } from "@/components/ui/JeeSubModeSelector";
 import { Sparkles, Flame, Trophy, Zap } from "lucide-react";
 import { useTodaysFocus } from "@/hooks/useTodaysFocus";
+import { CirclesDashboardCard } from "@/components/circles/CirclesDashboardCard";
 
 const Index: React.FC = () => {
   const { getMentorName, language } = useLanguage();
@@ -99,15 +100,17 @@ const Index: React.FC = () => {
           </div>
         )}
 
-        {/* ── Section 2: Smart Suggestion & Today's Focus ── */}
+        {/* ── Section 2: Today's Focus & Smart Suggestion ── */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-3 flex flex-col gap-6">
+            {/* Always show Daily Focus - PRIMARY */}
+            <TodaysFocus data={dailyFocus} isLoading={isLoading} streak={streak} />
 
-            {/* Show Smart Suggestion if available */}
+            {/* Show Smart Suggestion if available - SECONDARY */}
             {smartFocus && <SmartSuggestion data={smartFocus} />}
 
-            {/* Always show Daily Focus */}
-            <TodaysFocus data={dailyFocus} isLoading={isLoading} />
+            {/* ── Section 3: SETU Circles Dashboard Card ── */}
+            <CirclesDashboardCard />
           </div>
 
           <div className="lg:col-span-2">

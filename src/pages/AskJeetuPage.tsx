@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Sparkles, Camera, ImagePlus, X, Volume2, Loader2 } from 'lucide-react';
+import { Send, Sparkles, Camera, ImagePlus, X, Volume2, Loader2, Play, Pause, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { getGreetingByLanguage } from '@/lib/jeetuBhaiya';
@@ -17,115 +17,119 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 const WELCOME_VIDEO_PATH = "/videos/jeetu-welcome.mp4";
 const WELCOME_VIDEO_STORAGE_KEY = "jeetu-welcome-video-seen";
 
-const MOTIVATION_QUOTES: Record<string, string[]> = {
-  hinglish: [
-    "Abhi se thak gaye? Ek baar yeh sun lo 🔥",
-    "Woh din bhi dekhenge jab tum hase aur sab roye 💪",
-    "Haar ke baithne wale ko koi nahi puchta, uth aur laga reh!",
-    "Topper bhi ek time pe average tha, bas usne chhoda nahi 📚",
-    "Tera result tere mehnat ka receipt hai, likha ja raha hai ✍️",
-    "Phone rakh, kitaab utha — future khud shukr karega 🎯",
-    "Struggle temporary hai, regret permanent — choose wisely ⚡",
-  ],
-  english: [
-    "Tired already? Listen to this once 🔥",
-    "The day will come when you smile and others watch in awe 💪",
-    "Nobody remembers the one who gave up — get up and keep going!",
-    "Every topper was once average, they just never quit 📚",
-    "Your result is a receipt of your hard work — it's being written ✍️",
-    "Put the phone down, pick up the book — your future self will thank you 🎯",
-    "Struggle is temporary, regret is permanent — choose wisely ⚡",
-  ],
-  hindi: [
-    "अभी से थक गए? एक बार ये सुन लो 🔥",
-    "वो दिन भी देखेंगे जब तुम हँसे और सब रोए 💪",
-    "हार के बैठने वाले को कोई नहीं पूछता, उठ और लगा रह!",
-    "टॉपर भी एक टाइम पे average था, बस उसने छोड़ा नहीं 📚",
-    "तेरा रिज़ल्ट तेरी मेहनत की रसीद है, लिखा जा रहा है ✍️",
-    "फ़ोन रख, किताब उठा — भविष्य खुद शुक्र करेगा 🎯",
-    "संघर्ष अस्थायी है, पछतावा स्थायी — सोच-समझकर चुनो ⚡",
-  ],
-  kannada: [
-    "ಈಗಲೇ ಸುಸ್ತಾಯ್ತಾ? ಒಂದ್ಸಲ ಇದು ಕೇಳು 🔥",
-    "ಆ ದಿನ ಬರುತ್ತೆ — ನೀನು ನಗ್ತೀಯ, ಬಾಕಿಯವರು ನೋಡ್ತಾರೆ 💪",
-    "ಬಿಟ್ಟವನನ್ನ ಯಾರೂ ಕೇಳಲ್ಲ — ಎದ್ದು ಮುಂದುವರಿ!",
-    "ಪ್ರತಿ topper ಒಂದ್ಕಾಲದಲ್ಲಿ average ಇದ್ದ, ಆದ್ರೆ ಬಿಡಲಿಲ್ಲ 📚",
-  ],
-  telugu: [
-    "ఇప్పుడే అలసిపోయావా? ఒక్కసారి ఇది విను 🔥",
-    "ఆ రోజు వస్తుంది — నువ్వు నవ్వుతావ్, అందరూ చూస్తారు 💪",
-    "వదిలేసిన వాడిని ఎవరూ అడగరు — లే, కొనసాగు!",
-    "ప్రతి topper ఒకప్పుడు average — కానీ ఆగలేదు 📚",
-  ],
-  punjabi: [
-    "ਹੁਣੇ ਥੱਕ ਗਏ? ਇੱਕ ਵਾਰ ਇਹ ਸੁਣੋ 🔥",
-    "ਉਹ ਦਿਨ ਵੀ ਆਵੇਗਾ ਜਦੋਂ ਤੁਸੀਂ ਹੱਸੋਗੇ ਤੇ ਸਭ ਦੇਖਣਗੇ 💪",
-    "ਹਾਰ ਕੇ ਬੈਠਣ ਵਾਲੇ ਨੂੰ ਕੋਈ ਨਹੀਂ ਪੁੱਛਦਾ — ਉੱਠ ਤੇ ਲੱਗਾ ਰਹਿ!",
-    "ਹਰ topper ਇੱਕ ਟਾਈਮ ਤੇ average ਸੀ, ਬੱਸ ਉਸਨੇ ਛੱਡਿਆ ਨਹੀਂ 📚",
-  ],
-  marathi: [
-    "आत्ताच थकलास? एकदा हे ऐक 🔥",
-    "तो दिवस येईल — तू हसशील, बाकीचे बघत राहतील 💪",
-    "हार मानून बसणाऱ्याला कोणी विचारत नाही — ऊठ आणि लाग!",
-    "प्रत्येक topper एकेकाळी average होता, पण त्याने सोडलं नाही 📚",
-    "फोन ठेव, पुस्तक उचल — भविष्य स्वतः धन्यवाद देईल 🎯",
-    "संघर्ष तात्पुरता आहे, पश्चाताप कायमचा — समजूतदारपणे निवड ⚡",
-  ],
-};
+const JEE_MOTIVATION_QUOTES = [
+  "Beta, ek baar man bana lo — JEE karna hai. Phir har roz uthna, padhna, practice karna automatic ho jayega. Consistency hi result deti hai, shortcut nahi.",
+  "Padhai mein struggle feel ho raha hai? Good. Matlab tu grow kar raha hai. Jis cheez mein struggle nahi, usme grow bhi nahi hota. Laga reh.",
+  "Topper wo nahi hota jo har cheez jaanta hai. Topper wo hota hai jo galti karta hai, samajhta hai, aur dobara galti nahi karta. PYQ solve karo, samjho, aage badho.",
+  "Aaj ka ek chapter, kal ka ek advantage. Sab kuch ek saath nahi hoga. Aaj jo padha, wo exam mein kuch na kuch kaam aayega. Trust the process.",
+  "Phone rakh. Sirf 25 minute — ek concept, ek focus. Phir break le. Tujhe poora syllabus aaj nahi khatam karna. Bas aaj ka kaam kar le.",
+  "JEE Main mein 89 marks ka weightage hai — Maths, Physics, Chemistry. Har chapter ek chance hai. Weak chapter chhodna matlab marks chhodna hai.",
+  "Failure se mat darna. PYQs mein dekh — same concept baar baar aata hai. Jo baar baar aata hai, use master kar le. Baaki khud ho jayega.",
+];
 
-// Local motivation audio file
+const NEET_MOTIVATION_QUOTES = [
+  "Beta, NEET ki race lambi hai. Har din NCERT ke panno se dosti karo. Wo kitabein hi tumhe safeda kurta dilayengi.",
+  "Biology ke diagrams ko sirf dekho mat, unhe feel karo. Chemistry ki reactions tab tak likho jab tak hathon ko yaad na ho jaye.",
+  "Mock tests mein score kam aaya? Darna mat. Ye tests tumhe batate hain kahan sudharna hai. Har galti ek lesson hai.",
+  "Consistency is key. Roz 10 ghante ki jagah roz 6 ghante padho, lekin bina kisi break ke, roz.",
+  "Physics se darr lagta hai? Concepts ko pakdo, formulae khud-ba-khud yaad ho jayenge. Practice will make you perfect.",
+  "Medical seat sirf mehnat mangti hai. Aaj ki neend sacrifice karoge to kal hazaron ki jaan bachaoge.",
+  "NCERT hi tumhara Bible hai, Gita hai, aur Quran hai. Uske ek bhi corner ko mat chhodo.",
+];
+
+// Local motivation audio/video files
 const MOTIVATION_AUDIO_PATH = '/audio/jeetu-motivation.mp3';
-
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'motivation';
   content: string;
   timestamp: Date;
   image?: string;
+  mediaType?: 'audio' | 'video';
+  mediaUrl?: string;
 }
+
+const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
+  const [localPlaying, setLocalPlaying] = useState(false);
+  const [hasListened, setHasListened] = useState(false);
+  const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
+
+  const togglePlay = () => {
+    if (localPlaying) {
+      mediaRef.current?.pause();
+      setLocalPlaying(false);
+    } else {
+      mediaRef.current?.play().catch(() => {
+        toast.info("Media file not found. Here is the quote:", {
+          description: message.content,
+          duration: 5000
+        });
+      });
+      setLocalPlaying(true);
+      if (!hasListened) setHasListened(true);
+    }
+  };
+
+  return (
+    <div className="flex justify-center w-full my-4 animate-fade-in group">
+      <div
+        className={cn(
+          "flex items-center gap-3 px-4 py-2.5 rounded-full shadow-lg transition-all duration-300 cursor-pointer max-w-[95%]",
+          "bg-white border border-setu-saffron/10",
+          "hover:shadow-setu-saffron/20 hover:border-setu-saffron/30",
+          localPlaying && "ring-2 ring-setu-saffron/20 shadow-xl scale-[1.02]"
+        )}
+        onClick={togglePlay}
+      >
+        {/* Small Mentor Avatar with pulsing indicator */}
+        <div className="relative flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-dark flex items-center justify-center border border-white/20 shadow-sm">
+            <span className="text-white font-bold text-[10px]">JB</span>
+          </div>
+          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-setu-success animate-pulse"></span>
+        </div>
+
+        {/* Play Indicator / Waveform */}
+        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-setu-saffron/10 text-setu-saffron flex-shrink-0">
+          {localPlaying ? (
+            <Pause className="w-3.5 h-3.5 fill-current" />
+          ) : (
+            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+          )}
+        </div>
+
+        {/* Minimalist Text Label */}
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-medium text-foreground/90 truncate italic leading-relaxed">
+            "{message.content}"
+          </p>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className="text-[9px] font-bold text-setu-saffron uppercase tracking-widest leading-none">
+              {localPlaying ? "Listened — keep going." : "Jeetu ki Seekh"}
+            </span>
+            {hasListened && !localPlaying && (
+              <CheckCircle2 className="w-2.5 h-2.5 text-setu-success" />
+            )}
+          </div>
+        </div>
+
+        <audio
+          ref={mediaRef as any}
+          src={message.mediaUrl}
+          onEnded={() => setLocalPlaying(false)}
+          className="hidden"
+        />
+      </div>
+    </div>
+  );
+};
 
 const AskJeetuPage: React.FC = () => {
   const { language } = useLanguage();
   const { isNeet } = useExamMode();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { sendMessage, isLoading, error } = useJeetuChat();
-  const [isPlayingMotivation, setIsPlayingMotivation] = useState(false);
-  const motivAudioRef = useRef<HTMLAudioElement | null>(null);
-  // Pick a random quote once per session (per language)
-  const [quoteIndex] = useState(() => {
-    const quotes = MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish;
-    return Math.floor(Math.random() * quotes.length);
-  });
-
-  const currentQuote = (MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish)[quoteIndex % (MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish).length];
-
-  const playMotivation = useCallback(() => {
-    // If already playing, stop
-    if (isPlayingMotivation && motivAudioRef.current) {
-      motivAudioRef.current.pause();
-      motivAudioRef.current.currentTime = 0;
-      motivAudioRef.current = null;
-      setIsPlayingMotivation(false);
-      return;
-    }
-    const audio = new Audio(MOTIVATION_AUDIO_PATH);
-    motivAudioRef.current = audio;
-    setIsPlayingMotivation(true);
-    audio.onended = () => { setIsPlayingMotivation(false); motivAudioRef.current = null; };
-    audio.onerror = () => {
-      setIsPlayingMotivation(false);
-      motivAudioRef.current = null;
-      const fallback = (MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish)[0];
-      import('sonner').then(({ toast }) => toast.info(fallback, { duration: 8000 }));
-    };
-    audio.play().catch(() => {
-      setIsPlayingMotivation(false);
-      motivAudioRef.current = null;
-    });
-  }, [isPlayingMotivation]);
-
-
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -137,7 +141,6 @@ const AskJeetuPage: React.FC = () => {
   const [input, setInput] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showWelcomeVideo, setShowWelcomeVideo] = useState(() => {
-    // Check if user has already seen the welcome video
     return !localStorage.getItem(WELCOME_VIDEO_STORAGE_KEY);
   });
   const [videoMuted, setVideoMuted] = useState(true);
@@ -145,6 +148,21 @@ const AskJeetuPage: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
+  const injectMotivationMessage = useCallback(() => {
+    const quotes = isNeet ? NEET_MOTIVATION_QUOTES : JEE_MOTIVATION_QUOTES;
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+    const newMsg: Message = {
+      id: 'motiv-' + Date.now(),
+      role: 'motivation',
+      content: randomQuote,
+      timestamp: new Date(),
+      mediaType: 'audio',
+      mediaUrl: MOTIVATION_AUDIO_PATH
+    };
+
+    setMessages(prev => [...prev, newMsg]);
+  }, [isNeet]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -154,14 +172,12 @@ const AskJeetuPage: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Show error toast
   useEffect(() => {
     if (error) {
       toast.error(error);
     }
   }, [error]);
 
-  // Update greeting when language changes
   useEffect(() => {
     if (messages.length === 1) {
       setMessages([{
@@ -220,10 +236,9 @@ const AskJeetuPage: React.FC = () => {
     setInput('');
     setSelectedImage(null);
 
-    // Build message history for AI
     const chatHistory = messages
-      .filter(m => m.role !== 'assistant' || messages.indexOf(m) > 0 || messages.length > 1)
-      .map(m => ({ role: m.role, content: m.content }));
+      .filter(m => m.role !== 'motivation' && (m.role !== 'assistant' || messages.indexOf(m) > 0 || messages.length > 1))
+      .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
     chatHistory.push({ role: 'user', content: textToSend });
 
@@ -248,7 +263,6 @@ const AskJeetuPage: React.FC = () => {
     };
 
     await sendMessage(chatHistory, updateAssistant, () => {
-      // Finalize the message ID
       setMessages(prev =>
         prev.map(m =>
           m.id.startsWith('streaming-')
@@ -256,7 +270,6 @@ const AskJeetuPage: React.FC = () => {
             : m
         )
       );
-
     });
   };
 
@@ -267,7 +280,6 @@ const AskJeetuPage: React.FC = () => {
   const handleQuickQuestion = (question: string) => {
     setInput(question);
   };
-
 
   const formatMessage = (content: string) => {
     return content.split('\n').map((line, i) => {
@@ -288,7 +300,6 @@ const AskJeetuPage: React.FC = () => {
 
   return (
     <MainLayout title="Ask Jeetu Bhaiya">
-      {/* Welcome Video Modal */}
       <Dialog
         open={showWelcomeVideo}
         onOpenChange={(open) => {
@@ -303,7 +314,6 @@ const AskJeetuPage: React.FC = () => {
             <DialogTitle>Jeetu Bhaiya Welcome Message</DialogTitle>
           </VisuallyHidden>
           <div className="relative">
-            {/* Local Video Player */}
             <div className="aspect-video">
               <video
                 ref={videoRef}
@@ -320,7 +330,6 @@ const AskJeetuPage: React.FC = () => {
               />
             </div>
 
-            {/* Controls Overlay */}
             <div className="absolute bottom-14 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -334,7 +343,6 @@ const AskJeetuPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/* Skip Button */}
                   <Button
                     onClick={() => {
                       localStorage.setItem(WELCOME_VIDEO_STORAGE_KEY, 'true');
@@ -348,7 +356,6 @@ const AskJeetuPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Close Button */}
             <button
               onClick={() => {
                 localStorage.setItem(WELCOME_VIDEO_STORAGE_KEY, 'true');
@@ -363,7 +370,6 @@ const AskJeetuPage: React.FC = () => {
       </Dialog>
 
       <div className="h-[calc(100vh-8rem)] flex flex-col max-w-4xl mx-auto">
-        {/* Chat Header */}
         <div className="bg-card border border-border rounded-t-2xl p-4 flex items-center gap-4">
           <div className="relative">
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center shadow-lg">
@@ -383,55 +389,50 @@ const AskJeetuPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto bg-secondary/30 p-4 space-y-4">
           {messages.map((message, index) => (
-            <div
-              key={message.id}
-              className={cn(
-                'flex animate-fade-in',
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              )}
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              {message.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
-                  <span className="text-setu-saffron font-bold text-xs">JB</span>
+            <React.Fragment key={message.id}>
+              {message.role !== 'motivation' && (
+                <div
+                  className={cn(
+                    'flex animate-fade-in',
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  )}
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  {message.role === 'assistant' && (
+                    <div className="w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
+                      <span className="text-setu-saffron font-bold text-xs">JB</span>
+                    </div>
+                  )}
+                  <div
+                    className={cn(
+                      'max-w-[85%] rounded-2xl px-4 py-3',
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground rounded-br-md'
+                        : 'bg-card border border-border rounded-bl-md shadow-sm'
+                    )}
+                  >
+                    {message.image && (
+                      <img
+                        src={message.image}
+                        alt="Attached"
+                        className="max-w-full rounded-lg mb-2 max-h-48 object-contain"
+                      />
+                    )}
+
+                    <div className={cn(
+                      'text-sm leading-relaxed whitespace-pre-wrap',
+                      message.role === 'assistant' && 'text-foreground'
+                    )}>
+                      {message.role === 'assistant' ? formatMessage(message.content) : message.content}
+                    </div>
+                  </div>
                 </div>
               )}
-              <div
-                className={cn(
-                  'max-w-[85%] rounded-2xl px-4 py-3',
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground rounded-br-md'
-                    : 'bg-card border border-border rounded-bl-md shadow-sm'
-                )}
-              >
-                {/* Display attached image */}
-                {message.image && (
-                  <img
-                    src={message.image}
-                    alt="Attached"
-                    className="max-w-full rounded-lg mb-2 max-h-48 object-contain"
-                  />
-                )}
-
-                <div className={cn(
-                  'text-sm leading-relaxed whitespace-pre-wrap',
-                  message.role === 'assistant' && 'text-foreground'
-                )}>
-                  {message.role === 'assistant' ? formatMessage(message.content) : message.content}
-                </div>
-
-                {/* Speak button for assistant messages */}
-              </div>
-            </div>
+            </React.Fragment>
           ))}
 
-
-
-
-          {/* Typing Indicator */}
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
             <div className="flex justify-start animate-fade-in">
               <div className="w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0">
@@ -447,7 +448,6 @@ const AskJeetuPage: React.FC = () => {
             </div>
           )}
 
-          {/* Quick Questions - Show only at start */}
           {messages.length === 1 && !isLoading && (
             <div className="space-y-3 pt-4">
               <p className="text-xs text-muted-foreground font-medium">
@@ -474,30 +474,15 @@ const AskJeetuPage: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="bg-card border border-border rounded-b-2xl p-4">
-          {/* Motivation Quote Banner */}
-          <button
-            onClick={playMotivation}
-            className={cn(
-              'w-full flex items-center gap-3 px-4 py-3 mb-3 rounded-2xl transition-all text-left',
-              'bg-gradient-to-r from-setu-saffron/10 via-setu-saffron/5 to-transparent',
-              'border border-setu-saffron/20 shadow-sm',
-              'hover:shadow-md hover:border-setu-saffron/40 active:scale-[0.99]',
-              isPlayingMotivation && 'border-setu-saffron/50 shadow-md'
-            )}
-          >
-            <div className={cn(
-              'w-8 h-8 rounded-full bg-setu-saffron/15 flex items-center justify-center flex-shrink-0',
-              isPlayingMotivation && 'animate-pulse bg-setu-saffron/25'
-            )}>
-              <Volume2 className="w-4 h-4 text-setu-saffron" />
+        <div className="bg-card border border-border rounded-b-2xl p-4 relative">
+          {messages.filter(m => m.role === 'motivation').length > 0 && (
+            <div className="absolute bottom-full left-0 right-0 px-4 pb-2 z-20 pointer-events-none">
+              <div className="pointer-events-auto max-w-lg mx-auto">
+                <MotivationBubble message={messages.filter(m => m.role === 'motivation').slice(-1)[0]} />
+              </div>
             </div>
-            <span className="text-sm font-medium text-foreground/80 flex-1 leading-snug">
-              {currentQuote}
-            </span>
-          </button>
-          {/* Image Preview */}
+          )}
+
           {selectedImage && (
             <div className="mb-3 relative inline-block">
               <img
@@ -514,7 +499,6 @@ const AskJeetuPage: React.FC = () => {
             </div>
           )}
 
-          {/* Hidden file inputs */}
           <input
             type="file"
             ref={fileInputRef}
@@ -532,19 +516,16 @@ const AskJeetuPage: React.FC = () => {
           />
 
           <div className="flex gap-2">
-            {/* Gallery Upload Button */}
             <Button
               variant="outline"
               size="icon"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex-shrink-0 rounded-xl"
-              disabled={isLoading}
-              title="Upload from gallery"
+              onClick={injectMotivationMessage}
+              className="flex-shrink-0 rounded-xl border-setu-saffron/30 text-setu-saffron hover:bg-setu-saffron/10"
+              title="Jeetu Bhaiya ki Seekh suniye"
             >
-              <ImagePlus className="w-5 h-5" />
+              <Volume2 className="w-5 h-5" />
             </Button>
 
-            {/* Camera Button */}
             <Button
               variant="outline"
               size="icon"
