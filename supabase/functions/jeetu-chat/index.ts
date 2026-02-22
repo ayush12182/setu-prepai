@@ -224,27 +224,25 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const getSystemPrompt = (mode: string, lang: string) => {
-      if (mode === 'neet') {
-        return lang === 'english'
-          ? NEET_MENTOR_SYSTEM_PROMPT.replace("Hinglish", "Strict English")
-            .replace("bhai / bhen", "friend")
-            .replace("Samajh aaya? NCERT padh ke revise karo. 💪", "Understood? Revise from NCERT now. 💪")
-            .replace("Bhai, dhyaan se samjho…", "Listen carefully...")
-            .replace("Bhai, ek baar NCERT se cross-check kar lete hain.", "Let's cross-check with NCERT once.")
-            .replace("Bhai, NCERT mein iska exact reference check karte hain…", "Let's check the exact reference in NCERT...")
-          : NEET_MENTOR_SYSTEM_PROMPT;
+    const getLanguageInstruction = (lang: string) => {
+      switch (lang) {
+        case 'english': return 'Respond STRICTLY in English only. No Hindi, Hinglish, or any other Indian language words. Professional academic English.';
+        case 'hindi': return 'Respond STRICTLY in Hindi (Devanagari script). हिंदी में जवाब दो। No English words except technical/scientific terms. Use बहन/भाई।';
+        case 'kannada': return 'Respond STRICTLY in Kannada (ಕನ್ನಡ script). ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ. No English except technical terms.';
+        case 'telugu': return 'Respond STRICTLY in Telugu (తెలుగు script). తెలుగులో జవాబు ఇవ్వండి. No English except technical terms.';
+        case 'punjabi': return 'Respond STRICTLY in Punjabi (ਗੁਰਮੁਖੀ script). ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ. No English except technical terms.';
+        case 'marathi': return 'Respond STRICTLY in Marathi (मराठी Devanagari script). मराठीत उत्तर द्या. No English except technical terms.';
+        default: return 'Respond in Hinglish (Hindi + English mix). Use bhai/bhen. Coaching style.';
       }
+    };
 
-      // Default Jeetu Bhaiya (JEE)
-      return lang === 'english'
-        ? JEETU_BHAIYA_SYSTEM_PROMPT.replace("Hinglish", "Strict English")
-          .replace("bhai / bhen", "friend")
-          .replace("Samajh aaya? Tension mat le, hum sahi ja rahe hain.", "Understood? Don't worry, we are on the right track.")
-          .replace("Bhai, dhyaan se sun…", "Listen carefully...")
-          .replace("Bhai, main ek baar re-check kar raha hoon. Galat answer dena allowed nahi hai.", "I am re-checking once. Giving a wrong answer is not allowed.")
-          .replace("Bhai, yahan assumption clear karte hain…", "Let's clarify the assumption here...")
-        : JEETU_BHAIYA_SYSTEM_PROMPT;
+    const getSystemPrompt = (mode: string, lang: string) => {
+      const langRule = `\n\n🌐 LANGUAGE RULE (MANDATORY - OVERRIDE ALL OTHER TONE RULES):\n${getLanguageInstruction(lang)}\nFormulas and scientific notation remain universal.\n`;
+      
+      if (mode === 'neet') {
+        return NEET_MENTOR_SYSTEM_PROMPT + langRule;
+      }
+      return JEETU_BHAIYA_SYSTEM_PROMPT + langRule;
     };
 
     const systemPrompt = getSystemPrompt(examMode, language);

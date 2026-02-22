@@ -24,15 +24,23 @@ const Index: React.FC = () => {
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "Bhai";
 
   const getGreeting = () => {
-    if (language === 'english') {
-      return isNeet
-        ? "Your NEET Mentor is ready to help you."
-        : `${getMentorName()} is ready to help you.`;
+    const mentorName = getMentorName();
+    switch (language) {
+      case 'english':
+        return isNeet ? "Your NEET Mentor is ready to help you." : `${mentorName} is ready to help you.`;
+      case 'hindi':
+        return isNeet ? "आपका NEET मेंटर तैयार है आपकी मदद के लिए।" : `${mentorName} तैयार है आपकी मदद के लिए।`;
+      case 'kannada':
+        return isNeet ? "ನಿಮ್ಮ NEET ಮೆಂಟರ್ ಸಹಾಯಕ್ಕೆ ಸಿದ್ಧ." : `${mentorName} ಸಹಾಯಕ್ಕೆ ಸಿದ್ಧ.`;
+      case 'telugu':
+        return isNeet ? "మీ NEET మెంటార్ సహాయానికి సిద్ధంగా ఉన్నారు." : `${mentorName} సహాయానికి సిద్ధంగా ఉన్నారు.`;
+      case 'punjabi':
+        return isNeet ? "ਤੁਹਾਡਾ NEET ਮੈਂਟਰ ਮਦਦ ਲਈ ਤਿਆਰ ਹੈ।" : `${mentorName} ਮਦਦ ਲਈ ਤਿਆਰ ਹੈ।`;
+      case 'marathi':
+        return isNeet ? "तुमचा NEET मेंटर मदतीसाठी तयार आहे." : `${mentorName} मदतीसाठी तयार आहे.`;
+      default:
+        return isNeet ? "Your NEET Mentor ready hai tumhari help ke liye" : `${mentorName} ready hai tumhari help ke liye`;
     }
-    // Hinglish/Hindi
-    return isNeet
-      ? "Your NEET Mentor ready hai tumhari help ke liye"
-      : `${getMentorName()} ready hai tumhari help ke liye`;
   };
 
   return (

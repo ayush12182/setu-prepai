@@ -25,6 +25,7 @@ const languageLabels: Record<LanguageMode, string> = {
   kannada: 'ಕನ್ನಡ',
   telugu: 'తెలుగు',
   punjabi: 'ਪੰਜਾਬੀ',
+  marathi: 'मराठी',
 };
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) => {

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type LanguageMode = 'english' | 'hinglish' | 'hindi' | 'kannada' | 'telugu' | 'punjabi';
+export type LanguageMode = 'english' | 'hinglish' | 'hindi' | 'kannada' | 'telugu' | 'punjabi' | 'marathi';
 
 interface LanguageContextType {
   language: LanguageMode;
@@ -16,6 +16,7 @@ const greetings: Record<LanguageMode, string> = {
   kannada: "ನಮಸ್ಕಾರ! ನಾನು ಜೀತು ಭೈಯಾ, ನಿಮ್ಮ JEE ಮೆಂಟರ್.",
   telugu: "నమస్కారం! నేను జీతు భైయా, మీ JEE మెంటార్.",
   punjabi: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਜੀਤੂ ਭਾਈ, ਤੁਹਾਡਾ JEE ਮੈਂਟਰ।",
+  marathi: "नमस्कार! मी जीतू भैय्या, तुमचा JEE मेंटर.",
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
