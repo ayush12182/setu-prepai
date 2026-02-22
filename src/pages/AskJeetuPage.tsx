@@ -84,16 +84,11 @@ const AskJeetuPage: React.FC = () => {
   const { sendMessage, isLoading, error } = useJeetuChat();
   const [isPlayingMotivation, setIsPlayingMotivation] = useState(false);
   const motivAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [quoteIndex, setQuoteIndex] = useState(0);
-
-  // Rotate motivational quote every 5 seconds
-  useEffect(() => {
+  // Pick a random quote once per session (per language)
+  const [quoteIndex] = useState(() => {
     const quotes = MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish;
-    const interval = setInterval(() => {
-      setQuoteIndex(prev => (prev + 1) % quotes.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [language]);
+    return Math.floor(Math.random() * quotes.length);
+  });
 
   const currentQuote = (MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish)[quoteIndex % (MOTIVATION_QUOTES[language] || MOTIVATION_QUOTES.hinglish).length];
 
@@ -477,13 +472,20 @@ const AskJeetuPage: React.FC = () => {
           <button
             onClick={playMotivation}
             className={cn(
-              'w-full flex items-center gap-2 px-3 py-2 mb-3 rounded-xl border transition-all text-left',
-              'border-setu-saffron/30 bg-gradient-to-r from-setu-saffron/5 to-transparent hover:from-setu-saffron/10',
-              isPlayingMotivation && 'bg-setu-saffron/10 border-setu-saffron'
+              'w-full flex items-center gap-3 px-4 py-3 mb-3 rounded-2xl transition-all text-left',
+              'bg-gradient-to-r from-setu-saffron/10 via-setu-saffron/5 to-transparent',
+              'border border-setu-saffron/20 shadow-sm',
+              'hover:shadow-md hover:border-setu-saffron/40 active:scale-[0.99]',
+              isPlayingMotivation && 'border-setu-saffron/50 shadow-md'
             )}
           >
-            <Volume2 className={cn('w-4 h-4 flex-shrink-0 text-setu-saffron', isPlayingMotivation && 'animate-pulse')} />
-            <span className="text-xs font-medium text-setu-saffron truncate flex-1">
+            <div className={cn(
+              'w-8 h-8 rounded-full bg-setu-saffron/15 flex items-center justify-center flex-shrink-0',
+              isPlayingMotivation && 'animate-pulse bg-setu-saffron/25'
+            )}>
+              <Volume2 className="w-4 h-4 text-setu-saffron" />
+            </div>
+            <span className="text-sm font-medium text-foreground/80 flex-1 leading-snug">
               {currentQuote}
             </span>
           </button>
