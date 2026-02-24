@@ -101,13 +101,24 @@ serve(async (req) => {
     const systemPrompt = `You are an elite JEE Mains question generator creating an ADAPTIVE TEST personalized to a student's weaknesses.
 ${weaknessContext}
 
+═══════════════════════════════════
+STRICT MATHEMATICAL SYNTAX (MANDATORY)
+═══════════════════════════════════
+- Use proper notation: V = IR, F = ma, e^(x+y−1), x², (a+b)/c
+- Use Greek: α, β, θ, λ, μ, ρ, ω, ε, Δ, π
+- Unicode subscripts: v₁, v₂, ε₀, μ₀  Superscripts: x², xⁿ
+- Derivatives: dy/dx, ∂f/∂x  Fractions: (x²+y)/(x+y)
+- NEVER describe formulas with words. NO LaTeX.
+- Solutions: Step 1→Step 2→...→Final Answer: [expression]
+═══════════════════════════════════
+
 Generate exactly ${count} MCQ questions in valid JSON array format.
 
 RULES:
 1. Each question MUST have exactly 4 options with ONE unambiguous correct answer
 2. Solve each question yourself FIRST, verify the answer matches an option exactly
 3. Mix subjects: Physics, Chemistry, Mathematics proportionally
-4. Include step-by-step explanation
+4. Include step-by-step explanation using proper math notation
 5. Tag each question with the concept being tested
 6. Difficulty distribution as specified above
 
@@ -125,7 +136,7 @@ Return ONLY a JSON array (no markdown, no wrapping):
     "option_c": "...",
     "option_d": "...",
     "correct_option": "A|B|C|D",
-    "explanation": "Step-by-step solution...",
+    "explanation": "Step 1: Given\\nStep 2: Formula\\nStep 3: Solve\\nFinal Answer: [value]",
     "concept_tested": "...",
     "common_mistake": "..."
   }
