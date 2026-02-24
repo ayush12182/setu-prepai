@@ -6,7 +6,7 @@ import { useFocusRoom } from '@/hooks/useCircleRooms';
 import { CATEGORY_STYLES, CategoryStyle, MessageCategory } from '@/data/circlesData';
 import { BadgeChip } from '@/components/circles/ReputationBadge';
 import {
-    ArrowLeft, Users, Clock, Send, Star, Circle, AlertCircle, Sparkles,
+    ArrowLeft, Users, Clock, Send, Star, Circle, AlertCircle, Sparkles, Share2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -261,6 +261,32 @@ const CircleFocusRoomPage: React.FC = () => {
                             </span>
                         </div>
                     </div>
+
+                    {/* Invite button in header */}
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1.5 text-xs h-7"
+                        onClick={async () => {
+                            const url = `${window.location.origin}/circles/${roomId}`;
+                            const shareData = {
+                                title: 'Join me on SETU Commune!',
+                                text: `Let's study "${room?.topic}" together! 📚🔥`,
+                                url,
+                            };
+                            try {
+                                if (navigator.share && navigator.canShare?.(shareData)) {
+                                    await navigator.share(shareData);
+                                } else {
+                                    await navigator.clipboard.writeText(`${shareData.text}\n${url}`);
+                                    toast.success('Invite link copied! Share with your study buddy 🎉');
+                                }
+                            } catch { /* user cancelled */ }
+                        }}
+                    >
+                        <Share2 className="w-3 h-3" />
+                        Invite Friend
+                    </Button>
                 </div>
 
                 {/* ── Timer banner ── */}
@@ -366,17 +392,36 @@ const CircleFocusRoomPage: React.FC = () => {
                                 </div>
                             ))}
 
-                            {/* Study Together CTA */}
-                            <div className="pt-3 px-1">
-                                <p className="text-[10px] text-muted-foreground text-center mb-2">
-                                    Want to focus together?
+                            {/* Invite Friends CTA */}
+                            <div className="pt-3 px-1 space-y-2">
+                                <p className="text-[10px] text-muted-foreground text-center">
+                                    Invite your friends to study together!
                                 </p>
+                                <Button
+                                    size="sm"
+                                    className="w-full text-xs h-8 gap-1.5 bg-gradient-to-r from-accent to-[hsl(25_85%_55%)] text-white hover:opacity-90"
+                                    onClick={async () => {
+                                        const url = `${window.location.origin}/circles/${roomId}`;
+                                        const text = `Join me in "${room?.topic}" on SETU Commune! Let's study together 📚🔥`;
+                                        try {
+                                            if (navigator.share) {
+                                                await navigator.share({ title: 'SETU Commune', text, url });
+                                            } else {
+                                                await navigator.clipboard.writeText(`${text}\n${url}`);
+                                                toast.success('Invite link copied! 🎉');
+                                            }
+                                        } catch { /* cancelled */ }
+                                    }}
+                                >
+                                    <Share2 className="w-3.5 h-3.5" />
+                                    Invite Friends
+                                </Button>
                                 <Button
                                     size="sm"
                                     variant="outline"
                                     className="w-full text-xs h-7 gap-1"
                                     onClick={() => {
-                                        toast.success('Private focus room opened! Study together started 📚');
+                                        toast.success('Study session started! Your friend will join via the invite link 📚');
                                     }}
                                 >
                                     👥 Study Together
