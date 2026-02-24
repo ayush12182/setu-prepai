@@ -1,176 +1,313 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-    CircleRoom,
-    CircleMessage,
-    MessageCategory,
-    ALL_ROOMS,
-    SIMULATED_MEMBERS,
-    CircleMember,
-    buildInitialMessages,
-    MENTOR_MESSAGES_JEE,
-    MENTOR_MESSAGES_NEET,
-    MODERATION_RESPONSE,
-} from '@/data/circlesData';
-import { ExamType } from '@/data/circlesData';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { MessageCategory, CATEGORY_STYLES } from '@/data/circlesData';
+import type { ExamType } from '@/data/circlesData';
+import { toast } from 'sonner';
 
-// ─── Off-topic keyword detection (basic heuristic) ────────────────────────
+// ─── Types ─────────────────────────────────────────────────────────────────
 
-const OFF_TOPIC_KEYWORDS = [
-    'movie', 'cricket', 'ipl', 'web series', 'instagram', 'meme', 'tiktok',
-    'politics', 'election', 'dating', 'girlfriend', 'boyfriend', 'party',
-    'game', 'pubg', 'fortnite', 'netflix', 'amazon prime', 'gossip',
-];
-
-function isOffTopic(text: string): boolean {
-    const lower = text.toLowerCase();
-    return OFF_TOPIC_KEYWORDS.some(kw => lower.includes(kw));
+export interface CommuneRoom {
+  id: string;
+  title: string;
+  subject: string;
+  study_mode: string;
+  exam_type: ExamType;
+  created_by: string;
+  expires_at: string;
+  created_at: string;
 }
 
-// ─── Room state ────────────────────────────────────────────────────────────
+export interface CommuneMessage {
+  id: string;
+  room_id: string;
+  user_id: string;
+  user_name: string;
+  category: string;
+  content: string;
+  created_at: string;
+}
+
+export interface PresenceMember {
+  id: string;
+  name: string;
+  studying?: string;
+  joinedAt: string;
+}
 
 export interface RoomState {
-    room: CircleRoom;
-    studentCount: number;
-    remainingMinutes: number;
+  room: CommuneRoom;
+  studentCount: number;
+  remainingMinutes: number;
 }
 
 export interface FocusRoomState {
-    messages: CircleMessage[];
-    members: CircleMember[];
-    room: CircleRoom | null;
-    studentCount: number;
-    remainingMinutes: number;
-    sendMessage: (category: MessageCategory, text: string) => void;
+  messages: CommuneMessage[];
+  members: PresenceMember[];
+  room: CommuneRoom | null;
+  studentCount: number;
+  remainingMinutes: number;
+  sendMessage: (category: MessageCategory, text: string) => void;
+  loading: boolean;
 }
 
-// ─── Hook: useCircleRooms ──────────────────────────────────────────────────
+// ─── Helper: minutes remaining ─────────────────────────────────────────────
+
+function getMinutesRemaining(expiresAt: string): number {
+  return Math.max(0, (new Date(expiresAt).getTime() - Date.now()) / 60000);
+}
+
+// ─── Hook: useCircleRooms — list all active rooms ──────────────────────────
 
 export function useCircleRooms(exam: ExamType) {
-    const [roomStates, setRoomStates] = useState<RoomState[]>(() =>
-        ALL_ROOMS
-            .filter(r => r.exam === exam)
-            .map(r => ({
-                room: r,
-                studentCount: r.baseStudentCount,
-                remainingMinutes: Math.max(0, r.expiryMinutes - r.startedMinsAgo),
-            }))
-    );
+  const [roomStates, setRoomStates] = useState<RoomState[]>([]);
 
-    // Simulate live student count fluctuations every 8 seconds
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setRoomStates(prev =>
-                prev.map(rs => {
-                    if (rs.remainingMinutes <= 0) return rs;
-                    const delta = Math.floor(Math.random() * 5) - 2; // -2 to +2
-                    const newCount = Math.max(1, rs.studentCount + delta);
-                    const newRemaining = Math.max(0, rs.remainingMinutes - 1 / 7.5); // ~8s tick
-                    return { ...rs, studentCount: newCount, remainingMinutes: newRemaining };
-                })
-            );
-        }, 8000);
-        return () => clearInterval(interval);
-    }, []);
+  const fetchRooms = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('commune_rooms')
+      .select('*')
+      .eq('exam_type', exam)
+      .gte('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false });
 
-    return roomStates;
+    if (error) {
+      console.error('Failed to fetch rooms:', error);
+      return;
+    }
+
+    const rooms = (data ?? []) as CommuneRoom[];
+    setRoomStates(rooms.map(room => ({
+      room,
+      studentCount: 0, // Will be updated by presence
+      remainingMinutes: getMinutesRemaining(room.expires_at),
+    })));
+  }, [exam]);
+
+  useEffect(() => {
+    fetchRooms();
+
+    // Listen for new rooms in realtime
+    const channel = supabase
+      .channel('commune-rooms-list')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'commune_rooms',
+        filter: `exam_type=eq.${exam}`,
+      }, () => {
+        fetchRooms();
+      })
+      .subscribe();
+
+    // Update remaining minutes every 30s
+    const timer = setInterval(() => {
+      setRoomStates(prev =>
+        prev
+          .map(rs => ({ ...rs, remainingMinutes: getMinutesRemaining(rs.room.expires_at) }))
+          .filter(rs => rs.remainingMinutes > 0)
+      );
+    }, 30000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(timer);
+    };
+  }, [exam, fetchRooms]);
+
+  // Track presence per room to get student counts
+  useEffect(() => {
+    if (roomStates.length === 0) return;
+
+    const channels = roomStates.map(rs => {
+      const ch = supabase.channel(`room-presence-${rs.room.id}`, {
+        config: { presence: { key: 'viewers' } },
+      });
+
+      ch.on('presence', { event: 'sync' }, () => {
+        const state = ch.presenceState();
+        const count = Object.values(state).flat().length;
+        setRoomStates(prev =>
+          prev.map(r => r.room.id === rs.room.id ? { ...r, studentCount: count } : r)
+        );
+      }).subscribe();
+
+      return ch;
+    });
+
+    return () => {
+      channels.forEach(ch => supabase.removeChannel(ch));
+    };
+  }, [roomStates.length]); // Only re-subscribe when room count changes
+
+  // Create room function
+  const createRoom = useCallback(async (title: string, subject: string, studyMode: string, durationMinutes: number) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      toast.error('Please login to create a room');
+      return null;
+    }
+
+    const expiresAt = new Date(Date.now() + durationMinutes * 60000).toISOString();
+
+    const { data, error } = await supabase
+      .from('commune_rooms')
+      .insert({
+        title,
+        subject,
+        study_mode: studyMode,
+        exam_type: exam,
+        created_by: session.user.id,
+        expires_at: expiresAt,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast.error('Failed to create room');
+      console.error(error);
+      return null;
+    }
+
+    toast.success('Room created! 🎉');
+    return data as CommuneRoom;
+  }, [exam]);
+
+  return { roomStates, createRoom };
 }
 
-// ─── Hook: useFocusRoom ────────────────────────────────────────────────────
+// ─── Hook: useFocusRoom — join a specific room with realtime ───────────────
 
 export function useFocusRoom(roomId: string): FocusRoomState {
-    const room = ALL_ROOMS.find(r => r.id === roomId) ?? null;
-    const exam: ExamType = room?.exam ?? 'jee';
+  const { user, profile } = useAuth();
+  const [room, setRoom] = useState<CommuneRoom | null>(null);
+  const [messages, setMessages] = useState<CommuneMessage[]>([]);
+  const [members, setMembers] = useState<PresenceMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-    const [messages, setMessages] = useState<CircleMessage[]>(() =>
-        room ? buildInitialMessages(exam, room.topic) : []
-    );
+  const userName = profile?.full_name || user?.email?.split('@')[0] || 'Student';
 
-    const [studentCount, setStudentCount] = useState(room?.baseStudentCount ?? 0);
-    const [remainingMinutes, setRemainingMinutes] = useState(
-        room ? Math.max(0, room.expiryMinutes - room.startedMinsAgo) : 0
-    );
+  // Fetch room and initial messages
+  useEffect(() => {
+    if (!roomId) return;
 
-    const mentorMsgs = exam === 'neet' ? MENTOR_MESSAGES_NEET : MENTOR_MESSAGES_JEE;
-    const mentorMsgIdx = useRef(0);
+    const init = async () => {
+      setLoading(true);
 
-    // Countdown timer tick every 60 seconds
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setRemainingMinutes(prev => Math.max(0, prev - 1));
-        }, 60000);
-        return () => clearInterval(interval);
-    }, []);
+      // Fetch room
+      const { data: roomData } = await supabase
+        .from('commune_rooms')
+        .select('*')
+        .eq('id', roomId)
+        .single();
 
-    // Simulate student count fluctuation
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setStudentCount(prev => Math.max(1, prev + Math.floor(Math.random() * 5) - 2));
-        }, 8000);
-        return () => clearInterval(interval);
-    }, []);
+      if (roomData) setRoom(roomData as CommuneRoom);
 
-    // Mentor AI message injection every 45 seconds
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            const idx = mentorMsgIdx.current % mentorMsgs.length;
-            mentorMsgIdx.current += 1;
-            const mentorMsg: CircleMessage = {
-                id: `mentor-${Date.now()}`,
-                senderId: 'mentor',
-                senderName: exam === 'neet' ? 'NEET Mentor AI' : 'Jeetu Bhaiya AI',
-                senderPoints: 999,
-                category: 'Mentor',
-                isMentor: true,
-                text: mentorMsgs[idx],
-                timestamp: new Date(),
-                upvotes: 0,
-            };
-            setMessages(prev => [...prev, mentorMsg]);
+      // Fetch existing messages
+      const { data: msgData } = await supabase
+        .from('commune_messages')
+        .select('*')
+        .eq('room_id', roomId)
+        .order('created_at', { ascending: true })
+        .limit(200);
 
-            // Schedule next mentor message
-        }, 45000);
-        return () => clearTimeout(timeout);
-    }, [messages.length, mentorMsgs, exam]);
+      if (msgData) setMessages(msgData as CommuneMessage[]);
 
-    const sendMessage = useCallback((category: MessageCategory, text: string) => {
-        const trimmed = text.trim();
-        if (!trimmed) return;
+      setLoading(false);
+    };
 
-        const newMsg: CircleMessage = {
-            id: `msg-${Date.now()}`,
-            senderId: 'user',
-            senderName: 'You',
-            senderPoints: 0,
-            category,
-            text: trimmed,
-            timestamp: new Date(),
-            upvotes: 0,
-        };
+    init();
+  }, [roomId]);
 
-        setMessages(prev => [...prev, newMsg]);
+  // Subscribe to realtime messages + presence
+  useEffect(() => {
+    if (!roomId || !user) return;
 
-        // Moderation check — if off-topic, AI responds after 1.5s
-        if (isOffTopic(trimmed)) {
-            setTimeout(() => {
-                const modMsg: CircleMessage = {
-                    id: `mod-${Date.now()}`,
-                    senderId: 'mentor',
-                    senderName: exam === 'neet' ? 'NEET Mentor AI' : 'Jeetu Bhaiya AI',
-                    senderPoints: 999,
-                    category: 'Mentor',
-                    isMentor: true,
-                    isModeration: true,
-                    text: MODERATION_RESPONSE,
-                    timestamp: new Date(),
-                    upvotes: 0,
-                };
-                setMessages(prev => [...prev, modMsg]);
-            }, 1500);
-        }
-    }, [exam]);
+    const channel = supabase.channel(`room:${roomId}`, {
+      config: { presence: { key: user.id } },
+    });
 
-    // Subset of members for this room (random selection of 5–8)
-    const members = SIMULATED_MEMBERS.slice(0, 7);
+    // Realtime new messages via postgres_changes
+    channel.on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'commune_messages',
+      filter: `room_id=eq.${roomId}`,
+    }, (payload) => {
+      const newMsg = payload.new as CommuneMessage;
+      setMessages(prev => {
+        // Avoid duplicates
+        if (prev.some(m => m.id === newMsg.id)) return prev;
+        return [...prev, newMsg];
+      });
+    });
 
-    return { messages, members, room, studentCount, remainingMinutes, sendMessage };
+    // Presence tracking
+    channel.on('presence', { event: 'sync' }, () => {
+      const state = channel.presenceState();
+      const presenceMembers: PresenceMember[] = [];
+      Object.values(state).forEach((arr: any[]) => {
+        arr.forEach((p: any) => {
+          presenceMembers.push({
+            id: p.user_id || p.presence_ref,
+            name: p.user_name || 'Student',
+            studying: p.studying,
+            joinedAt: p.joined_at || new Date().toISOString(),
+          });
+        });
+      });
+      setMembers(presenceMembers);
+    });
+
+    channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({
+          user_id: user.id,
+          user_name: userName,
+          studying: room?.subject || 'General',
+          joined_at: new Date().toISOString(),
+        });
+      }
+    });
+
+    channelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      channelRef.current = null;
+    };
+  }, [roomId, user, userName, room?.subject]);
+
+  // Send message
+  const sendMessage = useCallback(async (category: MessageCategory, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || !user) return;
+
+    const { error } = await supabase
+      .from('commune_messages')
+      .insert({
+        room_id: roomId,
+        user_id: user.id,
+        user_name: userName,
+        category,
+        content: trimmed,
+      });
+
+    if (error) {
+      toast.error('Failed to send message');
+      console.error(error);
+    }
+  }, [roomId, user, userName]);
+
+  const remainingMinutes = room ? getMinutesRemaining(room.expires_at) : 0;
+
+  return {
+    messages,
+    members,
+    room,
+    studentCount: members.length,
+    remainingMinutes,
+    sendMessage,
+    loading,
+  };
 }
