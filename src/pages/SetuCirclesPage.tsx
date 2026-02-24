@@ -11,12 +11,34 @@ import {
     CircleSubject,
 } from '@/data/circlesData';
 import {
-    Search, Users, Clock, Flame, BookOpen, ChevronRight, Zap,
+    Search, Users, Clock, Flame, BookOpen, ChevronRight, Zap, Share2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 // ─── Room Card ─────────────────────────────────────────────────────────────
+
+const shareRoom = async (roomId: string, topic: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const url = `${window.location.origin}/circles/${roomId}`;
+    const shareData = {
+        title: `Join me on SETU Commune!`,
+        text: `Let's study "${topic}" together on SETU Commune! 📚🔥`,
+        url,
+    };
+
+    try {
+        if (navigator.share && navigator.canShare?.(shareData)) {
+            await navigator.share(shareData);
+        } else {
+            await navigator.clipboard.writeText(`${shareData.text}\n${url}`);
+            toast.success('Invite link copied! Share it with your friends 🎉');
+        }
+    } catch {
+        // User cancelled share dialog
+    }
+};
 
 const RoomCard: React.FC<{ rs: RoomState; subject?: CircleSubject; onJoin: () => void }> = ({
     rs, subject, onJoin,
@@ -39,10 +61,19 @@ const RoomCard: React.FC<{ rs: RoomState; subject?: CircleSubject; onJoin: () =>
             )}
 
             <div className="p-4">
-                {/* Topic */}
-                <h4 className="font-semibold text-sm text-foreground leading-snug mb-2 group-hover:text-accent transition-colors">
-                    {rs.room.topic}
-                </h4>
+                {/* Topic + invite */}
+                <div className="flex items-start justify-between gap-2 mb-2">
+                    <h4 className="font-semibold text-sm text-foreground leading-snug group-hover:text-accent transition-colors">
+                        {rs.room.topic}
+                    </h4>
+                    <button
+                        onClick={(e) => shareRoom(rs.room.id, rs.room.topic, e)}
+                        className="flex-shrink-0 w-7 h-7 rounded-lg bg-secondary/80 hover:bg-accent/10 hover:text-accent flex items-center justify-center transition-colors text-muted-foreground"
+                        title="Invite friends"
+                    >
+                        <Share2 className="w-3.5 h-3.5" />
+                    </button>
+                </div>
 
                 {/* Meta row */}
                 <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
@@ -63,15 +94,26 @@ const RoomCard: React.FC<{ rs: RoomState; subject?: CircleSubject; onJoin: () =>
                     )}
                 </div>
 
-                {/* Join button */}
-                <Button
-                    size="sm"
-                    className="w-full gap-1.5 h-7 text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
-                    onClick={e => { e.stopPropagation(); onJoin(); }}
-                >
-                    Join Room
-                    <ChevronRight className="w-3 h-3" />
-                </Button>
+                {/* Join + Invite buttons */}
+                <div className="flex gap-2">
+                    <Button
+                        size="sm"
+                        className="flex-1 gap-1.5 h-7 text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
+                        onClick={e => { e.stopPropagation(); onJoin(); }}
+                    >
+                        Join Room
+                        <ChevronRight className="w-3 h-3" />
+                    </Button>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs gap-1 px-2.5"
+                        onClick={(e) => shareRoom(rs.room.id, rs.room.topic, e)}
+                    >
+                        <Share2 className="w-3 h-3" />
+                        Invite
+                    </Button>
+                </div>
             </div>
         </div>
     );
@@ -138,13 +180,32 @@ const SetuCirclesPage: React.FC = () => {
                             Your peers are solving the same doubts. Join a live focus room.
                         </p>
 
-                        {/* Live counter */}
-                        <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/10">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                            <span className="text-white text-sm font-semibold">
-                                {totalLive.toLocaleString()} students studying right now
-                            </span>
-                            <Users className="w-4 h-4 text-white/60" />
+                        {/* Live counter + Invite CTA */}
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/10">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                <span className="text-white text-sm font-semibold">
+                                    {totalLive.toLocaleString()} students studying right now
+                                </span>
+                                <Users className="w-4 h-4 text-white/60" />
+                            </div>
+                            <Button
+                                size="sm"
+                                className="gap-1.5 bg-white/15 hover:bg-white/25 text-white border border-white/20 backdrop-blur-sm h-9"
+                                onClick={() => {
+                                    const url = `${window.location.origin}/circles`;
+                                    const text = `Join me on SETU Commune! Study with real students preparing for ${isNeet ? 'NEET' : 'JEE'}. 📚🔥`;
+                                    if (navigator.share) {
+                                        navigator.share({ title: 'SETU Commune', text, url });
+                                    } else {
+                                        navigator.clipboard.writeText(`${text}\n${url}`);
+                                        toast.success('Invite link copied! 🎉');
+                                    }
+                                }}
+                            >
+                                <Share2 className="w-4 h-4" />
+                                Invite Friends
+                            </Button>
                         </div>
                     </div>
                 </div>
