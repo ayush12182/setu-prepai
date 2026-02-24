@@ -3,10 +3,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
 
+// ─── Types ─────────────────────────────────────────────────────────────────
+
+export type QuestionType = 'mcq' | 'integer';
+export type SubjectName = 'physics' | 'chemistry' | 'maths';
+
 export interface MajorTestQuestion {
   id: string;
   questionNumber: number;
-  subject: 'physics' | 'chemistry' | 'maths';
+  subject: SubjectName;
+  section: 'A' | 'B'; // A = MCQ (1-20), B = Integer (21-25)
+  questionType: QuestionType;
   chapterId: string;
   chapterName: string;
   questionText: string;
@@ -14,7 +21,9 @@ export interface MajorTestQuestion {
   optionB: string;
   optionC: string;
   optionD: string;
-  correctOption: 'A' | 'B' | 'C' | 'D';
+  correctOption: 'A' | 'B' | 'C' | 'D'; // For MCQ
+  correctNumerical?: number; // For integer type
+  toleranceRange?: number; // e.g. ±0.01
   difficulty: 'easy' | 'medium' | 'hard';
   explanation: string;
   conceptTested: string;
@@ -24,8 +33,12 @@ export interface MajorTestAnswer {
   questionId: string;
   questionNumber: number;
   subject: string;
-  selectedOption: 'A' | 'B' | 'C' | 'D' | null;
+  questionType: QuestionType;
+  selectedOption: 'A' | 'B' | 'C' | 'D' | null; // For MCQ
+  numericalAnswer: number | null; // For integer type
   correctOption: 'A' | 'B' | 'C' | 'D';
+  correctNumerical?: number;
+  toleranceRange?: number;
   isMarkedReview: boolean;
   timeSpent: number;
 }
@@ -63,6 +76,32 @@ export interface ChapterAnalysis {
   strengthLevel: 'strong' | 'moderate' | 'weak';
 }
 
+// ─── Scoring helpers ───────────────────────────────────────────────────────
+
+export function isAnswerCorrect(answer: MajorTestAnswer): boolean {
+  if (answer.questionType === 'integer') {
+    if (answer.numericalAnswer === null) return false;
+    const tolerance = answer.toleranceRange ?? 0;
+    const correct = answer.correctNumerical ?? 0;
+    return Math.abs(answer.numericalAnswer - correct) <= tolerance;
+  }
+  return answer.selectedOption === answer.correctOption;
+}
+
+export function isAnswered(answer: MajorTestAnswer): boolean {
+  if (answer.questionType === 'integer') return answer.numericalAnswer !== null;
+  return answer.selectedOption !== null;
+}
+
+export function calculateScore(answer: MajorTestAnswer): number {
+  if (!isAnswered(answer)) return 0; // unattempted = 0
+  if (isAnswerCorrect(answer)) return 4; // correct = +4
+  // Incorrect: MCQ = -1, Integer = 0
+  return answer.questionType === 'mcq' ? -1 : 0;
+}
+
+// ─── Hook ──────────────────────────────────────────────────────────────────
+
 export const useMajorTest = () => {
   const [questions, setQuestions] = useState<MajorTestQuestion[]>([]);
   const [answers, setAnswers] = useState<Map<string, MajorTestAnswer>>(new Map());
@@ -70,20 +109,20 @@ export const useMajorTest = () => {
   const [activeCycle, setActiveCycle] = useState<MajorTestCycle | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [timeRemaining, setTimeRemaining] = useState(180 * 60); // 3 hours in seconds
+  const [timeRemaining, setTimeRemaining] = useState(180 * 60);
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
-  
+
   const autoSaveInterval = useRef<NodeJS.Timeout | null>(null);
   const timerInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch active cycle
+  // ── Fetch active cycle ────────────────────────────────────────────────
   const fetchActiveCycle = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('major_test_cycles')
       .select('*')
       .eq('is_active', true)
       .maybeSingle();
-    
+
     if (data) {
       setActiveCycle({
         id: data.id,
@@ -91,13 +130,13 @@ export const useMajorTest = () => {
         startDate: data.start_date,
         endDate: data.end_date,
         testDate: data.test_date,
-        isActive: data.is_active
+        isActive: data.is_active,
       });
     }
     return data;
   };
 
-  // Check for existing in-progress attempt
+  // ── Check for existing in-progress attempt ────────────────────────────
   const checkExistingAttempt = async (userId: string) => {
     const { data } = await supabase
       .from('major_test_attempts')
@@ -105,52 +144,52 @@ export const useMajorTest = () => {
       .eq('user_id', userId)
       .eq('status', 'in_progress')
       .maybeSingle();
-    
     return data;
   };
 
-  // Generate 90 questions (30 per subject)
+  // ── Generate 75 questions (25 per subject: 20 MCQ + 5 Integer) ────────
   const generateQuestions = async (): Promise<MajorTestQuestion[]> => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const allQuestions: MajorTestQuestion[] = [];
-      let questionNumber = 1;
-      
-      // Get random chapters from each subject
+
       const getRandomChapters = (chapters: typeof physicsChapters, count: number) => {
         const shuffled = [...chapters].sort(() => Math.random() - 0.5);
         return shuffled.slice(0, count);
       };
-      
-      const physicsSelected = getRandomChapters(physicsChapters, 6);
-      const chemistrySelected = getRandomChapters(chemistryChapters, 6);
-      const mathsSelected = getRandomChapters(mathsChapters, 6);
-      
-      // Generate questions for each subject
-      const subjects = [
+
+      const physicsSelected = getRandomChapters(physicsChapters, 5);
+      const chemistrySelected = getRandomChapters(chemistryChapters, 5);
+      const mathsSelected = getRandomChapters(mathsChapters, 5);
+
+      const subjects: { name: SubjectName; chapters: typeof physicsChapters }[] = [
         { name: 'physics', chapters: physicsSelected },
         { name: 'chemistry', chapters: chemistrySelected },
-        { name: 'maths', chapters: mathsSelected }
+        { name: 'maths', chapters: mathsSelected },
       ];
-      
+
       for (const subject of subjects) {
-        // First try to fetch existing questions from database
+        const subjectQuestions: MajorTestQuestion[] = [];
+
+        // Fetch existing questions from DB
         for (const chapter of subject.chapters) {
           const { data: existingQuestions } = await supabase
             .from('questions')
             .select('*')
             .eq('chapter_id', chapter.id)
-            .limit(5);
-          
-          if (existingQuestions && existingQuestions.length > 0) {
+            .limit(8);
+
+          if (existingQuestions) {
             const shuffled = existingQuestions.sort(() => Math.random() - 0.5);
-            for (const q of shuffled.slice(0, 5)) {
-              allQuestions.push({
+            for (const q of shuffled) {
+              subjectQuestions.push({
                 id: q.id,
-                questionNumber: questionNumber++,
-                subject: subject.name as 'physics' | 'chemistry' | 'maths',
+                questionNumber: 0, // renumbered later
+                subject: subject.name,
+                section: 'A',
+                questionType: 'mcq',
                 chapterId: chapter.id,
                 chapterName: chapter.name,
                 questionText: q.question_text,
@@ -161,32 +200,33 @@ export const useMajorTest = () => {
                 correctOption: q.correct_option as 'A' | 'B' | 'C' | 'D',
                 difficulty: q.difficulty as 'easy' | 'medium' | 'hard',
                 explanation: q.explanation,
-                conceptTested: q.concept_tested
+                conceptTested: q.concept_tested,
               });
             }
           }
         }
-        
-        // If we don't have enough questions, generate more
-        const questionsNeeded = 30 - allQuestions.filter(q => q.subject === subject.name).length;
+
+        // If not enough, generate via edge function
+        const questionsNeeded = 25 - subjectQuestions.length;
         if (questionsNeeded > 0) {
-          // Call edge function to generate questions
-          const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
+          const { data } = await supabase.functions.invoke('generate-questions', {
             body: {
               chapterId: subject.chapters[0].id,
               chapterName: subject.chapters[0].name,
               subject: subject.name,
               difficulty: 'medium',
-              count: questionsNeeded
-            }
+              count: questionsNeeded,
+            },
           });
-          
+
           if (data?.questions) {
             for (const q of data.questions) {
-              allQuestions.push({
+              subjectQuestions.push({
                 id: q.id || crypto.randomUUID(),
-                questionNumber: questionNumber++,
-                subject: subject.name as 'physics' | 'chemistry' | 'maths',
+                questionNumber: 0,
+                subject: subject.name,
+                section: 'A',
+                questionType: 'mcq',
                 chapterId: subject.chapters[0].id,
                 chapterName: subject.chapters[0].name,
                 questionText: q.question_text,
@@ -197,25 +237,31 @@ export const useMajorTest = () => {
                 correctOption: q.correct_option,
                 difficulty: q.difficulty,
                 explanation: q.explanation,
-                conceptTested: q.concept_tested
+                conceptTested: q.concept_tested,
               });
             }
           }
         }
+
+        // Take exactly 25: first 20 = Section A (MCQ), last 5 = Section B (Integer)
+        const trimmed = subjectQuestions.slice(0, 25);
+        trimmed.forEach((q, idx) => {
+          if (idx >= 20) {
+            q.section = 'B';
+            q.questionType = 'integer';
+            // Generate a plausible numerical answer from the correct MCQ option index
+            q.correctNumerical = parseNumericalFromQuestion(q);
+            q.toleranceRange = 0.01;
+          }
+        });
+
+        allQuestions.push(...trimmed);
       }
-      
-      // Ensure we have exactly 90 questions (30 per subject)
-      const physicsQuestions = allQuestions.filter(q => q.subject === 'physics').slice(0, 30);
-      const chemistryQuestions = allQuestions.filter(q => q.subject === 'chemistry').slice(0, 30);
-      const mathsQuestions = allQuestions.filter(q => q.subject === 'maths').slice(0, 30);
-      
-      // Renumber questions
+
+      // Renumber: Physics 1-25, Chemistry 26-50, Maths 51-75
       let num = 1;
-      const finalQuestions = [...physicsQuestions, ...chemistryQuestions, ...mathsQuestions].map(q => ({
-        ...q,
-        questionNumber: num++
-      }));
-      
+      const finalQuestions = allQuestions.map(q => ({ ...q, questionNumber: num++ }));
+
       setQuestions(finalQuestions);
       return finalQuestions;
     } catch (err) {
@@ -228,23 +274,74 @@ export const useMajorTest = () => {
     }
   };
 
-  // Start a new test attempt
+  // ── Start test (with resume support) ──────────────────────────────────
   const startTest = async () => {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Please login to take the test');
-      
-      // Check for existing attempt
+
+      // Check for existing in-progress attempt → resume
       const existing = await checkExistingAttempt(user.id);
       if (existing) {
-        throw new Error('You already have a test in progress');
+        // Resume the existing attempt
+        setCurrentAttempt({
+          id: existing.id,
+          cycleId: existing.cycle_id,
+          startedAt: existing.started_at,
+          status: 'in_progress',
+          tabSwitchCount: existing.tab_switch_count,
+        });
+        setTabSwitchCount(existing.tab_switch_count);
+
+        // Calculate remaining time
+        const elapsed = Math.floor((Date.now() - new Date(existing.started_at).getTime()) / 1000);
+        const remaining = Math.max(0, 180 * 60 - elapsed);
+        setTimeRemaining(remaining);
+
+        if (remaining <= 0) {
+          // Time expired, auto-submit
+          toast.info('Your test time has expired. Auto-submitting...');
+          // Generate questions to show results
+          await generateQuestions();
+          return true;
+        }
+
+        // Regenerate questions for display
+        await generateQuestions();
+
+        // Load saved answers
+        const { data: savedAnswers } = await supabase
+          .from('major_test_answers')
+          .select('*')
+          .eq('attempt_id', existing.id);
+
+        if (savedAnswers && savedAnswers.length > 0) {
+          const restoredAnswers = new Map<string, MajorTestAnswer>();
+          for (const sa of savedAnswers) {
+            const q = questions.find(qq => qq.id === sa.question_id);
+            restoredAnswers.set(sa.question_id, {
+              questionId: sa.question_id,
+              questionNumber: sa.question_number,
+              subject: sa.subject,
+              questionType: q?.questionType ?? 'mcq',
+              selectedOption: sa.selected_option as 'A' | 'B' | 'C' | 'D' | null,
+              numericalAnswer: null, // numerical answers stored in selected_option as string
+              correctOption: sa.correct_option as 'A' | 'B' | 'C' | 'D',
+              isMarkedReview: sa.is_marked_review ?? false,
+              timeSpent: sa.time_spent_seconds,
+            });
+          }
+          setAnswers(restoredAnswers);
+        }
+
+        toast.info('Resuming your in-progress test');
+        return true;
       }
-      
-      // Get or create active cycle
+
+      // Fresh test start
       let cycle = await fetchActiveCycle();
       if (!cycle) {
-        // Create a new cycle
         const { data: newCycle } = await supabase
           .from('major_test_cycles')
           .insert({
@@ -252,41 +349,39 @@ export const useMajorTest = () => {
             start_date: new Date().toISOString().split('T')[0],
             end_date: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
             test_date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            is_active: true
+            is_active: true,
           })
           .select()
           .single();
         cycle = newCycle;
       }
-      
-      // Generate questions
+
       const generatedQuestions = await generateQuestions();
       if (generatedQuestions.length === 0) {
         throw new Error('Failed to generate test questions');
       }
-      
-      // Create attempt
+
       const { data: attempt, error: attemptError } = await supabase
         .from('major_test_attempts')
         .insert({
           user_id: user.id,
           cycle_id: cycle?.id,
           status: 'in_progress',
-          tab_switch_count: 0
+          tab_switch_count: 0,
         })
         .select()
         .single();
-      
+
       if (attemptError) throw attemptError;
-      
+
       setCurrentAttempt({
         id: attempt.id,
         cycleId: attempt.cycle_id,
         startedAt: attempt.started_at,
         status: 'in_progress',
-        tabSwitchCount: 0
+        tabSwitchCount: 0,
       });
-      
+
       // Initialize answers map
       const initialAnswers = new Map<string, MajorTestAnswer>();
       for (const q of generatedQuestions) {
@@ -294,28 +389,31 @@ export const useMajorTest = () => {
           questionId: q.id,
           questionNumber: q.questionNumber,
           subject: q.subject,
+          questionType: q.questionType,
           selectedOption: null,
+          numericalAnswer: null,
           correctOption: q.correctOption,
+          correctNumerical: q.correctNumerical,
+          toleranceRange: q.toleranceRange,
           isMarkedReview: false,
-          timeSpent: 0
+          timeSpent: 0,
         });
-        
-        // Insert answer record
+
         await supabase.from('major_test_answers').insert({
           attempt_id: attempt.id,
           question_id: q.id,
           question_number: q.questionNumber,
           subject: q.subject,
-          correct_option: q.correctOption,
+          correct_option: q.questionType === 'integer'
+            ? String(q.correctNumerical ?? 0)
+            : q.correctOption,
           is_marked_review: false,
-          time_spent_seconds: 0
+          time_spent_seconds: 0,
         });
       }
       setAnswers(initialAnswers);
-      
-      // Start timer
       setTimeRemaining(180 * 60);
-      
+
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to start test';
@@ -327,7 +425,7 @@ export const useMajorTest = () => {
     }
   };
 
-  // Update answer
+  // ── Update MCQ answer ─────────────────────────────────────────────────
   const updateAnswer = useCallback((questionId: string, option: 'A' | 'B' | 'C' | 'D' | null) => {
     setAnswers(prev => {
       const newAnswers = new Map(prev);
@@ -339,7 +437,19 @@ export const useMajorTest = () => {
     });
   }, []);
 
-  // Mark for review
+  // ── Update numerical answer ───────────────────────────────────────────
+  const updateNumericalAnswer = useCallback((questionId: string, value: number | null) => {
+    setAnswers(prev => {
+      const newAnswers = new Map(prev);
+      const existing = newAnswers.get(questionId);
+      if (existing) {
+        newAnswers.set(questionId, { ...existing, numericalAnswer: value });
+      }
+      return newAnswers;
+    });
+  }, []);
+
+  // ── Mark for review ───────────────────────────────────────────────────
   const toggleMarkReview = useCallback((questionId: string) => {
     setAnswers(prev => {
       const newAnswers = new Map(prev);
@@ -351,7 +461,7 @@ export const useMajorTest = () => {
     });
   }, []);
 
-  // Update time spent on question
+  // ── Update time spent on question ─────────────────────────────────────
   const updateTimeSpent = useCallback((questionId: string, seconds: number) => {
     setAnswers(prev => {
       const newAnswers = new Map(prev);
@@ -363,21 +473,28 @@ export const useMajorTest = () => {
     });
   }, []);
 
-  // Auto-save answers
+  // ── Auto-save answers ─────────────────────────────────────────────────
   const autoSave = useCallback(async () => {
     if (!currentAttempt) return;
-    
+
     try {
       const answersArray = Array.from(answers.values());
       for (const answer of answersArray) {
+        const savedOption = answer.questionType === 'integer'
+          ? (answer.numericalAnswer !== null ? String(answer.numericalAnswer) : null)
+          : answer.selectedOption;
+        const correct = answer.questionType === 'integer'
+          ? isAnswerCorrect(answer)
+          : answer.selectedOption === answer.correctOption;
+
         await supabase
           .from('major_test_answers')
           .update({
-            selected_option: answer.selectedOption,
+            selected_option: savedOption,
             is_marked_review: answer.isMarkedReview,
             time_spent_seconds: answer.timeSpent,
-            is_correct: answer.selectedOption === answer.correctOption,
-            answered_at: answer.selectedOption ? new Date().toISOString() : null
+            is_correct: isAnswered(answer) ? correct : null,
+            answered_at: isAnswered(answer) ? new Date().toISOString() : null,
           })
           .eq('attempt_id', currentAttempt.id)
           .eq('question_id', answer.questionId);
@@ -387,18 +504,18 @@ export const useMajorTest = () => {
     }
   }, [currentAttempt, answers]);
 
-  // Handle tab switch
+  // ── Handle tab switch ─────────────────────────────────────────────────
   const handleTabSwitch = useCallback(async () => {
     const newCount = tabSwitchCount + 1;
     setTabSwitchCount(newCount);
-    
+
     if (currentAttempt) {
       await supabase
         .from('major_test_attempts')
         .update({ tab_switch_count: newCount })
         .eq('id', currentAttempt.id);
     }
-    
+
     if (newCount === 1) {
       toast.warning('Warning 1: Tab switch detected! Do not leave the test window.');
     } else if (newCount === 2) {
@@ -406,52 +523,46 @@ export const useMajorTest = () => {
     } else if (newCount >= 3) {
       await submitTest('auto_submitted');
     }
-    
+
     return newCount;
   }, [tabSwitchCount, currentAttempt]);
 
-  // Submit test
+  // ── Submit test ───────────────────────────────────────────────────────
   const submitTest = async (status: 'completed' | 'auto_submitted' = 'completed') => {
     if (!currentAttempt) return null;
-    
+
     setLoading(true);
     try {
       await autoSave();
-      
-      // Calculate scores
+
       const answersArray = Array.from(answers.values());
-      
-      const physicsAnswers = answersArray.filter(a => a.subject === 'physics');
-      const chemistryAnswers = answersArray.filter(a => a.subject === 'chemistry');
-      const mathsAnswers = answersArray.filter(a => a.subject === 'maths');
-      
+
       const calculateSubjectScore = (subjectAnswers: MajorTestAnswer[]) => {
-        let correct = 0, incorrect = 0, unattempted = 0;
+        let correct = 0, incorrect = 0, unattempted = 0, score = 0;
         for (const a of subjectAnswers) {
-          if (a.selectedOption === null) {
+          if (!isAnswered(a)) {
             unattempted++;
-          } else if (a.selectedOption === a.correctOption) {
+          } else if (isAnswerCorrect(a)) {
             correct++;
+            score += 4;
           } else {
             incorrect++;
+            // Negative marking only for MCQ
+            score += a.questionType === 'mcq' ? -1 : 0;
           }
         }
-        // JEE Main scoring: +4 for correct, -1 for incorrect, 0 for unattempted
-        const score = (correct * 4) - (incorrect * 1);
         return { correct, incorrect, unattempted, score };
       };
-      
-      const physicsStats = calculateSubjectScore(physicsAnswers);
-      const chemistryStats = calculateSubjectScore(chemistryAnswers);
-      const mathsStats = calculateSubjectScore(mathsAnswers);
-      
+
+      const physicsStats = calculateSubjectScore(answersArray.filter(a => a.subject === 'physics'));
+      const chemistryStats = calculateSubjectScore(answersArray.filter(a => a.subject === 'chemistry'));
+      const mathsStats = calculateSubjectScore(answersArray.filter(a => a.subject === 'maths'));
+
       const totalScore = physicsStats.score + chemistryStats.score + mathsStats.score;
-      const maxScore = 300; // 75 questions × 4 marks
-      
-      // Estimate percentile (rough approximation)
+      const maxScore = 300;
+
       const percentile = Math.min(99.9, Math.max(0, (totalScore / maxScore) * 100 + Math.random() * 10));
-      
-      // Update attempt
+
       const { error: updateError } = await supabase
         .from('major_test_attempts')
         .update({
@@ -472,19 +583,19 @@ export const useMajorTest = () => {
           maths_correct: mathsStats.correct,
           maths_incorrect: mathsStats.incorrect,
           maths_unattempted: mathsStats.unattempted,
-          percentile_estimate: percentile
+          percentile_estimate: percentile,
         })
         .eq('id', currentAttempt.id);
-      
+
       if (updateError) throw updateError;
-      
-      // Calculate chapter-wise analysis
+
+      // Chapter analysis
       const chapterMap = new Map<string, ChapterAnalysis>();
-      
+
       for (const q of questions) {
         const answer = answers.get(q.id);
         if (!answer) continue;
-        
+
         let analysis = chapterMap.get(q.chapterId);
         if (!analysis) {
           analysis = {
@@ -497,34 +608,33 @@ export const useMajorTest = () => {
             unattempted: 0,
             accuracy: 0,
             avgTime: 0,
-            strengthLevel: 'moderate'
+            strengthLevel: 'moderate',
           };
           chapterMap.set(q.chapterId, analysis);
         }
-        
+
         analysis.totalQuestions++;
-        if (answer.selectedOption === null) {
+        if (!isAnswered(answer)) {
           analysis.unattempted++;
-        } else if (answer.selectedOption === answer.correctOption) {
+        } else if (isAnswerCorrect(answer)) {
           analysis.correct++;
         } else {
           analysis.incorrect++;
         }
         analysis.avgTime += answer.timeSpent;
       }
-      
-      // Finalize and save chapter analysis
+
       for (const [_, analysis] of chapterMap) {
-        analysis.accuracy = analysis.totalQuestions > 0 
-          ? (analysis.correct / analysis.totalQuestions) * 100 
+        analysis.accuracy = analysis.totalQuestions > 0
+          ? (analysis.correct / analysis.totalQuestions) * 100
           : 0;
-        analysis.avgTime = analysis.totalQuestions > 0 
-          ? Math.round(analysis.avgTime / analysis.totalQuestions) 
+        analysis.avgTime = analysis.totalQuestions > 0
+          ? Math.round(analysis.avgTime / analysis.totalQuestions)
           : 0;
-        analysis.strengthLevel = analysis.accuracy >= 70 ? 'strong' 
-          : analysis.accuracy >= 40 ? 'moderate' 
+        analysis.strengthLevel = analysis.accuracy >= 70 ? 'strong'
+          : analysis.accuracy >= 40 ? 'moderate'
           : 'weak';
-        
+
         await supabase.from('major_test_chapter_analysis').insert({
           attempt_id: currentAttempt.id,
           chapter_id: analysis.chapterId,
@@ -536,10 +646,10 @@ export const useMajorTest = () => {
           unattempted: analysis.unattempted,
           accuracy: analysis.accuracy,
           avg_time_seconds: analysis.avgTime,
-          strength_level: analysis.strengthLevel
+          strength_level: analysis.strengthLevel,
         });
       }
-      
+
       return {
         totalScore,
         maxScore,
@@ -547,7 +657,7 @@ export const useMajorTest = () => {
         physics: physicsStats,
         chemistry: chemistryStats,
         maths: mathsStats,
-        chapterAnalysis: Array.from(chapterMap.values())
+        chapterAnalysis: Array.from(chapterMap.values()),
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to submit test';
@@ -559,11 +669,11 @@ export const useMajorTest = () => {
     }
   };
 
-  // Get previous attempts for comparison
+  // ── Previous attempts ─────────────────────────────────────────────────
   const getPreviousAttempts = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
-    
+
     const { data } = await supabase
       .from('major_test_attempts')
       .select('*')
@@ -571,11 +681,11 @@ export const useMajorTest = () => {
       .in('status', ['completed', 'auto_submitted'])
       .order('completed_at', { ascending: false })
       .limit(5);
-    
+
     return data || [];
   };
 
-  // Cleanup on unmount
+  // ── Cleanup on unmount ────────────────────────────────────────────────
   useEffect(() => {
     return () => {
       if (autoSaveInterval.current) clearInterval(autoSaveInterval.current);
@@ -583,13 +693,11 @@ export const useMajorTest = () => {
     };
   }, []);
 
-  // Start auto-save and timer when test is active
+  // ── Start auto-save and timer when test is active ─────────────────────
   useEffect(() => {
     if (currentAttempt && currentAttempt.status === 'in_progress') {
-      // Auto-save every 10 seconds
       autoSaveInterval.current = setInterval(autoSave, 10000);
-      
-      // Timer
+
       timerInterval.current = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
@@ -600,7 +708,7 @@ export const useMajorTest = () => {
         });
       }, 1000);
     }
-    
+
     return () => {
       if (autoSaveInterval.current) clearInterval(autoSaveInterval.current);
       if (timerInterval.current) clearInterval(timerInterval.current);
@@ -618,11 +726,24 @@ export const useMajorTest = () => {
     tabSwitchCount,
     startTest,
     updateAnswer,
+    updateNumericalAnswer,
     toggleMarkReview,
     updateTimeSpent,
     handleTabSwitch,
     submitTest,
     getPreviousAttempts,
-    fetchActiveCycle
+    fetchActiveCycle,
   };
 };
+
+// ─── Helper: extract a numerical value from a question ──────────────────
+
+function parseNumericalFromQuestion(q: MajorTestQuestion): number {
+  // Try to extract a number from the correct option text
+  const optionKey = `option${q.correctOption}` as keyof MajorTestQuestion;
+  const optionText = String(q[optionKey] ?? '');
+  const match = optionText.match(/-?\d+(\.\d+)?/);
+  if (match) return parseFloat(match[0]);
+  // Fallback: random integer 1-100
+  return Math.floor(Math.random() * 100) + 1;
+}
