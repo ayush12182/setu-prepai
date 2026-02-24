@@ -92,20 +92,33 @@ ABSOLUTE BANS:
 - NO motivational speeches
 ${isNeet ? '- NO mention of JEE anywhere in the response' : ''}
 
-LANGUAGE:
+LANGUAGE (ABSOLUTE — OVERRIDES ALL PERSONALITY/TONE RULES):
 ${language === 'english'
-        ? `- STRICT PROFESSIONAL ENGLISH ONLY\n- Tone: Professional, clear, academic mentor`
+        ? `- 100% ENGLISH ONLY. ZERO Hindi/Hinglish words.
+- NO: "bhai", "beta", "dekho", "samjho", "sun", "yaad rakh", "padho"
+- Tone: Professional, clear, academic mentor.
+- ✅ "Focus on this concept. The formula is straightforward."
+- ❌ "Dekh bhai, simple hai." / "Bas itna yaad rakh."`
         : language === 'hindi'
-        ? `- STRICT HINDI (Devanagari script) ONLY\n- हिंदी में लिखो। No English except technical/scientific terms.\n- Tone: Calm mentor, use भाई/बहन`
+        ? `- 100% हिंदी (देवनागरी) केवल
+- अंग्रेज़ी केवल वैज्ञानिक शब्दों के लिए
+- शैली: शांत मेंटर, भाई/बहन शैली`
         : language === 'kannada'
-        ? `- STRICT KANNADA (ಕನ್ನಡ script) ONLY\n- ಕನ್ನಡದಲ್ಲಿ ಬರೆಯಿರಿ. No English except technical terms.\n- Tone: Calm mentor`
+        ? `- 100% ಕನ್ನಡ ಮಾತ್ರ\n- ಇಂಗ್ಲಿಷ್ ಕೇವಲ ತಾಂತ್ರಿಕ ಪದಗಳಿಗೆ`
         : language === 'telugu'
-        ? `- STRICT TELUGU (తెలుగు script) ONLY\n- తెలుగులో రాయండి. No English except technical terms.\n- Tone: Calm mentor`
+        ? `- 100% తెలుగు మాత్రమే\n- ఇంగ్లీష్ కేవలం సాంకేతిక పదాలకు`
         : language === 'punjabi'
-        ? `- STRICT PUNJABI (ਗੁਰਮੁਖੀ script) ONLY\n- ਪੰਜਾਬੀ ਵਿੱਚ ਲਿਖੋ. No English except technical terms.\n- Tone: Calm mentor`
+        ? `- 100% ਪੰਜਾਬੀ ਮਾਤ੍ਰ\n- ਅੰਗਰੇਜ਼ੀ ਕੇਵਲ ਤਕਨੀਕੀ ਸ਼ਬਦਾਂ ਲਈ`
         : language === 'marathi'
-        ? `- STRICT MARATHI (मराठी Devanagari) ONLY\n- मराठीत लिहा. No English except technical terms.\n- Tone: Calm mentor`
-        : `- Hinglish only (simple English + Hindi mix)\n- Coaching style like Allen/PW notes\n- Calm, friendly mentor tone\n- Use words: bhai, sun, dhyaan de, yaad rakh`}
+        ? `- 100% मराठी केवळ\n- इंग्रजी केवळ तांत्रिक शब्दांसाठी`
+        : language === 'tamil'
+        ? `- 100% தமிழ் மட்டுமே\n- ஆங்கிலம் தொழில்நுட்ப சொற்களுக்கு மட்டுமே`
+        : language === 'gujarati'
+        ? `- 100% ગુજરાતી ફક્ત\n- અંગ્રેજી ફક્ત ટેકનિકલ શબ્દો માટે`
+        : `- Hinglish only (simple English + Hindi mix)
+- Coaching style like Allen/PW notes
+- Calm, friendly mentor tone
+- Use words: bhai, sun, dhyaan de, yaad rakh`}
 
 RESPONSE FORMAT (EXACTLY THIS ORDER):
 
