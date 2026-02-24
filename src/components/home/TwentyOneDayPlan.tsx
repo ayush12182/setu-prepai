@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -9,12 +9,13 @@ import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/da
 import { getAllSubchapters } from '@/data/subchapters';
 import {
   Calendar, Target, ChevronRight, Clock,
-  Flame, CheckCircle2, Zap, Brain, Video, ArrowRight, Quote, RotateCcw
+  Flame, CheckCircle2, Zap, Brain, Video, ArrowRight, Quote, RotateCcw, TrendingDown, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
 import { cn } from '@/lib/utils';
+import { useCycleHistory, WeakChapter } from '@/hooks/useCycleHistory';
 
 const jeetuQuotes = {
   english: [
@@ -78,16 +79,27 @@ const allChapters: (Chapter & { subjectName: string })[] = [
 const generateSchedule = (
   cycleStart: Date,
   completedSubchapters: Set<string>,
-  mode: 'jee' | 'neet'
+  mode: 'jee' | 'neet',
+  weakChaptersFromPrevCycle: WeakChapter[] = []
 ): DayPlan[] => {
   const allSubs = getAllSubchapters();
   const weightageOrder: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
+  
+  // Build a set of weak chapter IDs for priority boosting
+  const weakChapterIds = new Set(weakChaptersFromPrevCycle.map(w => w.chapterId));
+  
   const incomplete = allSubs.filter(s => !completedSubchapters.has(s.id));
   const pool = incomplete.length > 0 ? incomplete : allSubs;
 
   const sorted = [...pool].sort((a, b) => {
     const ca = allChapters.find(c => c.id === a.chapterId);
     const cb = allChapters.find(c => c.id === b.chapterId);
+    
+    // Weak chapters from previous cycle get highest priority (rank -1)
+    const weakA = weakChapterIds.has(a.chapterId) ? -1 : 0;
+    const weakB = weakChapterIds.has(b.chapterId) ? -1 : 0;
+    if (weakA !== weakB) return weakA - weakB;
+    
     return (weightageOrder[ca?.weightage || 'Low'] || 2) - (weightageOrder[cb?.weightage || 'Low'] || 2);
   });
 
@@ -200,6 +212,9 @@ export const TwentyOneDayPlan: React.FC = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isStartingNextCycle, setIsStartingNextCycle] = useState(false);
+  const [autoAdvanced, setAutoAdvanced] = useState(false);
+
+  const { latestWeakChapters, completeCycleAndAdvance, history } = useCycleHistory();
 
   const isHinglish = language === 'hinglish' || language === 'hindi' || language === 'punjabi';
   const quotes = isHinglish ? jeetuQuotes.hinglish : jeetuQuotes.english;
@@ -263,31 +278,40 @@ export const TwentyOneDayPlan: React.FC = () => {
   // Is the current cycle complete? (day 21 has passed)
   const isCycleComplete = daysSinceOrigin > 0 && (daysSinceOrigin % 21 === 0);
 
+  // AUTO-ADVANCE: When cycle is complete, save history & advance automatically
+  useEffect(() => {
+    if (!isCycleComplete || !user || autoAdvanced) return;
+    
+    const cycleEndDate = new Date(currentCycleWindowStart);
+    cycleEndDate.setDate(cycleEndDate.getDate() + 20); // Day 21
+
+    // Check if this cycle was already saved
+    const alreadySaved = history.some(h => h.cycle_number === computedCycleNumber);
+    if (alreadySaved) return;
+
+    setAutoAdvanced(true);
+    completeCycleAndAdvance(computedCycleNumber, currentCycleWindowStart, cycleEndDate);
+  }, [isCycleComplete, user, autoAdvanced, computedCycleNumber, currentCycleWindowStart, completeCycleAndAdvance, history]);
+
   const handleStartNextCycle = useCallback(async () => {
     if (!user) return;
     setIsStartingNextCycle(true);
     try {
-      // Advance cycle_start_date by 21 days
-      const nextStart = new Date(currentCycleWindowStart);
-      nextStart.setDate(nextStart.getDate() + 21);
-      await supabase.auth.updateUser({
-        data: { cycle_start_date: nextStart.toISOString() }
-      });
+      const cycleEndDate = new Date(currentCycleWindowStart);
+      cycleEndDate.setDate(cycleEndDate.getDate() + 20);
+      await completeCycleAndAdvance(computedCycleNumber, currentCycleWindowStart, cycleEndDate);
       setSelectedWeek(0);
-      await queryClient.invalidateQueries({ queryKey: ['active-major-test-cycle'] });
-      await queryClient.invalidateQueries({ queryKey: ['completed-subchapters'] });
-      toast.success(`🎉 Cycle ${computedCycleNumber + 1} started! Keep going!`);
     } catch (err) {
       console.error('Start next cycle error:', err);
       toast.error('Failed to start next cycle');
     } finally {
       setIsStartingNextCycle(false);
     }
-  }, [user, currentCycleWindowStart, computedCycleNumber, queryClient]);
+  }, [user, currentCycleWindowStart, computedCycleNumber, completeCycleAndAdvance]);
 
   const schedule = useMemo(
-    () => generateSchedule(currentCycleWindowStart, completedIds || new Set(), isNeet ? 'neet' : 'jee'),
-    [activeCycle, completedIds, currentCycleWindowStart, isNeet]
+    () => generateSchedule(currentCycleWindowStart, completedIds || new Set(), isNeet ? 'neet' : 'jee', latestWeakChapters),
+    [activeCycle, completedIds, currentCycleWindowStart, isNeet, latestWeakChapters]
   );
 
   const weekStart = selectedWeek * 7;
@@ -354,8 +378,42 @@ export const TwentyOneDayPlan: React.FC = () => {
               className="shrink-0 bg-accent text-primary hover:bg-accent/90 gap-2"
             >
               <Zap className="w-4 h-4" />
-              {isStartingNextCycle ? 'Starting...' : `Start Cycle ${cycleNumber + 1}`}
+              {isStartingNextCycle ? 'Analyzing & Starting...' : `Start Cycle ${cycleNumber + 1}`}
             </Button>
+          </div>
+
+          {/* Show weakness summary from completed cycle */}
+          {latestWeakChapters.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-accent/20">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <TrendingDown className="w-3.5 h-3.5 text-destructive" />
+                Focus areas for next cycle
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {latestWeakChapters.slice(0, 5).map((w) => (
+                  <span key={w.chapterId} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-medium border border-destructive/20">
+                    {w.subject} — {w.accuracy}% accuracy
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Previous Cycle Insights — show when weaknesses carried over */}
+      {!isCycleComplete && latestWeakChapters.length > 0 && (
+        <div className="rounded-xl bg-card border border-border p-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <Target className="w-3.5 h-3.5 text-accent" />
+            This cycle targets your weak areas from Cycle {Math.max(1, computedCycleNumber - 1)}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {latestWeakChapters.slice(0, 5).map((w) => (
+              <span key={w.chapterId} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium border border-accent/20">
+                {w.subject}: {w.chapterId} ({w.accuracy}%)
+              </span>
+            ))}
           </div>
         </div>
       )}
