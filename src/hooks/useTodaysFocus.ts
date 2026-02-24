@@ -227,14 +227,7 @@ export const useTodaysFocus = () => {
           }
         }
 
-        // DEMO OVERRIDE for weakness (remove in production)
-        if (!recentWeakness) {
-          recentWeakness = {
-            subchapter_id: 'phy-5-1',
-            correct_answers: 2,
-            total_questions: 5
-          };
-        }
+        // Use real weakness data only — no demo override
 
         // Smart Focus (weakness-based)
         if (recentWeakness) {

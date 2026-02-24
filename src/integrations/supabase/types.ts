@@ -549,6 +549,78 @@ export type Database = {
         }
         Relationships: []
       }
+      student_cycle_history: {
+        Row: {
+          biology_accuracy: number | null
+          chemistry_accuracy: number | null
+          created_at: string
+          cycle_end_date: string
+          cycle_number: number
+          cycle_start_date: string
+          exam_mode: string | null
+          id: string
+          major_test_max_score: number | null
+          major_test_percentile: number | null
+          major_test_score: number | null
+          maths_accuracy: number | null
+          overall_accuracy: number | null
+          physics_accuracy: number | null
+          skipped_chapters: Json | null
+          strong_chapters: Json | null
+          total_correct: number | null
+          total_questions_attempted: number | null
+          total_study_time_seconds: number | null
+          user_id: string
+          weak_chapters: Json | null
+        }
+        Insert: {
+          biology_accuracy?: number | null
+          chemistry_accuracy?: number | null
+          created_at?: string
+          cycle_end_date: string
+          cycle_number: number
+          cycle_start_date: string
+          exam_mode?: string | null
+          id?: string
+          major_test_max_score?: number | null
+          major_test_percentile?: number | null
+          major_test_score?: number | null
+          maths_accuracy?: number | null
+          overall_accuracy?: number | null
+          physics_accuracy?: number | null
+          skipped_chapters?: Json | null
+          strong_chapters?: Json | null
+          total_correct?: number | null
+          total_questions_attempted?: number | null
+          total_study_time_seconds?: number | null
+          user_id: string
+          weak_chapters?: Json | null
+        }
+        Update: {
+          biology_accuracy?: number | null
+          chemistry_accuracy?: number | null
+          created_at?: string
+          cycle_end_date?: string
+          cycle_number?: number
+          cycle_start_date?: string
+          exam_mode?: string | null
+          id?: string
+          major_test_max_score?: number | null
+          major_test_percentile?: number | null
+          major_test_score?: number | null
+          maths_accuracy?: number | null
+          overall_accuracy?: number | null
+          physics_accuracy?: number | null
+          skipped_chapters?: Json | null
+          strong_chapters?: Json | null
+          total_correct?: number | null
+          total_questions_attempted?: number | null
+          total_study_time_seconds?: number | null
+          user_id?: string
+          weak_chapters?: Json | null
+        }
+        Relationships: []
+      }
       user_practice_stats: {
         Row: {
           chapters_practiced: string[] | null
