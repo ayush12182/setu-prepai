@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMajorTest, ChapterAnalysis } from '@/hooks/useMajorTest';
 import MajorTestWarning from '@/components/major-test/MajorTestWarning';
@@ -6,7 +6,6 @@ import MajorTestExam from '@/components/major-test/MajorTestExam';
 import MajorTestResults from '@/components/major-test/MajorTestResults';
 import MajorTestMentorMessage from '@/components/major-test/MajorTestMentorMessage';
 import { Loader2 } from 'lucide-react';
-import { useExamMode } from '@/contexts/ExamModeContext';
 
 type TestPhase = 'warning' | 'loading' | 'exam' | 'results' | 'mentor';
 
@@ -22,7 +21,6 @@ interface TestResultsData {
 
 const MajorTestPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isNeet } = useExamMode();
   const [phase, setPhase] = useState<TestPhase>('warning');
   const [results, setResults] = useState<TestResultsData | null>(null);
   const [totalTimeUsed, setTotalTimeUsed] = useState(0);
@@ -35,10 +33,11 @@ const MajorTestPage: React.FC = () => {
     tabSwitchCount,
     startTest,
     updateAnswer,
+    updateNumericalAnswer,
     toggleMarkReview,
     updateTimeSpent,
     handleTabSwitch,
-    submitTest
+    submitTest,
   } = useMajorTest();
 
   const handleStartTest = async () => {
@@ -58,61 +57,30 @@ const MajorTestPage: React.FC = () => {
       setTotalTimeUsed((180 * 60) - timeRemaining);
       setResults(result);
       setPhase('results');
-
-      // Exit fullscreen
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      }
+      if (document.fullscreenElement) document.exitFullscreen();
     }
   };
 
-  const handleCancel = () => {
-    navigate('/dashboard');
-  };
-
-  const handleGoHome = () => {
-    navigate('/dashboard');
-  };
-
-  const handleViewMentor = () => {
-    setPhase('mentor');
-  };
-
-  const handleContinue = () => {
-    navigate('/dashboard');
-  };
-
-  // Loading state
   if (phase === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
           <p className="text-lg text-muted-foreground">
-            {phase === 'loading' && !questions.length
-              ? 'Preparing your Major Test...'
-              : 'Submitting your test...'}
+            {phase === 'loading' && !questions.length ? 'Preparing your Major Test...' : 'Submitting your test...'}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Generating {isNeet ? '180 NEET-level' : '90 JEE-level'} questions
+            Generating 75 NTA-pattern JEE questions (20 MCQ + 5 Integer per subject)
           </p>
         </div>
       </div>
     );
   }
 
-  // Warning phase
   if (phase === 'warning') {
-    return (
-      <MajorTestWarning
-        onStart={handleStartTest}
-        onCancel={handleCancel}
-        loading={loading}
-      />
-    );
+    return <MajorTestWarning onStart={handleStartTest} onCancel={() => navigate('/dashboard')} loading={loading} />;
   }
 
-  // Exam phase
   if (phase === 'exam' && questions.length > 0) {
     return (
       <MajorTestExam
@@ -121,6 +89,7 @@ const MajorTestPage: React.FC = () => {
         timeRemaining={timeRemaining}
         tabSwitchCount={tabSwitchCount}
         onUpdateAnswer={updateAnswer}
+        onUpdateNumericalAnswer={updateNumericalAnswer}
         onToggleMarkReview={toggleMarkReview}
         onUpdateTimeSpent={updateTimeSpent}
         onTabSwitch={handleTabSwitch}
@@ -129,7 +98,6 @@ const MajorTestPage: React.FC = () => {
     );
   }
 
-  // Results phase
   if (phase === 'results' && results) {
     return (
       <MajorTestResults
@@ -137,17 +105,15 @@ const MajorTestPage: React.FC = () => {
         questions={questions}
         answers={answers}
         totalTime={totalTimeUsed}
-        onViewMentorMessage={handleViewMentor}
-        onGoHome={handleGoHome}
+        onViewMentorMessage={() => setPhase('mentor')}
+        onGoHome={() => navigate('/dashboard')}
       />
     );
   }
 
-  // Mentor message phase
   if (phase === 'mentor' && results) {
     const weakChapters = results.chapterAnalysis.filter(c => c.strengthLevel === 'weak');
     const strongChapters = results.chapterAnalysis.filter(c => c.strengthLevel === 'strong');
-
     return (
       <MajorTestMentorMessage
         score={results.totalScore}
@@ -155,7 +121,7 @@ const MajorTestPage: React.FC = () => {
         percentile={results.percentile}
         weakChapters={weakChapters}
         strongChapters={strongChapters}
-        onContinue={handleContinue}
+        onContinue={() => navigate('/dashboard')}
       />
     );
   }

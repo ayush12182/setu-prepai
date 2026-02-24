@@ -12,31 +12,31 @@ interface MajorTestWarningProps {
 const MajorTestWarning: React.FC<MajorTestWarningProps> = ({
   onStart,
   onCancel,
-  loading
+  loading,
 }) => {
   const [acknowledged, setAcknowledged] = useState(false);
 
   const rules = [
     {
       icon: Clock,
-      title: '3 Hours - No Pause',
-      description: 'Once started, the test cannot be paused or resumed. Plan accordingly.'
+      title: '3 Hours — No Pause',
+      description: 'Once started, the test cannot be paused. If you leave, it will resume where you left off.',
     },
     {
       icon: Shield,
       title: 'Full Screen Required',
-      description: 'Test runs in full screen mode. Tab switches are monitored - 3 switches = auto-submit.'
+      description: 'Test runs in full screen mode. Tab switches are monitored — 3 switches = auto-submit.',
     },
     {
       icon: AlertTriangle,
       title: 'No Going Back',
-      description: 'Copy/paste, right-click, and page refresh are disabled. Answers auto-save every 10 seconds.'
+      description: 'Copy/paste, right-click, and page refresh are disabled. Answers auto-save every 10 seconds.',
     },
     {
       icon: Coffee,
       title: 'Be Prepared',
-      description: 'Keep water nearby. Use the restroom before starting. Sit with a calm mind.'
-    }
+      description: 'Keep water nearby. Use the restroom before starting. Sit with a calm mind.',
+    },
   ];
 
   return (
@@ -47,19 +47,15 @@ const MajorTestWarning: React.FC<MajorTestWarningProps> = ({
           <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-8 h-8 text-destructive" />
           </div>
-          <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-            Major Test
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            JEE Main Exam Simulation
-          </p>
+          <h1 className="text-3xl font-display font-bold text-foreground mb-2">Major Test</h1>
+          <p className="text-lg text-muted-foreground">JEE Main — NTA Pattern</p>
         </div>
 
         {/* Test Info */}
         <div className="bg-muted/50 rounded-xl p-6 mb-6">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-primary">90</div>
+              <div className="text-2xl font-bold text-primary">75</div>
               <div className="text-sm text-muted-foreground">Questions</div>
             </div>
             <div>
@@ -71,8 +67,12 @@ const MajorTestWarning: React.FC<MajorTestWarningProps> = ({
               <div className="text-sm text-muted-foreground">Max Marks</div>
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-border text-center text-sm text-muted-foreground">
-            Physics: 30 | Chemistry: 30 | Maths: 30
+          <div className="mt-4 pt-4 border-t border-border text-sm text-muted-foreground space-y-1">
+            <p className="text-center font-medium text-foreground">Per Subject: 25 Questions</p>
+            <div className="flex justify-center gap-6 text-xs">
+              <span>Section A: 20 MCQ (+4/−1)</span>
+              <span>Section B: 5 Integer (+4/0)</span>
+            </div>
           </div>
         </div>
 
@@ -112,26 +112,17 @@ const MajorTestWarning: React.FC<MajorTestWarningProps> = ({
             onCheckedChange={(checked) => setAcknowledged(checked === true)}
           />
           <label htmlFor="acknowledge" className="text-sm text-foreground cursor-pointer">
-            I understand that this is a 3-hour exam simulation. I have arranged for no distractions
-            and am ready to give this test seriously.
+            I understand that this is a 3-hour exam simulation following the NTA JEE Main pattern.
+            I have arranged for no distractions and am ready to give this test seriously.
           </label>
         </div>
 
         {/* Actions */}
         <div className="flex gap-4">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={onCancel}
-            disabled={loading}
-          >
+          <Button variant="outline" className="flex-1" onClick={onCancel} disabled={loading}>
             Not Now
           </Button>
-          <Button
-            className="flex-1 bg-primary text-primary-foreground"
-            onClick={onStart}
-            disabled={!acknowledged || loading}
-          >
+          <Button className="flex-1 bg-primary text-primary-foreground" onClick={onStart} disabled={!acknowledged || loading}>
             {loading ? 'Preparing Test...' : 'I am ready to start'}
           </Button>
         </div>
