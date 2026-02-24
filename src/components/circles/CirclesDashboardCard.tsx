@@ -10,9 +10,15 @@ export const CirclesDashboardCard: React.FC = () => {
     const { examMode } = useExamMode();
 
     const examRooms = ALL_ROOMS.filter(r => r.exam === examMode);
-    const baseTotal = examRooms.reduce((sum, r) => sum + r.baseStudentCount, 0);
+    const baseTotal = Math.max(50, examRooms.reduce((sum, r) => sum + r.baseStudentCount, 0));
 
     const [liveCount, setLiveCount] = useState(baseTotal);
+
+    useEffect(() => {
+        // Reset count when exam mode changes
+        const newBase = Math.max(50, ALL_ROOMS.filter(r => r.exam === examMode).reduce((sum, r) => sum + r.baseStudentCount, 0));
+        setLiveCount(newBase);
+    }, [examMode]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -21,8 +27,9 @@ export const CirclesDashboardCard: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
-    // Pick the top 3 most active rooms for this exam
-    const topRooms = [...examRooms]
+    // Pick the top 3 most active rooms for this exam — fallback to all rooms if none match
+    const roomPool = examRooms.length > 0 ? examRooms : ALL_ROOMS.slice(0, 5);
+    const topRooms = [...roomPool]
         .sort((a, b) => b.baseStudentCount - a.baseStudentCount)
         .slice(0, 3);
 

@@ -10,7 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExamMode } from "@/contexts/ExamModeContext";
 import { JeeSubModeSelector } from "@/components/ui/JeeSubModeSelector";
-import { Sparkles, Flame, Trophy, Zap } from "lucide-react";
+import { Sparkles, Flame } from "lucide-react";
 import { useTodaysFocus } from "@/hooks/useTodaysFocus";
 import { CirclesDashboardCard } from "@/components/circles/CirclesDashboardCard";
 
@@ -39,6 +39,10 @@ const Index: React.FC = () => {
         return isNeet ? "ਤੁਹਾਡਾ NEET ਮੈਂਟਰ ਮਦਦ ਲਈ ਤਿਆਰ ਹੈ।" : `${mentorName} ਮਦਦ ਲਈ ਤਿਆਰ ਹੈ।`;
       case 'marathi':
         return isNeet ? "तुमचा NEET मेंटर मदतीसाठी तयार आहे." : `${mentorName} मदतीसाठी तयार आहे.`;
+      case 'tamil':
+        return isNeet ? "உங்கள் NEET வழிகாட்டி உதவ தயாராக உள்ளார்." : `${mentorName} உதவ தயாராக உள்ளார்.`;
+      case 'gujarati':
+        return isNeet ? "તમારો NEET મેન્ટર મદદ માટે તૈયાર છે." : `${mentorName} મદદ માટે તૈયાર છે.`;
       default:
         return isNeet ? "Your NEET Mentor ready hai tumhari help ke liye" : `${mentorName} ready hai tumhari help ke liye`;
     }
@@ -83,18 +87,26 @@ const Index: React.FC = () => {
               </div>
 
               <div className="flex gap-3">
-                {[
-                  { icon: Trophy, label: 'Day', value: `📅 Day ${dailyFocus?.cycleDay ?? 1} / 21` },
-                  { icon: Zap, label: 'Streak', value: streak > 0 ? `🔥 ${streak} days` : '🌱 Day 1' },
-                ].map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center min-w-[80px]"
-                  >
-                    <div className="text-sm font-bold text-white">{stat.value}</div>
-                    <div className="text-[11px] text-white/50">{stat.label}</div>
+                {/* Cycle Day */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center min-w-[90px]">
+                  <div className="text-xl font-extrabold text-white leading-none">{dailyFocus?.cycleDay ?? 1}</div>
+                  <div className="text-[10px] text-white/50 mt-1 uppercase tracking-wider">Day / 21</div>
+                  <div className="w-full bg-white/10 rounded-full h-1 mt-1.5">
+                    <div
+                      className="bg-accent h-1 rounded-full transition-all"
+                      style={{ width: `${((dailyFocus?.cycleDay ?? 1) / 21) * 100}%` }}
+                    />
                   </div>
-                ))}
+                </div>
+                {/* Streak */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center min-w-[90px]">
+                  <div className="text-xl font-extrabold text-white leading-none flex items-center justify-center gap-1">
+                    🔥 {streak > 0 ? streak : 0}
+                  </div>
+                  <div className="text-[10px] text-white/50 mt-1 uppercase tracking-wider">
+                    {streak > 0 ? 'Day Streak' : 'No Streak'}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

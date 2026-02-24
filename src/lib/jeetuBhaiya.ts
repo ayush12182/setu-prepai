@@ -208,6 +208,10 @@ export const getGreetingByLanguage = (language: string): string => {
       return `ਦੱਸੋ, ਕੀ doubt ਹੈ?`;
     case 'marathi':
       return `सांगा, काय doubt आहे?`;
+    case 'tamil':
+      return `சொல்லுங்க, என்ன doubt இருக்கு?`;
+    case 'gujarati':
+      return `બોલો, શું doubt છે?`;
     default:
       return `Bolo, kya doubt hai?`;
   }
