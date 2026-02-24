@@ -55,14 +55,16 @@ const AuthPage: React.FC = () => {
   });
 
   // Check if user needs onboarding
+  // We check profile.class because target_exam has a DB default ('JEE Main'),
+  // so Google OAuth users would skip onboarding otherwise.
   useEffect(() => {
     if (user && !authLoading) {
       if (showOnboarding) return; // Already in onboarding, don't redirect
-      if (profile && !profile.target_exam) {
+      if (profile && !profile.class) {
+        // Profile exists but onboarding wasn't completed (class is only set during onboarding)
         setShowOnboarding(true);
-      } else if (profile?.target_exam) {
-        // Set exam mode from saved profile
-        // Exam mode will be synced by ExamModeContext
+      } else if (profile?.class) {
+        // Onboarding was completed — go to dashboard
         navigate('/dashboard');
       }
       // If profile is null (still loading from trigger), wait for next render
