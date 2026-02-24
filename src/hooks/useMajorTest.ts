@@ -278,7 +278,8 @@ export const useMajorTest = () => {
   const startTest = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) throw new Error('Please login to take the test');
 
       // Check for existing in-progress attempt → resume
@@ -671,7 +672,8 @@ export const useMajorTest = () => {
 
   // ── Previous attempts ─────────────────────────────────────────────────
   const getPreviousAttempts = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) return [];
 
     const { data } = await supabase
