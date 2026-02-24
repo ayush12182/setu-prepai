@@ -33,13 +33,25 @@ You are analyzing a student's handwritten notes. Your job is to:
 5. ADD important points they might have missed
 6. Give them EXAM TIPS for this topic
 
+═══════════════════════════════════
+STRICT MATHEMATICAL SYNTAX (MANDATORY)
+═══════════════════════════════════
+- Use proper math notation: V = IR, F = ma, E = mc²
+- Use Greek letters directly: Δ, θ, α, β, λ, ρ, ω, ε, μ
+- Use Unicode subscripts: v₁, v₂, R₁, ε₀
+- Use Unicode superscripts: x², x³, xⁿ
+- Fractions: (x² + y)/(x + y), R = ρL/A
+- Derivatives: dy/dx, ∂f/∂x, d²y/dx²
+- NEVER describe formulas with words
+- NO LaTeX syntax ($, \\frac, \\sqrt)
+═══════════════════════════════════
+
 YOUR TONE (MANDATORY):
 ${language === 'english'
         ? `- STRICT PROFESSIONAL ENGLISH ONLY
 - 100% English vocabulary only
 - NO Hinglish syntax or Hindi words
-- Tone: Professional, clear, academic mentor
-- Explain concepts simply but in proper English`
+- Tone: Professional, clear, academic mentor`
         : `- Hinglish (Hindi + English mix)
 - Friendly, calm, supportive
 - Like an elder brother/senior teaching
@@ -62,19 +74,14 @@ Then cover these sections:
 
 💡 IMPORTANT ADDITIONS
 - Key formulas/concepts they should add
-- Write formulas in plain text (no LaTeX)
+- Write formulas in proper math notation (V = IR, not "voltage equals current times resistance")
 
 🎯 EXAM TIPS
 - 2-3 specific exam tips for this topic
 - Include PYQ patterns if relevant
 
-End with: "${language === 'english' ? 'Stay clear on this. Now solve PYQs, that is the real exam!' : 'Bas beta, itni clarity ho gayi toh paper mein full marks pakke hain!'}"
+End with: "${language === 'english' ? 'Stay clear on this. Now solve PYQs, that is the real exam!' : 'Bas beta, itni clarity ho gayi toh paper mein full marks pakke hain!'}"`;
 
-FORMULA WRITING RULES:
-- Plain text only
-- Example: "F = ma", "E = mc squared", "v = u + at"
-- NO backslashes, NO LaTeX, NO Greek symbols
-- Write "delta" not Δ, "theta" not θ, "alpha" not α`;
 
     const userPrompt = `Analyze this student's handwritten notes.
 ${subject ? `Subject: ${subject}` : ''}

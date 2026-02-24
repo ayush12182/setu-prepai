@@ -67,9 +67,20 @@ serve(async (req) => {
       hard: isNeet ? "NEET advanced, multi-concept, 2-4 min" : "JEE Advanced level, multi-concept, 2-4 min"
     };
 
+    const MATH_SYNTAX = `
+STRICT MATHEMATICAL SYNTAX:
+- Use proper notation: V = IR, F = ma, e^(x+y−1), x², (a+b)/c
+- Use Greek: α, β, θ, λ, μ, ρ, ω, ε, Δ, π
+- Use Unicode subscripts: v₁, v₂, ε₀  Superscripts: x², xⁿ
+- Derivatives: dy/dx, ∂f/∂x   Fractions: (x²+y)/(x+y)
+- NEVER describe formulas with words. NO LaTeX.
+- Solutions: Step 1→Step 2→...→Final Answer: [expression]
+`;
+
     if (type === "INTEGER") {
       systemPrompt = `You are a ${examLabel} question designer. Create Integer Type numerical questions.
-- Answer MUST be a single integer.
+${MATH_SYNTAX}
+- Answer MUST be a single integer or decimal value.
 - No options.
 - Difficulty: ${difficulty} (${difficultyMap[difficulty]})
 - Topic: ${subject} > ${chapterName} > ${subchapterName}
@@ -87,6 +98,7 @@ Return JSON array:
 }]`;
     } else if (type === "MATCH") {
       systemPrompt = `You are a ${examLabel} question designer. Create Match the Following questions.
+${MATH_SYNTAX}
 - Two columns: Left (Items) and Right (Options).
 - Complexity suitable for ${difficulty} level.
 - Topic: ${subject} > ${chapterName} > ${subchapterName}
@@ -107,11 +119,11 @@ Return JSON array:
 }]`;
     } else {
       // Default MCQ
-      systemPrompt = `You are a ${examLabel} question designer. Create exam-grade MCQs with:
-- Unicode math notation (subscripts: v₁, superscripts: x², Greek: θ, α, arrows: →). NO LaTeX.
+      systemPrompt = `You are a ${examLabel} question designer. Create exam-grade MCQs.
+${MATH_SYNTAX}
 - Each wrong option from a real student mistake.
 - Exactly ONE correct answer.
-- Brief explanation: Given → Formula → Steps → Answer.
+- Explanation format: Given → Formula → Steps → Final Answer: [expression]
 Topic: ${subject} > ${chapterName} > ${subchapterName}
 Level: ${difficulty} — ${difficultyMap[difficulty]}
 ${isNeet ? "IMPORTANT: This is NEET UG, not JEE. Focus on NCERT conceptual/factual questions. Never write the word JEE." : ""}`;

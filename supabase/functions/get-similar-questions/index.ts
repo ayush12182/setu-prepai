@@ -13,28 +13,21 @@ interface SimilarQuestionsRequest {
   count?: number;
 }
 
-// JEE Clean-Syntax Format Instructions
+// Strict Mathematical Syntax Standard
 const JEE_SYNTAX_RULES = `
-==============================
-STRICT JEE CLEAN-SYNTAX FORMAT (MANDATORY)
-==============================
+═══════════════════════════════════
+STRICT MATHEMATICAL SYNTAX (MANDATORY)
+═══════════════════════════════════
 
-Every question, solution, and equation MUST follow clean, exam-style notation.
-
-❌ NO:
-- No LaTeX-like backslashes (\\frac, \\sqrt, etc.)
-- No dollar signs or markdown math
-- No inline words inside equations
-
-✅ YES:
-- Proper subscripts: v₁, v₂, R₁, R₂ (Unicode: ₀₁₂₃₄₅₆₇₈₉ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ)
-- Proper superscripts: x², x³, xⁿ (Unicode: ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿⁱˣʸ)
-- Greek letters: α, β, γ, δ, θ, λ, μ, ω
-- Fractions: (a − b)/c
+- Use proper notation: V = IR, F = ma, e^(x+y−1), x², (a+b)/c
+- Use Greek: α, β, θ, λ, μ, ρ, ω, ε, Δ, π
+- Subscripts: v₁, v₂, ε₀, μ₀ (Unicode: ₀₁₂₃₄₅₆₇₈₉)
+- Superscripts: x², x³, xⁿ (Unicode: ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿ)
+- Fractions: (a − b)/c    Derivatives: dy/dx, ∂f/∂x
 - Arrows: → for reactions
-
-SOLUTION FORMAT:
-Line-by-line calculation, one step per line, final answer clearly stated.
+- NEVER describe formulas with words. NO LaTeX.
+- Solution: Step 1→Step 2→...→Final Answer: [expression]
+═══════════════════════════════════
 `;
 
 serve(async (req) => {

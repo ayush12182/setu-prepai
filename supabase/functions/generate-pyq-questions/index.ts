@@ -13,77 +13,53 @@ interface PYQRequest {
   count?: number;
 }
 
-// JEE Clean-Syntax Format Instructions
+// Strict Mathematical Syntax Standard
 const JEE_SYNTAX_RULES = `
-==============================
-STRICT JEE CLEAN-SYNTAX FORMAT (MANDATORY)
-==============================
+═══════════════════════════════════
+STRICT MATHEMATICAL SYNTAX (MANDATORY)
+═══════════════════════════════════
 
-Every question, solution, and equation MUST follow clean, exam-style mathematical/chemical syntax exactly like JEE papers.
+All mathematics content MUST follow strict academic formatting used in JEE Main/Advanced textbooks.
+DO NOT describe formulas verbally. DO NOT mix explanations inside formulas.
 
-❌ NO:
-- No inline words inside equations
-- No informal spacing
-- No LaTeX-like backslashes (\\frac, \\sqrt, etc.)
-- No AI-style math writing
-- No explanatory text inside expressions
-- No dollar signs or markdown math
+1. EQUATION FORMAT:
+   ✅ V = IR    ✅ f(x) = 2x − x²    ✅ ∂f/∂x = 2y − 2x + 3
+   ❌ "Voltage equals current into resistance"
 
-✅ YES:
-- Standard textbook/JEE notation only
-- Proper brackets: (x − k)/2
-- Proper subscripts: v₁, v₂, R₁, R₂ (use Unicode: ₀₁₂₃₄₅₆₇₈₉ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ)
-- Proper superscripts: x², x³, xⁿ (use Unicode: ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿⁱˣʸ)
-- Greek letters: α, β, γ, δ, θ, λ, μ, ω, etc.
-- Proper arrows: → for reactions and implies
-- Proper vector notation
+2. EXPONENTIALS — Superscript notation:
+   ✅ e^(x+y−1)    ✅ x²    ✅ y³
+   ❌ "e power x+y-1"    ❌ "x square"
 
-==============================
-SUBJECT-WISE SYNTAX RULES
-==============================
+3. FRACTIONS — Structured form:
+   ✅ (x² + y)/(x + y)    ✅ R = ρL/A
+   ❌ "x2 + y divided by x + y"
 
-MATHS:
-- Line equations: S₁: (x − k)/2 = (y − 3)/1 = (z − 1)/4
-- Direction ratios: d₁ = (2, 1, 4)
-- Cross product: d₁ × d₂
-- Determinant shown as matrix format
-- Vectors with subscripts: P₁, P₂
+4. DERIVATIVES — Proper calculus notation:
+   ✅ dy/dx    ✅ ∂f/∂x    ✅ d²y/dx²
 
-PHYSICS:
-- Clean formulas: v = u + at, s = ut + (1/2)at²
-- Subscripts: v₀, v₁, T₁, T₂, ε₀, μ₀
-- Energy: E = mc², KE = (1/2)mv²
+5. SYMBOLS:
+   × for multiplication, = for equality, ⇒ for implication, ∴ for conclusion
+   Greek: α, β, γ, δ, θ, λ, μ, ρ, ω, ε, σ, φ, π
+   Subscripts: v₁, v₂, R₁, R₂, ε₀, μ₀ (Unicode: ₀₁₂₃₄₅₆₇₈₉ₐₑᵢⱼₖₗₘₙₒₚᵣₛₜᵤᵥₓ)
+   Superscripts: x², x³, xⁿ (Unicode: ⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻ⁿⁱˣʸ)
+   Arrows: → for reactions/implies
 
-CHEMISTRY:
-- Reactions: Fe + CuSO₄ → FeSO₄ + Cu
-- Molecular formulas: H₂O, CO₂, H₂SO₄
-- Proper subscripts for atom counts
+6. SUBJECT-WISE:
+   MATHS: S₁: (x−k)/2 = (y−3)/1 = (z−1)/4, d₁ × d₂, determinants as matrix
+   PHYSICS: v = u + at, s = ut + (1/2)at², KE = (1/2)mv², E = mc²
+   CHEMISTRY: Fe + CuSO₄ → FeSO₄ + Cu, H₂O, CO₂, H₂SO₄
 
-==============================
-SOLUTION FORMAT (MANDATORY)
-==============================
+7. SOLUTION FORMAT:
+   Given: [variables with values]
+   Solution:
+   Step 1: [formula/substitution]
+   ⇒ Step 2: [calculation]
+   Final Answer: [mathematical expression]
+   Answer: (X)
 
-Step-by-step with line-by-line calculations:
-
-Given:
-S₁: (x − k)/2 = (y − 3)/1 = (z − 1)/4
-S₂: (x − 3k)/3 = (y − k)/2 = (z + 1)/5
-
-Solution:
-d₁ = (2, 1, 4)
-d₂ = (3, 2, 5)
-
-d₁ × d₂ = (−3, 2, 1)
-
-For intersection:
-(P₂ − P₁) · (d₁ × d₂) = 0
-
-⇒ −6k + 2(k − 3) + 2 = 0
-⇒ k = −1
-
-Final Answer: 5k = −5
-
-Answer: (C)
+8. NO LaTeX ($, \\frac, \\sqrt). Plain text with Unicode only.
+9. NEVER replace symbols with words.
+═══════════════════════════════════
 `;
 
 serve(async (req) => {
