@@ -232,6 +232,8 @@ serve(async (req) => {
         case 'telugu': return 'Respond STRICTLY in Telugu (తెలుగు script). తెలుగులో జవాబు ఇవ్వండి. No English except technical terms.';
         case 'punjabi': return 'Respond STRICTLY in Punjabi (ਗੁਰਮੁਖੀ script). ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ. No English except technical terms.';
         case 'marathi': return 'Respond STRICTLY in Marathi (मराठी Devanagari script). मराठीत उत्तर द्या. No English except technical terms.';
+        case 'tamil': return 'Respond STRICTLY in Tamil (தமிழ் script). தமிழில் பதிலளிக்கவும். No English except technical terms.';
+        case 'gujarati': return 'Respond STRICTLY in Gujarati (ગુજરાતી script). ગુજરાતીમાં જવાબ આપો. No English except technical terms.';
         default: return 'Respond in Hinglish (Hindi + English mix). Use bhai/bhen. Coaching style.';
       }
     };
