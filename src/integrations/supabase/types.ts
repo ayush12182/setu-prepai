@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      commune_messages: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          room_id: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          id?: string
+          room_id: string
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          room_id?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commune_messages_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "commune_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commune_rooms: {
+        Row: {
+          created_at: string
+          created_by: string
+          exam_type: string
+          expires_at: string
+          id: string
+          study_mode: string
+          subject: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          exam_type?: string
+          expires_at: string
+          id?: string
+          study_mode?: string
+          subject: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          exam_type?: string
+          expires_at?: string
+          id?: string
+          study_mode?: string
+          subject?: string
+          title?: string
+        }
+        Relationships: []
+      }
       lecture_notes: {
         Row: {
           chapter: string | null
