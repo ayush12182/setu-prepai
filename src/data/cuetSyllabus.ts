@@ -387,3 +387,16 @@ export const getCuetChapterById = (id: string): Chapter | undefined => {
 export const getCuetSubjectsByCategory = (category: CuetSubjectCategory) => {
   return CUET_SUBJECTS.filter(s => s.category === category);
 };
+
+export const getAllCuetChapters = (): Chapter[] => [
+  ...cuetGeneralTestChapters,
+  ...cuetEnglishChapters,
+  ...cuetEconomicsChapters,
+  ...cuetAccountancyChapters,
+  ...cuetBusinessStudiesChapters,
+  ...cuetPoliticalScienceChapters,
+  ...cuetHistoryChapters,
+  ...cuetGeographyChapters,
+  ...cuetPsychologyChapters,
+  ...cuetSociologyChapters,
+];

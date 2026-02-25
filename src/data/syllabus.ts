@@ -8,6 +8,7 @@ export type ChemistryType = 'Physical' | 'Organic' | 'Inorganic';
 
 export { biologyChapters } from './biologySyllabus';
 import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from './neetSyllabus';
+import { getAllCuetChapters } from './cuetSyllabus';
 
 
 export interface PYQData {
@@ -1329,11 +1330,11 @@ export const getChaptersBySubject = (subject: Subject): Chapter[] => {
 };
 
 export const getChapterById = (id: string): Chapter | undefined => {
-  // Search JEE chapters first
   const jeeChapter = allChapters.find(ch => ch.id === id);
   if (jeeChapter) return jeeChapter;
-  // Search NEET chapters
-  return [...neetBiologyChapters, ...neetChemistryChapters, ...neetPhysicsChapters].find(ch => ch.id === id) as Chapter | undefined;
+  const neetChapter = [...neetBiologyChapters, ...neetChemistryChapters, ...neetPhysicsChapters].find(ch => ch.id === id) as Chapter | undefined;
+  if (neetChapter) return neetChapter;
+  return getAllCuetChapters().find(ch => ch.id === id) as Chapter | undefined;
 };
 
 export const getChaptersByChemistryType = (type: ChemistryType): Chapter[] => {

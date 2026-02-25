@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { SubjectCard } from '@/components/ui/SubjectCard';
 import { useSyllabusProgress } from '@/hooks/useSyllabusProgress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 export const SyllabusTracker: React.FC = () => {
   const navigate = useNavigate();
   const { progress, isLoading } = useSyllabusProgress();
+  const { isCuet } = useExamMode();
 
   if (isLoading) {
     return (
@@ -23,6 +25,9 @@ export const SyllabusTracker: React.FC = () => {
     );
   }
 
+  // For CUET, show top subjects (limit to 6 for dashboard)
+  const displayProgress = isCuet ? progress.slice(0, 6) : progress;
+
   return (
     <section>
       <div className="flex items-center justify-between mb-4">
@@ -35,8 +40,8 @@ export const SyllabusTracker: React.FC = () => {
         </button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {progress.map((subjectData) => (
+      <div className={`grid gap-4 ${isCuet ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-3'}`}>
+        {displayProgress.map((subjectData) => (
           <SubjectCard
             key={subjectData.subject}
             subject={subjectData.subject}

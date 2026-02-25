@@ -8,6 +8,7 @@ import { useSyllabusProgress } from '@/hooks/useSyllabusProgress';
 import { getAllSubchapters } from '@/data/subchapters';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
 import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
+import { getAllCuetChapters } from '@/data/cuetSyllabus';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface AnalyticsData {
@@ -21,7 +22,7 @@ interface AnalyticsData {
 
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuth();
-  const { isNeet } = useExamMode();
+  const { isNeet, isCuet } = useExamMode();
   const { progress } = useSyllabusProgress();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,9 +53,11 @@ const AnalyticsPage: React.FC = () => {
           .eq('status', 'completed');
 
         const allSubchapters = getAllSubchapters();
-        const allChapters = isNeet
-          ? [...neetPhysicsChapters, ...neetChemistryChapters, ...neetBiologyChapters]
-          : [...physicsChapters, ...chemistryChapters, ...mathsChapters];
+        const allChapters = isCuet
+          ? getAllCuetChapters()
+          : isNeet
+            ? [...neetPhysicsChapters, ...neetChemistryChapters, ...neetBiologyChapters]
+            : [...physicsChapters, ...chemistryChapters, ...mathsChapters];
 
         // Build chapter-level accuracy from sessions
         const chapterStats: Record<string, { correct: number; total: number; name: string; subject: string }> = {};
@@ -72,32 +75,34 @@ const AnalyticsPage: React.FC = () => {
         });
 
         // Subject scores from practice sessions
-        const thirdSubject = isNeet ? 'biology' : 'maths';
-        const subjectAgg: Record<string, { correct: number; total: number }> = {
-          physics: { correct: 0, total: 0 },
-          chemistry: { correct: 0, total: 0 },
-          [thirdSubject]: { correct: 0, total: 0 },
-        };
+        const thirdSubject = isCuet ? 'general_test' : isNeet ? 'biology' : 'maths';
+        const subjectKeys = isCuet
+          ? ['english', 'economics', 'general_test']
+          : isNeet
+            ? ['physics', 'chemistry', 'biology']
+            : ['physics', 'chemistry', 'maths'];
+        const subjectAgg: Record<string, { correct: number; total: number }> = {};
+        subjectKeys.forEach(k => { subjectAgg[k] = { correct: 0, total: 0 }; });
 
         Object.values(chapterStats).forEach(ch => {
-          const subj = ch.subject || thirdSubject;
+          const subj = ch.subject || '';
           if (subjectAgg[subj] !== undefined) {
             subjectAgg[subj].correct += ch.correct;
             subjectAgg[subj].total += ch.total;
           }
         });
 
-        const subjectScores = isNeet
-          ? [
-            { name: 'Physics', score: subjectAgg.physics.total > 0 ? Math.round((subjectAgg.physics.correct / subjectAgg.physics.total) * 100) : 0, color: 'bg-physics' },
-            { name: 'Chemistry', score: subjectAgg.chemistry.total > 0 ? Math.round((subjectAgg.chemistry.correct / subjectAgg.chemistry.total) * 100) : 0, color: 'bg-chemistry' },
-            { name: 'Biology', score: subjectAgg.biology?.total > 0 ? Math.round((subjectAgg.biology.correct / subjectAgg.biology.total) * 100) : 0, color: 'bg-green-500' },
-          ]
-          : [
-            { name: 'Physics', score: subjectAgg.physics.total > 0 ? Math.round((subjectAgg.physics.correct / subjectAgg.physics.total) * 100) : 0, color: 'bg-physics' },
-            { name: 'Chemistry', score: subjectAgg.chemistry.total > 0 ? Math.round((subjectAgg.chemistry.correct / subjectAgg.chemistry.total) * 100) : 0, color: 'bg-chemistry' },
-            { name: 'Mathematics', score: subjectAgg.maths?.total > 0 ? Math.round((subjectAgg.maths.correct / subjectAgg.maths.total) * 100) : 0, color: 'bg-maths' },
-          ];
+        const makeScore = (key: string, label: string, color: string) => ({
+          name: label,
+          score: subjectAgg[key]?.total > 0 ? Math.round((subjectAgg[key].correct / subjectAgg[key].total) * 100) : 0,
+          color,
+        });
+
+        const subjectScores = isCuet
+          ? [makeScore('english', 'English', 'bg-sky-500'), makeScore('economics', 'Economics', 'bg-emerald-500'), makeScore('general_test', 'General Test', 'bg-amber-500')]
+          : isNeet
+            ? [makeScore('physics', 'Physics', 'bg-physics'), makeScore('chemistry', 'Chemistry', 'bg-chemistry'), makeScore('biology', 'Biology', 'bg-green-500')]
+            : [makeScore('physics', 'Physics', 'bg-physics'), makeScore('chemistry', 'Chemistry', 'bg-chemistry'), makeScore('maths', 'Mathematics', 'bg-maths')];
 
         // Weak chapters: < 60% accuracy with at least some attempts
         const weakChaptersList = Object.values(chapterStats)

@@ -1,26 +1,21 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
+import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
+import { CUET_SUBJECTS, getCuetChaptersBySubject } from '@/data/cuetSyllabus';
 import { getAllSubchapters } from '@/data/subchapters';
 
 export interface SubjectProgress {
-  subject: 'physics' | 'chemistry' | 'maths';
+  subject: string;
   chaptersCount: number;
   totalSubchapters: number;
   completedSubchapters: number;
-  progress: number; // percentage 0-100
+  progress: number;
 }
 
-// Get subchapters for a subject based on chapter IDs
-const getSubchaptersForSubject = (subject: 'physics' | 'chemistry' | 'maths'): string[] => {
-  const chapters = subject === 'physics' 
-    ? physicsChapters 
-    : subject === 'chemistry' 
-      ? chemistryChapters 
-      : mathsChapters;
-  
-  const chapterIds = chapters.map(c => c.id);
+const getSubchaptersForSubjectChapters = (chapterIds: string[]): string[] => {
   const allSubchapters = getAllSubchapters();
   return allSubchapters
     .filter(s => chapterIds.includes(s.chapterId))
@@ -29,51 +24,30 @@ const getSubchaptersForSubject = (subject: 'physics' | 'chemistry' | 'maths'): s
 
 export const useSyllabusProgress = () => {
   const { user } = useAuth();
-  const [progress, setProgress] = useState<SubjectProgress[]>([
-    { subject: 'physics', chaptersCount: physicsChapters.length, totalSubchapters: 0, completedSubchapters: 0, progress: 0 },
-    { subject: 'chemistry', chaptersCount: chemistryChapters.length, totalSubchapters: 0, completedSubchapters: 0, progress: 0 },
-    { subject: 'maths', chaptersCount: mathsChapters.length, totalSubchapters: 0, completedSubchapters: 0, progress: 0 },
-  ]);
+  const { isNeet, isCuet } = useExamMode();
+  const [progress, setProgress] = useState<SubjectProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProgress = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
+      if (!user) { setIsLoading(false); return; }
 
       try {
-        // Get all practice sessions for the user
         const { data: sessions, error } = await supabase
           .from('practice_sessions')
           .select('subchapter_id, correct_answers, total_questions')
           .eq('user_id', user.id);
 
-        if (error) {
-          console.error('Error fetching practice sessions:', error);
-          setIsLoading(false);
-          return;
-        }
+        if (error) { console.error('Error fetching practice sessions:', error); setIsLoading(false); return; }
 
-        // Create a map of subchapter_id -> completion status
-        // A subchapter is considered "completed" if user has attempted it with >= 60% accuracy
         const completedSubchapters = new Set<string>();
-        
         if (sessions) {
-          // Group sessions by subchapter
           const subchapterProgress: Record<string, { correct: number; total: number }> = {};
-          
           sessions.forEach(session => {
-            if (!subchapterProgress[session.subchapter_id]) {
-              subchapterProgress[session.subchapter_id] = { correct: 0, total: 0 };
-            }
+            if (!subchapterProgress[session.subchapter_id]) subchapterProgress[session.subchapter_id] = { correct: 0, total: 0 };
             subchapterProgress[session.subchapter_id].correct += session.correct_answers;
             subchapterProgress[session.subchapter_id].total += session.total_questions;
           });
-
-          // Mark subchapters as completed if they have been practiced
-          // (at least 5 questions attempted OR 60% accuracy with any attempts)
           Object.entries(subchapterProgress).forEach(([subchapterId, stats]) => {
             if (stats.total >= 5 || (stats.total > 0 && (stats.correct / stats.total) >= 0.6)) {
               completedSubchapters.add(subchapterId);
@@ -81,26 +55,62 @@ export const useSyllabusProgress = () => {
           });
         }
 
-        // Calculate progress for each subject
-        const subjects: Array<'physics' | 'chemistry' | 'maths'> = ['physics', 'chemistry', 'maths'];
-        const newProgress: SubjectProgress[] = subjects.map(subject => {
-          const subchapterIds = getSubchaptersForSubject(subject);
-          const totalSubchapters = subchapterIds.length;
-          const completedCount = subchapterIds.filter(id => completedSubchapters.has(id)).length;
-          const chapters = subject === 'physics' 
-            ? physicsChapters 
-            : subject === 'chemistry' 
-              ? chemistryChapters 
-              : mathsChapters;
+        let newProgress: SubjectProgress[];
 
-          return {
-            subject,
-            chaptersCount: chapters.length,
-            totalSubchapters,
-            completedSubchapters: completedCount,
-            progress: totalSubchapters > 0 ? Math.round((completedCount / totalSubchapters) * 100) : 0
-          };
-        });
+        if (isCuet) {
+          // CUET: show subjects that have chapters with subchapters
+          newProgress = CUET_SUBJECTS
+            .map(subj => {
+              const chapters = getCuetChaptersBySubject(subj.key);
+              const chapterIds = chapters.map(c => c.id);
+              const subchapterIds = getSubchaptersForSubjectChapters(chapterIds);
+              const completedCount = subchapterIds.filter(id => completedSubchapters.has(id)).length;
+              return {
+                subject: subj.key,
+                chaptersCount: chapters.length,
+                totalSubchapters: subchapterIds.length,
+                completedSubchapters: completedCount,
+                progress: subchapterIds.length > 0 ? Math.round((completedCount / subchapterIds.length) * 100) : 0,
+              };
+            })
+            .filter(s => s.totalSubchapters > 0); // Only show subjects with content
+        } else if (isNeet) {
+          const neetSubjects = [
+            { key: 'biology', chapters: neetBiologyChapters },
+            { key: 'chemistry', chapters: neetChemistryChapters },
+            { key: 'physics', chapters: neetPhysicsChapters },
+          ];
+          newProgress = neetSubjects.map(({ key, chapters }) => {
+            const chapterIds = chapters.map(c => c.id);
+            const subchapterIds = getSubchaptersForSubjectChapters(chapterIds);
+            const completedCount = subchapterIds.filter(id => completedSubchapters.has(id)).length;
+            return {
+              subject: key,
+              chaptersCount: chapters.length,
+              totalSubchapters: subchapterIds.length,
+              completedSubchapters: completedCount,
+              progress: subchapterIds.length > 0 ? Math.round((completedCount / subchapterIds.length) * 100) : 0,
+            };
+          });
+        } else {
+          const jeeSubjects = [
+            { key: 'physics', chapters: physicsChapters },
+            { key: 'chemistry', chapters: chemistryChapters },
+            { key: 'maths', chapters: mathsChapters },
+          ];
+          newProgress = jeeSubjects.map(({ key, chapters }) => {
+            const chapterIds = chapters.map(c => c.id);
+            const subchapterIds = getSubchaptersForSubjectChapters(chapterIds);
+            const completedCount = subchapterIds.filter(id => completedSubchapters.has(id)).length;
+            return {
+              subject: key,
+              chaptersCount: chapters.length,
+              totalSubchapters: subchapterIds.length,
+              completedSubchapters: completedCount,
+              progress: subchapterIds.length > 0 ? Math.round((completedCount / subchapterIds.length) * 100) : 0,
+            };
+          });
+        }
 
         setProgress(newProgress);
       } catch (err) {
@@ -111,7 +121,7 @@ export const useSyllabusProgress = () => {
     };
 
     fetchProgress();
-  }, [user]);
+  }, [user, isNeet, isCuet]);
 
   return { progress, isLoading };
 };

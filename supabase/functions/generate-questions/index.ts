@@ -26,7 +26,8 @@ serve(async (req) => {
   try {
     const { subchapterId, subchapterName, chapterId, chapterName, subject, difficulty, type = "MCQ", count = 5, examMode = "JEE" }: QuestionRequest = await req.json();
     const isNeet = examMode === "NEET";
-    const examLabel = isNeet ? "NEET UG" : "JEE";
+    const isCuet = examMode === "CUET";
+    const examLabel = isCuet ? "CUET UG" : isNeet ? "NEET UG" : "JEE";
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -62,9 +63,9 @@ serve(async (req) => {
     let userPrompt = "";
 
     const difficultyMap: Record<string, string> = {
-      easy: isNeet ? "NCERT level, single-concept, direct recall" : "NCERT level, single-concept, 30-60s solve time",
-      medium: isNeet ? "NEET UG level, 2-3 concepts, 1-2 min" : "JEE Mains level, 2-3 concepts, 1-2 min",
-      hard: isNeet ? "NEET advanced, multi-concept, 2-4 min" : "JEE Advanced level, multi-concept, 2-4 min"
+      easy: isNeet ? "NCERT level, single-concept, direct recall" : examMode === "CUET" ? "NCERT level, direct recall, 30-45s solve time" : "NCERT level, single-concept, 30-60s solve time",
+      medium: isNeet ? "NEET UG level, 2-3 concepts, 1-2 min" : examMode === "CUET" ? "CUET level, NCERT application, 45-60s solve time" : "JEE Mains level, 2-3 concepts, 1-2 min",
+      hard: isNeet ? "NEET advanced, multi-concept, 2-4 min" : examMode === "CUET" ? "CUET challenging, multi-concept NCERT, 1-2 min" : "JEE Advanced level, multi-concept, 2-4 min"
     };
 
     const MATH_SYNTAX = `
@@ -126,7 +127,7 @@ ${MATH_SYNTAX}
 - Explanation format: Given → Formula → Steps → Final Answer: [expression]
 Topic: ${subject} > ${chapterName} > ${subchapterName}
 Level: ${difficulty} — ${difficultyMap[difficulty]}
-${isNeet ? "IMPORTANT: This is NEET UG, not JEE. Focus on NCERT conceptual/factual questions. Never write the word JEE." : ""}`;
+${isCuet ? "IMPORTANT: This is CUET UG, NOT JEE or NEET. Questions must be strictly NCERT-aligned, definition/concept/fact-based. Focus on speed and recall. Never write JEE or NEET. Avoid heavy derivations or advanced numericals." : isNeet ? "IMPORTANT: This is NEET UG, not JEE. Focus on NCERT conceptual/factual questions. Never write the word JEE." : ""}`;
 
       userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} — ${chapterName}) at ${difficulty} difficulty.
 
