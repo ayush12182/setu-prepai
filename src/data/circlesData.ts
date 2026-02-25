@@ -3,7 +3,7 @@
  *  All data is simulated frontend-only. No real-time backend required.
  * ─────────────────────────────────────────────────────────────────────────── */
 
-export type ExamType = 'jee' | 'neet';
+export type ExamType = 'jee' | 'neet' | 'cuet';
 export type StudyMode = 'all' | 'doubts' | 'revision' | 'strategy' | 'motivation';
 export type MessageCategory = 'Doubt' | 'Concept' | 'Strategy' | 'Motivation';
 export type ReputationBadge = 'Beginner' | 'Contributor' | 'Doubt Solver' | 'Top Mentor';

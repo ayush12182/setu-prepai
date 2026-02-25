@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 
-export type ExamMode = 'jee' | 'neet';
+export type ExamMode = 'jee' | 'neet' | 'cuet';
 export type JeeSubMode = 'main' | 'advanced' | 'both';
 
 interface ExamModeConfig {
@@ -14,6 +14,8 @@ interface ExamModeConfig {
   mentorTag: string;
   accentHue: number;
   quickDoubts: string[];
+  learningFlow: string;
+  notesStyle: string;
 }
 
 const JEE_CONFIG: ExamModeConfig = {
@@ -29,6 +31,8 @@ const JEE_CONFIG: ExamModeConfig = {
   mentorName: 'Jeetu Bhaiya',
   mentorTag: 'Your JEE Mentor',
   accentHue: 32,
+  learningFlow: 'Concept → Practice → Advanced → Analysis',
+  notesStyle: 'deep-theory',
   quickDoubts: [
     'Rotation vs Revolution explain karo',
     'Integration by Parts kaise kare?',
@@ -51,12 +55,41 @@ const NEET_CONFIG: ExamModeConfig = {
   mentorName: 'NEET Mentor',
   mentorTag: 'Your NEET AI Mentor',
   accentHue: 145,
+  learningFlow: 'Concept → Practice → NCERT Review → Analysis',
+  notesStyle: 'ncert-focus',
   quickDoubts: [
     'Human Physiology explain karo',
     'Genetics & Mendelian inheritance',
     'Plant Physiology concepts',
     'NCERT Biology important diagrams',
     'Cell Biology fundamentals',
+  ],
+};
+
+const CUET_CONFIG: ExamModeConfig = {
+  examMode: 'cuet',
+  label: 'CUET',
+  fullLabel: 'CUET Preparation Mode',
+  emoji: '🎯',
+  subjects: [
+    { key: 'english', label: 'English', icon: '📝' },
+    { key: 'general_test', label: 'General Test', icon: '🎯' },
+    { key: 'economics', label: 'Economics', icon: '📈' },
+    { key: 'political_science', label: 'Political Science', icon: '🏛️' },
+    { key: 'history', label: 'History', icon: '📜' },
+    { key: 'psychology', label: 'Psychology', icon: '🧠' },
+  ],
+  mentorName: 'CUET Mentor',
+  mentorTag: 'Your CUET AI Mentor',
+  accentHue: 260,
+  learningFlow: 'Concept Summary → Quick MCQs → Revision Loop → Speed Test',
+  notesStyle: 'ncert-concise',
+  quickDoubts: [
+    'Explain Demand & Supply curve',
+    'Reading comprehension strategies',
+    'Logical Reasoning shortcuts',
+    'Indian Constitution key articles',
+    'Current affairs last 6 months',
   ],
 };
 
@@ -72,6 +105,7 @@ interface ExamModeContextType {
   setExamMode: (mode: ExamMode) => void;
   isNeet: boolean;
   isJee: boolean;
+  isCuet: boolean;
   jeeSubMode: JeeSubMode;
   setJeeSubMode: (mode: JeeSubMode) => void;
   jeeSubModeLabel: string;
@@ -100,6 +134,7 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem('examMode', mode);
     setExamModeState(mode);
     document.documentElement.classList.toggle('neet-mode', mode === 'neet');
+    document.documentElement.classList.toggle('cuet-mode', mode === 'cuet');
   }, []);
 
   const setJeeSubMode = useCallback((mode: JeeSubMode) => {
@@ -109,8 +144,9 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     if (profile?.target_exam) {
-      const isNeetProfile = profile.target_exam === 'NEET';
-      const newMode: ExamMode = isNeetProfile ? 'neet' : 'jee';
+      let newMode: ExamMode = 'jee';
+      if (profile.target_exam === 'NEET') newMode = 'neet';
+      else if (profile.target_exam === 'CUET') newMode = 'cuet';
       if (newMode !== examMode) {
         setExamModeState(newMode);
         localStorage.setItem('examMode', newMode);
@@ -120,9 +156,10 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     document.documentElement.classList.toggle('neet-mode', examMode === 'neet');
+    document.documentElement.classList.toggle('cuet-mode', examMode === 'cuet');
   }, [examMode]);
 
-  const config = examMode === 'neet' ? NEET_CONFIG : JEE_CONFIG;
+  const config = examMode === 'neet' ? NEET_CONFIG : examMode === 'cuet' ? CUET_CONFIG : JEE_CONFIG;
 
   return (
     <ExamModeContext.Provider value={{
@@ -131,6 +168,7 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setExamMode,
       isNeet: examMode === 'neet',
       isJee: examMode === 'jee',
+      isCuet: examMode === 'cuet',
       jeeSubMode,
       setJeeSubMode,
       jeeSubModeLabel: JEE_SUB_MODE_LABELS[jeeSubMode],
