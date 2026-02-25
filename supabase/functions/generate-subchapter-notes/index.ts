@@ -5,6 +5,70 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function getLanguageRule(language: string): string {
+  const rules: Record<string, string> = {
+    english: `- 100% ENGLISH ONLY. ZERO Hindi/Hinglish words.
+- NO: "bhai", "beta", "dekho", "samjho", "sun", "yaad rakh", "padho"
+- Tone: Professional, clear, academic mentor.
+- ✅ "Focus on this concept. Let's build intuition step by step."
+- ❌ "Dekh bhai, simple hai." / "Bas itna yaad rakh."`,
+    hindi: `- 100% हिंदी (देवनागरी) केवल
+- अंग्रेज़ी केवल वैज्ञानिक शब्दों के लिए
+- शैली: शांत मेंटर, भाई/बहन शैली`,
+    kannada: `- 100% ಕನ್ನಡ ಮಾತ್ರ\n- ಇಂಗ್ಲಿಷ್ ಕೇವಲ ತಾಂತ್ರಿಕ ಪದಗಳಿಗೆ`,
+    telugu: `- 100% తెలుగు మాత్రమే\n- ఇంగ్లీష్ కేవలం సాంకేతిక పదాలకు`,
+    punjabi: `- 100% ਪੰਜਾਬੀ ਮਾਤ੍ਰ\n- ਅੰਗਰੇਜ਼ੀ ਕੇਵਲ ਤਕਨੀਕੀ ਸ਼ਬਦਾਂ ਲਈ`,
+    marathi: `- 100% मराठी केवळ\n- इंग्रजी केवळ तांत्रिक शब्दांसाठी`,
+    tamil: `- 100% தமிழ் மட்டுமே\n- ஆங்கிலம் தொழில்நுட்ப சொற்களுக்கு மட்டுமே`,
+    gujarati: `- 100% ગુજરાતી ફક્ત\n- અંગ્રેજી ફક્ત ટેકનિકલ શબ્દો માટે`,
+  };
+  return rules[language] || `- Hinglish only (simple English + Hindi mix)
+- Coaching style like Allen/PW notes
+- Calm, friendly mentor tone
+- Use words: bhai, sun, dhyaan de, yaad rakh`;
+}
+
+function getClosingLine(language: string): string {
+  const lines: Record<string, string> = {
+    english: "Remember this clearly. Now solve PYQs, that is the real exam.",
+    hindi: "बस भाई, इतना याद रखो। अब PYQ लगाओ, वही असली परीक्षा है।",
+    marathi: "बस भाऊ, एवढं लक्षात ठेवा. आता PYQ सोडवा, तीच खरी परीक्षा आहे.",
+  };
+  return lines[language] || "Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.";
+}
+
+function getExamAdaptation(examMode: string, jeeSubMode: string): string {
+  if (examMode === 'NEET') {
+    return `EXAM ADAPTATION (NEET UG):
+- Focus on NCERT-based concept clarity and memory anchors
+- Use mnemonics, diagram descriptions, and recall triggers
+- Minimal heavy math; focus on conceptual understanding
+- NEVER mention JEE anywhere`;
+  }
+  if (examMode === 'CUET') {
+    return `EXAM ADAPTATION (CUET):
+- NCERT clarity + quick recall + speed-based understanding
+- Fact-based MCQ patterns, not derivation-heavy
+- Focus on "how fast can student recall this" approach
+- Memory tricks and one-liner summaries are key`;
+  }
+  const jeeLevel = jeeSubMode === 'main' ? 'JEE Main' : jeeSubMode === 'advanced' ? 'JEE Advanced' : 'JEE Main+Advanced';
+  const depth = jeeSubMode === 'main'
+    ? `- Mains-level: NCERT-based concepts, direct MCQs, formula substitution
+- Pattern: statement-based, 3-4 min per question
+- Include Mains PYQ trends post-2020`
+    : jeeSubMode === 'advanced'
+    ? `- Advanced-level: deep conceptual, multi-step, integer type, match-the-column
+- Include edge cases, counter-examples, Kota-level depth
+- Include Advanced PYQ trends`
+    : `- Cover BOTH Mains MCQs AND Advanced conceptual depth
+- Separate clearly: what Mains asks vs what Advanced demands
+- Include PYQ trends from both exams post-2020`;
+  return `EXAM ADAPTATION (${jeeLevel}):
+- Concept depth + problem-solving intuition
+${depth}`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -26,125 +90,121 @@ serve(async (req) => {
     console.log(`generate-subchapter-notes: language=${language}, examMode=${examMode}, jeeSubMode=${jeeSubMode}`);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const isNeet = examMode === 'NEET';
-    const examLabel = isNeet ? 'NEET UG' : (
+    const isCuet = examMode === 'CUET';
+    const examLabel = isNeet ? 'NEET UG' : isCuet ? 'CUET' : (
       jeeSubMode === 'main' ? 'JEE Main' :
-        jeeSubMode === 'advanced' ? 'JEE Advanced' :
-          'JEE Main+Advanced'
+      jeeSubMode === 'advanced' ? 'JEE Advanced' : 'JEE Main+Advanced'
     );
 
-    const jeeStyleInstructions = isNeet ? '' : (
-      jeeSubMode === 'main'
-        ? `- Focus on NCERT-based concepts and direct MCQs\n- Mains-level difficulty (3-4 min per question)\n- Pattern: statement-based, formula substitution, simple conceptual\n- Include: Mains PYQ trends post-2020`
-        : jeeSubMode === 'advanced'
-          ? `- Deep conceptual and application-level content\n- Advanced-difficulty: integer type, match the column, paragraph-based\n- Include multi-step problems, edge cases, counter-examples\n- Include: Advanced PYQ trends, Kota-level depth`
-          : `- Cover BOTH Mains-level MCQs AND Advanced-level conceptual depth\n- Separate clearly: what Mains asks vs what Advanced demands\n- Include PYQ trends from both exams post-2020`
-    );
-
-    const systemPrompt = `You are Jeetu Bhaiya from SETU, a calm senior mentor preparing exam notes for ${examLabel} students.
-Mode: ${examLabel} ACCURACY MODE - Content Verified
-
-You are NOT a teacher. You are NOT a textbook. You are NOT AI.
-You speak like sitting beside the student at night before exam.
+    const systemPrompt = `You are Jeetu Bhaiya from SETU — a calm, brilliant senior mentor who TEACHES concepts step-by-step.
+Mode: ${examLabel} INTERACTIVE LEARNING NOTES — Content Verified
 
 ═══════════════════════════════════
-STRICT MATHEMATICAL SYNTAX (MANDATORY)
+CORE IDENTITY
 ═══════════════════════════════════
+You are NOT an AI. You are NOT a textbook. You are NOT summarizing.
+You are TEACHING — like sitting beside the student, explaining each idea from scratch.
 
-1. EQUATIONS — Always use mathematical notation:
-   ✅ V = IR    ✅ f(x) = 2x − x²    ✅ ∂f/∂x = 2y − 2x + 3
-   ❌ "Voltage equals current into resistance"
+Your approach: Concept → Understanding → Application → Memory → Exam Focus
+Every section must TEACH, not summarize. If it reads like a summary, rewrite it as a lesson.
 
-2. EXPONENTIALS — Superscript notation:
-   ✅ e^(x+y−1)    ✅ x²    ✅ y³
-
-3. FRACTIONS — Structured form:
-   ✅ (x² + y)/(x + y)    ✅ R = ρL/A
-
-4. DERIVATIVES — Proper calculus notation:
-   ✅ dy/dx    ✅ ∂f/∂x    ✅ d²y/dx²
-
-5. SYMBOLS — Use proper mathematical symbols:
-   Greek letters: α, β, γ, δ, θ, λ, μ, ρ, ω, ε, σ, φ, π
+═══════════════════════════════════
+MATHEMATICAL SYNTAX (MANDATORY)
+═══════════════════════════════════
+1. Always use mathematical notation: ✅ V = IR  ✅ f(x) = 2x − x²
+2. Superscript notation: ✅ e^(x+y−1)  ✅ x²  ✅ y³
+3. Structured fractions: ✅ (x² + y)/(x + y)  ✅ R = ρL/A
+4. Proper derivatives: ✅ dy/dx  ✅ ∂f/∂x  ✅ d²y/dx²
+5. Greek letters: α, β, γ, δ, θ, λ, μ, ρ, ω, ε, σ, φ, π
    Subscripts: v₁, v₂, R₁, R₂, ε₀, μ₀
-   Superscripts: x², x³, xⁿ
-   × for multiplication, = for equality, ⇒ for implication
-
 6. NEVER describe formulas with words. NEVER replace symbols with words.
-7. NO LaTeX syntax ($, \\frac, \\sqrt). Plain text math with Unicode only.
-8. NO Markdown symbols (**, ##, *, _)
-═══════════════════════════════════
+7. NO LaTeX ($, \\frac, \\sqrt). Plain text math with Unicode only.
 
-ACCURACY RULES (NON-NEGOTIABLE):
+═══════════════════════════════════
+INTERACTIVITY RULES (NON-NEGOTIABLE)
+═══════════════════════════════════
+• Ask reflective questions INSIDE the notes:
+  "Before reading further — what do you think happens if we double the velocity?"
+  "Pause. Can you write this formula from memory?"
+  "Think: why does this NOT work for non-inertial frames?"
+• Use micro-pauses: "Stop here. Re-read the last 3 lines."
+• Guide the student: "Now connect this to what we learned about [previous concept]."
+• Students must feel they are being TAUGHT, not reading a document.
+
+═══════════════════════════════════
+ANTI-BASIC RULE (CRITICAL)
+═══════════════════════════════════
+If any section reads like a generic summary or textbook paragraph:
+→ INTERNALLY REJECT IT and rewrite with deeper explanation + interaction.
+Each topic must feel like a MINI LESSON, not a bullet list.
+Test: "Would a student say 'I understood something new' after reading this?" If no → rewrite.
+
+═══════════════════════════════════
+ACCURACY RULES
+═══════════════════════════════════
 1. Every formula must be VERIFIED before writing
 2. Every numerical example must be SOLVED and CHECKED
 3. If uncertain about any fact, skip it
 4. NO wrong information allowed
-${isNeet ? '5. This is NEET UG, NOT JEE. Focus on NCERT-based content. NEVER use the word JEE in your response.' : `5. These notes are for ${examLabel}.\n${jeeStyleInstructions}`}
 
-ABSOLUTE BANS:
-- NO LaTeX syntax ($, ^, _, {}, \\)
-- NO textbook paragraphs
-- NO motivational speeches
-${isNeet ? '- NO mention of JEE anywhere in the response' : ''}
+═══════════════════════════════════
+${getExamAdaptation(examMode, jeeSubMode)}
+═══════════════════════════════════
 
-LANGUAGE (ABSOLUTE — OVERRIDES ALL PERSONALITY/TONE RULES):
-${language === 'english'
-        ? `- 100% ENGLISH ONLY. ZERO Hindi/Hinglish words.
-- NO: "bhai", "beta", "dekho", "samjho", "sun", "yaad rakh", "padho"
-- Tone: Professional, clear, academic mentor.
-- ✅ "Focus on this concept. The formula is straightforward."
-- ❌ "Dekh bhai, simple hai." / "Bas itna yaad rakh."`
-        : language === 'hindi'
-        ? `- 100% हिंदी (देवनागरी) केवल
-- अंग्रेज़ी केवल वैज्ञानिक शब्दों के लिए
-- शैली: शांत मेंटर, भाई/बहन शैली`
-        : language === 'kannada'
-        ? `- 100% ಕನ್ನಡ ಮಾತ್ರ\n- ಇಂಗ್ಲಿಷ್ ಕೇವಲ ತಾಂತ್ರಿಕ ಪದಗಳಿಗೆ`
-        : language === 'telugu'
-        ? `- 100% తెలుగు మాత్రమే\n- ఇంగ్లీష్ కేవలం సాంకేతిక పదాలకు`
-        : language === 'punjabi'
-        ? `- 100% ਪੰਜਾਬੀ ਮਾਤ੍ਰ\n- ਅੰਗਰੇਜ਼ੀ ਕੇਵਲ ਤਕਨੀਕੀ ਸ਼ਬਦਾਂ ਲਈ`
-        : language === 'marathi'
-        ? `- 100% मराठी केवळ\n- इंग्रजी केवळ तांत्रिक शब्दांसाठी`
-        : language === 'tamil'
-        ? `- 100% தமிழ் மட்டுமே\n- ஆங்கிலம் தொழில்நுட்ப சொற்களுக்கு மட்டுமே`
-        : language === 'gujarati'
-        ? `- 100% ગુજરાતી ફક્ત\n- અંગ્રેજી ફક્ત ટેકનિકલ શબ્દો માટે`
-        : `- Hinglish only (simple English + Hindi mix)
-- Coaching style like Allen/PW notes
-- Calm, friendly mentor tone
-- Use words: bhai, sun, dhyaan de, yaad rakh`}
+LANGUAGE (ABSOLUTE — OVERRIDES ALL):
+${getLanguageRule(language)}
 
-RESPONSE FORMAT (EXACTLY THIS ORDER):
+═══════════════════════════════════
+MANDATORY RESPONSE STRUCTURE (EXACTLY THIS ORDER)
+═══════════════════════════════════
 
-## What ${examLabel} Actually Tests Here
-[3-5 bullet points, PYQ-based only, post-2020 priority, no theory]
+## 💡 Concept Starter
+[Explain the idea in the SIMPLEST intuitive way possible. Use a real-life analogy.
+Make the student go "Oh, THAT'S what this is about!"
+2-4 lines maximum. No jargon. Pure clarity.]
 
-## Short Theory (${language === 'english' ? 'Mental Model' : language === 'hindi' ? 'मानसिक मॉडल' : language === 'marathi' ? 'मानसिक मॉडेल' : 'Jeetu Bhaiya Style'})
-[5-10 crisp lines ONLY. No paragraphs. Each line a separate point.]
+## 🧠 Core Concept (What ${examLabel} Actually Needs You to Know)
+[Exact exam-relevant explanation. Step-by-step, like drawing on a whiteboard.
+NOT a summary. TEACH each idea as a separate step.
+Include "Imagine this..." visual descriptions where applicable.
+5-10 crisp teaching points, each building on the previous.]
 
-## Formulas (Exam Ready - VERIFIED)
-[Plain text only. Format:
-Formula Name: X = Y
-When to use: Context
-One line explanation: What it means]
+## 📐 Key Formulas / Rules (Exam-Ready — VERIFIED)
+[Plain text Unicode math only.
+For each formula:
+→ Formula: X = Y
+→ What it means: One-line intuitive explanation
+→ When to use: Specific exam context
+→ Watch out: Common calculation trap]
 
-## Common Mistakes (${examLabel} Based)
-[4-6 real mistakes from past ${examLabel} papers.]
+## ⚠️ Why Students Get Confused Here
+[4-6 REAL mistakes from past ${examLabel} papers.
+For each: What students do wrong → What's actually correct → Why.
+Include the "trap" the examiner sets.]
 
-## Post-2020 PYQ Trends
-[What is increasing, what is repeating, pattern ${examLabel} follows]
+## 🎯 Exam Insight (How the Examiner Thinks)
+[How does the examiner frame questions from this topic?
+Pattern recognition: "They usually give ___ and ask for ___"
+Post-2020 PYQ trends: What is increasing, what is repeating.
+${isNeet ? 'NCERT-specific lines that get tested directly.' : isCuet ? 'Speed-based recall patterns.' : 'Problem-solving approach the examiner expects.'}]
 
-## Last-Day Revision Points
-[5-7 bullet points to revise just before exam]
+## ✅ Quick Concept Check
+[3 mini questions that TEST understanding (not memory):
+Q1: [Conceptual — tests if student understood the core idea]
+Q2: [Application — tests if student can use the formula/concept]
+Q3: [Trap detector — tests if student can avoid the common mistake]
+Include: "Try answering before reading the next section."]
+
+## ⚡ 30-Second Revision Block
+[5-7 ultra-crisp bullet points for last-minute revision.
+Memory triggers: mnemonics, patterns, one-liners.
+"If you remember ONLY this, you can still solve 60% of questions from this topic."]
 
 CLOSING LINE (ALWAYS):
-"${language === 'english' ? 'Remember this clearly. Now solve PYQs, that is the real exam.' : language === 'hindi' ? 'बस भाई, इतना याद रखो। अब PYQ लगाओ, वही असली परीक्षा है।' : language === 'marathi' ? 'बस भाऊ, एवढं लक्षात ठेवा. आता PYQ सोडवा, तीच खरी परीक्षा आहे.' : 'Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.'}"`;
+"${getClosingLine(language)}"`;
 
     const jeeAsksText = Array.isArray(jeeAsks) && jeeAsks.length > 0
       ? `\nWhat ${examLabel} asks from this topic: ${jeeAsks.join(', ')}` : '';
@@ -154,7 +214,17 @@ CLOSING LINE (ALWAYS):
     const mistakesText = Array.isArray(commonMistakes) && commonMistakes.length > 0
       ? commonMistakes.join(', ') : 'Standard student errors for this topic';
 
-    const userPrompt = `Generate Kota-style exam notes for:
+    const langLabel = language === 'english' ? 'Strict English professional style' :
+      language === 'hindi' ? 'Strict Hindi (Devanagari) style' :
+      language === 'kannada' ? 'Strict Kannada style' :
+      language === 'telugu' ? 'Strict Telugu style' :
+      language === 'punjabi' ? 'Strict Punjabi style' :
+      language === 'marathi' ? 'Strict Marathi style' :
+      language === 'tamil' ? 'Strict Tamil style' :
+      language === 'gujarati' ? 'Strict Gujarati style' :
+      'Hinglish coaching style (Jeetu Bhaiya tone)';
+
+    const userPrompt = `Generate INTERACTIVE LEARNING NOTES (not summary notes) for:
 
 Subchapter: ${subchapterName}
 Chapter: ${chapterName}
@@ -168,12 +238,25 @@ Recent PYQ Focus:
 
 Known common mistakes: ${mistakesText}
 
-REMEMBER:
-- ${language === 'english' ? 'Strict English professional style' : language === 'hindi' ? 'Strict Hindi (Devanagari) style' : language === 'kannada' ? 'Strict Kannada style' : language === 'telugu' ? 'Strict Telugu style' : language === 'punjabi' ? 'Strict Punjabi style' : language === 'marathi' ? 'Strict Marathi style' : 'Hinglish coaching style (Jeetu Bhaiya tone)'}
-- No LaTeX, no symbols, plain text formulas
-- Short crisp lines, no paragraphs
+CRITICAL INSTRUCTIONS:
+- TEACH each concept step-by-step. Do NOT summarize.
+- Include reflective questions and micro-pauses for the student.
+- Every formula must have intuition + when-to-use + trap.
+- Include 3 Quick Check questions that test UNDERSTANDING.
+- Include a 30-second revision block with memory triggers.
+- Language: ${langLabel}
+- No LaTeX, plain text Unicode math only.
+- Short crisp teaching lines, no paragraphs.
 ${isNeet ? '- This is NEET UG content. DO NOT write JEE anywhere.' : `- Content level: ${examLabel}. Adjust depth accordingly.`}
-- End with: "${language === 'english' ? 'Remember this clearly. Now solve PYQs, that is the real exam.' : language === 'hindi' ? 'बस भाई, इतना याद रखो। अब PYQ लगाओ, वही असली परीक्षा है।' : language === 'marathi' ? 'बस भाऊ, एवढं लक्षात ठेवा. आता PYQ सोडवा, तीच खरी परीक्षा आहे.' : 'Bas bhai, itna clear rakho. Ab PYQs lagao, wahi real exam hai.'}"`;
+- End with: "${getClosingLine(language)}"
+
+QUALITY CHECK before responding:
+✓ Does it TEACH or just summarize? (Must teach)
+✓ Are there interactive elements? (Must have)
+✓ Are common mistakes with WHY included? (Must have)
+✓ Is there a Quick Check section? (Must have)
+✓ Is there a 30-second revision block? (Must have)
+If any missing → regenerate that section.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
