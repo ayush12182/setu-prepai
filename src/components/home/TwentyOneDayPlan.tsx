@@ -12,8 +12,9 @@ import {
   Flame, CheckCircle2, Zap, Brain, Video, ArrowRight, Quote, RotateCcw, TrendingDown, TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useExamMode } from '@/contexts/ExamModeContext';
+import { useExamMode, ExamMode } from '@/contexts/ExamModeContext';
 import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
+import { getAllCuetChapters, CUET_SUBJECTS } from '@/data/cuetSyllabus';
 import { cn } from '@/lib/utils';
 import { useCycleHistory, WeakChapter } from '@/hooks/useCycleHistory';
 
@@ -57,6 +58,17 @@ const subjectColors: Record<string, string> = {
   Chemistry: 'bg-emerald-500/15 text-emerald-700 border-emerald-200',
   Maths: 'bg-violet-500/15 text-violet-700 border-violet-200',
   Biology: 'bg-green-500/15 text-green-700 border-green-200',
+  // CUET subjects
+  Economics: 'bg-amber-500/15 text-amber-700 border-amber-200',
+  English: 'bg-indigo-500/15 text-indigo-700 border-indigo-200',
+  'General Test': 'bg-purple-500/15 text-purple-700 border-purple-200',
+  Accountancy: 'bg-teal-500/15 text-teal-700 border-teal-200',
+  'Business Studies': 'bg-orange-500/15 text-orange-700 border-orange-200',
+  'Political Science': 'bg-rose-500/15 text-rose-700 border-rose-200',
+  History: 'bg-yellow-500/15 text-yellow-700 border-yellow-200',
+  Geography: 'bg-cyan-500/15 text-cyan-700 border-cyan-200',
+  Psychology: 'bg-pink-500/15 text-pink-700 border-pink-200',
+  Sociology: 'bg-lime-500/15 text-lime-700 border-lime-200',
 };
 
 const subjectDotColors: Record<string, string> = {
@@ -64,38 +76,68 @@ const subjectDotColors: Record<string, string> = {
   Chemistry: 'bg-emerald-500',
   Maths: 'bg-violet-500',
   Biology: 'bg-green-500',
+  Economics: 'bg-amber-500',
+  English: 'bg-indigo-500',
+  'General Test': 'bg-purple-500',
+  Accountancy: 'bg-teal-500',
+  'Business Studies': 'bg-orange-500',
+  'Political Science': 'bg-rose-500',
+  History: 'bg-yellow-500',
+  Geography: 'bg-cyan-500',
+  Psychology: 'bg-pink-500',
+  Sociology: 'bg-lime-500',
 };
 
-// Combine all possible chapters for lookup
-const allChapters: (Chapter & { subjectName: string })[] = [
-  ...physicsChapters.map(c => ({ ...c, subjectName: 'Physics' })),
-  ...chemistryChapters.map(c => ({ ...c, subjectName: 'Chemistry' })),
-  ...mathsChapters.map(c => ({ ...c, subjectName: 'Maths' })),
-  ...neetBiologyChapters.map(c => ({ ...c, subjectName: 'Biology' })),
-  ...neetPhysicsChapters.map(c => ({ ...c, subjectName: 'Physics' })), // NEET Physics
-  ...neetChemistryChapters.map(c => ({ ...c, subjectName: 'Chemistry' })), // NEET Chemistry
-];
+const getCuetSubjectName = (key: string): string => {
+  const found = CUET_SUBJECTS.find(s => s.key === key);
+  return found?.label || key;
+};
+
+// Build chapters for a given exam mode
+const getChaptersForMode = (mode: ExamMode): (Chapter & { subjectName: string })[] => {
+  if (mode === 'cuet') {
+    return getAllCuetChapters().map(c => ({
+      ...c,
+      subjectName: getCuetSubjectName(c.subject as string),
+    }));
+  }
+  const base = [
+    ...physicsChapters.map(c => ({ ...c, subjectName: 'Physics' })),
+    ...chemistryChapters.map(c => ({ ...c, subjectName: 'Chemistry' })),
+  ];
+  if (mode === 'neet') {
+    base.push(
+      ...neetBiologyChapters.map(c => ({ ...c, subjectName: 'Biology' })),
+      ...neetPhysicsChapters.map(c => ({ ...c, subjectName: 'Physics' })),
+      ...neetChemistryChapters.map(c => ({ ...c, subjectName: 'Chemistry' })),
+    );
+  } else {
+    base.push(...mathsChapters.map(c => ({ ...c, subjectName: 'Maths' })));
+  }
+  return base;
+};
 
 const generateSchedule = (
   cycleStart: Date,
   completedSubchapters: Set<string>,
-  mode: 'jee' | 'neet',
+  mode: ExamMode,
   weakChaptersFromPrevCycle: WeakChapter[] = []
 ): DayPlan[] => {
+  const modeChapters = getChaptersForMode(mode);
   const allSubs = getAllSubchapters();
+  const validChapterIds = new Set(modeChapters.map(c => c.id));
+  const modeSubs = allSubs.filter(s => validChapterIds.has(s.chapterId));
   const weightageOrder: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
   
-  // Build a set of weak chapter IDs for priority boosting
   const weakChapterIds = new Set(weakChaptersFromPrevCycle.map(w => w.chapterId));
   
-  const incomplete = allSubs.filter(s => !completedSubchapters.has(s.id));
-  const pool = incomplete.length > 0 ? incomplete : allSubs;
+  const incomplete = modeSubs.filter(s => !completedSubchapters.has(s.id));
+  const pool = incomplete.length > 0 ? incomplete : modeSubs;
 
   const sorted = [...pool].sort((a, b) => {
-    const ca = allChapters.find(c => c.id === a.chapterId);
-    const cb = allChapters.find(c => c.id === b.chapterId);
+    const ca = modeChapters.find(c => c.id === a.chapterId);
+    const cb = modeChapters.find(c => c.id === b.chapterId);
     
-    // Weak chapters from previous cycle get highest priority (rank -1)
     const weakA = weakChapterIds.has(a.chapterId) ? -1 : 0;
     const weakB = weakChapterIds.has(b.chapterId) ? -1 : 0;
     if (weakA !== weakB) return weakA - weakB;
@@ -103,24 +145,33 @@ const generateSchedule = (
     return (weightageOrder[ca?.weightage || 'Low'] || 2) - (weightageOrder[cb?.weightage || 'Low'] || 2);
   });
 
-  const subjects = mode === 'neet' ? ['Biology', 'Chemistry', 'Physics'] : ['Physics', 'Chemistry', 'Maths'];
+  // Determine subjects for rotation
+  let subjects: string[];
+  if (mode === 'cuet') {
+    // Get unique subject names from CUET chapters (rotate through top ones)
+    const uniqueSubjects = [...new Set(modeChapters.map(c => c.subjectName))];
+    subjects = uniqueSubjects.slice(0, 6); // Rotate through up to 6 subjects
+  } else if (mode === 'neet') {
+    subjects = ['Biology', 'Chemistry', 'Physics'];
+  } else {
+    subjects = ['Physics', 'Chemistry', 'Maths'];
+  }
 
-  const bySubject: Record<string, typeof sorted> = {
-    Physics: sorted.filter(s => {
-      const c = allChapters.find(ch => ch.id === s.chapterId);
-      // Filter by subject name AND check if chapter belongs to current mode
-      // This is a simplified check assuming IDs don't overlap or we prioritize based on mode
-      return c?.subjectName === 'Physics';
-    }),
-    Chemistry: sorted.filter(s => allChapters.find(c => c.id === s.chapterId)?.subjectName === 'Chemistry'),
-    Maths: sorted.filter(s => allChapters.find(c => c.id === s.chapterId)?.subjectName === 'Maths'),
-    Biology: sorted.filter(s => allChapters.find(c => c.id === s.chapterId)?.subjectName === 'Biology'),
-  };
+  const bySubject: Record<string, typeof sorted> = {};
+  subjects.forEach(s => {
+    bySubject[s] = sorted.filter(sub => {
+      const c = modeChapters.find(ch => ch.id === sub.chapterId);
+      return c?.subjectName === s;
+    });
+  });
 
-  const counters = { Physics: 0, Chemistry: 0, Maths: 0, Biology: 0 };
+  const counters: Record<string, number> = {};
+  subjects.forEach(s => { counters[s] = 0; });
+  
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const examLabel = mode === 'neet' ? 'NEET' : mode === 'cuet' ? 'CUET' : 'JEE Main';
   const plans: DayPlan[] = [];
 
   for (let day = 1; day <= 21; day++) {
@@ -128,9 +179,9 @@ const generateSchedule = (
       plans.push({
         day, subject: 'All', subjectId: 'all',
         chapter: 'Major Test', chapterId: 'major-test',
-        subchapter: mode === 'neet' ? '3-Hour Full NEET Simulation' : '3-Hour Full JEE Simulation',
+        subchapter: mode === 'cuet' ? '2-Hour Full CUET Simulation' : mode === 'neet' ? '3-Hour Full NEET Simulation' : '3-Hour Full JEE Simulation',
         subchapterId: 'major-test',
-        task: mode === 'neet' ? 'Full-length NEET test — 200 questions, 200 minutes' : 'Full-length JEE Main test — 90 questions, 180 minutes',
+        task: mode === 'cuet' ? `Full-length ${examLabel} test — speed & accuracy focus` : mode === 'neet' ? 'Full-length NEET test — 200 questions, 200 minutes' : 'Full-length JEE Main test — 90 questions, 180 minutes',
         difficulty: 'Hard',
         isToday: isSameDay(cycleStart, day, today),
         isPast: isPastDay(cycleStart, day, today),
@@ -152,30 +203,23 @@ const generateSchedule = (
       continue;
     }
 
-    const subjectIdx = (day - 1) % 3;
+    const subjectIdx = (day - 1) % subjects.length;
     const subjectName = subjects[subjectIdx];
     const subPool = bySubject[subjectName] || [];
 
-    // Safety check if pool is empty
     if (subPool.length === 0) continue;
 
-    const idx = counters[subjectName] % subPool.length;
+    const idx = (counters[subjectName] || 0) % subPool.length;
     const sub = subPool[idx];
-    counters[subjectName]++;
+    counters[subjectName] = (counters[subjectName] || 0) + 1;
 
     if (!sub) continue;
 
-    // Find chapter for this subchapter
-    // We need to look up in the correct set of chapters for the current mode
-    // However, our allChapters array is mixed. 
-    // Since Subchapters link to ChapterIDs, and ChapterIDs should be unique enough or valid,
-    // we just find the chapter in allChapters.
-    const chapter = allChapters.find(c => c.id === sub.chapterId);
-
+    const chapter = modeChapters.find(c => c.id === sub.chapterId);
     if (!chapter) continue;
 
     plans.push({
-      day, subject: subjectName, subjectId: chapter.subject,
+      day, subject: subjectName, subjectId: chapter.subject as string,
       chapter: chapter.name, chapterId: chapter.id,
       subchapter: sub.name, subchapterId: sub.id,
       task: sub.jeetuLine || `Focus on ${sub.name}`,
@@ -206,7 +250,7 @@ export const TwentyOneDayPlan: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { language } = useLanguage();
-  const { isNeet } = useExamMode();
+  const { isNeet, examMode } = useExamMode();
   const queryClient = useQueryClient();
   const [selectedWeek, setSelectedWeek] = useState<number>(0);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -310,8 +354,8 @@ export const TwentyOneDayPlan: React.FC = () => {
   }, [user, currentCycleWindowStart, computedCycleNumber, completeCycleAndAdvance]);
 
   const schedule = useMemo(
-    () => generateSchedule(currentCycleWindowStart, completedIds || new Set(), isNeet ? 'neet' : 'jee', latestWeakChapters),
-    [activeCycle, completedIds, currentCycleWindowStart, isNeet, latestWeakChapters]
+    () => generateSchedule(currentCycleWindowStart, completedIds || new Set(), examMode, latestWeakChapters),
+    [activeCycle, completedIds, currentCycleWindowStart, examMode, latestWeakChapters]
   );
 
   const weekStart = selectedWeek * 7;
