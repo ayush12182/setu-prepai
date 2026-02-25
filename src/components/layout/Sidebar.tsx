@@ -30,14 +30,14 @@ const navItems = [
   { path: '/test', icon: ClipboardCheck, label: 'Test', emoji: '📝' },
   { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄' },
   { path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬' },
-  { path: '/ask-jeetu', icon: MessageCircle, label: { jee: 'Ask Jeetu Bhaiya', neet: 'Ask NEET Mentor' }, emoji: '💬' },
+  { path: '/ask-jeetu', icon: MessageCircle, label: { jee: 'Ask Jeetu Bhaiya', neet: 'Ask NEET Mentor', cuet: 'Ask CUET Mentor' }, emoji: '💬' },
   { path: '/circles', icon: Users, label: 'SETU Commune', emoji: '👥', badge: 'New' },
   { path: '/analytics', icon: BarChart3, label: 'Analytics', emoji: '📊' },
   { path: '/profile', icon: User, label: 'My Profile', emoji: '👤' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { config, isNeet } = useExamMode();
+  const { config, isNeet, isCuet, examMode } = useExamMode();
 
   return (
     <>
@@ -55,7 +55,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
         style={{
-          background: isNeet
+          background: isCuet
+            ? 'linear-gradient(180deg, hsl(260 30% 16%) 0%, hsl(260 35% 12%) 50%, hsl(260 40% 8%) 100%)'
+            : isNeet
             ? 'linear-gradient(180deg, hsl(145 30% 14%) 0%, hsl(145 35% 10%) 50%, hsl(145 40% 8%) 100%)'
             : 'linear-gradient(180deg, hsl(213 40% 16%) 0%, hsl(213 45% 12%) 50%, hsl(213 50% 10%) 100%)',
         }}
@@ -67,7 +69,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <div className="flex items-center gap-3">
                 <div className={cn(
                   "w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
-                  isNeet
+                  isCuet
+                    ? "from-[hsl(260_50%_55%)] to-[hsl(260_60%_40%)] shadow-[hsl(260_50%_55%)/0.3]"
+                    : isNeet
                     ? "from-[hsl(145_50%_45%)] to-[hsl(145_60%_35%)] shadow-[hsl(145_50%_45%)/0.3]"
                     : "from-[hsl(36_80%_55%)] to-[hsl(36_90%_45%)] shadow-[hsl(36_80%_55%)/0.3]"
                 )}>
@@ -95,7 +99,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="mx-5 mb-2">
             <div className={cn(
               "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold",
-              isNeet ? "bg-[hsl(145_50%_38%/0.2)] text-[hsl(145_70%_70%)]" : "bg-[hsl(32_79%_57%/0.2)] text-[hsl(32_100%_80%)]"
+              isCuet ? "bg-[hsl(260_50%_55%/0.2)] text-[hsl(260_80%_80%)]"
+                : isNeet ? "bg-[hsl(145_50%_38%/0.2)] text-[hsl(145_70%_70%)]" : "bg-[hsl(32_79%_57%/0.2)] text-[hsl(32_100%_80%)]"
             )}>
               <span>{config.emoji}</span>
               <span>{config.fullLabel}</span>
@@ -108,7 +113,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto mt-2">
             {navItems.map((item) => {
               const label = typeof item.label === 'object'
-                ? (isNeet ? item.label.neet : item.label.jee)
+                ? (item.label as Record<string, string>)[examMode] || item.label.jee
                 : item.label;
 
               return (
@@ -123,7 +128,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       isActive
                         ? cn(
                           'text-white font-semibold shadow-lg',
-                          isNeet
+                          isCuet
+                            ? 'bg-gradient-to-r from-[hsl(260_50%_55%)] to-[hsl(260_60%_45%)] shadow-[hsl(260_50%_55%)/0.25]'
+                            : isNeet
                             ? 'bg-gradient-to-r from-[hsl(145_50%_38%)] to-[hsl(145_60%_32%)] shadow-[hsl(145_50%_38%)/0.25]'
                             : 'bg-gradient-to-r from-[hsl(36_80%_55%)] to-[hsl(36_90%_48%)] shadow-[hsl(36_80%_55%)/0.25]'
                         )
@@ -159,18 +166,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="p-4">
             <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.03] rounded-2xl p-4 border border-white/[0.08]">
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles className={cn("w-3.5 h-3.5", isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")} />
+                <Sparkles className={cn("w-3.5 h-3.5", isCuet ? "text-[hsl(260_50%_55%)]" : isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")} />
                 <p className="text-white/50 text-[11px] font-semibold tracking-wider uppercase">Your Mentor</p>
               </div>
               <div className="flex items-center gap-3">
                 <div className={cn(
                   "w-10 h-10 rounded-full bg-gradient-to-br flex items-center justify-center border",
-                  isNeet
+                  isCuet
+                    ? "from-[hsl(260_50%_55%/0.3)] to-[hsl(260_60%_40%/0.1)] border-[hsl(260_50%_55%/0.3)]"
+                    : isNeet
                     ? "from-[hsl(145_50%_38%/0.3)] to-[hsl(145_60%_35%/0.1)] border-[hsl(145_50%_38%/0.3)]"
                     : "from-[hsl(36_80%_55%/0.3)] to-[hsl(36_90%_45%/0.1)] border-[hsl(36_80%_55%/0.3)]"
                 )}>
-                  <span className={cn("font-bold text-sm", isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")}>
-                    {isNeet ? 'NM' : 'JB'}
+                  <span className={cn("font-bold text-sm", isCuet ? "text-[hsl(260_50%_55%)]" : isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")}>
+                    {isCuet ? 'CM' : isNeet ? 'NM' : 'JB'}
                   </span>
                 </div>
                 <div>

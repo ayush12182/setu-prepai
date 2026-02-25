@@ -1,6 +1,7 @@
 import React from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { TodaysFocus } from "@/components/home/TodaysFocus";
+import { ExamMode } from "@/contexts/ExamModeContext";
 import { SmartSuggestion } from "@/components/home/SmartSuggestion";
 import { QuickActions } from "@/components/home/QuickActions";
 import { SyllabusTracker } from "@/components/home/SyllabusTracker";
@@ -18,15 +19,18 @@ import { toast } from "sonner";
 const Index: React.FC = () => {
   const { getMentorName, language } = useLanguage();
   const { user, profile, updateProfile } = useAuth();
-  const { config, isNeet, examMode, setExamMode } = useExamMode();
+  const { config, isNeet, isCuet, examMode, setExamMode } = useExamMode();
+
+  const EXAM_CYCLE: ExamMode[] = ['jee', 'neet', 'cuet'];
 
   const handleExamModeSwitch = async () => {
-    const newMode = isNeet ? 'jee' : 'neet';
-    const newExamLabel = isNeet ? 'JEE Main' : 'NEET';
-    setExamMode(newMode);
+    const currentIdx = EXAM_CYCLE.indexOf(examMode);
+    const nextMode = EXAM_CYCLE[(currentIdx + 1) % EXAM_CYCLE.length];
+    const examLabelMap: Record<ExamMode, string> = { jee: 'JEE Main', neet: 'NEET', cuet: 'CUET' };
+    setExamMode(nextMode);
     try {
-      await updateProfile({ target_exam: newExamLabel });
-      toast.success(isNeet ? 'Switched to JEE Mode ⚡' : 'Switched to NEET Mode 🧬');
+      await updateProfile({ target_exam: examLabelMap[nextMode] });
+      toast.success(`Switched to ${nextMode.toUpperCase()} Mode ${nextMode === 'jee' ? '⚡' : nextMode === 'neet' ? '🧬' : '🎯'}`);
     } catch {
       toast.error('Could not update profile');
     }
@@ -39,25 +43,26 @@ const Index: React.FC = () => {
 
   const getGreeting = () => {
     const mentorName = getMentorName();
+    const mentorLabel = isCuet ? 'CUET Mentor' : isNeet ? 'NEET Mentor' : mentorName;
     switch (language) {
       case 'english':
-        return isNeet ? "Your NEET Mentor is ready to help you." : `${mentorName} is ready to help you.`;
+        return `${mentorLabel} is ready to help you.`;
       case 'hindi':
-        return isNeet ? "आपका NEET मेंटर तैयार है आपकी मदद के लिए।" : `${mentorName} तैयार है आपकी मदद के लिए।`;
+        return `${mentorLabel} तैयार है आपकी मदद के लिए।`;
       case 'kannada':
-        return isNeet ? "ನಿಮ್ಮ NEET ಮೆಂಟರ್ ಸಹಾಯಕ್ಕೆ ಸಿದ್ಧ." : `${mentorName} ಸಹಾಯಕ್ಕೆ ಸಿದ್ಧ.`;
+        return `${mentorLabel} ಸಹಾಯಕ್ಕೆ ಸಿದ್ಧ.`;
       case 'telugu':
-        return isNeet ? "మీ NEET మెంటార్ సహాయానికి సిద్ధంగా ఉన్నారు." : `${mentorName} సహాయానికి సిద్ధంగా ఉన్నారు.`;
+        return `${mentorLabel} సహాయానికి సిద్ధంగా ఉన్నారు.`;
       case 'punjabi':
-        return isNeet ? "ਤੁਹਾਡਾ NEET ਮੈਂਟਰ ਮਦਦ ਲਈ ਤਿਆਰ ਹੈ।" : `${mentorName} ਮਦਦ ਲਈ ਤਿਆਰ ਹੈ।`;
+        return `${mentorLabel} ਮਦਦ ਲਈ ਤਿਆਰ ਹੈ।`;
       case 'marathi':
-        return isNeet ? "तुमचा NEET मेंटर मदतीसाठी तयार आहे." : `${mentorName} मदतीसाठी तयार आहे.`;
+        return `${mentorLabel} मदतीसाठी तयार आहे.`;
       case 'tamil':
-        return isNeet ? "உங்கள் NEET வழிகாட்டி உதவ தயாராக உள்ளார்." : `${mentorName} உதவ தயாராக உள்ளார்.`;
+        return `${mentorLabel} உதவ தயாராக உள்ளார்.`;
       case 'gujarati':
-        return isNeet ? "તમારો NEET મેન્ટર મદદ માટે તૈયાર છે." : `${mentorName} મદદ માટે તૈયાર છે.`;
+        return `${mentorLabel} મદદ માટે તૈયાર છે.`;
       default:
-        return isNeet ? "Your NEET Mentor ready hai tumhari help ke liye" : `${mentorName} ready hai tumhari help ke liye`;
+        return `${mentorLabel} is ready to help you.`;
     }
   };
 
@@ -89,13 +94,13 @@ const Index: React.FC = () => {
                     {config.emoji} {config.label} Mode
                   </span>
                   {/* Exam mode switch button */}
-                  <button
+                    <button
                     onClick={handleExamModeSwitch}
                     className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white text-xs font-medium transition-all cursor-pointer border border-white/10 hover:border-white/20"
-                    title={isNeet ? 'Switch to JEE' : 'Switch to NEET'}
+                    title={`Switch to next exam mode`}
                   >
                     <ArrowRightLeft className="w-3 h-3" />
-                    Switch to {isNeet ? 'JEE' : 'NEET'}
+                    Switch Exam
                   </button>
                   {/* JEE Sub-mode selector — only visible in JEE mode */}
                   <div className="bg-white/10 rounded-xl p-0.5">

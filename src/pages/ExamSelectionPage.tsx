@@ -18,7 +18,9 @@ const examOptions = [
     activeBorder: 'border-[hsl(32_79%_57%)]',
     accentBg: 'bg-[hsl(32_79%_57%/0.15)]',
     accentText: 'text-[hsl(32_79%_57%)]',
+    ring: 'ring-[hsl(32_79%_57%/0.5)]',
     subjects: ['Physics', 'Chemistry', 'Mathematics'],
+    target: 'Deep problem-solving & advanced concepts',
   },
   {
     mode: 'neet' as ExamMode,
@@ -31,7 +33,24 @@ const examOptions = [
     activeBorder: 'border-[hsl(145_50%_38%)]',
     accentBg: 'bg-[hsl(145_50%_38%/0.15)]',
     accentText: 'text-[hsl(145_50%_38%)]',
+    ring: 'ring-[hsl(145_50%_38%/0.5)]',
     subjects: ['Biology', 'Chemistry', 'Physics'],
+    target: 'NCERT mastery & conceptual clarity',
+  },
+  {
+    mode: 'cuet' as ExamMode,
+    title: 'CUET',
+    subtitle: 'UG Entrance',
+    description: 'University entrance — Domain, Language & General Test',
+    emoji: '🎯',
+    gradient: 'from-[hsl(260_30%_16%)] to-[hsl(260_40%_10%)]',
+    border: 'border-[hsl(260_50%_55%/0.4)]',
+    activeBorder: 'border-[hsl(260_50%_55%)]',
+    accentBg: 'bg-[hsl(260_50%_55%/0.15)]',
+    accentText: 'text-[hsl(260_50%_55%)]',
+    ring: 'ring-[hsl(260_50%_55%/0.5)]',
+    subjects: ['English', 'General Test', 'Domain Subjects'],
+    target: 'Speed, accuracy & NCERT recall',
   },
 ];
 
@@ -50,7 +69,7 @@ const ExamSelectionPage: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-2xl"
+        className="w-full max-w-3xl"
       >
         {/* Logo */}
         <div className="text-center mb-8">
@@ -69,7 +88,7 @@ const ExamSelectionPage: React.FC = () => {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {examOptions.map((opt) => (
             <motion.button
               key={opt.mode}
@@ -77,11 +96,11 @@ const ExamSelectionPage: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelected(opt.mode)}
               className={cn(
-                "relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 border-2",
+                "relative overflow-hidden rounded-2xl p-5 text-left transition-all duration-300 border-2",
                 "bg-gradient-to-br",
                 opt.gradient,
                 selected === opt.mode
-                  ? cn(opt.activeBorder, "shadow-xl ring-2 ring-offset-2 ring-offset-background", opt.mode === 'jee' ? 'ring-[hsl(32_79%_57%/0.5)]' : 'ring-[hsl(145_50%_38%/0.5)]')
+                  ? cn(opt.activeBorder, "shadow-xl ring-2 ring-offset-2 ring-offset-background", opt.ring)
                   : cn(opt.border, "opacity-70 hover:opacity-100")
               )}
             >
@@ -93,14 +112,15 @@ const ExamSelectionPage: React.FC = () => {
                 </div>
               )}
 
-              <span className="text-4xl mb-3 block">{opt.emoji}</span>
-              <h3 className="text-2xl font-bold text-white mb-0.5">{opt.title}</h3>
-              <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-3">{opt.subtitle}</p>
-              <p className="text-white/70 text-sm mb-4">{opt.description}</p>
+              <span className="text-3xl mb-2 block">{opt.emoji}</span>
+              <h3 className="text-xl font-bold text-white mb-0.5">{opt.title}</h3>
+              <p className="text-white/50 text-[10px] font-medium uppercase tracking-wider mb-2">{opt.subtitle}</p>
+              <p className="text-white/70 text-xs mb-3">{opt.description}</p>
+              <p className="text-white/40 text-[10px] italic mb-3">{opt.target}</p>
 
               <div className="flex flex-wrap gap-1.5">
                 {opt.subjects.map((s) => (
-                  <span key={s} className={cn("px-2.5 py-1 rounded-full text-xs font-medium", opt.accentBg, opt.accentText)}>
+                  <span key={s} className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium", opt.accentBg, opt.accentText)}>
                     {s}
                   </span>
                 ))}

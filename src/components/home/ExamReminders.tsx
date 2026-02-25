@@ -7,20 +7,24 @@ import { useExamMode } from '@/contexts/ExamModeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
-// JEE & NEET Schedules
-const EXAM_SCHEDULE = {
+// JEE, NEET & CUET Schedules
+const EXAM_SCHEDULE: Record<string, { name: string; date: Date; endDate: Date }[]> = {
   jee: [
     { name: 'JEE Mains 2026 Session 1', date: new Date('2026-01-22'), endDate: new Date('2026-01-30') },
     { name: 'JEE Mains 2026 Session 2', date: new Date('2026-04-01'), endDate: new Date('2026-04-15') },
     { name: 'JEE Advanced 2026', date: new Date('2026-05-18'), endDate: new Date('2026-05-18') },
   ],
   neet: [
-    { name: 'NEET UG 2026', date: new Date('2026-05-03'), endDate: new Date('2026-05-03') }, // First Sunday of May
+    { name: 'NEET UG 2026', date: new Date('2026-05-03'), endDate: new Date('2026-05-03') },
     { name: 'NEET UG 2027', date: new Date('2027-05-02'), endDate: new Date('2027-05-02') },
-  ]
+  ],
+  cuet: [
+    { name: 'CUET UG 2026', date: new Date('2026-05-15'), endDate: new Date('2026-06-05') },
+    { name: 'CUET UG 2027', date: new Date('2027-05-15'), endDate: new Date('2027-06-05') },
+  ],
 };
 
-const getNextExam = (mode: 'jee' | 'neet') => {
+const getNextExam = (mode: string) => {
   const now = new Date();
   const sessions = EXAM_SCHEDULE[mode];
   for (const exam of sessions) {
@@ -37,7 +41,7 @@ const getDaysRemaining = (targetDate: Date): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-const getMotivationalMessage = (daysLeft: number, examType: 'jee' | 'neet' | 'major'): string => {
+const getMotivationalMessage = (daysLeft: number, examType: string): string => {
   if (examType === 'major') {
     if (daysLeft <= 3) return "Major Test close! Revise high-weightage topics. 🎯";
     return "Major Test preparation on track? Keep pushing!";
@@ -51,9 +55,9 @@ const getMotivationalMessage = (daysLeft: number, examType: 'jee' | 'neet' | 'ma
 
 export const ExamReminders: React.FC = () => {
   const navigate = useNavigate();
-  const { isNeet } = useExamMode();
+  const { isNeet, isCuet, examMode } = useExamMode();
   const { user } = useAuth();
-  const examModeKey = isNeet ? 'neet' : 'jee';
+  const examModeKey = examMode;
 
   // Compute major test date from user's account creation + 21 days
   // (cycles forward: cycle_start_date metadata overrides created_at)
@@ -93,19 +97,24 @@ export const ExamReminders: React.FC = () => {
     });
   };
 
-  const themeColor = isNeet ? 'emerald' : 'amber';
-  const ThemeIcon = isNeet ? Calendar : Trophy;
+  const themeColor = isCuet ? 'violet' : isNeet ? 'emerald' : 'amber';
+  const ThemeIcon = isCuet ? Clock : isNeet ? Calendar : Trophy;
+  const themeClasses = isCuet
+    ? { bg5: 'bg-violet-500/5', border20: 'border-violet-500/20', bg10: 'bg-violet-500/10', bg20: 'bg-violet-500/20', text: 'text-violet-500', textDark: 'text-violet-700 dark:text-violet-300', textBold: 'text-violet-600 dark:text-violet-400', borderBtn: 'border-violet-500/30 hover:bg-violet-500 text-violet-700 dark:text-violet-300', blob: 'bg-violet-500' }
+    : isNeet
+    ? { bg5: 'bg-emerald-500/5', border20: 'border-emerald-500/20', bg10: 'bg-emerald-500/10', bg20: 'bg-emerald-500/20', text: 'text-emerald-500', textDark: 'text-emerald-700 dark:text-emerald-300', textBold: 'text-emerald-600 dark:text-emerald-400', borderBtn: 'border-emerald-500/30 hover:bg-emerald-500 text-emerald-700 dark:text-emerald-300', blob: 'bg-emerald-500' }
+    : { bg5: 'bg-amber-500/5', border20: 'border-amber-500/20', bg10: 'bg-amber-500/10', bg20: 'bg-amber-500/20', text: 'text-amber-500', textDark: 'text-amber-700 dark:text-amber-300', textBold: 'text-amber-600 dark:text-amber-400', borderBtn: 'border-amber-500/30 hover:bg-amber-500 text-amber-700 dark:text-amber-300', blob: 'bg-amber-500' };
 
   return (
     <div className="grid grid-cols-1 gap-4 h-full">
       {/* Exam Reminder Card */}
       <Card className={cn(
         "overflow-hidden relative border-opacity-20",
-        isNeet ? "bg-emerald-500/5 border-emerald-500/20" : "bg-amber-500/5 border-amber-500/20"
+        isNeet ? "bg-emerald-500/5 border-emerald-500/20" : isCuet ? "bg-violet-500/5 border-violet-500/20" : "bg-amber-500/5 border-amber-500/20"
       )}>
         <div className={cn(
           "absolute top-0 right-0 w-32 h-32 rounded-full -translate-y-1/2 translate-x-1/2 opacity-10",
-          isNeet ? "bg-emerald-500" : "bg-amber-500"
+          isNeet ? "bg-emerald-500" : isCuet ? "bg-violet-500" : "bg-amber-500"
         )} />
 
         <CardContent className="p-5 relative z-10">
@@ -113,9 +122,9 @@ export const ExamReminders: React.FC = () => {
             <div className="flex items-center gap-2">
               <div className={cn(
                 "p-2 rounded-lg bg-opacity-20",
-                isNeet ? "bg-emerald-500/20" : "bg-amber-500/20"
+                isNeet ? "bg-emerald-500/20" : isCuet ? "bg-violet-500/20" : "bg-amber-500/20"
               )}>
-                <ThemeIcon className={cn("w-5 h-5", isNeet ? "text-emerald-500" : "text-amber-500")} />
+                <ThemeIcon className={cn("w-5 h-5", themeClasses.text)} />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground font-medium">UPCOMING EXAM</p>
@@ -123,9 +132,7 @@ export const ExamReminders: React.FC = () => {
               </div>
             </div>
             <div className="text-right">
-              <div className={cn("flex items-center gap-1 text-2xl font-bold",
-                isNeet ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"
-              )}>
+              <div className={cn("flex items-center gap-1 text-2xl font-bold", themeClasses.textBold)}>
                 <Flame className="w-4 h-4" />
                 <span>{daysLeft}</span>
               </div>
@@ -138,12 +145,8 @@ export const ExamReminders: React.FC = () => {
             <span>{formatDate(nextExam.date)}{nextExam.date.getTime() !== nextExam.endDate.getTime() ? ` - ${formatDate(nextExam.endDate)}` : ''}</span>
           </div>
 
-          <div className={cn("rounded-lg p-3 mb-3",
-            isNeet ? "bg-emerald-500/10" : "bg-amber-500/10"
-          )}>
-            <p className={cn("text-sm font-medium leading-relaxed",
-              isNeet ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"
-            )}>
+          <div className={cn("rounded-lg p-3 mb-3", themeClasses.bg10)}>
+            <p className={cn("text-sm font-medium leading-relaxed", themeClasses.textDark)}>
               💡 {examMessage}
             </p>
           </div>
@@ -151,9 +154,7 @@ export const ExamReminders: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            className={cn("w-full hover:bg-opacity-10",
-              isNeet ? "border-emerald-500/30 hover:bg-emerald-500 text-emerald-700 dark:text-emerald-300" : "border-amber-500/30 hover:bg-amber-500 text-amber-700 dark:text-amber-300"
-            )}
+            className={cn("w-full hover:bg-opacity-10", themeClasses.borderBtn)}
             onClick={() => navigate('/learn')}
           >
             Start Preparing
