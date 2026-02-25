@@ -82,9 +82,34 @@ const RevisionPage: React.FC = () => {
     }
   ];
 
-  const { isNeet } = useExamMode(); // Get exam mode
+  const { isNeet, isCuet } = useExamMode();
 
-  const lastDayChecklist = isNeet ? [
+  const lastDayChecklist = isCuet ? [
+    {
+      subject: 'english', label: 'English', icon: '📝', items: [
+        { name: 'Reading Comprehension', slug: 'reading-comprehension' },
+        { name: 'Vocabulary', slug: 'vocabulary' },
+        { name: 'Grammar Rules', slug: 'grammar-rules' },
+        { name: 'Idioms & Phrases', slug: 'idioms' },
+      ]
+    },
+    {
+      subject: 'general_test', label: 'General Test', icon: '🎯', items: [
+        { name: 'Logical Reasoning', slug: 'logical-reasoning' },
+        { name: 'Current Affairs', slug: 'current-affairs' },
+        { name: 'Quantitative Aptitude', slug: 'quantitative-aptitude' },
+        { name: 'GK Facts', slug: 'gk-facts' },
+      ]
+    },
+    {
+      subject: 'economics', label: 'Domain Subjects', icon: '📚', items: [
+        { name: 'NCERT Definitions', slug: 'ncert-definitions' },
+        { name: 'Key Diagrams', slug: 'key-diagrams' },
+        { name: 'Comparison Tables', slug: 'comparison-tables' },
+        { name: 'Important Dates & Events', slug: 'important-dates' },
+      ]
+    },
+  ] : isNeet ? [
     {
       subject: 'biology', label: 'Biology', icon: '🧬', items: [
         { name: 'Diagrams', slug: 'diagrams' },
