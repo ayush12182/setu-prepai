@@ -4,10 +4,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { physicsChapters, chemistryChapters, mathsChapters, biologyChapters, Chapter } from '@/data/syllabus';
 import { getAllSubchapters, Subchapter } from '@/data/subchapters';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { getAllCuetChapters, CUET_SUBJECTS } from '@/data/cuetSyllabus';
 
 export interface TodaysFocusData {
   subject: string;
-  subjectId: 'physics' | 'chemistry' | 'maths' | 'biology';
+  subjectId: string;
   chapter: string;
   chapterId: string;
   subchapter: string;
@@ -25,7 +26,13 @@ export interface TodaysFocusData {
 }
 
 // Map chapter weightage + subject to rich labels
-const getWeightageLabel = (weightage: string, subject: string, isNeet: boolean): string => {
+const getWeightageLabel = (weightage: string, subject: string, isNeet: boolean, isCuet: boolean): string => {
+  if (isCuet) {
+    const exam = 'CUET';
+    if (weightage === 'High') return `High — Frequently asked in ${exam}`;
+    if (weightage === 'Medium') return `Medium — Moderate in ${exam}`;
+    return `Low — Occasional in ${exam}`;
+  }
   const exam = isNeet ? 'NEET' : 'JEE Main';
   if (weightage === 'High') return `High — 3–4 Qs in ${exam}`;
   if (weightage === 'Medium') return `Medium — 1–2 Qs in ${exam}`;
@@ -89,7 +96,13 @@ const CLASS_11_CHAPTER_IDS = new Set([
   'neet-bio-14', // Chemical Coordination
 ]);
 
-const getBoardImportance = (subject: string, chapterId: string): string => {
+const getBoardImportance = (subject: string, chapterId: string, isCuet: boolean = false): string => {
+  if (isCuet) {
+    // CUET chapters are NCERT-based, show relevance differently
+    if (chapterId.startsWith('cuet-gt')) return 'General Test — scored separately in CUET';
+    if (chapterId.startsWith('cuet-eng') || chapterId.startsWith('cuet-hin')) return 'Language section — mandatory in CUET';
+    return 'Domain subject — NCERT Class 12 based';
+  }
   // Class 11 topics don't appear in CBSE Class 12 board exams
   if (CLASS_11_CHAPTER_IDS.has(chapterId)) {
     return 'School / Internal Exam only (Class 11)';
@@ -103,8 +116,20 @@ const getBoardImportance = (subject: string, chapterId: string): string => {
   return map[subject] || '10+ marks in CBSE Class 12 boards';
 };
 
+// Map CUET subject keys to display names
+const getCuetSubjectName = (subjectKey: string): string => {
+  const found = CUET_SUBJECTS.find(s => s.key === subjectKey);
+  return found?.label || subjectKey;
+};
+
 // Get all chapters with their subject based on Exam Mode
-const getAllChapters = (isNeet: boolean): (Chapter & { subjectName: string })[] => {
+const getAllChaptersForExam = (isNeet: boolean, isCuet: boolean): (Chapter & { subjectName: string })[] => {
+  if (isCuet) {
+    return getAllCuetChapters().map(c => ({
+      ...c,
+      subjectName: getCuetSubjectName(c.subject as string),
+    }));
+  }
   const baseChapters = [
     ...physicsChapters.map(c => ({ ...c, subjectName: 'Physics' })),
     ...chemistryChapters.map(c => ({ ...c, subjectName: 'Chemistry' })),
@@ -174,7 +199,7 @@ const calculateStreak = async (userId: string): Promise<number> => {
 
 export const useTodaysFocus = () => {
   const { user } = useAuth();
-  const { isNeet } = useExamMode();
+  const { isNeet, isCuet } = useExamMode();
   const [dailyFocus, setDailyFocus] = useState<TodaysFocusData | null>(null);
   const [smartFocus, setSmartFocus] = useState<TodaysFocusData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -183,7 +208,7 @@ export const useTodaysFocus = () => {
   useEffect(() => {
     const determineFocus = async () => {
       try {
-        const allChapters = getAllChapters(isNeet);
+        const allChapters = getAllChaptersForExam(isNeet, isCuet);
         const validChapterIds = new Set(allChapters.map(c => c.id));
         const allSubchapters = getAllSubchapters().filter(s => validChapterIds.has(s.chapterId));
 
@@ -247,9 +272,9 @@ export const useTodaysFocus = () => {
               suggestedTime: '15 min',
               streak: currentStreak,
               reason: 'weakness',
-              weightage: getWeightageLabel(chapter.weightage, chapter.subjectName, isNeet),
+              weightage: getWeightageLabel(chapter.weightage, chapter.subjectName, isNeet, isCuet),
               whyStudyToday: getWhyStudyToday(chapter.weightage, chapter.subjectName, sub.pyqFocus?.trends || []),
-              boardImportance: getBoardImportance(chapter.subjectName, chapter.id),
+              boardImportance: getBoardImportance(chapter.subjectName, chapter.id, isCuet),
               cycleDay,
             });
           }
@@ -288,12 +313,12 @@ export const useTodaysFocus = () => {
             subchapterId: todaysSubchapter.id,
             task: `Focus on ${jeeAsk}`,
             taskHinglish: todaysSubchapter.jeetuLine || `Aaj ${todaysSubchapter.name} pe focus karo!`,
-            suggestedTime: todaysChapter.difficulty === 'Hard' ? '3h' : todaysChapter.difficulty === 'Medium' ? '2h 30m' : '2h',
+            suggestedTime: isCuet ? '1h 30m' : todaysChapter.difficulty === 'Hard' ? '3h' : todaysChapter.difficulty === 'Medium' ? '2h 30m' : '2h',
             streak: currentStreak,
             reason: 'schedule',
-            weightage: getWeightageLabel(todaysChapter.weightage, todaysChapter.subjectName, isNeet),
+            weightage: getWeightageLabel(todaysChapter.weightage, todaysChapter.subjectName, isNeet, isCuet),
             whyStudyToday: getWhyStudyToday(todaysChapter.weightage, todaysChapter.subjectName, trends),
-            boardImportance: getBoardImportance(todaysChapter.subjectName, todaysChapter.id),
+            boardImportance: getBoardImportance(todaysChapter.subjectName, todaysChapter.id, isCuet),
             cycleDay,
           });
         }
@@ -306,7 +331,7 @@ export const useTodaysFocus = () => {
     };
 
     determineFocus();
-  }, [user, isNeet]);
+  }, [user, isNeet, isCuet]);
 
   return { dailyFocus, smartFocus, isLoading, streak };
 };
