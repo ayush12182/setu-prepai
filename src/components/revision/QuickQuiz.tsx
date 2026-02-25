@@ -1,176 +1,105 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
+import { ChevronLeft, CheckCircle, XCircle, RotateCcw, Loader2, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 
 interface QuickQuizProps {
   onBack: () => void;
 }
 
-const baseQuestions = [
-  {
-    question: 'At the highest point of projectile motion, what is the velocity?',
-    options: ['Zero', 'Maximum', 'u cosθ', 'u sinθ'],
-    correct: 2, subject: 'physics',
-    explanation: 'At highest point, vertical component = 0, only horizontal u cosθ remains'
-  },
-  {
-    question: 'Which gas has the highest value of Cp/Cv?',
-    options: ['Monoatomic', 'Diatomic', 'Triatomic', 'All equal'],
-    correct: 0, subject: 'physics',
-    explanation: 'Monoatomic: γ = 5/3, Diatomic: γ = 7/5, Triatomic: γ = 4/3'
-  },
-  {
-    question: 'The hybridization of carbon in benzene is:',
-    options: ['sp', 'sp²', 'sp³', 'sp³d'],
-    correct: 1, subject: 'chemistry',
-    explanation: 'Each C in benzene has 3 sigma bonds + 1 pi bond = sp² hybridization'
-  },
-  {
-    question: 'Which has highest ionization energy?',
-    options: ['Na', 'Mg', 'Al', 'Si'],
-    correct: 1, subject: 'chemistry',
-    explanation: 'Mg has stable 3s² configuration, removing electron needs more energy'
-  },
-  {
-    question: 'What is the SI unit of magnetic flux?',
-    options: ['Tesla', 'Weber', 'Henry', 'Gauss'],
-    correct: 1, subject: 'physics',
-    explanation: 'Magnetic flux φ = B × A, unit is Weber (Wb) = T·m²'
-  },
-  {
-    question: 'Which is the strongest nucleophile in polar aprotic solvent?',
-    options: ['F⁻', 'Cl⁻', 'Br⁻', 'I⁻'],
-    correct: 0, subject: 'chemistry',
-    explanation: 'In polar aprotic solvents, nucleophilicity follows basicity: F⁻ is strongest'
-  },
-  {
-    question: 'In photoelectric effect, if frequency is doubled:',
-    options: ['KE doubles', 'KE more than doubles', 'Current doubles', 'No emission'],
-    correct: 1, subject: 'physics',
-    explanation: 'KE = hν - φ. If ν doubles, KE increases by more than 2x since φ is subtracted'
-  }
+interface QuizQuestion {
+  question: string;
+  options: string[];
+  correct: number;
+  subject?: string;
+  explanation: string;
+}
+
+// Static fallbacks
+const cuetFallbackQuestions: QuizQuestion[] = [
+  { question: 'GDP at Market Price = GDP at Factor Cost + ?', options: ['Subsidies', 'Net Indirect Taxes', 'Depreciation', 'NFIA'], correct: 1, subject: 'economics', explanation: 'GDP(MP) = GDP(FC) + Net Indirect Taxes' },
+  { question: 'Who gave the 14 Principles of Management?', options: ['Taylor', 'Henri Fayol', 'Drucker', 'Mayo'], correct: 1, subject: 'business_studies', explanation: 'Henri Fayol is the father of General Management' },
+  { question: 'Goodwill is a:', options: ['Tangible asset', 'Intangible asset', 'Fictitious asset', 'Current asset'], correct: 1, subject: 'accountancy', explanation: 'Goodwill is intangible — reputation/brand value' },
+  { question: 'The antonym of "Benevolent" is:', options: ['Kind', 'Generous', 'Malevolent', 'Charitable'], correct: 2, subject: 'english', explanation: 'Benevolent = kind. Malevolent = evil intent' },
+  { question: 'Article 14 deals with:', options: ['Freedom of speech', 'Right to Equality', 'Right to Education', 'Right to Privacy'], correct: 1, subject: 'general_test', explanation: 'Article 14: Equality before law' },
+  { question: 'LPG reforms year:', options: ['1985', '1991', '1995', '2000'], correct: 1, subject: 'economics', explanation: '1991 under PM Narasimha Rao' },
+  { question: 'Which is NOT a function of management?', options: ['Planning', 'Cooperating', 'Controlling', 'Organizing'], correct: 1, subject: 'business_studies', explanation: 'Cooperating is not a management function' },
+  { question: 'Monopoly means:', options: ['Many sellers', 'One seller', 'Two sellers', 'No sellers'], correct: 1, subject: 'economics', explanation: 'Monopoly = single seller, no close substitutes' },
+  { question: 'Select correctly spelled:', options: ['Accomodate', 'Accommodate', 'Acommodate', 'Acomodate'], correct: 1, subject: 'english', explanation: 'Double C, double M' },
+  { question: 'Current Ratio = ?', options: ['Fixed Assets / CL', 'CA / CL', 'CA / Fixed Assets', 'Sales / CA'], correct: 1, subject: 'accountancy', explanation: 'Current Assets / Current Liabilities. Ideal = 2:1' },
 ];
 
-const jeeQuestions = [
-  {
-    question: 'd/dx (tan x) = ?',
-    options: ['sec x', 'sec² x', 'cot x', 'cosec² x'],
-    correct: 1, subject: 'maths',
-    explanation: 'd/dx (sin x/cos x) = (cos²x + sin²x)/cos²x = sec²x'
-  },
-  {
-    question: '∫(1/x) dx = ?',
-    options: ['x', 'ln x', 'ln|x| + C', '1/x²'],
-    correct: 2, subject: 'maths',
-    explanation: 'Absolute value needed for negative x, and constant of integration'
-  },
-  {
-    question: 'lim(x→0) sin x / x = ?',
-    options: ['0', '1', '∞', 'Does not exist'],
-    correct: 1, subject: 'maths',
-    explanation: 'Standard limit. Use L\'Hospital or Taylor series: sin x ≈ x for small x'
-  }
+const jeeFallbackQuestions: QuizQuestion[] = [
+  { question: 'At highest point of projectile, velocity = ?', options: ['Zero', 'Maximum', 'u cosθ', 'u sinθ'], correct: 2, subject: 'physics', explanation: 'Only horizontal component u cosθ remains' },
+  { question: 'Hybridization of C in benzene:', options: ['sp', 'sp²', 'sp³', 'sp³d'], correct: 1, subject: 'chemistry', explanation: '3 sigma + 1 pi = sp²' },
+  { question: 'd/dx (tan x) = ?', options: ['sec x', 'sec² x', 'cot x', 'cosec² x'], correct: 1, subject: 'maths', explanation: 'Standard derivative result' },
+  { question: 'SI unit of magnetic flux?', options: ['Tesla', 'Weber', 'Henry', 'Gauss'], correct: 1, subject: 'physics', explanation: 'Weber (Wb) = T·m²' },
+  { question: '∫(1/x) dx = ?', options: ['x', 'ln x', 'ln|x| + C', '1/x²'], correct: 2, subject: 'maths', explanation: 'Absolute value + constant C needed' },
 ];
 
-const neetQuestions = [
-  {
-    question: 'Which organelle is called the "powerhouse of the cell"?',
-    options: ['Nucleus', 'Ribosome', 'Mitochondria', 'Golgi body'],
-    correct: 2, subject: 'biology',
-    explanation: 'Mitochondria produce ATP through cellular respiration — the main energy currency'
-  },
-  {
-    question: 'The process of producing RNA from DNA is called:',
-    options: ['Translation', 'Replication', 'Transcription', 'Transduction'],
-    correct: 2, subject: 'biology',
-    explanation: 'Transcription = DNA → RNA, done by RNA polymerase in the nucleus'
-  },
-  {
-    question: 'Which part of the brain controls breathing and heartbeat?',
-    options: ['Cerebrum', 'Cerebellum', 'Medulla oblongata', 'Hypothalamus'],
-    correct: 2, subject: 'biology',
-    explanation: 'Medulla oblongata (part of brainstem) regulates autonomic functions like respiration and heart rate'
-  }
-];
-
-const cuetQuestions = [
-  {
-    question: 'GDP at Market Price = GDP at Factor Cost + ?',
-    options: ['Subsidies', 'Net Indirect Taxes', 'Depreciation', 'Net Factor Income from Abroad'],
-    correct: 1, subject: 'economics',
-    explanation: 'GDP(MP) = GDP(FC) + Indirect Taxes - Subsidies = GDP(FC) + Net Indirect Taxes'
-  },
-  {
-    question: 'Who gave the 14 Principles of Management?',
-    options: ['F.W. Taylor', 'Henri Fayol', 'Peter Drucker', 'Elton Mayo'],
-    correct: 1, subject: 'business_studies',
-    explanation: 'Henri Fayol is the father of General Management and gave 14 Principles'
-  },
-  {
-    question: 'Which market has only one seller and many buyers?',
-    options: ['Perfect Competition', 'Monopoly', 'Oligopoly', 'Monopolistic Competition'],
-    correct: 1, subject: 'economics',
-    explanation: 'Monopoly = single seller, no close substitutes, barriers to entry'
-  },
-  {
-    question: 'Goodwill is a:',
-    options: ['Tangible asset', 'Intangible asset', 'Fictitious asset', 'Current asset'],
-    correct: 1, subject: 'accountancy',
-    explanation: 'Goodwill is an intangible, non-physical asset representing reputation and brand value'
-  },
-  {
-    question: 'The antonym of "Benevolent" is:',
-    options: ['Kind', 'Generous', 'Malevolent', 'Charitable'],
-    correct: 2, subject: 'english',
-    explanation: 'Benevolent = well-meaning, kind. Malevolent = having evil intent'
-  },
-  {
-    question: 'If A is the brother of B, B is the sister of C, and C is the father of D, how is A related to D?',
-    options: ['Father', 'Uncle', 'Grandfather', 'Brother'],
-    correct: 1, subject: 'general_test',
-    explanation: 'A is brother of B, B is sister of C (so A & B are siblings of C\'s generation), C is father of D → A is uncle of D'
-  },
-  {
-    question: 'Which Article of the Indian Constitution deals with Right to Equality?',
-    options: ['Article 12', 'Article 14', 'Article 19', 'Article 21'],
-    correct: 1, subject: 'general_test',
-    explanation: 'Article 14: Equality before law and equal protection of laws'
-  },
-  {
-    question: 'LPG reforms were introduced in India in which year?',
-    options: ['1985', '1991', '1995', '2000'],
-    correct: 1, subject: 'economics',
-    explanation: 'Liberalisation, Privatisation, Globalisation reforms started in 1991 under PM Narasimha Rao'
-  },
-  {
-    question: 'Select the correctly spelled word:',
-    options: ['Accomodate', 'Accommodate', 'Acommodate', 'Acomodate'],
-    correct: 1, subject: 'english',
-    explanation: 'Accommodate has double C and double M'
-  },
-  {
-    question: 'Which is NOT a function of management?',
-    options: ['Planning', 'Cooperating', 'Controlling', 'Organizing'],
-    correct: 1, subject: 'business_studies',
-    explanation: 'Functions of management: Planning, Organizing, Staffing, Directing, Controlling. Cooperating is not one.'
-  },
+const neetFallbackQuestions: QuizQuestion[] = [
+  { question: 'Powerhouse of the cell?', options: ['Nucleus', 'Ribosome', 'Mitochondria', 'Golgi'], correct: 2, subject: 'biology', explanation: 'Mitochondria produce ATP' },
+  { question: 'DNA → RNA process?', options: ['Translation', 'Replication', 'Transcription', 'Transduction'], correct: 2, subject: 'biology', explanation: 'Transcription by RNA polymerase' },
+  { question: 'Breathing controlled by?', options: ['Cerebrum', 'Cerebellum', 'Medulla oblongata', 'Hypothalamus'], correct: 2, subject: 'biology', explanation: 'Medulla regulates autonomic functions' },
 ];
 
 const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
   const { isNeet, isCuet } = useExamMode();
-  const quizQuestions = isCuet
-    ? cuetQuestions
-    : isNeet
-      ? [...baseQuestions, ...neetQuestions]
-      : [...baseQuestions, ...jeeQuestions];
+  const { language } = useLanguage();
 
+  const getFallbackQuestions = (): QuizQuestion[] => {
+    if (isCuet) return cuetFallbackQuestions;
+    if (isNeet) return [...jeeFallbackQuestions.filter(q => q.subject !== 'maths'), ...neetFallbackQuestions];
+    return jeeFallbackQuestions;
+  };
+
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>(getFallbackQuestions());
   const [currentQ, setCurrentQ] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const [answered, setAnswered] = useState<boolean[]>(new Array(quizQuestions.length).fill(false));
+  const [isLoading, setIsLoading] = useState(false);
+
+  const generateAIQuiz = async () => {
+    setIsLoading(true);
+    try {
+      const subject = isCuet ? 'all CUET subjects (Economics, Business Studies, Accountancy, English, General Test)' : isNeet ? 'Physics, Chemistry, Biology' : 'Physics, Chemistry, Maths';
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-revision-content`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          type: 'quiz',
+          subject,
+          examMode: isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
+          language,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed');
+      const result = await response.json();
+      if (result.data && Array.isArray(result.data) && result.data.length > 0) {
+        setQuizQuestions(result.data);
+        setCurrentQ(0);
+        setSelected(null);
+        setShowResult(false);
+        setScore(0);
+        setAnswered(new Array(result.data.length).fill(false));
+        toast.success('Fresh quiz generated!');
+      }
+    } catch (error) {
+      console.error('AI quiz generation failed:', error);
+      toast.error('Could not generate quiz. Using saved questions.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const question = quizQuestions[currentQ];
 
@@ -194,14 +123,10 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
   };
 
   const subjectColors: Record<string, string> = {
-    physics: 'bg-physics/10 text-physics',
-    chemistry: 'bg-chemistry/10 text-chemistry',
-    maths: 'bg-maths/10 text-maths',
-    biology: 'bg-green-500/10 text-green-600',
-    economics: 'bg-amber-500/10 text-amber-600',
-    english: 'bg-indigo-500/10 text-indigo-600',
-    general_test: 'bg-purple-500/10 text-purple-600',
-    accountancy: 'bg-teal-500/10 text-teal-600',
+    physics: 'bg-physics/10 text-physics', chemistry: 'bg-chemistry/10 text-chemistry',
+    maths: 'bg-maths/10 text-maths', biology: 'bg-green-500/10 text-green-600',
+    economics: 'bg-amber-500/10 text-amber-600', english: 'bg-indigo-500/10 text-indigo-600',
+    general_test: 'bg-purple-500/10 text-purple-600', accountancy: 'bg-teal-500/10 text-teal-600',
     business_studies: 'bg-orange-500/10 text-orange-600',
   };
 
@@ -210,6 +135,21 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
     economics: 'Economics', english: 'English', general_test: 'General Test',
     accountancy: 'Accountancy', business_studies: 'Business Studies',
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={onBack}><ChevronLeft className="w-5 h-5" /></Button>
+          <h2 className="text-xl font-bold">1-Mark Quick Quiz</h2>
+        </div>
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Generating fresh questions...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (showResult) {
     return (
@@ -225,7 +165,10 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
               score >= quizQuestions.length * 0.5 ? 'Good! Revise weak areas.' :
                 'Need more practice. Review concepts.'}
           </p>
-          <Button onClick={restart} className="gap-2"><RotateCcw className="w-4 h-4" />Try Again</Button>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={restart} variant="outline" className="gap-2"><RotateCcw className="w-4 h-4" />Try Again</Button>
+            <Button onClick={generateAIQuiz} className="gap-2"><RefreshCw className="w-4 h-4" />New Quiz</Button>
+          </div>
         </div>
       </div>
     );
@@ -238,7 +181,12 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
           <Button variant="ghost" size="icon" onClick={onBack}><ChevronLeft className="w-5 h-5" /></Button>
           <h2 className="text-xl font-bold">1-Mark Quick Quiz</h2>
         </div>
-        <span className="text-sm text-muted-foreground">{currentQ + 1} / {quizQuestions.length}</span>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={generateAIQuiz} className="gap-2">
+            <RefreshCw className="w-4 h-4" />New Quiz
+          </Button>
+          <span className="text-sm text-muted-foreground">{currentQ + 1} / {quizQuestions.length}</span>
+        </div>
       </div>
 
       <div className="flex gap-1">
@@ -250,14 +198,16 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
       </div>
 
       <div className="bg-card border border-border rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <span className={cn('text-xs px-2 py-1 rounded-full capitalize', subjectColors[question.subject] || 'bg-primary/10 text-primary')}>
-            {subjectLabels[question.subject] || question.subject}
-          </span>
-        </div>
-        <p className="text-lg font-medium mb-6">{question.question}</p>
+        {question?.subject && (
+          <div className="flex items-center gap-2 mb-4">
+            <span className={cn('text-xs px-2 py-1 rounded-full', subjectColors[question.subject] || 'bg-primary/10 text-primary')}>
+              {subjectLabels[question.subject] || question.subject}
+            </span>
+          </div>
+        )}
+        <p className="text-lg font-medium mb-6">{question?.question}</p>
         <div className="space-y-3">
-          {question.options.map((option, i) => {
+          {question?.options.map((option, i) => {
             const isSelected = selected === i;
             const isCorrect = i === question.correct;
             const showFeedback = answered[currentQ];
@@ -284,7 +234,7 @@ const QuickQuiz: React.FC<QuickQuizProps> = ({ onBack }) => {
         </div>
         {answered[currentQ] && (
           <div className="mt-4 p-3 bg-secondary/50 rounded-lg">
-            <p className="text-sm text-muted-foreground"><strong>Explanation:</strong> {question.explanation}</p>
+            <p className="text-sm text-muted-foreground"><strong>Explanation:</strong> {question?.explanation}</p>
           </div>
         )}
       </div>
