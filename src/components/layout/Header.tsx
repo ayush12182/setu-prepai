@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Bell, Settings, Globe, LogIn, LogOut, User } from 'lucide-react';
+import { Menu, Bell, Settings, Globe, LogIn, LogOut, User, ArrowRightLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useExamMode, ExamMode } from '@/contexts/ExamModeContext';
+import { toast } from 'sonner';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -30,10 +32,29 @@ const languageLabels: Record<LanguageMode, string> = {
   gujarati: 'ગુજરાતી',
 };
 
+const examLabels: Record<ExamMode, { label: string; emoji: string }> = {
+  jee: { label: 'JEE', emoji: '⚡' },
+  neet: { label: 'NEET', emoji: '🧬' },
+  cuet: { label: 'CUET', emoji: '🎯' },
+};
+
 export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) => {
   const { language, setLanguage } = useLanguage();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, updateProfile } = useAuth();
+  const { examMode, setExamMode } = useExamMode();
   const navigate = useNavigate();
+
+  const handleExamChange = async (mode: ExamMode) => {
+    if (mode === examMode) return;
+    const examLabelMap: Record<ExamMode, string> = { jee: 'JEE Main', neet: 'NEET', cuet: 'CUET' };
+    setExamMode(mode);
+    try {
+      await updateProfile({ target_exam: examLabelMap[mode] });
+      toast.success(`Switched to ${mode.toUpperCase()} Mode ${examLabels[mode].emoji}`);
+    } catch {
+      toast.error('Failed to switch exam mode');
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -69,6 +90,28 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Exam Mode Switcher */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1.5">
+                <ArrowRightLeft className="w-4 h-4" />
+                <span className="text-sm font-medium">{examLabels[examMode].emoji} {examLabels[examMode].label}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {(Object.keys(examLabels) as ExamMode[]).map((mode) => (
+                <DropdownMenuItem
+                  key={mode}
+                  onClick={() => handleExamChange(mode)}
+                  className={examMode === mode ? 'bg-secondary font-medium' : ''}
+                >
+                  {examLabels[mode].emoji} {examLabels[mode].label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Language Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-2">
