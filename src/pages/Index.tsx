@@ -11,7 +11,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExamMode } from "@/contexts/ExamModeContext";
 import { JeeSubModeSelector } from "@/components/ui/JeeSubModeSelector";
-import { Sparkles, Flame, ArrowRightLeft } from "lucide-react";
+import { Sparkles, Flame } from "lucide-react";
 import { useTodaysFocus } from "@/hooks/useTodaysFocus";
 import { CirclesDashboardCard } from "@/components/circles/CirclesDashboardCard";
 import { toast } from "sonner";
@@ -21,20 +21,6 @@ const Index: React.FC = () => {
   const { user, profile, updateProfile } = useAuth();
   const { config, isNeet, isCuet, examMode, setExamMode } = useExamMode();
 
-  const EXAM_CYCLE: ExamMode[] = ['jee', 'neet', 'cuet'];
-
-  const handleExamModeSwitch = async () => {
-    const currentIdx = EXAM_CYCLE.indexOf(examMode);
-    const nextMode = EXAM_CYCLE[(currentIdx + 1) % EXAM_CYCLE.length];
-    const examLabelMap: Record<ExamMode, string> = { jee: 'JEE Main', neet: 'NEET', cuet: 'CUET' };
-    setExamMode(nextMode);
-    try {
-      await updateProfile({ target_exam: examLabelMap[nextMode] });
-      toast.success(`Switched to ${nextMode.toUpperCase()} Mode ${nextMode === 'jee' ? '⚡' : nextMode === 'neet' ? '🧬' : '🎯'}`);
-    } catch {
-      toast.error('Could not update profile');
-    }
-  };
 
   // Use the refactored hook that returns both focus types
   const { dailyFocus, smartFocus, isLoading, streak } = useTodaysFocus();
@@ -93,15 +79,6 @@ const Index: React.FC = () => {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-semibold">
                     {config.emoji} {config.label} Mode
                   </span>
-                  {/* Exam mode switch button */}
-                    <button
-                    onClick={handleExamModeSwitch}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white text-xs font-medium transition-all cursor-pointer border border-white/10 hover:border-white/20"
-                    title={`Switch to next exam mode`}
-                  >
-                    <ArrowRightLeft className="w-3 h-3" />
-                    Switch Exam
-                  </button>
                   {/* JEE Sub-mode selector — only visible in JEE mode */}
                   <div className="bg-white/10 rounded-xl p-0.5">
                     <JeeSubModeSelector />
