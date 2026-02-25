@@ -25,6 +25,19 @@ import {
   neetPhy4Subchapters, neetPhy5Subchapters, neetPhy6Subchapters
 } from './neetPhysicsSubchapters';
 
+import {
+  cuetGT1Subchapters, cuetGT2Subchapters, cuetGT3Subchapters, cuetGT4Subchapters,
+  cuetEng1Subchapters, cuetEng2Subchapters, cuetEng3Subchapters,
+  cuetEco1Subchapters, cuetEco2Subchapters, cuetEco3Subchapters,
+  cuetPS1Subchapters, cuetPS2Subchapters,
+  cuetHist1Subchapters, cuetHist2Subchapters,
+  cuetGeo1Subchapters, cuetGeo2Subchapters,
+  cuetPsy1Subchapters, cuetPsy2Subchapters,
+  cuetSoc1Subchapters,
+  cuetAcc1Subchapters, cuetAcc2Subchapters,
+  cuetBS1Subchapters, cuetBS2Subchapters,
+} from './cuetSubchapters';
+
 export interface Subchapter {
   id: string;
   chapterId: string;
@@ -2753,6 +2766,39 @@ export const subchaptersByChapter: Record<string, Subchapter[]> = {
   'neet-phy-4': neetPhy4Subchapters,
   'neet-phy-5': neetPhy5Subchapters,
   'neet-phy-6': neetPhy6Subchapters,
+  // CUET General Test
+  'cuet-gt-1': cuetGT1Subchapters,
+  'cuet-gt-2': cuetGT2Subchapters,
+  'cuet-gt-3': cuetGT3Subchapters,
+  'cuet-gt-4': cuetGT4Subchapters,
+  // CUET English
+  'cuet-eng-1': cuetEng1Subchapters,
+  'cuet-eng-2': cuetEng2Subchapters,
+  'cuet-eng-3': cuetEng3Subchapters,
+  // CUET Economics
+  'cuet-eco-1': cuetEco1Subchapters,
+  'cuet-eco-2': cuetEco2Subchapters,
+  'cuet-eco-3': cuetEco3Subchapters,
+  // CUET Political Science
+  'cuet-ps-1': cuetPS1Subchapters,
+  'cuet-ps-2': cuetPS2Subchapters,
+  // CUET History
+  'cuet-hist-1': cuetHist1Subchapters,
+  'cuet-hist-2': cuetHist2Subchapters,
+  // CUET Geography
+  'cuet-geo-1': cuetGeo1Subchapters,
+  'cuet-geo-2': cuetGeo2Subchapters,
+  // CUET Psychology
+  'cuet-psy-1': cuetPsy1Subchapters,
+  'cuet-psy-2': cuetPsy2Subchapters,
+  // CUET Sociology
+  'cuet-soc-1': cuetSoc1Subchapters,
+  // CUET Accountancy
+  'cuet-acc-1': cuetAcc1Subchapters,
+  'cuet-acc-2': cuetAcc2Subchapters,
+  // CUET Business Studies
+  'cuet-bs-1': cuetBS1Subchapters,
+  'cuet-bs-2': cuetBS2Subchapters,
 };
 
 // Helper function to get subchapters by chapter ID

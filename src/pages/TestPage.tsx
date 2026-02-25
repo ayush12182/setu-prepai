@@ -24,20 +24,24 @@ interface TestConfig {
 
 const TestPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isNeet } = useExamMode();
+  const { isNeet, isCuet } = useExamMode();
   const [showChapterSelect, setShowChapterSelect] = useState(false);
   const [showMixedSelect, setShowMixedSelect] = useState(false);
   const [showPYQSelect, setShowPYQSelect] = useState(false);
   const [activeTest, setActiveTest] = useState<TestConfig | null>(null);
 
-  const examLabel = isNeet ? 'NEET' : 'JEE Main';
-  const majorTestDesc = isNeet
-    ? 'Full NEET UG simulation — 3 hours, 180 questions, no pause. The real deal.'
-    : 'Full JEE Main simulation — 3 hours, 90 questions, no pause. The real deal.';
-  const majorTestQuestions = isNeet ? '180' : '90';
-  const pyqDesc = isNeet
-    ? 'Real NEET previous year questions from 2005–2024'
-    : 'Real previous year questions from 2004–2024';
+  const examLabel = isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE Main';
+  const majorTestDesc = isCuet
+    ? 'Full CUET UG simulation — timed sections, NCERT-level MCQs. Test your speed and accuracy.'
+    : isNeet
+      ? 'Full NEET UG simulation — 3 hours, 180 questions, no pause. The real deal.'
+      : 'Full JEE Main simulation — 3 hours, 90 questions, no pause. The real deal.';
+  const majorTestQuestions = isCuet ? '200' : isNeet ? '180' : '90';
+  const pyqDesc = isCuet
+    ? 'Real CUET previous year questions organized by subject'
+    : isNeet
+      ? 'Real NEET previous year questions from 2005–2024'
+      : 'Real previous year questions from 2004–2024';
 
   const testTypes = [
     {
@@ -249,10 +253,13 @@ const TestPage: React.FC = () => {
               <Sparkles className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <p className="font-semibold text-foreground mb-1">Jeetu Bhaiya's Test Strategy</p>
+              <p className="font-semibold text-foreground mb-1">
+                {isCuet ? 'CUET Mentor Tip' : 'Test Strategy'}
+              </p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Beta, test dene se mat daro. Galtiyan honi chahiye — lekin wahi galti dobaara nahi honi chahiye.
-                Har test ke baad analysis karo, weak areas note karo, aur next time better karo!
+                {isCuet
+                  ? 'Speed and accuracy win CUET. Practice with a timer, eliminate wrong options fast, and never spend more than 1 minute per question.'
+                  : 'Every test is a learning opportunity. Analyze your mistakes, note weak areas, and improve next time!'}
               </p>
             </div>
           </div>
