@@ -529,6 +529,17 @@ const AskJeetuPage: React.FC = () => {
             <Button
               variant="outline"
               size="icon"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex-shrink-0 rounded-xl"
+              disabled={isLoading}
+              title="Upload from gallery"
+            >
+              <ImagePlus className="w-5 h-5" />
+            </Button>
+
+            <Button
+              variant="outline"
+              size="icon"
               onClick={() => cameraInputRef.current?.click()}
               className="flex-shrink-0 rounded-xl"
               disabled={isLoading}
@@ -560,7 +571,7 @@ const AskJeetuPage: React.FC = () => {
           </div>
 
           <p className="text-xs text-muted-foreground mt-2 text-center">
-            📷 Photo upload • ⌨️ Type your doubt
+            🖼️ Media • 📷 Camera • ⌨️ Type your doubt
           </p>
         </div>
       </div>
