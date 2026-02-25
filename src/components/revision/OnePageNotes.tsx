@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, Loader2, Sparkles } from 'lucide-react';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
 import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
+import { getAllCuetChapters, CUET_SUBJECTS } from '@/data/cuetSyllabus';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -12,25 +13,15 @@ interface OnePageNotesProps {
   onBack: () => void;
 }
 
-type SubjectFilter = 'all' | 'physics' | 'chemistry' | 'maths' | 'botany' | 'zoology';
-
 const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
-  const [activeFilter, setActiveFilter] = useState<SubjectFilter>('all');
+  const [activeFilter, setActiveFilter] = useState<string>('all');
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [notes, setNotes] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const { language } = useLanguage();
-
-  const allChapters = {
-    physics: physicsChapters,
-    chemistry: chemistryChapters,
-    maths: mathsChapters
-  };
-
-  const { isNeet } = useExamMode();
+  const { isNeet, isCuet, examMode } = useExamMode();
 
   const getSubSubjects = () => {
-    // Split NEET Biology into Botany and Zoology
     const botanyChapters = neetBiologyChapters.filter(c =>
       ['neet-bio-1', 'neet-bio-3', 'neet-bio-4', 'neet-bio-5', 'neet-bio-9'].includes(c.id)
     );
@@ -40,7 +31,51 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
     return { botanyChapters, zoologyChapters };
   };
 
+  const getCuetGroups = () => {
+    const allCuet = getAllCuetChapters();
+    const groups: { subject: string; label: string; chapters: Chapter[]; color: string }[] = [];
+    const subjectMap = new Map<string, Chapter[]>();
+
+    allCuet.forEach(ch => {
+      const key = ch.subject as string;
+      if (!subjectMap.has(key)) subjectMap.set(key, []);
+      subjectMap.get(key)!.push(ch);
+    });
+
+    const colorMap: Record<string, string> = {
+      english: 'border-indigo-500',
+      general_test: 'border-purple-500',
+      economics: 'border-amber-500',
+      accountancy: 'border-teal-500',
+      business_studies: 'border-orange-500',
+      political_science: 'border-rose-500',
+      history: 'border-yellow-500',
+      geography: 'border-cyan-500',
+      psychology: 'border-pink-500',
+      sociology: 'border-lime-500',
+    };
+
+    subjectMap.forEach((chapters, key) => {
+      const meta = CUET_SUBJECTS.find(s => s.key === key);
+      groups.push({
+        subject: key,
+        label: meta?.label || key,
+        chapters,
+        color: colorMap[key] || 'border-primary',
+      });
+    });
+
+    return groups;
+  };
+
   const getFilteredChapters = () => {
+    if (isCuet) {
+      const groups = getCuetGroups();
+      if (activeFilter === 'all') return groups.map(g => ({ subject: g.label, chapters: g.chapters, color: g.color }));
+      const match = groups.find(g => g.subject === activeFilter);
+      return match ? [{ subject: match.label, chapters: match.chapters, color: match.color }] : [];
+    }
+
     if (activeFilter === 'all') {
       if (isNeet) {
         const { botanyChapters, zoologyChapters } = getSubSubjects();
@@ -59,7 +94,6 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
     }
 
     const { botanyChapters, zoologyChapters } = getSubSubjects();
-
     const subjectMap: Record<string, any> = {
       physics: { subject: 'Physics', chapters: isNeet ? neetPhysicsChapters : physicsChapters, color: 'border-physics' },
       chemistry: { subject: 'Chemistry', chapters: isNeet ? neetChemistryChapters : chemistryChapters, color: 'border-chemistry' },
@@ -71,13 +105,45 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
     return subjectMap[activeFilter] ? [subjectMap[activeFilter]] : [];
   };
 
+  const getFilterTabs = (): { key: string; label: string }[] => {
+    if (isCuet) {
+      const groups = getCuetGroups();
+      return [{ key: 'all', label: 'All Chapters' }, ...groups.map(g => ({ key: g.subject, label: g.label }))];
+    }
+    if (isNeet) {
+      return [
+        { key: 'all', label: 'All Chapters' },
+        { key: 'physics', label: 'Physics' },
+        { key: 'chemistry', label: 'Chemistry' },
+        { key: 'botany', label: 'Botany' },
+        { key: 'zoology', label: 'Zoology' },
+      ];
+    }
+    return [
+      { key: 'all', label: 'All Chapters' },
+      { key: 'physics', label: 'Physics' },
+      { key: 'chemistry', label: 'Chemistry' },
+      { key: 'maths', label: 'Maths' },
+    ];
+  };
+
   const subjectBadgeColors: Record<string, string> = {
     physics: 'bg-physics/10 text-physics',
     chemistry: 'bg-chemistry/10 text-chemistry',
     maths: 'bg-maths/10 text-maths',
-    biology: 'bg-emerald-500/10 text-emerald-500', // Default fallback
+    biology: 'bg-emerald-500/10 text-emerald-500',
     botany: 'bg-emerald-500/10 text-emerald-500',
-    zoology: 'bg-orange-500/10 text-orange-500'
+    zoology: 'bg-orange-500/10 text-orange-500',
+    english: 'bg-indigo-500/10 text-indigo-500',
+    general_test: 'bg-purple-500/10 text-purple-500',
+    economics: 'bg-amber-500/10 text-amber-500',
+    accountancy: 'bg-teal-500/10 text-teal-500',
+    business_studies: 'bg-orange-500/10 text-orange-500',
+    political_science: 'bg-rose-500/10 text-rose-500',
+    history: 'bg-yellow-500/10 text-yellow-500',
+    geography: 'bg-cyan-500/10 text-cyan-500',
+    psychology: 'bg-pink-500/10 text-pink-500',
+    sociology: 'bg-lime-500/10 text-lime-500',
   };
 
   const generateNotes = async (chapter: Chapter) => {
@@ -100,17 +166,12 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
           examTips: chapter.examTips,
           pyqData: chapter.pyqData,
           language,
-          examMode: isNeet ? 'NEET' : 'JEE'
+          examMode: isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE'
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate notes');
-      }
-
-      if (!response.body) {
-        throw new Error('No response body');
-      }
+      if (!response.ok) throw new Error('Failed to generate notes');
+      if (!response.body) throw new Error('No response body');
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -119,30 +180,21 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n');
-
         for (const line of lines) {
           if (line.startsWith('data: ') && line !== 'data: [DONE]') {
             try {
               const json = JSON.parse(line.slice(6));
               const content = json.choices?.[0]?.delta?.content;
-              if (content) {
-                fullNotes += content;
-                setNotes(fullNotes);
-              }
-            } catch {
-              // Skip invalid JSON
-            }
+              if (content) { fullNotes += content; setNotes(fullNotes); }
+            } catch { /* Skip invalid JSON */ }
           }
         }
       }
     } catch (error) {
       console.error('Error generating notes:', error);
       toast.error('Failed to generate notes. Showing offline version.');
-
-      // Fallback to local notes
       const fallbackNotes = generateFallbackNotes(chapter);
       setNotes(fallbackNotes);
     } finally {
@@ -151,23 +203,20 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
   };
 
   const generateFallbackNotes = (chapter: Chapter): string => {
-    // Keep formulas in standard notation, just ensure basic readability
-    const formattedFormulas = chapter.keyFormulas.map(f => {
-      return f.replace(/=/g, ' = '); // Just ensure spacing around equals
-    });
-
-    const examName = isNeet ? 'NEET' : 'JEE';
-    const biologyContext = 'Yeh chapter biology ka foundation hai. NEET mein line-by-line NCERT se questions aate hain. Diagrams aur examples ratt lo.';
+    const formattedFormulas = chapter.keyFormulas.map(f => f.replace(/=/g, ' = '));
+    const examName = isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE';
 
     let subjectContext = '';
-    if (chapter.subject === 'physics') {
+    if (isCuet) {
+      subjectContext = `NCERT Class 12 based chapter. ${examName} mein direct definitions aur facts se questions aate hain. Focus on key terms and concepts.`;
+    } else if (chapter.subject === 'physics') {
       subjectContext = `Yeh chapter physics ke core concepts cover karta hai. ${examName} mein direct questions aate hain, especially numerical type.`;
     } else if (chapter.subject === 'chemistry') {
       subjectContext = `Is chapter mein important reactions aur concepts hain jo ${examName} mein regularly pooche jaate hain.`;
     } else if (chapter.subject === 'maths') {
       subjectContext = 'Mathematics ka yeh chapter problem solving ke liye bahut important hai. Formulas yaad karo aur practice karo.';
     } else {
-      subjectContext = biologyContext;
+      subjectContext = `Yeh chapter biology ka foundation hai. ${examName} mein line-by-line NCERT se questions aate hain.`;
     }
 
     return `${chapter.name.toUpperCase()}
@@ -196,44 +245,27 @@ PYQ focus (Post-COVID priority)
 - Focus areas: ${chapter.pyqData.trendingConcepts.join(', ')}
 
 How to revise in last 24 hours
-1. Pehle saare concepts/formulas ek baar likh ke dekho
-2. Previous 5 years ke PYQs solve karo
+1. Pehle saare concepts ek baar likh ke dekho
+2. Previous years ke questions solve karo
 3. Common mistakes wali list dekh lo
 
-Beta, itna clear ho gaya na? Ab PYQs lagao, bas wahi exam hai.`;
+Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
   };
 
   const renderNotes = (content: string) => {
     return content.split('\n').map((line, i) => {
-      if (line.startsWith('# ')) {
-        return <h1 key={i} className="text-xl font-bold mt-0 mb-4">{line.slice(2)}</h1>;
-      }
-      if (line.startsWith('## ')) {
-        return <h2 key={i} className="text-lg font-semibold mt-6 mb-3 text-primary">{line.slice(3)}</h2>;
-      }
-      if (line.startsWith('### ')) {
-        return <h3 key={i} className="text-base font-medium mt-4 mb-2">{line.slice(4)}</h3>;
-      }
-      if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) {
-        return <p key={i} className="ml-4 my-1">• {line.slice(2)}</p>;
-      }
-      if (line.startsWith('⚡') || line.startsWith('💡')) {
-        return <p key={i} className="ml-4 my-1 text-setu-saffron font-medium">{line}</p>;
-      }
-      if (line.startsWith('---')) {
-        return <hr key={i} className="my-4 border-border" />;
-      }
-      if (line.match(/^\d+\./)) {
-        return <p key={i} className="ml-4 my-1">{line}</p>;
-      }
-      if (line.trim()) {
-        return <p key={i} className="my-2">{line}</p>;
-      }
+      if (line.startsWith('# ')) return <h1 key={i} className="text-xl font-bold mt-0 mb-4">{line.slice(2)}</h1>;
+      if (line.startsWith('## ')) return <h2 key={i} className="text-lg font-semibold mt-6 mb-3 text-primary">{line.slice(3)}</h2>;
+      if (line.startsWith('### ')) return <h3 key={i} className="text-base font-medium mt-4 mb-2">{line.slice(4)}</h3>;
+      if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) return <p key={i} className="ml-4 my-1">• {line.slice(2)}</p>;
+      if (line.startsWith('⚡') || line.startsWith('💡')) return <p key={i} className="ml-4 my-1 text-setu-saffron font-medium">{line}</p>;
+      if (line.startsWith('---')) return <hr key={i} className="my-4 border-border" />;
+      if (line.match(/^\d+\./)) return <p key={i} className="ml-4 my-1">{line}</p>;
+      if (line.trim()) return <p key={i} className="my-2">{line}</p>;
       return <br key={i} />;
     });
   };
 
-  // Viewing generated notes for a chapter
   if (selectedChapter) {
     return (
       <div className="space-y-6">
@@ -244,9 +276,9 @@ Beta, itna clear ho gaya na? Ab PYQs lagao, bas wahi exam hai.`;
           <div>
             <h2 className="text-xl font-bold">{selectedChapter.name}</h2>
             <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize',
-              subjectBadgeColors[selectedChapter.subject] || subjectBadgeColors['biology']
+              subjectBadgeColors[selectedChapter.subject as string] || 'bg-primary/10 text-primary'
             )}>
-              {selectedChapter.subject}
+              {CUET_SUBJECTS.find(s => s.key === selectedChapter.subject as string)?.label || selectedChapter.subject}
             </span>
           </div>
         </div>
@@ -260,9 +292,7 @@ Beta, itna clear ho gaya na? Ab PYQs lagao, bas wahi exam hai.`;
           ) : (
             <div className="prose prose-sm dark:prose-invert max-w-none">
               {renderNotes(notes)}
-              {isGenerating && (
-                <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />
-              )}
+              {isGenerating && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />}
             </div>
           )}
         </div>
@@ -270,7 +300,6 @@ Beta, itna clear ho gaya na? Ab PYQs lagao, bas wahi exam hai.`;
     );
   }
 
-  // Chapter selection view
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -280,32 +309,23 @@ Beta, itna clear ho gaya na? Ab PYQs lagao, bas wahi exam hai.`;
         <h2 className="text-xl font-bold">1-Page Notes</h2>
       </div>
 
-      {/* Filter Tabs */}
       <div className="flex gap-2 flex-wrap">
-        {(isNeet
-          ? ['all', 'physics', 'chemistry', 'botany', 'zoology'] as SubjectFilter[]
-          : ['all', 'physics', 'chemistry', 'maths'] as SubjectFilter[]
-        ).map((filter) => (
+        {getFilterTabs().map((tab) => (
           <Button
-            key={filter}
-            variant={activeFilter === filter ? 'default' : 'outline'}
+            key={tab.key}
+            variant={activeFilter === tab.key ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setActiveFilter(filter)}
-            className="capitalize"
+            onClick={() => setActiveFilter(tab.key)}
           >
-            {filter === 'all' ? 'All Chapters' : filter}
+            {tab.label}
           </Button>
         ))}
       </div>
 
-      {/* Chapters by Subject */}
       <div className="space-y-8 max-h-[60vh] overflow-y-auto pr-2">
         {getFilteredChapters().map((group) => (
           <div key={group.subject}>
-            <h3 className={cn(
-              'font-semibold text-lg mb-4 pb-2 border-b-2',
-              group.color
-            )}>
+            <h3 className={cn('font-semibold text-lg mb-4 pb-2 border-b-2', group.color)}>
               {group.subject} ({group.chapters.length} chapters)
             </h3>
             <div className="grid gap-3">

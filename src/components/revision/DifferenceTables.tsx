@@ -10,8 +10,7 @@ interface DifferenceTablesProps {
 
 const jeeOnlyTables = [
   {
-    title: 'Differentiation vs Integration',
-    subject: 'maths',
+    title: 'Differentiation vs Integration', subject: 'maths',
     items: [
       { aspect: 'Operation', left: 'Finding rate of change', right: 'Finding area under curve' },
       { aspect: 'Symbol', left: 'd/dx or f\'(x)', right: '∫f(x)dx' },
@@ -20,8 +19,7 @@ const jeeOnlyTables = [
     ]
   },
   {
-    title: 'Permutation vs Combination',
-    subject: 'maths',
+    title: 'Permutation vs Combination', subject: 'maths',
     items: [
       { aspect: 'Order', left: 'Matters', right: 'Does not matter' },
       { aspect: 'Formula', left: 'ⁿPᵣ = n!/(n-r)!', right: 'ⁿCᵣ = n!/[r!(n-r)!]' },
@@ -33,8 +31,7 @@ const jeeOnlyTables = [
 
 const neetOnlyTables = [
   {
-    title: 'Mitosis vs Meiosis',
-    subject: 'biology',
+    title: 'Mitosis vs Meiosis', subject: 'biology',
     items: [
       { aspect: 'Occurs in', left: 'Somatic cells', right: 'Germ cells' },
       { aspect: 'Divisions', left: '1 division', right: '2 divisions' },
@@ -43,8 +40,7 @@ const neetOnlyTables = [
     ]
   },
   {
-    title: 'Arteries vs Veins',
-    subject: 'biology',
+    title: 'Arteries vs Veins', subject: 'biology',
     items: [
       { aspect: 'Direction', left: 'Away from heart', right: 'Toward heart' },
       { aspect: 'Blood type', left: 'Oxygenated (except pulmonary)', right: 'Deoxygenated (except pulmonary)' },
@@ -53,8 +49,7 @@ const neetOnlyTables = [
     ]
   },
   {
-    title: 'C3 vs C4 Plants',
-    subject: 'biology',
+    title: 'C3 vs C4 Plants', subject: 'biology',
     items: [
       { aspect: 'First stable product', left: '3-PGA (3 carbon)', right: 'OAA (4 carbon)' },
       { aspect: 'CO₂ fixation enzyme', left: 'RuBisCO', right: 'PEP carboxylase' },
@@ -64,10 +59,75 @@ const neetOnlyTables = [
   }
 ];
 
+const cuetTables = [
+  {
+    title: 'Micro vs Macroeconomics', subject: 'economics',
+    items: [
+      { aspect: 'Scope', left: 'Individual units (firm, consumer)', right: 'Economy as a whole' },
+      { aspect: 'Focus', left: 'Price determination, demand-supply', right: 'National income, inflation, employment' },
+      { aspect: 'Example', left: 'Price of wheat in a market', right: 'GDP of India' },
+      { aspect: 'Key concept', left: 'Consumer equilibrium', right: 'Aggregate demand & supply' },
+    ]
+  },
+  {
+    title: 'Revenue Deficit vs Fiscal Deficit', subject: 'economics',
+    items: [
+      { aspect: 'Definition', left: 'Revenue Expenditure - Revenue Receipts', right: 'Total Expenditure - Total Receipts (excl. borrowings)' },
+      { aspect: 'Indicates', left: 'Govt spending more on day-to-day expenses', right: 'Total borrowing needs of govt' },
+      { aspect: 'Formula', left: 'RD = RE - RR', right: 'FD = TE - TR (non-debt)' },
+      { aspect: 'Concern', left: 'Using borrowed funds for consumption', right: 'Overall fiscal health' },
+    ]
+  },
+  {
+    title: 'Fayol vs Taylor', subject: 'business_studies',
+    items: [
+      { aspect: 'Focus', left: 'General management principles', right: 'Scientific management' },
+      { aspect: 'Approach', left: 'Top-down (manager level)', right: 'Bottom-up (shop floor)' },
+      { aspect: 'Applicability', left: 'Universal — all types of organizations', right: 'Mainly industrial/factory settings' },
+      { aspect: 'Key Idea', left: '14 Principles of Management', right: 'Time & Motion Study' },
+    ]
+  },
+  {
+    title: 'Money Market vs Capital Market', subject: 'business_studies',
+    items: [
+      { aspect: 'Duration', left: 'Short-term (up to 1 year)', right: 'Long-term (over 1 year)' },
+      { aspect: 'Instruments', left: 'T-bills, Commercial Paper, CD', right: 'Shares, Debentures, Bonds' },
+      { aspect: 'Risk', left: 'Low', right: 'Comparatively higher' },
+      { aspect: 'Liquidity', left: 'High', right: 'Moderate' },
+    ]
+  },
+  {
+    title: 'Partnership vs Company', subject: 'accountancy',
+    items: [
+      { aspect: 'Registration', left: 'Optional', right: 'Compulsory' },
+      { aspect: 'Members', left: 'Min 2, Max 50', right: 'Min 2 (Pvt) / 7 (Public), no max for public' },
+      { aspect: 'Liability', left: 'Unlimited', right: 'Limited to shares held' },
+      { aspect: 'Transferability', left: 'With consent of all partners', right: 'Shares freely transferable (public)' },
+    ]
+  },
+  {
+    title: 'Formal vs Informal Communication', subject: 'business_studies',
+    items: [
+      { aspect: 'Channel', left: 'Official chain of command', right: 'Grapevine / unofficial' },
+      { aspect: 'Speed', left: 'Slow (follows hierarchy)', right: 'Fast (no fixed path)' },
+      { aspect: 'Reliability', left: 'High — documented', right: 'Low — can be distorted' },
+      { aspect: 'Example', left: 'Memos, reports, notices', right: 'Casual talks, rumors' },
+    ]
+  },
+  {
+    title: 'Deductive vs Inductive Reasoning', subject: 'general_test',
+    items: [
+      { aspect: 'Direction', left: 'General → Specific', right: 'Specific → General' },
+      { aspect: 'Approach', left: 'Top-down', right: 'Bottom-up' },
+      { aspect: 'Conclusion', left: 'Certain (if premises true)', right: 'Probable' },
+      { aspect: 'Example', left: 'All birds fly; sparrow is bird; sparrow flies', right: 'Sparrows fly, eagles fly → all birds fly' },
+    ]
+  },
+];
+
 const commonTables = [
   {
-    title: 'Rotation vs Revolution',
-    subject: 'physics',
+    title: 'Rotation vs Revolution', subject: 'physics',
     items: [
       { aspect: 'Definition', left: 'Body spins on its own axis', right: 'Body moves around another object' },
       { aspect: 'Axis', left: 'Internal axis', right: 'External axis' },
@@ -76,8 +136,7 @@ const commonTables = [
     ]
   },
   {
-    title: 'Elastic vs Inelastic Collision',
-    subject: 'physics',
+    title: 'Elastic vs Inelastic Collision', subject: 'physics',
     items: [
       { aspect: 'KE', left: 'Conserved', right: 'Not conserved' },
       { aspect: 'Momentum', left: 'Conserved', right: 'Conserved' },
@@ -86,8 +145,7 @@ const commonTables = [
     ]
   },
   {
-    title: 'SHM vs Uniform Circular Motion',
-    subject: 'physics',
+    title: 'SHM vs Uniform Circular Motion', subject: 'physics',
     items: [
       { aspect: 'Path', left: 'Straight line (1D)', right: 'Circle (2D)' },
       { aspect: 'Projection', left: 'SHM is projection of UCM', right: 'UCM projects to SHM' },
@@ -96,8 +154,7 @@ const commonTables = [
     ]
   },
   {
-    title: 'Ionic vs Covalent Bond',
-    subject: 'chemistry',
+    title: 'Ionic vs Covalent Bond', subject: 'chemistry',
     items: [
       { aspect: 'Formation', left: 'Electron transfer', right: 'Electron sharing' },
       { aspect: 'Between', left: 'Metal + Non-metal', right: 'Non-metal + Non-metal' },
@@ -106,8 +163,7 @@ const commonTables = [
     ]
   },
   {
-    title: 'SN1 vs SN2 Reaction',
-    subject: 'chemistry',
+    title: 'SN1 vs SN2 Reaction', subject: 'chemistry',
     items: [
       { aspect: 'Mechanism', left: 'Two-step (carbocation)', right: 'One-step (concerted)' },
       { aspect: 'Rate', left: 'Rate = k[substrate]', right: 'Rate = k[substrate][nucleophile]' },
@@ -118,12 +174,14 @@ const commonTables = [
 ];
 
 const DifferenceTables: React.FC<DifferenceTablesProps> = ({ onBack }) => {
-  const { isNeet } = useExamMode();
+  const { isNeet, isCuet } = useExamMode();
   const [activeSubject, setActiveSubject] = useState<string>('all');
 
-  const differenceTables = isNeet
-    ? [...commonTables, ...neetOnlyTables]
-    : [...commonTables, ...jeeOnlyTables];
+  const differenceTables = isCuet
+    ? cuetTables
+    : isNeet
+      ? [...commonTables, ...neetOnlyTables]
+      : [...commonTables, ...jeeOnlyTables];
 
   const filteredTables = activeSubject === 'all'
     ? differenceTables
@@ -134,11 +192,24 @@ const DifferenceTables: React.FC<DifferenceTablesProps> = ({ onBack }) => {
     chemistry: 'border-chemistry',
     maths: 'border-maths',
     biology: 'border-green-500',
+    economics: 'border-amber-500',
+    business_studies: 'border-orange-500',
+    accountancy: 'border-teal-500',
+    general_test: 'border-purple-500',
   };
 
-  const subjects = isNeet
-    ? ['all', 'physics', 'chemistry', 'biology']
-    : ['all', 'physics', 'chemistry', 'maths'];
+  const getSubjects = (): { key: string; label: string }[] => {
+    if (isCuet) {
+      const uniqueSubjects = [...new Set(cuetTables.map(t => t.subject))];
+      const labelMap: Record<string, string> = {
+        economics: 'Economics', business_studies: 'Business Studies',
+        accountancy: 'Accountancy', general_test: 'General Test',
+      };
+      return [{ key: 'all', label: 'All' }, ...uniqueSubjects.map(s => ({ key: s, label: labelMap[s] || s }))];
+    }
+    if (isNeet) return [{ key: 'all', label: 'All' }, { key: 'physics', label: 'Physics' }, { key: 'chemistry', label: 'Chemistry' }, { key: 'biology', label: 'Biology' }];
+    return [{ key: 'all', label: 'All' }, { key: 'physics', label: 'Physics' }, { key: 'chemistry', label: 'Chemistry' }, { key: 'maths', label: 'Maths' }];
+  };
 
   return (
     <div className="space-y-6">
@@ -149,31 +220,22 @@ const DifferenceTables: React.FC<DifferenceTablesProps> = ({ onBack }) => {
         <h2 className="text-xl font-bold">Difference Tables</h2>
       </div>
 
-      {/* Filter */}
       <div className="flex gap-2 flex-wrap">
-        {subjects.map((subject) => (
+        {getSubjects().map((subject) => (
           <Button
-            key={subject}
-            variant={activeSubject === subject ? 'default' : 'outline'}
+            key={subject.key}
+            variant={activeSubject === subject.key ? 'default' : 'outline'}
             size="sm"
-            onClick={() => setActiveSubject(subject)}
-            className="capitalize"
+            onClick={() => setActiveSubject(subject.key)}
           >
-            {subject === 'all' ? 'All Subjects' : subject}
+            {subject.label}
           </Button>
         ))}
       </div>
 
-      {/* Tables */}
       <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
         {filteredTables.map((table, idx) => (
-          <div
-            key={idx}
-            className={cn(
-              'bg-card border-l-4 rounded-xl p-4',
-              subjectColors[table.subject]
-            )}
-          >
+          <div key={idx} className={cn('bg-card border-l-4 rounded-xl p-4', subjectColors[table.subject] || 'border-primary')}>
             <h3 className="font-semibold text-lg mb-4">{table.title}</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
