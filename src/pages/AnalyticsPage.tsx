@@ -15,6 +15,7 @@ import { ChapterBreakdown, type ChapterStat } from '@/components/analytics/Chapt
 import { MistakeAnalysis, type MistakePattern } from '@/components/analytics/MistakeAnalysis';
 import { TestHistory, type TestRecord } from '@/components/analytics/TestHistory';
 import { PracticeTimeline, type DayActivity } from '@/components/analytics/PracticeTimeline';
+import { AccuracyPieChart } from '@/components/analytics/AccuracyPieChart';
 import { useStreak } from '@/hooks/useStreak';
 import { subDays, isSameDay, parseISO } from 'date-fns';
 
@@ -259,6 +260,13 @@ const AnalyticsPage: React.FC = () => {
           weakChapters={weakChapters.length}
           totalCorrect={totalCorrect}
           totalIncorrect={totalIncorrect}
+        />
+
+        {/* Accuracy Pie Chart */}
+        <AccuracyPieChart
+          totalCorrect={totalCorrect}
+          totalIncorrect={totalIncorrect}
+          subjectScores={subjectScores}
         />
 
         {/* 30-Day Activity Timeline */}
