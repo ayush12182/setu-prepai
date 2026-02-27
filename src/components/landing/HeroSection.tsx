@@ -117,7 +117,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl mb-4 leading-relaxed"
           >
-            Don't spend <span className="text-accent font-semibold">₹1,00,000</span> on JEE/NEET preparation when smart guidance can start at just <span className="text-accent font-semibold">₹149</span>.
+            Don't spend <span className="text-accent font-semibold">lakhs</span> on JEE/NEET preparation when smart guidance can start at just <span className="text-accent font-semibold">₹149</span>.
           </motion.p>
 
           {/* Subheading */}
