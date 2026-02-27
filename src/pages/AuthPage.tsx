@@ -258,44 +258,49 @@ const AuthPage: React.FC = () => {
   // Onboarding Flow
   if (showOnboarding && user) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-setu-navy relative overflow-hidden flex flex-col">
+        {/* Background effects */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/8 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px]" />
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--accent)) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        </div>
+
         {/* Header */}
-        <header className="p-4 sm:p-6">
+        <header className="relative z-10 p-4 sm:p-6">
           <div className="max-w-md mx-auto flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">S</span>
+            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+              <span className="text-primary font-bold text-sm">S</span>
             </div>
-            <span className="font-serif font-semibold text-foreground">SETU</span>
+            <span className="font-serif font-semibold text-white">SETU</span>
           </div>
         </header>
 
         {/* Onboarding Content */}
-        <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
           <div className="w-full max-w-md">
             {/* Progress */}
             <div className="flex items-center gap-2 mb-8">
               {[1, 2, 3, 4, 5].map((step) => (
                 <div
                   key={step}
-                  className={`flex-1 h-1.5 rounded-full transition-colors ${step <= onboardingStep ? 'bg-accent' : 'bg-border'
-                    }`}
+                  className={`flex-1 h-1.5 rounded-full transition-colors ${step <= onboardingStep ? 'bg-accent' : 'bg-white/15'}`}
                 />
               ))}
             </div>
 
-            <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border shadow-card">
+            <div className="bg-white/[0.06] backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl">
               {/* Step 1: Exam */}
               {onboardingStep === 1 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
                       Which exam are you preparing for?
                     </h2>
-                    <p className="text-text-secondary">
+                    <p className="text-white/60">
                       This helps us customize your syllabus and strategy.
                     </p>
                   </div>
-
                   <div className="space-y-3">
                     {[
                       { value: 'JEE Main', label: 'JEE Main', desc: 'NIT, IIIT, GFTI admissions' },
@@ -307,14 +312,14 @@ const AuthPage: React.FC = () => {
                         key={exam.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, exam: exam.value }))}
                         className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.exam === exam.value
-                          ? 'border-accent bg-accent/5'
-                          : 'border-border hover:border-muted-foreground/30'
+                          ? 'border-accent bg-accent/10'
+                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
                           }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="font-medium text-foreground">{exam.label}</span>
-                            <p className="text-sm text-text-muted">{exam.desc}</p>
+                            <span className="font-medium text-white">{exam.label}</span>
+                            <p className="text-sm text-white/50">{exam.desc}</p>
                           </div>
                           {onboardingData.exam === exam.value && (
                             <Check className="h-5 w-5 text-accent" />
@@ -330,14 +335,13 @@ const AuthPage: React.FC = () => {
               {onboardingStep === 2 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
                       Which class are you in?
                     </h2>
-                    <p className="text-text-secondary">
+                    <p className="text-white/60">
                       Your study plan will be adjusted accordingly.
                     </p>
                   </div>
-
                   <div className="space-y-3">
                     {[
                       { value: '11', label: 'Class 11', desc: '2 years for complete preparation' },
@@ -348,14 +352,14 @@ const AuthPage: React.FC = () => {
                         key={option.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, class: option.value }))}
                         className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.class === option.value
-                          ? 'border-accent bg-accent/5'
-                          : 'border-border hover:border-muted-foreground/30'
+                          ? 'border-accent bg-accent/10'
+                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
                           }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="font-medium text-foreground">{option.label}</span>
-                            <p className="text-sm text-text-muted">{option.desc}</p>
+                            <span className="font-medium text-white">{option.label}</span>
+                            <p className="text-sm text-white/50">{option.desc}</p>
                           </div>
                           {onboardingData.class === option.value && (
                             <Check className="h-5 w-5 text-accent" />
@@ -371,14 +375,13 @@ const AuthPage: React.FC = () => {
               {onboardingStep === 3 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
                       How many hours can you study daily?
                     </h2>
-                    <p className="text-text-secondary">
+                    <p className="text-white/60">
                       Be honest - we'll plan realistically.
                     </p>
                   </div>
-
                   <div className="space-y-3">
                     {[
                       { value: '2-4', label: '2-4 hours', desc: 'Part-time preparation' },
@@ -390,14 +393,14 @@ const AuthPage: React.FC = () => {
                         key={option.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, dailyHours: option.value }))}
                         className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.dailyHours === option.value
-                          ? 'border-accent bg-accent/5'
-                          : 'border-border hover:border-muted-foreground/30'
+                          ? 'border-accent bg-accent/10'
+                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
                           }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="font-medium text-foreground">{option.label}</span>
-                            <p className="text-sm text-text-muted">{option.desc}</p>
+                            <span className="font-medium text-white">{option.label}</span>
+                            <p className="text-sm text-white/50">{option.desc}</p>
                           </div>
                           {onboardingData.dailyHours === option.value && (
                             <Check className="h-5 w-5 text-accent" />
@@ -413,14 +416,13 @@ const AuthPage: React.FC = () => {
               {onboardingStep === 4 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
                       Are you enrolled in any coaching?
                     </h2>
-                    <p className="text-text-secondary">
+                    <p className="text-white/60">
                       This helps us complement your learning.
                     </p>
                   </div>
-
                   <div className="space-y-3">
                     {[
                       { value: 'offline', label: 'Offline Coaching', desc: 'Allen, Resonance, FIITJEE, etc.' },
@@ -431,14 +433,14 @@ const AuthPage: React.FC = () => {
                         key={option.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, coaching: option.value }))}
                         className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.coaching === option.value
-                          ? 'border-accent bg-accent/5'
-                          : 'border-border hover:border-muted-foreground/30'
+                          ? 'border-accent bg-accent/10'
+                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
                           }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <span className="font-medium text-foreground">{option.label}</span>
-                            <p className="text-sm text-text-muted">{option.desc}</p>
+                            <span className="font-medium text-white">{option.label}</span>
+                            <p className="text-sm text-white/50">{option.desc}</p>
                           </div>
                           {onboardingData.coaching === option.value && (
                             <Check className="h-5 w-5 text-accent" />
@@ -454,14 +456,13 @@ const AuthPage: React.FC = () => {
               {onboardingStep === 5 && (
                 <div className="space-y-6">
                   <div>
-                    <h2 className="font-serif text-2xl font-semibold text-foreground mb-2">
+                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
                       Which subject needs the most work?
                     </h2>
-                    <p className="text-text-secondary">
+                    <p className="text-white/60">
                       We'll prioritize this in your dashboard.
                     </p>
                   </div>
-
                   <div className="space-y-3">
                     {(onboardingData.exam === 'NEET'
                       ? [
@@ -479,16 +480,16 @@ const AuthPage: React.FC = () => {
                         key={subject.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, weakSubject: subject.value }))}
                         className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.weakSubject === subject.value
-                          ? 'border-accent bg-accent/5'
-                          : 'border-border hover:border-muted-foreground/30'
+                          ? 'border-accent bg-accent/10'
+                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
                           }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className={`w-3 h-3 rounded-full ${subject.color}`} />
                             <div>
-                              <span className="font-medium text-foreground">{subject.label}</span>
-                              <p className="text-sm text-text-muted">{subject.desc}</p>
+                              <span className="font-medium text-white">{subject.label}</span>
+                              <p className="text-sm text-white/50">{subject.desc}</p>
                             </div>
                           </div>
                           {onboardingData.weakSubject === subject.value && (
@@ -507,7 +508,7 @@ const AuthPage: React.FC = () => {
                   <Button
                     variant="outline"
                     onClick={() => setOnboardingStep((prev) => (prev - 1) as OnboardingStep)}
-                    className="flex-1 h-12"
+                    className="flex-1 h-12 border-white/20 text-white hover:bg-white/10 bg-transparent"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back
@@ -516,12 +517,12 @@ const AuthPage: React.FC = () => {
                 <Button
                   onClick={handleOnboardingNext}
                   disabled={loading}
-                  className="flex-1 h-12 bg-primary hover:bg-primary/90"
+                  className="flex-1 h-12 bg-accent hover:bg-accent/90 text-primary font-semibold"
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : onboardingStep === 5 ? (
-                    "Let's Start"
+                    "Let's Start 🚀"
                   ) : (
                     <>
                       Next
@@ -538,42 +539,49 @@ const AuthPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-setu-navy relative overflow-hidden flex flex-col">
+      {/* Background effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/8 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[100px]" />
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--accent)) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+      </div>
+
       {/* Header */}
-      <header className="p-4 sm:p-6">
+      <header className="relative z-10 p-4 sm:p-6">
         <div className="max-w-md mx-auto flex items-center gap-2">
           <button
             onClick={() => navigate('/')}
             className="flex items-center gap-2 hover:opacity-70 transition-opacity"
           >
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">S</span>
+            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+              <span className="text-primary font-bold text-sm">S</span>
             </div>
-            <span className="font-serif font-semibold text-foreground">SETU</span>
+            <span className="font-serif font-semibold text-white">SETU</span>
           </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
+      <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
         <div className="w-full max-w-md">
           {/* Welcome Text */}
           <div className="text-center mb-8">
-            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-foreground mb-2">
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-white mb-2">
               Start your preparation the right way
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-white/60">
               No spam. No distractions. Only study.
             </p>
           </div>
 
           {/* Auth Card */}
-          <div className="bg-card rounded-2xl p-6 sm:p-8 border border-border shadow-card">
+          <div className="bg-white/[0.06] backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl">
             {/* Back button for phone/otp/forgot-password modes */}
             {(mode === 'phone' || mode === 'otp' || mode === 'forgot-password') && (
               <button
                 onClick={() => setMode('login')}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
+                className="flex items-center gap-2 text-white/50 hover:text-white mb-6 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="text-sm">Back to login</span>
@@ -586,7 +594,7 @@ const AuthPage: React.FC = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-12 text-base gap-3 mb-3"
+                  className="w-full h-12 text-base gap-3 mb-3 border-white/15 text-white hover:bg-white/10 bg-white/[0.04]"
                   onClick={handleGoogleAuth}
                   disabled={loading}
                 >
@@ -614,7 +622,7 @@ const AuthPage: React.FC = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-12 text-base gap-3"
+                  className="w-full h-12 text-base gap-3 border-white/15 text-white hover:bg-white/10 bg-white/[0.04]"
                   onClick={() => setMode('phone')}
                   disabled={loading}
                 >
@@ -623,8 +631,9 @@ const AuthPage: React.FC = () => {
                 </Button>
 
                 <div className="my-6 flex items-center gap-4">
-                  <Separator className="flex-1" />
-                  <span className="text-sm text-muted-foreground">or</span>
+                  <Separator className="flex-1 bg-white/10" />
+                  <span className="text-sm text-white/40">or</span>
+                  <Separator className="flex-1 bg-white/10" />
                   <Separator className="flex-1" />
                 </div>
               </>
@@ -635,22 +644,22 @@ const AuthPage: React.FC = () => {
               <form onSubmit={handleEmailAuth} className="space-y-4">
                 {mode === 'signup' && (
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
+                    <Label htmlFor="fullName" className="text-white/80">Full Name</Label>
                     <Input
                       id="fullName"
                       type="text"
                       placeholder="Your name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
-                      className="h-12"
+                      className="h-12 bg-white/[0.06] border-white/15 text-white placeholder:text-white/30 focus:border-accent"
                     />
                   </div>
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-white/80">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/30" />
                     <Input
                       id="email"
                       type="email"
@@ -661,7 +670,7 @@ const AuthPage: React.FC = () => {
                         if (errors.email) validateEmail(e.target.value);
                       }}
                       onBlur={() => email && validateEmail(email)}
-                      className="h-12 pl-10 border-2 focus:border-primary"
+                      className="h-12 pl-10 border-2 bg-white/[0.06] border-white/15 text-white placeholder:text-white/30 focus:border-accent"
                     />
                   </div>
                   {errors.email && (
@@ -670,7 +679,7 @@ const AuthPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-white/80">Password</Label>
                   <div className="relative">
                     <Input
                       id="password"
@@ -682,18 +691,18 @@ const AuthPage: React.FC = () => {
                         if (errors.password) validatePassword(e.target.value);
                       }}
                       onBlur={() => password && validatePassword(password)}
-                      className="h-12 pr-10"
+                      className="h-12 pr-10 bg-white/[0.06] border-white/15 text-white placeholder:text-white/30 focus:border-accent"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-sm text-muted-foreground">{errors.password}</p>
+                    <p className="text-sm text-white/50">{errors.password}</p>
                   )}
                 </div>
 
@@ -711,7 +720,7 @@ const AuthPage: React.FC = () => {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-setu-navy-light shadow-sm"
+                  className="w-full h-12 text-base font-semibold bg-accent hover:bg-accent/90 text-primary shadow-lg shadow-accent/20"
                   disabled={loading}
                 >
                   {loading ? (
@@ -724,7 +733,7 @@ const AuthPage: React.FC = () => {
                 </Button>
 
                 {/* Toggle Login/Signup */}
-                <p className="text-center text-sm text-muted-foreground pt-2">
+                <p className="text-center text-sm text-white/50 pt-2">
                   {mode === 'login' ? (
                     <>
                       New here?{' '}
@@ -756,9 +765,9 @@ const AuthPage: React.FC = () => {
             {mode === 'phone' && (
               <form onSubmit={handlePhoneAuth} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone" className="text-white/80">Phone Number</Label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/30" />
                     <Input
                       id="phone"
                       type="tel"
@@ -769,17 +778,17 @@ const AuthPage: React.FC = () => {
                         if (errors.phone) validatePhone(e.target.value);
                       }}
                       onBlur={() => phone && validatePhone(phone)}
-                      className="h-12 pl-10 border-2 focus:border-primary"
+                      className="h-12 pl-10 border-2 bg-white/[0.06] border-white/15 text-white placeholder:text-white/30 focus:border-accent"
                     />
                   </div>
                   {errors.phone && (
-                    <p className="text-sm text-destructive">{errors.phone}</p>
+                    <p className="text-sm text-red-400">{errors.phone}</p>
                   )}
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-setu-navy-light shadow-sm"
+                  className="w-full h-12 text-base font-semibold bg-accent hover:bg-accent/90 text-primary shadow-lg shadow-accent/20"
                   disabled={loading}
                 >
                   {loading ? (
@@ -795,7 +804,7 @@ const AuthPage: React.FC = () => {
             {mode === 'otp' && (
               <div className="space-y-6">
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-sm text-white/60 mb-4">
                     Enter the 6-digit code sent to {phone}
                   </p>
                 </div>
@@ -819,7 +828,7 @@ const AuthPage: React.FC = () => {
 
                 <Button
                   onClick={handleVerifyOTP}
-                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-setu-navy-light shadow-sm"
+                  className="w-full h-12 text-base font-semibold bg-accent hover:bg-accent/90 text-primary shadow-lg shadow-accent/20"
                   disabled={loading || otp.length !== 6}
                 >
                   {loading ? (
@@ -829,7 +838,7 @@ const AuthPage: React.FC = () => {
                   )}
                 </Button>
 
-                <p className="text-center text-sm text-muted-foreground">
+                <p className="text-center text-sm text-white/50">
                   Didn't receive it?{' '}
                   <button
                     onClick={() => handlePhoneAuth({ preventDefault: () => { } } as React.FormEvent)}
@@ -846,18 +855,18 @@ const AuthPage: React.FC = () => {
             {mode === 'forgot-password' && (
               <form onSubmit={handleForgotPassword} className="space-y-4">
                 <div className="text-center mb-4">
-                  <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
+                  <h3 className="font-serif text-xl font-semibold text-white mb-2">
                     Reset your password
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-white/60">
                     Enter your email and we'll send you a reset link
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="reset-email">Email</Label>
+                  <Label htmlFor="reset-email" className="text-white/80">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/30" />
                     <Input
                       id="reset-email"
                       type="email"
@@ -868,17 +877,17 @@ const AuthPage: React.FC = () => {
                         if (errors.email) validateEmail(e.target.value);
                       }}
                       onBlur={() => email && validateEmail(email)}
-                      className="h-12 pl-10 border-2 focus:border-primary"
+                      className="h-12 pl-10 border-2 bg-white/[0.06] border-white/15 text-white placeholder:text-white/30 focus:border-accent"
                     />
                   </div>
                   {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email}</p>
+                    <p className="text-sm text-red-400">{errors.email}</p>
                   )}
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold bg-primary hover:bg-setu-navy-light shadow-sm"
+                  className="w-full h-12 text-base font-semibold bg-accent hover:bg-accent/90 text-primary shadow-lg shadow-accent/20"
                   disabled={loading}
                 >
                   {loading ? (
@@ -888,7 +897,7 @@ const AuthPage: React.FC = () => {
                   )}
                 </Button>
 
-                <p className="text-center text-sm text-muted-foreground pt-2">
+                <p className="text-center text-sm text-white/50 pt-2">
                   Remember your password?{' '}
                   <button
                     type="button"
@@ -905,8 +914,8 @@ const AuthPage: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="p-4 text-center">
-        <p className="text-xs text-muted-foreground">
+      <footer className="relative z-10 p-4 text-center">
+        <p className="text-xs text-white/30">
           By continuing, you agree to our Terms of Service and Privacy Policy
         </p>
       </footer>
