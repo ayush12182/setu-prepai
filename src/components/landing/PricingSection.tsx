@@ -66,13 +66,14 @@ export const PricingSection: React.FC = () => {
 
           <div className="bg-card border border-border rounded-2xl p-8 sm:p-10 mb-8">
             <div className="flex items-center justify-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/15 text-accent text-xs font-semibold">
-                Student-Friendly Pricing
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/15 text-green-400 text-xs font-semibold">
+                🔥 50% OFF for early users
               </span>
             </div>
 
-            <div className="flex items-baseline justify-center gap-1 mb-4">
-              <span className="text-5xl sm:text-6xl font-bold text-accent">₹149</span>
+            <div className="flex items-baseline justify-center gap-2 mb-4">
+              <span className="text-2xl text-muted-foreground line-through">₹500</span>
+              <span className="text-5xl sm:text-6xl font-bold text-accent">₹249</span>
               <span className="text-muted-foreground text-lg">/ month</span>
             </div>
 
@@ -80,7 +81,7 @@ export const PricingSection: React.FC = () => {
               Complete AI mentorship for your exam journey
             </p>
             <p className="text-muted-foreground text-sm mb-6">
-              Affordable AI mentorship designed for serious aspirants.
+              Limited-time offer for first few users. Lock in this price forever.
             </p>
 
             {/* Features list */}
@@ -112,7 +113,7 @@ export const PricingSection: React.FC = () => {
                 ) : (
                   <Sparkles className="h-5 w-5 mr-2" />
                 )}
-                {user ? 'Start Learning for ₹149' : 'Sign Up to Subscribe'}
+                {user ? 'Start Learning for ₹249' : 'Sign Up to Subscribe'}
               </Button>
             )}
           </div>
