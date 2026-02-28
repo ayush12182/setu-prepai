@@ -117,7 +117,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl mb-4 leading-relaxed"
           >
-            Don't spend <span className="text-accent font-semibold">lakhs</span> on JEE/NEET preparation when smart guidance can start at just <span className="text-accent font-semibold">₹149</span>.
+            Don't spend <span className="text-accent font-semibold">lakhs</span> on JEE/NEET preparation when smart guidance can start at just <span className="line-through text-white/40">₹500</span> <span className="text-accent font-semibold">₹249</span>.
           </motion.p>
 
           {/* Subheading */}
@@ -154,7 +154,7 @@ export const HeroSection: React.FC = () => {
               onClick={() => navigate('/auth')}
               className="group h-14 px-8 text-lg font-semibold bg-accent text-primary hover:bg-accent/90 rounded-xl shadow-[0_0_40px_rgba(232,154,60,0.4)] hover:shadow-[0_0_60px_rgba(232,154,60,0.5)] transition-all duration-300 hover:-translate-y-1"
             >
-              Start Learning for ₹149
+              Start Learning for ₹249
               <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button
