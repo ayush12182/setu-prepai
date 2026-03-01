@@ -52,8 +52,7 @@ export const CTASection: React.FC = () => {
 
           {/* Subtext */}
           <p className="text-white/70 text-lg sm:text-xl max-w-lg mx-auto mb-10">
-            Join thousands of students who found clarity with SETU.
-            Your 21-day transformation starts now.
+            From Class 6 foundations to JEE/NEET/CUET success — join students who found clarity with SETU.
           </p>
 
           {/* CTA Button */}

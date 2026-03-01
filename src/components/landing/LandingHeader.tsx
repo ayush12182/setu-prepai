@@ -34,6 +34,9 @@ export const LandingHeader: React.FC = () => {
         
         {/* Nav Links - Desktop */}
         <nav className="hidden md:flex items-center gap-8">
+          <span className="text-white/50 text-xs font-medium tracking-wide px-3 py-1 rounded-full border border-white/15 bg-white/5">
+            Class 6–12 • JEE • NEET • CUET
+          </span>
           {['Features', 'How it Works', 'Pricing'].map((item) => (
             <a
               key={item}

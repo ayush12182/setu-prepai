@@ -269,21 +269,25 @@ const AuthPage: React.FC = () => {
   const getExamOptions = () => {
     if (onboardingData.studentLevel === '6-8') {
       return [
-        { value: 'Foundation', label: 'Foundation', desc: 'Build strong basics for future exams' },
+        { value: 'Foundation', label: 'School Improvement', desc: 'Build strong basics & excel in school', emoji: '📚' },
+        { value: 'JEE Main', label: 'JEE Preparation', desc: 'Start early JEE foundation', emoji: '⚡' },
+        { value: 'NEET', label: 'NEET Preparation', desc: 'Start early NEET foundation', emoji: '🧬' },
       ];
     }
     if (onboardingData.studentLevel === '9-10') {
       return [
-        { value: 'Foundation', label: 'Foundation + Olympiad', desc: 'NTSE, Olympiad, Board preparation' },
-        { value: 'JEE Main', label: 'Pre-JEE Track', desc: 'Early JEE preparation' },
-        { value: 'NEET', label: 'Pre-NEET Track', desc: 'Early NEET preparation' },
+        { value: 'Foundation', label: 'School Improvement', desc: 'Board exam preparation + Olympiad readiness', emoji: '📚' },
+        { value: 'JEE Main', label: 'JEE Preparation', desc: 'Pre-JEE competitive track', emoji: '⚡' },
+        { value: 'NEET', label: 'NEET Preparation', desc: 'Pre-NEET competitive track', emoji: '🧬' },
+        { value: 'CUET', label: 'CUET Preparation', desc: 'University entrance preparation', emoji: '🎯' },
       ];
     }
     return [
-      { value: 'JEE Main', label: 'JEE Main', desc: 'NIT, IIIT, GFTI admissions' },
-      { value: 'JEE Advanced', label: 'JEE Advanced', desc: 'IIT admissions' },
-      { value: 'Both', label: 'Both Main + Advanced', desc: 'Complete JEE preparation' },
-      { value: 'NEET', label: 'NEET UG', desc: 'Medical college admissions' },
+      { value: 'JEE Main', label: 'JEE Main', desc: 'NIT, IIIT, GFTI admissions', emoji: '⚡' },
+      { value: 'JEE Advanced', label: 'JEE Advanced', desc: 'IIT admissions', emoji: '🚀' },
+      { value: 'Both', label: 'Both Main + Advanced', desc: 'Complete JEE preparation', emoji: '💪' },
+      { value: 'NEET', label: 'NEET UG', desc: 'Medical college admissions', emoji: '🧬' },
+      { value: 'CUET', label: 'CUET', desc: 'Central university admissions', emoji: '🎯' },
     ];
   };
 
@@ -400,10 +404,10 @@ const AuthPage: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-white mb-2">
-                      {onboardingData.studentLevel === '11-12' ? 'Which exam are you preparing for?' : 'Choose your learning track'}
+                      What's your learning goal?
                     </h2>
                     <p className="text-white/60">
-                      This helps us customize your syllabus and strategy.
+                      This helps us customize your syllabus, strategy, and roadmap.
                     </p>
                   </div>
                   <div className="space-y-3">
@@ -417,9 +421,12 @@ const AuthPage: React.FC = () => {
                           }`}
                       >
                         <div className="flex items-center justify-between">
-                          <div>
-                            <span className="font-medium text-white">{exam.label}</span>
-                            <p className="text-sm text-white/50">{exam.desc}</p>
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{exam.emoji}</span>
+                            <div>
+                              <span className="font-medium text-white">{exam.label}</span>
+                              <p className="text-sm text-white/50">{exam.desc}</p>
+                            </div>
                           </div>
                           {onboardingData.exam === exam.value && (
                             <Check className="h-5 w-5 text-accent" />
@@ -664,10 +671,10 @@ const AuthPage: React.FC = () => {
           {/* Welcome Text */}
           <div className="text-center mb-8">
             <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-white mb-2">
-              Start your preparation the right way
+              Personalized Learning Mode
             </h2>
             <p className="text-white/60">
-              No spam. No distractions. Only study.
+              For Class 6–12 academics and JEE, NEET & CUET preparation.
             </p>
           </div>
 
