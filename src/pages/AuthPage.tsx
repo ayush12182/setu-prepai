@@ -18,9 +18,10 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 const phoneSchema = z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid phone number');
 
 type AuthMode = 'login' | 'signup' | 'phone' | 'otp' | 'forgot-password';
-type OnboardingStep = 0 | 1 | 2 | 3 | 4 | 5;
+type OnboardingStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 interface OnboardingData {
+  studentLevel: string;
   exam: string;
   class: string;
   weakSubject: string;
@@ -47,6 +48,7 @@ const AuthPage: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(1);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
+    studentLevel: '',
     exam: '',
     class: '',
     weakSubject: '',
@@ -216,10 +218,12 @@ const AuthPage: React.FC = () => {
 
       await updateProfile({
         target_exam: onboardingData.exam,
-        class: onboardingData.class as '11' | '12' | 'dropper',
+        class: onboardingData.class as string,
+        student_level: onboardingData.studentLevel,
       });
       toast.success('Chalo shuru karte hain! 🎯');
-      navigate('/dashboard');
+      // Redirect to diagnostic test for new students
+      navigate('/diagnostic-test');
     } catch (error: any) {
       console.error('Onboarding error:', error);
       toast.error('Profile update mein problem hui, please try again');
@@ -229,32 +233,80 @@ const AuthPage: React.FC = () => {
   };
 
   const handleOnboardingNext = () => {
-    if (onboardingStep === 1 && !onboardingData.exam) {
+    if (onboardingStep === 1 && !onboardingData.studentLevel) {
+      toast.error('Please select your academic level');
+      return;
+    }
+    if (onboardingStep === 2 && !onboardingData.exam) {
       toast.error('Please select your target exam');
       return;
     }
-    if (onboardingStep === 2 && !onboardingData.class) {
+    if (onboardingStep === 3 && !onboardingData.class) {
       toast.error('Please select your class');
       return;
     }
-    if (onboardingStep === 3 && !onboardingData.dailyHours) {
+    if (onboardingStep === 4 && !onboardingData.dailyHours) {
       toast.error('Please select study hours');
       return;
     }
-    if (onboardingStep === 4 && !onboardingData.coaching) {
+    if (onboardingStep === 5 && !onboardingData.coaching) {
       toast.error('Please select coaching status');
       return;
     }
-    if (onboardingStep === 5 && !onboardingData.weakSubject) {
+    if (onboardingStep === 6 && !onboardingData.weakSubject) {
       toast.error('Please select your weak subject');
       return;
     }
 
-    if (onboardingStep < 5) {
+    if (onboardingStep < 6) {
       setOnboardingStep((prev) => (prev + 1) as OnboardingStep);
     } else {
       handleOnboardingComplete();
     }
+  };
+
+  // Get exam options based on student level
+  const getExamOptions = () => {
+    if (onboardingData.studentLevel === '6-8') {
+      return [
+        { value: 'Foundation', label: 'Foundation', desc: 'Build strong basics for future exams' },
+      ];
+    }
+    if (onboardingData.studentLevel === '9-10') {
+      return [
+        { value: 'Foundation', label: 'Foundation + Olympiad', desc: 'NTSE, Olympiad, Board preparation' },
+        { value: 'JEE Main', label: 'Pre-JEE Track', desc: 'Early JEE preparation' },
+        { value: 'NEET', label: 'Pre-NEET Track', desc: 'Early NEET preparation' },
+      ];
+    }
+    return [
+      { value: 'JEE Main', label: 'JEE Main', desc: 'NIT, IIIT, GFTI admissions' },
+      { value: 'JEE Advanced', label: 'JEE Advanced', desc: 'IIT admissions' },
+      { value: 'Both', label: 'Both Main + Advanced', desc: 'Complete JEE preparation' },
+      { value: 'NEET', label: 'NEET UG', desc: 'Medical college admissions' },
+    ];
+  };
+
+  // Get class options based on student level
+  const getClassOptions = () => {
+    if (onboardingData.studentLevel === '6-8') {
+      return [
+        { value: '6', label: 'Class 6', desc: 'Foundation start' },
+        { value: '7', label: 'Class 7', desc: 'Building concepts' },
+        { value: '8', label: 'Class 8', desc: 'Strengthening fundamentals' },
+      ];
+    }
+    if (onboardingData.studentLevel === '9-10') {
+      return [
+        { value: '9', label: 'Class 9', desc: 'Pre-board preparation' },
+        { value: '10', label: 'Class 10', desc: 'Board + competitive readiness' },
+      ];
+    }
+    return [
+      { value: '11', label: 'Class 11', desc: '2 years for complete preparation' },
+      { value: '12', label: 'Class 12', desc: 'Board + exam balance mode' },
+      { value: 'dropper', label: 'Dropper', desc: 'Full focus on competitive exam' },
+    ];
   };
 
   if (authLoading) {
@@ -291,7 +343,7 @@ const AuthPage: React.FC = () => {
           <div className="w-full max-w-md">
             {/* Progress */}
             <div className="flex items-center gap-2 mb-8">
-              {[1, 2, 3, 4, 5].map((step) => (
+              {[1, 2, 3, 4, 5, 6].map((step) => (
                 <div
                   key={step}
                   className={`flex-1 h-1.5 rounded-full transition-colors ${step <= onboardingStep ? 'bg-accent' : 'bg-white/15'}`}
@@ -300,24 +352,62 @@ const AuthPage: React.FC = () => {
             </div>
 
             <div className="bg-white/[0.06] backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl">
-              {/* Step 1: Exam */}
+              {/* Step 1: Student Level */}
               {onboardingStep === 1 && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-white mb-2">
-                      Which exam are you preparing for?
+                      Select Your Academic Level
+                    </h2>
+                    <p className="text-white/60">
+                      This helps us tailor your entire learning experience.
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    {[
+                      { value: '6-8', label: 'Class 6–8', desc: 'Foundation Stage — Build strong basics', emoji: '🌱' },
+                      { value: '9-10', label: 'Class 9–10', desc: 'Concept Strengthening — Board + competitive readiness', emoji: '📐' },
+                      { value: '11-12', label: 'Class 11–12', desc: 'Competitive Alignment — JEE / NEET focused', emoji: '🎯' },
+                    ].map((level) => (
+                      <button
+                        key={level.value}
+                        onClick={() => setOnboardingData(prev => ({ ...prev, studentLevel: level.value, exam: '', class: '' }))}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.studentLevel === level.value
+                          ? 'border-accent bg-accent/10'
+                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
+                          }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{level.emoji}</span>
+                            <div>
+                              <span className="font-medium text-white">{level.label}</span>
+                              <p className="text-sm text-white/50">{level.desc}</p>
+                            </div>
+                          </div>
+                          {onboardingData.studentLevel === level.value && (
+                            <Check className="h-5 w-5 text-accent" />
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Exam/Track */}
+              {onboardingStep === 2 && (
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
+                      {onboardingData.studentLevel === '11-12' ? 'Which exam are you preparing for?' : 'Choose your learning track'}
                     </h2>
                     <p className="text-white/60">
                       This helps us customize your syllabus and strategy.
                     </p>
                   </div>
                   <div className="space-y-3">
-                    {[
-                      { value: 'JEE Main', label: 'JEE Main', desc: 'NIT, IIIT, GFTI admissions' },
-                      { value: 'JEE Advanced', label: 'JEE Advanced', desc: 'IIT admissions' },
-                      { value: 'Both', label: 'Both Main + Advanced', desc: 'Complete JEE preparation' },
-                      { value: 'NEET', label: 'NEET UG', desc: 'Medical college admissions' },
-                    ].map((exam) => (
+                    {getExamOptions().map((exam) => (
                       <button
                         key={exam.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, exam: exam.value }))}
@@ -341,8 +431,8 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 2: Class */}
-              {onboardingStep === 2 && (
+              {/* Step 3: Class */}
+              {onboardingStep === 3 && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-white mb-2">
@@ -353,11 +443,7 @@ const AuthPage: React.FC = () => {
                     </p>
                   </div>
                   <div className="space-y-3">
-                    {[
-                      { value: '11', label: 'Class 11', desc: '2 years for complete preparation' },
-                      { value: '12', label: 'Class 12', desc: onboardingData.exam === 'NEET' ? 'Board + NEET balance mode' : 'Board + JEE balance mode' },
-                      { value: 'dropper', label: 'Dropper', desc: onboardingData.exam === 'NEET' ? 'Full focus on NEET' : 'Full focus on JEE' },
-                    ].map((option) => (
+                    {getClassOptions().map((option) => (
                       <button
                         key={option.value}
                         onClick={() => setOnboardingData(prev => ({ ...prev, class: option.value }))}
@@ -381,8 +467,8 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 3: Daily Study Hours */}
-              {onboardingStep === 3 && (
+              {/* Step 4: Daily Study Hours */}
+              {onboardingStep === 4 && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-white mb-2">
@@ -422,8 +508,8 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 4: Coaching Status */}
-              {onboardingStep === 4 && (
+              {/* Step 5: Coaching Status */}
+              {onboardingStep === 5 && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-white mb-2">
@@ -462,8 +548,8 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 5: Weak Subject */}
-              {onboardingStep === 5 && (
+              {/* Step 6: Weak Subject */}
+              {onboardingStep === 6 && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-white mb-2">
@@ -531,8 +617,8 @@ const AuthPage: React.FC = () => {
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : onboardingStep === 5 ? (
-                    "Let's Start 🚀"
+                  ) : onboardingStep === 6 ? (
+                    "Take Diagnostic Test 🧠"
                   ) : (
                     <>
                       Next

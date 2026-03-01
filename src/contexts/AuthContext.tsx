@@ -12,6 +12,7 @@ interface Profile {
   avatar_url: string | null;
   class: string | null;
   target_exam: string | null;
+  student_level: string | null;
 }
 
 interface SubscriptionState {
@@ -192,10 +193,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) throw new Error('No user logged in');
     
+    // Cast to any to handle new columns not yet in generated types
+    const dbUpdates: any = { ...updates };
+    
     // Try update first, if no rows affected, upsert
     const { data, error } = await supabase
       .from('profiles')
-      .update(updates)
+      .update(dbUpdates)
       .eq('user_id', user.id)
       .select();
     
@@ -205,7 +209,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!data || data.length === 0) {
       const { error: insertError } = await supabase
         .from('profiles')
-        .insert({ user_id: user.id, ...updates });
+        .insert({ user_id: user.id, ...dbUpdates } as any);
       if (insertError) throw insertError;
     }
     

@@ -85,6 +85,206 @@ export type Database = {
         }
         Relationships: []
       }
+      diagnostic_answers: {
+        Row: {
+          answered_at: string | null
+          attempt_id: string
+          difficulty_at_time: string | null
+          id: string
+          is_correct: boolean | null
+          question_id: string
+          selected_option: string | null
+          time_taken_seconds: number
+        }
+        Insert: {
+          answered_at?: string | null
+          attempt_id: string
+          difficulty_at_time?: string | null
+          id?: string
+          is_correct?: boolean | null
+          question_id: string
+          selected_option?: string | null
+          time_taken_seconds?: number
+        }
+        Update: {
+          answered_at?: string | null
+          attempt_id?: string
+          difficulty_at_time?: string | null
+          id?: string
+          is_correct?: boolean | null
+          question_id?: string
+          selected_option?: string | null
+          time_taken_seconds?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnostic_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnostic_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnostic_attempts: {
+        Row: {
+          completed_at: string | null
+          correct_answers: number
+          id: string
+          started_at: string
+          status: string
+          student_level: string
+          total_questions: number
+          total_time_seconds: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          correct_answers?: number
+          id?: string
+          started_at?: string
+          status?: string
+          student_level: string
+          total_questions?: number
+          total_time_seconds?: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          correct_answers?: number
+          id?: string
+          started_at?: string
+          status?: string
+          student_level?: string
+          total_questions?: number
+          total_time_seconds?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      diagnostic_questions: {
+        Row: {
+          correct_option: string
+          created_at: string
+          difficulty: string
+          explanation: string
+          grade_range: string
+          id: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          prerequisite_topic: string | null
+          question_text: string
+          question_type: string
+          skill_tested: string
+          subject: string
+          subtopic: string | null
+          topic: string
+        }
+        Insert: {
+          correct_option: string
+          created_at?: string
+          difficulty?: string
+          explanation: string
+          grade_range: string
+          id?: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          prerequisite_topic?: string | null
+          question_text: string
+          question_type?: string
+          skill_tested: string
+          subject: string
+          subtopic?: string | null
+          topic: string
+        }
+        Update: {
+          correct_option?: string
+          created_at?: string
+          difficulty?: string
+          explanation?: string
+          grade_range?: string
+          id?: string
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          prerequisite_topic?: string | null
+          question_text?: string
+          question_type?: string
+          skill_tested?: string
+          subject?: string
+          subtopic?: string | null
+          topic?: string
+        }
+        Relationships: []
+      }
+      learning_profiles: {
+        Row: {
+          accuracy_score: number | null
+          concept_score: number | null
+          confidence_score: number | null
+          created_at: string
+          diagnostic_attempt_id: string | null
+          id: string
+          overall_level: string | null
+          prerequisite_gaps: Json | null
+          speed_score: number | null
+          strong_topics: Json | null
+          updated_at: string
+          user_id: string
+          weak_topics: Json | null
+        }
+        Insert: {
+          accuracy_score?: number | null
+          concept_score?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          diagnostic_attempt_id?: string | null
+          id?: string
+          overall_level?: string | null
+          prerequisite_gaps?: Json | null
+          speed_score?: number | null
+          strong_topics?: Json | null
+          updated_at?: string
+          user_id: string
+          weak_topics?: Json | null
+        }
+        Update: {
+          accuracy_score?: number | null
+          concept_score?: number | null
+          confidence_score?: number | null
+          created_at?: string
+          diagnostic_attempt_id?: string | null
+          id?: string
+          overall_level?: string | null
+          prerequisite_gaps?: Json | null
+          speed_score?: number | null
+          strong_topics?: Json | null
+          updated_at?: string
+          user_id?: string
+          weak_topics?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_profiles_diagnostic_attempt_id_fkey"
+            columns: ["diagnostic_attempt_id"]
+            isOneToOne: false
+            referencedRelation: "diagnostic_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lecture_notes: {
         Row: {
           chapter: string | null
@@ -420,6 +620,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          student_level: string | null
           target_exam: string | null
           updated_at: string
           user_id: string
@@ -431,6 +632,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          student_level?: string | null
           target_exam?: string | null
           updated_at?: string
           user_id: string
@@ -442,6 +644,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          student_level?: string | null
           target_exam?: string | null
           updated_at?: string
           user_id?: string
