@@ -18,15 +18,11 @@ const passwordSchema = z.string().min(6, 'Password must be at least 6 characters
 const phoneSchema = z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid phone number');
 
 type AuthMode = 'login' | 'signup' | 'phone' | 'otp' | 'forgot-password';
-type OnboardingStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+type OnboardingStep = 0 | 1 | 2 | 3;
 
 interface OnboardingData {
-  studentLevel: string;
-  exam: string;
-  class: string;
-  weakSubject: string;
-  dailyHours: string;
-  coaching: string;
+  studentClass: string;
+  examGoal: string;
 }
 
 const AuthPage: React.FC = () => {
@@ -48,12 +44,8 @@ const AuthPage: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(1);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
-    studentLevel: '',
-    exam: '',
-    class: '',
-    weakSubject: '',
-    dailyHours: '',
-    coaching: '',
+    studentClass: '',
+    examGoal: '',
   });
 
   // Check if user needs onboarding
@@ -207,22 +199,42 @@ const AuthPage: React.FC = () => {
     }
   };
 
+  const isFoundationClass = () => {
+    const cls = parseInt(onboardingData.studentClass);
+    return !isNaN(cls) && cls >= 6 && cls <= 10;
+  };
+
+  const getStudentLevel = () => {
+    const cls = parseInt(onboardingData.studentClass);
+    if (isNaN(cls)) return '11-12'; // dropper
+    if (cls <= 8) return '6-8';
+    if (cls <= 10) return '9-10';
+    return '11-12';
+  };
+
   const handleOnboardingComplete = async () => {
     setLoading(true);
     try {
-      const isNeet = onboardingData.exam === 'NEET';
-      setExamMode(isNeet ? 'neet' : 'jee');
+      const studentLevel = getStudentLevel();
+      const examGoal = isFoundationClass() ? 'Foundation' : onboardingData.examGoal;
+      
+      // Set exam mode based on goal
+      if (examGoal === 'NEET') {
+        setExamMode('neet');
+      } else if (examGoal === 'CUET') {
+        setExamMode('cuet');
+      } else {
+        setExamMode('jee');
+      }
 
-      // Small delay to ensure profile trigger has completed
       await new Promise(resolve => setTimeout(resolve, 500));
 
       await updateProfile({
-        target_exam: onboardingData.exam,
-        class: onboardingData.class as string,
-        student_level: onboardingData.studentLevel,
+        target_exam: examGoal,
+        class: onboardingData.studentClass,
+        student_level: studentLevel,
       });
       toast.success('Chalo shuru karte hain! 🎯');
-      // Redirect to diagnostic test for new students
       navigate('/diagnostic-test');
     } catch (error: any) {
       console.error('Onboarding error:', error);
@@ -233,85 +245,29 @@ const AuthPage: React.FC = () => {
   };
 
   const handleOnboardingNext = () => {
-    if (onboardingStep === 1 && !onboardingData.studentLevel) {
-      toast.error('Please select your academic level');
-      return;
-    }
-    if (onboardingStep === 2 && !onboardingData.exam) {
-      toast.error('Please select your target exam');
-      return;
-    }
-    if (onboardingStep === 3 && !onboardingData.class) {
+    if (onboardingStep === 1 && !onboardingData.studentClass) {
       toast.error('Please select your class');
       return;
     }
-    if (onboardingStep === 4 && !onboardingData.dailyHours) {
-      toast.error('Please select study hours');
-      return;
-    }
-    if (onboardingStep === 5 && !onboardingData.coaching) {
-      toast.error('Please select coaching status');
-      return;
-    }
-    if (onboardingStep === 6 && !onboardingData.weakSubject) {
-      toast.error('Please select your weak subject');
+    if (onboardingStep === 2 && !onboardingData.examGoal) {
+      toast.error('Please select your goal');
       return;
     }
 
-    if (onboardingStep < 6) {
-      setOnboardingStep((prev) => (prev + 1) as OnboardingStep);
-    } else {
+    if (onboardingStep === 1) {
+      if (isFoundationClass()) {
+        // Class 6-10: skip goal selection, go straight to complete
+        handleOnboardingComplete();
+      } else {
+        // Class 11-12 / Dropper: show goal selection
+        setOnboardingStep(2);
+      }
+    } else if (onboardingStep === 2) {
       handleOnboardingComplete();
     }
   };
 
-  // Get exam options based on student level
-  const getExamOptions = () => {
-    if (onboardingData.studentLevel === '6-8') {
-      return [
-        { value: 'Foundation', label: 'School Improvement', desc: 'Build strong basics & excel in school', emoji: '📚' },
-        { value: 'JEE Main', label: 'JEE Preparation', desc: 'Start early JEE foundation', emoji: '⚡' },
-        { value: 'NEET', label: 'NEET Preparation', desc: 'Start early NEET foundation', emoji: '🧬' },
-      ];
-    }
-    if (onboardingData.studentLevel === '9-10') {
-      return [
-        { value: 'Foundation', label: 'School Improvement', desc: 'Board exam preparation + Olympiad readiness', emoji: '📚' },
-        { value: 'JEE Main', label: 'JEE Preparation', desc: 'Pre-JEE competitive track', emoji: '⚡' },
-        { value: 'NEET', label: 'NEET Preparation', desc: 'Pre-NEET competitive track', emoji: '🧬' },
-        { value: 'CUET', label: 'CUET Preparation', desc: 'University entrance preparation', emoji: '🎯' },
-      ];
-    }
-    return [
-      { value: 'JEE Main', label: 'JEE Main', desc: 'NIT, IIIT, GFTI admissions', emoji: '⚡' },
-      { value: 'JEE Advanced', label: 'JEE Advanced', desc: 'IIT admissions', emoji: '🚀' },
-      { value: 'Both', label: 'Both Main + Advanced', desc: 'Complete JEE preparation', emoji: '💪' },
-      { value: 'NEET', label: 'NEET UG', desc: 'Medical college admissions', emoji: '🧬' },
-      { value: 'CUET', label: 'CUET', desc: 'Central university admissions', emoji: '🎯' },
-    ];
-  };
-
-  // Get class options based on student level
-  const getClassOptions = () => {
-    if (onboardingData.studentLevel === '6-8') {
-      return [
-        { value: '6', label: 'Class 6', desc: 'Foundation start' },
-        { value: '7', label: 'Class 7', desc: 'Building concepts' },
-        { value: '8', label: 'Class 8', desc: 'Strengthening fundamentals' },
-      ];
-    }
-    if (onboardingData.studentLevel === '9-10') {
-      return [
-        { value: '9', label: 'Class 9', desc: 'Pre-board preparation' },
-        { value: '10', label: 'Class 10', desc: 'Board + competitive readiness' },
-      ];
-    }
-    return [
-      { value: '11', label: 'Class 11', desc: '2 years for complete preparation' },
-      { value: '12', label: 'Class 12', desc: 'Board + exam balance mode' },
-      { value: 'dropper', label: 'Dropper', desc: 'Full focus on competitive exam' },
-    ];
-  };
+  const totalSteps = isFoundationClass() || !onboardingData.studentClass ? 1 : 2;
 
   if (authLoading) {
     return (
@@ -347,7 +303,7 @@ const AuthPage: React.FC = () => {
           <div className="w-full max-w-md">
             {/* Progress */}
             <div className="flex items-center gap-2 mb-8">
-              {[1, 2, 3, 4, 5, 6].map((step) => (
+              {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
                 <div
                   key={step}
                   className={`flex-1 h-1.5 rounded-full transition-colors ${step <= onboardingStep ? 'bg-accent' : 'bg-white/15'}`}
@@ -356,41 +312,41 @@ const AuthPage: React.FC = () => {
             </div>
 
             <div className="bg-white/[0.06] backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-white/10 shadow-2xl">
-              {/* Step 1: Student Level */}
+              {/* Step 1: Class Selection */}
               {onboardingStep === 1 && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-white mb-2">
-                      Select Your Academic Level
+                      Choose Your Current Class
                     </h2>
                     <p className="text-white/60">
-                      This helps us tailor your entire learning experience.
+                      This determines your entire learning experience.
                     </p>
                   </div>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {[
-                      { value: '6-8', label: 'Class 6–8', desc: 'Foundation Stage — Build strong basics', emoji: '🌱' },
-                      { value: '9-10', label: 'Class 9–10', desc: 'Concept Strengthening — Board + competitive readiness', emoji: '📐' },
-                      { value: '11-12', label: 'Class 11–12', desc: 'Competitive Alignment — JEE / NEET focused', emoji: '🎯' },
-                    ].map((level) => (
+                      { value: '6', label: 'Class 6', emoji: '🌱' },
+                      { value: '7', label: 'Class 7', emoji: '🌿' },
+                      { value: '8', label: 'Class 8', emoji: '📐' },
+                      { value: '9', label: 'Class 9', emoji: '📖' },
+                      { value: '10', label: 'Class 10', emoji: '🎯' },
+                      { value: '11', label: 'Class 11', emoji: '🚀' },
+                      { value: '12', label: 'Class 12', emoji: '⚡' },
+                      { value: 'dropper', label: 'Dropper', emoji: '💪' },
+                    ].map((cls) => (
                       <button
-                        key={level.value}
-                        onClick={() => setOnboardingData(prev => ({ ...prev, studentLevel: level.value, exam: '', class: '' }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.studentLevel === level.value
+                        key={cls.value}
+                        onClick={() => setOnboardingData(prev => ({ ...prev, studentClass: cls.value, examGoal: '' }))}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${onboardingData.studentClass === cls.value
                           ? 'border-accent bg-accent/10'
                           : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
                           }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{level.emoji}</span>
-                            <div>
-                              <span className="font-medium text-white">{level.label}</span>
-                              <p className="text-sm text-white/50">{level.desc}</p>
-                            </div>
-                          </div>
-                          {onboardingData.studentLevel === level.value && (
-                            <Check className="h-5 w-5 text-accent" />
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{cls.emoji}</span>
+                          <span className="font-medium text-white text-sm">{cls.label}</span>
+                          {onboardingData.studentClass === cls.value && (
+                            <Check className="h-4 w-4 text-accent ml-auto" />
                           )}
                         </div>
                       </button>
@@ -399,203 +355,41 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 2: Exam/Track */}
+              {/* Step 2: Goal Selection (Only for 11-12 / Dropper) */}
               {onboardingStep === 2 && (
                 <div className="space-y-6">
                   <div>
                     <h2 className="font-serif text-2xl font-semibold text-white mb-2">
-                      What's your learning goal?
+                      Select Your Goal
                     </h2>
                     <p className="text-white/60">
-                      This helps us customize your syllabus, strategy, and roadmap.
+                      This shapes your syllabus, tests, and roadmap.
                     </p>
                   </div>
                   <div className="space-y-3">
-                    {getExamOptions().map((exam) => (
+                    {[
+                      { value: 'JEE Main', label: 'JEE Preparation', desc: 'NIT, IIIT, IIT admissions', emoji: '⚡' },
+                      { value: 'NEET', label: 'NEET Preparation', desc: 'Medical college admissions', emoji: '🧬' },
+                      { value: 'CUET', label: 'CUET Preparation', desc: 'Central university admissions', emoji: '🎯' },
+                      { value: 'Foundation', label: 'School + Boards Focus', desc: 'Excel in academics first', emoji: '📚' },
+                    ].map((goal) => (
                       <button
-                        key={exam.value}
-                        onClick={() => setOnboardingData(prev => ({ ...prev, exam: exam.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.exam === exam.value
+                        key={goal.value}
+                        onClick={() => setOnboardingData(prev => ({ ...prev, examGoal: goal.value }))}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.examGoal === goal.value
                           ? 'border-accent bg-accent/10'
                           : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
                           }`}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <span className="text-2xl">{exam.emoji}</span>
+                            <span className="text-2xl">{goal.emoji}</span>
                             <div>
-                              <span className="font-medium text-white">{exam.label}</span>
-                              <p className="text-sm text-white/50">{exam.desc}</p>
+                              <span className="font-medium text-white">{goal.label}</span>
+                              <p className="text-sm text-white/50">{goal.desc}</p>
                             </div>
                           </div>
-                          {onboardingData.exam === exam.value && (
-                            <Check className="h-5 w-5 text-accent" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Step 3: Class */}
-              {onboardingStep === 3 && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
-                      Which class are you in?
-                    </h2>
-                    <p className="text-white/60">
-                      Your study plan will be adjusted accordingly.
-                    </p>
-                  </div>
-                  <div className="space-y-3">
-                    {getClassOptions().map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setOnboardingData(prev => ({ ...prev, class: option.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.class === option.value
-                          ? 'border-accent bg-accent/10'
-                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="font-medium text-white">{option.label}</span>
-                            <p className="text-sm text-white/50">{option.desc}</p>
-                          </div>
-                          {onboardingData.class === option.value && (
-                            <Check className="h-5 w-5 text-accent" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Step 4: Daily Study Hours */}
-              {onboardingStep === 4 && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
-                      How many hours can you study daily?
-                    </h2>
-                    <p className="text-white/60">
-                      Be honest - we'll plan realistically.
-                    </p>
-                  </div>
-                  <div className="space-y-3">
-                    {[
-                      { value: '2-4', label: '2-4 hours', desc: 'Part-time preparation' },
-                      { value: '4-6', label: '4-6 hours', desc: 'Balanced schedule' },
-                      { value: '6-8', label: '6-8 hours', desc: 'Serious preparation' },
-                      { value: '8+', label: '8+ hours', desc: 'Full-time dedication' },
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setOnboardingData(prev => ({ ...prev, dailyHours: option.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.dailyHours === option.value
-                          ? 'border-accent bg-accent/10'
-                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="font-medium text-white">{option.label}</span>
-                            <p className="text-sm text-white/50">{option.desc}</p>
-                          </div>
-                          {onboardingData.dailyHours === option.value && (
-                            <Check className="h-5 w-5 text-accent" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Step 5: Coaching Status */}
-              {onboardingStep === 5 && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
-                      Are you enrolled in any coaching?
-                    </h2>
-                    <p className="text-white/60">
-                      This helps us complement your learning.
-                    </p>
-                  </div>
-                  <div className="space-y-3">
-                    {[
-                      { value: 'offline', label: 'Offline Coaching', desc: 'Allen, Resonance, FIITJEE, etc.' },
-                      { value: 'online', label: 'Online Coaching', desc: 'PW, Unacademy, Vedantu, etc.' },
-                      { value: 'self', label: 'Self Study', desc: 'Books + YouTube + SETU' },
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setOnboardingData(prev => ({ ...prev, coaching: option.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.coaching === option.value
-                          ? 'border-accent bg-accent/10'
-                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="font-medium text-white">{option.label}</span>
-                            <p className="text-sm text-white/50">{option.desc}</p>
-                          </div>
-                          {onboardingData.coaching === option.value && (
-                            <Check className="h-5 w-5 text-accent" />
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Step 6: Weak Subject */}
-              {onboardingStep === 6 && (
-                <div className="space-y-6">
-                  <div>
-                    <h2 className="font-serif text-2xl font-semibold text-white mb-2">
-                      Which subject needs the most work?
-                    </h2>
-                    <p className="text-white/60">
-                      We'll prioritize this in your dashboard.
-                    </p>
-                  </div>
-                  <div className="space-y-3">
-                    {(onboardingData.exam === 'NEET'
-                      ? [
-                        { value: 'biology', label: 'Biology', desc: 'Botany, Zoology, NCERT-based', color: 'bg-green-500' },
-                        { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
-                        { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
-                      ]
-                      : [
-                        { value: 'physics', label: 'Physics', desc: 'Concepts + numericals', color: 'bg-blue-500' },
-                        { value: 'chemistry', label: 'Chemistry', desc: 'Organic, Inorganic, Physical', color: 'bg-emerald-500' },
-                        { value: 'maths', label: 'Mathematics', desc: 'Calculus, Algebra, Coordinate', color: 'bg-amber-500' },
-                      ]
-                    ).map((subject) => (
-                      <button
-                        key={subject.value}
-                        onClick={() => setOnboardingData(prev => ({ ...prev, weakSubject: subject.value }))}
-                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${onboardingData.weakSubject === subject.value
-                          ? 'border-accent bg-accent/10'
-                          : 'border-white/10 hover:border-white/25 bg-white/[0.03]'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-3 h-3 rounded-full ${subject.color}`} />
-                            <div>
-                              <span className="font-medium text-white">{subject.label}</span>
-                              <p className="text-sm text-white/50">{subject.desc}</p>
-                            </div>
-                          </div>
-                          {onboardingData.weakSubject === subject.value && (
+                          {onboardingData.examGoal === goal.value && (
                             <Check className="h-5 w-5 text-accent" />
                           )}
                         </div>
@@ -624,7 +418,7 @@ const AuthPage: React.FC = () => {
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : onboardingStep === 6 ? (
+                  ) : (onboardingStep === 1 && isFoundationClass()) || onboardingStep === 2 ? (
                     "Take Diagnostic Test 🧠"
                   ) : (
                     <>
@@ -635,6 +429,15 @@ const AuthPage: React.FC = () => {
                 </Button>
               </div>
             </div>
+
+            {/* Foundation info for Class 6-10 */}
+            {onboardingStep === 1 && isFoundationClass() && (
+              <div className="mt-6 bg-white/[0.04] rounded-xl p-4 border border-white/10">
+                <p className="text-white/70 text-sm leading-relaxed">
+                  🧠 <span className="text-accent font-medium">Foundation Mode:</span> We'll take a short diagnostic test to identify your strong and weak concepts, then build a personalized learning roadmap.
+                </p>
+              </div>
+            )}
           </div>
         </main>
       </div>

@@ -11,23 +11,35 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExamMode } from "@/contexts/ExamModeContext";
 import { JeeSubModeSelector } from "@/components/ui/JeeSubModeSelector";
-import { Sparkles, Flame } from "lucide-react";
+import { Sparkles, Flame, BookOpen, Target, TrendingUp, Brain } from "lucide-react";
 import { useTodaysFocus } from "@/hooks/useTodaysFocus";
 import { CirclesDashboardCard } from "@/components/circles/CirclesDashboardCard";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const Index: React.FC = () => {
   const { getMentorName, language } = useLanguage();
   const { user, profile, updateProfile } = useAuth();
   const { config, isNeet, isCuet, examMode, setExamMode } = useExamMode();
+  const navigate = useNavigate();
 
-
-  // Use the refactored hook that returns both focus types
   const { dailyFocus, smartFocus, isLoading, streak } = useTodaysFocus();
 
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "Bhai";
 
+  // Determine if user is in foundation mode (Class 6-10)
+  const isFoundationMode = () => {
+    if (!profile?.class) return false;
+    const cls = parseInt(profile.class);
+    return !isNaN(cls) && cls >= 6 && cls <= 10;
+  };
+
+  const isFoundation = isFoundationMode();
+
   const getGreeting = () => {
+    if (isFoundation) {
+      return language === 'hindi' ? 'आज कुछ नया सीखते हैं!' : "Let's learn something new today!";
+    }
     const mentorName = getMentorName();
     const mentorLabel = isCuet ? 'CUET Mentor' : isNeet ? 'NEET Mentor' : mentorName;
     switch (language) {
@@ -58,7 +70,6 @@ const Index: React.FC = () => {
         {/* ── Section 1: Welcome Hero ── */}
         {user && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--setu-navy-light))] p-8 sm:p-10">
-            {/* ... background elements ... */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
             <div
@@ -77,12 +88,13 @@ const Index: React.FC = () => {
                     Dashboard
                   </span>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-semibold">
-                    {config.emoji} {config.label} Mode
+                    {isFoundation ? `📚 Class ${profile?.class} • Foundation` : `${config.emoji} ${config.label} Mode`}
                   </span>
-                  {/* JEE Sub-mode selector — only visible in JEE mode */}
-                  <div className="bg-white/10 rounded-xl p-0.5">
-                    <JeeSubModeSelector />
-                  </div>
+                  {!isFoundation && (
+                    <div className="bg-white/10 rounded-xl p-0.5">
+                      <JeeSubModeSelector />
+                    </div>
+                  )}
                 </div>
                 <p className="text-white/60 text-sm font-medium mb-1">Welcome back, {displayName}! 👋</p>
                 <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
@@ -91,18 +103,18 @@ const Index: React.FC = () => {
               </div>
 
               <div className="flex gap-3">
-                {/* Cycle Day */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center min-w-[90px]">
-                  <div className="text-xl font-extrabold text-white leading-none">{dailyFocus?.cycleDay ?? 1}</div>
-                  <div className="text-[10px] text-white/50 mt-1 uppercase tracking-wider">Day / 21</div>
-                  <div className="w-full bg-white/10 rounded-full h-1 mt-1.5">
-                    <div
-                      className="bg-accent h-1 rounded-full transition-all"
-                      style={{ width: `${((dailyFocus?.cycleDay ?? 1) / 21) * 100}%` }}
-                    />
+                {!isFoundation && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center min-w-[90px]">
+                    <div className="text-xl font-extrabold text-white leading-none">{dailyFocus?.cycleDay ?? 1}</div>
+                    <div className="text-[10px] text-white/50 mt-1 uppercase tracking-wider">Day / 21</div>
+                    <div className="w-full bg-white/10 rounded-full h-1 mt-1.5">
+                      <div
+                        className="bg-accent h-1 rounded-full transition-all"
+                        style={{ width: `${((dailyFocus?.cycleDay ?? 1) / 21) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                </div>
-                {/* Streak */}
+                )}
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center min-w-[90px]">
                   <div className="text-xl font-extrabold text-white leading-none flex items-center justify-center gap-1">
                     🔥 {streak > 0 ? streak : 0}
@@ -116,38 +128,94 @@ const Index: React.FC = () => {
           </div>
         )}
 
-        {/* ── Section 2: Today's Focus & Smart Suggestion ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3 flex flex-col gap-6">
-            {/* Always show Daily Focus - PRIMARY */}
-            <TodaysFocus data={dailyFocus} isLoading={isLoading} streak={streak} />
+        {/* ── FOUNDATION MODE DASHBOARD (Class 6-10) ── */}
+        {isFoundation ? (
+          <>
+            {/* Foundation Quick Actions */}
+            <section>
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-accent" />
+                Your Learning Tools
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                  { icon: Brain, label: 'Concept Map', desc: 'Visualize mastery', path: '/concept-graph', color: 'from-[hsl(270,70%,60%)] to-[hsl(300,60%,55%)]' },
+                  { icon: Target, label: 'Diagnostic Test', desc: 'Find your gaps', path: '/diagnostic-test', color: 'from-accent to-[hsl(15,80%,55%)]' },
+                  { icon: TrendingUp, label: 'Learning Roadmap', desc: 'Your weekly plan', path: '/learning-roadmap', color: 'from-[hsl(145,60%,45%)] to-[hsl(170,70%,45%)]' },
+                  { icon: BookOpen, label: 'Learning Profile', desc: 'Your strengths', path: '/learning-profile', color: 'from-[hsl(210,80%,55%)] to-[hsl(230,70%,60%)]' },
+                ].map((action) => (
+                  <button
+                    key={action.label}
+                    onClick={() => navigate(action.path)}
+                    className="group bg-card border border-border rounded-xl p-5 text-left hover:border-accent/30 hover:shadow-lg transition-all duration-300"
+                  >
+                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                      <action.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-sm mb-1">{action.label}</h3>
+                    <p className="text-xs text-muted-foreground">{action.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </section>
 
-            {/* Show Smart Suggestion if available - SECONDARY */}
-            {smartFocus && <SmartSuggestion data={smartFocus} />}
+            {/* Foundation Focus */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+              <div className="lg:col-span-3 flex flex-col gap-6">
+                <TodaysFocus data={dailyFocus} isLoading={isLoading} streak={streak} />
+                {smartFocus && <SmartSuggestion data={smartFocus} />}
+              </div>
+              <div className="lg:col-span-2">
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-accent" />
+                    Foundation Focus
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Concept Mastery</span>
+                      <span className="font-medium text-foreground">Building...</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-accent h-2 rounded-full w-1/4 transition-all" />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Complete your diagnostic test to see your personalized mastery map.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            {/* ── Section 3: SETU Circles Dashboard Card ── */}
-            <CirclesDashboardCard />
-          </div>
+            <SyllabusTracker />
+          </>
+        ) : (
+          <>
+            {/* ── COMPETITIVE MODE DASHBOARD (Class 11-12 / Dropper) ── */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+              <div className="lg:col-span-3 flex flex-col gap-6">
+                <TodaysFocus data={dailyFocus} isLoading={isLoading} streak={streak} />
+                {smartFocus && <SmartSuggestion data={smartFocus} />}
+                <CirclesDashboardCard />
+              </div>
+              <div className="lg:col-span-2">
+                <ExamReminders />
+              </div>
+            </div>
 
-          <div className="lg:col-span-2">
-            <ExamReminders />
-          </div>
-        </div>
+            <TwentyOneDayPlan />
 
-        {/* ── Section 3: 21-Day Cycle Plan ── */}
-        <TwentyOneDayPlan />
+            <section>
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-accent" />
+                Quick Actions
+              </h2>
+              <QuickActions />
+            </section>
 
-        {/* ── Section 4: Quick Actions ── */}
-        <section>
-          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-accent" />
-            Quick Actions
-          </h2>
-          <QuickActions />
-        </section>
-
-        {/* ── Section 5: Syllabus Tracker ── */}
-        <SyllabusTracker />
+            <SyllabusTracker />
+          </>
+        )}
       </div>
     </MainLayout>
   );

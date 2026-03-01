@@ -236,6 +236,7 @@ export type Database = {
           confidence_score: number | null
           created_at: string
           diagnostic_attempt_id: string | null
+          diagnostic_completed: boolean
           id: string
           overall_level: string | null
           prerequisite_gaps: Json | null
@@ -251,6 +252,7 @@ export type Database = {
           confidence_score?: number | null
           created_at?: string
           diagnostic_attempt_id?: string | null
+          diagnostic_completed?: boolean
           id?: string
           overall_level?: string | null
           prerequisite_gaps?: Json | null
@@ -266,6 +268,7 @@ export type Database = {
           confidence_score?: number | null
           created_at?: string
           diagnostic_attempt_id?: string | null
+          diagnostic_completed?: boolean
           id?: string
           overall_level?: string | null
           prerequisite_gaps?: Json | null
