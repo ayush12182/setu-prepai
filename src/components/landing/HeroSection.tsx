@@ -81,7 +81,7 @@ export const HeroSection: React.FC = () => {
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium">
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              Built for JEE & NEET aspirants
+              Class 6–12 • JEE • NEET • CUET
             </span>
           </motion.div>
 
@@ -92,7 +92,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.05] mb-6"
           >
-            <span className="block">Your AI</span>
+            <span className="block">Your AI Learning</span>
             <span className="block mt-2">
               <AnimatePresence mode="wait">
                 <motion.span
@@ -107,7 +107,7 @@ export const HeroSection: React.FC = () => {
                 </motion.span>
               </AnimatePresence>
             </span>
-            <span className="block mt-2 text-white/90">for Exam Success</span>
+            <span className="block mt-2 text-white/90 text-3xl sm:text-5xl lg:text-6xl xl:text-7xl">Foundations to Competitive Success</span>
           </motion.h1>
 
           {/* Value Tagline */}
@@ -117,7 +117,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.25 }}
             className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl mb-4 leading-relaxed"
           >
-            Don't spend <span className="text-accent font-semibold">lakhs</span> on JEE/NEET preparation when smart guidance can start at just <span className="line-through text-white/40">₹500</span> <span className="text-accent font-semibold">₹249</span>.
+            One platform for <span className="text-accent font-semibold">Class 6–12 academics</span> and <span className="text-accent font-semibold">JEE, NEET & CUET</span> preparation — starting at just <span className="line-through text-white/40">₹500</span> <span className="text-accent font-semibold">₹249</span>.
           </motion.p>
 
           {/* Subheading */}
@@ -127,9 +127,9 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-lg sm:text-xl lg:text-2xl text-white/70 max-w-2xl mb-3 leading-relaxed"
           >
-            Not random AI. A mentor who understands your syllabus,
+            Start strengthening concepts in school and seamlessly transition
             <br className="hidden sm:block" />
-            tracks your progress, and guides like <span className="text-accent font-semibold">a real teacher</span>.
+            into JEE, NEET, or CUET preparation — guided like <span className="text-accent font-semibold">a real teacher</span>.
           </motion.p>
 
           {/* Supporting line */}
@@ -139,7 +139,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.35 }}
             className="text-sm sm:text-base text-white/50 max-w-2xl mb-10 leading-relaxed"
           >
-            High-quality exam mentorship shouldn't be expensive. SETU brings structured guidance at a price every aspirant can afford.
+            From building strong foundations in Class 6 to cracking competitive exams — SETU is one continuous learning journey.
           </motion.p>
 
           {/* CTAs */}
@@ -190,9 +190,9 @@ export const HeroSection: React.FC = () => {
             className="flex flex-wrap items-center gap-8 sm:gap-12"
           >
             {[
-              { value: '21', label: 'Day Cycles' },
-              { value: '50K+', label: 'PYQs Covered' },
-              { value: '3', label: 'Hour Tests' },
+              { value: '6–12', label: 'Classes Covered' },
+              { value: '50K+', label: 'PYQs & Questions' },
+              { value: '3', label: 'Competitive Exams' },
             ].map((stat) => (
               <div key={stat.label} className="text-center sm:text-left">
                 <div className="text-3xl sm:text-4xl font-bold text-white">{stat.value}</div>

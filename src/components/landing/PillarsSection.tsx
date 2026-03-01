@@ -5,24 +5,24 @@ import { motion } from 'framer-motion';
 const pillars = [
   {
     icon: Route,
-    title: 'Structured Path',
-    description: 'Chapter → Subchapter → Practice → Analysis. Every step planned.',
+    title: 'Diagnostic Assessment',
+    description: 'Every student starts with an AI diagnostic that pinpoints exact weak concepts.',
     gradient: 'from-[hsl(210,80%,55%)] to-[hsl(190,80%,50%)]',
     bgGlow: 'bg-[hsl(210,80%,55%)]',
     number: '01',
   },
   {
     icon: Brain,
-    title: 'AI That Thinks Like a Teacher',
-    description: 'Explains concepts step-by-step, in a calm coaching tone.',
+    title: 'AI Detects Weak Concepts',
+    description: 'Automatically identifies gaps and prerequisite holes across subjects.',
     gradient: 'from-[hsl(270,70%,60%)] to-[hsl(330,70%,60%)]',
     bgGlow: 'bg-[hsl(270,70%,60%)]',
     number: '02',
   },
   {
     icon: Target,
-    title: 'Exam-Accurate Testing',
-    description: '3-hour JEE Main-style tests every 21 days.',
+    title: 'Personalized Roadmap',
+    description: 'AI builds a weekly plan tailored to your level — from Class 6 basics to advanced JEE/NEET.',
     gradient: 'from-accent to-[hsl(15,80%,55%)]',
     bgGlow: 'bg-accent',
     number: '03',
@@ -30,15 +30,15 @@ const pillars = [
   {
     icon: Clock,
     title: '21-Day Cycles',
-    description: 'Time-bound preparation with clear milestones.',
+    description: 'Time-bound preparation with clear milestones and adaptive testing.',
     gradient: 'from-[hsl(150,60%,45%)] to-[hsl(170,70%,45%)]',
     bgGlow: 'bg-[hsl(150,60%,45%)]',
     number: '04',
   },
   {
     icon: BookOpen,
-    title: 'PYQ-First Approach',
-    description: 'Learn from 15+ years of previous year questions.',
+    title: 'School + Competitive in One',
+    description: 'Board prep and competitive exam strategy — one integrated system.',
     gradient: 'from-[hsl(40,90%,55%)] to-accent',
     bgGlow: 'bg-[hsl(40,90%,55%)]',
     number: '05',
@@ -46,7 +46,7 @@ const pillars = [
   {
     icon: Trophy,
     title: 'Track Your Growth',
-    description: 'Detailed analytics on every topic and test.',
+    description: 'Detailed analytics on every topic, concept mastery maps, and performance trends.',
     gradient: 'from-[hsl(240,60%,60%)] to-[hsl(270,70%,60%)]',
     bgGlow: 'bg-[hsl(240,60%,60%)]',
     number: '06',
@@ -81,10 +81,10 @@ export const PillarsSection: React.FC = () => {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
             Six pillars that make
             <br />
-            <span className="text-accent">preparation actually work</span>
+            <span className="text-accent">learning actually work</span>
           </h2>
           <p className="text-white/50 text-lg max-w-xl mx-auto">
-            Not random features. A system designed for results.
+            Not random features. A system designed for Class 6–12 academics and competitive exams.
           </p>
         </motion.div>
 
