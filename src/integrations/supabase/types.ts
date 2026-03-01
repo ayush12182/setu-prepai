@@ -285,6 +285,42 @@ export type Database = {
           },
         ]
       }
+      learning_roadmaps: {
+        Row: {
+          created_at: string
+          focus_area: string
+          id: string
+          status: string
+          title: string
+          topics: Json
+          updated_at: string
+          user_id: string
+          week_number: number
+        }
+        Insert: {
+          created_at?: string
+          focus_area: string
+          id?: string
+          status?: string
+          title: string
+          topics?: Json
+          updated_at?: string
+          user_id: string
+          week_number?: number
+        }
+        Update: {
+          created_at?: string
+          focus_area?: string
+          id?: string
+          status?: string
+          title?: string
+          topics?: Json
+          updated_at?: string
+          user_id?: string
+          week_number?: number
+        }
+        Relationships: []
+      }
       lecture_notes: {
         Row: {
           chapter: string | null
