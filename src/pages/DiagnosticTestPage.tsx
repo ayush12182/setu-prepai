@@ -46,37 +46,49 @@ const DiagnosticTestPage: React.FC = () => {
   // Map student level to grade_range
   const gradeRange = studentLevel === '6-8' ? '6-8' : studentLevel === '9-10' ? '9-10' : '11-12';
 
+  // CAT: Track current difficulty level
+  const [currentDifficulty, setCurrentDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [questionPool, setQuestionPool] = useState<DiagnosticQuestion[]>([]);
+  const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
+  const [consecutiveWrong, setConsecutiveWrong] = useState(0);
+
   const loadQuestions = useCallback(async () => {
     if (!user) return;
     setLoading(true);
 
     try {
-      // Fetch questions from bank for this grade range
+      // Fetch ALL questions from bank for this grade range (for CAT pool)
       const { data: bankQuestions, error } = await supabase
         .from('diagnostic_questions')
         .select('*')
         .eq('grade_range', gradeRange)
-        .limit(100);
+        .limit(200);
 
       if (error) throw error;
+
+      let pool: DiagnosticQuestion[] = [];
 
       if (!bankQuestions || bankQuestions.length === 0) {
         // Generate questions via AI if bank is empty
         const { data: generated, error: genError } = await supabase.functions.invoke('generate-diagnostic-test', {
-          body: { gradeRange, studentLevel, count: 25 }
+          body: { gradeRange, studentLevel, count: 40 }
         });
         if (genError) throw genError;
         if (generated?.questions) {
-          setQuestions(generated.questions);
+          pool = generated.questions;
         } else {
           toast.error('Could not generate questions. Please try again.');
           return;
         }
       } else {
-        // Shuffle and pick 25 questions, balanced across subjects and difficulties
-        const shuffled = bankQuestions.sort(() => Math.random() - 0.5).slice(0, 25);
-        setQuestions(shuffled as DiagnosticQuestion[]);
+        pool = bankQuestions.sort(() => Math.random() - 0.5) as DiagnosticQuestion[];
       }
+
+      setQuestionPool(pool);
+
+      // CAT: Start with medium difficulty question
+      const firstQ = pool.find(q => q.difficulty === 'medium') || pool[0];
+      setQuestions([firstQ]);
 
       // Create attempt record
       const { data: attempt, error: attemptError } = await supabase
@@ -95,6 +107,50 @@ const DiagnosticTestPage: React.FC = () => {
       setLoading(false);
     }
   }, [user, gradeRange, studentLevel]);
+
+  // CAT: Select next question based on performance
+  const selectNextCATQuestion = (wasCorrect: boolean) => {
+    let newConsCorrect = wasCorrect ? consecutiveCorrect + 1 : 0;
+    let newConsWrong = wasCorrect ? 0 : consecutiveWrong + 1;
+    setConsecutiveCorrect(newConsCorrect);
+    setConsecutiveWrong(newConsWrong);
+
+    // Adjust difficulty based on CAT logic
+    let nextDifficulty = currentDifficulty;
+    if (newConsCorrect >= 2 && currentDifficulty === 'easy') nextDifficulty = 'medium';
+    else if (newConsCorrect >= 2 && currentDifficulty === 'medium') nextDifficulty = 'hard';
+    else if (newConsWrong >= 2 && currentDifficulty === 'hard') nextDifficulty = 'medium';
+    else if (newConsWrong >= 2 && currentDifficulty === 'medium') nextDifficulty = 'easy';
+    // If incorrect, also try shifting to prerequisite topic
+    if (!wasCorrect) {
+      const currentQ = questions[currentIndex];
+      if (currentQ?.prerequisite_topic) {
+        const prereqQ = questionPool.find(q =>
+          q.topic.toLowerCase().includes(currentQ.prerequisite_topic!.toLowerCase()) &&
+          !questions.some(asked => asked.id === q.id)
+        );
+        if (prereqQ) {
+          setCurrentDifficulty(nextDifficulty);
+          setQuestions(prev => [...prev, prereqQ]);
+          return;
+        }
+      }
+    }
+
+    setCurrentDifficulty(nextDifficulty);
+
+    // Find next question at the target difficulty that hasn't been asked
+    const askedIds = new Set(questions.map(q => q.id));
+    let candidates = questionPool.filter(q => q.difficulty === nextDifficulty && !askedIds.has(q.id));
+    if (candidates.length === 0) {
+      // Fallback to any unused question
+      candidates = questionPool.filter(q => !askedIds.has(q.id));
+    }
+    if (candidates.length > 0) {
+      const next = candidates[Math.floor(Math.random() * candidates.length)];
+      setQuestions(prev => [...prev, next]);
+    }
+  };
 
   useEffect(() => {
     loadQuestions();
@@ -135,9 +191,13 @@ const DiagnosticTestPage: React.FC = () => {
   };
 
   const handleNext = () => {
-    if (currentIndex + 1 >= questions.length) {
+    const totalTarget = 25;
+    if (answers.length >= totalTarget) {
       handleTestComplete();
     } else {
+      // CAT: Select next question adaptively
+      const lastAnswer = answers[answers.length - 1];
+      selectNextCATQuestion(lastAnswer?.isCorrect || false);
       setCurrentIndex(prev => prev + 1);
       setSelectedOption(null);
       setShowResult(false);
@@ -285,7 +345,7 @@ const DiagnosticTestPage: React.FC = () => {
   }
 
   const currentQ = questions[currentIndex];
-  const progress = ((currentIndex + (showResult ? 1 : 0)) / questions.length) * 100;
+  const progress = ((answers.length + (showResult ? 0 : 0)) / 25) * 100;
 
   return (
     <div className="min-h-screen bg-background">
@@ -299,7 +359,7 @@ const DiagnosticTestPage: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
-              <span>Q {currentIndex + 1}/{questions.length}</span>
+              <span>Q {answers.length + 1}/25</span>
             </div>
           </div>
           <Progress value={progress} className="h-2" />

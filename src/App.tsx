@@ -30,6 +30,9 @@ import SetuCirclesPage from "./pages/SetuCirclesPage";
 import CircleFocusRoomPage from "./pages/CircleFocusRoomPage";
 import DiagnosticTestPage from "./pages/DiagnosticTestPage";
 import LearningProfilePage from "./pages/LearningProfilePage";
+import ConceptGraphPage from "./pages/ConceptGraphPage";
+import LearningRoadmapPage from "./pages/LearningRoadmapPage";
+import TeacherDashboardPage from "./pages/TeacherDashboardPage";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +70,9 @@ const App = () => (
                 <Route path="/circles/:roomId" element={<CircleFocusRoomPage />} />
                 <Route path="/diagnostic-test" element={<DiagnosticTestPage />} />
                 <Route path="/learning-profile" element={<LearningProfilePage />} />
+                <Route path="/concept-graph" element={<ConceptGraphPage />} />
+                <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
+                <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </TooltipProvider>
