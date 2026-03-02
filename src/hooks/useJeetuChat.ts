@@ -29,7 +29,16 @@ export const useJeetuChat = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages, examMode, language, classContext: aiContext }),
+        body: JSON.stringify({ 
+          messages, 
+          examMode: aiContext.learning_mode === 'foundation' ? 'foundation' : examMode, 
+          language, 
+          classContext: {
+            ...aiContext,
+            strict_class_only: true,
+            teaching_style: aiContext.learning_mode === 'foundation' ? 'school_teacher' : 'competitive_mentor',
+          }
+        }),
       });
 
       if (!resp.ok) {

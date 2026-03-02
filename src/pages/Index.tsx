@@ -34,30 +34,13 @@ const Index: React.FC = () => {
     }
     const mentorName = getMentorName();
     const mentorLabel = isCuet ? 'CUET Mentor' : isNeet ? 'NEET Mentor' : mentorName;
-    switch (language) {
-      case 'english':
-        return `${mentorLabel} is ready to help you.`;
-      case 'hindi':
-        return `${mentorLabel} तैयार है आपकी मदद के लिए।`;
-      case 'kannada':
-        return `${mentorLabel} ಸಹಾಯಕ್ಕೆ ಸಿದ್ಧ.`;
-      case 'telugu':
-        return `${mentorLabel} సహాయానికి సిద్ధంగా ఉన్నారు.`;
-      case 'punjabi':
-        return `${mentorLabel} ਮਦਦ ਲਈ ਤਿਆਰ ਹੈ।`;
-      case 'marathi':
-        return `${mentorLabel} मदतीसाठी तयार आहे.`;
-      case 'tamil':
-        return `${mentorLabel} உதவ தயாராக உள்ளார்.`;
-      case 'gujarati':
-        return `${mentorLabel} મદદ માટે તૈયાર છે.`;
-      default:
-        return `${mentorLabel} is ready to help you.`;
-    }
+    return language === 'hindi'
+      ? `${mentorLabel} तैयार है आपकी मदद के लिए।`
+      : `${mentorLabel} is ready to help you.`;
   };
 
   return (
-    <MainLayout title="SETU">
+    <MainLayout title={isFoundation ? "Learning Dashboard" : "SETU"}>
       <div className="space-y-10">
         {/* ── Section 1: Welcome Hero ── */}
         {user && (
@@ -77,7 +60,7 @@ const Index: React.FC = () => {
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider">
                     <Flame className="w-3.5 h-3.5" />
-                    Dashboard
+                    {isFoundation ? 'Learning' : 'Dashboard'}
                   </span>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-semibold">
                     {isFoundation ? `📚 ${classLabel} • Foundation` : `${config.emoji} ${config.label} Mode`}
@@ -131,10 +114,10 @@ const Index: React.FC = () => {
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
-                  { icon: Brain, label: 'Concept Map', desc: 'Visualize mastery', path: '/concept-graph', color: 'from-[hsl(270,70%,60%)] to-[hsl(300,60%,55%)]' },
-                  { icon: Target, label: 'Diagnostic Test', desc: 'Find your gaps', path: '/diagnostic-test', color: 'from-accent to-[hsl(15,80%,55%)]' },
-                  { icon: TrendingUp, label: 'Learning Roadmap', desc: 'Your weekly plan', path: '/learning-roadmap', color: 'from-[hsl(145,60%,45%)] to-[hsl(170,70%,45%)]' },
-                  { icon: BookOpen, label: 'Learning Profile', desc: 'Your strengths', path: '/learning-profile', color: 'from-[hsl(210,80%,55%)] to-[hsl(230,70%,60%)]' },
+                  { icon: Brain, label: 'Concept Map', desc: 'Visualize your mastery', path: '/concept-graph', color: 'from-[hsl(270,70%,60%)] to-[hsl(300,60%,55%)]' },
+                  { icon: Target, label: 'Learning Assessment', desc: 'Find your gaps', path: '/diagnostic-test', color: 'from-accent to-[hsl(15,80%,55%)]' },
+                  { icon: TrendingUp, label: 'Weekly Plan', desc: 'Your learning plan', path: '/learning-roadmap', color: 'from-[hsl(145,60%,45%)] to-[hsl(170,70%,45%)]' },
+                  { icon: BookOpen, label: 'My Profile', desc: 'Your strengths', path: '/learning-profile', color: 'from-[hsl(210,80%,55%)] to-[hsl(230,70%,60%)]' },
                 ].map((action) => (
                   <button
                     key={action.label}
@@ -161,18 +144,18 @@ const Index: React.FC = () => {
                 <div className="bg-card border border-border rounded-xl p-6">
                   <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                     <Target className="w-4 h-4 text-accent" />
-                    Foundation Focus
+                    Chapter Mastery
                   </h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Concept Mastery</span>
+                      <span className="text-muted-foreground">Chapter Understanding</span>
                       <span className="font-medium text-foreground">Building...</span>
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div className="bg-accent h-2 rounded-full w-1/4 transition-all" />
                     </div>
                     <p className="text-xs text-muted-foreground mt-2">
-                      Complete your diagnostic test to see your personalized mastery map.
+                      Complete your learning assessment to see your personalized mastery map.
                     </p>
                   </div>
                 </div>

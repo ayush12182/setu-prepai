@@ -17,27 +17,30 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useClassContext } from '@/contexts/ClassContext';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const navItems = [
+const getNavItems = (isFoundation: boolean) => [
   { path: '/', icon: Home, label: 'Home', emoji: '🏠' },
   { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📖' },
-  { path: '/practice', icon: PenTool, label: 'Practice', emoji: '✏️' },
-  { path: '/test', icon: ClipboardCheck, label: 'Test', emoji: '📝' },
+  { path: '/practice', icon: PenTool, label: isFoundation ? 'School Practice' : 'Practice', emoji: '✏️' },
+  { path: '/test', icon: ClipboardCheck, label: isFoundation ? 'Chapter Test' : 'Test', emoji: '📝' },
   { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄' },
   { path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬' },
-  { path: '/ask-jeetu', icon: MessageCircle, label: { jee: 'Ask Jeetu Bhaiya', neet: 'Ask NEET Mentor', cuet: 'Ask CUET Mentor' }, emoji: '💬' },
-  { path: '/circles', icon: Users, label: 'SETU Commune', emoji: '👥', badge: 'New' },
-  { path: '/analytics', icon: BarChart3, label: 'Analytics', emoji: '📊' },
+  { path: '/ask-jeetu', icon: MessageCircle, label: isFoundation ? 'Ask SETU Mentor' : { jee: 'Ask Jeetu Bhaiya', neet: 'Ask NEET Mentor', cuet: 'Ask CUET Mentor' }, emoji: '💬' },
+  ...(!isFoundation ? [{ path: '/circles', icon: Users, label: 'SETU Commune', emoji: '👥', badge: 'New' }] : []),
+  { path: '/analytics', icon: BarChart3, label: isFoundation ? 'Progress' : 'Analytics', emoji: '📊' },
   { path: '/profile', icon: User, label: 'My Profile', emoji: '👤' },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { config, isNeet, isCuet, examMode } = useExamMode();
+  const { isFoundation, classLabel } = useClassContext();
+  const navItems = getNavItems(isFoundation);
 
   return (
     <>
@@ -80,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <div>
                   <h1 className="font-display font-bold text-xl text-white tracking-wide">SETU</h1>
                   <p className="text-[11px] text-white/50 font-medium tracking-wider uppercase">
-                    {config.label} Prep Mentor
+                    {isFoundation ? `${classLabel} • School` : `${config.label} Prep Mentor`}
                   </p>
                 </div>
               </div>
@@ -99,11 +102,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="mx-5 mb-2">
             <div className={cn(
               "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold",
-              isCuet ? "bg-[hsl(260_50%_55%/0.2)] text-[hsl(260_80%_80%)]"
+              isFoundation
+                ? "bg-[hsl(210_60%_50%/0.2)] text-[hsl(210_80%_80%)]"
+                : isCuet ? "bg-[hsl(260_50%_55%/0.2)] text-[hsl(260_80%_80%)]"
                 : isNeet ? "bg-[hsl(145_50%_38%/0.2)] text-[hsl(145_70%_70%)]" : "bg-[hsl(32_79%_57%/0.2)] text-[hsl(32_100%_80%)]"
             )}>
-              <span>{config.emoji}</span>
-              <span>{config.fullLabel}</span>
+              <span>{isFoundation ? '📚' : config.emoji}</span>
+              <span>{isFoundation ? `${classLabel} • Foundation Learning` : config.fullLabel}</span>
             </div>
           </div>
 
@@ -172,18 +177,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <div className="flex items-center gap-3">
                 <div className={cn(
                   "w-10 h-10 rounded-full bg-gradient-to-br flex items-center justify-center border",
-                  isCuet
+                  isFoundation
+                    ? "from-[hsl(210_60%_50%/0.3)] to-[hsl(210_60%_40%/0.1)] border-[hsl(210_60%_50%/0.3)]"
+                    : isCuet
                     ? "from-[hsl(260_50%_55%/0.3)] to-[hsl(260_60%_40%/0.1)] border-[hsl(260_50%_55%/0.3)]"
                     : isNeet
                     ? "from-[hsl(145_50%_38%/0.3)] to-[hsl(145_60%_35%/0.1)] border-[hsl(145_50%_38%/0.3)]"
                     : "from-[hsl(36_80%_55%/0.3)] to-[hsl(36_90%_45%/0.1)] border-[hsl(36_80%_55%/0.3)]"
                 )}>
-                  <span className={cn("font-bold text-sm", isCuet ? "text-[hsl(260_50%_55%)]" : isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")}>
-                    {isCuet ? 'CM' : isNeet ? 'NM' : 'JB'}
+                  <span className={cn("font-bold text-sm", isFoundation ? "text-[hsl(210_60%_50%)]" : isCuet ? "text-[hsl(260_50%_55%)]" : isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")}>
+                    {isFoundation ? 'SM' : isCuet ? 'CM' : isNeet ? 'NM' : 'JB'}
                   </span>
                 </div>
                 <div>
-                  <p className="text-white font-semibold text-sm">{config.mentorName}</p>
+                  <p className="text-white font-semibold text-sm">{isFoundation ? 'SETU Mentor' : config.mentorName}</p>
                   <p className="text-white/40 text-xs">Always here to help</p>
                 </div>
               </div>

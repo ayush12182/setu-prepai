@@ -10,13 +10,16 @@ interface ProtectedRouteProps {
   skipDiagnosticCheck?: boolean;
 }
 
+// Routes that foundation (Class 6-10) students should NOT access
+const COMPETITIVE_ONLY_ROUTES = ['/major-test', '/circles'];
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
   requireAuth = true,
   skipDiagnosticCheck = false,
 }) => {
   const { user, loading } = useAuth();
-  const { diagnosticCompleted } = useClassContext();
+  const { diagnosticCompleted, isFoundation } = useClassContext();
   const location = useLocation();
 
   if (loading) {
@@ -45,6 +48,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     location.pathname !== '/profile'
   ) {
     return <Navigate to="/diagnostic-test" replace />;
+  }
+
+  // Block foundation students from competitive-only routes
+  if (requireAuth && user && isFoundation) {
+    if (COMPETITIVE_ONLY_ROUTES.some(r => location.pathname.startsWith(r))) {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <>{children}</>;
