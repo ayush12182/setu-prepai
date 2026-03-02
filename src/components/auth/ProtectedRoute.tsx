@@ -1,18 +1,22 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useClassContext } from '@/contexts/ClassContext';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
+  skipDiagnosticCheck?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requireAuth = true 
+  requireAuth = true,
+  skipDiagnosticCheck = false,
 }) => {
   const { user, loading } = useAuth();
+  const { diagnosticCompleted } = useClassContext();
   const location = useLocation();
 
   if (loading) {
@@ -27,8 +31,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   if (requireAuth && !user) {
-    // Redirect to login page but save the attempted location
     return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  // Enforce diagnostic completion before accessing platform
+  if (
+    requireAuth &&
+    user &&
+    !skipDiagnosticCheck &&
+    !diagnosticCompleted &&
+    location.pathname !== '/diagnostic-test' &&
+    location.pathname !== '/select-exam' &&
+    location.pathname !== '/profile'
+  ) {
+    return <Navigate to="/diagnostic-test" replace />;
   }
 
   return <>{children}</>;

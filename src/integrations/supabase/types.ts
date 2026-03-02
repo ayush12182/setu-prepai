@@ -656,6 +656,8 @@ export type Database = {
           avatar_url: string | null
           class: string | null
           created_at: string
+          diagnostic_completed: boolean
+          exam_goal: string | null
           full_name: string | null
           id: string
           phone: string | null
@@ -668,6 +670,8 @@ export type Database = {
           avatar_url?: string | null
           class?: string | null
           created_at?: string
+          diagnostic_completed?: boolean
+          exam_goal?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
@@ -680,6 +684,8 @@ export type Database = {
           avatar_url?: string | null
           class?: string | null
           created_at?: string
+          diagnostic_completed?: boolean
+          exam_goal?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
