@@ -13,6 +13,7 @@ import TestResults from '@/components/practice/TestResults';
 import { Loader2, Target, Zap, Clock, TrendingUp, Sparkles, Brain } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useClassContext } from '@/contexts/ClassContext';
 
 type PracticeMode = 'practice' | 'test';
 
@@ -28,6 +29,7 @@ const PracticePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { isNeet } = useExamMode();
+  const { isFoundation, classLabel } = useClassContext();
   const [state, setState] = useState<PracticeState>({ step: 'select-topic' });
   const [initialized, setInitialized] = useState(false);
   const [mode, setMode] = useState<PracticeMode>('practice');
@@ -111,8 +113,17 @@ const PracticePage: React.FC = () => {
     return `${mins}.${Math.round((seconds % 60) / 6)} min`;
   };
 
+  // Foundation-friendly labels
+  const heroTitle = isFoundation ? 'School Practice' : 'Practice Arena';
+  const heroSubtitle = isFoundation
+    ? `Practice questions based on ${classLabel} syllabus to strengthen your concepts.`
+    : `Select a topic, pick difficulty, and sharpen your skills with AI-generated ${isNeet ? 'NEET' : 'JEE'} questions.`;
+  const loadingText = isFoundation
+    ? 'Generating practice questions...'
+    : mode === 'test' ? 'Preparing your test...' : `Generating ${isNeet ? 'NEET' : 'JEE'}-style questions...`;
+
   return (
-    <MainLayout title={mode === 'test' ? 'Test' : 'Practice'}>
+    <MainLayout title={isFoundation ? 'School Practice' : mode === 'test' ? 'Test' : 'Practice'}>
       <div className="max-w-4xl mx-auto">
         {/* Stats Hero - Show on topic selection */}
         {state.step === 'select-topic' && user && (
@@ -128,11 +139,11 @@ const PracticePage: React.FC = () => {
               <div className="flex items-center gap-2 mb-3">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider">
                   <Brain className="w-3.5 h-3.5" />
-                  Practice Mode
+                  {isFoundation ? 'School Mode' : 'Practice Mode'}
                 </span>
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">Practice Arena</h1>
-              <p className="text-white/50 text-sm mb-6 max-w-md">Select a topic, pick difficulty, and sharpen your skills with AI-generated {isNeet ? 'NEET' : 'JEE'} questions.</p>
+              <h1 className="text-3xl font-bold text-white mb-2">{heroTitle}</h1>
+              <p className="text-white/50 text-sm mb-6 max-w-md">{heroSubtitle}</p>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
@@ -163,7 +174,7 @@ const PracticePage: React.FC = () => {
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20">
                 <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
-                <p className="text-muted-foreground">{mode === 'test' ? 'Preparing your test...' : `Generating ${isNeet ? 'NEET' : 'JEE'}-style questions...`}</p>
+                <p className="text-muted-foreground">{loadingText}</p>
                 <p className="text-sm text-muted-foreground mt-1">This may take a few seconds</p>
               </div>
             ) : error ? (
