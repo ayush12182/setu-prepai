@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Brain, Clock, CheckCircle2, XCircle, ArrowRight, Sparkles } from 'lucide-react';
+import { Loader2, Brain, Clock, CheckCircle2, XCircle, ArrowRight, Sparkles, Lightbulb, Network, Gauge, Target, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface DiagnosticQuestion {
@@ -30,7 +30,8 @@ const DiagnosticTestPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
 
-  const [loading, setLoading] = useState(true);
+  const [testStarted, setTestStarted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<DiagnosticQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -153,8 +154,8 @@ const DiagnosticTestPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadQuestions();
-  }, [loadQuestions]);
+    if (testStarted) loadQuestions();
+  }, [testStarted, loadQuestions]);
 
   const handleAnswer = async (option: string) => {
     if (showResult || !attemptId) return;
@@ -258,6 +259,106 @@ const DiagnosticTestPage: React.FC = () => {
       setGeneratingProfile(false);
     }
   };
+
+  const INTRO_FEATURES = [
+    { icon: Lightbulb, title: 'Concept Understanding', desc: 'We check if you truly understand fundamentals — not just memorized answers. Can you apply a concept in a new situation?', color: 'text-amber-400', bg: 'bg-amber-500/10' },
+    { icon: Brain, title: 'Thinking Pattern', desc: 'We observe how you approach problems — logically or randomly, with confidence or hesitation. This reveals your problem-solving style.', color: 'text-violet-400', bg: 'bg-violet-500/10' },
+    { icon: Network, title: 'Concept Connections', desc: 'Learning is a network. We detect which foundations are missing and where gaps actually start — often in an earlier concept.', color: 'text-sky-400', bg: 'bg-sky-500/10' },
+    { icon: Gauge, title: 'Speed & Confidence', desc: 'Time per question, decision hesitation, accuracy under pressure — we estimate your learning pace and cognitive load tolerance.', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    { icon: Target, title: 'Strength & Weakness Map', desc: 'You won\'t get marks. You\'ll get a Learning Profile — strong zones (green), developing (orange), and foundation gaps (grey).', color: 'text-rose-400', bg: 'bg-rose-500/10' },
+  ];
+
+  // ─── INTRO SCREEN ───
+  if (!testStarted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-[-15%] left-[25%] w-[500px] h-[500px] bg-accent/[0.06] rounded-full blur-[140px]" />
+          <div className="absolute bottom-[-10%] right-[15%] w-[400px] h-[400px] bg-violet-500/[0.04] rounded-full blur-[120px]" />
+        </div>
+
+        <div className="relative z-10 max-w-2xl mx-auto px-4 py-8 sm:py-12">
+          {/* Header */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-5">
+              <Brain className="h-4 w-4 text-accent" />
+              <span className="text-xs font-medium text-accent">SETU Learning Diagnostic</span>
+            </div>
+            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white mb-3 leading-tight">
+              Understand How You <span className="text-accent">Think</span>,<br />Not Just What You Know
+            </h1>
+            <p className="text-white/45 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
+              This is not a marks-based test. We analyze your thinking patterns, concept clarity, and learning behavior to build your personalized profile.
+            </p>
+          </motion.div>
+
+          {/* Feature cards */}
+          <div className="space-y-3 mb-8">
+            {INTRO_FEATURES.map((feat, i) => (
+              <motion.div
+                key={feat.title}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + i * 0.08 }}
+                className="flex items-start gap-4 p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] backdrop-blur-sm"
+              >
+                <div className={`w-10 h-10 rounded-xl ${feat.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+                  <feat.icon className={`h-5 w-5 ${feat.color}`} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-sm mb-1">{feat.title}</h3>
+                  <p className="text-white/40 text-xs leading-relaxed">{feat.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Difference callout */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mb-8 p-5 rounded-2xl bg-accent/[0.06] border border-accent/15 text-center"
+          >
+            <p className="text-white/50 text-xs mb-1">Normal tests ask: <span className="text-white/70">"How much did you score?"</span></p>
+            <p className="text-accent font-semibold text-sm">SETU asks: "How does your brain learn best?"</p>
+          </motion.div>
+
+          {/* Result preview */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="mb-8 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06]"
+          >
+            <p className="text-white/60 text-xs mb-3 font-medium flex items-center gap-2">
+              <BookOpen className="h-3.5 w-3.5" /> After the test, your dashboard becomes personalized:
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {['Topics to study first', 'Concepts to reinforce', 'Weekly improvement plan', 'Guidance for your style'].map(item => (
+                <div key={item} className="flex items-center gap-2 text-white/40 text-[11px]">
+                  <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* CTA */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center">
+            <Button
+              size="lg"
+              onClick={() => { setTestStarted(true); setLoading(true); }}
+              className="h-13 px-10 rounded-xl bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white font-semibold shadow-xl shadow-accent/25 text-base gap-2"
+            >
+              Begin Diagnostic <ArrowRight className="h-5 w-5" />
+            </Button>
+            <p className="mt-3 text-[11px] text-white/25">~15 minutes • 25 adaptive questions • No marks, only insights</p>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
