@@ -13,6 +13,7 @@ import {
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode, ExamMode } from '@/contexts/ExamModeContext';
+import { useClassContext } from '@/contexts/ClassContext';
 import { toast } from 'sonner';
 
 interface HeaderProps {
@@ -42,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
   const { language, setLanguage } = useLanguage();
   const { user, profile, signOut, updateProfile } = useAuth();
   const { examMode, setExamMode } = useExamMode();
+  const { isFoundation, classLabel } = useClassContext();
   const navigate = useNavigate();
 
   const handleExamChange = async (mode: ExamMode) => {
@@ -90,26 +92,32 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Exam Mode Switcher */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-1.5">
-                <ArrowRightLeft className="w-4 h-4" />
-                <span className="text-sm font-medium">{examLabels[examMode].emoji} {examLabels[examMode].label}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {(Object.keys(examLabels) as ExamMode[]).map((mode) => (
-                <DropdownMenuItem
-                  key={mode}
-                  onClick={() => handleExamChange(mode)}
-                  className={examMode === mode ? 'bg-secondary font-medium' : ''}
-                >
-                  {examLabels[mode].emoji} {examLabels[mode].label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Exam Mode Switcher — hidden in foundation mode */}
+          {!isFoundation ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-1.5">
+                  <ArrowRightLeft className="w-4 h-4" />
+                  <span className="text-sm font-medium">{examLabels[examMode].emoji} {examLabels[examMode].label}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {(Object.keys(examLabels) as ExamMode[]).map((mode) => (
+                  <DropdownMenuItem
+                    key={mode}
+                    onClick={() => handleExamChange(mode)}
+                    className={examMode === mode ? 'bg-secondary font-medium' : ''}
+                  >
+                    {examLabels[mode].emoji} {examLabels[mode].label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent/15 text-accent">
+              📚 {classLabel} • Foundation
+            </span>
+          )}
 
           {/* Language Selector */}
           <DropdownMenu>

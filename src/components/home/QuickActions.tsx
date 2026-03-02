@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useClassContext } from '@/contexts/ClassContext';
 
 interface ActionItem {
   icon: React.ElementType;
@@ -29,8 +30,77 @@ interface ActionItem {
 export const QuickActions: React.FC = () => {
   const navigate = useNavigate();
   const { isNeet, config } = useExamMode();
+  const { isFoundation } = useClassContext();
 
-  const actions: ActionItem[] = [
+  const actions: ActionItem[] = isFoundation
+    ? [
+        {
+          icon: BookOpen,
+          title: 'Learn',
+          description: 'Concept notes & visual explanations for your class',
+          path: '/learn',
+          gradient: 'from-[hsl(213_60%_50%)] to-[hsl(200_70%_55%)]',
+          iconBg: 'bg-[hsl(213_60%_50%/0.12)]',
+          emoji: '📖',
+        },
+        {
+          icon: PenTool,
+          title: 'School Practice',
+          description: 'Chapter-wise MCQs matched to your school syllabus',
+          path: '/practice',
+          gradient: 'from-[hsl(145_50%_38%)] to-[hsl(160_50%_45%)]',
+          iconBg: 'bg-[hsl(145_50%_38%/0.12)]',
+          emoji: '✍️',
+        },
+        {
+          icon: ClipboardCheck,
+          title: 'Chapter Test',
+          description: 'Test your understanding chapter by chapter',
+          path: '/test',
+          gradient: 'from-[hsl(280_50%_55%)] to-[hsl(260_55%_60%)]',
+          iconBg: 'bg-[hsl(280_50%_55%/0.12)]',
+          emoji: '📋',
+        },
+        {
+          icon: RotateCcw,
+          title: 'Revision',
+          description: 'Quick notes, key points & flashcards',
+          path: '/revision',
+          gradient: 'from-[hsl(32_79%_57%)] to-[hsl(25_85%_55%)]',
+          iconBg: 'bg-[hsl(32_79%_57%/0.12)]',
+          emoji: '🔄',
+        },
+        {
+          icon: Video,
+          title: 'Lecture SETU',
+          description: 'Convert any lecture video into structured notes',
+          path: '/lecture-setu',
+          gradient: 'from-[hsl(350_65%_55%)] to-[hsl(330_60%_55%)]',
+          iconBg: 'bg-[hsl(350_65%_55%/0.12)]',
+          emoji: '🎬',
+          badge: 'New',
+        },
+        {
+          icon: MessageCircle,
+          title: 'Ask SETU Mentor',
+          description: 'Your personal learning mentor — any doubt, any time',
+          path: '/ask-jeetu',
+          gradient: 'from-primary to-[hsl(213_28%_25%)]',
+          iconBg: 'bg-primary/10',
+          emoji: '💬',
+          span: true,
+        },
+        {
+          icon: BarChart3,
+          title: 'Progress',
+          description: 'Track your chapter mastery & learning streak',
+          path: '/analytics',
+          gradient: 'from-[hsl(180_50%_40%)] to-[hsl(195_60%_45%)]',
+          iconBg: 'bg-[hsl(180_50%_40%/0.12)]',
+          emoji: '📊',
+        },
+      ]
+    : [
     {
       icon: BookOpen,
       title: 'Learn',
