@@ -52,8 +52,9 @@ const DiagnosticTestPage: React.FC = () => {
   const [generatingProfile, setGeneratingProfile] = useState(false);
   const [testStartTimestamp, setTestStartTimestamp] = useState(Date.now());
 
+  const studentClass = profile?.class || '11';
   const studentLevel = profile?.student_level || '11-12';
-  const gradeRange = studentLevel === '6-8' ? '6-8' : studentLevel === '9-10' ? '9-10' : '11-12';
+  const gradeRange = ['6', '7', '8'].includes(studentClass) ? '6-8' : ['9', '10'].includes(studentClass) ? '9-10' : '11-12';
 
   // CAT state for adaptive section
   const [currentDifficulty, setCurrentDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
@@ -88,7 +89,7 @@ const DiagnosticTestPage: React.FC = () => {
 
       if (!bankQuestions || bankQuestions.length === 0) {
         const { data: generated, error: genError } = await supabase.functions.invoke('generate-diagnostic-test', {
-          body: { gradeRange, studentLevel, count: 50 }
+          body: { gradeRange, studentLevel, count: 50, studentClass }
         });
         if (genError) throw genError;
         if (generated?.questions) {
