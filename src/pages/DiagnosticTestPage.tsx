@@ -287,6 +287,9 @@ const DiagnosticTestPage: React.FC = () => {
           prerequisite_gaps: profileData.profile.prerequisite_gaps,
           overall_level: profileData.profile.overall_level,
         });
+
+        // Mark diagnostic as completed on the user's profile
+        await supabase.from('profiles').update({ diagnostic_completed: true } as any).eq('user_id', user!.id);
       }
 
       toast.success('Your learning profile is ready!');

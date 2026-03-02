@@ -10,6 +10,7 @@ import { TwentyOneDayPlan } from "@/components/home/TwentyOneDayPlan";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExamMode } from "@/contexts/ExamModeContext";
+import { useClassContext } from "@/contexts/ClassContext";
 import { JeeSubModeSelector } from "@/components/ui/JeeSubModeSelector";
 import { Sparkles, Flame, BookOpen, Target, TrendingUp, Brain } from "lucide-react";
 import { useTodaysFocus } from "@/hooks/useTodaysFocus";
@@ -21,20 +22,11 @@ const Index: React.FC = () => {
   const { getMentorName, language } = useLanguage();
   const { user, profile, updateProfile } = useAuth();
   const { config, isNeet, isCuet, examMode, setExamMode } = useExamMode();
+  const { isFoundation, classLabel } = useClassContext();
   const navigate = useNavigate();
 
   const { dailyFocus, smartFocus, isLoading, streak } = useTodaysFocus();
-
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "Bhai";
-
-  // Determine if user is in foundation mode (Class 6-10)
-  const isFoundationMode = () => {
-    if (!profile?.class) return false;
-    const cls = parseInt(profile.class);
-    return !isNaN(cls) && cls >= 6 && cls <= 10;
-  };
-
-  const isFoundation = isFoundationMode();
 
   const getGreeting = () => {
     if (isFoundation) {
@@ -88,7 +80,7 @@ const Index: React.FC = () => {
                     Dashboard
                   </span>
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-semibold">
-                    {isFoundation ? `📚 Class ${profile?.class} • Foundation` : `${config.emoji} ${config.label} Mode`}
+                    {isFoundation ? `📚 ${classLabel} • Foundation` : `${config.emoji} ${config.label} Mode`}
                   </span>
                   {!isFoundation && (
                     <div className="bg-white/10 rounded-xl p-0.5">
