@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Brain, Clock, CheckCircle2, XCircle, ArrowRight, Sparkles, Lightbulb, Network, Gauge, Target, BookOpen } from 'lucide-react';
+import { Loader2, Brain, Clock, CheckCircle2, XCircle, ArrowRight, Sparkles, Lightbulb, Network, Gauge, Target, BookOpen, Zap, ShieldCheck, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface DiagnosticQuestion {
@@ -26,6 +26,15 @@ interface DiagnosticQuestion {
   prerequisite_topic: string | null;
 }
 
+// Section definitions for structured diagnostic
+const SECTIONS = [
+  { name: 'Foundation', label: '🟢 Foundation Check', color: 'text-emerald-400', bg: 'bg-emerald-500/15', difficulty: 'easy', count: 6, desc: 'Basic concepts & prerequisite clarity' },
+  { name: 'Understanding', label: '🟡 Understanding', color: 'text-amber-400', bg: 'bg-amber-500/15', difficulty: 'medium', count: 8, desc: 'Multi-step thinking & concept application' },
+  { name: 'Thinking', label: '🔴 Thinking Ability', color: 'text-rose-400', bg: 'bg-rose-500/15', difficulty: 'adaptive', count: 4, desc: 'Adaptive — difficulty changes with your answers' },
+  { name: 'Confidence', label: '🧠 Speed & Confidence', color: 'text-violet-400', bg: 'bg-violet-500/15', difficulty: 'mixed', count: 4, desc: 'Quick decisions & reasoning under time' },
+];
+const TOTAL_QUESTIONS = SECTIONS.reduce((s, sec) => s + sec.count, 0); // 22
+
 const DiagnosticTestPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -41,24 +50,32 @@ const DiagnosticTestPage: React.FC = () => {
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
   const [testComplete, setTestComplete] = useState(false);
   const [generatingProfile, setGeneratingProfile] = useState(false);
+  const [testStartTimestamp, setTestStartTimestamp] = useState(Date.now());
 
   const studentLevel = profile?.student_level || '11-12';
-
-  // Map student level to grade_range
   const gradeRange = studentLevel === '6-8' ? '6-8' : studentLevel === '9-10' ? '9-10' : '11-12';
 
-  // CAT: Track current difficulty level
+  // CAT state for adaptive section
   const [currentDifficulty, setCurrentDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [questionPool, setQuestionPool] = useState<DiagnosticQuestion[]>([]);
   const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
   const [consecutiveWrong, setConsecutiveWrong] = useState(0);
+
+  // Get current section info
+  const getCurrentSection = (qIndex: number) => {
+    let cumulative = 0;
+    for (const sec of SECTIONS) {
+      cumulative += sec.count;
+      if (qIndex < cumulative) return { ...sec, startIndex: cumulative - sec.count };
+    }
+    return SECTIONS[SECTIONS.length - 1];
+  };
 
   const loadQuestions = useCallback(async () => {
     if (!user) return;
     setLoading(true);
 
     try {
-      // Fetch ALL questions from bank for this grade range (for CAT pool)
       const { data: bankQuestions, error } = await supabase
         .from('diagnostic_questions')
         .select('*')
@@ -70,9 +87,8 @@ const DiagnosticTestPage: React.FC = () => {
       let pool: DiagnosticQuestion[] = [];
 
       if (!bankQuestions || bankQuestions.length === 0) {
-        // Generate questions via AI if bank is empty
         const { data: generated, error: genError } = await supabase.functions.invoke('generate-diagnostic-test', {
-          body: { gradeRange, studentLevel, count: 40 }
+          body: { gradeRange, studentLevel, count: 50 }
         });
         if (genError) throw genError;
         if (generated?.questions) {
@@ -87,20 +103,56 @@ const DiagnosticTestPage: React.FC = () => {
 
       setQuestionPool(pool);
 
-      // CAT: Start with medium difficulty question
-      const firstQ = pool.find(q => q.difficulty === 'medium') || pool[0];
-      setQuestions([firstQ]);
+      // Build structured question set: pick by difficulty for each section
+      const structured: DiagnosticQuestion[] = [];
+      const usedIds = new Set<string>();
 
-      // Create attempt record
+      const pickQuestions = (difficulty: string, count: number) => {
+        const candidates = pool.filter(q => q.difficulty === difficulty && !usedIds.has(q.id));
+        const picked = candidates.slice(0, count);
+        picked.forEach(q => usedIds.add(q.id));
+        return picked;
+      };
+
+      // Section 1: Foundation (easy)
+      const s1 = pickQuestions('easy', 6);
+      structured.push(...s1);
+      // Fill shortage from medium
+      if (s1.length < 6) structured.push(...pickQuestions('medium', 6 - s1.length));
+
+      // Section 2: Understanding (medium)
+      const s2 = pickQuestions('medium', 8);
+      structured.push(...s2);
+      if (s2.length < 8) structured.push(...pickQuestions('easy', 8 - s2.length));
+
+      // Section 3: Thinking (adaptive — start medium, will adapt)
+      const s3 = pickQuestions('medium', 2);
+      const s3h = pickQuestions('hard', 2);
+      structured.push(...s3, ...s3h);
+      const s3Need = 4 - s3.length - s3h.length;
+      if (s3Need > 0) structured.push(...pickQuestions('easy', s3Need));
+
+      // Section 4: Speed & Confidence (mixed)
+      const s4e = pickQuestions('easy', 1);
+      const s4m = pickQuestions('medium', 2);
+      const s4h = pickQuestions('hard', 1);
+      structured.push(...s4e, ...s4m, ...s4h);
+      const s4Need = 4 - s4e.length - s4m.length - s4h.length;
+      if (s4Need > 0) structured.push(...pool.filter(q => !usedIds.has(q.id)).slice(0, s4Need));
+
+      setQuestions(structured);
+
+      // Create attempt
       const { data: attempt, error: attemptError } = await supabase
         .from('diagnostic_attempts')
-        .insert({ user_id: user.id, student_level: studentLevel, total_questions: 25 })
+        .insert({ user_id: user.id, student_level: studentLevel, total_questions: TOTAL_QUESTIONS })
         .select()
         .single();
 
       if (attemptError) throw attemptError;
       setAttemptId(attempt.id);
       setQuestionStartTime(Date.now());
+      setTestStartTimestamp(Date.now());
     } catch (err) {
       console.error('Failed to load diagnostic test:', err);
       toast.error('Failed to load test. Please try again.');
@@ -109,47 +161,49 @@ const DiagnosticTestPage: React.FC = () => {
     }
   }, [user, gradeRange, studentLevel]);
 
-  // CAT: Select next question based on performance
-  const selectNextCATQuestion = (wasCorrect: boolean) => {
-    let newConsCorrect = wasCorrect ? consecutiveCorrect + 1 : 0;
-    let newConsWrong = wasCorrect ? 0 : consecutiveWrong + 1;
-    setConsecutiveCorrect(newConsCorrect);
-    setConsecutiveWrong(newConsWrong);
+  // CAT logic for adaptive section (Section 3)
+  const adaptQuestion = (wasCorrect: boolean, idx: number) => {
+    const section = getCurrentSection(idx);
+    if (section.name !== 'Thinking') return;
 
-    // Adjust difficulty based on CAT logic
-    let nextDifficulty = currentDifficulty;
-    if (newConsCorrect >= 2 && currentDifficulty === 'easy') nextDifficulty = 'medium';
-    else if (newConsCorrect >= 2 && currentDifficulty === 'medium') nextDifficulty = 'hard';
-    else if (newConsWrong >= 2 && currentDifficulty === 'hard') nextDifficulty = 'medium';
-    else if (newConsWrong >= 2 && currentDifficulty === 'medium') nextDifficulty = 'easy';
-    // If incorrect, also try shifting to prerequisite topic
+    const nc = wasCorrect ? consecutiveCorrect + 1 : 0;
+    const nw = wasCorrect ? 0 : consecutiveWrong + 1;
+    setConsecutiveCorrect(nc);
+    setConsecutiveWrong(nw);
+
+    let next = currentDifficulty;
+    if (nc >= 2 && next !== 'hard') next = next === 'easy' ? 'medium' : 'hard';
+    if (nw >= 2 && next !== 'easy') next = next === 'hard' ? 'medium' : 'easy';
+
     if (!wasCorrect) {
-      const currentQ = questions[currentIndex];
+      const currentQ = questions[idx];
       if (currentQ?.prerequisite_topic) {
         const prereqQ = questionPool.find(q =>
           q.topic.toLowerCase().includes(currentQ.prerequisite_topic!.toLowerCase()) &&
           !questions.some(asked => asked.id === q.id)
         );
         if (prereqQ) {
-          setCurrentDifficulty(nextDifficulty);
-          setQuestions(prev => [...prev, prereqQ]);
+          setCurrentDifficulty(next);
+          setQuestions(prev => {
+            const updated = [...prev];
+            if (idx + 1 < updated.length) updated[idx + 1] = prereqQ;
+            return updated;
+          });
           return;
         }
       }
     }
 
-    setCurrentDifficulty(nextDifficulty);
-
-    // Find next question at the target difficulty that hasn't been asked
-    const askedIds = new Set(questions.map(q => q.id));
-    let candidates = questionPool.filter(q => q.difficulty === nextDifficulty && !askedIds.has(q.id));
-    if (candidates.length === 0) {
-      // Fallback to any unused question
-      candidates = questionPool.filter(q => !askedIds.has(q.id));
-    }
-    if (candidates.length > 0) {
-      const next = candidates[Math.floor(Math.random() * candidates.length)];
-      setQuestions(prev => [...prev, next]);
+    setCurrentDifficulty(next);
+    const usedIds = new Set(questions.map(q => q.id));
+    const candidates = questionPool.filter(q => q.difficulty === next && !usedIds.has(q.id));
+    if (candidates.length > 0 && idx + 1 < questions.length) {
+      const replacement = candidates[Math.floor(Math.random() * candidates.length)];
+      setQuestions(prev => {
+        const updated = [...prev];
+        updated[idx + 1] = replacement;
+        return updated;
+      });
     }
   };
 
@@ -166,17 +220,12 @@ const DiagnosticTestPage: React.FC = () => {
     const currentQ = questions[currentIndex];
     const isCorrect = option === currentQ.correct_option;
 
-    // Record answer
-    const answer = {
-      questionId: currentQ.id,
-      selected: option,
-      correct: currentQ.correct_option,
-      isCorrect,
-      time: timeTaken,
-    };
+    const answer = { questionId: currentQ.id, selected: option, correct: currentQ.correct_option, isCorrect, time: timeTaken };
     setAnswers(prev => [...prev, answer]);
 
-    // Save to DB
+    // Adapt for Section 3
+    adaptQuestion(isCorrect, currentIndex);
+
     try {
       await supabase.from('diagnostic_answers').insert({
         attempt_id: attemptId,
@@ -192,13 +241,9 @@ const DiagnosticTestPage: React.FC = () => {
   };
 
   const handleNext = () => {
-    const totalTarget = 25;
-    if (answers.length >= totalTarget) {
+    if (answers.length >= TOTAL_QUESTIONS || currentIndex + 1 >= questions.length) {
       handleTestComplete();
     } else {
-      // CAT: Select next question adaptively
-      const lastAnswer = answers[answers.length - 1];
-      selectNextCATQuestion(lastAnswer?.isCorrect || false);
       setCurrentIndex(prev => prev + 1);
       setSelectedOption(null);
       setShowResult(false);
@@ -214,7 +259,6 @@ const DiagnosticTestPage: React.FC = () => {
     const totalTime = answers.reduce((sum, a) => sum + a.time, 0);
 
     try {
-      // Update attempt
       await supabase.from('diagnostic_attempts').update({
         status: 'completed',
         correct_answers: totalCorrect,
@@ -222,24 +266,17 @@ const DiagnosticTestPage: React.FC = () => {
         completed_at: new Date().toISOString(),
       }).eq('id', attemptId!);
 
-      // Generate learning profile via AI
       const { data: profileData, error: profileError } = await supabase.functions.invoke('generate-learning-profile', {
-        body: {
-          attemptId,
-          answers,
-          questions,
-          studentLevel,
-          gradeRange,
-        }
+        body: { attemptId, answers, questions, studentLevel, gradeRange }
       });
 
       if (profileError) throw profileError;
 
       if (profileData?.profile) {
-        // Save learning profile
         await supabase.from('learning_profiles').upsert({
           user_id: user!.id,
           diagnostic_attempt_id: attemptId!,
+          diagnostic_completed: true,
           concept_score: profileData.profile.concept_score,
           accuracy_score: profileData.profile.accuracy_score,
           speed_score: profileData.profile.speed_score,
@@ -261,12 +298,18 @@ const DiagnosticTestPage: React.FC = () => {
   };
 
   const INTRO_FEATURES = [
-    { icon: Lightbulb, title: 'Concept Understanding', desc: 'We check if you truly understand fundamentals — not just memorized answers. Can you apply a concept in a new situation?', color: 'text-amber-400', bg: 'bg-amber-500/10' },
-    { icon: Brain, title: 'Thinking Pattern', desc: 'We observe how you approach problems — logically or randomly, with confidence or hesitation. This reveals your problem-solving style.', color: 'text-violet-400', bg: 'bg-violet-500/10' },
-    { icon: Network, title: 'Concept Connections', desc: 'Learning is a network. We detect which foundations are missing and where gaps actually start — often in an earlier concept.', color: 'text-sky-400', bg: 'bg-sky-500/10' },
-    { icon: Gauge, title: 'Speed & Confidence', desc: 'Time per question, decision hesitation, accuracy under pressure — we estimate your learning pace and cognitive load tolerance.', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { icon: Target, title: 'Strength & Weakness Map', desc: 'You won\'t get marks. You\'ll get a Learning Profile — strong zones (green), developing (orange), and foundation gaps (grey).', color: 'text-rose-400', bg: 'bg-rose-500/10' },
+    { icon: Lightbulb, title: 'Concept Understanding', desc: 'We check if you truly understand fundamentals — not just memorized answers.', color: 'text-amber-400', bg: 'bg-amber-500/10' },
+    { icon: Brain, title: 'Thinking Pattern', desc: 'We observe how you approach problems — logically or randomly, with confidence or hesitation.', color: 'text-violet-400', bg: 'bg-violet-500/10' },
+    { icon: Network, title: 'Brain Mapping', desc: 'We detect which concept foundations are missing and where gaps actually start.', color: 'text-sky-400', bg: 'bg-sky-500/10' },
+    { icon: Gauge, title: 'Speed & Confidence', desc: 'Time per question, decision hesitation, accuracy under pressure — all measured.', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+    { icon: Target, title: 'Strength & Weakness Map', desc: 'No marks — just a personalized Learning Profile with strong, developing, and gap zones.', color: 'text-rose-400', bg: 'bg-rose-500/10' },
   ];
+
+  // Elapsed time display
+  const getElapsed = () => {
+    const s = Math.round((Date.now() - testStartTimestamp) / 1000);
+    return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  };
 
   // ─── INTRO SCREEN ───
   if (!testStarted) {
@@ -282,32 +325,44 @@ const DiagnosticTestPage: React.FC = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-5">
               <Brain className="h-4 w-4 text-accent" />
-              <span className="text-xs font-medium text-accent">SETU Learning Diagnostic</span>
+              <span className="text-xs font-medium text-accent">Skill Mapping Assessment</span>
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white mb-3 leading-tight">
               Understand How You <span className="text-accent">Think</span>,<br />Not Just What You Know
             </h1>
             <p className="text-white/45 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-              This is not a marks-based test. We analyze your thinking patterns, concept clarity, and learning behavior to build your personalized profile.
+              This diagnostic doesn't judge you — it understands you. We analyze your thinking patterns to build your personalized learning map.
             </p>
           </motion.div>
 
-          {/* Feature cards */}
-          <div className="space-y-3 mb-8">
+          {/* Test structure preview */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mb-6">
+            <div className="grid grid-cols-2 gap-2.5">
+              {SECTIONS.map((sec, i) => (
+                <div key={sec.name} className={`p-3 rounded-xl ${sec.bg} border border-white/[0.06]`}>
+                  <p className="text-white font-medium text-xs mb-0.5">{sec.label}</p>
+                  <p className="text-white/40 text-[10px]">{sec.count} questions • {sec.desc}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* What we measure */}
+          <div className="space-y-2.5 mb-6">
             {INTRO_FEATURES.map((feat, i) => (
               <motion.div
                 key={feat.title}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + i * 0.08 }}
-                className="flex items-start gap-4 p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06] backdrop-blur-sm"
+                transition={{ delay: 0.2 + i * 0.06 }}
+                className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.06] backdrop-blur-sm"
               >
-                <div className={`w-10 h-10 rounded-xl ${feat.bg} flex items-center justify-center shrink-0 mt-0.5`}>
-                  <feat.icon className={`h-5 w-5 ${feat.color}`} />
+                <div className={`w-9 h-9 rounded-xl ${feat.bg} flex items-center justify-center shrink-0`}>
+                  <feat.icon className={`h-4 w-4 ${feat.color}`} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-sm mb-1">{feat.title}</h3>
-                  <p className="text-white/40 text-xs leading-relaxed">{feat.desc}</p>
+                  <h3 className="font-semibold text-white text-[13px] mb-0.5">{feat.title}</h3>
+                  <p className="text-white/40 text-[11px] leading-relaxed">{feat.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -318,111 +373,122 @@ const DiagnosticTestPage: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="mb-8 p-5 rounded-2xl bg-accent/[0.06] border border-accent/15 text-center"
+            className="mb-6 p-4 rounded-2xl bg-accent/[0.06] border border-accent/15 text-center"
           >
             <p className="text-white/50 text-xs mb-1">Normal tests ask: <span className="text-white/70">"How much did you score?"</span></p>
             <p className="text-accent font-semibold text-sm">SETU asks: "How does your brain learn best?"</p>
           </motion.div>
 
-          {/* Result preview */}
+          {/* Stats bar */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="mb-8 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.65 }}
+            className="flex items-center justify-center gap-6 mb-6 text-white/35 text-xs"
           >
-            <p className="text-white/60 text-xs mb-3 font-medium flex items-center gap-2">
-              <BookOpen className="h-3.5 w-3.5" /> After the test, your dashboard becomes personalized:
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {['Topics to study first', 'Concepts to reinforce', 'Weekly improvement plan', 'Guidance for your style'].map(item => (
-                <div key={item} className="flex items-center gap-2 text-white/40 text-[11px]">
-                  <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
+            <span className="flex items-center gap-1.5"><Timer className="h-3.5 w-3.5" /> ~15 minutes</span>
+            <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> {TOTAL_QUESTIONS} questions</span>
+            <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> No marks</span>
           </motion.div>
 
           {/* CTA */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="text-center">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-center">
             <Button
               size="lg"
               onClick={() => { setTestStarted(true); setLoading(true); }}
               className="h-13 px-10 rounded-xl bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white font-semibold shadow-xl shadow-accent/25 text-base gap-2"
             >
-              Begin Diagnostic <ArrowRight className="h-5 w-5" />
+              Begin Assessment <ArrowRight className="h-5 w-5" />
             </Button>
-            <p className="mt-3 text-[11px] text-white/25">~15 minutes • 25 adaptive questions • No marks, only insights</p>
+            <p className="mt-3 text-[11px] text-white/20">Your dashboard becomes personalized after this</p>
           </motion.div>
         </div>
       </div>
     );
   }
 
+  // ─── LOADING ───
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
         <div className="text-center space-y-4">
           <Brain className="w-12 h-12 text-accent mx-auto animate-pulse" />
-          <h2 className="text-xl font-semibold text-foreground">Preparing Your Diagnostic Test</h2>
-          <p className="text-muted-foreground">We're building a personalized assessment just for you...</p>
+          <h2 className="text-xl font-semibold text-white">Preparing Your Assessment</h2>
+          <p className="text-white/40 text-sm">Building a personalized question set for you…</p>
           <Loader2 className="w-6 h-6 animate-spin mx-auto text-accent" />
         </div>
       </div>
     );
   }
 
+  // ─── COMPLETE ───
   if (testComplete) {
     const totalCorrect = answers.filter(a => a.isCorrect).length;
-    const accuracy = Math.round((totalCorrect / answers.length) * 100);
+    const totalTime = answers.reduce((s, a) => s + a.time, 0);
+
+    // Per-section breakdown
+    const sectionResults = SECTIONS.map(sec => {
+      let start = 0;
+      for (const s of SECTIONS) {
+        if (s.name === sec.name) break;
+        start += s.count;
+      }
+      const sectionAnswers = answers.slice(start, start + sec.count);
+      const correct = sectionAnswers.filter(a => a.isCorrect).length;
+      return { ...sec, correct, total: sectionAnswers.length };
+    });
 
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-lg"
-        >
-          <Card className="p-8 text-center space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-lg">
+          <Card className="p-6 sm:p-8 text-center space-y-5 bg-white/[0.04] border-white/[0.08] backdrop-blur-md">
             {generatingProfile ? (
               <>
                 <Sparkles className="w-12 h-12 text-accent mx-auto animate-pulse" />
-                <h2 className="text-2xl font-bold text-foreground">Analyzing Your Results</h2>
-                <p className="text-muted-foreground">
-                  AI is building your personalized learning profile...
-                </p>
+                <h2 className="text-2xl font-bold text-white">Analyzing Your Brain Map</h2>
+                <p className="text-white/40 text-sm">AI is building your personalized learning profile…</p>
                 <Loader2 className="w-8 h-8 animate-spin mx-auto text-accent" />
               </>
             ) : (
               <>
-                <div className="w-20 h-20 rounded-full bg-accent/15 flex items-center justify-center mx-auto">
-                  <Brain className="w-10 h-10 text-accent" />
+                <div className="w-16 h-16 rounded-2xl bg-accent/15 flex items-center justify-center mx-auto">
+                  <Brain className="w-8 h-8 text-accent" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">Diagnostic Complete!</h2>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="p-3 rounded-xl bg-muted/50">
-                    <p className="text-2xl font-bold text-foreground">{accuracy}%</p>
-                    <p className="text-xs text-muted-foreground">Accuracy</p>
+                <h2 className="text-2xl font-bold text-white">Assessment Complete! 🎉</h2>
+                <p className="text-white/40 text-sm">Here's a quick snapshot before your full profile</p>
+
+                {/* Section breakdown */}
+                <div className="space-y-2 text-left">
+                  {sectionResults.map(sr => (
+                    <div key={sr.name} className={`flex items-center justify-between p-3 rounded-xl ${sr.bg}`}>
+                      <span className="text-white/80 text-xs font-medium">{sr.label}</span>
+                      <span className="text-white font-semibold text-sm">{sr.correct}/{sr.total}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Summary stats */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3 rounded-xl bg-white/[0.05]">
+                    <p className="text-xl font-bold text-white">{Math.round((totalCorrect / answers.length) * 100)}%</p>
+                    <p className="text-[10px] text-white/40">Accuracy</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-muted/50">
-                    <p className="text-2xl font-bold text-foreground">{totalCorrect}/{answers.length}</p>
-                    <p className="text-xs text-muted-foreground">Correct</p>
+                  <div className="p-3 rounded-xl bg-white/[0.05]">
+                    <p className="text-xl font-bold text-white">{totalCorrect}/{answers.length}</p>
+                    <p className="text-[10px] text-white/40">Correct</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-muted/50">
-                    <p className="text-2xl font-bold text-foreground">
-                      {Math.round(answers.reduce((s, a) => s + a.time, 0) / 60)}m
-                    </p>
-                    <p className="text-xs text-muted-foreground">Time</p>
+                  <div className="p-3 rounded-xl bg-white/[0.05]">
+                    <p className="text-xl font-bold text-white">{Math.round(totalTime / 60)}m</p>
+                    <p className="text-[10px] text-white/40">Time</p>
                   </div>
                 </div>
+
                 <Button
                   size="lg"
                   onClick={() => navigate('/learning-profile')}
-                  className="w-full gap-2"
+                  className="w-full gap-2 bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white"
                 >
-                  View Your Learning Profile
-                  <ArrowRight className="w-5 h-5" />
+                  View Your Learning Profile <ArrowRight className="w-5 h-5" />
                 </Button>
               </>
             )}
@@ -432,38 +498,43 @@ const DiagnosticTestPage: React.FC = () => {
     );
   }
 
+  // ─── EMPTY ───
   if (questions.length === 0) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="p-8 text-center space-y-4 max-w-md">
-          <Brain className="w-12 h-12 text-muted-foreground mx-auto" />
-          <h2 className="text-xl font-semibold">No Questions Available</h2>
-          <p className="text-muted-foreground">We're still building the question bank for your level. Please check back soon.</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+        <Card className="p-8 text-center space-y-4 max-w-md bg-white/[0.04] border-white/[0.08]">
+          <Brain className="w-12 h-12 text-white/30 mx-auto" />
+          <h2 className="text-xl font-semibold text-white">No Questions Available</h2>
+          <p className="text-white/40 text-sm">We're still building the question bank for your level. Check back soon.</p>
           <Button onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
         </Card>
       </div>
     );
   }
 
+  // ─── ACTIVE TEST ───
   const currentQ = questions[currentIndex];
-  const progress = ((answers.length + (showResult ? 0 : 0)) / 25) * 100;
+  const progress = (answers.length / TOTAL_QUESTIONS) * 100;
+  const section = getCurrentSection(currentIndex);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
+      <div className="sticky top-0 z-10 bg-slate-950/90 backdrop-blur-md border-b border-white/[0.06] px-4 py-3">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-accent" />
-              <span className="font-semibold text-foreground text-sm">Diagnostic Assessment</span>
+              <Brain className="w-4 h-4 text-accent" />
+              <span className="font-semibold text-white text-sm">Skill Mapping</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="w-4 h-4" />
-              <span>Q {answers.length + 1}/25</span>
+            <div className="flex items-center gap-3 text-xs text-white/40">
+              <span className={`px-2 py-0.5 rounded-full ${section.bg} ${section.color} text-[10px] font-medium`}>
+                {section.label}
+              </span>
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Q{answers.length + 1}/{TOTAL_QUESTIONS}</span>
             </div>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className="h-1.5" />
         </div>
       </div>
 
@@ -475,27 +546,27 @@ const DiagnosticTestPage: React.FC = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25 }}
           >
-            {/* Meta */}
-            <div className="flex items-center gap-2 mb-4">
+            {/* Meta tags */}
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
               <span className="px-2.5 py-0.5 rounded-full bg-accent/15 text-accent text-xs font-medium">
                 {currentQ.subject}
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-muted text-muted-foreground text-xs">
+              <span className="px-2.5 py-0.5 rounded-full bg-white/[0.06] text-white/50 text-xs">
                 {currentQ.topic}
               </span>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                currentQ.difficulty === 'easy' ? 'bg-green-500/15 text-green-500' :
-                currentQ.difficulty === 'hard' ? 'bg-red-500/15 text-red-500' :
-                'bg-yellow-500/15 text-yellow-500'
+                currentQ.difficulty === 'easy' ? 'bg-emerald-500/15 text-emerald-400' :
+                currentQ.difficulty === 'hard' ? 'bg-rose-500/15 text-rose-400' :
+                'bg-amber-500/15 text-amber-400'
               }`}>
                 {currentQ.difficulty}
               </span>
             </div>
 
             {/* Question Text */}
-            <h2 className="text-lg font-medium text-foreground mb-6 leading-relaxed">
+            <h2 className="text-lg font-medium text-white mb-6 leading-relaxed">
               {currentQ.question_text}
             </h2>
 
@@ -506,11 +577,11 @@ const DiagnosticTestPage: React.FC = () => {
                 const isSelected = selectedOption === opt;
                 const isCorrect = opt === currentQ.correct_option;
 
-                let borderClass = 'border-border hover:border-accent/50';
+                let borderClass = 'border-white/[0.08] hover:border-accent/40';
                 if (showResult) {
-                  if (isCorrect) borderClass = 'border-green-500 bg-green-500/10';
-                  else if (isSelected && !isCorrect) borderClass = 'border-red-500 bg-red-500/10';
-                  else borderClass = 'border-border opacity-50';
+                  if (isCorrect) borderClass = 'border-emerald-500 bg-emerald-500/10';
+                  else if (isSelected && !isCorrect) borderClass = 'border-rose-500 bg-rose-500/10';
+                  else borderClass = 'border-white/[0.04] opacity-40';
                 } else if (isSelected) {
                   borderClass = 'border-accent bg-accent/10';
                 }
@@ -524,15 +595,15 @@ const DiagnosticTestPage: React.FC = () => {
                   >
                     <div className="flex items-start gap-3">
                       <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold shrink-0 ${
-                        showResult && isCorrect ? 'bg-green-500 text-white' :
-                        showResult && isSelected && !isCorrect ? 'bg-red-500 text-white' :
-                        isSelected ? 'bg-accent text-primary' : 'bg-muted text-muted-foreground'
+                        showResult && isCorrect ? 'bg-emerald-500 text-white' :
+                        showResult && isSelected && !isCorrect ? 'bg-rose-500 text-white' :
+                        isSelected ? 'bg-accent text-white' : 'bg-white/[0.06] text-white/50'
                       }`}>
                         {showResult && isCorrect ? <CheckCircle2 className="w-4 h-4" /> :
                          showResult && isSelected && !isCorrect ? <XCircle className="w-4 h-4" /> :
                          opt}
                       </span>
-                      <span className="text-foreground pt-1">{optionText}</span>
+                      <span className="text-white/80 pt-1 text-sm">{optionText}</span>
                     </div>
                   </button>
                 );
@@ -546,11 +617,15 @@ const DiagnosticTestPage: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-6 space-y-4"
               >
-                <div className="p-4 rounded-xl bg-muted/50 border border-border">
-                  <p className="text-sm text-muted-foreground">{currentQ.explanation}</p>
+                <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                  <p className="text-sm text-white/50 leading-relaxed">{currentQ.explanation}</p>
                 </div>
-                <Button onClick={handleNext} className="w-full gap-2" size="lg">
-                  {currentIndex + 1 >= questions.length ? 'Finish Test' : 'Next Question'}
+                <Button
+                  onClick={handleNext}
+                  className="w-full gap-2 bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white"
+                  size="lg"
+                >
+                  {currentIndex + 1 >= questions.length || answers.length >= TOTAL_QUESTIONS ? 'Finish Assessment' : 'Next Question'}
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </motion.div>
