@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useClassContext } from '@/contexts/ClassContext';
 import FormulaSheet from '@/components/revision/FormulaSheet';
 import DifferenceTables from '@/components/revision/DifferenceTables';
 import QuickQuiz from '@/components/revision/QuickQuiz';
@@ -28,13 +29,16 @@ type RevisionMode = 'home' | 'notes' | 'formulas' | 'tables' | 'quiz' | 'handwri
 const RevisionPage: React.FC = () => {
   const [activeMode, setActiveMode] = useState<RevisionMode>('home');
   const navigate = useNavigate();
+  const { isFoundation, classLabel, studentClass } = useClassContext();
 
   const revisionModes = [
     {
       id: 'notes' as RevisionMode,
       icon: FileText,
       title: '1-Page Notes',
-      description: 'AI-generated condensed chapter notes — everything you need on one page',
+      description: isFoundation
+        ? `Quick summary notes for ${classLabel} chapters — everything on one page`
+        : 'AI-generated condensed chapter notes — everything you need on one page',
       action: 'Generate Notes',
       gradient: 'from-blue-500 to-cyan-500',
       bgGlow: 'bg-blue-500/10',
@@ -53,8 +57,10 @@ const RevisionPage: React.FC = () => {
     {
       id: 'formulas' as RevisionMode,
       icon: ListChecks,
-      title: 'Formula Sheets',
-      description: 'Every important formula organized by chapter — no more hunting',
+      title: isFoundation ? 'Key Formulas & Rules' : 'Formula Sheets',
+      description: isFoundation
+        ? `Important formulas and rules for ${classLabel} — organized by chapter`
+        : 'Every important formula organized by chapter — no more hunting',
       action: 'View Formulas',
       gradient: 'from-emerald-500 to-green-500',
       bgGlow: 'bg-emerald-500/10',
@@ -73,8 +79,10 @@ const RevisionPage: React.FC = () => {
     {
       id: 'quiz' as RevisionMode,
       icon: Zap,
-      title: '1-Mark Questions',
-      description: 'Rapid-fire quick questions to test your revision in seconds',
+      title: isFoundation ? 'Quick Quiz' : '1-Mark Questions',
+      description: isFoundation
+        ? 'Rapid-fire questions to test how well you remember concepts'
+        : 'Rapid-fire quick questions to test your revision in seconds',
       action: 'Start Quiz',
       gradient: 'from-rose-500 to-pink-500',
       bgGlow: 'bg-rose-500/10',
@@ -84,7 +92,52 @@ const RevisionPage: React.FC = () => {
 
   const { isNeet, isCuet } = useExamMode();
 
-  const lastDayChecklist = isCuet ? [
+  // Foundation checklist — school subjects
+  const foundationChecklist = studentClass <= 8 ? [
+    {
+      subject: 'mathematics', label: 'Mathematics', icon: '📐', items: [
+        { name: 'Key Formulas', slug: 'formulas' },
+        { name: 'Important Definitions', slug: 'definitions' },
+        { name: 'Problem Patterns', slug: 'patterns' },
+        { name: 'Common Mistakes', slug: 'mistakes' },
+      ]
+    },
+    {
+      subject: 'science', label: 'Science', icon: '🔬', items: [
+        { name: 'Key Diagrams', slug: 'diagrams' },
+        { name: 'Important Terms', slug: 'terms' },
+        { name: 'Experiments', slug: 'experiments' },
+        { name: 'Concept Maps', slug: 'concept-maps' },
+      ]
+    },
+  ] : [
+    {
+      subject: 'mathematics', label: 'Mathematics', icon: '📐', items: [
+        { name: 'Key Formulas', slug: 'formulas' },
+        { name: 'Theorems', slug: 'theorems' },
+        { name: 'Problem Patterns', slug: 'patterns' },
+        { name: 'Common Mistakes', slug: 'mistakes' },
+      ]
+    },
+    {
+      subject: 'physics', label: 'Physics', icon: '⚛️', items: [
+        { name: 'Formulas', slug: 'formulas' },
+        { name: 'Diagrams', slug: 'diagrams' },
+        { name: 'Derivations', slug: 'derivations' },
+        { name: 'Numerical Tips', slug: 'numerical-tips' },
+      ]
+    },
+    {
+      subject: 'chemistry', label: 'Chemistry', icon: '🧪', items: [
+        { name: 'Reactions', slug: 'reactions' },
+        { name: 'Important Terms', slug: 'terms' },
+        { name: 'Periodic Table', slug: 'periodic-table' },
+        { name: 'Equations', slug: 'equations' },
+      ]
+    },
+  ];
+
+  const competitiveChecklist = isCuet ? [
     {
       subject: 'english', label: 'English', icon: '📝', items: [
         { name: 'Reading Comprehension', slug: 'reading-comprehension' },
@@ -161,6 +214,8 @@ const RevisionPage: React.FC = () => {
     },
   ];
 
+  const lastDayChecklist = isFoundation ? foundationChecklist : competitiveChecklist;
+
   const renderContent = () => {
     switch (activeMode) {
       case 'notes': return <OnePageNotes onBack={() => setActiveMode('home')} />;
@@ -187,7 +242,6 @@ const RevisionPage: React.FC = () => {
       <div className="space-y-8">
         {/* Hero Header */}
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--setu-navy-light))] p-8 sm:p-10">
-          {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
           <div className="absolute inset-0 opacity-5" style={{
@@ -200,18 +254,19 @@ const RevisionPage: React.FC = () => {
               <div className="flex items-center gap-2 mb-3">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider">
                   <Sparkles className="w-3.5 h-3.5" />
-                  Exam Ready Mode
+                  {isFoundation ? 'Quick Revision' : 'Exam Ready Mode'}
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                 Revision Hub
               </h1>
               <p className="text-white/60 text-base max-w-md">
-                Everything you need for last-minute revision — notes, formulas, quick tests, all in one place.
+                {isFoundation
+                  ? `Everything you need to revise ${classLabel} chapters — notes, formulas, quizzes, all in one place.`
+                  : 'Everything you need for last-minute revision — notes, formulas, quick tests, all in one place.'}
               </p>
             </div>
 
-            {/* Quick Stats */}
             <div className="flex gap-4">
               {[
                 { icon: Clock, label: 'Quick Revise', value: '15 min' },
@@ -245,14 +300,12 @@ const RevisionPage: React.FC = () => {
                 )}
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
-                {/* Hover glow */}
                 <div className={cn(
                   "absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500",
                   mode.bgGlow
                 )} />
 
                 <div className="relative">
-                  {/* Icon + Emoji */}
                   <div className="flex items-center justify-between mb-4">
                     <div className={cn(
                       "w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md",
@@ -290,12 +343,16 @@ const RevisionPage: React.FC = () => {
                 <BookOpen className="w-5 h-5 text-accent" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Last Day Revision Checklist</h2>
-                <p className="text-white/40 text-sm">Tick off as you revise — stay on track!</p>
+                <h2 className="text-xl font-bold text-white">
+                  {isFoundation ? 'Revision Checklist' : 'Last Day Revision Checklist'}
+                </h2>
+                <p className="text-white/40 text-sm">
+                  {isFoundation ? 'Review these topics before your test!' : 'Tick off as you revise — stay on track!'}
+                </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className={cn("grid gap-5", isFoundation && studentClass <= 8 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-3")}>
               {lastDayChecklist.map((subj) => (
                 <div key={subj.subject} className="bg-white/[0.06] backdrop-blur-sm rounded-xl p-5 border border-white/10">
                   <h4 className="font-semibold mb-3 text-accent flex items-center gap-2">
@@ -328,11 +385,13 @@ const RevisionPage: React.FC = () => {
               <Sparkles className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <p className="font-semibold text-foreground mb-1">Jeetu Bhaiya's Revision Strategy</p>
+              <p className="font-semibold text-foreground mb-1">
+                {isFoundation ? 'Study Tip' : "Jeetu Bhaiya's Revision Strategy"}
+              </p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                Beta, exam se 1 din pehle naya kuch mat padho. Sirf revision karo —
-                formula sheets dekho, PYQ patterns yaad karo, aur confident raho.
-                Sleep is important — kam se kam 6 ghante ki neend lo!
+                {isFoundation
+                  ? 'Before your test, focus on reviewing your weak areas first. Read through 1-page notes, practice quick quizzes, and sleep well — a rested mind performs better!'
+                  : 'Beta, exam se 1 din pehle naya kuch mat padho. Sirf revision karo — formula sheets dekho, PYQ patterns yaad karo, aur confident raho. Sleep is important — kam se kam 6 ghante ki neend lo!'}
               </p>
             </div>
           </div>

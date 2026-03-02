@@ -11,7 +11,7 @@ interface ProtectedRouteProps {
 }
 
 // Routes that foundation (Class 6-10) students should NOT access
-const COMPETITIVE_ONLY_ROUTES = ['/major-test', '/circles'];
+const COMPETITIVE_ONLY_ROUTES = ['/major-test', '/circles', '/tutorial-sessions'];
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 

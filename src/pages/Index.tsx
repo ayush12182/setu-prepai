@@ -5,7 +5,7 @@ import { ExamMode } from "@/contexts/ExamModeContext";
 import { SmartSuggestion } from "@/components/home/SmartSuggestion";
 import { QuickActions } from "@/components/home/QuickActions";
 import { SyllabusTracker } from "@/components/home/SyllabusTracker";
-import { ExamReminders } from "@/components/home/ExamReminders";
+import ExamReminders from "@/components/home/ExamReminders";
 import { TwentyOneDayPlan } from "@/components/home/TwentyOneDayPlan";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
