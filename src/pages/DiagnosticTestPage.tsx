@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useClassContext } from '@/contexts/ClassContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -38,6 +39,14 @@ const TOTAL_QUESTIONS = SECTIONS.reduce((s, sec) => s + sec.count, 0); // 22
 const DiagnosticTestPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { diagnosticCompleted } = useClassContext();
+
+  // Redirect if diagnostic already completed
+  useEffect(() => {
+    if (diagnosticCompleted) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [diagnosticCompleted, navigate]);
 
   const [testStarted, setTestStarted] = useState(false);
   const [loading, setLoading] = useState(false);
