@@ -36,7 +36,8 @@ export const useJeetuChat = () => {
           classContext: {
             ...aiContext,
             strict_class_only: true,
-            teaching_style: aiContext.learning_mode === 'foundation' ? 'school_teacher' : 'competitive_mentor',
+            strict_stage_control: true,
+            teaching_style: aiContext.teaching_tone,
           }
         }),
       });
