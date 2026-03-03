@@ -7,6 +7,8 @@ import { QuickActions } from "@/components/home/QuickActions";
 import { SyllabusTracker } from "@/components/home/SyllabusTracker";
 import ExamReminders from "@/components/home/ExamReminders";
 import { TwentyOneDayPlan } from "@/components/home/TwentyOneDayPlan";
+import { MajorTestCountdown } from "@/components/home/MajorTestCountdown";
+import { WeakTopicsCard } from "@/components/home/WeakTopicsCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useExamMode } from "@/contexts/ExamModeContext";
@@ -44,7 +46,7 @@ const Index: React.FC = () => {
 
   return (
     <MainLayout title={isFoundation ? "Learning Dashboard" : "SETU"}>
-      <div className="space-y-10">
+      <div className="space-y-8">
         {/* ── Section 1: Welcome Hero ── */}
         {user && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--setu-navy-light))] p-8 sm:p-10">
@@ -109,12 +111,10 @@ const Index: React.FC = () => {
         {/* ── FOUNDATION MODE DASHBOARD (Class 6-10) ── */}
         {isFoundation ? (
           <>
-            {/* Transition Banner for Class 10 students ready for competitive */}
             {isReadyForTransition && transitionMessage && (
               <TransitionBanner message={transitionMessage} />
             )}
 
-            {/* Foundation Quick Actions */}
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-accent" />
@@ -142,7 +142,6 @@ const Index: React.FC = () => {
               </div>
             </section>
 
-            {/* Foundation Focus */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
               <div className="lg:col-span-3 flex flex-col gap-6">
                 <TodaysFocus data={dailyFocus} isLoading={isLoading} streak={streak} />
@@ -174,29 +173,42 @@ const Index: React.FC = () => {
           </>
         ) : (
           <>
-            {/* ── COMPETITIVE MODE DASHBOARD (Class 11-12 / Dropper) ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-              <div className="lg:col-span-3 flex flex-col gap-6">
+            {/* ── COMPETITIVE MODE DASHBOARD ── */}
+
+            {/* Row 1: Today's Focus (wide) + Right sidebar (Major Test + Exam) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 flex flex-col gap-6">
                 <TodaysFocus data={dailyFocus} isLoading={isLoading} streak={streak} />
                 {smartFocus && <SmartSuggestion data={smartFocus} />}
-                <CirclesDashboardCard />
               </div>
-              <div className="lg:col-span-2">
+              <div className="flex flex-col gap-4">
+                <MajorTestCountdown />
                 <ExamReminders />
               </div>
             </div>
 
+            {/* Row 2: Weak Topics + Quick Actions side by side */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <WeakTopicsCard />
+              <div>
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-accent" />
+                  Quick Actions
+                </h2>
+                <QuickActions />
+              </div>
+            </div>
+
+            {/* Row 3: 21-Day Plan */}
             <TwentyOneDayPlan />
 
-            <section>
-              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-accent" />
-                Quick Actions
-              </h2>
-              <QuickActions />
-            </section>
-
-            <SyllabusTracker />
+            {/* Row 4: Syllabus + Circles */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <SyllabusTracker />
+              </div>
+              <CirclesDashboardCard />
+            </div>
           </>
         )}
       </div>
