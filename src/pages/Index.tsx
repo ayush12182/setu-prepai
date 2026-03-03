@@ -14,7 +14,9 @@ import { useClassContext } from "@/contexts/ClassContext";
 import { JeeSubModeSelector } from "@/components/ui/JeeSubModeSelector";
 import { Sparkles, Flame, BookOpen, Target, TrendingUp, Brain } from "lucide-react";
 import { useTodaysFocus } from "@/hooks/useTodaysFocus";
+import { useProgressiveLearning } from "@/hooks/useProgressiveLearning";
 import { CirclesDashboardCard } from "@/components/circles/CirclesDashboardCard";
+import { TransitionBanner } from "@/components/home/TransitionBanner";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -26,6 +28,7 @@ const Index: React.FC = () => {
   const navigate = useNavigate();
 
   const { dailyFocus, smartFocus, isLoading, streak } = useTodaysFocus();
+  const { transitionMessage, isReadyForTransition } = useProgressiveLearning();
   const displayName = profile?.full_name || user?.email?.split("@")[0] || "Bhai";
 
   const getGreeting = () => {
@@ -106,6 +109,11 @@ const Index: React.FC = () => {
         {/* ── FOUNDATION MODE DASHBOARD (Class 6-10) ── */}
         {isFoundation ? (
           <>
+            {/* Transition Banner for Class 10 students ready for competitive */}
+            {isReadyForTransition && transitionMessage && (
+              <TransitionBanner message={transitionMessage} />
+            )}
+
             {/* Foundation Quick Actions */}
             <section>
               <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">

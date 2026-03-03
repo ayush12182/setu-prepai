@@ -5,9 +5,40 @@ export type LearningMode = 'foundation' | 'competitive';
 
 export type StudentClass = 6 | 7 | 8 | 9 | 10 | 11 | 12 | 0; // 0 = dropper
 
+export type LearningStage = 'curiosity_stage' | 'concept_stage' | 'analytical_stage' | 'competitive_stage';
+
+export type ContentTag = 'conceptual' | 'applied' | 'analytical' | 'competitive';
+
+export type TeachingTone = 'school_teacher' | 'advanced_mentor' | 'competitive_mentor';
+
+function deriveLearningStage(studentClass: StudentClass): LearningStage {
+  if (studentClass >= 6 && studentClass <= 7) return 'curiosity_stage';
+  if (studentClass >= 8 && studentClass <= 9) return 'concept_stage';
+  if (studentClass === 10) return 'analytical_stage';
+  return 'competitive_stage'; // 11, 12, 0 (dropper)
+}
+
+function getAllowedContentTags(stage: LearningStage): ContentTag[] {
+  switch (stage) {
+    case 'curiosity_stage': return ['conceptual'];
+    case 'concept_stage': return ['conceptual', 'applied'];
+    case 'analytical_stage': return ['applied', 'analytical'];
+    case 'competitive_stage': return ['analytical', 'competitive'];
+  }
+}
+
+function getTeachingTone(stage: LearningStage): TeachingTone {
+  if (stage === 'curiosity_stage' || stage === 'concept_stage') return 'school_teacher';
+  if (stage === 'analytical_stage') return 'advanced_mentor';
+  return 'competitive_mentor';
+}
+
 interface ClassContextType {
   studentClass: StudentClass;
   learningMode: LearningMode;
+  learningStage: LearningStage;
+  allowedContentTags: ContentTag[];
+  teachingTone: TeachingTone;
   isFoundation: boolean;
   isCompetitive: boolean;
   diagnosticCompleted: boolean;
@@ -17,7 +48,11 @@ interface ClassContextType {
   aiContext: {
     student_class: number;
     learning_mode: LearningMode;
+    learning_stage: LearningStage;
+    allowed_content_tags: ContentTag[];
+    teaching_tone: TeachingTone;
     syllabus_scope: 'strict_class_only';
+    strict_stage_control: true;
   };
 }
 
@@ -45,8 +80,10 @@ export const ClassProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const studentClass = parseStudentClass(profile?.class);
     const isFoundation = studentClass >= 6 && studentClass <= 10;
     const learningMode: LearningMode = isFoundation ? 'foundation' : 'competitive';
+    const learningStage = deriveLearningStage(studentClass);
+    const allowedContentTags = getAllowedContentTags(learningStage);
+    const teachingTone = getTeachingTone(learningStage);
     
-    // Read diagnostic_completed from profile (cast needed since types not yet regenerated)
     const profileAny = profile as any;
     const diagnosticCompleted = profileAny?.diagnostic_completed ?? false;
     const examGoal = profileAny?.exam_goal ?? profile?.target_exam ?? null;
@@ -56,6 +93,9 @@ export const ClassProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return {
       studentClass,
       learningMode,
+      learningStage,
+      allowedContentTags,
+      teachingTone,
       isFoundation,
       isCompetitive: !isFoundation,
       diagnosticCompleted,
@@ -64,7 +104,11 @@ export const ClassProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       aiContext: {
         student_class: studentClass,
         learning_mode: learningMode,
+        learning_stage: learningStage,
+        allowed_content_tags: allowedContentTags,
+        teaching_tone: teachingTone,
         syllabus_scope: 'strict_class_only',
+        strict_stage_control: true,
       },
     };
   }, [profile]);
