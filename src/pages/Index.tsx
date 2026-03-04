@@ -46,7 +46,7 @@ const Index: React.FC = () => {
 
   return (
     <MainLayout title={isFoundation ? "Learning Dashboard" : "SETU"}>
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* ── Section 1: Welcome Hero ── */}
         {user && (
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--setu-navy-light))] p-8 sm:p-10">
@@ -176,25 +176,28 @@ const Index: React.FC = () => {
             {/* ── COMPETITIVE MODE DASHBOARD ── */}
 
             {/* Row 1: Today's Focus (wide) + Right sidebar (Major Test + Exam) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 flex flex-col gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2 flex flex-col gap-4">
                 <TodaysFocus data={dailyFocus} isLoading={isLoading} streak={streak} />
                 {smartFocus && <SmartSuggestion data={smartFocus} />}
               </div>
               <div className="flex flex-col gap-4">
                 <MajorTestCountdown />
                 <ExamReminders />
+                <CirclesDashboardCard />
               </div>
             </div>
 
-            {/* Row 2: Weak Topics + Quick Actions side by side */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <WeakTopicsCard />
-              <div>
-                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-accent" />
-                  Quick Actions
-                </h2>
+            {/* Row 2: Weak Topics + Quick Actions */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+              <div className="lg:col-span-2">
+                <WeakTopicsCard />
+              </div>
+              <div className="lg:col-span-3">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-4 h-4 text-accent" />
+                  <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Quick Actions</h2>
+                </div>
                 <QuickActions />
               </div>
             </div>
@@ -202,13 +205,8 @@ const Index: React.FC = () => {
             {/* Row 3: 21-Day Plan */}
             <TwentyOneDayPlan />
 
-            {/* Row 4: Syllabus + Circles */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <SyllabusTracker />
-              </div>
-              <CirclesDashboardCard />
-            </div>
+            {/* Row 4: Syllabus */}
+            <SyllabusTracker />
           </>
         )}
       </div>
