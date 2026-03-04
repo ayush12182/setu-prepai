@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ExamModeProvider } from "@/contexts/ExamModeContext";
@@ -39,50 +40,52 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <AuthProvider>
-        <ExamModeProvider>
-          <ClassProvider>
-            <LanguageProvider>
-              <TooltipProvider>
-                <Toaster />
-                <Sonner />
-                <Routes>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/select-exam" element={<ExamSelectionPage />} />
-                  <Route path="/dashboard" element={<Index />} />
-                  <Route path="/learn" element={<PreparationPage />} />
-                  <Route path="/preparation" element={<PreparationPage />} />
-                  <Route path="/tutorial-sessions" element={<TutorialSessionsPage />} />
-                  <Route path="/chapter/:chapterId" element={<ChapterPage />} />
-                  <Route path="/subchapter/:subchapterId" element={<SubchapterPage />} />
-                  <Route path="/practice" element={<PracticePage />} />
-                  <Route path="/test" element={<TestPage />} />
-                  <Route path="/major-test" element={<MajorTestPage />} />
-                  <Route path="/revision" element={<RevisionPage />} />
-                  <Route path="/revision/:subject/:topic" element={<RevisionTopicPage />} />
-                  <Route path="/lecture-setu" element={<LectureSetu />} />
-                  <Route path="/ask-jeetu" element={<AskJeetuPage />} />
-                  <Route path="/analytics" element={<AnalyticsPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/privacy" element={<PrivacyPage />} />
-                  <Route path="/terms" element={<TermsPage />} />
-                  <Route path="/circles" element={<SetuCirclesPage />} />
-                  <Route path="/circles/:roomId" element={<CircleFocusRoomPage />} />
-                  <Route path="/diagnostic-test" element={<DiagnosticTestPage />} />
-                  <Route path="/learning-profile" element={<LearningProfilePage />} />
-                  <Route path="/concept-graph" element={<ConceptGraphPage />} />
-                  <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
-                  <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </TooltipProvider>
-            </LanguageProvider>
-          </ClassProvider>
-        </ExamModeProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <BrowserRouter>
+        <AuthProvider>
+          <ExamModeProvider>
+            <ClassProvider>
+              <LanguageProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/select-exam" element={<ExamSelectionPage />} />
+                    <Route path="/dashboard" element={<Index />} />
+                    <Route path="/learn" element={<PreparationPage />} />
+                    <Route path="/preparation" element={<PreparationPage />} />
+                    <Route path="/tutorial-sessions" element={<TutorialSessionsPage />} />
+                    <Route path="/chapter/:chapterId" element={<ChapterPage />} />
+                    <Route path="/subchapter/:subchapterId" element={<SubchapterPage />} />
+                    <Route path="/practice" element={<PracticePage />} />
+                    <Route path="/test" element={<TestPage />} />
+                    <Route path="/major-test" element={<MajorTestPage />} />
+                    <Route path="/revision" element={<RevisionPage />} />
+                    <Route path="/revision/:subject/:topic" element={<RevisionTopicPage />} />
+                    <Route path="/lecture-setu" element={<LectureSetu />} />
+                    <Route path="/ask-jeetu" element={<AskJeetuPage />} />
+                    <Route path="/analytics" element={<AnalyticsPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/circles" element={<SetuCirclesPage />} />
+                    <Route path="/circles/:roomId" element={<CircleFocusRoomPage />} />
+                    <Route path="/diagnostic-test" element={<DiagnosticTestPage />} />
+                    <Route path="/learning-profile" element={<LearningProfilePage />} />
+                    <Route path="/concept-graph" element={<ConceptGraphPage />} />
+                    <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
+                    <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </TooltipProvider>
+              </LanguageProvider>
+            </ClassProvider>
+          </ExamModeProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

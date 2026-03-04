@@ -32,28 +32,28 @@ export const QuickActions: React.FC = () => {
 
   const actions: ActionItem[] = isFoundation
     ? [
-        { icon: BookOpen, title: 'Learn', description: 'Concept notes & explanations', path: '/learn', gradient: 'from-blue-500 to-cyan-500', emoji: '📖' },
-        { icon: PenTool, title: 'Practice', description: 'Chapter-wise MCQs', path: '/practice', gradient: 'from-emerald-500 to-teal-500', emoji: '✍️' },
-        { icon: ClipboardCheck, title: 'Test', description: 'Test your understanding', path: '/test', gradient: 'from-violet-500 to-purple-500', emoji: '📋' },
-        { icon: RotateCcw, title: 'Revision', description: 'Quick notes & flashcards', path: '/revision', gradient: 'from-amber-500 to-orange-500', emoji: '🔄' },
-        { icon: Video, title: 'Lecture SETU', description: 'Video → structured notes', path: '/lecture-setu', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' },
-        { icon: MessageCircle, title: 'Ask Mentor', description: 'Any doubt, any time', path: '/ask-jeetu', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
-        { icon: BarChart3, title: 'Progress', description: 'Track your mastery', path: '/analytics', gradient: 'from-teal-500 to-cyan-500', emoji: '📊' },
-      ]
+      { icon: BookOpen, title: 'Learn', description: 'Concept notes & explanations', path: '/learn', gradient: 'from-blue-500 to-cyan-500', emoji: '📖' },
+      { icon: PenTool, title: 'Practice', description: 'Chapter-wise MCQs', path: '/practice', gradient: 'from-emerald-500 to-teal-500', emoji: '✍️' },
+      { icon: ClipboardCheck, title: 'Test', description: 'Test your understanding', path: '/test', gradient: 'from-violet-500 to-purple-500', emoji: '📋' },
+      { icon: RotateCcw, title: 'Revision', description: 'Quick notes & flashcards', path: '/revision', gradient: 'from-amber-500 to-orange-500', emoji: '🔄' },
+      { icon: Video, title: 'Lecture SETU', description: 'Video → structured notes', path: '/lecture-setu', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' },
+      { icon: MessageCircle, title: 'Ask Mentor', description: 'Any doubt, any time', path: '/ask-jeetu', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
+      { icon: BarChart3, title: 'Progress', description: 'Track your mastery', path: '/analytics', gradient: 'from-teal-500 to-cyan-500', emoji: '📊' },
+    ]
     : [
-        { icon: BookOpen, title: 'Learn', description: isNeet ? 'NCERT-aligned notes' : 'AI notes & concepts', path: '/learn', gradient: 'from-blue-500 to-cyan-500', emoji: '📖' },
-        { icon: PenTool, title: 'Practice', description: isNeet ? 'NCERT MCQs' : 'MCQs by difficulty', path: '/practice', gradient: 'from-emerald-500 to-teal-500', emoji: '✍️' },
-        { icon: ClipboardCheck, title: 'Test', description: isNeet ? 'Biology-heavy tests' : 'Chapter & PYQ tests', path: '/test', gradient: 'from-violet-500 to-purple-500', emoji: '📋' },
-        { icon: RotateCcw, title: 'Revision', description: isNeet ? 'NCERT flashcards' : 'Formula sheets', path: '/revision', gradient: 'from-amber-500 to-orange-500', emoji: '🔄' },
-        { icon: Video, title: 'Lecture SETU', description: 'Video → structured notes', path: '/lecture-setu', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' },
-        { icon: MessageCircle, title: isNeet ? 'Ask NEET Mentor' : 'Ask Jeetu Bhaiya', description: 'Doubts & strategy', path: '/ask-jeetu', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
-        { icon: BarChart3, title: 'Analytics', description: 'Accuracy & trends', path: '/analytics', gradient: 'from-teal-500 to-cyan-500', emoji: '📊' },
-        { icon: Users, title: 'SETU Circles', description: 'Live study rooms', path: '/circles', gradient: 'from-amber-500 via-rose-500 to-violet-500', emoji: '🔥', badge: 'Live' },
-      ];
+      { icon: BookOpen, title: 'Learn', description: isNeet ? 'NCERT-aligned notes' : 'AI notes & concepts', path: '/learn', gradient: 'from-blue-500 to-cyan-500', emoji: '📖' },
+      { icon: PenTool, title: 'Practice', description: isNeet ? 'NCERT MCQs' : 'MCQs by difficulty', path: '/practice', gradient: 'from-emerald-500 to-teal-500', emoji: '✍️' },
+      { icon: ClipboardCheck, title: 'Test', description: isNeet ? 'Biology-heavy tests' : 'Chapter & PYQ tests', path: '/test', gradient: 'from-violet-500 to-purple-500', emoji: '📋' },
+      { icon: RotateCcw, title: 'Revision', description: isNeet ? 'NCERT flashcards' : 'Formula sheets', path: '/revision', gradient: 'from-amber-500 to-orange-500', emoji: '🔄' },
+      { icon: Video, title: 'Lecture SETU', description: 'Video → structured notes', path: '/lecture-setu', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' },
+      { icon: MessageCircle, title: isNeet ? 'Ask NEET Mentor' : 'Ask Jeetu Bhaiya', description: 'Doubts & strategy', path: '/ask-jeetu', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
+      { icon: BarChart3, title: 'Analytics', description: 'Accuracy & trends', path: '/analytics', gradient: 'from-teal-500 to-cyan-500', emoji: '📊' },
+      { icon: Users, title: 'SETU Circles', description: 'Live study rooms', path: '/circles', gradient: 'from-amber-500 via-rose-500 to-violet-500', emoji: '🔥', badge: 'Live' },
+    ];
 
   return (
-    <div className="w-full max-w-[1100px] mx-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div className="w-full mx-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4">
         {actions.map((action) => (
           <button
             key={action.path + action.title}

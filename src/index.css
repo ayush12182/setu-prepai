@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,8 +8,6 @@
    SETU DESIGN SYSTEM - Kota Coaching Notes Aesthetic
    Premium • Clear • Serious • Mentor-style
    ═══════════════════════════════════════════════════════════════════════════ */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -55,32 +55,36 @@
     /* ═══════════════════════════════════════════════════════
        TEXT COLOR HIERARCHY - Premium Contrast
        ═══════════════════════════════════════════════════════ */
-    
+
     /* On Light Background */
-    --text-primary: 213 32% 17%;      /* #1E2A3A - Deep Navy */
-    --text-secondary: 216 10% 40%;    /* #5A6472 - Calm Grey */
-    --text-muted: 215 8% 58%;         /* #8A919C - Muted Labels */
+    --text-primary: 213 32% 17%;
+    /* #1E2A3A - Deep Navy */
+    --text-secondary: 216 10% 40%;
+    /* #5A6472 - Calm Grey */
+    --text-muted: 215 8% 58%;
+    /* #8A919C - Muted Labels */
 
     /* On Dark Background (Navy) */
     --text-on-dark: 0 0% 100%;
     --text-on-dark-secondary: 0 0% 92%;
     --text-on-dark-muted: 0 0% 75%;
-    
+
     /* Tip/Highlight on Dark */
     --text-tip-on-dark: 32 100% 80%;
 
     /* ═══════════════════════════════════════════════════════
        SETU CUSTOM TOKENS - Kota Coaching Palette
        ═══════════════════════════════════════════════════════ */
-    
+
     /* Navy palette (#1E2A3A) */
     --setu-navy: 213 32% 17%;
     --setu-navy-light: 213 28% 25%;
     --setu-navy-dark: 213 35% 12%;
-    
+
     /* Saffron palette (#E89A3C) */
     --setu-saffron: 32 79% 57%;
-    --setu-saffron-light: 32 100% 96%;  /* #FFF6EB - Light tint for cards */
+    --setu-saffron-light: 32 100% 96%;
+    /* #FFF6EB - Light tint for cards */
     --setu-saffron-dark: 32 85% 50%;
 
     /* Action Colors */
@@ -88,7 +92,7 @@
     --setu-warning: 32 79% 57%;
     --setu-error: 0 65% 48%;
     --setu-info: 213 60% 50%;
-    
+
     /* Subject Colors */
     --physics-color: 213 60% 50%;
     --chemistry-color: 145 50% 38%;
@@ -214,7 +218,9 @@
     @apply text-foreground;
   }
 
-  h4, h5, h6 {
+  h4,
+  h5,
+  h6 {
     font-family: 'Inter', 'IBM Plex Sans', system-ui, sans-serif;
     font-weight: 500;
     line-height: 1.35;
@@ -228,7 +234,8 @@
   }
 
   /* Small text */
-  small, .text-sm {
+  small,
+  .text-sm {
     line-height: 1.4;
   }
 
@@ -246,7 +253,7 @@
   /* ─────────────────────────────────────────────────────────
      BUTTONS
      ───────────────────────────────────────────────────────── */
-  
+
   .btn-primary {
     @apply bg-primary text-white font-medium;
     @apply shadow-sm hover:shadow-md transition-all duration-200;
@@ -276,7 +283,7 @@
   /* ─────────────────────────────────────────────────────────
      CARDS
      ───────────────────────────────────────────────────────── */
-  
+
   .card-elevated {
     @apply bg-card rounded-xl p-6;
     box-shadow: var(--shadow-card);
@@ -290,7 +297,7 @@
   /* ─────────────────────────────────────────────────────────
      DARK CARD TEXT (Navy backgrounds)
      ───────────────────────────────────────────────────────── */
-  
+
   .dark-card-title {
     color: hsl(var(--text-on-dark));
     font-weight: 600;
@@ -311,7 +318,7 @@
   /* ─────────────────────────────────────────────────────────
      MENTOR / JEETU BHAIYA SECTIONS
      ───────────────────────────────────────────────────────── */
-  
+
   .mentor-tip {
     @apply bg-accent/10;
     @apply border-l-4 border-accent p-4 rounded-r-lg;
@@ -326,7 +333,7 @@
   /* ─────────────────────────────────────────────────────────
      TABS & NAVIGATION
      ───────────────────────────────────────────────────────── */
-  
+
   .tab-active {
     @apply border-b-2 border-primary font-medium;
     color: hsl(var(--text-primary));
@@ -341,11 +348,11 @@
   /* ─────────────────────────────────────────────────────────
      PROGRESS & STATUS
      ───────────────────────────────────────────────────────── */
-  
+
   .progress-setu {
     @apply h-2 bg-secondary rounded-full overflow-hidden;
   }
-  
+
   .progress-setu-fill {
     @apply h-full bg-primary rounded-full;
     @apply transition-all duration-500 ease-out;
@@ -355,17 +362,17 @@
     @apply bg-[hsl(var(--setu-success)/0.15)] font-medium;
     color: hsl(var(--setu-success));
   }
-  
+
   .badge-warning {
     @apply bg-[hsl(var(--setu-warning)/0.15)] font-medium;
     color: hsl(var(--setu-warning));
   }
-  
+
   .badge-error {
     @apply bg-[hsl(var(--setu-error)/0.15)] font-medium;
     color: hsl(var(--setu-error));
   }
-  
+
   .badge-info {
     @apply bg-[hsl(var(--setu-info)/0.15)] font-medium;
     color: hsl(var(--setu-info));
@@ -374,20 +381,20 @@
   /* ─────────────────────────────────────────────────────────
      MCQ & TEST STYLES
      ───────────────────────────────────────────────────────── */
-  
+
   .mcq-option {
     @apply border-2 border-border rounded-lg p-4 cursor-pointer transition-all duration-200;
     @apply hover:border-primary/40 hover:bg-secondary/50;
   }
-  
+
   .mcq-option-selected {
     @apply border-primary bg-primary/5;
   }
-  
+
   .mcq-option-correct {
     @apply border-[hsl(var(--setu-success))] bg-[hsl(var(--setu-success)/0.1)];
   }
-  
+
   .mcq-option-wrong {
     @apply border-[hsl(var(--setu-error))] bg-[hsl(var(--setu-error)/0.1)];
   }
@@ -395,7 +402,7 @@
   /* ─────────────────────────────────────────────────────────
      FORM INPUTS
      ───────────────────────────────────────────────────────── */
-  
+
   .input-setu {
     @apply bg-card border-2 border-border rounded-lg px-4 py-3;
     @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
@@ -406,15 +413,15 @@
   /* ─────────────────────────────────────────────────────────
      SUBJECT CARDS
      ───────────────────────────────────────────────────────── */
-  
+
   .subject-physics {
     @apply bg-[hsl(var(--physics-color))];
   }
-  
+
   .subject-chemistry {
     @apply bg-[hsl(var(--chemistry-color))];
   }
-  
+
   .subject-maths {
     @apply bg-[hsl(var(--maths-color))];
   }
@@ -425,28 +432,67 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(-16px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); opacity: 0.4; }
-  50% { transform: translateY(-20px); opacity: 0.7; }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: translateY(-20px);
+    opacity: 0.7;
+  }
 }
 
 @keyframes float-slow {
-  0%, 100% { transform: translateY(0px); opacity: 0.15; }
-  50% { transform: translateY(-15px); opacity: 0.25; }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+    opacity: 0.15;
+  }
+
+  50% {
+    transform: translateY(-15px);
+    opacity: 0.25;
+  }
 }
 
 .animate-float-slow {
@@ -455,14 +501,29 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(232, 154, 60, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(232, 154, 60, 0.5); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(232, 154, 60, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(232, 154, 60, 0.5);
+  }
 }
 
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .animate-fade-in {
@@ -491,32 +552,83 @@
 }
 
 /* Stagger animations */
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.1s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.2s; }
-.stagger-5 { animation-delay: 0.25s; }
-.stagger-6 { animation-delay: 0.3s; }
+.stagger-1 {
+  animation-delay: 0.05s;
+}
+
+.stagger-2 {
+  animation-delay: 0.1s;
+}
+
+.stagger-3 {
+  animation-delay: 0.15s;
+}
+
+.stagger-4 {
+  animation-delay: 0.2s;
+}
+
+.stagger-5 {
+  animation-delay: 0.25s;
+}
+
+.stagger-6 {
+  animation-delay: 0.3s;
+}
 
 @keyframes breathing {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.9; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
 }
 
 @keyframes waveform {
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
+
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
 }
 
 @keyframes glow-aura {
-  0%, 100% { filter: drop-shadow(0 0 15px rgba(232, 154, 60, 0.1)); }
-  50% { filter: drop-shadow(0 0 25px rgba(232, 154, 60, 0.3)); }
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 15px rgba(232, 154, 60, 0.1));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 25px rgba(232, 154, 60, 0.3));
+  }
 }
 
 @keyframes particle-drift {
-  0% { transform: translate(0, 0) rotate(0deg); opacity: 0.2; }
-  50% { transform: translate(15px, -15px) rotate(180deg); opacity: 0.4; }
-  100% { transform: translate(0, 0) rotate(360deg); opacity: 0.2; }
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.2;
+  }
+
+  50% {
+    transform: translate(15px, -15px) rotate(180deg);
+    opacity: 0.4;
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(360deg);
+    opacity: 0.2;
+  }
 }
 
 .animate-breathing {

@@ -14,16 +14,15 @@ const CLASS_CONFIG: Record<string, {
   topics: string;
   style: string;
   aiDetects: string;
-}> = {
   '6': {
     label: 'Class 6 — Foundation Awareness',
     goal: 'Check basic thinking ability & number sense',
     subjects: ['Mathematics', 'Science', 'Logic'],
     sections: [
-      { name: 'Foundation', difficulty: 'easy', count: 8, focus: 'Basic arithmetic, fractions, patterns' },
-      { name: 'Understanding', difficulty: 'medium', count: 6, focus: 'Simple reasoning & observation' },
-      { name: 'Thinking', difficulty: 'adaptive', count: 4, focus: 'Visual reasoning & curiosity' },
-      { name: 'Speed', difficulty: 'mixed', count: 4, focus: 'Quick number sense checks' },
+      { name: 'Foundation', difficulty: 'easy', count: 4, focus: 'Basic arithmetic, fractions, patterns' },
+      { name: 'Understanding', difficulty: 'medium', count: 3, focus: 'Simple reasoning & observation' },
+      { name: 'Thinking', difficulty: 'adaptive', count: 2, focus: 'Visual reasoning & curiosity' },
+      { name: 'Speed', difficulty: 'mixed', count: 1, focus: 'Quick number sense checks' },
     ],
     topics: 'Fractions comparison, pattern continuation (2,4,8,__?), unit understanding (length, weight, time), everyday science reasoning (Why does ice melt? Why do shadows change?), basic shapes & symmetry, counting & grouping',
     style: 'Visual reasoning, simple arithmetic logic, basic science understanding. Questions should feel like puzzles, NOT exam pressure. Use friendly language.',
@@ -225,7 +224,7 @@ Return ONLY the JSON array, no markdown or extra text.`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error("AI error:", response.status, errorText);
-      
+
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -241,7 +240,7 @@ Return ONLY the JSON array, no markdown or extra text.`;
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '';
-    
+
     let questions;
     try {
       const jsonMatch = content.match(/\[[\s\S]*\]/);
@@ -263,7 +262,7 @@ Return ONLY the JSON array, no markdown or extra text.`;
       class_level: classKey,
     }));
 
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       questions,
       meta: {
         classLevel: classKey,

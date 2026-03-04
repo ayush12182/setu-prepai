@@ -188,18 +188,16 @@ const Index: React.FC = () => {
               </div>
             </div>
 
-            {/* Row 2: Weak Topics + Quick Actions */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-              <div className="lg:col-span-2">
-                <WeakTopicsCard />
+            {/* Row 2: Weak Topics */}
+            <WeakTopicsCard />
+
+            {/* Row 3: Quick Actions (full width, centered) */}
+            <div>
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Sparkles className="w-4 h-4 text-accent" />
+                <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Quick Actions</h2>
               </div>
-              <div className="lg:col-span-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-4 h-4 text-accent" />
-                  <h2 className="text-sm font-bold text-foreground uppercase tracking-wider">Quick Actions</h2>
-                </div>
-                <QuickActions />
-              </div>
+              <QuickActions />
             </div>
 
             {/* Row 3: 21-Day Plan */}

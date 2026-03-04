@@ -34,7 +34,13 @@ const SECTIONS = [
   { name: 'Thinking', label: '🔴 Thinking Ability', color: 'text-rose-400', bg: 'bg-rose-500/15', difficulty: 'adaptive', count: 4, desc: 'Adaptive — difficulty changes with your answers' },
   { name: 'Confidence', label: '🧠 Speed & Confidence', color: 'text-violet-400', bg: 'bg-violet-500/15', difficulty: 'mixed', count: 4, desc: 'Quick decisions & reasoning under time' },
 ];
-const TOTAL_QUESTIONS = SECTIONS.reduce((s, sec) => s + sec.count, 0); // 22
+
+const FOUNDATION_SECTIONS = [
+  { name: 'Foundation', label: '🟢 Foundation Check', color: 'text-emerald-400', bg: 'bg-emerald-500/15', difficulty: 'easy', count: 4, desc: 'Basic concepts & prerequisite clarity' },
+  { name: 'Understanding', label: '🟡 Understanding', color: 'text-amber-400', bg: 'bg-amber-500/15', difficulty: 'medium', count: 3, desc: 'Multi-step thinking & concept application' },
+  { name: 'Thinking', label: '🔴 Thinking Ability', color: 'text-rose-400', bg: 'bg-rose-500/15', difficulty: 'adaptive', count: 2, desc: 'Adaptive — difficulty changes with your answers' },
+  { name: 'Confidence', label: '🧠 Speed & Confidence', color: 'text-violet-400', bg: 'bg-violet-500/15', difficulty: 'mixed', count: 1, desc: 'Quick decisions & reasoning under time' },
+];
 
 const DiagnosticTestPage: React.FC = () => {
   const navigate = useNavigate();
@@ -65,6 +71,10 @@ const DiagnosticTestPage: React.FC = () => {
   const studentLevel = profile?.student_level || '11-12';
   const gradeRange = ['6', '7', '8'].includes(studentClass) ? '6-8' : ['9', '10'].includes(studentClass) ? '9-10' : '11-12';
 
+  const isClass6 = studentClass === '6';
+  const activeSections = isClass6 ? FOUNDATION_SECTIONS : SECTIONS;
+  const TOTAL_QUESTIONS = activeSections.reduce((s, sec) => s + sec.count, 0);
+
   // CAT state for adaptive section
   const [currentDifficulty, setCurrentDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [questionPool, setQuestionPool] = useState<DiagnosticQuestion[]>([]);
@@ -74,11 +84,11 @@ const DiagnosticTestPage: React.FC = () => {
   // Get current section info
   const getCurrentSection = (qIndex: number) => {
     let cumulative = 0;
-    for (const sec of SECTIONS) {
+    for (const sec of activeSections) {
       cumulative += sec.count;
       if (qIndex < cumulative) return { ...sec, startIndex: cumulative - sec.count };
     }
-    return SECTIONS[SECTIONS.length - 1];
+    return activeSections[activeSections.length - 1];
   };
 
   const loadQuestions = useCallback(async () => {
@@ -125,29 +135,33 @@ const DiagnosticTestPage: React.FC = () => {
       };
 
       // Section 1: Foundation (easy)
-      const s1 = pickQuestions('easy', 6);
+      const s1 = pickQuestions('easy', activeSections[0].count);
       structured.push(...s1);
-      // Fill shortage from medium
-      if (s1.length < 6) structured.push(...pickQuestions('medium', 6 - s1.length));
+      if (s1.length < activeSections[0].count) structured.push(...pickQuestions('medium', activeSections[0].count - s1.length));
 
       // Section 2: Understanding (medium)
-      const s2 = pickQuestions('medium', 8);
+      const s2Count = activeSections[1].count;
+      const s2 = pickQuestions('medium', s2Count);
       structured.push(...s2);
-      if (s2.length < 8) structured.push(...pickQuestions('easy', 8 - s2.length));
+      if (s2.length < s2Count) structured.push(...pickQuestions('easy', s2Count - s2.length));
 
-      // Section 3: Thinking (adaptive — start medium, will adapt)
-      const s3 = pickQuestions('medium', 2);
-      const s3h = pickQuestions('hard', 2);
+      // Section 3: Thinking (adaptive)
+      const s3Count = activeSections[2].count;
+      const s3Half = Math.floor(s3Count / 2);
+      const s3Rest = s3Count - s3Half;
+      const s3 = pickQuestions('medium', s3Half);
+      const s3h = pickQuestions('hard', s3Rest);
       structured.push(...s3, ...s3h);
-      const s3Need = 4 - s3.length - s3h.length;
+      const s3Need = s3Count - s3.length - s3h.length;
       if (s3Need > 0) structured.push(...pickQuestions('easy', s3Need));
 
       // Section 4: Speed & Confidence (mixed)
-      const s4e = pickQuestions('easy', 1);
-      const s4m = pickQuestions('medium', 2);
-      const s4h = pickQuestions('hard', 1);
+      const s4Count = activeSections[3].count;
+      const s4e = pickQuestions('easy', Math.max(1, Math.floor(s4Count / 4)));
+      const s4m = pickQuestions('medium', Math.max(1, Math.floor(s4Count / 2)));
+      const s4h = pickQuestions('hard', Math.max(0, s4Count - s4e.length - s4m.length));
       structured.push(...s4e, ...s4m, ...s4h);
-      const s4Need = 4 - s4e.length - s4m.length - s4h.length;
+      const s4Need = s4Count - s4e.length - s4m.length - s4h.length;
       if (s4Need > 0) structured.push(...pool.filter(q => !usedIds.has(q.id)).slice(0, s4Need));
 
       setQuestions(structured);
@@ -351,7 +365,7 @@ const DiagnosticTestPage: React.FC = () => {
           {/* Test structure preview */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mb-6">
             <div className="grid grid-cols-2 gap-2.5">
-              {SECTIONS.map((sec, i) => (
+              {activeSections.map((sec, i) => (
                 <div key={sec.name} className={`p-3 rounded-xl ${sec.bg} border border-white/[0.06]`}>
                   <p className="text-white font-medium text-xs mb-0.5">{sec.label}</p>
                   <p className="text-white/40 text-[10px]">{sec.count} questions • {sec.desc}</p>
@@ -440,9 +454,9 @@ const DiagnosticTestPage: React.FC = () => {
     const totalTime = answers.reduce((s, a) => s + a.time, 0);
 
     // Per-section breakdown
-    const sectionResults = SECTIONS.map(sec => {
+    const sectionResults = activeSections.map(sec => {
       let start = 0;
-      for (const s of SECTIONS) {
+      for (const s of activeSections) {
         if (s.name === sec.name) break;
         start += s.count;
       }
@@ -569,11 +583,10 @@ const DiagnosticTestPage: React.FC = () => {
               <span className="px-2.5 py-0.5 rounded-full bg-white/[0.06] text-white/50 text-xs">
                 {currentQ.topic}
               </span>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                currentQ.difficulty === 'easy' ? 'bg-emerald-500/15 text-emerald-400' :
-                currentQ.difficulty === 'hard' ? 'bg-rose-500/15 text-rose-400' :
-                'bg-amber-500/15 text-amber-400'
-              }`}>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${currentQ.difficulty === 'easy' ? 'bg-emerald-500/15 text-emerald-400' :
+                  currentQ.difficulty === 'hard' ? 'bg-rose-500/15 text-rose-400' :
+                    'bg-amber-500/15 text-amber-400'
+                }`}>
                 {currentQ.difficulty}
               </span>
             </div>
@@ -607,14 +620,13 @@ const DiagnosticTestPage: React.FC = () => {
                     className={`w-full p-4 rounded-xl border-2 text-left transition-all ${borderClass}`}
                   >
                     <div className="flex items-start gap-3">
-                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold shrink-0 ${
-                        showResult && isCorrect ? 'bg-emerald-500 text-white' :
-                        showResult && isSelected && !isCorrect ? 'bg-rose-500 text-white' :
-                        isSelected ? 'bg-accent text-white' : 'bg-white/[0.06] text-white/50'
-                      }`}>
+                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold shrink-0 ${showResult && isCorrect ? 'bg-emerald-500 text-white' :
+                          showResult && isSelected && !isCorrect ? 'bg-rose-500 text-white' :
+                            isSelected ? 'bg-accent text-white' : 'bg-white/[0.06] text-white/50'
+                        }`}>
                         {showResult && isCorrect ? <CheckCircle2 className="w-4 h-4" /> :
-                         showResult && isSelected && !isCorrect ? <XCircle className="w-4 h-4" /> :
-                         opt}
+                          showResult && isSelected && !isCorrect ? <XCircle className="w-4 h-4" /> :
+                            opt}
                       </span>
                       <span className="text-white/80 pt-1 text-sm">{optionText}</span>
                     </div>

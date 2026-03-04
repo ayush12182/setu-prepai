@@ -17,12 +17,13 @@ export interface SchoolSubject {
   dotColor: string;
 }
 
-// Foundation subjects by class range
 export const getSchoolSubjects = (studentClass: number): SchoolSubject[] => {
   if (studentClass <= 8) {
     return [
       { key: 'mathematics', label: 'Mathematics', emoji: '📐', gradient: 'from-violet-500 to-purple-500', dotColor: 'bg-violet-500' },
       { key: 'science', label: 'Science', emoji: '🔬', gradient: 'from-emerald-500 to-green-500', dotColor: 'bg-emerald-500' },
+      { key: 'english', label: 'English', emoji: '📖', gradient: 'from-sky-500 to-blue-500', dotColor: 'bg-sky-500' },
+      { key: 'social_science', label: 'Social Science', emoji: '🌍', gradient: 'from-amber-500 to-orange-500', dotColor: 'bg-amber-500' },
     ];
   }
   // Class 9-10: Science splits into Physics, Chemistry, Biology
@@ -66,6 +67,18 @@ const schoolChapters: Record<number, SchoolChapter[]> = {
     { id: 'sch-6-sci-12', name: 'Fun with Magnets', subject: 'science', classLevel: 6, weightage: 'Medium' },
     { id: 'sch-6-sci-13', name: 'Water', subject: 'science', classLevel: 6, weightage: 'Medium' },
     { id: 'sch-6-sci-14', name: 'Air Around Us', subject: 'science', classLevel: 6, weightage: 'Medium' },
+    // English
+    { id: 'sch-6-eng-1', name: 'Who Did Patrick\'s Homework?', subject: 'english', classLevel: 6, weightage: 'Medium' },
+    { id: 'sch-6-eng-2', name: 'How the Dog Found Himself a New Master!', subject: 'english', classLevel: 6, weightage: 'Medium' },
+    { id: 'sch-6-eng-3', name: 'Taro\'s Reward', subject: 'english', classLevel: 6, weightage: 'Medium' },
+    { id: 'sch-6-eng-4', name: 'An Indian-American Woman in Space', subject: 'english', classLevel: 6, weightage: 'High' },
+    { id: 'sch-6-eng-5', name: 'A Different Kind of School', subject: 'english', classLevel: 6, weightage: 'High' },
+    // Social Science
+    { id: 'sch-6-sst-1', name: 'What, Where, How and When?', subject: 'social_science', classLevel: 6, weightage: 'High' },
+    { id: 'sch-6-sst-2', name: 'From Hunting-Gathering to Growing Food', subject: 'social_science', classLevel: 6, weightage: 'Medium' },
+    { id: 'sch-6-sst-3', name: 'In the Earliest Cities', subject: 'social_science', classLevel: 6, weightage: 'High' },
+    { id: 'sch-6-sst-4', name: 'The Earth in the Solar System', subject: 'social_science', classLevel: 6, weightage: 'High' },
+    { id: 'sch-6-sst-5', name: 'Globe: Latitudes and Longitudes', subject: 'social_science', classLevel: 6, weightage: 'High' },
   ],
   7: [
     // Mathematics

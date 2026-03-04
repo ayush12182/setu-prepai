@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode, ExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { toast } from 'sonner';
+import { ModeToggle } from '@/components/mode-toggle';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -85,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
           >
             <Menu className="w-5 h-5" />
           </Button>
-          
+
           <Link to="/dashboard" className="flex items-center">
             <img src="/setu-logo.png" alt="SETU" className="h-12 w-auto rounded-lg shadow-sm hover:opacity-80 transition-opacity" />
           </Link>
@@ -140,10 +141,12 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
             </DropdownMenuContent>
           </DropdownMenu>
 
+          <ModeToggle />
+
           <Button variant="ghost" size="icon">
             <Bell className="w-5 h-5" />
           </Button>
-          
+
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

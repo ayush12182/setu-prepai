@@ -37,6 +37,14 @@ const NEET_MOTIVATION_QUOTES = [
   "NCERT hi tumhara Bible hai, Gita hai, aur Quran hai. Uske ek bhi corner ko mat chhodo.",
 ];
 
+const FOUNDATION_MOTIVATION_QUOTES = [
+  "Padhai mein maza aana chahiye! Naye concepts ko samjho, ratto mat. Curiosity hi sabse badi taaqat hai.",
+  "Galti karna achhi baat hai, kyonki galti se hi seekhte hain. Bas ek hi galti do baar mat karna.",
+  "Roz thoda practice karo, aur khelna bhi utna hi zaroori hai. Balance maintain karo.",
+  "Science hamaare aas-paas hai. Dekho, pucho 'Kyon? Kaise?' aur apne teachers se sawal pucho.",
+  "Maths koi darr nahi hai, maths toh ek puzzle hai. Aur puzzles solve karna kisse pasand nahi?",
+];
+
 // Local motivation audio/video files
 const MOTIVATION_AUDIO_PATH = '/audio/jeetu-motivation.mp3';
 
@@ -127,8 +135,10 @@ const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
 
 const AskJeetuPage: React.FC = () => {
   const { language } = useLanguage();
-  const { isNeet } = useExamMode();
+  const { isNeet, examMode } = useExamMode();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const isFoundation = examMode === 'foundation';
   const { sendMessage, isLoading, error } = useJeetuChat();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -149,7 +159,10 @@ const AskJeetuPage: React.FC = () => {
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const injectMotivationMessage = useCallback(() => {
-    const quotes = isNeet ? NEET_MOTIVATION_QUOTES : JEE_MOTIVATION_QUOTES;
+    let quotes = JEE_MOTIVATION_QUOTES;
+    if (isFoundation) quotes = FOUNDATION_MOTIVATION_QUOTES;
+    else if (isNeet) quotes = NEET_MOTIVATION_QUOTES;
+
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 
     const newMsg: Message = {
@@ -196,14 +209,16 @@ const AskJeetuPage: React.FC = () => {
     "JEE Advanced Physics kaise prepare karein?"
   ];
 
-  const neetQuickQuestions = [
-    "Cell aur Organism mein kya difference hai?",
-    "Krebs cycle explain karo simply",
-    "Genetics ki important topics kaunsi hain NEET ke liye?",
-    "NEET ke liye Biology kaise prepare karein?"
+  const foundationQuickQuestions = [
+    "Photosynthesis kaise hota hai?",
+    "Fractions ko kaise add karte hain?",
+    "Solar system ke planets ke naam kya hain?",
+    "HCF aur LCM mein kya difference hai?"
   ];
 
-  const quickQuestions = isNeet ? neetQuickQuestions : jeeQuickQuestions;
+  let quickQuestions = jeeQuickQuestions;
+  if (isFoundation) quickQuestions = foundationQuickQuestions;
+  else if (isNeet) quickQuestions = neetQuickQuestions;
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -378,10 +393,12 @@ const AskJeetuPage: React.FC = () => {
             <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-card bg-setu-success"></span>
           </div>
           <div className="flex-1">
-            <h2 className="font-display font-bold text-lg text-foreground">Jeetu Bhaiya</h2>
+            <h2 className="font-display font-bold text-lg text-foreground">
+              {isFoundation ? 'SETU Mentor' : 'Jeetu Bhaiya'}
+            </h2>
             <p className="text-sm text-setu-success flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
-              Online • Your {isNeet ? 'NEET' : 'JEE'} Mentor
+              Online • Your {isFoundation ? 'School' : isNeet ? 'NEET' : 'JEE'} Mentor
             </p>
           </div>
           <div className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
