@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Clock, Zap, ArrowRight } from 'lucide-react';
+import { Calendar, Zap, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -24,11 +24,10 @@ export const MajorTestCountdown: React.FC = () => {
     },
   });
 
-  // Calculate days until test
   const testDate = activeCycle?.test_date ? new Date(activeCycle.test_date) : null;
   const now = new Date();
   now.setHours(0, 0, 0, 0);
-  
+
   let daysUntilTest = 0;
   if (testDate) {
     const td = new Date(testDate);
@@ -39,28 +38,19 @@ export const MajorTestCountdown: React.FC = () => {
   const examLabel = examMode === 'neet' ? 'NEET Simulation' : examMode === 'cuet' ? 'CUET Simulation' : 'JEE Simulation';
   const urgency = daysUntilTest <= 3 ? 'critical' : daysUntilTest <= 7 ? 'warning' : 'normal';
 
-  // Cycle progress
   const cycleDay = activeCycle
     ? Math.max(1, Math.min(21, Math.ceil((now.getTime() - new Date(activeCycle.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1))
     : 1;
   const progressPercent = Math.round((cycleDay / 21) * 100);
 
   return (
-    <div className={cn(
-      "relative overflow-hidden rounded-2xl border-2 p-5",
-      urgency === 'critical'
-        ? "border-destructive/50 bg-gradient-to-br from-destructive/10 via-destructive/5 to-card"
-        : urgency === 'warning'
-        ? "border-accent/40 bg-gradient-to-br from-accent/10 via-accent/5 to-card"
-        : "border-border bg-card"
-    )}>
-      {/* Decorative glow */}
-      {urgency !== 'normal' && (
-        <div className={cn(
-          "absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl pointer-events-none",
-          urgency === 'critical' ? "bg-destructive/20" : "bg-accent/20"
-        )} />
-      )}
+    <div className="bg-gradient-to-br from-[#0c141d] via-[#1e2a3a] to-[#0c141d] rounded-2xl p-5 relative overflow-hidden border border-white/10 shadow-xl group hover:shadow-2xl hover:shadow-primary/20 transition-all duration-300">
+      {/* Decorative glows */}
+      <div className={cn(
+        "absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl pointer-events-none",
+        urgency === 'critical' ? "bg-red-500/15" : urgency === 'warning' ? "bg-amber-500/15" : "bg-accent/10"
+      )} />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/15 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl pointer-events-none" />
 
       <div className="relative z-10">
         {/* Header */}
@@ -68,16 +58,16 @@ export const MajorTestCountdown: React.FC = () => {
           <div className="flex items-center gap-2">
             <div className={cn(
               "w-10 h-10 rounded-xl flex items-center justify-center",
-              urgency === 'critical' ? "bg-destructive/20" : "bg-accent/20"
+              urgency === 'critical' ? "bg-red-500/20" : "bg-accent/20"
             )}>
               <Zap className={cn(
                 "w-5 h-5",
-                urgency === 'critical' ? "text-destructive" : "text-accent"
+                urgency === 'critical' ? "text-red-400" : "text-accent"
               )} />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">21-Day Cycle</p>
-              <h3 className="font-bold text-foreground text-sm">Major Test</h3>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-white/50">21-Day Cycle</p>
+              <h3 className="font-bold text-white text-sm">Major Test</h3>
             </div>
           </div>
 
@@ -85,25 +75,25 @@ export const MajorTestCountdown: React.FC = () => {
           <div className="text-right">
             <div className={cn(
               "text-3xl font-black leading-none",
-              urgency === 'critical' ? "text-destructive" : urgency === 'warning' ? "text-accent" : "text-foreground"
+              urgency === 'critical' ? "text-red-400" : urgency === 'warning' ? "text-amber-400" : "text-white"
             )}>
               {daysUntilTest}
             </div>
-            <p className="text-[10px] text-muted-foreground font-medium mt-0.5">days left</p>
+            <p className="text-[10px] text-white/50 font-medium mt-0.5">days left</p>
           </div>
         </div>
 
         {/* Cycle progress */}
         <div className="mb-4">
-          <div className="flex justify-between text-[10px] text-muted-foreground mb-1.5 font-medium">
+          <div className="flex justify-between text-[10px] text-white/50 mb-1.5 font-medium">
             <span>Day {cycleDay} of 21</span>
             <span>{examLabel}</span>
           </div>
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-500",
-                urgency === 'critical' ? "bg-destructive" : "bg-accent"
+                urgency === 'critical' ? "bg-red-500" : "bg-accent"
               )}
               style={{ width: `${progressPercent}%` }}
             />
@@ -112,7 +102,7 @@ export const MajorTestCountdown: React.FC = () => {
 
         {/* Test date & CTA */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xs text-white/60">
             <Calendar className="w-3.5 h-3.5" />
             <span>
               {testDate
@@ -122,8 +112,12 @@ export const MajorTestCountdown: React.FC = () => {
           </div>
           <Button
             size="sm"
-            variant={urgency === 'critical' ? 'destructive' : 'default'}
-            className="text-xs gap-1 h-8"
+            className={cn(
+              "text-xs gap-1 h-8",
+              urgency === 'critical'
+                ? "bg-red-500/20 text-red-300 border border-red-500/30 hover:bg-red-500/30"
+                : "btn-hero"
+            )}
             onClick={() => navigate('/major-test')}
           >
             {urgency === 'critical' ? 'Take Test' : 'Prepare'}

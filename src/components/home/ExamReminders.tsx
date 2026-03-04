@@ -1,6 +1,5 @@
 import React from 'react';
-import { Calendar, Clock, Trophy, Flame, ArrowRight } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, Clock, Flame, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useExamMode } from '@/contexts/ExamModeContext';
@@ -8,7 +7,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { cn } from '@/lib/utils';
 
-// JEE, NEET & CUET Schedules
 const EXAM_SCHEDULE: Record<string, { name: string; date: Date; endDate: Date }[]> = {
   jee: [
     { name: 'JEE Mains 2026 Session 1', date: new Date('2026-01-22'), endDate: new Date('2026-01-30') },
@@ -25,7 +23,6 @@ const EXAM_SCHEDULE: Record<string, { name: string; date: Date; endDate: Date }[
   ],
 };
 
-// School exam schedule
 const SCHOOL_SCHEDULE = [
   { name: 'Unit Test 1', date: new Date('2026-07-15'), endDate: new Date('2026-07-20') },
   { name: 'Half-Yearly Exam', date: new Date('2026-10-01'), endDate: new Date('2026-10-10') },
@@ -46,54 +43,46 @@ const ExamReminders: React.FC = () => {
   const navigate = useNavigate();
   const { examMode } = useExamMode();
   const { profile } = useAuth();
-  const { isFoundation, classLabel } = useClassContext();
+  const { isFoundation } = useClassContext();
 
   const nextExam = getNextExam(examMode, isFoundation);
   const now = new Date();
   const daysLeft = Math.max(0, Math.ceil((nextExam.date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-
   const urgency = daysLeft <= 30 ? 'critical' : daysLeft <= 90 ? 'warning' : 'normal';
 
-  // For foundation, don't show if no school schedule is upcoming
   if (isFoundation && daysLeft <= 0) return null;
 
   return (
-    <Card className={cn(
-      "relative overflow-hidden border-2 transition-all",
-      urgency === 'critical' ? "border-destructive/40 bg-destructive/5" :
-      urgency === 'warning' ? "border-accent/40 bg-accent/5" :
-      "border-border bg-card"
-    )}>
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
+    <div className="bg-gradient-to-br from-[#0c141d] via-[#1e2a3a] to-[#0c141d] rounded-2xl p-5 relative overflow-hidden border border-white/10 shadow-xl transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20">
+      <div className="absolute -top-8 -right-8 w-28 h-28 bg-accent/8 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-20 h-20 bg-primary/15 rounded-full translate-y-1/3 -translate-x-1/4 blur-2xl pointer-events-none" />
+
+      <div className="relative z-10">
+        <div className="flex items-start gap-3">
           <div className={cn(
-            "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
-            urgency === 'critical' ? "bg-destructive/20" :
-            urgency === 'warning' ? "bg-accent/20" :
-            "bg-primary/10"
+            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+            urgency === 'critical' ? "bg-red-500/20" : "bg-accent/20"
           )}>
             {urgency === 'critical' ? (
-              <Flame className="w-6 h-6 text-destructive" />
+              <Flame className="w-5 h-5 text-red-400" />
             ) : (
-              <Calendar className="w-6 h-6 text-accent" />
+              <Calendar className="w-5 h-5 text-accent" />
             )}
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-foreground text-sm">
+              <h3 className="font-semibold text-white text-sm">
                 {isFoundation ? 'Upcoming Exam' : 'Next Exam'}
               </h3>
               {urgency === 'critical' && (
-                <span className="px-2 py-0.5 bg-destructive/20 text-destructive text-[10px] font-bold rounded-full uppercase">
+                <span className="px-2 py-0.5 bg-red-500/20 text-red-300 text-[10px] font-bold rounded-full uppercase border border-red-500/30">
                   {daysLeft <= 7 ? 'This Week!' : 'Coming Soon'}
                 </span>
               )}
             </div>
-
-            <p className="text-foreground font-medium text-base mb-2">{nextExam.name}</p>
-
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <p className="text-white font-medium text-sm mb-2 truncate">{nextExam.name}</p>
+            <div className="flex items-center gap-4 text-xs text-white/50">
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {daysLeft} days left
@@ -107,8 +96,7 @@ const ExamReminders: React.FC = () => {
 
           <Button
             size="sm"
-            variant="outline"
-            className="shrink-0 text-xs"
+            className="shrink-0 text-xs btn-hero h-8"
             onClick={() => navigate(isFoundation ? '/revision' : '/test')}
           >
             {isFoundation ? 'Revise' : 'Prepare'}
@@ -116,28 +104,25 @@ const ExamReminders: React.FC = () => {
           </Button>
         </div>
 
-        {/* Progress bar */}
         {daysLeft <= 90 && (
           <div className="mt-4">
-            <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+            <div className="flex justify-between text-[10px] text-white/40 mb-1">
               <span>Today</span>
               <span>{nextExam.name}</span>
             </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
               <div
                 className={cn(
                   "h-full rounded-full transition-all",
-                  urgency === 'critical' ? "bg-destructive" :
-                  urgency === 'warning' ? "bg-accent" :
-                  "bg-primary"
+                  urgency === 'critical' ? "bg-red-500" : urgency === 'warning' ? "bg-accent" : "bg-primary"
                 )}
                 style={{ width: `${Math.max(5, Math.min(95, ((90 - daysLeft) / 90) * 100))}%` }}
               />
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

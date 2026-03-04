@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, ChevronRight, TrendingDown } from 'lucide-react';
+import { ChevronRight, TrendingDown, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,10 +21,10 @@ interface WeakTopic {
 }
 
 const subjectDots: Record<string, string> = {
-  Physics: 'bg-blue-500',
-  Chemistry: 'bg-emerald-500',
-  Maths: 'bg-violet-500',
-  Biology: 'bg-green-500',
+  Physics: 'bg-blue-400',
+  Chemistry: 'bg-emerald-400',
+  Maths: 'bg-violet-400',
+  Biology: 'bg-green-400',
 };
 
 export const WeakTopicsCard: React.FC = () => {
@@ -56,8 +56,6 @@ export const WeakTopicsCard: React.FC = () => {
       ];
 
       const allSubs = getAllSubchapters();
-
-      // Aggregate by subchapter
       const agg: Record<string, { correct: number; total: number }> = {};
       sessions.forEach(s => {
         if (!agg[s.subchapter_id]) agg[s.subchapter_id] = { correct: 0, total: 0 };
@@ -67,9 +65,9 @@ export const WeakTopicsCard: React.FC = () => {
 
       const weak: WeakTopic[] = [];
       Object.entries(agg).forEach(([subId, stats]) => {
-        if (stats.total < 3) return; // need minimum attempts
+        if (stats.total < 3) return;
         const accuracy = Math.round((stats.correct / stats.total) * 100);
-        if (accuracy >= 60) return; // not weak
+        if (accuracy >= 60) return;
 
         const sub = allSubs.find(s => s.id === subId);
         const chapter = allChapters.find(c => c.id === sub?.chapterId);
@@ -92,61 +90,70 @@ export const WeakTopicsCard: React.FC = () => {
   if (weakTopics.length === 0) return null;
 
   return (
-    <div className="bg-card border border-border rounded-2xl overflow-hidden">
-      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-destructive/15 flex items-center justify-center">
-            <TrendingDown className="w-4 h-4 text-destructive" />
+    <div className="bg-gradient-to-br from-[#0c141d] via-[#1e2a3a] to-[#0c141d] rounded-2xl relative overflow-hidden border border-white/10 shadow-xl">
+      {/* Decorative glow */}
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary/15 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl pointer-events-none" />
+
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+              <TrendingDown className="w-4 h-4 text-red-400" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-white text-sm">Needs More Practice</h3>
+              <p className="text-[10px] text-white/40">Topics below 60% accuracy</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold text-foreground text-sm">Needs More Practice</h3>
-            <p className="text-[10px] text-muted-foreground">Topics below 60% accuracy</p>
-          </div>
+          <span className="text-xs font-bold text-red-300 bg-red-500/20 px-2 py-0.5 rounded-full border border-red-500/30">
+            {weakTopics.length} weak
+          </span>
         </div>
-        <span className="text-xs font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
-          {weakTopics.length} weak
-        </span>
-      </div>
 
-      <div className="divide-y divide-border">
-        {weakTopics.map((topic) => (
-          <button
-            key={topic.subchapterId}
-            onClick={() => navigate(`/subchapter/${topic.subchapterId}`)}
-            className="w-full px-5 py-3 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left group"
+        {/* Topic list */}
+        <div className="divide-y divide-white/5">
+          {weakTopics.map((topic) => (
+            <button
+              key={topic.subchapterId}
+              onClick={() => navigate(`/subchapter/${topic.subchapterId}`)}
+              className="w-full px-5 py-3 flex items-center gap-3 hover:bg-white/5 transition-colors text-left group"
+            >
+              <div className={cn("w-2 h-2 rounded-full shrink-0", subjectDots[topic.subject] || 'bg-white/40')} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white/90 truncate group-hover:text-[hsl(35_100%_83%)] transition-colors">
+                  {topic.subchapterName}
+                </p>
+                <p className="text-[10px] text-white/40">
+                  {topic.subject} • {topic.chapterName}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <span className={cn(
+                  "text-sm font-bold",
+                  topic.accuracy < 30 ? "text-red-400" : "text-amber-400"
+                )}>
+                  {topic.accuracy}%
+                </span>
+                <p className="text-[10px] text-white/40">{topic.totalAttempts} Qs</p>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-white/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-3 border-t border-white/10">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full text-xs text-[hsl(35_100%_83%)] hover:text-[hsl(35_100%_90%)] hover:bg-white/5"
+            onClick={() => navigate('/analytics')}
           >
-            <div className={cn("w-2 h-2 rounded-full shrink-0", subjectDots[topic.subject] || 'bg-muted-foreground')} />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate group-hover:text-accent transition-colors">
-                {topic.subchapterName}
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                {topic.subject} • {topic.chapterName}
-              </p>
-            </div>
-            <div className="text-right shrink-0">
-              <span className={cn(
-                "text-sm font-bold",
-                topic.accuracy < 30 ? "text-destructive" : "text-amber-500"
-              )}>
-                {topic.accuracy}%
-              </span>
-              <p className="text-[10px] text-muted-foreground">{topic.totalAttempts} Qs</p>
-            </div>
-            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-        ))}
-      </div>
-
-      <div className="px-5 py-3 border-t border-border">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full text-xs text-accent hover:text-accent"
-          onClick={() => navigate('/analytics')}
-        >
-          View Full Analysis →
-        </Button>
+            View Full Analysis →
+          </Button>
+        </div>
       </div>
     </div>
   );
