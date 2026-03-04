@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Atom, 
-  Calculator, 
-  FlaskConical, 
+import {
+  Atom,
+  Calculator,
+  FlaskConical,
   GraduationCap,
   ArrowRight,
   Sparkles,
@@ -22,11 +22,11 @@ import {
 import { cn } from '@/lib/utils';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
-import { 
-  physicsChapters, 
-  chemistryChapters, 
+import {
+  physicsChapters,
+  chemistryChapters,
   mathsChapters,
-  getChapterById 
+  getChapterById
 } from '@/data/syllabus';
 import {
   getPhysicsChapterIdsByClass,
@@ -139,8 +139,8 @@ const PreparationPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 {chapter?.weightage && (
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className={cn(
                       "text-[10px] px-1.5",
                       chapter?.weightage === 'High' && "border-red-200 text-red-600 bg-red-50",
@@ -175,10 +175,10 @@ const PreparationPage: React.FC = () => {
               <div className="flex items-center gap-2 mb-3">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider">
                   <BookOpen className="w-3.5 h-3.5" />
-                  {classLabel} Syllabus
+                  {classLabel} Topics
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-semibold">
-                  📚 Foundation Learning
+                  📚 School Curriculum
                 </span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{classLabel} Learning</h1>
@@ -213,7 +213,7 @@ const PreparationPage: React.FC = () => {
 
           {/* Quick Access - Foundation friendly */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div 
+            <div
               className="relative overflow-hidden bg-card border border-accent/20 rounded-2xl p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
               onClick={() => navigate('/revision')}
             >
@@ -239,7 +239,7 @@ const PreparationPage: React.FC = () => {
               </div>
             </div>
 
-            <div 
+            <div
               className="relative overflow-hidden bg-card border border-border rounded-2xl p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
               onClick={() => navigate('/practice')}
             >
@@ -364,7 +364,7 @@ const PreparationPage: React.FC = () => {
 
         {/* Quick Access Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div 
+          <div
             className="relative overflow-hidden bg-card border border-border rounded-2xl p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
             onClick={() => navigate('/practice?mode=pyq')}
           >
@@ -388,7 +388,7 @@ const PreparationPage: React.FC = () => {
             </div>
           </div>
 
-          <div 
+          <div
             className="relative overflow-hidden bg-card border border-accent/20 rounded-2xl p-6 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
             onClick={() => navigate('/tutorial-sessions')}
           >

@@ -5,6 +5,8 @@ import { physicsChapters, chemistryChapters, mathsChapters, biologyChapters, Cha
 import { getAllSubchapters, Subchapter } from '@/data/subchapters';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { getAllCuetChapters, CUET_SUBJECTS } from '@/data/cuetSyllabus';
+import { useClassContext } from '@/contexts/ClassContext';
+import { getSchoolChapters } from '@/data/schoolSyllabus';
 
 export interface TodaysFocusData {
   subject: string;
@@ -26,7 +28,8 @@ export interface TodaysFocusData {
 }
 
 // Map chapter weightage + subject to rich labels
-const getWeightageLabel = (weightage: string, subject: string, isNeet: boolean, isCuet: boolean): string => {
+const getWeightageLabel = (weightage: string, subject: string, isNeet: boolean, isCuet: boolean, isFoundation: boolean): string => {
+  if (isFoundation) return `${weightage} Priority`;
   if (isCuet) {
     const exam = 'CUET';
     if (weightage === 'High') return `High — Frequently asked in ${exam}`;
@@ -39,7 +42,12 @@ const getWeightageLabel = (weightage: string, subject: string, isNeet: boolean, 
   return `Low — occasional Q in ${exam}`;
 };
 
-const getWhyStudyToday = (weightage: string, subject: string, trends: string[]): string => {
+const getWhyStudyToday = (weightage: string, subject: string, trends: string[], isFoundation: boolean): string => {
+  if (isFoundation) {
+    if (weightage === 'High') return '🔥 Core curriculum concept — crucial for exams';
+    if (weightage === 'Medium') return '📈 Important concept — build your base';
+    return '📚 Build conceptual foundation';
+  }
   if (trends.length > 0) return `📊 PYQ trend: ${trends[0]}`;
   if (weightage === 'High') return '🔥 High-repeat chapter — appeared in 8 of last 10 exams';
   if (weightage === 'Medium') return '📈 Moderate frequency — expected in upcoming sessions';
@@ -123,7 +131,19 @@ const getCuetSubjectName = (subjectKey: string): string => {
 };
 
 // Get all chapters with their subject based on Exam Mode
-const getAllChaptersForExam = (isNeet: boolean, isCuet: boolean): (Chapter & { subjectName: string })[] => {
+const getAllChaptersForExam = (isNeet: boolean, isCuet: boolean, isFoundation: boolean, studentClass: number): (Chapter & { subjectName: string })[] => {
+  if (isFoundation) {
+    return getSchoolChapters(studentClass).map(c => ({
+      id: c.id,
+      name: c.name,
+      subject: c.subject,
+      subjectName: c.subject.charAt(0).toUpperCase() + c.subject.slice(1).replace('_', ' '),
+      class: c.classLevel.toString(),
+      weightage: c.weightage || 'Medium',
+      difficulty: 'Medium',
+      term: '1'
+    }));
+  }
   if (isCuet) {
     return getAllCuetChapters().map(c => ({
       ...c,
@@ -200,6 +220,7 @@ const calculateStreak = async (userId: string): Promise<number> => {
 export const useTodaysFocus = () => {
   const { user } = useAuth();
   const { isNeet, isCuet } = useExamMode();
+  const { isFoundation, studentClass } = useClassContext();
   const [dailyFocus, setDailyFocus] = useState<TodaysFocusData | null>(null);
   const [smartFocus, setSmartFocus] = useState<TodaysFocusData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -208,9 +229,20 @@ export const useTodaysFocus = () => {
   useEffect(() => {
     const determineFocus = async () => {
       try {
-        const allChapters = getAllChaptersForExam(isNeet, isCuet);
+        const allChapters = getAllChaptersForExam(isNeet, isCuet, isFoundation, studentClass);
         const validChapterIds = new Set(allChapters.map(c => c.id));
-        const allSubchapters = getAllSubchapters().filter(s => validChapterIds.has(s.chapterId));
+
+        let allSubchapters = getAllSubchapters().filter(s => validChapterIds.has(s.chapterId));
+        if (isFoundation && allSubchapters.length === 0) {
+          // Foundation mode doesn't have explicit subchapters mapped yet, mock them dynamically using chapters directly.
+          allSubchapters = allChapters.map(c => ({
+            id: `${c.id}-basics`,
+            chapterId: c.id,
+            name: `${c.name} Basics`,
+            importance: 'High',
+            jeeAsks: ['Core Concepts']
+          }));
+        }
 
         let completedSubchapters = new Set<string>();
         let currentStreak = 0;
@@ -272,9 +304,9 @@ export const useTodaysFocus = () => {
               suggestedTime: '15 min',
               streak: currentStreak,
               reason: 'weakness',
-              weightage: getWeightageLabel(chapter.weightage, chapter.subjectName, isNeet, isCuet),
-              whyStudyToday: getWhyStudyToday(chapter.weightage, chapter.subjectName, sub.pyqFocus?.trends || []),
-              boardImportance: getBoardImportance(chapter.subjectName, chapter.id, isCuet),
+              weightage: getWeightageLabel(chapter.weightage, chapter.subjectName, isNeet, isCuet, isFoundation),
+              whyStudyToday: getWhyStudyToday(chapter.weightage, chapter.subjectName, sub.pyqFocus?.trends || [], isFoundation),
+              boardImportance: isFoundation ? `School Subject` : getBoardImportance(chapter.subjectName, chapter.id, isCuet),
               cycleDay,
             });
           }
@@ -313,12 +345,12 @@ export const useTodaysFocus = () => {
             subchapterId: todaysSubchapter.id,
             task: `Focus on ${jeeAsk}`,
             taskHinglish: todaysSubchapter.jeetuLine || `Aaj ${todaysSubchapter.name} pe focus karo!`,
-            suggestedTime: isCuet ? '1h 30m' : todaysChapter.difficulty === 'Hard' ? '3h' : todaysChapter.difficulty === 'Medium' ? '2h 30m' : '2h',
+            suggestedTime: isCuet || isFoundation ? '1h 30m' : todaysChapter.difficulty === 'Hard' ? '3h' : todaysChapter.difficulty === 'Medium' ? '2h 30m' : '2h',
             streak: currentStreak,
             reason: 'schedule',
-            weightage: getWeightageLabel(todaysChapter.weightage, todaysChapter.subjectName, isNeet, isCuet),
-            whyStudyToday: getWhyStudyToday(todaysChapter.weightage, todaysChapter.subjectName, trends),
-            boardImportance: getBoardImportance(todaysChapter.subjectName, todaysChapter.id, isCuet),
+            weightage: getWeightageLabel(todaysChapter.weightage, todaysChapter.subjectName, isNeet, isCuet, isFoundation),
+            whyStudyToday: getWhyStudyToday(todaysChapter.weightage, todaysChapter.subjectName, trends, isFoundation),
+            boardImportance: isFoundation ? `School Subject` : getBoardImportance(todaysChapter.subjectName, todaysChapter.id, isCuet),
             cycleDay,
           });
         }
@@ -331,7 +363,7 @@ export const useTodaysFocus = () => {
     };
 
     determineFocus();
-  }, [user, isNeet, isCuet]);
+  }, [user, isNeet, isCuet, isFoundation, studentClass]);
 
   return { dailyFocus, smartFocus, isLoading, streak };
 };

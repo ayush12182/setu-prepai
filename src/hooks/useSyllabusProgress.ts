@@ -6,6 +6,8 @@ import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllab
 import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
 import { CUET_SUBJECTS, getCuetChaptersBySubject } from '@/data/cuetSyllabus';
 import { getAllSubchapters } from '@/data/subchapters';
+import { useClassContext } from '@/contexts/ClassContext';
+import { getSchoolSubjects, getSchoolChapters } from '@/data/schoolSyllabus';
 
 export interface SubjectProgress {
   subject: string;
@@ -25,6 +27,7 @@ const getSubchaptersForSubjectChapters = (chapterIds: string[]): string[] => {
 export const useSyllabusProgress = () => {
   const { user } = useAuth();
   const { isNeet, isCuet } = useExamMode();
+  const { isFoundation, studentClass } = useClassContext();
   const [progress, setProgress] = useState<SubjectProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -56,7 +59,25 @@ export const useSyllabusProgress = () => {
 
       let newProgress: SubjectProgress[];
 
-      if (isCuet) {
+      if (isFoundation) {
+        const schoolSubjects = getSchoolSubjects(studentClass);
+        newProgress = schoolSubjects.map(subj => {
+          const chapters = getSchoolChapters(studentClass, subj.key);
+          const chapterIds = chapters.map(c => c.id);
+
+          // Foundation subchapters are currently mocked via their chapters
+          const subchapterIds = chapterIds.map(id => `${id}-basics`);
+          const completedCount = subchapterIds.filter(id => completedSubchapters.has(id)).length;
+
+          return {
+            subject: subj.key.charAt(0).toUpperCase() + subj.key.slice(1).replace('_', ' '),
+            chaptersCount: chapters.length,
+            totalSubchapters: subchapterIds.length,
+            completedSubchapters: completedCount,
+            progress: subchapterIds.length > 0 ? Math.round((completedCount / subchapterIds.length) * 100) : 0,
+          };
+        }).filter(s => s.chaptersCount > 0);
+      } else if (isCuet) {
         newProgress = CUET_SUBJECTS
           .map(subj => {
             const chapters = getCuetChaptersBySubject(subj.key);
@@ -116,7 +137,7 @@ export const useSyllabusProgress = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [user, isNeet, isCuet]);
+  }, [user, isNeet, isCuet, isFoundation, studentClass]);
 
   // Initial fetch
   useEffect(() => {
