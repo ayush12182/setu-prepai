@@ -28,10 +28,10 @@ export const HeroSection: React.FC = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-primary">
+    <section className="relative min-h-screen w-full overflow-hidden bg-[#1E2A3A]">
       {/* Video Background */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/95 via-primary/80 to-primary z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1E2A3A]/95 via-[#1E2A3A]/80 to-[#1E2A3A] z-10" />
         <iframe
           src={`https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`}
           title="SETU Background"
