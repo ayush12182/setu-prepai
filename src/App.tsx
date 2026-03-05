@@ -24,6 +24,7 @@ import LectureSetu from "./pages/LectureSetu";
 import AskJeetuPage from "./pages/AskJeetuPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
 import RevisionTopicPage from "./pages/RevisionTopicPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
@@ -68,6 +69,7 @@ const App = () => (
                     <Route path="/ask-jeetu" element={<AskJeetuPage />} />
                     <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/circles" element={<SetuCirclesPage />} />
