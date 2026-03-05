@@ -42,9 +42,11 @@ const PracticePage: React.FC = () => {
   useEffect(() => {
     if (initialized) return;
     const subchapterId = searchParams.get('subchapter');
+    const chapterId = searchParams.get('chapter');
     const difficulty = searchParams.get('difficulty') as 'easy' | 'medium' | 'hard' | null;
     const modeParam = searchParams.get('mode');
     if (modeParam === 'test') setMode('test');
+
     if (subchapterId) {
       const subchapter = getSubchapterById(subchapterId);
       if (subchapter) {
@@ -56,6 +58,26 @@ const PracticePage: React.FC = () => {
           } else {
             setState({ step: 'select-difficulty', subchapter, chapter, subject: chapter.subject });
           }
+        }
+      }
+    } else if (chapterId) {
+      const chapter = getChapterById(chapterId);
+      if (chapter) {
+        // Create mock subchapter for the whole chapter
+        const subchapter: Subchapter = {
+          id: `${chapter.id}-full`,
+          chapterId: chapter.id,
+          name: `Complete Chapter`,
+          jeeAsks: ["Foundation Practice"],
+          pyqFocus: { trends: [], patterns: [], traps: [] },
+          commonMistakes: [],
+          jeetuLine: "Practice makes perfect."
+        };
+        if (difficulty && ['easy', 'medium', 'hard'].includes(difficulty)) {
+          setState({ step: 'quiz', subchapter, chapter, subject: chapter.subject, difficulty });
+          generateQuestions(subchapter.id, subchapter.name, chapter.id, chapter.name, chapter.subject, difficulty, modeParam === 'test' ? 10 : 5);
+        } else {
+          setState({ step: 'select-difficulty', subchapter, chapter, subject: chapter.subject });
         }
       }
     }

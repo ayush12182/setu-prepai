@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useClassContext } from '@/contexts/ClassContext';
+import { getSchoolSubjects, getSchoolChapters } from '@/data/schoolSyllabus';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
 import { getSubchaptersByChapterId, Subchapter } from '@/data/subchapters';
 import {
@@ -50,6 +52,7 @@ const cuetColorMap: Record<string, { color: string; hoverColor: string }> = {
 
 const SubchapterSelector: React.FC<SubchapterSelectorProps> = ({ onSelect }) => {
   const { isNeet, isCuet } = useExamMode();
+  const { isFoundation, studentClass } = useClassContext();
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
 
@@ -72,6 +75,26 @@ const SubchapterSelector: React.FC<SubchapterSelectorProps> = ({ onSelect }) => 
         { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters as Chapter[], icon: FlaskConical, color: 'bg-chemistry text-white', hoverColor: 'hover:bg-chemistry/10 hover:border-chemistry/50' },
         { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters as Chapter[], icon: Atom, color: 'bg-physics text-white', hoverColor: 'hover:bg-physics/10 hover:border-physics/50' },
       ];
+    }
+    if (isFoundation) {
+      const colorMap: Record<string, { color: string; hoverColor: string }> = {
+        mathematics: { color: 'bg-violet-500 text-white', hoverColor: 'hover:bg-violet-500/10 hover:border-violet-500/50' },
+        science: { color: 'bg-emerald-500 text-white', hoverColor: 'hover:bg-emerald-500/10 hover:border-emerald-500/50' },
+        english: { color: 'bg-sky-500 text-white', hoverColor: 'hover:bg-sky-500/10 hover:border-sky-500/50' },
+        social_science: { color: 'bg-amber-500 text-white', hoverColor: 'hover:bg-amber-500/10 hover:border-amber-500/50' },
+        physics: { color: 'bg-blue-500 text-white', hoverColor: 'hover:bg-blue-500/10 hover:border-blue-500/50' },
+        chemistry: { color: 'bg-emerald-500 text-white', hoverColor: 'hover:bg-emerald-500/10 hover:border-emerald-500/50' },
+        biology: { color: 'bg-green-500 text-white', hoverColor: 'hover:bg-green-500/10 hover:border-green-500/50' },
+      };
+      const iconMap: Record<string, any> = { mathematics: Calculator, science: FlaskConical, english: BookOpenCheck, social_science: Globe, physics: Atom, chemistry: FlaskConical, biology: Dna };
+      return getSchoolSubjects(studentClass).map(s => ({
+        id: s.key,
+        name: s.label,
+        chapters: getSchoolChapters(studentClass, s.key) as Chapter[],
+        icon: iconMap[s.key] || BookOpen,
+        color: colorMap[s.key]?.color || 'bg-gray-500 text-white',
+        hoverColor: colorMap[s.key]?.hoverColor || 'hover:bg-gray-500/10 hover:border-gray-500/50',
+      }));
     }
     return [
       { id: 'physics', name: 'Physics', chapters: physicsChapters, icon: Atom, color: 'bg-physics text-white', hoverColor: 'hover:bg-physics/10 hover:border-physics/50' },
@@ -168,8 +191,29 @@ const SubchapterSelector: React.FC<SubchapterSelectorProps> = ({ onSelect }) => 
                   )}
 
                   {isExpanded && subchapters.length === 0 && (
-                    <div className="border-t border-border bg-secondary/30 p-4 text-center">
-                      <p className="text-sm text-muted-foreground">Topics coming soon...</p>
+                    <div className="border-t border-border bg-secondary/30">
+                      <button
+                        onClick={() => onSelect(
+                          {
+                            id: `${chapter.id}-full`,
+                            chapterId: chapter.id,
+                            name: `Complete Chapter`,
+                            jeeAsks: ["Foundation Practice"],
+                            pyqFocus: { trends: [], patterns: [], traps: [] },
+                            commonMistakes: [],
+                            jeetuLine: "Practice makes perfect."
+                          },
+                          chapter,
+                          selectedSubject
+                        )}
+                        className="w-full text-left p-3 pl-12 flex items-center justify-between hover:bg-secondary transition-colors"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Complete Chapter Practice</p>
+                          <p className="text-xs text-muted-foreground">Test all concepts from this chapter</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </button>
                     </div>
                   )}
                 </div>
