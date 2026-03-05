@@ -102,7 +102,7 @@ const ProfilePage: React.FC = () => {
         studyHours: Math.round(totalTime / 3600),
         accuracy: totalQ > 0 ? Math.round((totalCorrect / totalQ) * 100) : 0,
       });
-    } catch {}
+    } catch { }
   };
 
   const handleSave = async () => {
@@ -176,12 +176,12 @@ const ProfilePage: React.FC = () => {
   return (
     <MainLayout title="Profile">
       <div className="max-w-3xl mx-auto space-y-6 pb-10">
-        
+
         {/* ═══ Hero Card with Avatar ═══ */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--accent)/0.8)] p-8"
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(var(--setu-navy))] via-[hsl(var(--setu-navy-light))] to-[hsl(var(--accent)/0.8)] p-8"
         >
           {/* Decorative background */}
           <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />

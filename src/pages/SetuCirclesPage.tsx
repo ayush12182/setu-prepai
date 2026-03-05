@@ -284,7 +284,7 @@ const SetuCirclesPage: React.FC = () => {
       <div className="space-y-8 animate-fade-in max-w-4xl mx-auto">
 
         {/* ── Hero Header ── */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(var(--setu-navy-light))] p-7">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(var(--setu-navy))] via-[hsl(var(--setu-navy-light))] to-[hsl(var(--setu-navy-dark))] p-7">
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
           <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
           <div
