@@ -37,6 +37,7 @@ import {
   cuetAcc1Subchapters, cuetAcc2Subchapters,
   cuetBS1Subchapters, cuetBS2Subchapters,
 } from './cuetSubchapters';
+import { getSchoolChapterById } from './schoolSyllabus';
 
 export interface Subchapter {
   id: string;
@@ -2803,6 +2804,19 @@ export const subchaptersByChapter: Record<string, Subchapter[]> = {
 
 // Helper function to get subchapters by chapter ID
 export function getSubchaptersByChapterId(chapterId: string): Subchapter[] {
+  if (chapterId.startsWith('sch-')) {
+    const schoolCh = getSchoolChapterById(chapterId);
+    if (!schoolCh) return [];
+    return [{
+      id: `${chapterId}-basics`,
+      chapterId: chapterId,
+      name: `Core Concepts of ${schoolCh.name}`,
+      jeeAsks: ['Fundamental definitions', 'Basic applications', 'School exam patterns'],
+      pyqFocus: { trends: [], patterns: [], traps: [] },
+      commonMistakes: ['Skipping definitions', 'Calculation errors'],
+      jeetuLine: 'School ka foundation strong rakho, aage kaam aayega.'
+    }];
+  }
   return subchaptersByChapter[chapterId] || [];
 }
 

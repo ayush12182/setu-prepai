@@ -9,6 +9,7 @@ export type ChemistryType = 'Physical' | 'Organic' | 'Inorganic';
 export { biologyChapters } from './biologySyllabus';
 import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from './neetSyllabus';
 import { getAllCuetChapters } from './cuetSyllabus';
+import { getSchoolChapterById } from './schoolSyllabus';
 
 
 export interface PYQData {
@@ -1330,6 +1331,24 @@ export const getChaptersBySubject = (subject: Subject): Chapter[] => {
 };
 
 export const getChapterById = (id: string): Chapter | undefined => {
+  if (id.startsWith('sch-')) {
+    const schoolCh = getSchoolChapterById(id);
+    if (schoolCh) {
+      return {
+        id: schoolCh.id,
+        name: schoolCh.name,
+        subject: schoolCh.subject as Subject,
+        weightage: schoolCh.weightage || 'Medium',
+        difficulty: 'Medium',
+        prerequisites: [],
+        topics: [schoolCh.name],
+        keyFormulas: [],
+        pyqData: { total: 0, postCovid: 0, preCovid: 0, legacy: 0, trendingConcepts: [] },
+        examTips: ['Focus on complete understanding of NCERT text for school exams.', 'Make sure you practice the exercise back questions.']
+      };
+    }
+  }
+
   const jeeChapter = allChapters.find(ch => ch.id === id);
   if (jeeChapter) return jeeChapter;
   const neetChapter = [...neetBiologyChapters, ...neetChemistryChapters, ...neetPhysicsChapters].find(ch => ch.id === id) as Chapter | undefined;
