@@ -161,15 +161,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signInWithGoogle = async () => {
-    const { error } = await lovable.auth.signInWithOAuth('google', {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin,
+      }
     });
     if (error) throw error;
   };
 
   const signInWithApple = async () => {
-    const { error } = await lovable.auth.signInWithOAuth('apple', {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: {
+        redirectTo: window.location.origin,
+      }
     });
     if (error) throw error;
   };
@@ -192,19 +198,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) throw new Error('No user logged in');
-    
+
     // Cast to any to handle new columns not yet in generated types
     const dbUpdates: any = { ...updates };
-    
+
     // Try update first, if no rows affected, upsert
     const { data, error } = await supabase
       .from('profiles')
       .update(dbUpdates)
       .eq('user_id', user.id)
       .select();
-    
+
     if (error) throw error;
-    
+
     // If update matched no rows, insert instead
     if (!data || data.length === 0) {
       const { error: insertError } = await supabase
@@ -212,7 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .insert({ user_id: user.id, ...dbUpdates } as any);
       if (insertError) throw insertError;
     }
-    
+
     await fetchProfile(user.id);
   };
 
