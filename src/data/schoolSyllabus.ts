@@ -26,12 +26,14 @@ export const getSchoolSubjects = (studentClass: number): SchoolSubject[] => {
       { key: 'social_science', label: 'Social Science', emoji: '🌍', gradient: 'from-amber-500 to-orange-500', dotColor: 'bg-amber-500' },
     ];
   }
-  // Class 9-10: Science splits into Physics, Chemistry, Biology
+  // Class 9-10: Science splits, and English/SST remain
   return [
     { key: 'mathematics', label: 'Mathematics', emoji: '📐', gradient: 'from-violet-500 to-purple-500', dotColor: 'bg-violet-500' },
     { key: 'physics', label: 'Physics', emoji: '⚛️', gradient: 'from-blue-500 to-cyan-500', dotColor: 'bg-blue-500' },
     { key: 'chemistry', label: 'Chemistry', emoji: '🧪', gradient: 'from-emerald-500 to-green-500', dotColor: 'bg-emerald-500' },
     { key: 'biology', label: 'Biology', emoji: '🧬', gradient: 'from-green-500 to-emerald-600', dotColor: 'bg-green-500' },
+    { key: 'english', label: 'English', emoji: '📖', gradient: 'from-sky-500 to-blue-500', dotColor: 'bg-sky-500' },
+    { key: 'social_science', label: 'Social Science', emoji: '🌍', gradient: 'from-amber-500 to-orange-500', dotColor: 'bg-amber-500' },
   ];
 };
 
@@ -106,6 +108,18 @@ const schoolChapters: Record<number, SchoolChapter[]> = {
     { id: 'sch-7-sci-10', name: 'Electric Current and Its Effects', subject: 'science', classLevel: 7, weightage: 'High' },
     { id: 'sch-7-sci-11', name: 'Light', subject: 'science', classLevel: 7, weightage: 'Medium' },
     { id: 'sch-7-sci-12', name: 'Water: A Precious Resource', subject: 'science', classLevel: 7, weightage: 'Low' },
+    // English
+    { id: 'sch-7-eng-1', name: 'Three Questions', subject: 'english', classLevel: 7, weightage: 'Medium' },
+    { id: 'sch-7-eng-2', name: 'A Gift of Chappals', subject: 'english', classLevel: 7, weightage: 'Medium' },
+    { id: 'sch-7-eng-3', name: 'Gopal and the Hilsa Fish', subject: 'english', classLevel: 7, weightage: 'Medium' },
+    { id: 'sch-7-eng-4', name: 'The Ashes That Made Trees Bloom', subject: 'english', classLevel: 7, weightage: 'High' },
+    { id: 'sch-7-eng-5', name: 'Quality', subject: 'english', classLevel: 7, weightage: 'High' },
+    // Social Science
+    { id: 'sch-7-sst-1', name: 'Tracing Changes Through a Thousand Years', subject: 'social_science', classLevel: 7, weightage: 'High' },
+    { id: 'sch-7-sst-2', name: 'New Kings and Kingdoms', subject: 'social_science', classLevel: 7, weightage: 'High' },
+    { id: 'sch-7-sst-3', name: 'The Delhi Sultans', subject: 'social_science', classLevel: 7, weightage: 'High' },
+    { id: 'sch-7-sst-4', name: 'The Mughal Empire', subject: 'social_science', classLevel: 7, weightage: 'High' },
+    { id: 'sch-7-sst-5', name: 'Environment', subject: 'social_science', classLevel: 7, weightage: 'Medium' },
   ],
   8: [
     // Mathematics
@@ -137,6 +151,18 @@ const schoolChapters: Record<number, SchoolChapter[]> = {
     { id: 'sch-8-sci-12', name: 'Some Natural Phenomena', subject: 'science', classLevel: 8, weightage: 'Medium' },
     { id: 'sch-8-sci-13', name: 'Light', subject: 'science', classLevel: 8, weightage: 'High' },
     { id: 'sch-8-sci-14', name: 'Stars and the Solar System', subject: 'science', classLevel: 8, weightage: 'Low' },
+    // English
+    { id: 'sch-8-eng-1', name: 'The Best Christmas Present in the World', subject: 'english', classLevel: 8, weightage: 'Medium' },
+    { id: 'sch-8-eng-2', name: 'The Tsunami', subject: 'english', classLevel: 8, weightage: 'High' },
+    { id: 'sch-8-eng-3', name: 'Glimpses of the Past', subject: 'english', classLevel: 8, weightage: 'Medium' },
+    { id: 'sch-8-eng-4', name: 'Bepin Choudhury\'s Lapse of Memory', subject: 'english', classLevel: 8, weightage: 'Medium' },
+    { id: 'sch-8-eng-5', name: 'The Summit Within', subject: 'english', classLevel: 8, weightage: 'High' },
+    // Social Science
+    { id: 'sch-8-sst-1', name: 'How, When and Where', subject: 'social_science', classLevel: 8, weightage: 'High' },
+    { id: 'sch-8-sst-2', name: 'From Trade to Territory', subject: 'social_science', classLevel: 8, weightage: 'High' },
+    { id: 'sch-8-sst-3', name: 'Ruling the Countryside', subject: 'social_science', classLevel: 8, weightage: 'Medium' },
+    { id: 'sch-8-sst-4', name: 'Tribals, Dikus and the Vision of a Golden Age', subject: 'social_science', classLevel: 8, weightage: 'Medium' },
+    { id: 'sch-8-sst-5', name: 'When People Rebel 1857 and After', subject: 'social_science', classLevel: 8, weightage: 'High' },
   ],
   9: [
     // Mathematics
@@ -171,6 +197,18 @@ const schoolChapters: Record<number, SchoolChapter[]> = {
     { id: 'sch-9-bio-4', name: 'Why Do We Fall Ill?', subject: 'biology', classLevel: 9, weightage: 'Medium' },
     { id: 'sch-9-bio-5', name: 'Natural Resources', subject: 'biology', classLevel: 9, weightage: 'Medium' },
     { id: 'sch-9-bio-6', name: 'Improvement in Food Resources', subject: 'biology', classLevel: 9, weightage: 'Low' },
+    // English
+    { id: 'sch-9-eng-1', name: 'The Fun They Had', subject: 'english', classLevel: 9, weightage: 'Medium' },
+    { id: 'sch-9-eng-2', name: 'The Sound of Music', subject: 'english', classLevel: 9, weightage: 'High' },
+    { id: 'sch-9-eng-3', name: 'The Little Girl', subject: 'english', classLevel: 9, weightage: 'Medium' },
+    { id: 'sch-9-eng-4', name: 'A Truly Beautiful Mind', subject: 'english', classLevel: 9, weightage: 'High' },
+    { id: 'sch-9-eng-5', name: 'The Snake and the Mirror', subject: 'english', classLevel: 9, weightage: 'Medium' },
+    // Social Science
+    { id: 'sch-9-sst-1', name: 'The French Revolution', subject: 'social_science', classLevel: 9, weightage: 'High' },
+    { id: 'sch-9-sst-2', name: 'Socialism in Europe and the Russian Revolution', subject: 'social_science', classLevel: 9, weightage: 'High' },
+    { id: 'sch-9-sst-3', name: 'Nazism and the Rise of Hitler', subject: 'social_science', classLevel: 9, weightage: 'High' },
+    { id: 'sch-9-sst-4', name: 'India - Size and Location', subject: 'social_science', classLevel: 9, weightage: 'Medium' },
+    { id: 'sch-9-sst-5', name: 'Physical Features of India', subject: 'social_science', classLevel: 9, weightage: 'High' },
   ],
   10: [
     // Mathematics
@@ -206,6 +244,18 @@ const schoolChapters: Record<number, SchoolChapter[]> = {
     { id: 'sch-10-bio-3', name: 'How do Organisms Reproduce?', subject: 'biology', classLevel: 10, weightage: 'High' },
     { id: 'sch-10-bio-4', name: 'Heredity and Evolution', subject: 'biology', classLevel: 10, weightage: 'High' },
     { id: 'sch-10-bio-5', name: 'Our Environment', subject: 'biology', classLevel: 10, weightage: 'Medium' },
+    // English
+    { id: 'sch-10-eng-1', name: 'A Letter to God', subject: 'english', classLevel: 10, weightage: 'High' },
+    { id: 'sch-10-eng-2', name: 'Nelson Mandela: Long Walk to Freedom', subject: 'english', classLevel: 10, weightage: 'High' },
+    { id: 'sch-10-eng-3', name: 'Two Stories about Flying', subject: 'english', classLevel: 10, weightage: 'Medium' },
+    { id: 'sch-10-eng-4', name: 'From the Diary of Anne Frank', subject: 'english', classLevel: 10, weightage: 'Medium' },
+    { id: 'sch-10-eng-5', name: 'Glimpses of India', subject: 'english', classLevel: 10, weightage: 'High' },
+    // Social Science
+    { id: 'sch-10-sst-1', name: 'The Rise of Nationalism in Europe', subject: 'social_science', classLevel: 10, weightage: 'High' },
+    { id: 'sch-10-sst-2', name: 'Nationalism in India', subject: 'social_science', classLevel: 10, weightage: 'High' },
+    { id: 'sch-10-sst-3', name: 'The Making of a Global World', subject: 'social_science', classLevel: 10, weightage: 'Medium' },
+    { id: 'sch-10-sst-4', name: 'Resources and Development', subject: 'social_science', classLevel: 10, weightage: 'High' },
+    { id: 'sch-10-sst-5', name: 'Power Sharing', subject: 'social_science', classLevel: 10, weightage: 'Medium' },
   ],
 };
 

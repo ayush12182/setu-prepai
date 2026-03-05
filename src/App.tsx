@@ -15,6 +15,7 @@ import ExamSelectionPage from "./pages/ExamSelectionPage";
 import PreparationPage from "./pages/PreparationPage";
 import TutorialSessionsPage from "./pages/TutorialSessionsPage";
 import ChapterPage from "./pages/ChapterPage";
+import ChapterNotesPage from "./pages/ChapterNotesPage";
 import SubchapterPage from "./pages/SubchapterPage";
 import PracticePage from "./pages/PracticePage";
 import TestPage from "./pages/TestPage";
@@ -59,6 +60,7 @@ const App = () => (
                     <Route path="/preparation" element={<PreparationPage />} />
                     <Route path="/tutorial-sessions" element={<TutorialSessionsPage />} />
                     <Route path="/chapter/:chapterId" element={<ChapterPage />} />
+                    <Route path="/chapter/:chapterId/notes" element={<ChapterNotesPage />} />
                     <Route path="/subchapter/:subchapterId" element={<SubchapterPage />} />
                     <Route path="/practice" element={<PracticePage />} />
                     <Route path="/test" element={<TestPage />} />
