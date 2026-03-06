@@ -21,6 +21,8 @@ import { getSubchaptersByChapterId } from '@/data/subchapters';
 import { ChapterSelection } from '@/hooks/useTestQuestions';
 import { toast } from 'sonner';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useClassContext } from '@/contexts/ClassContext';
+import { getSchoolSubjects, getSchoolChapters } from '@/data/schoolSyllabus';
 
 
 interface ChapterTestDialogProps {
@@ -35,17 +37,25 @@ const ChapterTestDialog: React.FC<ChapterTestDialogProps> = ({
   onStart
 }) => {
   const { isNeet } = useExamMode();
-  const subjectsData = isNeet
-    ? [
-      { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters },
-      { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters },
-      { id: 'biology', name: 'Biology', chapters: neetBiologyChapters },
-    ]
-    : [
-      { id: 'physics', name: 'Physics', chapters: physicsChapters },
-      { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters },
-      { id: 'maths', name: 'Mathematics', chapters: mathsChapters },
-    ];
+  const { isFoundation, studentClass } = useClassContext();
+
+  const subjectsData = isFoundation
+    ? getSchoolSubjects(studentClass).map(s => ({
+      id: s.key,
+      name: s.label,
+      chapters: getSchoolChapters(studentClass, s.key).map(c => ({ id: c.id, name: c.name }))
+    }))
+    : isNeet
+      ? [
+        { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters },
+        { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters },
+        { id: 'biology', name: 'Biology', chapters: neetBiologyChapters },
+      ]
+      : [
+        { id: 'physics', name: 'Physics', chapters: physicsChapters },
+        { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters },
+        { id: 'maths', name: 'Mathematics', chapters: mathsChapters },
+      ];
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [selectedChapter, setSelectedChapter] = useState<string>('');
   const selectedSubjectData = subjectsData.find(s => s.id === selectedSubject);

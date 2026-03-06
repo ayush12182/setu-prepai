@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { shuffleQuestionOptions } from '@/utils/questionUtils';
 
 export interface Question {
   id: string;
@@ -57,8 +58,9 @@ export const usePracticeQuestions = () => {
         .limit(count);
 
       if (cachedQuestions && cachedQuestions.length >= count) {
-        setQuestions(cachedQuestions.slice(0, count) as Question[]);
-        return cachedQuestions.slice(0, count) as Question[];
+        const qs = (cachedQuestions.slice(0, count) as Question[]).map(shuffleQuestionOptions);
+        setQuestions(qs);
+        return qs;
       }
 
       // If not enough cached, try generating via edge function
@@ -83,7 +85,7 @@ export const usePracticeQuestions = () => {
         }
         throw new Error('Failed to generate questions. Please check your AI credits in Settings → Workspace → Usage.');
       }
-      
+
       if (data?.error) {
         // If AI error but we have some cached questions, use them
         if (cachedQuestions && cachedQuestions.length > 0) {
@@ -91,7 +93,7 @@ export const usePracticeQuestions = () => {
           toast.info(`Loaded ${cachedQuestions.length} available questions.`);
           return cachedQuestions as Question[];
         }
-        const errMsg = data.error.includes('credits') 
+        const errMsg = data.error.includes('credits')
           ? 'AI credits exhausted. Add credits in Settings → Workspace → Usage.'
           : data.error.includes('Rate limit')
             ? 'Too many requests. Please wait a moment.'
@@ -101,8 +103,9 @@ export const usePracticeQuestions = () => {
         return null;
       }
 
-      setQuestions(data.questions);
-      return data.questions;
+      const mappedQuestions = (data.questions as Question[]).map(shuffleQuestionOptions);
+      setQuestions(mappedQuestions);
+      return mappedQuestions;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load questions';
       setError(message);
@@ -136,7 +139,7 @@ export const usePracticeQuestions = () => {
         return null;
       }
 
-      return data.questions;
+      return (data.questions as SimilarQuestion[]).map(shuffleQuestionOptions);
     } catch (err) {
       toast.error('Failed to get similar questions');
       return null;
@@ -201,7 +204,7 @@ export const usePracticeStats = () => {
       if (error) throw error;
 
       if (data) {
-        const accuracy = data.total_questions_solved > 0 
+        const accuracy = data.total_questions_solved > 0
           ? Math.round((data.total_correct / data.total_questions_solved) * 100)
           : 0;
         const avgTime = data.total_questions_solved > 0

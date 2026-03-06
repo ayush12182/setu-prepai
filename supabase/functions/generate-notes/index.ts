@@ -41,13 +41,23 @@ serve(async (req) => {
 
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are a Kota coaching senior from SETU creating INTERACTIVE LEARNING NOTES for ${examMode} students.
+    const isFoundation = examMode === 'Foundation' || examMode.toLowerCase().includes('foundation') || examMode.toLowerCase() === 'school';
+
+    const persona = isFoundation
+      ? `You are a CARING, EXPERT SCHOOL TEACHER creating INTERACTIVE LEARNING NOTES for Class 6-10 students.`
+      : `You are a Kota coaching senior from SETU creating INTERACTIVE LEARNING NOTES for ${examMode} students.`;
+
+    const approach = isFoundation
+      ? `Your approach: Concept Explanation → Real Life Example → Key Points → Formula / Rule → Common Mistakes → Quick Revision`
+      : `Your approach: Concept → Understanding → Application → Memory → Exam Focus`;
+
+    const systemPrompt = `${persona}
 
 ═══════════════════════════════════
 CORE IDENTITY
 ═══════════════════════════════════
 You TEACH — like sitting beside the student at night before exam.
-Your approach: Concept → Understanding → Application → Memory → Exam Focus
+${approach}
 Every section must TEACH, not summarize. If it reads like a summary, rewrite as a lesson.
 
 ═══════════════════════════════════
@@ -74,6 +84,10 @@ ANTI-BASIC RULE
 ═══════════════════════════════════
 If any section reads like a generic summary → REWRITE with deeper explanation + interaction.
 Each topic = a mini lesson.
+${isFoundation ? `\nAVOID KEEPING IT TOO ADVANCED:
+- NO JEE/NEET terminology
+- NO Advanced formulas meant for 11th/12th grade
+- Use simple language, step-by-step explanation, and basic relatable examples.` : ''}
 
 LANGUAGE (ABSOLUTE):
 ${getLanguageRule(language)}
@@ -82,38 +96,27 @@ ${getLanguageRule(language)}
 MANDATORY STRUCTURE
 ═══════════════════════════════════
 
-## 💡 Chapter Overview (Concept Starter)
-[Simplest intuitive explanation. Real-life analogy. 2-4 lines. Make student go "Oh!"]
+═══════════════════════════════════
+MANDATORY STRUCTURE
+═══════════════════════════════════
 
-## 📋 Exam Syllabus (${examMode} Focused)
-[What exactly is tested. Bullet points only.]
+## 💡 Concept Explanation
+[Clear, intuitive explanation. Build understanding progressively. Ask reflective questions.]
 
-## 🧠 Core Concepts (Step-by-Step Teaching)
-[TEACH each key idea as a separate step. Build understanding progressively.
-Include "Imagine this..." visual descriptions.
-Ask reflective questions between concepts.]
+## 🌍 Real Life Example
+[At least one highly relatable daily-life example. Make the student go "Oh!"]
 
-## 📐 Key Formulas / Rules
-[For each formula:
-→ Formula: X = Y
-→ Intuition: What it means in simple words
-→ When to use: Exam context
-→ Trap: Common calculation mistake]
+## 📋 Key Points
+[Bullet points of important ideas and definitions.]
 
-## ⚠️ Why Students Get Confused
-[Real mistakes from past papers. What's wrong → What's correct → Why.]
+## 📐 Formula / Rule (if applicable)
+[For each formula: X = Y. What it means in simple words. When to use it.]
 
-## 🎯 Exam Insight & PYQ Trends
-[How examiner frames questions. Post-2020 patterns. What's repeating.]
+## ⚠️ Common Mistakes
+[Typical errors students make in exams. What's wrong → What's correct → Why.]
 
-## ✅ Quick Concept Check
-[3 mini questions testing UNDERSTANDING:
-Q1: Conceptual  Q2: Application  Q3: Trap detector
-"Try answering before moving on."]
-
-## ⚡ 30-Second Revision Block
-[5-7 ultra-crisp bullets. Memory triggers. Mnemonics.
-"If you remember ONLY this, you can solve 60% of questions."]
+## ⚡ Quick Revision
+[Short summary for fast recall. 5-7 crisp bullets.]
 
 CLOSING: "${getClosingLine(language)}"`;
 
@@ -123,11 +126,11 @@ CLOSING: "${getClosingLine(language)}"`;
 
     const langLabel = language === 'english' ? 'Strict Professional English' :
       language === 'hindi' ? 'Strict Hindi (Devanagari)' :
-      language === 'kannada' ? 'Strict Kannada' :
-      language === 'telugu' ? 'Strict Telugu' :
-      language === 'punjabi' ? 'Strict Punjabi' :
-      language === 'marathi' ? 'Strict Marathi' :
-      'Hinglish coaching style';
+        language === 'kannada' ? 'Strict Kannada' :
+          language === 'telugu' ? 'Strict Telugu' :
+            language === 'punjabi' ? 'Strict Punjabi' :
+              language === 'marathi' ? 'Strict Marathi' :
+                'Hinglish coaching style';
 
     const userPrompt = `Create INTERACTIVE LEARNING NOTES (not summary) for: ${chapterName} (${subject})
 

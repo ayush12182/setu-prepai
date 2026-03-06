@@ -2822,6 +2822,22 @@ export function getSubchaptersByChapterId(chapterId: string): Subchapter[] {
 
 // Helper function to get a specific subchapter
 export function getSubchapterById(subchapterId: string): Subchapter | undefined {
+  if (subchapterId.startsWith('sch-') && subchapterId.endsWith('-basics')) {
+    const chapterId = subchapterId.replace('-basics', '');
+    const schoolCh = getSchoolChapterById(chapterId);
+    if (schoolCh) {
+      return {
+        id: subchapterId,
+        chapterId: chapterId,
+        name: `Core Concepts of ${schoolCh.name}`,
+        jeeAsks: ['Fundamental definitions', 'Basic applications', 'School exam patterns'],
+        pyqFocus: { trends: [], patterns: [], traps: [] },
+        commonMistakes: ['Skipping definitions', 'Calculation errors'],
+        jeetuLine: 'School ka foundation strong rakho, aage kaam aayega.'
+      };
+    }
+  }
+
   for (const subchapters of Object.values(subchaptersByChapter)) {
     const found = subchapters.find(s => s.id === subchapterId);
     if (found) return found;

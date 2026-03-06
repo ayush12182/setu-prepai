@@ -9,8 +9,9 @@ import { Card } from '@/components/ui/card';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Brain, Clock, CheckCircle2, XCircle, ArrowRight, Sparkles, Lightbulb, Network, Gauge, Target, BookOpen, Zap, ShieldCheck, Timer } from 'lucide-react';
 import { toast } from 'sonner';
+import { shuffleQuestionOptions } from '@/utils/questionUtils';
 
-interface DiagnosticQuestion {
+export interface DiagnosticQuestion {
   id: string;
   subject: string;
   topic: string;
@@ -120,6 +121,9 @@ const DiagnosticTestPage: React.FC = () => {
       } else {
         pool = bankQuestions.sort(() => Math.random() - 0.5) as DiagnosticQuestion[];
       }
+
+      // Shuffle options to prevent AI bias (Option A always correct)
+      pool = pool.map(shuffleQuestionOptions);
 
       setQuestionPool(pool);
 
@@ -584,8 +588,8 @@ const DiagnosticTestPage: React.FC = () => {
                 {currentQ.topic}
               </span>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${currentQ.difficulty === 'easy' ? 'bg-emerald-500/15 text-emerald-400' :
-                  currentQ.difficulty === 'hard' ? 'bg-rose-500/15 text-rose-400' :
-                    'bg-amber-500/15 text-amber-400'
+                currentQ.difficulty === 'hard' ? 'bg-rose-500/15 text-rose-400' :
+                  'bg-amber-500/15 text-amber-400'
                 }`}>
                 {currentQ.difficulty}
               </span>
@@ -621,8 +625,8 @@ const DiagnosticTestPage: React.FC = () => {
                   >
                     <div className="flex items-start gap-3">
                       <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold shrink-0 ${showResult && isCorrect ? 'bg-emerald-500 text-white' :
-                          showResult && isSelected && !isCorrect ? 'bg-rose-500 text-white' :
-                            isSelected ? 'bg-accent text-white' : 'bg-white/[0.06] text-white/50'
+                        showResult && isSelected && !isCorrect ? 'bg-rose-500 text-white' :
+                          isSelected ? 'bg-accent text-white' : 'bg-white/[0.06] text-white/50'
                         }`}>
                         {showResult && isCorrect ? <CheckCircle2 className="w-4 h-4" /> :
                           showResult && isSelected && !isCorrect ? <XCircle className="w-4 h-4" /> :

@@ -130,7 +130,15 @@ const CLASS_CONFIG: Record<string, {
 
 // Map class string to grade_range for backward compat
 function getClassFromInput(gradeRange: string, studentLevel: string, studentClass?: string): string {
-  if (studentClass && CLASS_CONFIG[studentClass]) return studentClass;
+  if (studentClass) {
+    const lower = studentClass.toString().toLowerCase();
+    if (lower === 'dropper') return 'dropper';
+    const match = lower.match(/(\d+)/);
+    if (match) {
+      const num = parseInt(match[0]);
+      if (num >= 6 && num <= 12) return num.toString();
+    }
+  }
   if (gradeRange === '6-8') return '7'; // default middle of range
   if (gradeRange === '9-10') return '9';
   return '11';

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Question } from './usePracticeQuestions';
+import { shuffleQuestionOptions } from '@/utils/questionUtils';
 
 export interface ChapterSelection {
   chapterId: string;
@@ -49,8 +50,9 @@ export const useTestQuestions = () => {
 
         if (existingQuestions && existingQuestions.length > 0) {
           // Shuffle and take required number
-          const shuffled = existingQuestions.sort(() => Math.random() - 0.5);
-          allQuestions.push(...shuffled.slice(0, questionsPerChapter) as Question[]);
+          let shuffled = existingQuestions.sort(() => Math.random() - 0.5);
+          shuffled = (shuffled.slice(0, questionsPerChapter) as Question[]).map(shuffleQuestionOptions);
+          allQuestions.push(...shuffled);
         } else {
           // Generate questions if none exist
           const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
@@ -66,7 +68,8 @@ export const useTestQuestions = () => {
           });
 
           if (!fnError && data?.questions) {
-            allQuestions.push(...data.questions);
+            const mappedQuestions = data.questions.map(shuffleQuestionOptions);
+            allQuestions.push(...mappedQuestions);
           }
         }
       }
@@ -124,8 +127,9 @@ export const useTestQuestions = () => {
       }
 
       if (pyqQuestions && pyqQuestions.length > 0) {
-        // Shuffle the questions
-        const shuffled = pyqQuestions.sort(() => Math.random() - 0.5) as Question[];
+        // Shuffle the questions order, then shuffle options per question
+        let shuffled = pyqQuestions.sort(() => Math.random() - 0.5) as Question[];
+        shuffled = shuffled.map(shuffleQuestionOptions);
         setQuestions(shuffled);
         return shuffled;
       }
@@ -141,7 +145,7 @@ export const useTestQuestions = () => {
       });
 
       if (fnError) throw fnError;
-      
+
       if (data?.error) {
         setError(data.error);
         toast.error(data.error);
@@ -149,8 +153,9 @@ export const useTestQuestions = () => {
       }
 
       if (data?.questions) {
-        setQuestions(data.questions);
-        return data.questions;
+        const mappedQuestions = data.questions.map(shuffleQuestionOptions);
+        setQuestions(mappedQuestions);
+        return mappedQuestions;
       }
 
       // Fallback: inform user no PYQs available
@@ -192,8 +197,9 @@ export const useTestQuestions = () => {
       }
 
       if (data?.questions && data.questions.length > 0) {
-        setQuestions(data.questions as Question[]);
-        return data.questions as Question[];
+        const mappedQuestions = (data.questions as Question[]).map(shuffleQuestionOptions);
+        setQuestions(mappedQuestions);
+        return mappedQuestions;
       }
 
       toast.error('No questions generated');

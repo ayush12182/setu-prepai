@@ -21,6 +21,8 @@ import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from 
 import { ChapterSelection } from '@/hooks/useTestQuestions';
 import { toast } from 'sonner';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useClassContext } from '@/contexts/ClassContext';
+import { getSchoolSubjects, getSchoolChapters } from '@/data/schoolSyllabus';
 
 
 interface MixedTestDialogProps {
@@ -35,17 +37,26 @@ const MixedTestDialog: React.FC<MixedTestDialogProps> = ({
   onStart
 }) => {
   const { isNeet } = useExamMode();
-  const subjectsData = isNeet
-    ? [
-      { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters, color: 'bg-physics/20 text-physics' },
-      { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters, color: 'bg-chemistry/20 text-chemistry' },
-      { id: 'biology', name: 'Biology', chapters: neetBiologyChapters, color: 'bg-green-500/20 text-green-700' },
-    ]
-    : [
-      { id: 'physics', name: 'Physics', chapters: physicsChapters, color: 'bg-physics/20 text-physics' },
-      { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters, color: 'bg-chemistry/20 text-chemistry' },
-      { id: 'maths', name: 'Mathematics', chapters: mathsChapters, color: 'bg-maths/20 text-maths' },
-    ];
+  const { isFoundation, studentClass } = useClassContext();
+
+  const subjectsData = isFoundation
+    ? getSchoolSubjects(studentClass).map(s => ({
+      id: s.key,
+      name: s.label,
+      chapters: getSchoolChapters(studentClass, s.key).map(c => ({ id: c.id, name: c.name })),
+      color: `bg-${s.key.replace('_', '')}/20 text-${s.key.replace('_', '')}`
+    }))
+    : isNeet
+      ? [
+        { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters, color: 'bg-physics/20 text-physics' },
+        { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters, color: 'bg-chemistry/20 text-chemistry' },
+        { id: 'biology', name: 'Biology', chapters: neetBiologyChapters, color: 'bg-green-500/20 text-green-700' },
+      ]
+      : [
+        { id: 'physics', name: 'Physics', chapters: physicsChapters, color: 'bg-physics/20 text-physics' },
+        { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters, color: 'bg-chemistry/20 text-chemistry' },
+        { id: 'maths', name: 'Mathematics', chapters: mathsChapters, color: 'bg-maths/20 text-maths' },
+      ];
   const [selectedChapters, setSelectedChapters] = useState<ChapterSelection[]>([]);
   const [currentSubject, setCurrentSubject] = useState<string>('');
   const [currentChapter, setCurrentChapter] = useState<string>('');

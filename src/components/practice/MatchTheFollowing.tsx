@@ -21,7 +21,7 @@ interface MatchTheFollowingProps {
     chapterId: string;
     chapterName: string;
     subject: string;
-    examMode?: 'JEE' | 'NEET';
+    examMode?: 'JEE' | 'NEET' | 'Foundation';
     onBack: () => void;
 }
 

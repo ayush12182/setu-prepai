@@ -5,11 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
 export const MajorTestCountdown: React.FC = () => {
   const navigate = useNavigate();
   const { examMode } = useExamMode();
+
+  const { user } = useAuth();
 
   const { data: activeCycle } = useQuery({
     queryKey: ['active-major-test-cycle'],
@@ -24,23 +27,30 @@ export const MajorTestCountdown: React.FC = () => {
     },
   });
 
-  const testDate = activeCycle?.test_date ? new Date(activeCycle.test_date) : null;
   const now = new Date();
   now.setHours(0, 0, 0, 0);
 
-  let daysUntilTest = 0;
-  if (testDate) {
-    const td = new Date(testDate);
-    td.setHours(0, 0, 0, 0);
-    daysUntilTest = Math.max(0, Math.ceil((td.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
-  }
+  // Derive stable personal cycle origin
+  const userCreatedAt = user?.created_at ? new Date(user.created_at) : new Date();
+  const cycleStartMeta = user?.user_metadata?.cycle_start_date;
+  const cycleStart = cycleStartMeta
+    ? new Date(cycleStartMeta)
+    : (activeCycle ? new Date(activeCycle.start_date) : userCreatedAt);
+
+  const cs = new Date(cycleStart);
+  cs.setHours(0, 0, 0, 0);
+
+  // Auto-resetting 21-day cycle
+  const daysSinceOrigin = Math.max(0, Math.floor((now.getTime() - cs.getTime()) / (1000 * 60 * 60 * 24)));
+  const cycleDay = (daysSinceOrigin % 21) + 1;
+  const daysUntilTest = 21 - cycleDay;
+
+  const testDate = new Date(now);
+  testDate.setDate(testDate.getDate() + daysUntilTest);
 
   const examLabel = examMode === 'neet' ? 'NEET Simulation' : examMode === 'cuet' ? 'CUET Simulation' : 'JEE Simulation';
   const urgency = daysUntilTest <= 3 ? 'critical' : daysUntilTest <= 7 ? 'warning' : 'normal';
 
-  const cycleDay = activeCycle
-    ? Math.max(1, Math.min(21, Math.ceil((now.getTime() - new Date(activeCycle.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1))
-    : 1;
   const progressPercent = Math.round((cycleDay / 21) * 100);
 
   return (

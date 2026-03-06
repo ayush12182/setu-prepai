@@ -68,7 +68,11 @@ function parseStudentClass(raw: string | null | undefined): StudentClass {
   if (!raw) return 11; // default competitive
   const lower = raw.toLowerCase().trim();
   if (lower === 'dropper') return 0;
-  const num = parseInt(lower);
+
+  // Extract number using regex, e.g., "Class 8" -> 8
+  const match = lower.match(/(\d+)/);
+  const num = match ? parseInt(match[0]) : NaN;
+
   if (!isNaN(num) && num >= 6 && num <= 12) return num as StudentClass;
   return 11;
 }
@@ -83,7 +87,7 @@ export const ClassProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const learningStage = deriveLearningStage(studentClass);
     const allowedContentTags = getAllowedContentTags(learningStage);
     const teachingTone = getTeachingTone(learningStage);
-    
+
     const profileAny = profile as any;
     const diagnosticCompleted = profileAny?.diagnostic_completed ?? false;
     const examGoal = profileAny?.exam_goal ?? profile?.target_exam ?? null;

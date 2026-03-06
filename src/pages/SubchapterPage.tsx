@@ -28,6 +28,7 @@ import {
   MessageCircle,
   Sparkles
 } from 'lucide-react';
+import { useClassContext } from '@/contexts/ClassContext';
 
 const SubchapterPage: React.FC = () => {
   const { subchapterId } = useParams<{ subchapterId: string }>();
@@ -41,7 +42,8 @@ const SubchapterPage: React.FC = () => {
   const subchapter = subchapterId ? getSubchapterById(subchapterId) : undefined;
   const chapter = subchapter ? getChapterById(subchapter.chapterId) : undefined;
   const { isNeet } = useExamMode();
-  const examMode = isNeet ? 'NEET' : 'JEE';
+  const { isFoundation } = useClassContext();
+  const examMode = isFoundation ? 'Foundation' : (isNeet ? 'NEET' : 'JEE');
 
   const { notes, isLoading, error, generateNotes } = useSubchapterNotes();
 
@@ -166,23 +168,25 @@ const SubchapterPage: React.FC = () => {
 
             {/* Quick Reference Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* A. What JEE Asks */}
-              <div className="bg-card border border-border rounded-xl p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-8 h-8 rounded-lg ${subjectTextColors[chapter.subject]} bg-current/10 flex items-center justify-center`}>
-                    <Target className="w-4 h-4" />
+              {/* A. What JEE Asks (Hidden in Foundation) */}
+              {!isFoundation && (
+                <div className="bg-card border border-border rounded-xl p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`w-8 h-8 rounded-lg ${subjectTextColors[chapter.subject]} bg-current/10 flex items-center justify-center`}>
+                      <Target className="w-4 h-4" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-sm">What {isNeet ? 'NEET' : 'JEE'} Asks</h3>
                   </div>
-                  <h3 className="font-semibold text-foreground text-sm">What {isNeet ? 'NEET' : 'JEE'} Asks</h3>
+                  <ul className="space-y-1.5">
+                    {subchapter.jeeAsks.map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-setu-success mt-0.5 flex-shrink-0" />
+                        <span className="text-xs text-foreground">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-1.5">
-                  {subchapter.jeeAsks.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-setu-success mt-0.5 flex-shrink-0" />
-                      <span className="text-xs text-foreground">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              )}
 
               {/* C. Common Mistakes */}
               <div className="bg-card border border-border rounded-xl p-5">
@@ -203,45 +207,47 @@ const SubchapterPage: React.FC = () => {
               </div>
             </div>
 
-            {/* B. Post-2020 PYQ Focus */}
-            <div className="bg-card border border-border rounded-xl p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-setu-saffron/10 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-setu-saffron" />
+            {/* B. Post-2020 PYQ Focus (Hidden in Foundation) */}
+            {!isFoundation && (
+              <div className="bg-card border border-border rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-setu-saffron/10 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-setu-saffron" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground text-sm">Post-2020 PYQ Focus</h3>
+                    <p className="text-xs text-muted-foreground">Recent exam trends</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-foreground text-sm">Post-2020 PYQ Focus</h3>
-                  <p className="text-xs text-muted-foreground">Recent exam trends</p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Trends</h4>
-                  <ul className="space-y-1">
-                    {subchapter.pyqFocus.trends.map((item, index) => (
-                      <li key={index} className="text-xs text-foreground">• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Patterns</h4>
-                  <ul className="space-y-1">
-                    {subchapter.pyqFocus.patterns.map((item, index) => (
-                      <li key={index} className="text-xs text-foreground">• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Traps</h4>
-                  <ul className="space-y-1">
-                    {subchapter.pyqFocus.traps.map((item, index) => (
-                      <li key={index} className="text-xs text-setu-error">⚠ {item}</li>
-                    ))}
-                  </ul>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Trends</h4>
+                    <ul className="space-y-1">
+                      {subchapter.pyqFocus.trends.map((item, index) => (
+                        <li key={index} className="text-xs text-foreground">• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Patterns</h4>
+                    <ul className="space-y-1">
+                      {subchapter.pyqFocus.patterns.map((item, index) => (
+                        <li key={index} className="text-xs text-foreground">• {item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Traps</h4>
+                    <ul className="space-y-1">
+                      {subchapter.pyqFocus.traps.map((item, index) => (
+                        <li key={index} className="text-xs text-setu-error">⚠ {item}</li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* E. Jeetu Bhaiya Line */}
             <div className="bg-gradient-to-r from-setu-saffron/10 to-setu-green/10 border border-setu-saffron/20 rounded-xl p-5">
