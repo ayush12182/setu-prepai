@@ -81,7 +81,7 @@ export const HeroSection: React.FC = () => {
           >
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium">
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              Class 6–12 • JEE • NEET • CUET
+              Foundation for Class 6–12. Built for JEE, NEET & CUET.
             </span>
           </motion.div>
 

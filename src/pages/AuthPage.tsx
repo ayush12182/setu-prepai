@@ -482,13 +482,13 @@ const AuthPage: React.FC = () => {
         {/* Hero content */}
         <div className="relative z-10 space-y-8">
           <div>
-            <h1 className="font-serif text-4xl xl:text-5xl font-bold text-white leading-tight mb-4">
+            <h1 className="font-serif text-3xl xl:text-4xl font-semibold text-white leading-tight mb-4">
               Your AI-Powered
               <br />
               <span className="bg-gradient-to-r from-accent to-amber-400 bg-clip-text text-transparent">Learning Engine</span>
             </h1>
-            <p className="text-white/50 text-lg leading-relaxed max-w-md">
-              From Class 6 fundamentals to JEE Advanced mastery — one intelligent platform that adapts to you.
+            <p className="text-white/50 text-base leading-relaxed max-w-md">
+              Foundation for Class 6–12. Built for JEE, NEET & CUET.
             </p>
           </div>
 
@@ -574,7 +574,7 @@ const AuthPage: React.FC = () => {
                 {mode === 'signup' ? 'Create Your Account' : 'Sign In'}
               </h2>
               <p className="text-white/40 text-sm">
-                Foundation • JEE Core • JEE Advanced
+                Foundation for Class 6–12. Built for JEE, NEET & CUET.
               </p>
             </div>
 
