@@ -154,7 +154,7 @@ export const HeroSection: React.FC = () => {
               onClick={() => navigate('/auth')}
               className="group h-14 px-8 text-lg font-semibold bg-accent text-primary hover:bg-accent/90 rounded-xl shadow-[0_0_40px_rgba(232,154,60,0.4)] hover:shadow-[0_0_60px_rgba(232,154,60,0.5)] transition-all duration-300 hover:-translate-y-1"
             >
-              Start Learning for ₹249
+              Start Learning for ₹49
               <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button
@@ -228,6 +228,6 @@ export const HeroSection: React.FC = () => {
           <div className="w-1 h-2 bg-white/50 rounded-full" />
         </div>
       </div>
-    </section>
+    </section >
   );
 };
