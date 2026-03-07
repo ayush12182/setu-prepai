@@ -293,8 +293,12 @@ const SubchapterPage: React.FC = () => {
                     <div className="w-12 h-12 rounded-lg bg-setu-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🌱</span>
                     </div>
-                    <h4 className="font-semibold text-foreground">Level 1: Concept</h4>
-                    <p className="text-sm text-muted-foreground mt-1">Basic understanding MCQs</p>
+                    <h4 className="font-semibold text-foreground">
+                      {isFoundation ? 'Level 1: Basic Understanding' : 'Level 1: Concept'}
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {isFoundation ? 'Direct understanding questions' : 'Basic understanding MCQs'}
+                    </p>
                     <p className="text-xs text-setu-success font-medium mt-2">15 Questions • Easy</p>
                   </div>
 
@@ -305,8 +309,12 @@ const SubchapterPage: React.FC = () => {
                     <div className="w-12 h-12 rounded-lg bg-setu-warning/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🎯</span>
                     </div>
-                    <h4 className="font-semibold text-foreground">Level 2: Exam Pattern</h4>
-                    <p className="text-sm text-muted-foreground mt-1">Previous year pattern</p>
+                    <h4 className="font-semibold text-foreground">
+                      {isFoundation ? 'Level 2: Application' : 'Level 2: Exam Pattern'}
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {isFoundation ? 'Use the concept in real situations' : 'Previous year pattern'}
+                    </p>
                     <p className="text-xs text-setu-warning font-medium mt-2">20 Questions • Medium</p>
                   </div>
 
@@ -317,8 +325,12 @@ const SubchapterPage: React.FC = () => {
                     <div className="w-12 h-12 rounded-lg bg-setu-error/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🔥</span>
                     </div>
-                    <h4 className="font-semibold text-foreground">Level 3: Advanced</h4>
-                    <p className="text-sm text-muted-foreground mt-1">Competition level</p>
+                    <h4 className="font-semibold text-foreground">
+                      {isFoundation ? 'Level 3: Advanced Thinking' : 'Level 3: Advanced'}
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {isFoundation ? 'Challenge questions requiring reasoning' : 'Competition level'}
+                    </p>
                     <p className="text-xs text-setu-error font-medium mt-2">15 Questions • Hard</p>
                   </div>
                 </div>
