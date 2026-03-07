@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Mail, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Loader2, Check, BookOpen, GraduationCap, Sparkles } from 'lucide-react';
+import { Mail, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Loader2, Check, BookOpen, GraduationCap, Sparkles, Rocket, Zap, Brain } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -18,28 +18,56 @@ const phoneSchema = z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid
 
 type AuthMode = 'login' | 'signup' | 'phone' | 'otp' | 'forgot-password';
 type OnboardingStep = 0 | 1 | 2 | 3;
+type ProgramType = 'foundation' | 'jee_core' | 'jee_advanced' | '';
 
 interface OnboardingData {
+  program: ProgramType;
   studentClass: string;
   examGoal: string;
 }
 
-const CLASS_OPTIONS = [
+const PROGRAM_OPTIONS = [
+  {
+    value: 'foundation' as ProgramType,
+    label: 'SETU Foundation',
+    desc: 'Conceptual learning in Maths & Science',
+    badge: 'Classes 6–10',
+    emoji: '🧠',
+    icon: Brain,
+    color: 'from-emerald-500/20 to-teal-500/20',
+    borderColor: 'border-emerald-500/30',
+    accentColor: 'text-emerald-400',
+  },
+  {
+    value: 'jee_core' as ProgramType,
+    label: 'SETU JEE Core',
+    desc: 'JEE Main + Advanced fundamentals',
+    badge: 'Class 11',
+    emoji: '🚀',
+    icon: Rocket,
+    color: 'from-amber-500/20 to-orange-500/20',
+    borderColor: 'border-amber-500/30',
+    accentColor: 'text-amber-400',
+  },
+  {
+    value: 'jee_advanced' as ProgramType,
+    label: 'SETU JEE Advanced',
+    desc: 'Advanced problem solving & full mock tests',
+    badge: 'Class 12',
+    emoji: '⚡',
+    icon: Zap,
+    color: 'from-violet-500/20 to-purple-500/20',
+    borderColor: 'border-violet-500/30',
+    accentColor: 'text-violet-400',
+  },
+];
+
+const FOUNDATION_CLASS_OPTIONS = [
   { value: '6', label: 'Class 6', emoji: '🌱', tag: 'Foundation' },
   { value: '7', label: 'Class 7', emoji: '🌿', tag: 'Foundation' },
   { value: '8', label: 'Class 8', emoji: '📐', tag: 'Foundation' },
   { value: '9', label: 'Class 9', emoji: '📖', tag: 'Board Prep' },
   { value: '10', label: 'Class 10', emoji: '🎯', tag: 'Board Prep' },
-  { value: '11', label: 'Class 11', emoji: '🚀', tag: 'Competitive' },
-  { value: '12', label: 'Class 12', emoji: '⚡', tag: 'Competitive' },
-  { value: 'dropper', label: 'Dropper', emoji: '💪', tag: 'Competitive' },
-];
-
-const GOAL_OPTIONS = [
-  { value: 'JEE Main', label: 'JEE Preparation', desc: 'IIT, NIT & IIIT admissions', emoji: '⚡', color: 'from-amber-500/20 to-orange-500/20' },
-  { value: 'NEET', label: 'NEET Preparation', desc: 'Medical college admissions', emoji: '🧬', color: 'from-emerald-500/20 to-green-500/20' },
-  { value: 'CUET', label: 'CUET Preparation', desc: 'Central university admissions', emoji: '🎯', color: 'from-violet-500/20 to-purple-500/20' },
-  { value: 'Foundation', label: 'School + Boards', desc: 'Excel in academics first', emoji: '📚', color: 'from-sky-500/20 to-blue-500/20' },
 ];
 
 const AuthPage: React.FC = () => {
@@ -60,6 +88,7 @@ const AuthPage: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(1);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
+    program: '',
     studentClass: '',
     examGoal: '',
   });
@@ -144,10 +173,7 @@ const AuthPage: React.FC = () => {
     finally { setLoading(false); }
   };
 
-  const isFoundationClass = () => {
-    const cls = parseInt(onboardingData.studentClass);
-    return !isNaN(cls) && cls >= 6 && cls <= 10;
-  };
+  const isFoundationProgram = () => onboardingData.program === 'foundation';
 
   const getStudentLevel = () => {
     const cls = parseInt(onboardingData.studentClass);
@@ -160,18 +186,34 @@ const AuthPage: React.FC = () => {
   const handleOnboardingComplete = async () => {
     setLoading(true);
     try {
+      let examGoal = 'Foundation';
+      let studentClass = onboardingData.studentClass;
+
+      if (onboardingData.program === 'jee_core') {
+        examGoal = 'JEE Main';
+        studentClass = '11';
+      } else if (onboardingData.program === 'jee_advanced') {
+        examGoal = 'JEE Main';
+        studentClass = '12';
+      }
+
+      if (examGoal === 'JEE Main') setExamMode('jee');
+      else setExamMode('jee'); // Foundation mode handled by ClassContext
+
       const studentLevel = getStudentLevel();
-      const examGoal = isFoundationClass() ? 'Foundation' : onboardingData.examGoal;
-      if (examGoal === 'NEET') setExamMode('neet');
-      else if (examGoal === 'CUET') setExamMode('cuet');
-      else setExamMode('jee');
 
       await new Promise(resolve => setTimeout(resolve, 500));
       await updateProfile({
         target_exam: examGoal,
-        class: onboardingData.studentClass,
+        class: studentClass,
         student_level: studentLevel,
       });
+
+      // Also store program in user metadata
+      await supabase.auth.updateUser({
+        data: { program: onboardingData.program }
+      });
+
       toast.success('All set! Let\'s begin your journey 🚀');
       navigate('/diagnostic-test');
     } catch (error: any) {
@@ -181,17 +223,29 @@ const AuthPage: React.FC = () => {
   };
 
   const handleOnboardingNext = () => {
-    if (onboardingStep === 1 && !onboardingData.studentClass) { toast.error('Please select your class'); return; }
-    if (onboardingStep === 2 && !onboardingData.examGoal) { toast.error('Please select your goal'); return; }
+    // Step 1: Program selection
+    if (onboardingStep === 1 && !onboardingData.program) {
+      toast.error('Please select your program');
+      return;
+    }
+    // Step 2: Class selection (Foundation only)
+    if (onboardingStep === 2 && !onboardingData.studentClass) {
+      toast.error('Please select your class');
+      return;
+    }
+
     if (onboardingStep === 1) {
-      if (isFoundationClass()) handleOnboardingComplete();
-      else setOnboardingStep(2);
+      if (isFoundationProgram()) {
+        setOnboardingStep(2); // Go to class selection
+      } else {
+        handleOnboardingComplete(); // JEE Core/Advanced auto-completes
+      }
     } else if (onboardingStep === 2) {
       handleOnboardingComplete();
     }
   };
 
-  const totalSteps = isFoundationClass() || !onboardingData.studentClass ? 1 : 2;
+  const totalSteps = isFoundationProgram() ? 2 : 1;
 
   if (authLoading) {
     return (
@@ -235,7 +289,7 @@ const AuthPage: React.FC = () => {
             </div>
 
             <div className="bg-white/[0.05] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/[0.08] shadow-2xl">
-              {/* Step 1: Class */}
+              {/* Step 1: Program Selection */}
               {onboardingStep === 1 && (
                 <div className="space-y-5">
                   <div className="text-center">
@@ -244,37 +298,43 @@ const AuthPage: React.FC = () => {
                       <span className="text-xs font-medium text-accent">Step 1 of {totalSteps}</span>
                     </div>
                     <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white mb-2">
-                      What class are you in?
+                      Choose your Program
                     </h2>
                     <p className="text-white/50 text-sm">
-                      We'll personalize everything — from topics to difficulty level
+                      Your entire learning journey adapts to this
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {CLASS_OPTIONS.map((cls) => {
-                      const selected = onboardingData.studentClass === cls.value;
+                  <div className="space-y-3">
+                    {PROGRAM_OPTIONS.map((prog) => {
+                      const selected = onboardingData.program === prog.value;
+                      const IconComp = prog.icon;
                       return (
                         <button
-                          key={cls.value}
-                          onClick={() => setOnboardingData(prev => ({ ...prev, studentClass: cls.value, examGoal: '' }))}
-                          className={`relative p-3.5 rounded-2xl border-2 text-left transition-all duration-200 group
+                          key={prog.value}
+                          onClick={() => setOnboardingData(prev => ({ ...prev, program: prog.value, studentClass: '', examGoal: '' }))}
+                          className={`w-full p-4 rounded-2xl border-2 text-left transition-all duration-200 group
                             ${selected
-                              ? 'border-accent bg-accent/10 shadow-lg shadow-accent/10'
+                              ? `${prog.borderColor} bg-gradient-to-br ${prog.color} shadow-lg`
                               : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04]'
                             }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{cls.emoji}</span>
+                          <div className="flex items-center gap-4">
+                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${prog.color} flex items-center justify-center shrink-0`}>
+                              <IconComp className={`w-6 h-6 ${selected ? prog.accentColor : 'text-white/60'}`} />
+                            </div>
                             <div className="flex-1 min-w-0">
-                              <span className="font-semibold text-white text-sm block">{cls.label}</span>
-                              <span className={`text-[10px] font-medium uppercase tracking-wider ${selected ? 'text-accent' : 'text-white/30'}`}>
-                                {cls.tag}
-                              </span>
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <span className="font-bold text-white text-base">{prog.label}</span>
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${selected ? `${prog.accentColor} bg-white/10` : 'text-white/30 bg-white/5'}`}>
+                                  {prog.badge}
+                                </span>
+                              </div>
+                              <span className="text-sm text-white/50">{prog.desc}</span>
                             </div>
                             {selected && (
-                              <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center">
-                                <Check className="h-3 w-3 text-white" />
+                              <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shrink-0">
+                                <Check className="h-3.5 w-3.5 text-white" />
                               </div>
                             )}
                           </div>
@@ -285,45 +345,45 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 2: Goal */}
+              {/* Step 2: Foundation Class Selection */}
               {onboardingStep === 2 && (
                 <div className="space-y-5">
                   <div className="text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-4">
-                      <GraduationCap className="h-3.5 w-3.5 text-accent" />
-                      <span className="text-xs font-medium text-accent">Step 2 of 2</span>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
+                      <GraduationCap className="h-3.5 w-3.5 text-emerald-400" />
+                      <span className="text-xs font-medium text-emerald-400">Step 2 of 2</span>
                     </div>
                     <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white mb-2">
-                      What's your goal?
+                      What class are you in?
                     </h2>
                     <p className="text-white/50 text-sm">
-                      Your syllabus, tests, and analytics will adapt to this
+                      We'll load the exact NCERT syllabus for your class
                     </p>
                   </div>
-                  <div className="space-y-2.5">
-                    {GOAL_OPTIONS.map((goal) => {
-                      const selected = onboardingData.examGoal === goal.value;
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {FOUNDATION_CLASS_OPTIONS.map((cls) => {
+                      const selected = onboardingData.studentClass === cls.value;
                       return (
                         <button
-                          key={goal.value}
-                          onClick={() => setOnboardingData(prev => ({ ...prev, examGoal: goal.value }))}
-                          className={`w-full p-4 rounded-2xl border-2 text-left transition-all duration-200
+                          key={cls.value}
+                          onClick={() => setOnboardingData(prev => ({ ...prev, studentClass: cls.value }))}
+                          className={`relative p-3.5 rounded-2xl border-2 text-left transition-all duration-200 group
                             ${selected
-                              ? 'border-accent bg-accent/10 shadow-lg shadow-accent/10'
+                              ? 'border-emerald-500/50 bg-emerald-500/10 shadow-lg shadow-emerald-500/10'
                               : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04]'
                             }`}
                         >
-                          <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${goal.color} flex items-center justify-center text-2xl`}>
-                              {goal.emoji}
-                            </div>
-                            <div className="flex-1">
-                              <span className="font-semibold text-white block">{goal.label}</span>
-                              <span className="text-sm text-white/40">{goal.desc}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{cls.emoji}</span>
+                            <div className="flex-1 min-w-0">
+                              <span className="font-semibold text-white text-sm block">{cls.label}</span>
+                              <span className={`text-[10px] font-medium uppercase tracking-wider ${selected ? 'text-emerald-400' : 'text-white/30'}`}>
+                                {cls.tag}
+                              </span>
                             </div>
                             {selected && (
-                              <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center">
-                                <Check className="h-3.5 w-3.5 text-white" />
+                              <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                                <Check className="h-3 w-3 text-white" />
                               </div>
                             )}
                           </div>
@@ -352,21 +412,39 @@ const AuthPage: React.FC = () => {
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : (onboardingStep === 1 && isFoundationClass()) || onboardingStep === 2 ? (
+                  ) : onboardingStep === 2 ? (
                     <>Start Diagnostic Test <ArrowRight className="h-4 w-4 ml-2" /></>
+                  ) : isFoundationProgram() ? (
+                    <>Select Class <ArrowRight className="h-4 w-4 ml-2" /></>
                   ) : (
-                    <>Next <ArrowRight className="h-4 w-4 ml-2" /></>
+                    <>Start Diagnostic Test <ArrowRight className="h-4 w-4 ml-2" /></>
                   )}
                 </Button>
               </div>
             </div>
 
-            {/* Foundation hint */}
-            {onboardingStep === 1 && isFoundationClass() && (
+            {/* Program hint */}
+            {onboardingStep === 1 && onboardingData.program === 'foundation' && (
               <div className="mt-5 flex items-start gap-3 bg-emerald-500/[0.08] rounded-2xl p-4 border border-emerald-500/15">
                 <span className="text-lg mt-0.5">🧠</span>
                 <p className="text-white/60 text-sm leading-relaxed">
-                  <span className="text-emerald-400 font-medium">Foundation Mode:</span> A quick diagnostic test will map your strengths and gaps, then we'll create your personalized learning roadmap.
+                  <span className="text-emerald-400 font-medium">SETU Foundation:</span> Build strong fundamentals in Maths & Science from Class 6–10. Perfect preparation for JEE, NEET & Olympiads — without competitive pressure.
+                </p>
+              </div>
+            )}
+            {onboardingStep === 1 && onboardingData.program === 'jee_core' && (
+              <div className="mt-5 flex items-start gap-3 bg-amber-500/[0.08] rounded-2xl p-4 border border-amber-500/15">
+                <span className="text-lg mt-0.5">🚀</span>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  <span className="text-amber-400 font-medium">JEE Core (Class 11):</span> Master Physics, Chemistry & Mathematics fundamentals with a structured 21-day cycle approach.
+                </p>
+              </div>
+            )}
+            {onboardingStep === 1 && onboardingData.program === 'jee_advanced' && (
+              <div className="mt-5 flex items-start gap-3 bg-violet-500/[0.08] rounded-2xl p-4 border border-violet-500/15">
+                <span className="text-lg mt-0.5">⚡</span>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  <span className="text-violet-400 font-medium">JEE Advanced (Class 12):</span> Advanced problem solving, full mock tests, and targeted weak-area elimination for top-tier ranks.
                 </p>
               </div>
             )}
@@ -422,11 +500,11 @@ const AuthPage: React.FC = () => {
               <>
                 <div className="grid grid-cols-2 gap-2.5 mb-3">
                   <Button type="button" variant="outline" className="h-11 gap-2 border-white/10 text-white hover:bg-white/10 bg-white/[0.04] rounded-xl text-sm" onClick={handleGoogleAuth} disabled={loading}>
-                    <svg className="h-4 w-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
                     Google
                   </Button>
                   <Button type="button" variant="outline" className="h-11 gap-2 border-white/10 text-white hover:bg-white/10 bg-white/[0.04] rounded-xl text-sm" onClick={handleAppleAuth} disabled={loading}>
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" /></svg>
                     Apple
                   </Button>
                 </div>
@@ -529,7 +607,7 @@ const AuthPage: React.FC = () => {
                 <div className="flex justify-center">
                   <InputOTP maxLength={6} value={otp} onChange={(value) => setOtp(value)}>
                     <InputOTPGroup>
-                      {[0,1,2,3,4,5].map(i => <InputOTPSlot key={i} index={i} />)}
+                      {[0, 1, 2, 3, 4, 5].map(i => <InputOTPSlot key={i} index={i} />)}
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
@@ -537,7 +615,7 @@ const AuthPage: React.FC = () => {
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verify OTP'}
                 </Button>
                 <p className="text-center text-xs text-white/40">
-                  Didn't receive it? <button onClick={() => handlePhoneAuth({ preventDefault: () => {} } as React.FormEvent)} className="text-accent hover:underline" disabled={loading}>Resend</button>
+                  Didn't receive it? <button onClick={() => handlePhoneAuth({ preventDefault: () => { } } as React.FormEvent)} className="text-accent hover:underline" disabled={loading}>Resend</button>
                 </p>
               </div>
             )}
