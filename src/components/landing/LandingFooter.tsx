@@ -12,16 +12,17 @@ export const LandingFooter: React.FC = () => {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="flex items-center"
+            className="flex items-center gap-2.5"
           >
-<img 
-              src={setuLogo} 
-              alt="SETU" 
-              className="h-10 w-auto rounded-lg" 
+            <img
+              src={setuLogo}
+              alt="SETU"
+              className="h-10 w-auto rounded-lg"
             />
+            <span className="font-serif font-bold text-lg text-white tracking-wide">SETU</span>
           </motion.div>
 
-        {/* Links */}
+          {/* Links */}
           <div className="flex items-center gap-8">
             <a href="/privacy" className="text-white/50 hover:text-white text-sm font-medium transition-colors">Privacy</a>
             <a href="/terms" className="text-white/50 hover:text-white text-sm font-medium transition-colors">Terms</a>
