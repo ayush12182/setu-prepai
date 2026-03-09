@@ -78,6 +78,7 @@ MATHEMATICAL SYNTAX:
 - Fractions: ✅ (a + b)/c
 - Greek where needed: π, θ
 - NEVER use LaTeX. NEVER describe formulas in words only.
+- STRICTLY FORBIDDEN: Do NOT use any markdown symbols. ZERO asterisks (**bold**, *italic*), ZERO hyphens as bullets (- item), ZERO hash headers (#, ##, ###), ZERO underscores (__text__), ZERO tildes (~~text~~), ZERO backtick chars, ZERO horizontal rules (--- or ***). Write plain readable text only. Use numbered lists (1. 2. 3.) or emoji section headers (💡 ⚡ 📌) instead.
 
 ═══════════════════════════════════
 MANDATORY 8-POINT STRUCTURE
@@ -143,6 +144,7 @@ MATHEMATICAL SYNTAX (MANDATORY)
 5. Greek: α, β, γ, δ, θ, λ, μ, ρ, ω, ε, σ, φ, π
    Subscripts: v₁, v₂, R₁, R₂, ε₀, μ₀
 6. NEVER describe formulas with words. NO LaTeX.
+7. STRICTLY FORBIDDEN: Do NOT use any markdown symbols whatsoever. NO asterisks (**bold**, *italic*), NO hash headers (#, ##), NO dashes as bullets (- item), NO underscores (__text__), NO backtick chars, NO tildes (~~strikethrough~~), NO horizontal rules (--- or *** or ___), NO blockquotes (> text). Use plain text. Use numbered steps (1. 2. 3.) or emoji section titles (💡 ⚡ 📌 📐) as headers.
 
 ═══════════════════════════════════
 INTERACTIVITY (NON-NEGOTIABLE)
