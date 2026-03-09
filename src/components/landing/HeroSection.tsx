@@ -110,16 +110,6 @@ export const HeroSection: React.FC = () => {
             <span className="block mt-2 text-white/90 text-3xl sm:text-5xl lg:text-6xl xl:text-7xl">Foundations to Competitive Success</span>
           </motion.h1>
 
-          {/* Value Tagline */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.25 }}
-            className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl mb-4 leading-relaxed"
-          >
-            One platform for <span className="text-accent font-semibold">Class 6–12 academics</span> and <span className="text-accent font-semibold">JEE, NEET & CUET</span> preparation — starting at just <span className="line-through text-white/40">₹500</span> <span className="text-accent font-semibold">₹249</span>.
-          </motion.p>
-
           {/* Subheading */}
           <motion.p
             initial={{ opacity: 0, y: 20 }}

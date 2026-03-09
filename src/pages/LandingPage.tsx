@@ -1,6 +1,7 @@
 import React from 'react';
 import { LandingHeader } from '@/components/landing/LandingHeader';
 import { HeroSection } from '@/components/landing/HeroSection';
+import { MarqueeTicker } from '@/components/landing/MarqueeTicker';
 import { ProgramsSection } from '@/components/landing/ProgramsSection';
 import { PillarsSection } from '@/components/landing/PillarsSection';
 import { LearningJourneySection } from '@/components/landing/LearningJourneySection';
@@ -17,6 +18,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       <LandingHeader />
       <HeroSection />
+      <MarqueeTicker />
       <ProgramsSection />
       <LearningJourneySection />
       <PillarsSection />

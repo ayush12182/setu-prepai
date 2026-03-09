@@ -137,127 +137,158 @@ const LearningProfilePage: React.FC = () => {
       <div className="relative z-10 max-w-2xl mx-auto px-4 py-6 sm:py-10">
 
         {/* ═══════════ REPORT HEADER ═══════════ */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] mb-4">
-            <Shield className="h-3.5 w-3.5 text-accent" />
-            <span className="text-[10px] font-medium text-white/50 uppercase tracking-wider">Diagnostic Report</span>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-6">
+            <Shield className="h-4 w-4 text-accent" />
+            <span className="text-[11px] font-semibold text-accent uppercase tracking-wider">Diagnostic Report</span>
           </div>
-          <div className="w-14 h-14 rounded-2xl bg-accent/15 flex items-center justify-center mx-auto mb-4">
-            <Brain className="w-7 h-7 text-accent" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-accent/25">
+            <Brain className="w-8 h-8 text-white" />
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-white mb-2">Your Learning Profile</h1>
-          <p className="text-white/40 text-sm mb-3">Based on your diagnostic assessment</p>
-          <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium border ${level.color}`}>
+          <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3">Your Learning Profile</h1>
+          <p className="text-white/50 text-base mb-6">Based on your diagnostic assessment</p>
+          <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border shadow-sm ${level.color}`}>
             {level.emoji} {profile.overall_level.charAt(0).toUpperCase() + profile.overall_level.slice(1)} Level
           </span>
         </motion.div>
 
         {/* ═══════════ OVERALL SCORE RING ═══════════ */}
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-          <Card className="p-5 mb-4 bg-white/[0.04] border-white/[0.08] text-center">
-            <div className="relative w-24 h-24 mx-auto mb-3">
-              <svg className="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="6" className="text-white/[0.06]" />
-                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="6" strokeDasharray={`${avgScore * 2.64} 264`} strokeLinecap="round" className="text-accent" />
+          <div className="p-8 mb-6 rounded-3xl bg-white/[0.02] border border-white/[0.05] shadow-[inset_0_0_80px_rgba(255,255,255,0.02)] text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent blur-2xl" />
+            <div className="relative w-32 h-32 mx-auto mb-5">
+              <svg className="w-32 h-32 -rotate-90 drop-shadow-lg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="6" className="text-white/[0.08]" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="6" strokeDasharray={`${avgScore * 2.64} 264`} strokeLinecap="round" className="text-accent drop-shadow-[0_0_8px_rgba(232,154,60,0.8)] transition-all duration-1000 ease-out" />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-2xl font-bold text-white">{avgScore}%</span>
-                <span className="text-[9px] text-white/30 uppercase tracking-wider">Overall</span>
+                <span className="text-3xl font-bold text-white drop-shadow-md">{avgScore}%</span>
+                <span className="text-[10px] text-white/40 uppercase tracking-widest font-medium mt-0.5">Overall</span>
               </div>
             </div>
-            <p className="text-white/35 text-xs">Composite score across all cognitive dimensions</p>
-          </Card>
+            <p className="text-white/40 text-sm font-medium">Composite score across all cognitive dimensions</p>
+          </div>
         </motion.div>
 
         {/* ═══════════ SCORE CARDS ═══════════ */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           {scores.map((score, i) => (
             <motion.div key={score.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.08 }}>
-              <Card className="p-4 space-y-3 bg-white/[0.04] border-white/[0.08]">
-                <div className="flex items-center gap-2">
-                  <div className={`w-7 h-7 rounded-lg ${score.bg} flex items-center justify-center`}>
-                    <score.icon className={`w-3.5 h-3.5 ${score.color}`} />
+              <div className="group p-5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.1] transition-all duration-300 relative overflow-hidden">
+                <div className={`absolute top-0 right-0 w-32 h-32 ${score.bg} opacity-50 blur-3xl rounded-full translate-x-10 -translate-y-10 group-hover:scale-110 transition-transform duration-500`} />
+
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-9 h-9 rounded-xl ${score.bg} border border-white/5 flex items-center justify-center shadow-inner`}>
+                      <score.icon className={`w-4 h-4 ${score.color}`} />
+                    </div>
+                    <span className="text-[13px] font-medium text-white/80">{score.label}</span>
                   </div>
-                  <span className="text-xs font-medium text-white/70">{score.label}</span>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="text-2xl font-bold text-white">{Math.round(score.value)}%</span>
-                  <div className={`h-1.5 rounded-full ${score.track}`}>
-                    <div className={`h-full rounded-full transition-all duration-1000`} style={{ width: `${score.value}%`, background: `hsl(var(--accent))` }} />
+
+                  <div className="flex items-end justify-between mb-2">
+                    <span className="text-3xl font-bold text-white tracking-tight">{Math.round(score.value)}%</span>
+                  </div>
+
+                  <div className={`h-1.5 rounded-full overflow-hidden ${score.track}`}>
+                    <div
+                      className={`h-full rounded-full transition-all duration-1000 relative`}
+                      style={{ width: `${score.value}%`, backgroundColor: 'currentColor', color: `var(--${score.color.split('-')[1]})` }}
+                    >
+                      <div className="absolute inset-0 bg-white/20" />
+                    </div>
                   </div>
                 </div>
-              </Card>
+              </div>
             </motion.div>
           ))}
         </div>
 
         {/* ═══════════ AREAS TO IMPROVE ═══════════ */}
         {profile.weak_topics.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-            <Card className="p-5 mb-4 space-y-3 bg-white/[0.04] border-white/[0.08]">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                </div>
-                <h3 className="font-semibold text-white text-sm">Areas to Improve</h3>
-                <span className="ml-auto text-[10px] text-white/25 bg-white/[0.04] px-2 py-0.5 rounded-full">{profile.weak_topics.length} topics</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {profile.weak_topics.map((topic) => (
-                  <span key={topic} className="px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-xs font-medium border border-amber-500/15">
-                    {topic}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+            <div className="p-6 mb-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 hover:from-amber-500/15 hover:to-amber-500/10 border border-amber-500/20 transition-all duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-10 -translate-y-10" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center -ml-1 shadow-inner shadow-amber-500/20">
+                    <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-amber-50 text-base">Areas to Improve</h3>
+                    <p className="text-amber-200/50 text-[11px] font-medium uppercase tracking-wider">Priority Focus Zones</p>
+                  </div>
+                  <span className="ml-auto text-xs font-medium text-amber-300 bg-amber-500/20 px-2.5 py-1 rounded-full shadow-sm">
+                    {profile.weak_topics.length} topics
                   </span>
-                ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {profile.weak_topics.map((topic) => (
+                    <span key={topic} className="px-3.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-200 text-sm font-medium border border-amber-500/20 hover:border-amber-400/40 transition-colors shadow-sm">
+                      {topic}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </Card>
+            </div>
           </motion.div>
         )}
 
         {/* ═══════════ STRENGTHS ═══════════ */}
         {profile.strong_topics.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.55 }}>
-            <Card className="p-5 mb-4 space-y-3 bg-white/[0.04] border-white/[0.08]">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                </div>
-                <h3 className="font-semibold text-white text-sm">Your Strengths</h3>
-                <span className="ml-auto text-[10px] text-white/25 bg-white/[0.04] px-2 py-0.5 rounded-full">{profile.strong_topics.length} topics</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {profile.strong_topics.map((topic) => (
-                  <span key={topic} className="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/15">
-                    {topic}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}>
+            <div className="p-6 mb-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 hover:from-emerald-500/15 hover:to-emerald-500/10 border border-emerald-500/20 transition-all duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-10 -translate-y-10" />
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center -ml-1 shadow-inner shadow-emerald-500/20">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-emerald-50 text-base">Your Strengths</h3>
+                    <p className="text-emerald-200/50 text-[11px] font-medium uppercase tracking-wider">Mastered Concepts</p>
+                  </div>
+                  <span className="ml-auto text-xs font-medium text-emerald-300 bg-emerald-500/20 px-2.5 py-1 rounded-full shadow-sm">
+                    {profile.strong_topics.length} topics
                   </span>
-                ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {profile.strong_topics.map((topic) => (
+                    <span key={topic} className="px-3.5 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-200 text-sm font-medium border border-emerald-500/20 hover:border-emerald-400/40 transition-colors shadow-sm">
+                      {topic}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </Card>
+            </div>
           </motion.div>
         )}
 
         {/* ═══════════ PREREQUISITE GAPS ═══════════ */}
         {profile.prerequisite_gaps.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
-            <Card className="p-5 mb-6 space-y-3 bg-white/[0.04] border-white/[0.08]">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center">
-                  <Target className="w-3.5 h-3.5 text-rose-400" />
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+            <div className="p-6 mb-8 rounded-2xl bg-gradient-to-br from-rose-500/10 to-rose-500/5 hover:from-rose-500/15 hover:to-rose-500/10 border border-rose-500/20 transition-all duration-300 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-10 -translate-y-10" />
+              <div className="relative">
+                <div className="flex items-start gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-xl bg-rose-500/20 flex items-center justify-center -ml-1 shrink-0 shadow-inner shadow-rose-500/20">
+                    <Target className="w-4 h-4 text-rose-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-rose-50 text-base">Prerequisite Gaps</h3>
+                    <p className="text-rose-200/70 text-xs mt-1 leading-relaxed">These foundational concepts need attention before moving forward to advanced chapters.</p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-white text-sm">Prerequisite Gaps</h3>
+                <div className="flex flex-wrap gap-2 ml-12">
+                  {profile.prerequisite_gaps.map((gap) => (
+                    <span key={gap} className="px-3.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-200 text-sm font-medium border border-rose-500/20 hover:border-rose-400/40 transition-colors shadow-sm">
+                      {gap}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <p className="text-xs text-white/35">These foundational concepts need attention before moving forward:</p>
-              <div className="flex flex-wrap gap-2">
-                {profile.prerequisite_gaps.map((gap) => (
-                  <span key={gap} className="px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-400 text-xs font-medium border border-rose-500/15">
-                    {gap}
-                  </span>
-                ))}
-              </div>
-            </Card>
+            </div>
           </motion.div>
         )}
-
-        {/* ═══════════ DIVIDER ═══════════ */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.65 }} className="my-8">
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-white/[0.06]" />
@@ -278,94 +309,97 @@ const LearningProfilePage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 + i * 0.1 }}
             >
-              <Card className={`p-5 bg-white/[0.04] border ${section.border} overflow-hidden relative`}>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-white/[0.02] to-transparent rounded-bl-full" />
+              <div className={`p-6 rounded-2xl bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.1] transition-all duration-300 overflow-hidden relative group`}>
+                <div className={`absolute top-0 right-0 w-40 h-40 ${section.bg} blur-3xl rounded-full opacity-0 group-hover:opacity-40 transition-opacity duration-500 translate-x-10 -translate-y-10`} />
                 <div className="relative z-10">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className={`w-10 h-10 rounded-xl ${section.bg} flex items-center justify-center shrink-0`}>
-                      <section.icon className={`w-5 h-5 ${section.color}`} />
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className={`w-12 h-12 rounded-xl ${section.bg} border border-white/5 flex items-center justify-center shrink-0 shadow-inner`}>
+                      <section.icon className={`w-6 h-6 ${section.color}`} />
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-white text-sm mb-1">{section.title}</h3>
-                      <p className="text-white/40 text-xs leading-relaxed">{section.desc}</p>
+                    <div className="pt-0.5">
+                      <h3 className="font-semibold text-white text-base mb-1.5">{section.title}</h3>
+                      <p className="text-white/40 text-xs leading-relaxed max-w-sm">{section.desc}</p>
                     </div>
                   </div>
-                  <div className="ml-[52px] space-y-1.5">
+                  <div className="ml-16 space-y-2">
                     {section.features.map((feat) => (
-                      <div key={feat} className="flex items-center gap-2">
-                        <CheckCircle2 className="w-3 h-3 text-accent shrink-0" />
-                        <span className="text-white/50 text-[11px]">{feat}</span>
+                      <div key={feat} className="flex items-center gap-2.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-accent shrink-0" />
+                        <span className="text-white/60 text-xs">{feat}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-              </Card>
+              </div>
             </motion.div>
           ))}
         </div>
 
         {/* ═══════════ TEACHER + AI COMPARISON ═══════════ */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}>
-          <Card className="p-5 mb-6 bg-white/[0.04] border-white/[0.08]">
-            <h3 className="font-semibold text-white text-sm text-center mb-4">The Best of Both Worlds</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-xl bg-sky-500/[0.06] border border-sky-500/10 space-y-2.5">
-                <div className="flex items-center gap-2 mb-2">
+          <div className="p-6 mb-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+            <h3 className="font-semibold text-white text-sm text-center mb-5 tracking-wide uppercase opacity-80">The Best of Both Worlds</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-sky-500/[0.04] border border-sky-500/10 space-y-3">
+                <div className="flex items-center gap-2.5 mb-3 pb-2 border-b border-sky-500/10">
                   <GraduationCap className="w-4 h-4 text-sky-400" />
-                  <span className="text-xs font-semibold text-white">Real Teachers</span>
+                  <span className="text-sm font-semibold text-sky-50">Real Teachers</span>
                 </div>
                 {['Deep concept clarity', 'Emotional support', 'Exam strategy', 'Motivation & mentoring'].map(item => (
-                  <div key={item} className="flex items-center gap-1.5">
-                    <div className="w-1 h-1 rounded-full bg-sky-400" />
-                    <span className="text-[10px] text-white/45">{item}</span>
+                  <div key={item} className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+                    <span className="text-xs text-white/50 font-medium">{item}</span>
                   </div>
                 ))}
               </div>
-              <div className="p-3.5 rounded-xl bg-violet-500/[0.06] border border-violet-500/10 space-y-2.5">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="p-4 rounded-xl bg-violet-500/[0.04] border border-violet-500/10 space-y-3">
+                <div className="flex items-center gap-2.5 mb-3 pb-2 border-b border-violet-500/10">
                   <Bot className="w-4 h-4 text-violet-400" />
-                  <span className="text-xs font-semibold text-white">AI Enhancement</span>
+                  <span className="text-sm font-semibold text-violet-50">AI Enhancement</span>
                 </div>
                 {['24/7 instant help', 'Adaptive practice', 'Memory-based revision', 'Progress tracking'].map(item => (
-                  <div key={item} className="flex items-center gap-1.5">
-                    <div className="w-1 h-1 rounded-full bg-violet-400" />
-                    <span className="text-[10px] text-white/45">{item}</span>
+                  <div key={item} className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                    <span className="text-xs text-white/50 font-medium">{item}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="mt-3 p-2.5 rounded-lg bg-accent/[0.06] border border-accent/10 text-center">
-              <p className="text-[11px] text-accent font-medium">Together = Personalized learning that actually works</p>
+            <div className="mt-5 p-3 rounded-lg bg-accent/[0.08] border border-accent/15 text-center flex items-center justify-center gap-2">
+              <Sparkles className="w-4 h-4 text-accent" />
+              <p className="text-xs text-accent font-semibold tracking-wide">Together = Personalized learning that actually works</p>
             </div>
-          </Card>
+          </div>
         </motion.div>
 
         {/* ═══════════ WHAT HAPPENS NEXT ═══════════ */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1 }}>
-          <Card className="p-5 mb-6 bg-white/[0.04] border-white/[0.08]">
-            <h3 className="font-semibold text-white text-sm mb-3 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-accent" />
+          <div className="p-6 mb-8 rounded-2xl bg-white/[0.03] border border-white/[0.06] relative">
+            <h3 className="font-semibold text-white text-base mb-6 flex items-center gap-2.5">
+              <Calendar className="w-5 h-5 text-accent" />
               What Happens Next
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-5 relative">
+              <div className="absolute left-4 top-4 bottom-4 w-px bg-white/5" />
               {[
                 { step: '1', title: 'Your Personalized Roadmap', desc: 'AI creates a week-by-week plan targeting your weak zones first', icon: BookOpen },
                 { step: '2', title: 'Smart Practice Sessions', desc: 'Questions adapt to your level — easy when you\'re learning, harder as you grow', icon: Zap },
                 { step: '3', title: 'Teacher Check-ins', desc: 'Regular sessions with real teachers to review your progress and guide strategy', icon: Video },
                 { step: '4', title: 'Continuous Brain Mapping', desc: 'Your profile updates as you learn — SETU keeps getting smarter about you', icon: Brain },
               ].map((item, i) => (
-                <div key={item.step} className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 text-accent text-xs font-bold">
+                <div key={item.step} className="flex items-start gap-4 relative z-10">
+                  <div className="w-8 h-8 rounded-full bg-accent/20 border-2 border-slate-900 flex items-center justify-center shrink-0 text-accent text-sm font-bold shadow-sm backdrop-blur-md">
                     {item.step}
                   </div>
-                  <div>
-                    <p className="text-white text-xs font-medium">{item.title}</p>
-                    <p className="text-white/35 text-[11px]">{item.desc}</p>
+                  <div className="pt-1">
+                    <p className="text-white text-sm font-semibold mb-0.5">{item.title}</p>
+                    <p className="text-white/40 text-xs leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </motion.div>
 
         {/* ═══════════ CTA ═══════════ */}
@@ -388,8 +422,8 @@ const LearningProfilePage: React.FC = () => {
 
         {/* Footer note */}
         <p className="text-center text-[10px] text-white/15 mt-6">SETU Learning Report • Generated for you • Updates as you learn</p>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

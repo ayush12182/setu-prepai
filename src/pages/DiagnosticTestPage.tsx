@@ -345,94 +345,102 @@ const DiagnosticTestPage: React.FC = () => {
   // ─── INTRO SCREEN ───
   if (!testStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden flex items-center">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[-15%] left-[25%] w-[500px] h-[500px] bg-accent/[0.06] rounded-full blur-[140px]" />
-          <div className="absolute bottom-[-10%] right-[15%] w-[400px] h-[400px] bg-violet-500/[0.04] rounded-full blur-[120px]" />
+          <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-accent/[0.05] rounded-full blur-[160px]" />
+          <div className="absolute bottom-[-10%] right-[10%] w-[500px] h-[500px] bg-violet-500/[0.04] rounded-full blur-[140px]" />
         </div>
 
-        <div className="relative z-10 max-w-2xl mx-auto px-4 py-8 sm:py-12">
-          {/* Header */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-5">
-              <Brain className="h-4 w-4 text-accent" />
-              <span className="text-xs font-medium text-accent">Skill Mapping Assessment</span>
-            </div>
-            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-white mb-3 leading-tight">
-              Understand How You <span className="text-accent">Think</span>,<br />Not Just What You Know
-            </h1>
-            <p className="text-white/45 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-              This diagnostic doesn't judge you — it understands you. We analyze your thinking patterns to build your personalized learning map.
-            </p>
-          </motion.div>
+        <div className="relative z-10 w-full max-w-6xl mx-auto px-6 py-12 lg:py-20 lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+          {/* Left Column: Hero Text */}
+          <div className="mb-12 lg:mb-0">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-6">
+                <Brain className="h-4 w-4 text-accent" />
+                <span className="text-xs font-semibold text-accent tracking-wide uppercase">Skill Mapping Assessment</span>
+              </div>
+              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 leading-[1.15]">
+                Understand <br className="hidden sm:block" /> How You <span className="bg-gradient-to-r from-accent to-amber-400 bg-clip-text text-transparent italic pr-2">Think</span>,<br />Not Just What You Know
+              </h1>
+              <p className="text-white/50 text-base sm:text-lg max-w-lg leading-relaxed mb-6">
+                This diagnostic doesn't judge you — it understands you. We analyze your thinking patterns to build your personalized learning map.
+              </p>
 
-          {/* Test structure preview */}
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mb-6">
-            <div className="grid grid-cols-2 gap-2.5">
-              {activeSections.map((sec, i) => (
-                <div key={sec.name} className={`p-3 rounded-xl ${sec.bg} border border-white/[0.06]`}>
-                  <p className="text-white font-medium text-xs mb-0.5">{sec.label}</p>
-                  <p className="text-white/40 text-[10px]">{sec.count} questions • {sec.desc}</p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+              {/* Difference callout */}
+              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] backdrop-blur-sm max-w-md inline-block mb-10">
+                <p className="text-white/40 text-xs mb-1.5">Traditional tests ask: <span className="text-white/60">"How much did you score?"</span></p>
+                <p className="text-accent/90 font-medium text-sm flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  SETU asks: "How does your brain learn best?"
+                </p>
+              </div>
 
-          {/* What we measure */}
-          <div className="space-y-2.5 mb-6">
-            {INTRO_FEATURES.map((feat, i) => (
-              <motion.div
-                key={feat.title}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 + i * 0.06 }}
-                className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.04] border border-white/[0.06] backdrop-blur-sm"
-              >
-                <div className={`w-9 h-9 rounded-xl ${feat.bg} flex items-center justify-center shrink-0`}>
-                  <feat.icon className={`h-4 w-4 ${feat.color}`} />
+              {/* Stats & CTA */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                <Button
+                  size="lg"
+                  onClick={() => { setTestStarted(true); setLoading(true); }}
+                  className="h-14 px-8 rounded-2xl bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white font-semibold shadow-[0_0_40px_rgba(232,154,60,0.3)] hover:shadow-[0_0_60px_rgba(232,154,60,0.4)] transition-all duration-300 text-base gap-2"
+                >
+                  Begin Assessment <ArrowRight className="h-5 w-5" />
+                </Button>
+
+                <div className="flex sm:flex-col gap-4 sm:gap-1 text-white/40 text-[11px] font-medium uppercase tracking-wider">
+                  <span className="flex items-center gap-1.5"><Timer className="h-3.5 w-3.5 text-white/30" /> ~15 minutes</span>
+                  <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-white/30" /> {TOTAL_QUESTIONS} questions</span>
+                  <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-white/30" /> No marks</span>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-white text-[13px] mb-0.5">{feat.title}</h3>
-                  <p className="text-white/40 text-[11px] leading-relaxed">{feat.desc}</p>
-                </div>
-              </motion.div>
-            ))}
+              </div>
+            </motion.div>
           </div>
 
-          {/* Difference callout */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mb-6 p-4 rounded-2xl bg-accent/[0.06] border border-accent/15 text-center"
-          >
-            <p className="text-white/50 text-xs mb-1">Normal tests ask: <span className="text-white/70">"How much did you score?"</span></p>
-            <p className="text-accent font-semibold text-sm">SETU asks: "How does your brain learn best?"</p>
-          </motion.div>
+          {/* Right Column: Features & Sections */}
+          <div className="relative">
+            {/* Ambient right glow */}
+            <div className="absolute inset-0 bg-gradient-to-b from-accent/5 to-transparent rounded-3xl blur-2xl" />
 
-          {/* Stats bar */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.65 }}
-            className="flex items-center justify-center gap-6 mb-6 text-white/35 text-xs"
-          >
-            <span className="flex items-center gap-1.5"><Timer className="h-3.5 w-3.5" /> ~15 minutes</span>
-            <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> {TOTAL_QUESTIONS} questions</span>
-            <span className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5" /> No marks</span>
-          </motion.div>
+            <div className="relative space-y-4">
+              {/* What We Measure */}
+              <div className="mb-8">
+                <h3 className="text-sm font-semibold text-white/80 mb-4 px-1">What we map</h3>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {INTRO_FEATURES.map((feat, i) => (
+                    <motion.div
+                      key={feat.title}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 + i * 0.1 }}
+                      className="group p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] hover:border-white/[0.1] backdrop-blur-sm transition-all duration-300"
+                    >
+                      <div className={`w-8 h-8 rounded-xl ${feat.bg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+                        <feat.icon className={`h-4 w-4 ${feat.color}`} />
+                      </div>
+                      <h4 className="font-semibold text-white/90 text-[13px] mb-1">{feat.title}</h4>
+                      <p className="text-white/40 text-[11px] leading-relaxed">{feat.desc}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
 
-          {/* CTA */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="text-center">
-            <Button
-              size="lg"
-              onClick={() => { setTestStarted(true); setLoading(true); }}
-              className="h-13 px-10 rounded-xl bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white font-semibold shadow-xl shadow-accent/25 text-base gap-2"
-            >
-              Begin Assessment <ArrowRight className="h-5 w-5" />
-            </Button>
-            <p className="mt-3 text-[11px] text-white/20">Your dashboard becomes personalized after this</p>
-          </motion.div>
+              {/* Sections Preview */}
+              <div>
+                <h3 className="text-sm font-semibold text-white/80 mb-4 px-1">Assessment Structure</h3>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.6 }}
+                  className="p-1 rounded-2xl bg-white/[0.02] border border-white/[0.05] flex flex-col sm:flex-row gap-1"
+                >
+                  {activeSections.map((sec, i) => (
+                    <div key={sec.name} className={`flex-1 p-3.5 rounded-xl ${sec.bg.replace('/15', '/10')} border border-transparent hover:border-white/10 transition-colors`}>
+                      <p className="text-white/90 font-semibold text-xs mb-1">{sec.label.replace(/^[^\s]+\s/, '')}</p>
+                      <p className="text-white/40 text-[10px] leading-relaxed">{sec.count} qs • {sec.difficulty}</p>
+                    </div>
+                  ))}
+                </motion.div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
