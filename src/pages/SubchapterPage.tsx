@@ -2,7 +2,8 @@
 // Follows: Subject → Chapter → Subchapter → Learn/Practice/Test/Analyze
 // With Jeetu Bhaiya-style notes generation and PDF download
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,42 @@ const SubchapterPage: React.FC = () => {
   const examMode = isFoundation ? 'Foundation' : (isNeet ? 'NEET' : 'JEE');
 
   const { notes, isLoading, error, generateNotes } = useSubchapterNotes();
+
+  // ── Analytics state ──────────────────────────────────────────
+  const [analytics, setAnalytics] = useState<{
+    attempted: number;
+    correct: number;
+    avgTime: number;
+    testsTaken: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!subchapter) return;
+    const fetchAnalytics = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      // Fetch all attempts for questions in this subchapter
+      const { data } = await supabase
+        .from('question_attempts')
+        .select('is_correct, time_taken_seconds, questions!inner(subchapter_id)')
+        .eq('user_id', user.id)
+        .eq('questions.subchapter_id', subchapter.id);
+      if (data && data.length > 0) {
+        const correct = data.filter((a: any) => a.is_correct).length;
+        const totalTime = data.reduce((sum: number, a: any) => sum + (a.time_taken_seconds || 0), 0);
+        // Count distinct test sessions by grouping (rough heuristic: every 10 attempts = 1 test)
+        setAnalytics({
+          attempted: data.length,
+          correct,
+          avgTime: Math.round(totalTime / data.length),
+          testsTaken: Math.max(1, Math.floor(data.length / 8)),
+        });
+      } else {
+        setAnalytics({ attempted: 0, correct: 0, avgTime: 0, testsTaken: 0 });
+      }
+    };
+    fetchAnalytics();
+  }, [subchapter?.id]);
 
   if (!subchapter || !chapter) {
     return (
@@ -376,13 +413,13 @@ const SubchapterPage: React.FC = () => {
               <TestExecution
                 config={{
                   type: activeTest.type === 'pyq' ? 'pyq' : 'chapter',
-                  chapters: activeTest.type === 'chapter' ? [{
+                  chapters: [{
                     chapterId: chapter.id,
                     chapterName: chapter.name,
                     subject: chapter.subject,
                     subchapterId: subchapter.id,
                     subchapterName: subchapter.name
-                  }] : undefined,
+                  }],
                   subject: activeTest.type === 'pyq' ? chapter.subject : undefined,
                   questionCount: activeTest.type === 'pyq' ? 10 : undefined,
                 }}
@@ -433,28 +470,47 @@ const SubchapterPage: React.FC = () => {
           {/* ==================== ANALYZE TAB ==================== */}
           <TabsContent value="analyze" className="mt-6 space-y-6">
             <div className="bg-card border border-border rounded-xl p-6">
-              <h3 className="font-semibold text-foreground mb-4">Your Performance in {subchapter.name}</h3>
+              <h3 className="font-semibold text-foreground mb-6">Your Performance in {subchapter.name}</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-foreground">0</p>
-                  <p className="text-sm text-muted-foreground">Questions Attempted</p>
+                <div className="text-center p-4 bg-muted/30 rounded-lg">
+                  <p className="text-3xl font-bold text-foreground">{analytics?.attempted ?? '—'}</p>
+                  <p className="text-sm text-muted-foreground mt-1">Questions Attempted</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-muted-foreground">--</p>
-                  <p className="text-sm text-muted-foreground">Accuracy</p>
+                <div className="text-center p-4 bg-muted/30 rounded-lg">
+                  <p className="text-3xl font-bold text-foreground">
+                    {analytics && analytics.attempted > 0
+                      ? `${Math.round((analytics.correct / analytics.attempted) * 100)}%`
+                      : '--'}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Accuracy</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-muted-foreground">--</p>
-                  <p className="text-sm text-muted-foreground">Avg Time</p>
+                <div className="text-center p-4 bg-muted/30 rounded-lg">
+                  <p className="text-3xl font-bold text-foreground">
+                    {analytics && analytics.avgTime > 0 ? `${analytics.avgTime}s` : '--'}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Avg Time / Q</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-muted-foreground">0</p>
-                  <p className="text-sm text-muted-foreground">Tests Taken</p>
+                <div className="text-center p-4 bg-muted/30 rounded-lg">
+                  <p className="text-3xl font-bold text-foreground">{analytics?.testsTaken ?? '—'}</p>
+                  <p className="text-sm text-muted-foreground mt-1">Tests Taken</p>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground text-center mt-6">
-                Start practicing to see your analytics here!
-              </p>
+              {analytics && analytics.attempted === 0 && (
+                <p className="text-sm text-muted-foreground text-center mt-6">
+                  Start practicing to see your analytics here!
+                </p>
+              )}
+              {analytics && analytics.attempted > 0 && (
+                <div className="mt-6 p-4 bg-muted/20 rounded-lg">
+                  <p className="text-sm font-medium text-foreground mb-1">Progress Summary</p>
+                  <p className="text-xs text-muted-foreground">
+                    You've answered {analytics.correct} out of {analytics.attempted} questions correctly in this topic.
+                    {analytics.correct / analytics.attempted >= 0.7
+                      ? ' Great work! You are mastering this topic.'
+                      : ' Keep practicing to improve your accuracy.'}
+                  </p>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>

@@ -40,7 +40,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
 
   const loadQuestions = async () => {
     let result;
-    
+
     switch (config.type) {
       case 'chapter':
         if (config.chapters && config.chapters.length > 0) {
@@ -55,7 +55,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
       case 'pyq':
         result = await fetchPYQQuestions(
           config.subject,
-          undefined,
+          config.chapters?.[0]?.chapterId,   // filter by chapter topic
           config.yearRange,
           config.questionCount || 25
         );
@@ -109,7 +109,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
           Preparing your {config.type === 'pyq' ? 'PYQ' : config.type} test...
         </p>
         <p className="text-sm text-muted-foreground mt-1">
-          {config.type === 'pyq' 
+          {config.type === 'pyq'
             ? 'Fetching previous year questions...'
             : 'Generating JEE-style questions...'}
         </p>
