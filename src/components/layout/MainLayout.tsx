@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 interface MainLayoutProps {
   children: React.ReactNode;
   title?: string;
+  fullHeight?: boolean;
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children, title }) => {
+export const MainLayout: React.FC<MainLayoutProps> = ({ children, title, fullHeight }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -18,10 +19,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, title }) => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} title={title} />
         
-        <main className="flex-1 overflow-auto">
-          <div className="container py-6 px-4 lg:px-6">
-            {children}
-          </div>
+        <main className={cn("flex-1", fullHeight ? "overflow-hidden" : "overflow-auto")}>
+          {fullHeight ? (
+            <div className="h-full">{children}</div>
+          ) : (
+            <div className="container py-6 px-4 lg:px-6">{children}</div>
+          )}
         </main>
       </div>
     </div>

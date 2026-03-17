@@ -12,7 +12,8 @@ import {
   User,
   X,
   Sparkles,
-  Users
+  Users,
+  GraduationCap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ interface SidebarProps {
 const getNavItems = (isFoundation: boolean) => [
   { path: '/', icon: Home, label: 'Home', emoji: '🏠' },
   { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📖' },
+  ...(!isFoundation ? [{ path: '/teacher-dashboard', icon: GraduationCap, label: 'AI Teachers', emoji: '👨🏫' }] : []),
   { path: '/practice', icon: PenTool, label: isFoundation ? 'School Practice' : 'Practice', emoji: '✏️' },
   { path: '/test', icon: ClipboardCheck, label: isFoundation ? 'Chapter Test' : 'Test', emoji: '📝' },
   { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄' },

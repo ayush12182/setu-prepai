@@ -37,6 +37,7 @@ import LearningProfilePage from "./pages/LearningProfilePage";
 import ConceptGraphPage from "./pages/ConceptGraphPage";
 import LearningRoadmapPage from "./pages/LearningRoadmapPage";
 import TeacherDashboardPage from "./pages/TeacherDashboardPage";
+import AITeachingRoomPage from "./pages/AITeachingRoomPage";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => (
                     <Route path="/concept-graph" element={<ConceptGraphPage />} />
                     <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
                     <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
+                    <Route path="/teaching-room/:teacherId" element={<AITeachingRoomPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </TooltipProvider>
