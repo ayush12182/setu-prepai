@@ -94,10 +94,10 @@ LANGUAGE: Respond ONLY in ${LANG_INSTRUCTION[lang]}.
 STYLE RULES (follow every time):
 1. Open with a natural hook like "Chalo bhai, aaj iska kaccha chitha nikalte hain!" or "Dekho, yeh concept 90% log galat karte hain — tum mat karna."
 2. Build concept in this order: Hook → Core idea (1-2 lines) → Physical intuition/analogy → Worked example → Exam trick
-3. Ask 1 mid-explanation question like "Yeh samajh aaya?" or "Kya hoga agar F = 0?"
-4. End with: "Exam mein pakka aata hai — yaad rakhna!" or "Is trick se 30 seconds mein solve hoga."
+3. Ask 1 mid-explanation question like "Yeh samajh aaya?" or "Haan bhai samajh mein aaya ya nahi?"
+4. End with motivation and an exam tip: "Exam mein pakka aata hai — yaad rakhna! Tum kar loge, bas practice karte raho!"
 5. Bold key formulas with **bold**. Use → for step chains.
-6. Under 150 words. No long paragraphs. Friendly, never robotic.`,
+6. Keep it interactive and motivational throughout. Under 150 words. No long paragraphs. Friendly, never robotic.`,
     chapters: [
       { name: 'Mechanics', topics: ["Newton's Laws of Motion", 'Projectile Motion', 'Work-Energy Theorem', 'Circular Motion'] },
       { name: 'Electrostatics', topics: ["Coulomb's Law", 'Electric Field & Potential', 'Capacitors', "Gauss's Law"] },
@@ -120,10 +120,10 @@ LANGUAGE: Respond ONLY in ${LANG_INSTRUCTION[lang]}.
 STYLE RULES (follow every time):
 1. Open with a hook: "Yaar, yeh reaction yaad nahi? Main batata hoon — aur bhoologe nahi." or "Chalo, isko ek baar crystal clear karte hain!"
 2. Structure: Hook → Core mechanism (1-2 lines) → Memory trick/analogy → Real example with reaction (use →) → JEE tip
-3. Throw in: "Yeh JEE Advanced ka favourite hai, dhyan se!" or "Organic mein yeh sabse zyada aata hai."
-4. End with an exam shortcut or mnemonic.
+3. Throw in questions: "Haan bhai samajh mein aaya ya nahi?" or "Yeh clear hua sabko?"
+4. End with an exam shortcut and motivation: "Tum fodd ke aaoge exam mein, bas ye shortcut yaad rakhna!"
 5. Bold key terms **bold**. Show reactions with →.
-6. Under 150 words. Lively, never dull.`,
+6. Keep it interactive and motivational throughout. Under 150 words. Lively, never dull.`,
     chapters: [
       { name: 'Organic Chemistry', topics: ['Named Reactions', 'Reaction Mechanisms', 'Isomerism', 'Functional Groups'] },
       { name: 'Physical Chemistry', topics: ['Thermodynamics', 'Chemical Equilibrium', 'Electrochemistry', 'Chemical Kinetics'] },
@@ -147,9 +147,9 @@ STYLE RULES (follow every time):
 1. Open sharp: "Dekho, wahi purana formula ratta nahi maarna — samajhke karo." or "Yeh question JEE mein 3 tarike se aata hai — teeno sikho!"
 2. Structure: Hook → Core formula (bold) → Geometric or visual intuition → Solved example with numbered steps → Speed trick for exam
 3. Use Unicode math: dy/dx, ∫, ∑, ∞, θ, π, √, ±
-4. Mid-explanation: "Is step mein galati mat karna" or "Yeh trick 5 types ke questions mein kaam aati hai."
-5. End: "Exam shortcut: [shortcut]. Is se 40 seconds bachenge."
-6. Under 150 words. Bold key formulas. Numbered steps. Never robotic.`,
+4. Mid-explanation ask: "Haan bhai samajh mein aaya ya nahi?" or "Is step mein galati mat karna."
+5. End with motivation: "Exam shortcut: [shortcut]. Is se 40 seconds bachenge. Laga reh, selection pakka hai!"
+6. Keep it interactive and motivational throughout. Under 150 words. Bold key formulas. Numbered steps. Never robotic.`,
     chapters: [
       { name: 'Calculus', topics: ['Limits & Continuity', 'Differentiation', 'Integration', 'Differential Equations'] },
       { name: 'Algebra', topics: ['Quadratic Equations', 'Complex Numbers', 'Matrices & Determinants', 'Permutations & Combinations'] },
@@ -164,7 +164,7 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jeetu-chat`;
 /* ────────────────────────────────────────────────
    TYPEWRITER HOOK
 ──────────────────────────────────────────────── */
-function useTypewriter(text: string, speed = 18) {
+function useTypewriter(text: string, speed = 8) {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
 
@@ -312,7 +312,7 @@ const AITeachingRoomPage: React.FC = () => {
   const chatHistoryRef = useRef<{ role: 'user' | 'assistant'; content: string }[]>([]);
 
   // The full text currently displayed (including streaming)
-  const { displayed, done } = useTypewriter(isStreaming ? '' : boardContent, 12);
+  const { displayed, done } = useTypewriter(isStreaming ? '' : boardContent, 7);
 
   // ── Welcome message on mount
   useEffect(() => {
@@ -354,6 +354,7 @@ const AITeachingRoomPage: React.FC = () => {
 
       if (audioRef.current) {
         audioRef.current.src = url;
+        audioRef.current.playbackRate = 1.15; // increased playback speed
         audioRef.current.onended = () => setIsSpeaking(false);
         audioRef.current.onerror = () => setIsSpeaking(false);
         await audioRef.current.play();
