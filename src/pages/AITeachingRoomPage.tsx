@@ -198,7 +198,7 @@ function BlackboardText({ text }: { text: string }) {
         // Bold **text**
         const parts = line.split(/(\*\*.*?\*\*)/g);
         return (
-          <p key={i} className={line.startsWith('Step') || line.startsWith('चरण') ? 'mt-3' : ''}>
+          <p key={i} className={`text-white ${line.startsWith('Step') || line.startsWith('चरण') ? 'mt-3' : ''}`}>
             {parts.map((part, j) =>
               part.startsWith('**') && part.endsWith('**')
                 ? <span key={j} className="font-bold" style={{ color: '#FCD34D' }}>{part.slice(2, -2)}</span>
@@ -537,7 +537,7 @@ const AITeachingRoomPage: React.FC = () => {
                 <div className="flex items-center gap-2 text-green-300/50 text-sm mt-4">
                   <Loader2 size={14} className="animate-spin" />
                   <span style={{ fontFamily: 'cursive' }}>
-                    {teacher.name} likh raha hai...
+                    {teacher.name} is writing on the board...
                   </span>
                 </div>
               )}
