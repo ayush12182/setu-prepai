@@ -370,6 +370,7 @@ const AITeachingRoomPage: React.FC = () => {
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioUrlRef = useRef<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null); // cancels in-flight AI stream
 
   // Doubt input
   const [doubtInput, setDoubtInput] = useState('');
@@ -444,6 +445,9 @@ const AITeachingRoomPage: React.FC = () => {
 
   // ── Core AI call
   const callAI = useCallback(async (userMessage: string) => {
+    // 0. Stop any previous audio + stream immediately
+    stopAll();
+
     // 1. Erase board
     setIsErasing(true);
     await new Promise(r => setTimeout(r, 600));
@@ -458,9 +462,14 @@ const AITeachingRoomPage: React.FC = () => {
     setIsStreaming(true);
     let accumulated = '';
 
+    // Create a fresh abort controller for this request
+    const abort = new AbortController();
+    abortRef.current = abort;
+
     try {
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
+        signal: abort.signal,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
@@ -481,7 +490,7 @@ const AITeachingRoomPage: React.FC = () => {
       const decoder = new TextDecoder();
       let buf = '';
 
-      while (true) {
+      while (!abort.signal.aborted) {
         const { done, value } = await reader.read();
         if (done) break;
         buf += decoder.decode(value, { stream: true });
@@ -511,15 +520,16 @@ const AITeachingRoomPage: React.FC = () => {
       setStreamingContent(accumulated);
     }
 
-    // 4. Finalize
-    setIsStreaming(false);
-    setBoardContent(accumulated);
-    setStreamingContent('');
-    chatHistoryRef.current.push({ role: 'assistant', content: accumulated });
-
-    // 5. Speak
-    speakText(accumulated);
-  }, [language, teacher, speakText]);
+    // 4. Finalize (only if this request was NOT aborted by a new topic switch)
+    if (!abort.signal.aborted) {
+      setIsStreaming(false);
+      setBoardContent(accumulated);
+      setStreamingContent('');
+      chatHistoryRef.current.push({ role: 'assistant', content: accumulated });
+      // 5. Speak
+      speakText(accumulated);
+    }
+  }, [language, teacher, speakText, stopAll]);
 
   // Voice input (mic)
   const [isListening, setIsListening] = useState(false);
@@ -587,11 +597,23 @@ const AITeachingRoomPage: React.FC = () => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendDoubt(); }
   };
 
-  // ── Stop audio
-  const stopAudio = () => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
+  // ── Stop all: audio + in-flight AI stream
+  const stopAll = useCallback(() => {
+    // 1. Abort any in-flight fetch/stream
+    if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
+    // 2. Stop audio immediately
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = '';
+    }
+    if (audioUrlRef.current) { URL.revokeObjectURL(audioUrlRef.current); audioUrlRef.current = null; }
     setIsSpeaking(false);
-  };
+    setIsStreaming(false);
+  }, []);
+
+  // Keep legacy ref for mic use
+  const stopAudio = stopAll;
 
   const currentChapter = teacher.chapters[selectedChapter];
 
