@@ -7,6 +7,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { getGreetingByLanguage } from '@/lib/jeetuBhaiya';
 import { useJeetuChat } from '@/hooks/useJeetuChat';
+import { useClassContext } from '@/contexts/ClassContext';
+
 
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -136,9 +138,10 @@ const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
 const AskJeetuPage: React.FC = () => {
   const { language } = useLanguage();
   const { isNeet, examMode } = useExamMode();
+  const { aiContext } = useClassContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const isFoundation = examMode === 'foundation';
+  const isFoundation = aiContext?.learning_mode === 'foundation';
   const { sendMessage, isLoading, error } = useJeetuChat();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -216,6 +219,13 @@ const AskJeetuPage: React.FC = () => {
     "HCF aur LCM mein kya difference hai?"
   ];
 
+  const neetQuickQuestions = [
+    "Mitochondria ka function kya hai?",
+    "Human heart mein kitne chambers hote hain?",
+    "Cell cycle stages kya hain?",
+    "Photosynthesis ki equation kya hai?"
+  ];
+
   let quickQuestions = jeeQuickQuestions;
   if (isFoundation) quickQuestions = foundationQuickQuestions;
   else if (isNeet) quickQuestions = neetQuickQuestions;
@@ -253,9 +263,30 @@ const AskJeetuPage: React.FC = () => {
 
     const chatHistory = messages
       .filter(m => m.role !== 'motivation' && (m.role !== 'assistant' || messages.indexOf(m) > 0 || messages.length > 1))
-      .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+      .map(m => {
+        if (m.role === 'user' && m.image) {
+          return {
+            role: 'user' as const,
+            content: [
+              { type: 'text', text: m.content },
+              { type: 'image_url', image_url: { url: m.image } }
+            ]
+          };
+        }
+        return { role: m.role as 'user' | 'assistant', content: m.content };
+      });
 
-    chatHistory.push({ role: 'user', content: textToSend });
+    if (selectedImage) {
+      chatHistory.push({
+        role: 'user',
+        content: [
+          { type: 'text', text: textToSend || 'Please explain this.' },
+          { type: 'image_url', image_url: { url: selectedImage } }
+        ]
+      });
+    } else {
+      chatHistory.push({ role: 'user', content: textToSend });
+    }
 
     let assistantContent = '';
 
@@ -277,7 +308,7 @@ const AskJeetuPage: React.FC = () => {
       });
     };
 
-    await sendMessage(chatHistory, updateAssistant, () => {
+    await sendMessage(chatHistory as any, updateAssistant, () => {
       setMessages(prev =>
         prev.map(m =>
           m.id.startsWith('streaming-')

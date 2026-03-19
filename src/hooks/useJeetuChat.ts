@@ -3,7 +3,7 @@ import { useExamMode } from '@/contexts/ExamModeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useClassContext } from '@/contexts/ClassContext';
 
-type Message = { role: 'user' | 'assistant'; content: string };
+type Message = { role: 'user' | 'assistant'; content: any };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jeetu-chat`;
 
