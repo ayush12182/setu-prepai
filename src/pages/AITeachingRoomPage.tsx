@@ -466,6 +466,13 @@ const AITeachingRoomPage: React.FC = () => {
     // 0. Stop any previous audio + stream immediately
     stopAll();
 
+    // 0.5 Unlock audio context synchronously on user gesture
+    if (audioRef.current) {
+      // Tiny 1-sample silent WAV to register a user-initiated play
+      audioRef.current.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+      audioRef.current.play().catch(() => {});
+    }
+
     // 1. Erase board
     setIsErasing(true);
     await new Promise(r => setTimeout(r, 600));
