@@ -443,6 +443,24 @@ const AITeachingRoomPage: React.FC = () => {
     }
   }, [voiceEnabled, teacher.voiceId]);
 
+  // ── Stop all: audio + in-flight AI stream
+  const stopAll = useCallback(() => {
+    // 1. Abort any in-flight fetch/stream
+    if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
+    // 2. Stop audio immediately
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = '';
+    }
+    if (audioUrlRef.current) { URL.revokeObjectURL(audioUrlRef.current); audioUrlRef.current = null; }
+    setIsSpeaking(false);
+    setIsStreaming(false);
+  }, []);
+
+  // Keep legacy ref for mic use
+  const stopAudio = stopAll;
+
   // ── Core AI call
   const callAI = useCallback(async (userMessage: string) => {
     // 0. Stop any previous audio + stream immediately
@@ -597,23 +615,6 @@ const AITeachingRoomPage: React.FC = () => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendDoubt(); }
   };
 
-  // ── Stop all: audio + in-flight AI stream
-  const stopAll = useCallback(() => {
-    // 1. Abort any in-flight fetch/stream
-    if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
-    // 2. Stop audio immediately
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.src = '';
-    }
-    if (audioUrlRef.current) { URL.revokeObjectURL(audioUrlRef.current); audioUrlRef.current = null; }
-    setIsSpeaking(false);
-    setIsStreaming(false);
-  }, []);
-
-  // Keep legacy ref for mic use
-  const stopAudio = stopAll;
 
   const currentChapter = teacher.chapters[selectedChapter];
 
