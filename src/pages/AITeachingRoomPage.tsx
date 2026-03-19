@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
+import { DiagramRenderer } from '@/components/DiagramRenderer';
 
 /* ────────────────────────────────────────────────
    LANGUAGE HELPERS
@@ -100,7 +101,9 @@ EXPLANATION DEPTH — JEE MAINS STANDARD:
 OUTPUT STRUCTURE (always follow):
 1. Intuition — real-life hook. E.g. "Socho ek ball throw karo..."
 2. Concept — step-by-step logic, one idea at a time.
-3. ASCII Diagram — MANDATORY for Physics: force diagrams, trajectories, vectors, field lines. Label axes.
+3. Visual Diagram — MANDATORY for Physics. Output EXACTLY this JSON format (no ASCII art ever):
+   [DIAGRAM]{"type":"fbd","title":"e.g. Block on incline","forces":[{"label":"N","dir":"up"},{"label":"mg","dir":"down"},{"label":"F","dir":"right"},{"label":"f","dir":"left"}]}[/DIAGRAM]
+   For velocity/displacement graphs use type:"graph" with xLabel, yLabel, curves:[{label,points:[[x,y],...]}]
 4. Formulas — write, derive simply, explain every term. E.g. **F = ma**: F=net force(N), m=mass(kg), a=accel(m/s2)
 5. Solved JEE Example — JEE Mains-style numerical, full step-by-step solution.
 6. Practice Q — 1 JEE Mains question. Hints only, don't solve.
@@ -135,7 +138,9 @@ EXPLANATION DEPTH — JEE MAINS STANDARD:
 OUTPUT STRUCTURE (always follow):
 1. Intuition — real-life hook. E.g. "Socho rust kaise banta hai..."
 2. Concept — step-by-step logic of the reaction/mechanism.
-3. ASCII Diagram — MANDATORY: structural formulas, reaction flow (->), electron movement, energy diagrams.
+3. Visual Diagram — MANDATORY for Chemistry. Output EXACTLY this JSON format (no ASCII art ever):
+   [DIAGRAM]{"type":"reaction","title":"e.g. SN1 Mechanism","steps":[{"formula":"R-X","arrow":"slow"},{"formula":"R+","arrow":"Nu-"},{"formula":"R-Nu"}]}[/DIAGRAM]
+   For energy diagrams use type:"energy" with bars:[{label, value}]
 4. Mechanism — every step. Bold key intermediates. Use -> arrows.
 5. Solved JEE Example — JEE Mains-style question, full step-by-step solution.
 6. Practice Q — 1 JEE Mains question. Hints only, don't solve.
@@ -170,7 +175,9 @@ EXPLANATION DEPTH — JEE MAINS STANDARD:
 OUTPUT STRUCTURE (always follow):
 1. Intuition — real-life hook. E.g. "Socho ek parabola ek ball ki path hoti hai..."
 2. Concept — geometric intuition first, then formula step by step.
-3. ASCII Graph/Diagram — MANDATORY: coordinate axes, curves, geometric shapes, labeled key points (vertex, asymptote, root, intercept).
+3. Visual Diagram — MANDATORY for Maths. Output EXACTLY this JSON format (no ASCII art ever):
+   [DIAGRAM]{"type":"graph","title":"e.g. y = x^2","xLabel":"x","yLabel":"y","curves":[{"label":"y=x²","color":"#93C5FD","points":[[-3,9],[-2,4],[-1,1],[0,0],[1,1],[2,4],[3,9]]}]}[/DIAGRAM]
+   For geometry: type:"geometry" with vertices:[[x,y],...] sides:[{label}] angles:[{vertex,label}]
 4. Formulas — write, derive simply, explain every term. Use dy/dx, integral, sigma, inf, theta, pi, sqrt, +-. Bold key formulas **like this**.
 5. Solved JEE Example — JEE Mains 2020-2024 style numerical. Full numbered step-by-step solution.
 6. Practice Q — 1 JEE Mains question. Hints only, don't solve.
@@ -219,36 +226,53 @@ function useTypewriter(text: string, speed = 8) {
    BLACKBOARD TEXT FORMATTER
 ──────────────────────────────────────────────── */
 function BlackboardText({ text }: { text: string }) {
-  const lines = text.split('\n');
+  // Split text into segments: diagram blocks vs normal text
+  const DIAGRAM_RE = /\[DIAGRAM\]([\s\S]*?)\[\/DIAGRAM\]/g;
+  const segments: Array<{ kind: 'text' | 'diagram'; content: string }> = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = DIAGRAM_RE.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      segments.push({ kind: 'text', content: text.slice(lastIndex, match.index) });
+    }
+    segments.push({ kind: 'diagram', content: match[1].trim() });
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < text.length) {
+    segments.push({ kind: 'text', content: text.slice(lastIndex) });
+  }
+
   return (
     <div className="space-y-1.5 leading-relaxed">
-      {lines.map((line, i) => {
-        // Strip and style markdown headings (### ## #)
-        const headingMatch = line.match(/^#{1,3}\s+(.*)/);
-        const rawLine = headingMatch ? headingMatch[1] : line;
-        const isHeading = !!headingMatch;
-
-        // Bold **text**
-        const parts = rawLine.split(/(\*\*.*?\*\*)/g);
-        const rendered = parts.map((part, j) =>
-          part.startsWith('**') && part.endsWith('**')
-            ? <span key={j} className="font-bold" style={{ color: '#FCD34D' }}>{part.slice(2, -2)}</span>
-            : <span key={j}>{part}</span>
-        );
-
-        if (isHeading) {
+      {segments.map((seg, si) => {
+        if (seg.kind === 'diagram') {
+          return <DiagramRenderer key={si} raw={seg.content} />;
+        }
+        // Normal text segment
+        return seg.content.split('\n').map((line, i) => {
+          const headingMatch = line.match(/^#{1,3}\s+(.*)/);
+          const rawLine = headingMatch ? headingMatch[1] : line;
+          const isHeading = !!headingMatch;
+          const parts = rawLine.split(/(\*\*.*?\*\*)/g);
+          const rendered = parts.map((part, j) =>
+            part.startsWith('**') && part.endsWith('**')
+              ? <span key={j} className="font-bold" style={{ color: '#FCD34D' }}>{part.slice(2, -2)}</span>
+              : <span key={j}>{part}</span>
+          );
+          if (isHeading) {
+            return (
+              <p key={`${si}-${i}`} className="mt-4 mb-1 font-bold"
+                style={{ color: '#86EFAC', fontSize: '1.05rem', textShadow: '0 0 8px rgba(134,239,172,0.35)' }}>
+                {rendered}
+              </p>
+            );
+          }
           return (
-            <p key={i} className="mt-4 mb-1 font-bold" style={{ color: '#86EFAC', fontSize: '1.05rem', textShadow: '0 0 8px rgba(134,239,172,0.35)' }}>
+            <p key={`${si}-${i}`} className={`text-white ${line.startsWith('Step') || line.startsWith('\u091a\u0930\u0923') ? 'mt-3' : ''}`}>
               {rendered}
             </p>
           );
-        }
-
-        return (
-          <p key={i} className={`text-white ${line.startsWith('Step') || line.startsWith('\u091a\u0930\u0923') ? 'mt-3' : ''}`}>
-            {rendered}
-          </p>
-        );
+        });
       })}
     </div>
   );
