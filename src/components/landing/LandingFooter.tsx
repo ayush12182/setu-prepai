@@ -4,7 +4,7 @@ import setuLogo from '@/assets/setu-logo.png';
 
 export const LandingFooter: React.FC = () => {
   return (
-    <footer className="relative py-12 px-6 sm:px-12 bg-primary border-t border-white/10">
+    <footer className="relative py-12 px-6 sm:px-12 bg-setu-navy border-t border-white/10">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}

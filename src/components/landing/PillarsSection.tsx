@@ -55,7 +55,7 @@ const pillars = [
 
 export const PillarsSection: React.FC = () => {
   return (
-    <section id="features" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-primary">
+    <section id="features" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-setu-navy">
       {/* Background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-accent rounded-full blur-[200px]" />

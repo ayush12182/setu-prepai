@@ -31,7 +31,7 @@ const steps = [
 
 export const HowItWorksSection: React.FC = () => {
   return (
-    <section id="how-it-works" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-primary">
+    <section id="how-it-works" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-setu-navy">
       {/* Background */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 right-20 w-80 h-80 bg-accent rounded-full blur-3xl" />

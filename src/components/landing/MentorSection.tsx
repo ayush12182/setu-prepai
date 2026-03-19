@@ -30,7 +30,7 @@ export const MentorSection: React.FC = () => {
   const [isMuted, setIsMuted] = useState(true);
 
   return (
-    <section id="mentor-section" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-primary">
+    <section id="mentor-section" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-setu-navy">
       {/* Background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent rounded-full blur-[150px]" />

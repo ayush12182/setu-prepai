@@ -28,7 +28,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 const LectureSetu: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState('');
   const { language } = useLanguage();
-  const { isProcessing, currentNote, notes, processLecture, fetchUserNotes } = useLectureNotes();
+  const { isProcessing, currentNote, notes, processLecture, fetchUserNotes, setCurrentNote } = useLectureNotes();
 
   useEffect(() => { fetchUserNotes(); }, []);
 
@@ -115,7 +115,19 @@ const LectureSetu: React.FC = () => {
         </div>
 
         {/* Results Section */}
-        {currentNote && <LectureResults note={currentNote} />}
+        {currentNote && (
+          <div className="space-y-4">
+            <Button 
+              variant="ghost" 
+              onClick={() => setCurrentNote(null)}
+              className="mb-2 -ml-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowRight className="w-4 h-4 mr-2 rotate-180" />
+              Back to Lectures
+            </Button>
+            <LectureResults note={currentNote} />
+          </div>
+        )}
 
         {/* Features Grid (shown when no results) */}
         {!currentNote && (
@@ -147,6 +159,7 @@ const LectureSetu: React.FC = () => {
               {notes.slice(0, 5).map((note) => (
                 <button
                   key={note.id}
+                  onClick={() => setCurrentNote(note)}
                   className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors text-left group/item"
                 >
                   {note.thumbnail_url && (

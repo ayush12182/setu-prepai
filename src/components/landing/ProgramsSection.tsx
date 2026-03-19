@@ -94,7 +94,7 @@ export const ProgramsSection: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <section id="programs" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-primary">
+        <section id="programs" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-setu-navy">
             {/* Background */}
             <div className="absolute inset-0 opacity-15">
                 <div className="absolute top-1/3 right-0 w-[600px] h-[600px] bg-accent rounded-full blur-[200px]" />

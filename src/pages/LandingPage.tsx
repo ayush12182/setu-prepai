@@ -15,7 +15,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter';
 
 const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-[#1E2A3A] text-white overflow-x-hidden">
       <LandingHeader />
       <HeroSection />
       <MarqueeTicker />
