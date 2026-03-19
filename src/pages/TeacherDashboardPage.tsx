@@ -19,6 +19,7 @@ const teachers = [
     reviews: 3240,
     status: 'live' as const,
     icon: Atom,
+    image: undefined as string | undefined,
     students: '3.2K',
     topics: ["Newton's Laws", 'Electrostatics', 'Optics', 'Modern Physics'],
     accent: 'hsl(213 60% 55%)',
@@ -53,6 +54,7 @@ const teachers = [
     reviews: 4150,
     status: 'available' as const,
     icon: FunctionSquare,
+    image: '/images/ak-sir.jpg',
     students: '4.1K',
     topics: ['Integration', 'Matrices', 'Coordinate Geometry', 'Limits'],
     accent: 'hsl(32 79% 57%)',
@@ -96,10 +98,14 @@ function TeacherCard({ teacher, index }: { teacher: typeof teachers[0]; index: n
         <div className="flex items-start justify-between gap-3">
           {/* Avatar */}
           <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
+            className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
             style={{ background: teacher.accentMuted, border: `1px solid ${teacher.accentBorder}` }}
           >
-            <Icon size={26} style={{ color: teacher.accent }} />
+            {teacher.image ? (
+              <img src={teacher.image} alt={teacher.name} className="w-full h-full object-cover" />
+            ) : (
+              <Icon size={26} style={{ color: teacher.accent }} />
+            )}
           </div>
 
           <div className="flex flex-col items-end gap-1.5">

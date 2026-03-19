@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, MicOff, Send, ChevronDown, Volume2, Loader2,
+  ArrowLeft, MicOff, Mic, Send, ChevronDown, Volume2, VolumeX, Loader2,
   BookOpen, Atom, FlaskConical, FunctionSquare, Eraser,
 } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -87,17 +87,27 @@ const TEACHERS = {
     accentDark: '#1D4ED8',
     voiceId: 'onwK4e9ZLuTAKqWW03F9',
     systemPrompt: (lang: LanguageMode) =>
-      `You are P.K. Sir — a legendary Physics teacher from Kota, India. You teach like the best Allen/Resonance coaches: confident, slightly humorous, deeply caring about the student.
+      `You are P.K. Sir — a Physics teacher from Kota, speaking in a real-time voice conversation with a student. You sound exactly like Jeetu Bhaiya from Kota Factory: calm, warm, patient, and mentor-like. You are a real human teacher, not an AI.
 
 LANGUAGE: Respond ONLY in ${LANG_INSTRUCTION[lang]}.
 
-STYLE RULES (follow every time):
-1. Open with a natural hook like "Chalo bhai, aaj iska kaccha chitha nikalte hain!" or "Dekho, yeh concept 90% log galat karte hain — tum mat karna."
-2. Build concept in this order: Hook → Core idea (1-2 lines) → Physical intuition/analogy → Worked example → Exam trick
-3. Ask 1 mid-explanation question like "Yeh samajh aaya?" or "Haan bhai samajh mein aaya ya nahi?"
-4. End with motivation and an exam tip: "Exam mein pakka aata hai — yaad rakhna! Tum kar loge, bas practice karte raho!"
-5. Bold key formulas with **bold**. Use → for step chains.
-6. Keep it interactive and motivational throughout. Under 150 words. No long paragraphs. Friendly, never robotic.`,
+PERSONA:
+- Call the student "bhai" or "bhen"
+- Speak in short, natural spoken sentences — NOT long paragraphs
+- Add natural pauses with "..."
+- Sound patient and slightly thoughtful. Never rush. Never robotic.
+
+TEACHING STYLE:
+1. Start with a warm, casual opener: "haan bhai, bata..." or "dekh, yeh concept simple hai actually..."
+2. Explain step-by-step, very simply. No heavy theory dump.
+3. Use real-world analogies and physical intuition to explain Physics.
+4. Bold key formulas with **bold**. Use → for steps.
+5. After explaining, ask: "samajh aaya?" or "yahan tak clear hai?" or "bol na bhai, doubt hai kya?"
+6. After explaining, encourage: "chal ek question try karte hain"
+7. If student is stuck, give HINTS not full solution.
+8. End with gentle motivation — not preachy, like a friend: "laga reh bhai, hoga tera"
+
+Keep responses under 130 words. Make the student feel like they are sitting with a real teacher, not reading a textbook.`,
     chapters: [
       { name: 'Mechanics', topics: ["Newton's Laws of Motion", 'Projectile Motion', 'Work-Energy Theorem', 'Circular Motion'] },
       { name: 'Electrostatics', topics: ["Coulomb's Law", 'Electric Field & Potential', 'Capacitors', "Gauss's Law"] },
@@ -113,17 +123,26 @@ STYLE RULES (follow every time):
     accentDark: '#047857',
     voiceId: 'onwK4e9ZLuTAKqWW03F9',
     systemPrompt: (lang: LanguageMode) =>
-      `You are V.K. Sir — one of India's most beloved JEE Chemistry teachers. You explain like a friend who knows every JEE pattern inside out. Slightly dramatic, always precise.
+      `You are V.K. Sir — a Chemistry teacher from Kota, speaking in a real-time voice conversation with a student. You sound exactly like Jeetu Bhaiya from Kota Factory: calm, warm, patient, and mentor-like. You are a real human teacher, not an AI.
 
 LANGUAGE: Respond ONLY in ${LANG_INSTRUCTION[lang]}.
 
-STYLE RULES (follow every time):
-1. Open with a hook: "Yaar, yeh reaction yaad nahi? Main batata hoon — aur bhoologe nahi." or "Chalo, isko ek baar crystal clear karte hain!"
-2. Structure: Hook → Core mechanism (1-2 lines) → Memory trick/analogy → Real example with reaction (use →) → JEE tip
-3. Throw in questions: "Haan bhai samajh mein aaya ya nahi?" or "Yeh clear hua sabko?"
-4. End with an exam shortcut and motivation: "Tum fodd ke aaoge exam mein, bas ye shortcut yaad rakhna!"
-5. Bold key terms **bold**. Show reactions with →.
-6. Keep it interactive and motivational throughout. Under 150 words. Lively, never dull.`,
+PERSONA:
+- Call the student "bhai" or "bhen"
+- Speak in short, natural spoken sentences — NOT long paragraphs
+- Add natural pauses with "..."
+- Sound patient and slightly thoughtful. Never rush. Never robotic.
+
+TEACHING STYLE:
+1. Start warmly: "haan bhai, yeh reaction confusing lagta hai na..." or "dekh, isko ek baar samajh liya toh kabhi bhoolega nahi..."
+2. Explain step-by-step. Build memory tricks and analogies for Chemistry concepts.
+3. Show reactions using →. Bold key terms with **bold**.
+4. After explaining, check-in: "samajh aaya?" or "yahan tak clear hai?" or "bol na bhai, doubt hai kya?"
+5. After explaining, encourage: "chal ek question try karte hain"
+6. If student is stuck, give HINTS not full solution.
+7. End with gentle motivation: "tera Chemistry strong ho raha hai, laga reh"
+
+Keep responses under 130 words. Make the student feel like they are sitting with a real teacher, not reading a textbook.`,
     chapters: [
       { name: 'Organic Chemistry', topics: ['Named Reactions', 'Reaction Mechanisms', 'Isomerism', 'Functional Groups'] },
       { name: 'Physical Chemistry', topics: ['Thermodynamics', 'Chemical Equilibrium', 'Electrochemistry', 'Chemical Kinetics'] },
@@ -139,17 +158,26 @@ STYLE RULES (follow every time):
     accentDark: '#B45309',
     voiceId: 'onwK4e9ZLuTAKqWW03F9',
     systemPrompt: (lang: LanguageMode) =>
-      `You are A.K. Sir — a master JEE Mathematics teacher from Kota. Precise, disciplined, but warm. Students call you the "shortcut king" because every explanation ends with a JEE time-saving trick.
+      `You are A.K. Sir — a Mathematics teacher from Kota, speaking in a real-time voice conversation with a student. You sound exactly like Jeetu Bhaiya from Kota Factory: calm, warm, patient, and mentor-like. You are a real human teacher, not an AI.
 
 LANGUAGE: Respond ONLY in ${LANG_INSTRUCTION[lang]}.
 
-STYLE RULES (follow every time):
-1. Open sharp: "Dekho, wahi purana formula ratta nahi maarna — samajhke karo." or "Yeh question JEE mein 3 tarike se aata hai — teeno sikho!"
-2. Structure: Hook → Core formula (bold) → Geometric or visual intuition → Solved example with numbered steps → Speed trick for exam
-3. Use Unicode math: dy/dx, ∫, ∑, ∞, θ, π, √, ±
-4. Mid-explanation ask: "Haan bhai samajh mein aaya ya nahi?" or "Is step mein galati mat karna."
-5. End with motivation: "Exam shortcut: [shortcut]. Is se 40 seconds bachenge. Laga reh, selection pakka hai!"
-6. Keep it interactive and motivational throughout. Under 150 words. Bold key formulas. Numbered steps. Never robotic.`,
+PERSONA:
+- Call the student "bhai" or "bhen"
+- Speak in short, natural spoken sentences — NOT long paragraphs
+- Add natural pauses with "..."
+- Sound patient and slightly thoughtful. Never rush. Never robotic.
+
+TEACHING STYLE:
+1. Start naturally: "haan bhai, yeh formula ratta mat maaar..." or "dekh, isko visually soch..."
+2. Explain step-by-step — build geometric intuition first, then formula.
+3. Use Unicode math naturally: dy/dx, ∫, ∑, ∞, θ, π, √, ±. Bold key formulas **like this**.
+4. After explaining, check-in: "samajh aaya?" or "yahan tak clear hai?" or "bol na bhai, doubt hai kya?"
+5. After explaining, encourage: "chal ek question try karte hain"
+6. If student is stuck, give HINTS — never give the full solution directly.
+7. End with a quick exam shortcut and gentle motivation: "is trick se 40 seconds bachenge exam mein... laga reh bhai"
+
+Keep responses under 130 words. Make the student feel like they are sitting with a real teacher, not reading a textbook.`,
     chapters: [
       { name: 'Calculus', topics: ['Limits & Continuity', 'Differentiation', 'Integration', 'Differential Equations'] },
       { name: 'Algebra', topics: ['Quadratic Equations', 'Complex Numbers', 'Matrices & Determinants', 'Permutations & Combinations'] },
@@ -442,6 +470,45 @@ const AITeachingRoomPage: React.FC = () => {
     // 5. Speak
     speakText(accumulated);
   }, [language, teacher, speakText]);
+
+  // Voice input (mic)
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  const startListening = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Your browser does not support voice input. Please try Chrome or Edge.');
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+    // Stop any currently playing audio so the mic doesn't pick it up
+    stopAudio();
+
+    const recognition = new SpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+
+    recognition.onstart = () => setIsListening(true);
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setIsListening(false);
+      // ✅ Auto-submit directly to AI — no text box step
+      callAI(transcript);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend   = () => setIsListening(false);
+    recognition.start();
+  }, [isListening, callAI]);
 
   // ── Explain topic
   const handleExplain = useCallback(() => {
@@ -752,59 +819,123 @@ const AITeachingRoomPage: React.FC = () => {
 
       {/* ── BOTTOM DOUBT BOX ── */}
       <div
-        className="flex items-center gap-2 px-4 py-3 flex-shrink-0"
+        className="flex-shrink-0"
         style={{
           borderTop: '1px solid rgba(255,255,255,0.07)',
           background: 'rgba(8,11,18,0.95)',
           backdropFilter: 'blur(12px)',
         }}
       >
-        <div
-          className="flex flex-1 items-center gap-2 px-3 py-2 rounded-xl"
-          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
-        >
-          <input
-            type="text"
-            value={doubtInput}
-            onChange={e => setDoubtInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={
-              language === 'hindi'
-                ? `${teacher.name} से अपना प्रश्न पूछें...`
-                : language === 'hinglish'
-                  ? `${teacher.name} se apna doubt pooch...`
-                  : `Ask your doubt to ${teacher.name}...`
-            }
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-600"
-            style={{ color: 'rgba(255,255,255,0.85)' }}
+        {/* ── Voice-first row ── */}
+        <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+          {/* Speaker toggle */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => { const next = !voiceEnabled; setVoiceEnabled(next); if (!next) stopAudio(); }}
+            title={voiceEnabled ? 'Mute teacher voice' : 'Unmute teacher voice'}
+            className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all"
+            style={{
+              background: voiceEnabled ? `${teacher.accent}20` : 'rgba(239,68,68,0.15)',
+              border: voiceEnabled ? `1px solid ${teacher.accent}40` : '1px solid rgba(239,68,68,0.3)',
+              color: voiceEnabled ? teacher.accent : '#F87171',
+            }}
+          >
+            {voiceEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          </motion.button>
+
+          {/* Big voice/mic button */}
+          <motion.button
+            whileTap={{ scale: 0.93 }}
+            onClick={startListening}
             disabled={isStreaming}
-          />
+            title={isListening ? 'Stop listening' : 'Speak to ask your doubt (hands-free)'}
+            className="flex flex-1 items-center justify-center gap-3 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed select-none"
+            style={{
+              background: isListening
+                ? 'linear-gradient(135deg, rgba(239,68,68,0.25), rgba(220,38,38,0.15))'
+                : `linear-gradient(135deg, ${teacher.accent}25, ${teacher.accentDark}15)`,
+              border: isListening
+                ? '1px solid rgba(239,68,68,0.5)'
+                : `1px solid ${teacher.accent}35`,
+              color: isListening ? '#F87171' : teacher.accent,
+              boxShadow: isListening ? '0 0 20px rgba(239,68,68,0.2)' : `0 0 14px ${teacher.accent}18`,
+            }}
+            animate={isListening ? { scale: [1, 1.02, 1] } : {}}
+            transition={{ repeat: Infinity, duration: 0.9 }}
+          >
+            {isListening ? (
+              <>
+                {/* Animated waveform */}
+                <div className="flex items-center gap-0.5">
+                  {[0.5, 1, 0.7, 1, 0.6].map((h, i) => (
+                    <motion.span
+                      key={i}
+                      className="w-0.5 rounded-full bg-red-400"
+                      style={{ height: 16 }}
+                      animate={{ scaleY: [h, 1, h * 0.4, 1, h] }}
+                      transition={{ repeat: Infinity, duration: 0.55, delay: i * 0.07 }}
+                    />
+                  ))}
+                </div>
+                <span>Listening... (tap to cancel)</span>
+                <MicOff size={16} />
+              </>
+            ) : (
+              <>
+                <Mic size={18} />
+                <span>Tap &amp; Speak your doubt</span>
+              </>
+            )}
+          </motion.button>
         </div>
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={handleSendDoubt}
-          disabled={!doubtInput.trim() || isStreaming || isSendingDoubt}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{
-            background: `linear-gradient(135deg, ${teacher.accent}, ${teacher.accentDark})`,
-            color: '#fff',
-            boxShadow: `0 2px 12px ${teacher.accent}40`,
-          }}
-        >
-          {isSendingDoubt ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
-          <span className="hidden sm:inline">Send</span>
-        </motion.button>
+
+        {/* ── Text fallback row ── */}
+        <div className="flex items-center gap-2 px-4 pb-3">
+          <div
+            className="flex flex-1 items-center gap-2 px-3 py-2 rounded-xl"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+          >
+            <input
+              type="text"
+              value={doubtInput}
+              onChange={e => setDoubtInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                language === 'hindi'
+                  ? `या यहाँ टाइप करें...`
+                  : language === 'hinglish'
+                    ? `Ya yahan type karo...`
+                    : `Or type your doubt here...`
+              }
+              className="flex-1 bg-transparent text-xs outline-none placeholder:text-slate-700"
+              style={{ color: 'rgba(255,255,255,0.6)' }}
+              disabled={isStreaming || isListening}
+            />
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={handleSendDoubt}
+            disabled={!doubtInput.trim() || isStreaming || isSendingDoubt}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{
+              background: `${teacher.accent}20`,
+              color: teacher.accent,
+              border: `1px solid ${teacher.accent}30`,
+            }}
+          >
+            {isSendingDoubt ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+            <span>Send</span>
+          </motion.button>
+        </div>
       </div>
 
-      {/* Close chapter/topic dropdowns on outside click */}
+      {/* Close dropdowns on outside click */}
       {(chapterOpen || topicOpen) && (
-        <div
-          className="fixed inset-0 z-30"
-          onClick={() => { setChapterOpen(false); setTopicOpen(false); }}
-        />
+        <div className="fixed inset-0 z-30" onClick={() => { setChapterOpen(false); setTopicOpen(false); }} />
       )}
     </MainLayout>
   );
 };
 
 export default AITeachingRoomPage;
+
