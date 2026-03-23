@@ -1,302 +1,312 @@
 import React, { useEffect, useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
-import { getAllSubchapters } from '@/data/subchapters';
-import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
-import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
-import { getAllCuetChapters } from '@/data/cuetSyllabus';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { OverviewCards } from '@/components/analytics/OverviewCards';
-import { SubjectPerformance } from '@/components/analytics/SubjectPerformance';
-import { ChapterBreakdown, type ChapterStat } from '@/components/analytics/ChapterBreakdown';
-import { MistakeAnalysis, type MistakePattern } from '@/components/analytics/MistakeAnalysis';
-import { TestHistory, type TestRecord } from '@/components/analytics/TestHistory';
-import { PracticeTimeline, type DayActivity } from '@/components/analytics/PracticeTimeline';
-import { AccuracyPieChart } from '@/components/analytics/AccuracyPieChart';
-import { useStreak } from '@/hooks/useStreak';
-import { subDays, isSameDay, parseISO } from 'date-fns';
-
-interface SubjectScore {
-  name: string;
-  score: number;
-  correct: number;
-  total: number;
-  color: string;
-}
+import { useNavigate } from 'react-router-dom';
+import { generateMockAnalytics, StudentAnalyticsData } from '@/lib/analyticsSimulation';
+import { generateDiagnosticReport, AIDiagnosisReport } from '@/lib/diagnosisEngine';
+import { Target, TrendingUp, AlertTriangle, Zap, ArrowRight, BrainCircuit, Clock, BookOpen, User } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuth();
   const { isNeet, isCuet } = useExamMode();
-  const { streak } = useStreak();
+  const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
-  const [overallScore, setOverallScore] = useState(0);
-  const [questionsDone, setQuestionsDone] = useState(0);
-  const [totalCorrect, setTotalCorrect] = useState(0);
-  const [totalIncorrect, setTotalIncorrect] = useState(0);
-  const [studyTimeHours, setStudyTimeHours] = useState(0);
-  const [subjectScores, setSubjectScores] = useState<SubjectScore[]>([]);
-  const [chapterStats, setChapterStats] = useState<ChapterStat[]>([]);
-  const [weakChapters, setWeakChapters] = useState<{ name: string; accuracy: number; subject: string }[]>([]);
-  const [mistakePatterns, setMistakePatterns] = useState<MistakePattern[]>([]);
-  const [testHistory, setTestHistory] = useState<TestRecord[]>([]);
-  const [last30Days, setLast30Days] = useState<DayActivity[]>([]);
+  const [data, setData] = useState<StudentAnalyticsData | null>(null);
+  const [report, setReport] = useState<AIDiagnosisReport | null>(null);
 
   useEffect(() => {
-    const fetchAll = async () => {
-      if (!user) { setIsLoading(false); return; }
-
-      try {
-        // Parallel data fetching
-        const [statsRes, sessionsRes, testsRes, attemptsRes] = await Promise.all([
-          supabase.from('user_practice_stats')
-            .select('total_correct, total_questions_solved, total_time_seconds')
-            .eq('user_id', user.id).maybeSingle(),
-          supabase.from('practice_sessions')
-            .select('subchapter_id, correct_answers, total_questions, total_time_seconds, started_at')
-            .eq('user_id', user.id),
-          supabase.from('major_test_attempts')
-            .select('id, score, max_score, physics_score, chemistry_score, maths_score, total_time_seconds, completed_at, percentile_estimate, created_at')
-            .eq('user_id', user.id).eq('status', 'completed').order('created_at', { ascending: false }),
-          supabase.from('question_attempts')
-            .select('question_id, is_correct, attempted_at, questions(chapter_id, subject, concept_tested)')
-            .eq('user_id', user.id).order('attempted_at', { ascending: false }).limit(1000),
-        ]);
-
-        const stats = statsRes.data;
-        const sessions = sessionsRes.data || [];
-        const tests = testsRes.data || [];
-        const attempts = attemptsRes.data || [];
-
-        const allSubchapters = getAllSubchapters();
-        const allChapters = isCuet
-          ? getAllCuetChapters()
-          : isNeet
-            ? [...neetPhysicsChapters, ...neetChemistryChapters, ...neetBiologyChapters]
-            : [...physicsChapters, ...chemistryChapters, ...mathsChapters];
-
-        // ═══ OVERVIEW ═══
-        const tCorrect = stats?.total_correct || 0;
-        const tQ = stats?.total_questions_solved || 0;
-        const tTimeSec = stats?.total_time_seconds || 0;
-        const testTimeSec = tests.reduce((sum, t) => sum + (t.total_time_seconds || 0), 0);
-        setTotalCorrect(tCorrect);
-        setTotalIncorrect(tQ - tCorrect);
-        setQuestionsDone(tQ);
-        setOverallScore(tQ > 0 ? Math.round((tCorrect / tQ) * 100) : 0);
-        setStudyTimeHours(Math.round((tTimeSec + testTimeSec) / 3600));
-
-        // ═══ CHAPTER-LEVEL STATS ═══
-        const chMap: Record<string, { correct: number; total: number; name: string; subject: string; time: number; sessions: number }> = {};
-
-        sessions.forEach(s => {
-          const sub = allSubchapters.find(sc => sc.id === s.subchapter_id);
-          if (!sub) return;
-          const chapter = allChapters.find(c => c.id === sub.chapterId);
-          if (!chapter) return;
-          if (!chMap[chapter.id]) {
-            chMap[chapter.id] = { correct: 0, total: 0, name: chapter.name, subject: chapter.subject || '', time: 0, sessions: 0 };
-          }
-          chMap[chapter.id].correct += s.correct_answers;
-          chMap[chapter.id].total += s.total_questions;
-          chMap[chapter.id].time += s.total_time_seconds;
-          chMap[chapter.id].sessions += 1;
-        });
-
-        const chapterList: ChapterStat[] = Object.entries(chMap)
-          .filter(([, v]) => v.total > 0)
-          .map(([id, v]) => ({
-            id,
-            name: v.name,
-            subject: v.subject,
-            correct: v.correct,
-            total: v.total,
-            accuracy: Math.round((v.correct / v.total) * 100),
-            timeSpent: v.time,
-            sessions: v.sessions,
-          }));
-        setChapterStats(chapterList);
-
-        // Weak chapters
-        const weak = chapterList.filter(ch => ch.total >= 3 && ch.accuracy < 60)
-          .sort((a, b) => a.accuracy - b.accuracy);
-        setWeakChapters(weak.map(ch => ({ name: ch.name, accuracy: ch.accuracy, subject: ch.subject })));
-
-        // ═══ SUBJECT SCORES ═══
-        const subjectKeys = isCuet
-          ? ['english', 'economics', 'general_test']
-          : isNeet ? ['physics', 'chemistry', 'biology'] : ['physics', 'chemistry', 'maths'];
-        const subjectAgg: Record<string, { correct: number; total: number }> = {};
-        subjectKeys.forEach(k => { subjectAgg[k] = { correct: 0, total: 0 }; });
-
-        Object.values(chMap).forEach(ch => {
-          if (subjectAgg[ch.subject] !== undefined) {
-            subjectAgg[ch.subject].correct += ch.correct;
-            subjectAgg[ch.subject].total += ch.total;
-          }
-        });
-
-        const makeScore = (key: string, label: string, color: string): SubjectScore => ({
-          name: label,
-          score: subjectAgg[key]?.total > 0 ? Math.round((subjectAgg[key].correct / subjectAgg[key].total) * 100) : 0,
-          correct: subjectAgg[key]?.correct || 0,
-          total: subjectAgg[key]?.total || 0,
-          color,
-        });
-
-        const scores = isCuet
-          ? [makeScore('english', 'English', 'bg-physics'), makeScore('economics', 'Economics', 'bg-chemistry'), makeScore('general_test', 'General Test', 'bg-setu-saffron')]
-          : isNeet
-            ? [makeScore('physics', 'Physics', 'bg-physics'), makeScore('chemistry', 'Chemistry', 'bg-chemistry'), makeScore('biology', 'Biology', 'bg-setu-success')]
-            : [makeScore('physics', 'Physics', 'bg-physics'), makeScore('chemistry', 'Chemistry', 'bg-chemistry'), makeScore('maths', 'Mathematics', 'bg-maths')];
-        setSubjectScores(scores);
-
-        // ═══ MISTAKE PATTERNS from question_attempts ═══
-        const conceptMistakes: Record<string, { concept: string; chapter: string; subject: string; wrong: number; total: number }> = {};
-
-        attempts.forEach(a => {
-          const q = a.questions as any;
-          if (!q || !q.concept_tested) return;
-          const key = `${q.concept_tested}__${q.chapter_id}`;
-          if (!conceptMistakes[key]) {
-            const ch = allChapters.find(c => c.id === q.chapter_id);
-            conceptMistakes[key] = { concept: q.concept_tested, chapter: ch?.name || q.chapter_id, subject: q.subject, wrong: 0, total: 0 };
-          }
-          conceptMistakes[key].total++;
-          if (!a.is_correct) conceptMistakes[key].wrong++;
-        });
-
-        const patterns: MistakePattern[] = Object.values(conceptMistakes)
-          .filter(m => m.wrong >= 2)
-          .map(m => ({
-            concept: m.concept,
-            chapter: m.chapter,
-            subject: m.subject,
-            wrongCount: m.wrong,
-            totalAttempts: m.total,
-            accuracy: Math.round(((m.total - m.wrong) / m.total) * 100),
-          }))
-          .sort((a, b) => b.wrongCount - a.wrongCount);
-        setMistakePatterns(patterns);
-
-        // ═══ TEST HISTORY ═══
-        const testRecords: TestRecord[] = tests.map(t => ({
-          id: t.id,
-          date: t.completed_at || t.created_at,
-          score: t.score,
-          maxScore: t.max_score,
-          physicsScore: t.physics_score,
-          chemistryScore: t.chemistry_score,
-          mathsScore: t.maths_score,
-          timeSeconds: t.total_time_seconds,
-          percentile: t.percentile_estimate,
-        }));
-        setTestHistory(testRecords);
-
-        // ═══ 30-DAY ACTIVITY ═══
-        const today = new Date();
-        const dayMap: Record<string, DayActivity> = {};
-        attempts.forEach(a => {
-          const d = parseISO(a.attempted_at);
-          const dayKey = d.toDateString();
-          if (!dayMap[dayKey]) dayMap[dayKey] = { date: d, questions: 0, correct: 0 };
-          dayMap[dayKey].questions++;
-          if (a.is_correct) dayMap[dayKey].correct++;
-        });
-        // Also include sessions
-        sessions.forEach(s => {
-          const d = parseISO(s.started_at);
-          const dayKey = d.toDateString();
-          // sessions already counted via attempts, skip double-count
-        });
-        setLast30Days(Object.values(dayMap));
-
-      } catch (err) {
-        console.error('Analytics fetch error:', err);
-      } finally {
+    // Simulate fetching and analyzing deep data
+    const loadDiagnostics = () => {
+      setIsLoading(true);
+      setTimeout(() => {
+        const examType = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE';
+        const simData = generateMockAnalytics(examType);
+        const diagReport = generateDiagnosticReport(simData);
+        setData(simData);
+        setReport(diagReport);
         setIsLoading(false);
-      }
+      }, 1500); // Fake delay for dramatic effect
     };
 
-    fetchAll();
+    loadDiagnostics();
   }, [user, isNeet, isCuet]);
 
-  if (isLoading) {
+  const handleActionClick = (act: import('@/lib/diagnosisEngine').AIAction) => {
+    if (act.actionType === 'practice_chapter') {
+      navigate('/practice');
+    } else if (act.actionType === 'fix_mistakes') {
+      navigate('/ask-jeetu');
+    } else if (act.actionType === 'focus_sprint') {
+      navigate('/circles');
+    }
+  };
+
+  if (isLoading || !data || !report) {
     return (
-      <MainLayout title="Analytics">
-        <div className="space-y-6">
-          <Skeleton className="h-8 w-48" />
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}
+      <MainLayout title="AI Academic Coach">
+        <div className="space-y-6 pt-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full border-4 border-accent/20 border-t-accent animate-spin" />
+            <div>
+              <h2 className="text-xl font-bold font-display text-foreground">Analyzing Your Brain...</h2>
+              <p className="text-muted-foreground text-sm">Processing 1,000+ data points to find your exact weak spots.</p>
+            </div>
           </div>
-          <Skeleton className="h-48 rounded-xl" />
-          <Skeleton className="h-64 rounded-xl" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
+            <Skeleton className="h-40 rounded-2xl bg-secondary" />
+            <Skeleton className="h-40 rounded-2xl bg-secondary" />
+            <Skeleton className="h-40 rounded-2xl bg-secondary" />
+          </div>
+          <Skeleton className="h-64 rounded-2xl bg-secondary mt-6" />
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // Data Reliability Check (Not enough Attempts)
+  if (!report.isReliable) {
+    return (
+      <MainLayout title="AI Academic Coach">
+        <div className="flex flex-col items-center justify-center py-32 text-center max-w-lg mx-auto">
+          <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mb-6 border border-border">
+            <AlertTriangle className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Not enough data to diagnose.</h2>
+          <p className="text-muted-foreground leading-relaxed mb-8">
+            The AI Coach requires at least 100 questions of combined test and practice data across subjects to confidently identify your real blockers. Right now, it might just be statistical noise.
+          </p>
+          <Button onClick={() => navigate('/practice')} className="bg-primary text-primary-foreground font-bold h-12 px-8 hover:bg-primary/90">
+            Start a Practice Session
+          </Button>
         </div>
       </MainLayout>
     );
   }
 
   return (
-    <MainLayout title="Analytics">
-      <div className="space-y-6">
+    <MainLayout title="AI Academic Coach">
+      <div className="space-y-8 pb-12 max-w-6xl mx-auto">
+        
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-display font-bold text-foreground mb-1">
-            Your Analytics
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Deep insights into your preparation — mistakes, strengths, and improvement areas
-          </p>
+        <div className="flex items-end justify-between border-b border-border pb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <BrainCircuit className="w-5 h-5 text-accent" />
+              <span className="text-sm font-bold uppercase tracking-widest text-accent">Diagnosis Complete</span>
+            </div>
+            <h1 className="text-3xl font-display font-bold text-foreground">
+              The Focus Zone
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Stop practicing blindly. Here is exactly what is holding your score back.
+            </p>
+          </div>
         </div>
 
-        {/* Overview */}
-        <OverviewCards
-          overallScore={overallScore}
-          questionsDone={questionsDone}
-          studyTimeHours={studyTimeHours}
-          weakChapters={weakChapters.length}
-          totalCorrect={totalCorrect}
-          totalIncorrect={totalIncorrect}
-        />
+        {/* ─── THE FOCUS ZONE: Top Priorities ─── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Card 1: Weakest Link */}
+          <div className="bg-red-500/5 dark:bg-red-500/10 border border-red-500/20 rounded-2xl p-5 relative overflow-hidden group hover:border-red-500/40 transition-colors">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              <h3 className="text-red-500 font-bold uppercase tracking-wider text-xs">Priority #1 Fix</h3>
+            </div>
+            <p className="text-foreground text-lg font-serif mb-1">{report.whatToFixFirst}</p>
+            <p className="text-muted-foreground text-xs mb-3 font-medium">{report.problemSummary}</p>
+            <p className="text-muted-foreground/50 text-[10px] uppercase font-bold tracking-widest">{report.confidenceMessage}</p>
+          </div>
 
-        {/* Accuracy Pie Chart */}
-        <AccuracyPieChart
-          totalCorrect={totalCorrect}
-          totalIncorrect={totalIncorrect}
-          subjectScores={subjectScores}
-        />
+          {/* Card 2: Mistake Profile */}
+          <div className="bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/20 rounded-2xl p-5 relative overflow-hidden group hover:border-amber-500/40 transition-colors">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-5 h-5 text-amber-500" />
+              <h3 className="text-amber-500 font-bold uppercase tracking-wider text-xs">Behavioral Flaw</h3>
+            </div>
+            <p className="text-foreground text-lg font-serif mb-1">{report.rootCause}</p>
+            <p className="text-muted-foreground text-xs mb-3 font-medium">This is an entirely fixable pattern. Slow down.</p>
+            <p className="text-muted-foreground/50 text-[10px] uppercase font-bold tracking-widest">{report.confidenceMessage}</p>
+          </div>
 
-        {/* 30-Day Activity Timeline */}
-        <PracticeTimeline last30Days={last30Days} streak={streak} />
+          {/* Card 3: Impact */}
+          <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-colors">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+              <h3 className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-xs">Expected Gain</h3>
+            </div>
+            <p className="text-foreground text-2xl font-display font-bold mb-1">{report.marksPotential}</p>
+            <p className="text-muted-foreground text-xs mb-3 font-medium">By locking down the top 2 chapters in 3 days.</p>
+            <p className="text-muted-foreground/50 text-[10px] uppercase font-bold tracking-widest">Calculated via Risk Engine</p>
+          </div>
 
-        {/* Tabbed Deep Analysis */}
-        <Tabs defaultValue="subjects" className="w-full">
-          <TabsList className="w-full justify-start bg-secondary/50 p-1 rounded-lg">
-            <TabsTrigger value="subjects" className="text-sm">Subjects</TabsTrigger>
-            <TabsTrigger value="chapters" className="text-sm">Chapters</TabsTrigger>
-            <TabsTrigger value="mistakes" className="text-sm">Mistakes</TabsTrigger>
-            <TabsTrigger value="tests" className="text-sm">Tests</TabsTrigger>
-          </TabsList>
+        </div>
 
-          <TabsContent value="subjects" className="mt-4">
-            <SubjectPerformance subjectScores={subjectScores} />
-          </TabsContent>
+        {/* ─── JEETU BHAIYA MENTOR RESPONSE ─── */}
+        {/* We keep this explicitly dark-themed because Jeetu's card is a premium focal point */}
+        <div className="relative rounded-3xl p-[1px] bg-gradient-to-b from-accent/50 to-border shadow-xl">
+          <div className="absolute inset-0 bg-accent/5 blur-xl rounded-3xl pointer-events-none" />
+          <div className="bg-slate-950 rounded-[23px] p-6 lg:p-8 relative overflow-hidden">
+            <div className="flex items-start gap-5">
+              <div className="w-14 h-14 flex-shrink-0 rounded-full bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center shadow-lg shadow-accent/20 border-2 border-slate-950">
+                <span className="text-white font-display font-bold text-xl">JB</span>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-white mb-4">Mentor's Verdict</h2>
+                <div className="text-white/90 whitespace-pre-wrap leading-relaxed font-medium">
+                  {report.jeetuMessage}
+                </div>
+                
+                {/* Action Loop Buttons */}
+                <div className="mt-8 flex flex-wrap gap-3">
+                  {report.priorityActions.map((act, i) => (
+                    <Button 
+                      key={i}
+                      onClick={() => handleActionClick(act)}
+                      variant={i === 0 ? 'default' : 'outline'}
+                      className={cn(
+                        "rounded-xl font-bold tracking-wide transition-all",
+                        i === 0 
+                          ? "bg-white text-black hover:bg-white/90 shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
+                          : "bg-white/10 border-white/20 text-white hover:bg-white/20"
+                      )}
+                    >
+                      {i === 0 ? <Zap className="w-4 h-4 mr-2 text-amber-500" /> : <ArrowRight className="w-4 h-4 mr-2" />}
+                      {act.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          <TabsContent value="chapters" className="mt-4">
-            <ChapterBreakdown chapters={chapterStats} />
-          </TabsContent>
+        {/* ─── DEEP DIAGNOSTICS (Heatmaps & Behavioral) ─── */}
+        <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-muted-foreground" />
+            Diagnostic Evidence
+          </h2>
+          
+          <Tabs defaultValue="heatmaps" className="w-full">
+            <TabsList className="bg-secondary border border-border p-1 rounded-xl mb-6">
+              <TabsTrigger value="heatmaps" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-sm">Chapter Heatmaps</TabsTrigger>
+              <TabsTrigger value="behavioral" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-sm">Time & Stamina</TabsTrigger>
+              <TabsTrigger value="story" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-sm">Weekly Story</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="mistakes" className="mt-4">
-            <MistakeAnalysis patterns={mistakePatterns} weakChapters={weakChapters} />
-          </TabsContent>
+            <TabsContent value="heatmaps" className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
+              {data.subjects.map((subject, idx) => (
+                <div key={subject.name} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">{subject.name}</h4>
+                    {report.benchmarks[idx] && (
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest bg-secondary px-2 py-0.5 rounded border border-border">
+                        {report.benchmarks[idx].message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {subject.chapters.map(ch => {
+                      const isWeak = ch.accuracy < 50;
+                      const isStrong = ch.accuracy >= 75;
+                      const label = isWeak ? 'MUST FIX 🔥' : isStrong ? 'STRONG ✅' : 'IMPROVE ⚠️';
+                      
+                      return (
+                        <div 
+                          key={ch.name} 
+                          title={`Accuracy: ${ch.accuracy}% | Attempts: ${ch.attempts} | Avg Time: ${ch.behavior.avgTimeSeconds}s`}
+                          className={cn(
+                            "px-3 py-2 rounded-lg text-xs font-semibold border backdrop-blur-sm transition-transform hover:scale-105 cursor-pointer relative group bg-card",
+                            isWeak ? "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400" :
+                            isStrong ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400" :
+                            "bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400"
+                          )}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            {ch.name} 
+                            <span className="opacity-50 ml-1">{ch.accuracy}%</span>
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity ml-1 bg-black/80 text-white px-1.5 py-0.5 rounded text-[9px] absolute -top-3 right-0 -translate-y-full whitespace-nowrap z-10 shadow-lg">
+                              {ch.attempts} attempts
+                            </span>
+                          </div>
+                          <div className="text-[8px] uppercase font-bold opacity-60 mt-0.5 tracking-wider">{label}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </TabsContent>
 
-          <TabsContent value="tests" className="mt-4">
-            <TestHistory tests={testHistory} />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="behavioral" className="animate-in fade-in slide-in-from-bottom-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-secondary/50 border border-border rounded-2xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Clock className="w-5 h-5 text-blue-500" />
+                    <h3 className="text-foreground font-bold">Stamina Drop-off</h3>
+                  </div>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                    {report.timeInsight}
+                  </p>
+                  <div className="h-2 w-full bg-border rounded-full overflow-hidden flex">
+                    <div className="h-full bg-blue-500" style={{ width: `${(data.timeDropoff.peakMinutes / 120) * 100}%` }} />
+                    <div className="h-full bg-red-400 flex-1" />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground mt-1 uppercase font-bold">
+                    <span>0m</span>
+                    <span>{data.timeDropoff.peakMinutes}m (Peak)</span>
+                    <span>120m</span>
+                  </div>
+                </div>
+
+                <div className="bg-secondary/50 border border-border rounded-2xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <User className="w-5 h-5 text-purple-500" />
+                    <h3 className="text-foreground font-bold">Mistake Profile</h3>
+                  </div>
+                  <div className="space-y-4">
+                    {[
+                      { l: 'Conceptual', v: data.mistakeProfile.conceptual, c: 'bg-red-500' },
+                      { l: 'Silly Mistakes', v: data.mistakeProfile.silly, c: 'bg-amber-500' },
+                      { l: 'Time Pressure', v: data.mistakeProfile.timeTracker, c: 'bg-blue-500' },
+                      { l: 'Guessing', v: data.mistakeProfile.guess, c: 'bg-purple-500' },
+                    ].sort((a,b) => b.v - a.v).map(m => (
+                      <div key={m.l}>
+                        <div className="flex justify-between text-xs font-bold text-muted-foreground mb-1">
+                          <span>{m.l}</span>
+                          <span>{m.v}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-border rounded-full overflow-hidden">
+                          <div className={cn("h-full rounded-full", m.c)} style={{ width: `${m.v}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="story" className="animate-in fade-in slide-in-from-bottom-2">
+              <div className="bg-secondary/50 border border-border rounded-2xl p-6 max-w-2xl">
+                <h3 className="text-foreground font-bold mb-3">Your Progress Narrative</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {report.weeklyStory}
+                </p>
+              </div>
+            </TabsContent>
+
+          </Tabs>
+        </div>
+
       </div>
     </MainLayout>
   );

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Clock, Target, TrendingUp, Zap, ArrowRight, Trophy, Shield, Sparkles, Brain } from 'lucide-react';
+import { Clock, Target, TrendingUp, Zap, ArrowRight, Trophy, Shield, Sparkles, Brain, Flame, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import ChapterTestDialog from '@/components/test/ChapterTestDialog';
@@ -12,7 +12,7 @@ import { ChapterSelection } from '@/hooks/useTestQuestions';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 
-type TestType = 'chapter' | 'mixed' | 'pyq' | 'adaptive' | 'major';
+type TestType = 'chapter' | 'mixed' | 'pyq' | 'adaptive' | 'major' | 'weakness' | 'speed';
 type ExecutableTestType = 'chapter' | 'mixed' | 'pyq' | 'adaptive';
 
 interface TestConfig {
@@ -21,6 +21,7 @@ interface TestConfig {
   subject?: string;
   yearRange?: { start: number; end: number };
   questionCount?: number;
+  timeLimitSeconds?: number;
 }
 
 const TestPage: React.FC = () => {
@@ -32,7 +33,7 @@ const TestPage: React.FC = () => {
   const [showPYQSelect, setShowPYQSelect] = useState(false);
   const [activeTest, setActiveTest] = useState<TestConfig | null>(null);
 
-  // Foundation test types — NO major test, NO PYQ, NO competitive labels
+  // Foundation test types — NO major test, NO competitive labels
   const foundationTestTypes = [
     {
       title: 'Chapter Test',
@@ -46,46 +47,40 @@ const TestPage: React.FC = () => {
       emoji: '🎯',
     },
     {
-      title: 'Mixed Test',
-      description: 'Combine multiple chapters for comprehensive revision',
-      icon: TrendingUp,
+      title: 'Weakness Attack Test',
+      description: 'A custom test generated directly from your lowest-scoring topics',
+      icon: Flame,
       time: '30-45 min',
-      questions: '20-30',
-      action: 'mixed' as TestType,
-      gradient: 'from-emerald-500 to-green-500',
-      bgGlow: 'bg-emerald-500/10',
-      emoji: '📊',
+      questions: '20',
+      action: 'weakness' as TestType,
+      gradient: 'from-red-500 to-rose-500',
+      bgGlow: 'bg-red-500/10',
+      emoji: '🔥',
     },
     {
-      title: 'Smart Test',
-      description: 'AI picks questions based on your weak areas',
+      title: 'Smart Mixed Test',
+      description: 'AI picks questions balanced across your syllabus',
       icon: Zap,
-      time: 'Varies',
-      questions: 'Personalized',
+      time: '45 min',
+      questions: '30',
       action: 'adaptive' as TestType,
-      gradient: 'from-rose-500 to-pink-500',
-      bgGlow: 'bg-rose-500/10',
+      gradient: 'from-purple-500 to-pink-500',
+      bgGlow: 'bg-purple-500/10',
       emoji: '⚡',
     },
   ];
 
   // Competitive test types
-  const examLabel = isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE Main';
   const majorTestDesc = isCuet
     ? 'Full CUET UG simulation — timed sections, NCERT-level MCQs. Test your speed and accuracy.'
     : isNeet
       ? 'Full NEET UG simulation — 3 hours, 180 questions, no pause. The real deal.'
       : 'Full JEE Main simulation — 3 hours, 90 questions, no pause. The real deal.';
   const majorTestQuestions = isCuet ? '200' : isNeet ? '180' : '90';
-  const pyqDesc = isCuet
-    ? 'Real CUET previous year questions organized by subject'
-    : isNeet
-      ? 'Real NEET previous year questions from 2005–2024'
-      : 'Real previous year questions from 2004–2024';
 
   const competitiveTestTypes = [
     {
-      title: 'Major Test',
+      title: 'Full Mock Test',
       description: majorTestDesc,
       icon: Trophy,
       time: '180 min',
@@ -94,34 +89,34 @@ const TestPage: React.FC = () => {
       highlight: true,
       gradient: 'from-amber-500 to-orange-600',
       bgGlow: 'bg-amber-500/10',
-      badge: 'Every 21 Days',
+      badge: 'Highly Recommended',
       emoji: '🏆',
     },
     {
-      title: 'Chapter Test',
-      description: 'Focus on one chapter — test depth of understanding',
-      icon: Target,
-      time: '30-60 min',
-      questions: '20-30',
-      action: 'chapter' as TestType,
-      gradient: 'from-blue-500 to-cyan-500',
-      bgGlow: 'bg-blue-500/10',
-      emoji: '🎯',
+      title: 'Weakness-Based Test',
+      description: 'High ROI. A brutal custom mock generated exclusively from your bottom 3 chapters.',
+      icon: Flame,
+      time: '60 min',
+      questions: '30',
+      action: 'weakness' as TestType,
+      gradient: 'from-red-500 to-rose-600',
+      bgGlow: 'bg-red-500/10',
+      emoji: '🔥',
     },
     {
-      title: 'Mixed Test',
-      description: 'Combine chapters for comprehensive multi-topic revision',
-      icon: TrendingUp,
-      time: '60-90 min',
-      questions: '40-60',
-      action: 'mixed' as TestType,
-      gradient: 'from-emerald-500 to-green-500',
-      bgGlow: 'bg-emerald-500/10',
-      emoji: '📊',
+      title: 'Speed Run Test',
+      description: 'Crucial for CUET & NEET. Strict time limits to force you to manage time pressure.',
+      icon: Timer,
+      time: '45 min',
+      questions: '50',
+      action: 'speed' as TestType,
+      gradient: 'from-blue-500 to-cyan-500',
+      bgGlow: 'bg-blue-500/10',
+      emoji: '⏱️',
     },
     {
       title: 'PYQ Test',
-      description: pyqDesc,
+      description: 'Real previous year questions to gauge actual exam standard.',
       icon: Clock,
       time: '45 min',
       questions: '25',
@@ -131,15 +126,15 @@ const TestPage: React.FC = () => {
       emoji: '📚',
     },
     {
-      title: 'Adaptive Test',
-      description: 'AI picks questions based on your weak areas',
-      icon: Zap,
-      time: 'Varies',
-      questions: 'Personalized',
-      action: 'adaptive' as TestType,
-      gradient: 'from-rose-500 to-pink-500',
-      bgGlow: 'bg-rose-500/10',
-      emoji: '⚡',
+      title: 'Chapter/Mixed Test',
+      description: 'Classic format. Manually select chapters or subjects to test.',
+      icon: TrendingUp,
+      time: 'Custom',
+      questions: 'Custom',
+      action: 'mixed' as TestType,
+      gradient: 'from-emerald-500 to-green-500',
+      bgGlow: 'bg-emerald-500/10',
+      emoji: '📊',
     }
   ];
 
@@ -151,6 +146,12 @@ const TestPage: React.FC = () => {
       case 'chapter': setShowChapterSelect(true); break;
       case 'mixed': setShowMixedSelect(true); break;
       case 'pyq': setShowPYQSelect(true); break;
+      case 'weakness':
+        setActiveTest({ type: 'adaptive', questionCount: 30 }); // Engine will bias this to weaknesses
+        break;
+      case 'speed':
+        setActiveTest({ type: 'adaptive', questionCount: 50, timeLimitSeconds: 45 * 60 });
+        break;
       case 'adaptive':
         setActiveTest({ type: 'adaptive', questionCount: 15 });
         break;
@@ -176,73 +177,55 @@ const TestPage: React.FC = () => {
 
   if (activeTest) {
     return (
-      <MainLayout title="Test">
+      <MainLayout title="Test Execution">
         <TestExecution config={activeTest} onComplete={handleTestComplete} onExit={handleTestComplete} />
       </MainLayout>
     );
   }
 
   return (
-    <MainLayout title={isFoundation ? 'Chapter Test' : 'Test'}>
-      <div className="space-y-8">
+    <MainLayout title={isFoundation ? 'Chapter Test' : 'Test Engine'}>
+      <div className="space-y-8 animate-fade-in max-w-6xl mx-auto">
         {/* Hero Header */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(var(--setu-navy))] via-[hsl(var(--setu-navy-light))] to-[hsl(var(--setu-navy-dark))] p-8 sm:p-10">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-accent/20 border border-border p-8 sm:p-12 shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
-          <div className="absolute inset-0 opacity-5" style={{
-            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }} />
-
-          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          
+          <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 z-10">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-bold uppercase tracking-widest border border-accent/20">
                   <Shield className="w-3.5 h-3.5" />
-                  {isFoundation ? 'Test Mode' : 'Battle Mode'}
+                  {isFoundation ? 'Test Mode' : 'Examination Engine'}
                 </span>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                {isFoundation ? 'Chapter Tests' : 'Test Arena'}
+              <h1 className="text-4xl sm:text-5xl font-display font-bold text-white mb-3">
+                {isFoundation ? 'Chapter Tests' : 'Mock Test Arena'}
               </h1>
-              <p className="text-white/60 text-base max-w-md">
+              <p className="text-white/60 text-lg max-w-lg">
                 {isFoundation
                   ? `Test your understanding of ${classLabel} chapters. Every test helps you learn better!`
-                  : 'Challenge yourself with timed, exam-style tests. Every test brings you closer to your rank.'}
+                  : 'Highly specialized test modes designed to expose conceptual gaps and destroy time pressure.'}
               </p>
             </div>
-
-            {!isFoundation && (
-              <div className="flex gap-4">
-                {[
-                  { label: 'Test Types', value: '5' },
-                  { label: 'PYQs', value: '20yr' },
-                ].map((stat) => (
-                  <div key={stat.label} className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3 border border-white/10 text-center min-w-[80px]">
-                    <div className="text-lg font-bold text-white">{stat.value}</div>
-                    <div className="text-[11px] text-white/50">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
         {/* Test Cards */}
         <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
             <Brain className="w-5 h-5 text-accent" />
-            {isFoundation ? 'Choose Your Test' : 'Choose Your Test'}
+            {isFoundation ? 'Choose Your Test' : 'Select Testing Protocol'}
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {testTypes.map((test, i) => (
               <div
                 key={i}
                 className={cn(
                   "relative group bg-card border rounded-2xl p-6 cursor-pointer transition-all duration-300",
-                  "hover:shadow-lg hover:-translate-y-1 overflow-hidden",
+                  "hover:shadow-xl hover:-translate-y-1 overflow-hidden",
                   (test as any).highlight
-                    ? "border-accent/40 sm:col-span-2 hover:border-accent/60"
+                    ? "border-accent/40 lg:col-span-3 hover:border-accent/60"
                     : "border-border hover:border-accent/30"
                 )}
                 onClick={() => handleStartTest(test.action)}
@@ -252,63 +235,37 @@ const TestPage: React.FC = () => {
                   test.bgGlow
                 )} />
 
-                <div className="relative flex items-start gap-4">
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-start gap-4 flex-1">
+                <div className="relative flex items-start gap-4 h-full">
+                  <div className="flex items-center justify-between w-full h-full">
+                    <div className="flex items-start gap-5 flex-1 h-full flex-col sm:flex-row">
                       <div className={cn(
-                        "w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md shrink-0",
+                        "w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg shrink-0",
                         test.gradient
                       )}>
-                        <test.icon className="w-6 h-6 text-white" />
+                        <test.icon className="w-7 h-7 text-white" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-lg text-foreground group-hover:text-accent transition-colors">{test.title}</h3>
-                          {(test as any).badge && (
-                            <span className="px-2 py-0.5 bg-accent/15 text-accent text-xs rounded-full font-medium">{(test as any).badge}</span>
-                          )}
+                      <div className="flex-1 flex flex-col h-full justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-bold text-xl text-foreground group-hover:text-accent transition-colors">{test.title}</h3>
+                            {(test as any).badge && (
+                              <span className="px-2.5 py-0.5 bg-accent/20 text-accent text-[10px] rounded-full font-bold uppercase tracking-widest border border-accent/20">{(test as any).badge}</span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{test.description}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-3">{test.description}</p>
-                        <div className="flex gap-4 text-xs text-muted-foreground mb-4">
-                          <span className="flex items-center gap-1">⏱ {test.time}</span>
-                          <span className="flex items-center gap-1">📝 {test.questions} questions</span>
+                        <div className="flex items-center justify-between mt-auto">
+                          <div className="flex gap-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {test.time}</span>
+                            <span className="flex items-center gap-1.5"><Target className="w-3.5 h-3.5" /> {test.questions} Qs</span>
+                          </div>
                         </div>
-                        <Button
-                          size="sm"
-                          className="group-hover:bg-accent group-hover:text-primary transition-all duration-300"
-                        >
-                          {(test as any).highlight ? 'Take Major Test' : 'Start Test'}
-                          <ArrowRight className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-0.5 transition-transform" />
-                        </Button>
                       </div>
                     </div>
-                    <span className="text-3xl opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 hidden sm:block">{test.emoji}</span>
                   </div>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* Mentor Tip */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-accent/10 via-accent/5 to-transparent border border-accent/20 p-6">
-          <div className="absolute -right-8 -bottom-8 text-8xl opacity-10 select-none">🎯</div>
-          <div className="relative flex gap-4">
-            <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 text-accent" />
-            </div>
-            <div>
-              <p className="font-semibold text-foreground mb-1">
-                {isFoundation ? 'Study Tip' : isCuet ? 'CUET Mentor Tip' : 'Test Strategy'}
-              </p>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {isFoundation
-                  ? 'Take chapter tests after completing your study. Review wrong answers carefully — understanding mistakes is the best way to learn!'
-                  : isCuet
-                    ? 'Speed and accuracy win CUET. Practice with a timer, eliminate wrong options fast, and never spend more than 1 minute per question.'
-                    : 'Every test is a learning opportunity. Analyze your mistakes, note weak areas, and improve next time!'}
-              </p>
-            </div>
           </div>
         </div>
       </div>

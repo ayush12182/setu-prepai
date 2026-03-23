@@ -48,6 +48,7 @@ export interface FocusRoomState {
   studentCount: number;
   remainingMinutes: number;
   sendMessage: (category: MessageCategory, text: string) => void;
+  uploadImage: (file: File) => Promise<string | null>;
   loading: boolean;
 }
 
@@ -299,6 +300,36 @@ export function useFocusRoom(roomId: string): FocusRoomState {
     }
   }, [roomId, user, userName]);
 
+  // Upload image to Storage
+  const uploadImage = useCallback(async (file: File) => {
+    if (!user) return null;
+    
+    // Create a unique file name
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+    const filePath = `${roomId}/${fileName}`;
+    
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from('commune-images')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+        
+      if (uploadError) {
+        throw uploadError;
+      }
+      
+      const { data } = supabase.storage
+        .from('commune-images')
+        .getPublicUrl(filePath);
+        
+      return data.publicUrl;
+    } catch (err: any) {
+      console.error('Image upload failed:', err);
+      toast.error('Failed to upload image: ' + err.message);
+      return null;
+    }
+  }, [roomId, user]);
+
   const remainingMinutes = room ? getMinutesRemaining(room.expires_at) : 0;
 
   return {
@@ -308,6 +339,7 @@ export function useFocusRoom(roomId: string): FocusRoomState {
     studentCount: members.length,
     remainingMinutes,
     sendMessage,
+    uploadImage,
     loading,
   };
 }
