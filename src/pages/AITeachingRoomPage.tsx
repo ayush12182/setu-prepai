@@ -8,6 +8,7 @@ import {
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { DiagramRenderer } from '@/components/DiagramRenderer';
+import StreamingAvatar, { AvatarQuality, StreamingEvents, TaskType, TaskMode, VoiceEmotion } from '@heygen/streaming-avatar';
 
 /* ────────────────────────────────────────────────
    LANGUAGE HELPERS
@@ -87,6 +88,7 @@ const TEACHERS = {
     accent: '#3B82F6',
     accentDark: '#1D4ED8',
     voiceId: 'onwK4e9ZLuTAKqWW03F9',
+    avatarId: 'josh_lite3_20230714',
     systemPrompt: (lang: LanguageMode) =>
 `You are P.K. Sir — a Physics teacher from Kota. Warm, visual-first, deeply thorough mentor. Real human teacher, not AI.
 
@@ -124,6 +126,7 @@ RULES: Diagrams mandatory. Never skip example. JEE: conceptual, numerical, graph
     accent: '#10B981',
     accentDark: '#047857',
     voiceId: 'onwK4e9ZLuTAKqWW03F9',
+    avatarId: 'josh_lite3_20230714',
     systemPrompt: (lang: LanguageMode) =>
 `You are V.K. Sir — a Chemistry teacher from Kota. Warm, visual-first, deeply thorough mentor. Real human teacher, not AI.
 
@@ -161,6 +164,7 @@ RULES: Diagrams mandatory. Never skip example. JEE: MCQ, mechanism tracing, prod
     accent: '#F59E0B',
     accentDark: '#B45309',
     voiceId: 'onwK4e9ZLuTAKqWW03F9',
+    avatarId: 'josh_lite3_20230714',
     systemPrompt: (lang: LanguageMode) =>
 `You are A.K. Sir — a Mathematics teacher from Kota. Warm, visual-first, deeply thorough mentor. Real human teacher, not AI.
 
@@ -372,6 +376,12 @@ const AITeachingRoomPage: React.FC = () => {
   const audioUrlRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null); // cancels in-flight AI stream
 
+  // HeyGen Avatar
+  const [avatarMode, setAvatarMode] = useState(true);
+  const [isAvatarLoading, setIsAvatarLoading] = useState(false);
+  const avatarClientRef = useRef<StreamingAvatar | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   // Doubt input
   const [doubtInput, setDoubtInput] = useState('');
   const [isSendingDoubt, setIsSendingDoubt] = useState(false);
@@ -441,7 +451,65 @@ const AITeachingRoomPage: React.FC = () => {
     } catch {
       setIsSpeaking(false);
     }
-  }, [voiceEnabled, teacher.voiceId]);
+  }, [voiceEnabled, teacher.voiceId, avatarMode]);
+
+  // -- Avatar function
+  const startAvatarSession = useCallback(async () => {
+    setIsAvatarLoading(true);
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/heygen-token`, {
+        method: 'POST',
+      });
+      if (!resp.ok) throw new Error("Failed to get HeyGen token");
+      const { data: { token } } = await resp.json();
+      
+      const avatar = new StreamingAvatar({ token });
+      avatarClientRef.current = avatar;
+      
+      avatar.on(StreamingEvents.STREAM_READY, (event: any) => {
+        if (event.detail && videoRef.current) {
+          videoRef.current.srcObject = event.detail;
+          videoRef.current.onloadedmetadata = () => {
+             videoRef.current?.play().catch(console.error);
+          };
+        }
+      });
+
+      avatar.on(StreamingEvents.STREAM_DISCONNECTED, () => {
+        if (videoRef.current) videoRef.current.srcObject = null;
+      });
+
+      await avatar.createStartAvatar({
+        quality: AvatarQuality.Medium,
+        avatarName: teacher.avatarId,
+        voice: {
+          voiceId: teacher.voiceId,
+          rate: 1.0,
+        },
+        language: language === 'english' ? 'en' : 'hi',
+      });
+    } catch (error) {
+      console.error("Avatar failed to start", error);
+      setAvatarMode(false);
+    } finally {
+      setIsAvatarLoading(false);
+    }
+  }, [teacher, language]);
+
+  const stopAvatarSession = useCallback(async () => {
+    if (avatarClientRef.current) {
+      await avatarClientRef.current.stopAvatar();
+      avatarClientRef.current = null;
+    }
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }, []);
+
+  useEffect(() => {
+    if (avatarMode) {
+      startAvatarSession();
+    }
+    return () => { stopAvatarSession(); };
+  }, [avatarMode, startAvatarSession, stopAvatarSession]);
 
   // ── Stop all: audio + in-flight AI stream
   const stopAll = useCallback(() => {
@@ -466,8 +534,13 @@ const AITeachingRoomPage: React.FC = () => {
     // 0. Stop any previous audio + stream immediately
     stopAll();
 
-    // 0.5 Unlock audio context synchronously on user gesture
-    if (audioRef.current) {
+    // 0.5 Interrupt avatar
+    if (avatarMode && avatarClientRef.current) {
+      avatarClientRef.current.interrupt().catch(() => {});
+    }
+
+    // 0.6 Unlock audio context synchronously on user gesture
+    if (audioRef.current && !avatarMode) {
       // Tiny 1-sample silent WAV to register a user-initiated play
       audioRef.current.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
       audioRef.current.play().catch(() => {});
@@ -486,6 +559,7 @@ const AITeachingRoomPage: React.FC = () => {
     // 3. Stream from jeetu-chat using the teacher's custom system prompt
     setIsStreaming(true);
     let accumulated = '';
+    let spokenCursor = 0;
 
     // Create a fresh abort controller for this request
     const abort = new AbortController();
@@ -534,6 +608,23 @@ const AITeachingRoomPage: React.FC = () => {
             if (chunk) {
               accumulated += chunk;
               setStreamingContent(accumulated);
+
+              if (avatarMode && avatarClientRef.current) {
+                const cleanText = accumulated
+                  .replace(/\[DIAGRAM\][\s\S]*?(?:\[\/DIAGRAM\]|$)/g, '')
+                  .replace(/[*_`#]/g, '')
+                  .replace(/\n{2,}/g, '. ');
+                
+                const unspoken = cleanText.slice(spokenCursor);
+                const match = unspoken.match(/([^.?!]+[.?!]+)/);
+                if (match) {
+                  const sentence = match[0];
+                  spokenCursor += match.index! + sentence.length;
+                  if (sentence.trim().length > 3) {
+                     avatarClientRef.current.speak({ text: sentence.trim(), taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch((e) => console.error('Avatar speak error', e));
+                  }
+                }
+              }
             }
           } catch { /* skip */ }
         }
@@ -551,10 +642,22 @@ const AITeachingRoomPage: React.FC = () => {
       setBoardContent(accumulated);
       setStreamingContent('');
       chatHistoryRef.current.push({ role: 'assistant', content: accumulated });
-      // 5. Speak
-      speakText(accumulated);
+      
+      if (avatarMode && avatarClientRef.current) {
+          const cleanText = accumulated
+                  .replace(/\[DIAGRAM\][\s\S]*?(?:\[\/DIAGRAM\]|$)/g, '')
+                  .replace(/[*_`#]/g, '')
+                  .replace(/\n{2,}/g, '. ');
+          const unspoken = cleanText.slice(spokenCursor).trim();
+          if (unspoken.length > 2) {
+             avatarClientRef.current.speak({ text: unspoken, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch(() => {});
+          }
+      } else {
+          // 5. Speak with regular TTS
+          speakText(accumulated);
+      }
     }
-  }, [language, teacher, speakText, stopAll]);
+  }, [language, teacher, speakText, stopAll, avatarMode]);
 
   // Voice input (mic)
   const [isListening, setIsListening] = useState(false);
@@ -717,29 +820,58 @@ const AITeachingRoomPage: React.FC = () => {
                 transition={{ repeat: Infinity, duration: 0.8 }}
                 className="relative"
               >
-                {/* Avatar glow */}
-                {isSpeaking && (
-                  <div
-                    className="absolute inset-0 rounded-full animate-pulse"
-                    style={{ background: `radial-gradient(circle, ${teacher.accent}30 0%, transparent 70%)`, transform: 'scale(1.3)' }}
-                  />
+                {avatarMode ? (
+                  <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden" 
+                       style={{ border: `3px solid ${teacher.accent}88`, boxShadow: `0 0 24px ${teacher.accent}45` }}>
+                     <video
+                        ref={videoRef}
+                        className="absolute inset-0 w-full h-full object-cover bg-black"
+                        autoPlay
+                        playsInline
+                     />
+                     {isAvatarLoading && (
+                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-10 text-white text-xs gap-2">
+                          <Loader2 size={16} className="animate-spin text-emerald-400" />
+                          <span>Connecting...</span>
+                       </div>
+                     )}
+                  </div>
+                ) : (
+                  <>
+                    {/* Avatar glow */}
+                    {isSpeaking && (
+                      <div
+                        className="absolute inset-0 rounded-full animate-pulse"
+                        style={{ background: `radial-gradient(circle, ${teacher.accent}30 0%, transparent 70%)`, transform: 'scale(1.3)' }}
+                      />
+                    )}
+                    <div
+                      className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black relative"
+                      style={{
+                        background: `radial-gradient(circle at 35% 35%, ${teacher.accent}55, ${teacher.accentDark}88)`,
+                        border: `2px solid ${teacher.accent}55`,
+                        boxShadow: `0 0 24px ${teacher.accent}25`,
+                        color: '#fff',
+                        letterSpacing: '-0.02em',
+                      }}
+                    >
+                      {teacher.initials}
+                    </div>
+                  </>
                 )}
-                <div
-                  className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black relative"
-                  style={{
-                    background: `radial-gradient(circle at 35% 35%, ${teacher.accent}55, ${teacher.accentDark}88)`,
-                    border: `2px solid ${teacher.accent}55`,
-                    boxShadow: `0 0 24px ${teacher.accent}25`,
-                    color: '#fff',
-                    letterSpacing: '-0.02em',
-                  }}
-                >
-                  {teacher.initials}
-                </div>
               </motion.div>
 
-              <div className="mt-3 text-center">
-                <h2 className="text-base font-bold text-white">{teacher.name}</h2>
+              <div className="mt-4 text-center">
+                <h2 className="text-base font-bold text-white flex items-center justify-center gap-2">
+                   {teacher.name}
+                   <button 
+                     onClick={() => setAvatarMode(!avatarMode)}
+                     className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider transition-colors ${avatarMode ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
+                     title={avatarMode ? "Disable Video Avatar" : "Enable Video Avatar"}
+                   >
+                     {avatarMode ? "Video ON" : "Video OFF"}
+                   </button>
+                </h2>
                 <p className="text-xs mt-0.5" style={{ color: teacher.accent }}>{teacher.subject} Teacher</p>
               </div>
 

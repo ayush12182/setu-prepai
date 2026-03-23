@@ -27,7 +27,7 @@ export const TrialExpiredScreen: React.FC = () => {
     const handleShare = () => {
         const text = `Join SETU — India's smartest learning platform! Use my code ${trialStatus.referralCode} to get started. 🚀`;
         if (navigator.share) {
-            navigator.share({ title: 'Join SETU', text, url: 'https://setu-prepai.vercel.app' });
+            navigator.share({ title: 'Join SETU', text, url: 'https://setulearning.in' });
         } else {
             navigator.clipboard.writeText(text);
             toast.success('Share text copied to clipboard!');

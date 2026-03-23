@@ -143,14 +143,29 @@ const AskJeetuPage: React.FC = () => {
 
   const isFoundation = aiContext?.learning_mode === 'foundation';
   const { sendMessage, isLoading, error } = useJeetuChat();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: getGreetingByLanguage(language),
-      timestamp: new Date()
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const saved = localStorage.getItem('jeetu-chat-history');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) }));
+      } catch (e) {
+        console.error('Failed to parse chat history', e);
+      }
     }
-  ]);
+    return [
+      {
+        id: '1',
+        role: 'assistant',
+        content: getGreetingByLanguage(language),
+        timestamp: new Date()
+      }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('jeetu-chat-history', JSON.stringify(messages));
+  }, [messages]);
   const [input, setInput] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showWelcomeVideo, setShowWelcomeVideo] = useState(() => {
@@ -195,14 +210,16 @@ const AskJeetuPage: React.FC = () => {
   }, [error]);
 
   useEffect(() => {
-    if (messages.length === 1) {
-      setMessages([{
-        id: '1',
-        role: 'assistant',
-        content: getGreetingByLanguage(language),
-        timestamp: new Date()
-      }]);
-    }
+    setMessages(prev => {
+      if (prev.length === 1 && prev[0].role === 'assistant') {
+        return [{
+          ...prev[0],
+          content: getGreetingByLanguage(language),
+          timestamp: new Date()
+        }];
+      }
+      return prev;
+    });
   }, [language]);
 
   const jeeQuickQuestions = [

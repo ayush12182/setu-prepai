@@ -1,5 +1,19 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "setu-prepai\\.vercel\\.app"
+        }
+      ],
+      "destination": "https://setulearning.in/$1",
+      "permanent": true
+    }
   ]
 }
+
