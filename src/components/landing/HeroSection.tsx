@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { startSubscriptionCheckout } from '@/lib/paymentEngine';
+import { Loader2 } from 'lucide-react';
 
 const formulas = ['E = mc²', 'F = ma', '∫ dx', 'Σ n²', 'λ = h/p', 'PV = nRT', 'DNA 🧬', '∇ × B'];
 
@@ -15,8 +19,27 @@ const formulaPositions = [
 
 export const HeroSection: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [isMuted, setIsMuted] = useState(true);
   const [currentWord, setCurrentWord] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleTrialClick = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    try {
+      setIsProcessing(true);
+      toast({ title: 'Connecting to Bank...', description: 'Securing connection via Cashfree Payments.' });
+      await startSubscriptionCheckout(49, user);
+      setIsProcessing(false);
+    } catch (err: any) {
+      setIsProcessing(false);
+      toast({ title: 'Payment Error', description: err.message || 'Failed to initialize checkout', variant: 'destructive' });
+    }
+  };
 
   const words = ['Mentor', 'Guide', 'Coach', 'Teacher'];
 
@@ -141,10 +164,18 @@ export const HeroSection: React.FC = () => {
           >
             <Button
               size="lg"
-              onClick={() => navigate('/auth')}
+              disabled={isProcessing}
+              onClick={handleTrialClick}
               className="group h-14 px-8 text-lg font-semibold bg-accent text-primary hover:bg-accent/90 rounded-xl shadow-[0_0_40px_rgba(232,154,60,0.4)] hover:shadow-[0_0_60px_rgba(232,154,60,0.5)] transition-all duration-300 hover:-translate-y-1"
             >
-              Start Learning for ₹49
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                'Start Learning for ₹49'
+              )}
               <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button

@@ -91,7 +91,7 @@ export const startSubscriptionCheckout = async (
     // 2. Launch Cashfree Drop-in Checkout
     const checkoutOptions = {
         paymentSessionId: sessionId,
-        redirectTarget: "_modal", // use '_self' to redirect on success/fail
+        redirectTarget: "_self", // FIXED: use '_self' for full-page redirect as requested
     };
     
     cashfree.checkout(checkoutOptions);

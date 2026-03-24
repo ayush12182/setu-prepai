@@ -3,9 +3,32 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { startSubscriptionCheckout } from '@/lib/paymentEngine';
+import { Loader2 } from 'lucide-react';
 
 export const CTASection: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = React.useState(false);
+
+  const handleTrialClick = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    try {
+      setIsProcessing(true);
+      toast({ title: 'Connecting to Bank...', description: 'Securing connection via Cashfree Payments.' });
+      await startSubscriptionCheckout(49, user);
+      setIsProcessing(false);
+    } catch (err: any) {
+      setIsProcessing(false);
+      toast({ title: 'Payment Error', description: err.message || 'Failed to initialize checkout', variant: 'destructive' });
+    }
+  };
 
   return (
     <section className="relative py-32 px-6 sm:px-12 overflow-hidden bg-setu-navy">
@@ -58,10 +81,18 @@ export const CTASection: React.FC = () => {
           {/* CTA Button */}
           <Button
             size="lg"
-            onClick={() => navigate('/auth')}
+            disabled={isProcessing}
+            onClick={handleTrialClick}
             className="group h-16 px-10 text-lg font-semibold bg-accent text-primary hover:bg-accent/90 rounded-2xl shadow-[0_0_60px_rgba(232,154,60,0.4)] hover:shadow-[0_0_80px_rgba(232,154,60,0.5)] transition-all duration-300 hover:-translate-y-1"
           >
-            Start Learning for ₹49
+            {isProcessing ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-3 animate-spin" />
+                Connecting...
+              </>
+            ) : (
+              'Start Learning for ₹49'
+            )}
             <ArrowRight className="h-5 w-5 ml-3 group-hover:translate-x-2 transition-transform" />
           </Button>
 
