@@ -395,12 +395,14 @@ const AITeachingRoomPage: React.FC = () => {
   // ── Welcome message on mount
   useEffect(() => {
     setBoardContent(getWelcome(teacher.name, teacher.subject, language));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teacher.name, teacher.subject]);
 
   // Update welcome when language changes
   useEffect(() => {
     setBoardContent(getWelcome(teacher.name, teacher.subject, language));
     chatHistoryRef.current = [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
 
   // -- TTS function
@@ -412,8 +414,7 @@ const AITeachingRoomPage: React.FC = () => {
       .replace(/[*_`]/g, ' ')          // remove other markdown
       .replace(/\n{2,}/g, '. ')
       .replace(/\n/g, ' ')
-      .trim()
-      .slice(0, 600);                  // keep short so TTS starts fast
+      .trim();
     if (clean.length < 5) return;
 
     try {
@@ -424,10 +425,10 @@ const AITeachingRoomPage: React.FC = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ text: clean, voiceId: teacher.voiceId }),
+        body: JSON.stringify({ text: clean.slice(0, 600), voiceId: teacher.voiceId }),
       });
 
-      if (!resp.ok) { setIsSpeaking(false); return; }
+      if (!resp.ok) { throw new Error('TTS fetch failed'); }
 
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
@@ -445,13 +446,28 @@ const AITeachingRoomPage: React.FC = () => {
         } catch {
           // Retry once after short delay (browser autoplay policy)
           await new Promise(r => setTimeout(r, 300));
-          await audioRef.current.play().catch(() => setIsSpeaking(false));
+          await audioRef.current.play().catch(() => { throw new Error('Autoplay blocked'); });
         }
       }
     } catch {
-      setIsSpeaking(false);
+      console.warn("Using Native SpeechSynthesis fallback");
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.lang = language === 'english' ? 'en-IN' : 'hi-IN';
+      utterance.rate = 1.0;
+      
+      const voices = window.speechSynthesis.getVoices();
+      const hindiVoice = voices.find((v: SpeechSynthesisVoice) => v.lang.includes('hi')) || 
+                         voices.find((v: SpeechSynthesisVoice) => v.lang.includes('en-IN')) ||
+                         voices[0];
+      if (hindiVoice) utterance.voice = hindiVoice;
+
+      utterance.onstart = () => setIsSpeaking(true);
+      utterance.onend = () => setIsSpeaking(false);
+      utterance.onerror = () => setIsSpeaking(false);
+      window.speechSynthesis.speak(utterance);
     }
-  }, [voiceEnabled, teacher.voiceId, avatarMode]);
+  }, [voiceEnabled, teacher.voiceId, avatarMode, language]);
 
   // -- Avatar function
   const startAvatarSession = useCallback(async () => {
@@ -466,7 +482,7 @@ const AITeachingRoomPage: React.FC = () => {
       const avatar = new StreamingAvatar({ token });
       avatarClientRef.current = avatar;
       
-      avatar.on(StreamingEvents.STREAM_READY, (event: any) => {
+      avatar.on(StreamingEvents.STREAM_READY, (event: { detail?: MediaStream }) => {
         if (event.detail && videoRef.current) {
           videoRef.current.srcObject = event.detail;
           videoRef.current.onloadedmetadata = () => {
@@ -522,6 +538,7 @@ const AITeachingRoomPage: React.FC = () => {
       audioRef.current.src = '';
     }
     if (audioUrlRef.current) { URL.revokeObjectURL(audioUrlRef.current); audioUrlRef.current = null; }
+    window.speechSynthesis.cancel();
     setIsSpeaking(false);
     setIsStreaming(false);
   }, []);
@@ -664,6 +681,7 @@ const AITeachingRoomPage: React.FC = () => {
   const recognitionRef = useRef<any>(null);
 
   const startListening = useCallback(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert('Your browser does not support voice input. Please try Chrome or Edge.');
@@ -686,7 +704,7 @@ const AITeachingRoomPage: React.FC = () => {
 
     recognition.onstart = () => setIsListening(true);
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: { results: { transcript: string }[][] }) => {
       const transcript = event.results[0][0].transcript;
       setIsListening(false);
       // ✅ Auto-submit directly to AI — no text box step
@@ -696,7 +714,7 @@ const AITeachingRoomPage: React.FC = () => {
     recognition.onerror = () => setIsListening(false);
     recognition.onend   = () => setIsListening(false);
     recognition.start();
-  }, [isListening, callAI]);
+  }, [isListening, callAI, stopAudio]);
 
   // ── Explain topic
   const handleExplain = useCallback(() => {

@@ -30,6 +30,7 @@ const LectureSetu: React.FC = () => {
   const { language } = useLanguage();
   const { isProcessing, currentNote, notes, processLecture, fetchUserNotes, setCurrentNote } = useLectureNotes();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchUserNotes(); }, []);
 
   const handleProcess = async () => {
@@ -178,20 +179,20 @@ const LectureSetu: React.FC = () => {
 
         {/* What You Get */}
         {!currentNote && (
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-[hsl(var(--setu-navy-light))] p-8">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-accent/10 rounded-full blur-3xl" />
+          <div className="relative overflow-hidden rounded-2xl bg-card border border-border p-8 shadow-sm">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-accent/5 rounded-full blur-3xl" />
             <div className="relative">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                   <Zap className="w-5 h-5 text-accent" />
                 </div>
-                <h3 className="text-xl font-bold text-white">What You Get</h3>
+                <h3 className="text-xl font-bold text-foreground">What You Get</h3>
               </div>
               <ul className="space-y-3">
                 {benefits.map((item, i) => (
                   <li key={i} className="flex items-start gap-3">
                     <CheckCircle2 className="w-5 h-5 text-accent shrink-0 mt-0.5" />
-                    <span className="text-white/80">{item}</span>
+                    <span className="text-muted-foreground font-medium">{item}</span>
                   </li>
                 ))}
               </ul>

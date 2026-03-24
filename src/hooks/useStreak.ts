@@ -51,7 +51,7 @@ export const useStreak = () => {
 
                 // We iterate backwards from today/yesterday to find consecutive days
                 let currentStreak = 0;
-                let checkDate = activityDates.includes(today.toDateString()) ? today : yesterday;
+                const checkDate = activityDates.includes(today.toDateString()) ? today : yesterday;
 
                 // If neither today nor yesterday has activity, streak is 0 (broken)
                 if (!activityDates.includes(today.toDateString()) && !activityDates.includes(yesterday.toDateString())) {

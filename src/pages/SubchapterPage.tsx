@@ -68,8 +68,8 @@ const SubchapterPage: React.FC = () => {
         .eq('user_id', user.id)
         .eq('questions.subchapter_id', subchapter.id);
       if (data && data.length > 0) {
-        const correct = data.filter((a: any) => a.is_correct).length;
-        const totalTime = data.reduce((sum: number, a: any) => sum + (a.time_taken_seconds || 0), 0);
+        const correct = data.filter((a: { is_correct?: boolean; time_taken_seconds?: number }) => a.is_correct).length;
+        const totalTime = data.reduce((sum: number, a: { is_correct?: boolean; time_taken_seconds?: number }) => sum + (a.time_taken_seconds || 0), 0);
         // Count distinct test sessions by grouping (rough heuristic: every 10 attempts = 1 test)
         setAnalytics({
           attempted: data.length,
@@ -82,6 +82,7 @@ const SubchapterPage: React.FC = () => {
       }
     };
     fetchAnalytics();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subchapter?.id]);
 
   if (!subchapter || !chapter) {

@@ -5,11 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
+import { startSubscriptionCheckout } from '@/lib/paymentEngine';
+import { useToast } from '@/hooks/use-toast';
 
 export const PricingSection: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { trialStatus, activateTrial, upgradeToPro, loading } = useTrialSystem();
+  const { toast } = useToast();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const trialFeatures = [
     'Complete syllabus — Maths, Science & more',
@@ -34,7 +38,15 @@ export const PricingSection: React.FC = () => {
       navigate('/auth');
       return;
     }
-    await activateTrial();
+    try {
+      setIsProcessing(true);
+      toast({ title: 'Connecting to Bank...', description: 'Securing connection via Cashfree Payments.' });
+      await startSubscriptionCheckout(49, user);
+      setIsProcessing(false);
+    } catch (err: any) {
+      setIsProcessing(false);
+      toast({ title: 'Payment Error', description: err.message || 'Failed to initialize checkout', variant: 'destructive' });
+    }
   };
 
   const handleProClick = async () => {
@@ -42,7 +54,15 @@ export const PricingSection: React.FC = () => {
       navigate('/auth');
       return;
     }
-    await upgradeToPro();
+    try {
+      setIsProcessing(true);
+      toast({ title: 'Connecting to Bank...', description: 'Securing connection via Cashfree Payments.' });
+      await startSubscriptionCheckout(249, user);
+      setIsProcessing(false);
+    } catch (err: any) {
+      setIsProcessing(false);
+      toast({ title: 'Payment Error', description: err.message || 'Failed to initialize checkout', variant: 'destructive' });
+    }
   };
 
   return (
@@ -115,10 +135,10 @@ export const PricingSection: React.FC = () => {
             ) : (
               <Button
                 onClick={handleTrialClick}
-                disabled={loading || trialStatus.plan === 'pro'}
+                disabled={loading || isProcessing || trialStatus.plan === 'pro'}
                 className="w-full h-12 rounded-xl text-sm font-semibold bg-accent hover:bg-accent/90 text-primary shadow-lg shadow-accent/20 transition-all"
               >
-                {loading ? (
+                {loading || isProcessing ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : (
                   <Sparkles className="h-4 w-4 mr-2" />
@@ -179,10 +199,10 @@ export const PricingSection: React.FC = () => {
             ) : (
               <Button
                 onClick={handleProClick}
-                disabled={loading}
+                disabled={loading || isProcessing}
                 className="w-full h-12 rounded-xl text-sm font-semibold bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white shadow-lg shadow-accent/25 transition-all"
               >
-                {loading ? (
+                {loading || isProcessing ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : (
                   <Crown className="h-4 w-4 mr-2" />

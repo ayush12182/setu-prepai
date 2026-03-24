@@ -38,6 +38,7 @@ import ConceptGraphPage from "./pages/ConceptGraphPage";
 import LearningRoadmapPage from "./pages/LearningRoadmapPage";
 import TeacherDashboardPage from "./pages/TeacherDashboardPage";
 import AITeachingRoomPage from "./pages/AITeachingRoomPage";
+import PricingPage from "./pages/PricingPage";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,8 @@ const App = () => (
                     <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
                     <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
                     <Route path="/teaching-room/:teacherId" element={<AITeachingRoomPage />} />
+                    <Route path="/pricing" element={<PricingPage />} />
+                    <Route path="/premium" element={<PricingPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </TooltipProvider>

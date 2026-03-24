@@ -77,7 +77,8 @@ const PracticePage: React.FC = () => {
 
   // --- ADAPTIVE LAUNCHERS ---
   const launchAdaptiveSession = async (title: string, modeName: string, intensity: 'easy' | 'medium' | 'hard' = 'medium') => {
-    const mockChapter: Chapter = { id: 'adaptive', name: title, subject: 'Mixed', description: '', icon: '' };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mockChapter: Chapter = { id: 'adaptive', name: title, subject: 'Mixed' as any };
     const mockSub: Subchapter = { id: 'adaptive-sub', chapterId: 'adaptive', name: title, jeeAsks: [], pyqFocus: { trends:[], patterns:[], traps:[] }, commonMistakes: [], jeetuLine: "Show me what you got." };
     
     setState({ step: 'quiz', subchapter: mockSub, chapter: mockChapter, subject: mockChapter.subject, difficulty: intensity, adaptiveMode: modeName });
@@ -101,7 +102,7 @@ const PracticePage: React.FC = () => {
     await generateQuestions(subchapter.id, subchapter.name, chapter.id, chapter.name, subject, difficulty, 5);
   };
 
-  const handleGetSimilar = async (question: any) => {
+  const handleGetSimilar = async (question: { concept_tested: string; question_text: string }) => {
     if (state.step !== 'quiz') return null;
     return getSimilarQuestions(question.concept_tested, state.subchapter.name, state.subject, question.question_text);
   };

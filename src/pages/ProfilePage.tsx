@@ -57,6 +57,7 @@ const ProfilePage: React.FC = () => {
       fetchProfile();
       fetchStats();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchProfile = async () => {
@@ -102,7 +103,9 @@ const ProfilePage: React.FC = () => {
         studyHours: Math.round(totalTime / 3600),
         accuracy: totalQ > 0 ? Math.round((totalCorrect / totalQ) * 100) : 0,
       });
-    } catch { }
+    } catch {
+      // Ignore errors for fetching optional stats
+    }
   };
 
   const handleSave = async () => {

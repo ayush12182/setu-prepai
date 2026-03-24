@@ -130,18 +130,19 @@ const AuthPage: React.FC = () => {
       } else {
         await signInWithEmail(email, password);
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Something went wrong, please try again');
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Something went wrong, please try again';
+      toast.error(msg);
     } finally { setLoading(false); }
   };
 
   const handleGoogleAuth = async () => {
     setLoading(true);
-    try { await signInWithGoogle(); } catch (error: any) { toast.error(error.message || 'Google login failed'); setLoading(false); }
+    try { await signInWithGoogle(); } catch (error) { toast.error(error instanceof Error ? error.message : 'Google login failed'); setLoading(false); }
   };
   const handleAppleAuth = async () => {
     setLoading(true);
-    try { await signInWithApple(); } catch (error: any) { toast.error(error.message || 'Apple login failed'); setLoading(false); }
+    try { await signInWithApple(); } catch (error) { toast.error(error instanceof Error ? error.message : 'Apple login failed'); setLoading(false); }
   };
 
   const handlePhoneAuth = async (e: React.FormEvent) => {
@@ -149,14 +150,14 @@ const AuthPage: React.FC = () => {
     if (!validatePhone(phone)) return;
     setLoading(true);
     try { await signInWithPhone(phone); toast.success('OTP sent! Check your phone.'); setMode('otp'); }
-    catch (error: any) { toast.error(error.message || 'Failed to send OTP'); }
+    catch (error) { toast.error(error instanceof Error ? error.message : 'Failed to send OTP'); }
     finally { setLoading(false); }
   };
 
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) { toast.error('Enter complete OTP'); return; }
     setLoading(true);
-    try { await verifyOTP(phone, otp); } catch (error: any) { toast.error(error.message || 'Invalid OTP'); }
+    try { await verifyOTP(phone, otp); } catch (error) { toast.error(error instanceof Error ? error.message : 'Invalid OTP'); }
     finally { setLoading(false); }
   };
 
@@ -169,7 +170,7 @@ const AuthPage: React.FC = () => {
       if (error) throw error;
       toast.success('Reset link sent! Check your email.');
       setMode('login');
-    } catch (error: any) { toast.error(error.message || 'Failed to send reset link'); }
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'Failed to send reset link'); }
     finally { setLoading(false); }
   };
 
@@ -216,7 +217,7 @@ const AuthPage: React.FC = () => {
 
       toast.success('All set! Let\'s begin your journey 🚀');
       navigate('/diagnostic-test');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Onboarding error:', error);
       toast.error('Profile update failed, please try again');
     } finally { setLoading(false); }

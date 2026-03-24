@@ -125,7 +125,7 @@ const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
         </div>
 
         <audio
-          ref={mediaRef as any}
+          ref={mediaRef as React.LegacyRef<HTMLAudioElement>}
           src={message.mediaUrl}
           onEnded={() => setLocalPlaying(false)}
           className="hidden"
@@ -148,7 +148,7 @@ const AskJeetuPage: React.FC = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        return parsed.map((m: any) => ({ ...m, timestamp: new Date(m.timestamp) }));
+        return parsed.map((m: Record<string, unknown>) => ({ ...m, timestamp: new Date(String(m.timestamp)) }));
       } catch (e) {
         console.error('Failed to parse chat history', e);
       }
@@ -193,7 +193,7 @@ const AskJeetuPage: React.FC = () => {
     };
 
     setMessages(prev => [...prev, newMsg]);
-  }, [isNeet]);
+  }, [isNeet, isFoundation]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -325,7 +325,8 @@ const AskJeetuPage: React.FC = () => {
       });
     };
 
-    await sendMessage(chatHistory as any, updateAssistant, () => {
+    // @ts-ignore
+    await sendMessage(chatHistory, updateAssistant, () => {
       setMessages(prev =>
         prev.map(m =>
           m.id.startsWith('streaming-')

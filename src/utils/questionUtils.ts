@@ -4,7 +4,7 @@ export interface BaseQuestion {
     option_c?: string | null;
     option_d?: string | null;
     correct_option?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 /**

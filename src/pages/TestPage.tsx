@@ -224,7 +224,7 @@ const TestPage: React.FC = () => {
                 className={cn(
                   "relative group bg-card border rounded-2xl p-6 cursor-pointer transition-all duration-300",
                   "hover:shadow-xl hover:-translate-y-1 overflow-hidden",
-                  (test as any).highlight
+                  (test as { highlight?: boolean }).highlight
                     ? "border-accent/40 lg:col-span-3 hover:border-accent/60"
                     : "border-border hover:border-accent/30"
                 )}
@@ -248,8 +248,8 @@ const TestPage: React.FC = () => {
                         <div>
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-bold text-xl text-foreground group-hover:text-accent transition-colors">{test.title}</h3>
-                            {(test as any).badge && (
-                              <span className="px-2.5 py-0.5 bg-accent/20 text-accent text-[10px] rounded-full font-bold uppercase tracking-widest border border-accent/20">{(test as any).badge}</span>
+                            {(test as { badge?: string }).badge && (
+                              <span className="px-2.5 py-0.5 bg-accent/20 text-accent text-[10px] rounded-full font-bold uppercase tracking-widest border border-accent/20">{(test as { badge?: string }).badge}</span>
                             )}
                           </div>
                           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{test.description}</p>

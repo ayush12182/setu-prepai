@@ -38,7 +38,7 @@ const LearningRoadmapPage: React.FC = () => {
       if (error) throw error;
       setRoadmap((data || []).map(d => ({
         ...d,
-        topics: (d.topics as any[]) || [],
+        topics: (d.topics as { name: string; type: string; duration: string; completed?: boolean }[]) || [],
       })));
     } catch (err) {
       console.error('Failed to fetch roadmap:', err);
@@ -47,6 +47,7 @@ const LearningRoadmapPage: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchRoadmap(); }, [user]);
 
   const generateRoadmap = async () => {
@@ -87,7 +88,7 @@ const LearningRoadmapPage: React.FC = () => {
     updatedTopics[topicIndex] = { ...updatedTopics[topicIndex], completed: !updatedTopics[topicIndex].completed };
 
     await supabase.from('learning_roadmaps')
-      .update({ topics: updatedTopics as any })
+      .update({ topics: updatedTopics })
       .eq('id', weekId);
 
     setRoadmap(prev => prev.map(w => w.id === weekId ? { ...w, topics: updatedTopics } : w));

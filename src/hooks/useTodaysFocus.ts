@@ -195,7 +195,7 @@ const calculateStreak = async (userId: string): Promise<number> => {
     yesterday.setDate(yesterday.getDate() - 1);
 
     let currentStreak = 0;
-    let checkDate = activityDates.includes(today.toDateString()) ? today : yesterday;
+    const checkDate = activityDates.includes(today.toDateString()) ? today : yesterday;
 
     if (!activityDates.includes(today.toDateString()) && !activityDates.includes(yesterday.toDateString())) {
       return 0;
@@ -244,7 +244,7 @@ export const useTodaysFocus = () => {
           }));
         }
 
-        let completedSubchapters = new Set<string>();
+        const completedSubchapters = new Set<string>();
         let currentStreak = 0;
         let recentWeakness: any = null;
 

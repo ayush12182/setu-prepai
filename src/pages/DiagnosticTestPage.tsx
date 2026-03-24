@@ -26,6 +26,7 @@ export interface DiagnosticQuestion {
   correct_option: string;
   explanation: string;
   prerequisite_topic: string | null;
+  [key: string]: unknown;
 }
 
 // Section definitions for structured diagnostic
@@ -187,6 +188,7 @@ const DiagnosticTestPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, gradeRange, studentLevel]);
 
   // CAT logic for adaptive section (Section 3)
@@ -316,7 +318,8 @@ const DiagnosticTestPage: React.FC = () => {
         });
 
         // Mark diagnostic as completed on the user's profile
-        await supabase.from('profiles').update({ diagnostic_completed: true } as any).eq('user_id', user!.id);
+        // @ts-ignore
+        await supabase.from('profiles').update({ diagnostic_completed: true }).eq('user_id', user!.id);
       }
 
       toast.success('Your learning profile is ready!');

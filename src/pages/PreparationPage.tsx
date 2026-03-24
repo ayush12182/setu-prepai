@@ -61,7 +61,7 @@ const neetSubjectConfig = {
   physics: { icon: Atom, label: 'Physics', gradient: 'from-blue-500 to-cyan-500', bgGlow: 'bg-blue-500/10', dotColor: 'bg-blue-500', emoji: '⚛️' },
 };
 
-const schoolSubjectIconMap: Record<string, any> = {
+const schoolSubjectIconMap: Record<string, React.ElementType> = {
   mathematics: Calculator,
   science: Microscope,
   physics: Atom,
@@ -69,13 +69,13 @@ const schoolSubjectIconMap: Record<string, any> = {
   biology: Dna,
 };
 
-const cuetCategoryConfig: Record<CuetSubjectCategory, { label: string; icon: any; gradient: string; description: string }> = {
+const cuetCategoryConfig: Record<CuetSubjectCategory, { label: string; icon: React.ElementType; gradient: string; description: string }> = {
   language: { label: 'Language Tests', icon: BookOpenCheck, gradient: 'from-sky-500 to-blue-500', description: 'English, Hindi & more' },
   domain: { label: 'Domain Subjects', icon: GraduationCap, gradient: 'from-violet-500 to-purple-600', description: 'NCERT-based subjects' },
   general: { label: 'General Test', icon: Brain, gradient: 'from-amber-500 to-orange-500', description: 'Reasoning, GK & Aptitude' },
 };
 
-const cuetSubjectIconMap: Record<string, { icon: any; gradient: string; dotColor: string }> = {
+const cuetSubjectIconMap: Record<string, { icon: React.ElementType; gradient: string; dotColor: string }> = {
   english: { icon: BookOpenCheck, gradient: 'from-sky-500 to-blue-500', dotColor: 'bg-sky-500' },
   hindi: { icon: BookOpenCheck, gradient: 'from-orange-400 to-red-500', dotColor: 'bg-orange-500' },
   general_test: { icon: Brain, gradient: 'from-amber-500 to-orange-500', dotColor: 'bg-amber-500' },
@@ -109,8 +109,9 @@ const PreparationPage: React.FC = () => {
     return { biology: neetBiologyChapters, chemistry: neetChemistryChapters, physics: neetPhysicsChapters }[subject];
   };
 
-  const SubjectSection = ({ subject, chapters, config }: { subject: string; chapters: any[]; config: any }) => {
-    const Icon = config.icon;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const SubjectSection = ({ subject, chapters, config }: { subject: string; chapters: any[]; config: Record<string, unknown> }) => {
+    const Icon = config.icon as React.ElementType;
     return (
       <div className="relative bg-card border border-border rounded-2xl overflow-hidden group">
         <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500", config.bgGlow || 'bg-primary/10')} />
@@ -127,7 +128,7 @@ const PreparationPage: React.FC = () => {
           </div>
         </div>
         <div className="p-3 space-y-1.5 max-h-[400px] overflow-y-auto">
-          {chapters.map((chapter: any) => (
+          {chapters.map((chapter: { id: string; name: string; weightage?: string }) => (
             <button
               key={chapter?.id}
               onClick={() => navigate(`/chapter/${chapter?.id}`)}

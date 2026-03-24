@@ -26,7 +26,7 @@ interface SidebarProps {
 }
 
 const getNavItems = (isFoundation: boolean) => [
-  { path: '/', icon: Home, label: 'Home', emoji: '🏠' },
+  { path: '/dashboard', icon: Home, label: 'Home', emoji: '🏠' },
   { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📖' },
   ...(!isFoundation ? [{ path: '/teacher-dashboard', icon: GraduationCap, label: 'AI Teachers', emoji: '👨🏫' }] : []),
   { path: '/practice', icon: PenTool, label: isFoundation ? 'School Practice' : 'Practice', emoji: '✏️' },
