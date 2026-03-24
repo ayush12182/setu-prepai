@@ -13,22 +13,6 @@ export default defineConfig(({ mode }) => {
       hmr: {
         overlay: false,
       },
-      proxy: {
-        '/api/payment/orders': {
-          target: 'https://api.cashfree.com/pg/orders', // FIXED: Production endpoint for Prod keys
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api\/payment\/orders/, ''),
-          configure: (proxy, options) => {
-            proxy.on('proxyReq', (proxyReq, req, res) => {
-              proxyReq.setHeader('x-client-id', env.VITE_CASHFREE_APP_ID || '');
-              proxyReq.setHeader('x-client-secret', env.VITE_CASHFREE_SECRET_KEY || '');
-              proxyReq.setHeader('x-api-version', '2023-08-01');
-              proxyReq.setHeader('Content-Type', 'application/json');
-              proxyReq.setHeader('Accept', 'application/json');
-            });
-          }
-        }
-      }
     },
     plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
     resolve: {

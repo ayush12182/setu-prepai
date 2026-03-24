@@ -1,4 +1,5 @@
 import { load } from '@cashfreepayments/cashfree-js';
+import { supabase } from '@/integrations/supabase/client';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let cashfreeInstance: any = null;
@@ -41,23 +42,20 @@ export const createPaymentSession = async (
   };
 
   try {
-    // In production, this should hit `https://[project].supabase.co/functions/v1/create-cashfree-order`
-    // Right now, this hits the local Vite proxy defined in vite.config.ts which injects the `x-client-secret`.
-    const response = await fetch('/api/payment/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(orderPayload)
+    const { data, error } = await supabase.functions.invoke('create-cashfree-order', {
+      body: orderPayload
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Cashfree API Error Response:", errorText);
-      throw new Error(`Failed to create order: ${response.status} ${response.statusText}`);
+    if (error) {
+      console.error("Supabase Function Error:", error);
+      throw new Error(`Failed to create order: ${error.message}`);
     }
 
-    const data = await response.json();
+    if (!data?.payment_session_id) {
+       console.error("Malformed response from function:", data);
+       throw new Error("No payment session ID returned from server");
+    }
+
     return data.payment_session_id;
 
   } catch (err) {
