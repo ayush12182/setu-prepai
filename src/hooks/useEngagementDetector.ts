@@ -1,23 +1,23 @@
 /**
  * useEngagementDetector.ts
  *
- * Phase 1 MVP — Face presence and attention tracking using MediaPipe FaceDetector.
+ * Phase 1 MVP — Face presence + gaze/eye attention tracking using MediaPipe.
+ * Uses FaceLandmarker for full eye + iris tracking (not just face presence).
  * All processing is fully on-device (WASM). No raw video is sent to any server.
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { FaceDetector, FilesetResolver } from '@mediapipe/tasks-vision';
+import {
+  FaceLandmarker,
+  FilesetResolver,
+  NormalizedLandmark,
+} from '@mediapipe/tasks-vision';
 
 // ────────────────────────────────────────
 //  Types
 // ────────────────────────────────────────
 
 export type EngagementState = 'focused' | 'distracted' | 'away' | 'idle';
-
-export interface EngagementEvent {
-  type: 'attention_drop' | 'attention_restored' | 'face_lost' | 'face_found';
-  timestamp: number;
-}
 
 export interface SessionStats {
   totalMs: number;
@@ -29,73 +29,127 @@ export interface SessionStats {
 }
 
 export interface UseEngagementDetectorReturn {
-  // Current state
-  engagementScore: number;       // 0–100, smoothed
+  engagementScore: number;
   engagementState: EngagementState;
   facePresent: boolean;
-  isPermissionGranted: boolean | null; // null = not yet asked
+  isPermissionGranted: boolean | null;
   isDetectorReady: boolean;
-
-  // Control
   startDetection: (videoEl: HTMLVideoElement) => Promise<void>;
   stopDetection: () => void;
-
-  // Post-session
   sessionStats: SessionStats | null;
-
-  // Camera stream (to display in preview)
   cameraStream: MediaStream | null;
 }
 
 // ────────────────────────────────────────
-//  Constants
+//  Constants — pinned version for stability
 // ────────────────────────────────────────
-const POLL_INTERVAL_MS = 600;      // MediaPipe inference every 600ms (lightweight)
-const EMA_ALPHA = 0.3;             // Exponential moving average smoothing factor
-const TIMELINE_SAMPLE_MS = 5000;   // Record score to timeline every 5s
-const WASM_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm';
+const MP_VERSION = '0.10.14';
+const WASM_CDN = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSION}/wasm`;
+const MODEL_URL = `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`;
+
+const POLL_INTERVAL_MS = 200;      // 5 FPS is enough for engagement
+const EMA_ALPHA = 0.25;
+const TIMELINE_SAMPLE_MS = 5000;
+
+// Iris landmark indices (MediaPipe FaceLandmarker 478-point model)
+// Center of each iris: left = 468, right = 473
+const LEFT_IRIS_CENTER  = 468;
+const RIGHT_IRIS_CENTER = 473;
+const LEFT_EYE_LEFT  = 33;  // left corner of left eye
+const LEFT_EYE_RIGHT = 133; // right corner of left eye
+const LEFT_EYE_TOP   = 159;
+const LEFT_EYE_BOT   = 145;
+
+// ────────────────────────────────────────
+//  Gaze utilities
+// ────────────────────────────────────────
+
+/**
+ * Returns a horizontal gaze ratio for one eye.
+ * 0.5 = looking straight at screen, <0.3 or >0.7 = looking away
+ */
+function getGazeRatio(lm: NormalizedLandmark[]): number {
+  const iris = lm[LEFT_IRIS_CENTER];
+  const eyeL = lm[LEFT_EYE_LEFT];
+  const eyeR = lm[LEFT_EYE_RIGHT];
+  if (!iris || !eyeL || !eyeR) return 0.5;
+  const eyeWidth = Math.abs(eyeR.x - eyeL.x);
+  if (eyeWidth < 0.001) return 0.5;
+  const ratio = (iris.x - eyeL.x) / eyeWidth;
+  return ratio;
+}
+
+/**
+ * Check if eyes are open (vertical eye openness).
+ * Returns 0 (closed) to 1 (fully open)
+ */
+function getEyeOpenness(lm: NormalizedLandmark[]): number {
+  const top = lm[LEFT_EYE_TOP];
+  const bot = lm[LEFT_EYE_BOT];
+  const eyeL = lm[LEFT_EYE_LEFT];
+  const eyeR = lm[LEFT_EYE_RIGHT];
+  if (!top || !bot || !eyeL || !eyeR) return 1;
+  const eyeHeight = Math.abs(top.y - bot.y);
+  const eyeWidth  = Math.abs(eyeR.x - eyeL.x);
+  if (eyeWidth < 0.001) return 1;
+  // Normalized aspect ratio — typically 0.2–0.4 when open, <0.1 when closed
+  return Math.min(1, eyeHeight / eyeWidth / 0.35);
+}
 
 // ────────────────────────────────────────
 //  Hook
 // ────────────────────────────────────────
 export function useEngagementDetector(): UseEngagementDetectorReturn {
-  const [engagementScore, setEngagementScore]       = useState(100);
-  const [engagementState, setEngagementState]       = useState<EngagementState>('idle');
-  const [facePresent, setFacePresent]               = useState(false);
-  const [isPermissionGranted, setIsPermissionGranted] = useState<boolean | null>(null);
-  const [isDetectorReady, setIsDetectorReady]       = useState(false);
-  const [cameraStream, setCameraStream]             = useState<MediaStream | null>(null);
-  const [sessionStats, setSessionStats]             = useState<SessionStats | null>(null);
+  const [engagementScore, setEngagementScore]        = useState(100);
+  const [engagementState, setEngagementState]        = useState<EngagementState>('idle');
+  const [facePresent, setFacePresent]                = useState(false);
+  const [isPermissionGranted, setIsPermissionGranted]= useState<boolean | null>(null);
+  const [isDetectorReady, setIsDetectorReady]        = useState(false);
+  const [cameraStream, setCameraStream]              = useState<MediaStream | null>(null);
+  const [sessionStats, setSessionStats]              = useState<SessionStats | null>(null);
 
-  const detectorRef        = useRef<FaceDetector | null>(null);
-  const videoRef           = useRef<HTMLVideoElement | null>(null);
-  const streamRef          = useRef<MediaStream | null>(null);
-  const pollingRef         = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timelineTimerRef   = useRef<ReturnType<typeof setInterval> | null>(null);
-  const smoothedScoreRef   = useRef(100);
+  const detectorRef       = useRef<FaceLandmarker | null>(null);
+  const videoRef          = useRef<HTMLVideoElement | null>(null);
+  const streamRef         = useRef<MediaStream | null>(null);
+  const pollingRef        = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timelineTimerRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const smoothedScoreRef  = useRef(100);
+  const sessionStartRef   = useRef<number | null>(null);
+  const attentiveMsRef    = useRef(0);
+  const distractedMsRef   = useRef(0);
+  const lastTickRef       = useRef<number | null>(null);
+  const timelineRef       = useRef<{ t: number; score: number }[]>([]);
 
-  // Session tracking (mutable refs to avoid stale closures)
-  const sessionStartRef    = useRef<number | null>(null);
-  const attentiveMsRef     = useRef(0);
-  const distractedMsRef    = useRef(0);
-  const lastTickRef        = useRef<number | null>(null);
-  const timelineRef        = useRef<{ t: number; score: number }[]>([]);
-
-  // ── Initialise MediaPipe Face Detector (lazy, on first call)
+  // ── Init MediaPipe FaceLandmarker (with CPU fallback)
   const initDetector = useCallback(async () => {
-    if (detectorRef.current) return; // already initialised
+    if (detectorRef.current) return;
     try {
       const vision = await FilesetResolver.forVisionTasks(WASM_CDN);
-      detectorRef.current = await FaceDetector.createFromOptions(vision, {
-        baseOptions: {
-          // Tiny BlazeFace model — ~350KB
-          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
-          delegate: 'GPU',
-        },
-        runningMode: 'VIDEO',
-        minDetectionConfidence: 0.5,
-      });
+
+      // Try GPU first, fall back to CPU silently
+      let detector: FaceLandmarker | null = null;
+      try {
+        detector = await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: { modelAssetPath: MODEL_URL, delegate: 'GPU' },
+          runningMode: 'VIDEO',
+          numFaces: 1,
+          outputFaceBlendshapes: false,
+          outputFacialTransformationMatrixes: false,
+        });
+      } catch {
+        console.warn('[Engagement] GPU delegate failed, falling back to CPU');
+        detector = await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: { modelAssetPath: MODEL_URL, delegate: 'CPU' },
+          runningMode: 'VIDEO',
+          numFaces: 1,
+          outputFaceBlendshapes: false,
+          outputFacialTransformationMatrixes: false,
+        });
+      }
+
+      detectorRef.current = detector;
       setIsDetectorReady(true);
+      console.log('[Engagement] FaceLandmarker ready ✅');
     } catch (err) {
       console.error('[Engagement] MediaPipe init failed:', err);
       setIsDetectorReady(false);
@@ -106,28 +160,34 @@ export function useEngagementDetector(): UseEngagementDetectorReturn {
   const startDetection = useCallback(async (videoEl: HTMLVideoElement) => {
     videoRef.current = videoEl;
 
-    // Request camera permission
+    // Camera permission
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: 320, height: 240 },
+        video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } },
         audio: false,
       });
       setIsPermissionGranted(true);
       setCameraStream(stream);
       streamRef.current = stream;
-
       videoEl.srcObject = stream;
-      await videoEl.play();
+
+      // Wait for video to actually have pixel data
+      await new Promise<void>((resolve, reject) => {
+        videoEl.onloadeddata = () => resolve();
+        videoEl.onerror = () => reject(new Error('Video failed to load'));
+        videoEl.play().catch(reject);
+        // Safety timeout
+        setTimeout(resolve, 3000);
+      });
     } catch {
       setIsPermissionGranted(false);
       return;
     }
 
-    // Initialise detector
     await initDetector();
     if (!detectorRef.current) return;
 
-    // Reset session counters
+    // Reset counters
     sessionStartRef.current  = Date.now();
     lastTickRef.current      = Date.now();
     attentiveMsRef.current   = 0;
@@ -135,76 +195,106 @@ export function useEngagementDetector(): UseEngagementDetectorReturn {
     timelineRef.current      = [];
     smoothedScoreRef.current = 100;
 
-    // Polling loop
+    // ── Polling loop
     pollingRef.current = setInterval(() => {
       if (!detectorRef.current || !videoRef.current) return;
+      const video = videoRef.current;
+
+      // Guard: video must be playing and have data
+      if (video.readyState < 2 || video.paused || video.videoWidth === 0) return;
 
       const now = Date.now();
       const dt  = now - (lastTickRef.current ?? now);
       lastTickRef.current = now;
 
       try {
-        const result = detectorRef.current.detectForVideo(videoRef.current!, now);
-        const detected = result.detections.length > 0;
-        setFacePresent(detected);
+        const result = detectorRef.current.detectForVideo(video, now);
+        const hasLandmarks = result.faceLandmarks && result.faceLandmarks.length > 0;
+        setFacePresent(hasLandmarks);
 
-        // Raw score: 100 if face present, 0 if not
-        const rawScore = detected ? 100 : 0;
+        let rawScore = 0;
 
-        // Exponential moving average to smooth jitter
+        if (hasLandmarks) {
+          const lm = result.faceLandmarks[0];
+
+          // Eye gaze: 0.5 = looking at screen
+          const gazeRatio    = getGazeRatio(lm);
+          const gazeCentered = 1 - Math.min(1, Math.abs(gazeRatio - 0.5) / 0.25);
+
+          // Eye openness
+          const openness = getEyeOpenness(lm);
+
+          // Iris presence (478-landmark model includes iris if available)
+          const hasIris = lm[LEFT_IRIS_CENTER] !== undefined && lm[RIGHT_IRIS_CENTER] !== undefined;
+
+          if (hasIris) {
+            // Full score: weighted sum of face presence, gaze, eyes open
+            rawScore = Math.round(
+              0.40 * 100 +           // face is present (40%)
+              0.40 * gazeCentered * 100 + // gaze toward screen (40%)
+              0.20 * openness * 100        // eyes open (20%)
+            );
+          } else {
+            // No iris data — just face presence
+            rawScore = 65;
+          }
+        } else {
+          rawScore = 0; // face not detected
+        }
+
+        // EMA smoothing
         smoothedScoreRef.current =
           EMA_ALPHA * rawScore + (1 - EMA_ALPHA) * smoothedScoreRef.current;
 
-        const score = Math.round(smoothedScoreRef.current);
+        const score = Math.round(Math.max(0, Math.min(100, smoothedScoreRef.current)));
         setEngagementScore(score);
 
-        // Classify state
         const state: EngagementState =
-          score >= 70 ? 'focused' :
-          score >= 40 ? 'distracted' :
-          detected    ? 'distracted' : 'away';
+          score >= 65 ? 'focused' :
+          score >= 35 ? 'distracted' : 'away';
         setEngagementState(state);
 
-        // Accrue session time
-        if (score >= 60) attentiveMsRef.current  += dt;
+        if (score >= 55) attentiveMsRef.current  += dt;
         else             distractedMsRef.current += dt;
 
-      } catch {
-        // Video not ready yet — skip
+      } catch (e) {
+        console.warn('[Engagement] Detection error (skipping frame):', e);
       }
     }, POLL_INTERVAL_MS);
 
-    // Timeline sampler (every 5s)
+    // Timeline sampler
     timelineTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - (sessionStartRef.current ?? Date.now());
-      timelineRef.current.push({ t: Math.round(elapsed / 1000), score: Math.round(smoothedScoreRef.current) });
+      timelineRef.current.push({
+        t: Math.round(elapsed / 1000),
+        score: Math.round(smoothedScoreRef.current),
+      });
     }, TIMELINE_SAMPLE_MS);
   }, [initDetector]);
 
-  // ── Stop detection and compute session stats
+  // ── Stop detection
   const stopDetection = useCallback(() => {
     if (pollingRef.current)      clearInterval(pollingRef.current);
     if (timelineTimerRef.current) clearInterval(timelineTimerRef.current);
+    pollingRef.current = null;
+    timelineTimerRef.current = null;
 
-    // Stop camera stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
       streamRef.current = null;
     }
     setCameraStream(null);
 
-    // Compute final session stats
     if (sessionStartRef.current !== null) {
-      const totalMs = Date.now() - sessionStartRef.current;
-      const attentiveMs   = attentiveMsRef.current;
-      const distractedMs  = distractedMsRef.current;
-
+      const totalMs        = Date.now() - sessionStartRef.current;
+      const attentiveMs    = attentiveMsRef.current;
+      const distractedMs   = distractedMsRef.current;
       setSessionStats({
         totalMs,
         attentiveMs,
         distractedMs,
-        attentivePercent:   totalMs ? Math.round((attentiveMs  / totalMs) * 100) : 0,
-        distractedPercent:  totalMs ? Math.round((distractedMs / totalMs) * 100) : 0,
+        attentivePercent:  totalMs ? Math.round((attentiveMs  / totalMs) * 100) : 0,
+        distractedPercent: totalMs ? Math.round((distractedMs / totalMs) * 100) : 0,
         engagementTimeline: [...timelineRef.current],
       });
     }
