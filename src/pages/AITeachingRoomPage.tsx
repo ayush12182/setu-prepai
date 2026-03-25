@@ -8,7 +8,9 @@ import {
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { DiagramRenderer } from '@/components/DiagramRenderer';
-import StreamingAvatar, { AvatarQuality, StreamingEvents, TaskType, TaskMode, VoiceEmotion } from '@heygen/streaming-avatar';
+import { useEngagementDetector } from '@/hooks/useEngagementDetector';
+import { EngagementOverlay, SessionStatsCard } from '@/components/EngagementOverlay';
+import StreamingAvatar, { AvatarQuality, StreamingEvents, TaskType, TaskMode } from '@heygen/streaming-avatar';
 
 /* ────────────────────────────────────────────────
    LANGUAGE HELPERS
@@ -415,6 +417,64 @@ const AITeachingRoomPage: React.FC = () => {
   // Chat history for context
   const chatHistoryRef = useRef<{ role: 'user' | 'assistant'; content: string }[]>([]);
 
+  // ── Engagement Detection
+  const engagement = useEngagementDetector();
+  const [engagementEnabled, setEngagementEnabled] = useState(false);
+  const [showSessionStats, setShowSessionStats] = useState(false);
+  const cameraVideoRef = useRef<HTMLVideoElement>(null);
+  const lowAttentionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAdaptationRef = useRef<number>(0);
+  // callAIRef allows the engagement effect to reference callAI without a declaration-order issue
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const callAIRef = useRef<(msg: string) => Promise<void>>(async () => {});
+
+  // Monitor engagement score and trigger AI adaptation when student is distracted
+  useEffect(() => {
+    if (!engagementEnabled) return;
+    const score = engagement.engagementScore;
+
+    if (score < 40) {
+      // Start low-attention timer if not already running
+      if (!lowAttentionTimerRef.current) {
+        lowAttentionTimerRef.current = setTimeout(() => {
+          lowAttentionTimerRef.current = null;
+          const now = Date.now();
+          // Rate-limit: only trigger every 90 seconds
+          if (now - lastAdaptationRef.current < 90_000) return;
+          lastAdaptationRef.current = now;
+
+          const isAway = engagement.engagementState === 'away';
+          const adaptMsg = isAway
+            ? `Hey! Don't go — stay with me, this part in ${teacher.subject} is important for your exams! 📚`
+            : `Hmm, lagta hai dhyan thoda hat gaya. 🤔 Chalte hain — apna doubt batao ya phirse samjhaaoon?`;
+          callAIRef.current(adaptMsg);
+        }, 12_000); // Trigger after 12 seconds of low attention
+      }
+    } else {
+      // Clear the timer when attention is restored
+      if (lowAttentionTimerRef.current) {
+        clearTimeout(lowAttentionTimerRef.current);
+        lowAttentionTimerRef.current = null;
+      }
+    }
+  }, [engagement.engagementScore, engagement.engagementState, engagementEnabled, teacher.subject]);
+
+  const handleEnableEngagement = useCallback(async () => {
+    if (!cameraVideoRef.current) return;
+    setEngagementEnabled(true);
+    await engagement.startDetection(cameraVideoRef.current);
+  }, [engagement]);
+
+  const handleDisableEngagement = useCallback(() => {
+    setEngagementEnabled(false);
+    engagement.stopDetection();
+    if (lowAttentionTimerRef.current) {
+      clearTimeout(lowAttentionTimerRef.current);
+      lowAttentionTimerRef.current = null;
+    }
+    if (engagement.sessionStats) setShowSessionStats(true);
+  }, [engagement]);
+
   // The full text currently displayed (including streaming)
   const { displayed, done } = useTypewriter(isStreaming ? '' : boardContent, 7);
 
@@ -714,6 +774,10 @@ const AITeachingRoomPage: React.FC = () => {
     }
   }, [language, teacher, speakText, stopAll, avatarMode]);
 
+  // Sync callAIRef so the engagement effect can call it without stale-closure issues
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { callAIRef.current = callAI; }, [callAI]);
+
   // Voice input (mic)
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
@@ -788,6 +852,14 @@ const AITeachingRoomPage: React.FC = () => {
     <MainLayout title={`${teacher.name} — ${teacher.subject}`} fullHeight>
       {/* Hidden audio */}
       <audio ref={audioRef} className="hidden" />
+
+      {/* ── Session Stats popup (shown when engagement tracking is stopped) */}
+      {showSessionStats && engagement.sessionStats && (
+        <SessionStatsCard
+          stats={engagement.sessionStats}
+          onDismiss={() => setShowSessionStats(false)}
+        />
+      )}
 
       {/* ── MAIN CONTENT ── */}
       <div className="flex overflow-hidden gap-0 rounded-xl" style={{ height: 'calc(100vh - 13rem)' }}>
@@ -939,6 +1011,29 @@ const AITeachingRoomPage: React.FC = () => {
                   </span>
                 )}
               </div>
+            </div>
+
+            {/* ── Engagement / Focus Mode ── */}
+            <div className="flex flex-col items-center">
+              {/* Hidden video element used by MediaPipe — not displayed */}
+              <video
+                ref={cameraVideoRef}
+                muted
+                playsInline
+                className="hidden"
+                style={{ width: 320, height: 240 }}
+              />
+              <EngagementOverlay
+                cameraStream={engagement.cameraStream}
+                engagementScore={engagement.engagementScore}
+                engagementState={engagement.engagementState}
+                facePresent={engagement.facePresent}
+                isPermissionGranted={engagement.isPermissionGranted}
+                isDetectorReady={engagement.isDetectorReady}
+                isEnabled={engagementEnabled}
+                onEnable={handleEnableEngagement}
+                onDisable={handleDisableEngagement}
+              />
             </div>
 
             {/* ── Divider ── */}
