@@ -26,6 +26,32 @@ const LANG_INSTRUCTION: Record<LanguageMode, string> = {
   gujarati: 'Gujarati (ગુજરાતી) script only',
 };
 
+// BCP-47 language codes for the browser SpeechSynthesis API
+const LANG_BCP47: Record<LanguageMode, string> = {
+  english:  'en-IN',
+  hinglish: 'hi-IN',
+  hindi:    'hi-IN',
+  kannada:  'kn-IN',
+  telugu:   'te-IN',
+  punjabi:  'pa-IN',
+  marathi:  'mr-IN',
+  tamil:    'ta-IN',
+  gujarati: 'gu-IN',
+};
+
+// HeyGen supported language codes (limited set)
+const HEYGEN_LANG_CODE: Record<LanguageMode, string> = {
+  english:  'en',
+  hinglish: 'hi',
+  hindi:    'hi',
+  kannada:  'hi', // fallback: HeyGen doesn't support Kannada natively
+  telugu:   'hi',
+  punjabi:  'hi',
+  marathi:  'hi',
+  tamil:    'ta',
+  gujarati: 'hi',
+};
+
 // Welcome messages for each language
 const getWelcome = (name: string, subject: string, lang: LanguageMode): string => {
   const maps: Record<LanguageMode, string> = {
@@ -450,17 +476,29 @@ const AITeachingRoomPage: React.FC = () => {
         }
       }
     } catch {
-      console.warn("Using Native SpeechSynthesis fallback");
+      console.warn("TTS Edge Function failed, using Native SpeechSynthesis fallback");
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.lang = language === 'english' ? 'en-IN' : 'hi-IN';
+      const targetLang = LANG_BCP47[language];
+      utterance.lang = targetLang;
       utterance.rate = 1.0;
-      
-      const voices = window.speechSynthesis.getVoices();
-      const hindiVoice = voices.find((v: SpeechSynthesisVoice) => v.lang.includes('hi')) || 
-                         voices.find((v: SpeechSynthesisVoice) => v.lang.includes('en-IN')) ||
-                         voices[0];
-      if (hindiVoice) utterance.voice = hindiVoice;
+
+      // Wait for voices to load (needed in Safari)
+      const loadVoices = (): Promise<SpeechSynthesisVoice[]> =>
+        new Promise(resolve => {
+          const voices = window.speechSynthesis.getVoices();
+          if (voices.length) { resolve(voices); return; }
+          window.speechSynthesis.addEventListener('voiceschanged', () => resolve(window.speechSynthesis.getVoices()), { once: true });
+        });
+
+      const voices = await loadVoices();
+      // Prefer voice matching the exact language code, then the language prefix, then any English Indian voice
+      const matchedVoice =
+        voices.find((v: SpeechSynthesisVoice) => v.lang === targetLang) ||
+        voices.find((v: SpeechSynthesisVoice) => v.lang.startsWith(targetLang.split('-')[0])) ||
+        voices.find((v: SpeechSynthesisVoice) => v.lang.includes('IN')) ||
+        voices[0];
+      if (matchedVoice) utterance.voice = matchedVoice;
 
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
@@ -502,7 +540,7 @@ const AITeachingRoomPage: React.FC = () => {
           voiceId: teacher.voiceId,
           rate: 1.0,
         },
-        language: language === 'english' ? 'en' : 'hi',
+        language: HEYGEN_LANG_CODE[language],
       });
     } catch (error) {
       console.error("Avatar failed to start", error);
