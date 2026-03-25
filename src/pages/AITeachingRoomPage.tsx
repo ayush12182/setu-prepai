@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, MicOff, Mic, Send, ChevronDown, Volume2, VolumeX, Loader2,
-  BookOpen, Atom, FlaskConical, FunctionSquare, Eraser,
+  BookOpen, Atom, FlaskConical, FunctionSquare, Eraser, Flag,
 } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
@@ -11,6 +11,10 @@ import { DiagramRenderer } from '@/components/DiagramRenderer';
 import { useEngagementDetector } from '@/hooks/useEngagementDetector';
 import { EngagementOverlay, SessionStatsCard } from '@/components/EngagementOverlay';
 import { getClosingFeedback } from '@/lib/closingFeedback';
+import { useSessionTracker } from '@/hooks/useSessionTracker';
+import { useMCQ } from '@/hooks/useMCQ';
+import { MCQCard } from '@/components/MCQCard';
+import { SessionReport } from '@/components/SessionReport';
 import StreamingAvatar, { AvatarQuality, StreamingEvents, TaskType, TaskMode } from '@heygen/streaming-avatar';
 
 /* ────────────────────────────────────────────────
@@ -418,6 +422,13 @@ const AITeachingRoomPage: React.FC = () => {
   // Chat history for context
   const chatHistoryRef = useRef<{ role: 'user' | 'assistant'; content: string }[]>([]);
 
+  // ── Session Tracker
+  const sessionTracker = useSessionTracker();
+
+  // ── Session Report state (no engagement refs needed here yet)
+  const [showSessionReport, setShowSessionReport] = useState(false);
+  const [compiledReport, setCompiledReport] = useState<import('@/hooks/useSessionTracker').CompiledSessionReport | null>(null);
+
   // ── Engagement Detection
   const engagement = useEngagementDetector();
   const [engagementEnabled, setEngagementEnabled] = useState(false);
@@ -475,6 +486,22 @@ const AITeachingRoomPage: React.FC = () => {
     }
     if (engagement.sessionStats) setShowSessionStats(true);
   }, [engagement]);
+
+  // ── Finish Session handler (after engagement hooks are declared)
+  const handleFinishSession = useCallback(() => {
+    const report = sessionTracker.compileReport({
+      engagementScore:    engagement.engagementScore,
+      attentivePercent:   engagement.sessionStats?.attentivePercent ?? 0,
+      distractedPercent:  engagement.sessionStats?.distractedPercent ?? 0,
+      engagementTimeline: engagement.sessionStats?.engagementTimeline ?? [],
+    });
+    setCompiledReport(report);
+    setShowSessionReport(true);
+  }, [sessionTracker, engagement]);
+
+  // ── MCQ System
+  const { mcq, startMCQ, selectAnswer: selectMCQAnswer, nextQuestion: nextMCQQuestion, skipMCQ } =
+    useMCQ(language, sessionTracker.recordMCQResult);
 
   // The full text currently displayed (including streaming)
   const { displayed, done } = useTypewriter(isStreaming ? '' : boardContent, 7);
@@ -691,7 +718,16 @@ const AITeachingRoomPage: React.FC = () => {
         },
         body: JSON.stringify({
           messages: [
-            { role: 'system', content: teacher.systemPrompt(language) },
+            {
+              role: 'system',
+              content: teacher.systemPrompt(language) +
+                // ── Engagement context: passes real-time facial signal state to the AI
+                (engagementEnabled
+                  ? `\n\n[STUDENT ENGAGEMENT STATE: ${engagement.engagementState}. Score: ${engagement.engagementScore}/100. ` +
+                    `Adjust your teaching tone accordingly — if distracted/away, be more engaging and hook attention; ` +
+                    `if focused, maintain depth and flow; if confused/distracted, simplify and check in.]`
+                  : ''),
+            },
             ...chatHistoryRef.current,
           ],
           examMode: 'jee',
@@ -777,6 +813,21 @@ const AITeachingRoomPage: React.FC = () => {
 
       setBoardContent(finalContent);
 
+      // ── Record AI response in session tracker
+      sessionTracker.recordAIResponse();
+
+      // ── Trigger MCQ after explanation (not for internal adaptation messages)
+      const isAdaptationMsg = userMessage.includes('dhyan') || userMessage.includes('distracted') || userMessage.includes('stay with me');
+      if (!isAdaptationMsg && mcq.status === 'idle') {
+        // Small delay so the board content settles before the quiz slides in
+        setTimeout(() => {
+          startMCQ(
+            teacher.chapters[selectedChapter]?.topics[selectedTopic] ?? 'General',
+            teacher.subject,
+          );
+        }, 1500);
+      }
+
       if (avatarMode && avatarClientRef.current) {
           const cleanText = accumulated
                   .replace(/\[DIAGRAM\][\s\S]*?(?:\[\/DIAGRAM\]|$)/g, '')
@@ -836,6 +887,7 @@ const AITeachingRoomPage: React.FC = () => {
       const transcript = event.results[0][0].transcript;
       setIsListening(false);
       // ✅ Auto-submit directly to AI — no text box step
+      sessionTracker.recordInteraction('voice');
       callAI(transcript);
     };
 
@@ -848,6 +900,8 @@ const AITeachingRoomPage: React.FC = () => {
   const handleExplain = useCallback(() => {
     const chapter = teacher.chapters[selectedChapter];
     const topic = chapter.topics[selectedTopic];
+    sessionTracker.recordInteraction('explain');
+    sessionTracker.recordTopicChange(chapter.name, topic);
     // Build a simple explain prompt; the system prompt enforces the language
     const prompt = language === 'hindi'
       ? `${chapter.name} में "${topic}" समझाइए।`
@@ -855,7 +909,7 @@ const AITeachingRoomPage: React.FC = () => {
         ? `Explain "${topic}" from ${chapter.name}.`
         : `${chapter.name} mein "${topic}" samjhao.`; // hinglish + regional: just use English query, AI responds in chosen language
     callAI(prompt);
-  }, [teacher, selectedChapter, selectedTopic, language, callAI]);
+  }, [teacher, selectedChapter, selectedTopic, language, callAI, sessionTracker]);
 
   // ── Send doubt
   const handleSendDoubt = useCallback(async () => {
@@ -863,9 +917,10 @@ const AITeachingRoomPage: React.FC = () => {
     setIsSendingDoubt(true);
     const q = doubtInput.trim();
     setDoubtInput('');
+    sessionTracker.recordInteraction('typed'); // ── track typed interaction
     await callAI(q);
     setIsSendingDoubt(false);
-  }, [doubtInput, isSendingDoubt, isStreaming, callAI]);
+  }, [doubtInput, isSendingDoubt, isStreaming, callAI, sessionTracker]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendDoubt(); }
@@ -879,11 +934,20 @@ const AITeachingRoomPage: React.FC = () => {
       {/* Hidden audio */}
       <audio ref={audioRef} className="hidden" />
 
-      {/* ── Session Stats popup (shown when engagement tracking is stopped) */}
+      {/* ── Session Stats popup */}
       {showSessionStats && engagement.sessionStats && (
-        <SessionStatsCard
-          stats={engagement.sessionStats}
-          onDismiss={() => setShowSessionStats(false)}
+        <SessionStatsCard stats={engagement.sessionStats} onDismiss={() => setShowSessionStats(false)} />
+      )}
+
+      {/* ── Finish Session Report Modal */}
+      {showSessionReport && compiledReport && (
+        <SessionReport
+          report={compiledReport}
+          language={language}
+          teacherName={teacher.name}
+          accentColor={teacher.accent}
+          onClose={() => setShowSessionReport(false)}
+          onNewSession={() => { setShowSessionReport(false); navigate('/dashboard'); }}
         />
       )}
 
@@ -910,6 +974,15 @@ const AITeachingRoomPage: React.FC = () => {
 
             {/* Erase animation */}
             <EraseOverlay visible={isErasing} />
+
+            {/* MCQ Card — slides up from bottom of blackboard */}
+            <MCQCard
+              mcq={mcq}
+              accentColor={teacher.accent}
+              onSelectAnswer={selectMCQAnswer}
+              onNext={nextMCQQuestion}
+              onSkip={skipMCQ}
+            />
 
             {/* Board content */}
             <div className="relative h-full overflow-y-auto z-0 p-5 sm:p-7">
@@ -1172,6 +1245,15 @@ const AITeachingRoomPage: React.FC = () => {
                   <><BookOpen size={14} /> Explain This Topic</>
                 )}
               </motion.button>
+              {/* Finish Session button */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={handleFinishSession}
+                className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 mt-2 transition-all border border-red-500/30 hover:bg-red-500/10 text-red-400"
+                style={{ background: 'rgba(239, 68, 68, 0.05)' }}
+              >
+                <Flag size={14} /> Finish Session
+              </motion.button>
             </div>
 
             {/* ── Divider ── */}
@@ -1188,7 +1270,7 @@ const AITeachingRoomPage: React.FC = () => {
                 ].map((chip, i) => (
                   <button
                     key={i}
-                    onClick={() => callAI(chip)}
+                    onClick={() => { sessionTracker.recordInteraction('chip'); callAI(chip); }}
                     disabled={isStreaming}
                     className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all disabled:opacity-40"
                     style={{
