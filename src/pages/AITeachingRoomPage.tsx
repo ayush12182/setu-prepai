@@ -10,6 +10,7 @@ import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { DiagramRenderer } from '@/components/DiagramRenderer';
 import { useEngagementDetector } from '@/hooks/useEngagementDetector';
 import { EngagementOverlay, SessionStatsCard } from '@/components/EngagementOverlay';
+import { getClosingFeedback } from '@/lib/closingFeedback';
 import StreamingAvatar, { AvatarQuality, StreamingEvents, TaskType, TaskMode } from '@heygen/streaming-avatar';
 
 /* ────────────────────────────────────────────────
@@ -757,7 +758,25 @@ const AITeachingRoomPage: React.FC = () => {
       setBoardContent(accumulated);
       setStreamingContent('');
       chatHistoryRef.current.push({ role: 'assistant', content: accumulated });
-      
+
+      // ── Closing feedback based on live engagement signals
+      // Only append if engagement tracking was active during this explanation
+      const closingMsg = engagementEnabled
+        ? getClosingFeedback(
+            {
+              engagementScore: engagement.engagementScore,
+              distractedPercent: engagement.sessionStats?.distractedPercent ?? 0,
+            },
+            language,
+          )
+        : null;
+
+      const finalContent = closingMsg
+        ? `${accumulated}\n\n---\n\n*${closingMsg}*`
+        : accumulated;
+
+      setBoardContent(finalContent);
+
       if (avatarMode && avatarClientRef.current) {
           const cleanText = accumulated
                   .replace(/\[DIAGRAM\][\s\S]*?(?:\[\/DIAGRAM\]|$)/g, '')
@@ -767,9 +786,16 @@ const AITeachingRoomPage: React.FC = () => {
           if (unspoken.length > 2) {
              avatarClientRef.current.speak({ text: unspoken, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch(() => {});
           }
+          // Speak the closing message via avatar too
+          if (closingMsg) {
+            setTimeout(() => {
+              avatarClientRef.current?.speak({ text: closingMsg, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch(() => {});
+            }, 1200);
+          }
       } else {
-          // 5. Speak with regular TTS
-          speakText(accumulated);
+          // 5. Speak accumulated + closing with regular TTS
+          const toSpeak = closingMsg ? `${accumulated} ... ${closingMsg}` : accumulated;
+          speakText(toSpeak);
       }
     }
   }, [language, teacher, speakText, stopAll, avatarMode]);
