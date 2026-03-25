@@ -1039,6 +1039,17 @@ const AITeachingRoomPage: React.FC = () => {
           style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(8,11,18,0.8)' }}
         >
           <div className="flex-1 overflow-y-auto p-4 space-y-5">
+            {/* ── Finish Session — Top Position for visibility ── */}
+            <div className="flex justify-end">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={handleFinishSession}
+                className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-red-500/30 hover:bg-red-500/10 text-red-500 flex items-center gap-1.5"
+                style={{ background: 'rgba(239, 68, 68, 0.05)' }}
+              >
+                <Flag size={12} /> Finish Session
+              </motion.button>
+            </div>
 
             {/* ── Teacher Avatar ── */}
             <div className="flex flex-col items-center pt-3">
@@ -1244,15 +1255,6 @@ const AITeachingRoomPage: React.FC = () => {
                 ) : (
                   <><BookOpen size={14} /> Explain This Topic</>
                 )}
-              </motion.button>
-              {/* Finish Session button */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handleFinishSession}
-                className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 mt-2 transition-all border border-red-500/30 hover:bg-red-500/10 text-red-400"
-                style={{ background: 'rgba(239, 68, 68, 0.05)' }}
-              >
-                <Flag size={14} /> Finish Session
               </motion.button>
             </div>
 
