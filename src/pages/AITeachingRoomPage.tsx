@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   MicOff, Mic, Send, ChevronDown, Volume2, VolumeX, Loader2,
   BookOpen, Eraser, Flag, Pause, Play, Gauge,
-  Atom, FlaskConical, FunctionSquare,
+  Atom, FlaskConical, FunctionSquare, X,
 } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
@@ -582,6 +582,15 @@ const AITeachingRoomPage: React.FC = () => {
     sessionTracker.recordMCQResult(topic, correct);
   });
 
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // ── Auto-open sidebar on mobile when MCQ becomes active
+  useEffect(() => {
+    if (mcq.status === 'active' || mcq.status === 'feedback') {
+      setIsMobileSidebarOpen(true);
+    }
+  }, [mcq.status]);
+
   // The full text currently displayed (including streaming)
   const { displayed, done } = useTypewriter(isStreaming ? '' : boardContent, 7, playbackSpeed);
   const isWriting = isStreaming || !done;
@@ -1035,10 +1044,10 @@ const AITeachingRoomPage: React.FC = () => {
       )}
 
       {/* ── MAIN CONTENT ── */}
-      <div className="flex overflow-hidden gap-0 rounded-xl" style={{ height: 'calc(100vh - 13rem)' }}>
+      <div className="flex flex-col lg:flex-row overflow-hidden gap-0 rounded-xl" style={{ height: 'calc(100vh - 13rem)' }}>
 
-        {/* ══ LEFT: BLACKBOARD (60%) ══ */}
-        <div className="flex-[3] flex flex-col min-h-0 p-3 sm:p-4">
+        {/* ══ LEFT: BLACKBOARD (70%) ══ */}
+        <div className="flex-[7] flex flex-col min-h-0 p-3 sm:p-4">
           <div
             className="relative flex-1 rounded-xl overflow-hidden"
             style={{
@@ -1057,15 +1066,6 @@ const AITeachingRoomPage: React.FC = () => {
 
             {/* Erase animation */}
             <EraseOverlay visible={isErasing} />
-
-            {/* MCQ Card — slides up from bottom of blackboard */}
-            <MCQCard
-              mcq={mcq}
-              accentColor={teacher.accent}
-              onSelectAnswer={selectMCQAnswer}
-              onNext={nextMCQQuestion}
-              onSkip={skipMCQ}
-            />
 
             {/* Board content */}
             <div className="relative h-full overflow-y-auto z-0 p-5 sm:p-8">
@@ -1117,25 +1117,70 @@ const AITeachingRoomPage: React.FC = () => {
           />
         </div>
 
-        {/* ══ RIGHT: TEACHER PANEL (40%) ══ */}
-        <div
-          className="flex-[2] flex flex-col min-h-0 border-l relative"
-          style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(8,11,18,0.8)' }}
-        >
-          {/* Local dim overlay for panel */}
-          <AnimatePresence>
-            {isWriting && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.45 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-black/50 z-10 pointer-events-none"
-                style={{ backdropFilter: 'blur(0.5px)' }}
-              />
-            )}
-          </AnimatePresence>
-          
-          <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        {/* ══ RIGHT: INTERACTION PANEL (30%) ══ */}
+        {/* On mobile: Fixed bottom drawer. On desktop: Sidebar. */}
+        <AnimatePresence>
+          {(isMobileSidebarOpen || window.innerWidth >= 1024) && (
+            <motion.div
+              initial={window.innerWidth < 1024 ? { y: '100%' } : { opacity: 0, x: 20 }}
+              animate={window.innerWidth < 1024 ? { y: 0 } : { opacity: 1, x: 0 }}
+              exit={window.innerWidth < 1024 ? { y: '100%' } : { opacity: 0, x: 20 }}
+              className={`
+                flex-[3] flex flex-col min-h-0 border-l relative overflow-y-auto z-50
+                ${window.innerWidth < 1024 ? 'fixed inset-x-0 bottom-0 h-[80vh] rounded-t-3xl border-t' : ''}
+              `}
+              style={{ 
+                borderColor: 'rgba(255,255,255,0.06)', 
+                background: 'rgba(8,11,18,0.98)',
+              }}
+            >
+              {/* Mobile Close Handle */}
+              <div className="lg:hidden w-full flex justify-center py-3">
+                 <button 
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                  className="w-12 h-1.5 rounded-full bg-white/20 hover:bg-white/40 transition-colors" 
+                 />
+              </div>
+
+              {/* Local dim overlay for panel */}
+              <AnimatePresence>
+                {isWriting && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 0.45 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-black/50 z-10 pointer-events-none"
+                    style={{ backdropFilter: 'blur(0.5px)' }}
+                  />
+                )}
+              </AnimatePresence>
+              
+              <div className="flex-1 p-4 lg:p-6 space-y-6">
+                 {/* Mobile Close Button (Alternative) */}
+                 <div className="lg:hidden flex justify-between items-center mb-2">
+                    <span className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Interaction Panel</span>
+                    <button onClick={() => setIsMobileSidebarOpen(false)} className="text-white/40 hover:text-white"><X size={18}/></button>
+                 </div>
+            {/* ── Active Quiz Section ── */}
+            <AnimatePresence>
+               {(mcq.status !== 'idle' || !!mcq.error) && (
+                 <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-6"
+                 >
+                    <MCQCard
+                      mcq={mcq}
+                      accentColor={teacher.accent}
+                      onSelectAnswer={selectMCQAnswer}
+                      onNext={nextMCQQuestion}
+                      onSkip={skipMCQ}
+                    />
+                 </motion.div>
+               )}
+            </AnimatePresence>
+
             {/* ── Finish Session — Top Position for visibility ── */}
             <div className="flex justify-end">
               <motion.button
@@ -1384,7 +1429,31 @@ const AITeachingRoomPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Mobile Floating Toggle Tab ── */}
+      <AnimatePresence>
+         {!isMobileSidebarOpen && (mcq.status === 'active' || mcq.status === 'feedback') && (
+           <motion.button
+             initial={{ y: 50, opacity: 0 }}
+             animate={{ y: 0, opacity: 1 }}
+             exit={{ y: 50, opacity: 0 }}
+             onClick={() => setIsMobileSidebarOpen(true)}
+             className="lg:hidden fixed bottom-24 right-4 z-40 px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 border border-emerald-500/30"
+             style={{ background: teacher.accent, color: '#fff' }}
+           >
+             <BookOpen size={16} />
+             <span className="text-xs font-bold uppercase tracking-wider">Open Assessment</span>
+             <motion.div 
+               animate={{ scale: [1, 1.2, 1] }} 
+               transition={{ repeat: Infinity, duration: 1 }}
+               className="w-2 h-2 rounded-full bg-white shadow-glow" 
+             />
+           </motion.button>
+         )}
+      </AnimatePresence>
       </div>
 
       {/* ── BOTTOM DOUBT BOX ── */}

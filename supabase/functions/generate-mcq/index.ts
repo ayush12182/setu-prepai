@@ -60,25 +60,23 @@ serve(async (req) => {
       ? `\nAvoid questions similar to these already asked:\n${previousQuestions.map((q: string, i: number) => `- ${q}`).join('\n')}`
       : '';
 
-    const systemPrompt = `You are an expert JEE preparation teacher. Generate ONE high-quality MCQ for:
-- Subject: ${subject}
-- Topic: ${topic}
-- Difficulty: ${diffInstruction}
-- Language: ${langInstruction}
+    const systemPrompt = `You are an expert ${subject} teacher specializing in IIT-JEE Mains and Advanced preparation with 20+ years of experience.
+Your goal is to generate one high-quality Multiple Choice Question (MCQ) based on the teacher's current explanation of ${topic}.
+
+CRITICAL REQUIREMENTS:
+1. JEE STANDARDS: The question must strictly align with the pattern and difficulty of JEE Mains (Previous 20 Years PYQs).
+2. CONCEPTUAL DEPTH: Focus on conceptual understanding, common traps, and multi-concept applications rather than just simple formula substitution.
+3. STRUCTURE: Return ONLY a valid JSON object.
+4. DIFFICULTY: ${diffInstruction}
+5. LANGUAGE: ${langInstruction}
 ${avoidList}
 
-Rules:
-- The question must specifically test understanding of "${topic}"
-- Options must be plausible and non-trivially different
-- Explanation must be concise but complete (2–3 sentences max)
-- Response must be a raw JSON object only.
-
-Format:
+JSON FORMAT:
 {
-  "question": "text",
-  "options": ["A. choice", "B. choice", "C. choice", "D. choice"],
-  "correctIndex": number,
-  "explanation": "text"
+  "question": "A clear, concise JEE-style question.",
+  "options": ["A. Option 1", "B. Option 2", "C. Option 3", "D. Option 4"],
+  "correctIndex": number (0-3),
+  "explanation": "A detailed step-by-step 'teacher-style' explanation explaining why the correct option is right and others are wrong."
 }`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {

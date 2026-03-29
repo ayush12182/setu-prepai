@@ -118,15 +118,15 @@ export function useMCQ(
       // ── MOCK FALLBACK ──
       // This ensures the user sees something even if the Supabase function is missing
       return {
-        question: `Based on our discussion about ${topic}, which of the following best describes the core concept of ${topic} in ${subject}?`,
+        question: `Consider the application of ${topic} in a standard JEE Mains scenario. Which of the following statements strictly aligns with the fundamental principles of ${subject} as seen in past 20 years of PYQs?`,
         options: [
-          "A. It follows a linear progression as discussed.",
-          "B. It is a fundamental law used in problem solving.",
-          "C. Both A and B are correct in most JEE scenarios.",
-          "D. None of the above are perfectly accurate."
+          "A. It acts as a conservative force governed by the laws of symmetry.",
+          "B. The net change is independent of the path taken, assuming an ideal field.",
+          "C. The principle holds true only in inertial frames of reference.",
+          "D. Both B and C are critical constraints in JEE-level problem solving."
         ],
-        correctIndex: 2,
-        explanation: `As P.K. Sir explained, ${topic} is central to ${subject} and involves multi-step reasoning.`
+        correctIndex: 3,
+        explanation: `JEE Mains frequently tests the constraints of ${topic}, specifically inertial frames and path-independence. As P.K. Sir mentioned, understanding these 'boundary' conditions is key to solving 4-mark questions.`
       };
     }
   }, [language]);
