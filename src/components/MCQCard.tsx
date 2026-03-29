@@ -24,7 +24,7 @@ const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 export const MCQCard: React.FC<MCQCardProps> = ({
   mcq, accentColor, onSelectAnswer, onNext, onSkip,
 }) => {
-  const isVisible = mcq.status !== 'idle' && mcq.status !== 'complete';
+  const isVisible = (mcq.status !== 'idle' || !!mcq.error) && mcq.status !== 'complete';
 
   return (
     <AnimatePresence>
@@ -71,6 +71,21 @@ export const MCQCard: React.FC<MCQCardProps> = ({
               <div className="flex items-center justify-center py-8 gap-3 text-white/50">
                 <Loader2 className="w-5 h-5 animate-spin" style={{ color: accentColor }} />
                 <span className="text-sm">Generating question...</span>
+              </div>
+            )}
+
+            {/* Error state */}
+            {mcq.status === 'idle' && mcq.error && (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <p className="text-xs text-red-400/80 mb-3 bg-red-400/10 px-3 py-1.5 rounded-lg border border-red-400/20">
+                  {mcq.error}
+                </p>
+                <button
+                  onClick={onSkip}
+                  className="text-[10px] text-white/40 hover:text-white/70 transition-colors underline"
+                >
+                  Closeassessment
+                </button>
               </div>
             )}
 
