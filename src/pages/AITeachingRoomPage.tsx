@@ -607,6 +607,17 @@ const AITeachingRoomPage: React.FC = () => {
     chatHistoryRef.current = [];
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
+  
+  // ── Reactive Quiz Topic Sync: Trigger new MCQ when selection changes ──
+  useEffect(() => {
+    const topic = teacher.chapters[selectedChapter]?.topics[selectedTopic];
+    if (topic) {
+      console.log(`[MCQ] Selection changed to: ${topic}. Resetting and starting new quiz.`);
+      resetMCQ();
+      startMCQ(topic, teacher.subject);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedChapter, selectedTopic, teacher.subject]);
 
   // -- TTS function
   const speakText = useCallback(async (text: string) => {
@@ -906,17 +917,7 @@ const AITeachingRoomPage: React.FC = () => {
       sessionTracker.recordAIResponse();
 
       // ── Trigger MCQ after explanation (not for internal adaptation messages)
-      const isAdaptationMsg = userMessage.includes('dhyan') || userMessage.includes('distracted') || userMessage.includes('stay with me');
-      if (!isAdaptationMsg) {
-        // Reset and trigger new MCQ for this topic
-        resetMCQ();
-        setTimeout(() => {
-          startMCQ(
-            teacher.chapters[selectedChapter]?.topics[selectedTopic] ?? 'General',
-            teacher.subject,
-          );
-        }, 1500);
-      }
+      // (MCQ is now handled reactively by the useEffect on topic change)
 
       if (avatarMode && avatarClientRef.current) {
           const cleanText = accumulated

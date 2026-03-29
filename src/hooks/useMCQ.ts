@@ -107,6 +107,7 @@ export function useMCQ(
           difficulty,
           language,
           previousQuestions: previousQsRef.current,
+          _t: Date.now(), // Cache-busting timestamp
         }),
       });
       if (!res.ok) throw new Error(`MCQ API error: ${res.status}`);
@@ -194,6 +195,7 @@ export function useMCQ(
       currentDifficulty: 'easy', selectedIndex: null, isCorrect: null,
       totalCorrect: 0, totalAttempted: 0 }));
 
+    console.log(`[MCQ] Starting session for topic: "${topic}" in subject: "${subject}"`);
     const q = await fetchQuestion(topic, subject, 'easy', 1);
     if (!q) {
       setMCQ(s => ({ ...s, status: 'idle', error: 'Could not generate question. Try again.' }));
