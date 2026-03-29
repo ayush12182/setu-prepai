@@ -115,19 +115,68 @@ export function useMCQ(
       return q;
     } catch (e) {
       console.warn('[MCQ] fetchQuestion failed, using frontend fallback:', e);
-      // ── MOCK FALLBACK ──
-      // This ensures the user sees something even if the Supabase function is missing
-      return {
-        question: `Consider the application of ${topic} in a standard JEE Mains scenario. Which of the following statements strictly aligns with the fundamental principles of ${subject} as seen in past 20 years of PYQs?`,
-        options: [
-          "A. It acts as a conservative force governed by the laws of symmetry.",
-          "B. The net change is independent of the path taken, assuming an ideal field.",
-          "C. The principle holds true only in inertial frames of reference.",
-          "D. Both B and C are critical constraints in JEE-level problem solving."
-        ],
-        correctIndex: 3,
-        explanation: `JEE Mains frequently tests the constraints of ${topic}, specifically inertial frames and path-independence. As P.K. Sir mentioned, understanding these 'boundary' conditions is key to solving 4-mark questions.`
-      };
+      // ── MOCK FALLBACK POOL (JEE Standards) ──
+      const questions = [
+        {
+          question: `Consider the application of ${topic} in a standard JEE Mains scenario. Which of the following statements strictly aligns with the fundamental principles of ${subject} as seen in past 20 years of PYQs?`,
+          options: [
+            "A. It acts as a conservative force governed by the laws of symmetry.",
+            "B. The net change is independent of the path taken, assuming an ideal field.",
+            "C. The principle holds true only in inertial frames of reference.",
+            "D. Both B and C are critical constraints in JEE-level problem solving."
+          ],
+          correctIndex: 3,
+          explanation: `JEE Mains frequently tests the constraints of ${topic}, specifically inertial frames and path-independence. As P.K. Sir mentioned, understanding these 'boundary' conditions is key to solving 4-mark questions.`
+        },
+        {
+          question: `Regarding the mathematical formulation of ${topic}, how does the dependent variable scale according to the most recent JEE Mains patterns?`,
+          options: [
+            "A. It follows an inverse-square law relationship.",
+            "B. It scales linearly with the primary constant of ${subject}.",
+            "C. It exhibits logarithmic decay in a non-ideal medium.",
+            "D. It remains invariant under a Galilean transformation."
+          ],
+          correctIndex: 0,
+          explanation: `Inverse-square laws are a staple of JEE ${subject}. Many ${topic} problems rely on identifying this relationship early to simplify the differential equations.`
+        },
+        {
+          question: `In a multi-concept JEE problem involving ${topic} and conservation laws, what is the most common 'trap' encountered in PYQs?`,
+          options: [
+            "A. Neglecting the external impulse during the interaction.",
+            "B. Assuming perfectly elastic behavior without explicit mention.",
+            "C. Confusing the frame of reference for the potential energy calculation.",
+            "D. All of the above are frequently used to differentiate top rankers."
+          ],
+          correctIndex: 3,
+          explanation: `JEE ${subject} is known for 'traps'. Successful candidates always check these three conditions before finalizing their answer for ${topic}.`
+        },
+        {
+          question: `Analyze the graphical representation of ${topic}. In a standard JEE Mains plot, what does the area under the curve typically represent?`,
+          options: [
+            "A. The cumulative work done or energy transformed.",
+            "B. The rate of change of the primary state variable.",
+            "C. A dimensionless constant specific to ${topic}.",
+            "D. The instantaneous flux across the boundary layer."
+          ],
+          correctIndex: 0,
+          explanation: `Area-under-the-curve interpretations are high-yield for JEE. For ${topic}, this often corresponds to the fundamental work-energy theorem application.`
+        },
+        {
+          question: `Which of the following dimensionless ratios is most critical when scaling up a problem related to ${topic} for JEE Advanced levels?`,
+          options: [
+            "A. The proportionality constant alpha.",
+            "B. The Reynolds-equivalent for ${subject} systems.",
+            "C. The ratio of internal to external resistive forces.",
+            "D. None of these; ${topic} is scale-invariant."
+          ],
+          correctIndex: 2,
+          explanation: `Advancing from Mains to Advanced requires looking at ratios. For ${topic}, the balance between internal and external factors is often the key to solving the 'Challenge' sections.`
+        }
+      ];
+
+      // Simple pseudo-random index based on topic length and characters
+      const index = (topic.length + topic.charCodeAt(0)) % questions.length;
+      return questions[index];
     }
   }, [language]);
 
