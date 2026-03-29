@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, MicOff, Mic, Send, ChevronDown, Volume2, VolumeX, Loader2,
-  BookOpen, Atom, FlaskConical, FunctionSquare, Eraser, Flag,
+  MicOff, Mic, Send, ChevronDown, Volume2, VolumeX, Loader2,
+  BookOpen, Eraser, Flag, Pause, Play, Gauge,
+  Atom, FlaskConical, FunctionSquare,
 } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
@@ -405,6 +406,9 @@ const AITeachingRoomPage: React.FC = () => {
   // Voice
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const SPEED_OPTIONS = [0.5, 1, 1.25, 1.5, 2] as const;
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioUrlRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null); // cancels in-flight AI stream
@@ -552,8 +556,8 @@ const AITeachingRoomPage: React.FC = () => {
 
       if (audioRef.current) {
         audioRef.current.src = url;
-        audioRef.current.playbackRate = 1.1;
-        audioRef.current.onended = () => setIsSpeaking(false);
+        audioRef.current.playbackRate = playbackSpeed;
+        audioRef.current.onended = () => { setIsSpeaking(false); setIsPaused(false); };
         audioRef.current.onerror = () => setIsSpeaking(false);
         try {
           await audioRef.current.play();
@@ -569,7 +573,7 @@ const AITeachingRoomPage: React.FC = () => {
       const utterance = new SpeechSynthesisUtterance(clean);
       const targetLang = LANG_BCP47[language];
       utterance.lang = targetLang;
-      utterance.rate = 1.0;
+      utterance.rate = playbackSpeed;
 
       // Wait for voices to load (needed in Safari)
       const loadVoices = (): Promise<SpeechSynthesisVoice[]> =>
@@ -985,16 +989,17 @@ const AITeachingRoomPage: React.FC = () => {
             />
 
             {/* Board content */}
-            <div className="relative h-full overflow-y-auto z-0 p-5 sm:p-7">
+            <div className="relative h-full overflow-y-auto z-0 p-5 sm:p-8">
               {/* Chalk font styling */}
               <div
                 style={{
-                  fontFamily: "'Caveat', 'Permanent Marker', cursive, sans-serif",
-                  fontSize: '18px',
-                  lineHeight: 1.8,
-                  color: '#FFFFFF',
-                  textShadow: '0 0 8px rgba(255,255,255,0.3)',
-                  letterSpacing: '0.015em',
+                  fontFamily: "'Caveat', cursive",
+                  fontSize: 'clamp(17px, 2vw, 21px)',
+                  lineHeight: 2.05,
+                  color: '#f3f3e8',
+                  textShadow: '0 0 12px rgba(255,255,240,0.25), 0 1px 0 rgba(0,0,0,0.4)',
+                  letterSpacing: '0.025em',
+                  fontWeight: 500,
                 }}
               >
                 {isStreaming ? (
@@ -1012,9 +1017,9 @@ const AITeachingRoomPage: React.FC = () => {
 
               {/* Loading shimmer when waiting for first token */}
               {isStreaming && !streamingContent && (
-                <div className="flex items-center gap-2 text-green-300/50 text-sm mt-4">
+                <div className="flex items-center gap-2 mt-4" style={{ color: 'rgba(180,255,180,0.45)' }}>
                   <Loader2 size={14} className="animate-spin" />
-                  <span style={{ fontFamily: 'cursive' }}>
+                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: '17px', letterSpacing: '0.02em' }}>
                     {teacher.name} is writing on the board...
                   </span>
                 </div>
@@ -1360,6 +1365,67 @@ const AITeachingRoomPage: React.FC = () => {
               </>
             )}
           </motion.button>
+        </div>
+
+        {/* ── Voice Controls Bar: Play/Pause + Speed ── */}
+        <div className="flex items-center gap-2 px-4 pb-1.5">
+          {/* Play / Pause (only visible while speaking) */}
+          <AnimatePresence>
+            {isSpeaking && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  if (!audioRef.current) return;
+                  if (isPaused) {
+                    audioRef.current.play();
+                    setIsPaused(false);
+                  } else {
+                    audioRef.current.pause();
+                    setIsPaused(true);
+                  }
+                }}
+                className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                style={{
+                  background: `${teacher.accent}25`,
+                  border: `1px solid ${teacher.accent}40`,
+                  color: teacher.accent,
+                }}
+                title={isPaused ? 'Resume' : 'Pause'}
+              >
+                {isPaused ? <Play size={14} /> : <Pause size={14} />}
+              </motion.button>
+            )}
+          </AnimatePresence>
+
+          {/* Speed selector chips */}
+          <div className="flex items-center gap-1 flex-1">
+            <Gauge size={11} style={{ color: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
+            <div className="flex gap-1">
+              {SPEED_OPTIONS.map(speed => (
+                <button
+                  key={speed}
+                  onClick={() => {
+                    setPlaybackSpeed(speed);
+                    if (audioRef.current && isSpeaking) {
+                      audioRef.current.playbackRate = speed;
+                    }
+                  }}
+                  className="px-2 py-0.5 rounded-md text-[10px] font-bold transition-all"
+                  style={{
+                    background: playbackSpeed === speed ? `${teacher.accent}30` : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${playbackSpeed === speed ? teacher.accent : 'rgba(255,255,255,0.08)'}`,
+                    color: playbackSpeed === speed ? teacher.accent : 'rgba(255,255,255,0.35)',
+                    fontFamily: "'Inter', sans-serif",
+                  }}
+                >
+                  {speed === 1 ? '1x' : `${speed}x`}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* ── Text fallback row ── */}
