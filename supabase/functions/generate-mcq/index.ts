@@ -60,24 +60,31 @@ serve(async (req) => {
       ? `\nAvoid questions similar to these already asked:\n${previousQuestions.map((q: string, i: number) => `- ${q}`).join('\n')}`
       : '';
 
-    const systemPrompt = `You are an expert ${subject} teacher specializing in IIT-JEE Mains and Advanced preparation with 20+ years of experience.
-Your goal is to generate one high-quality Multiple Choice Question (MCQ) based on the teacher's current explanation of ${topic}.
+    const systemPrompt = `You are an expert IIT-JEE Mains Physics & Chemistry teacher. Your goal is to generate one AUTHENTIC JEE Main level Multiple Choice Question (MCQ) for the topic: ${topic}.
 
-CRITICAL REQUIREMENTS:
-1. JEE STANDARDS: The question must strictly align with the pattern and difficulty of JEE Mains (Previous 20 Years PYQs).
-2. CONCEPTUAL DEPTH: Focus on conceptual understanding, common traps, and multi-concept applications rather than just simple formula substitution.
-3. STRUCTURE: Return ONLY a valid JSON object.
-4. DIFFICULTY: ${diffInstruction}
-5. LANGUAGE: ${langInstruction}
-${avoidList}
+STRICT GUIDELINES:
+1. NO VAGUE THEORY: Avoid abstract, philosophical, or theoretical wording (e.g., "which best describes", "recent patterns"). 
+2. NUMERICAL AUTHENTICITY: Use realistic numerical values (e.g., 2 kg, 10 m/s², 0.5 friction coefficient). DO NOT use placeholders like \${subject} or \${topic} in the question text.
+3. CLARITY: Clearly define:
+   - GIVEN DATA: (e.g., "A block of 5kg is on a 30° incline...")
+   - REQUIRED OUTPUT: (e.g., "Find the minimum force to prevent sliding...")
+4. DIFFICULTY: ${diffInstruction} (Must align with actual JEE Mains difficulty).
+5. FORMAT: 
+   - 4 Options (A, B, C, D).
+   - Only ONE correct answer.
+   - Return ONLY a valid JSON object.
+6. EXPLANATION: Provide a concise, step-by-step logical solution using formulas (e.g., F = ma, W = ΔK).
 
 JSON FORMAT:
 {
-  "question": "A clear, concise JEE-style question.",
-  "options": ["A. Option 1", "B. Option 2", "C. Option 3", "D. Option 4"],
-  "correctIndex": number (0-3),
-  "explanation": "A detailed step-by-step 'teacher-style' explanation explaining why the correct option is right and others are wrong."
-}`;
+  "question": "A clear, numerical JEE Main style problem.",
+  "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+  "correctIndex": 0-3,
+  "explanation": "Step-by-step logical solution starting with Given data."
+}
+
+Language: ${language}
+${avoidList}`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",

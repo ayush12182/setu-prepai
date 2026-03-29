@@ -189,7 +189,10 @@ CRITICAL RULES:
 5. Explanations should be encouraging, not judgmental (use "Think about it this way..." style)
 6. For classes 6-8: NO complex formulas, keep language simple and friendly
 7. For classes 9-10: Can use basic formulas but focus on conceptual understanding
-8. For classes 11-12 & dropper: JEE/NEET level conceptual questions
+8. For classes 11-12 & dropper: JEE/NEET level AUTHENTIC questions. 
+   - STICK TO NUMERICALS: Use real values (kg, N, m/s²). No placeholders.
+   - GIVEN/REQUIRED: Must clearly state given data and what to find.
+   - NO VAGUE THEORY: Avoid "which best describes" or "recent patterns".
 
 IMPORTANT - TWO-PASS VERIFICATION:
 PASS 1: Solve each question completely to find the exact answer.

@@ -69,13 +69,13 @@ serve(async (req) => {
     };
 
     const MATH_SYNTAX = `
-STRICT MATHEMATICAL SYNTAX:
-- Use proper notation: V = IR, F = ma, e^(x+y−1), x², (a+b)/c
-- Use Greek: α, β, θ, λ, μ, ρ, ω, ε, Δ, π
-- Use Unicode subscripts: v₁, v₂, ε₀  Superscripts: x², xⁿ
-- Derivatives: dy/dx, ∂f/∂x   Fractions: (x²+y)/(x+y)
-- NEVER describe formulas with words. NO LaTeX.
-- Solutions: Step 1→Step 2→...→Final Answer: [expression]
+STRICT JEE AUTHENTICITY:
+- NUMERICAL VALUES: Use realistic mass (2 kg), force (10 N), velocity (500 m/s), etc. NO placeholders.
+- GIVEN/REQUIRED: State GIVEN data clearly and what is REQUIRED (e.g., "Find the acceleration...").
+- NO VAGUE THEORY: Avoid "which best describes" or "recent trends". Test measurable relationships.
+- MATH NOTATION: Use V = IR, F = ma, x², (a+b)/c. No LaTeX.
+- SYMBOLS: Use Unicode (α, β, θ, λ, μ, ρ, ω, ε, Δ, π, v₁, ε₀).
+- SOLUTIONS: Step 1 → Step 2 → Final Answer: [expression].
 `;
 
     if (type === "INTEGER") {
@@ -118,16 +118,16 @@ Return JSON array:
   "concept_tested": "Concept",
   "common_mistake": "Confusing similar items..."
 }]`;
-    } else {
       // Default MCQ
-      systemPrompt = `You are a ${examLabel} question designer. Create exam-grade MCQs.
+      systemPrompt = `You are an expert ${examLabel} question designer. Create AUTHENTIC JEE Main style MCQs for ${subject}.
 ${MATH_SYNTAX}
-- Each wrong option from a real student mistake.
+- STYLE: Numerical or conceptual application-based. No abstract/philosophical wording.
+- DIFFICULTY: ${difficulty} (${difficultyMap[difficulty]}).
+- Each wrong option MUST stem from a real student mistake (e.g., sign error, reciprocal error).
 - Exactly ONE correct answer.
-- Explanation format: Given → Formula → Steps → Final Answer: [expression]
-Topic: ${subject} > ${chapterName} > ${subchapterName}
-Level: ${difficulty} — ${difficultyMap[difficulty]}
-${isCuet ? "IMPORTANT: This is CUET UG, NOT JEE or NEET. Questions must be strictly NCERT-aligned, definition/concept/fact-based. Focus on speed and recall. Never write JEE or NEET. Avoid heavy derivations or advanced numericals." : isNeet ? "IMPORTANT: This is NEET UG, not JEE. Focus on NCERT conceptual/factual questions. Never write the word JEE." : ""}`;
+- Explanation: Concise, step-by-step logic starting with Given data.
+Topic: ${chapterName} > ${subchapterName}
+${isCuet ? "IMPORTANT: This is CUET UG, NOT JEE or NEET. Strictly NCERT-aligned. Focus on speed and recall." : isNeet ? "IMPORTANT: This is NEET UG, not JEE. Focus on NCERT factual/conceptual questions." : ""}`;
 
       userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} — ${chapterName}) at ${difficulty} difficulty.
 

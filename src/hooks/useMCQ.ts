@@ -115,67 +115,68 @@ export function useMCQ(
       return q;
     } catch (e) {
       console.warn('[MCQ] fetchQuestion failed, using frontend fallback:', e);
-      // ── MOCK FALLBACK POOL (JEE Standards) ──
+      // ── AUTHENTIC JEE MAINS FALLBACK POOL (Numerical & Concept Focused) ──
       const questions = [
         {
-          question: `Consider the application of ${topic} in a standard JEE Mains scenario. Which of the following statements strictly aligns with the fundamental principles of ${subject} as seen in past 20 years of PYQs?`,
+          question: "A block of mass 5 kg is placed on a rough horizontal surface with coefficient of static friction μs = 0.6 and kinetic friction μk = 0.4. A horizontal force of 25 N is applied to the block. What is the acceleration of the block? (Take g = 10 m/s²)",
           options: [
-            "A. It acts as a conservative force governed by the laws of symmetry.",
-            "B. The net change is independent of the path taken, assuming an ideal field.",
-            "C. The principle holds true only in inertial frames of reference.",
-            "D. Both B and C are critical constraints in JEE-level problem solving."
-          ],
-          correctIndex: 3,
-          explanation: `JEE Mains frequently tests the constraints of ${topic}, specifically inertial frames and path-independence. As P.K. Sir mentioned, understanding these 'boundary' conditions is key to solving 4-mark questions.`
-        },
-        {
-          question: `Regarding the mathematical formulation of ${topic}, how does the dependent variable scale according to the most recent JEE Mains patterns?`,
-          options: [
-            "A. It follows an inverse-square law relationship.",
-            "B. It scales linearly with the primary constant of ${subject}.",
-            "C. It exhibits logarithmic decay in a non-ideal medium.",
-            "D. It remains invariant under a Galilean transformation."
+            "A. 0 m/s²",
+            "B. 1 m/s²",
+            "C. 5 m/s²",
+            "D. 2 m/s²"
           ],
           correctIndex: 0,
-          explanation: `Inverse-square laws are a staple of JEE ${subject}. Many ${topic} problems rely on identifying this relationship early to simplify the differential equations.`
+          explanation: "Given: m=5kg, F=25N, μs=0.6. \n1. Calculate Max Static Friction: fs(max) = μs * m * g = 0.6 * 5 * 10 = 30 N. \n2. Compare: Since applied force (25 N) < fs(max) (30 N), the block does not move. \nAcceleration = 0 m/s²."
         },
         {
-          question: `In a multi-concept JEE problem involving ${topic} and conservation laws, what is the most common 'trap' encountered in PYQs?`,
+          question: "Two masses 2 kg and 3 kg are connected by a light string passing over a frictionless pulley. The system is released from rest. Find the tension in the string during motion. (Take g = 10 m/s²)",
           options: [
-            "A. Neglecting the external impulse during the interaction.",
-            "B. Assuming perfectly elastic behavior without explicit mention.",
-            "C. Confusing the frame of reference for the potential energy calculation.",
-            "D. All of the above are frequently used to differentiate top rankers."
+            "A. 12 N",
+            "B. 24 N",
+            "C. 20 N",
+            "D. 30 N"
           ],
-          correctIndex: 3,
-          explanation: `JEE ${subject} is known for 'traps'. Successful candidates always check these three conditions before finalizing their answer for ${topic}.`
+          correctIndex: 1,
+          explanation: "Given: m1=2kg, m2=3kg. \n1. System acceleration (a) = (m2 - m1)g / (m1 + m2) = (3 - 2) * 10 / (2 + 3) = 10/5 = 2 m/s². \n2. Tension (T) = m1(g + a) = 2(10 + 2) = 24 N."
         },
         {
-          question: `Analyze the graphical representation of ${topic}. In a standard JEE Mains plot, what does the area under the curve typically represent?`,
+          question: "A bullet of mass 20 g moving with a velocity of 500 m/s strikes a wooden block and comes to rest after penetrating 5 cm. Find the average resistive force exerted by the block.",
           options: [
-            "A. The cumulative work done or energy transformed.",
-            "B. The rate of change of the primary state variable.",
-            "C. A dimensionless constant specific to ${topic}.",
-            "D. The instantaneous flux across the boundary layer."
+            "A. 50,000 N",
+            "B. 25,000 N",
+            "C. 10,000 N",
+            "D. 5,000 N"
           ],
           correctIndex: 0,
-          explanation: `Area-under-the-curve interpretations are high-yield for JEE. For ${topic}, this often corresponds to the fundamental work-energy theorem application.`
+          explanation: "Given: m=0.02kg, u=500m/s, v=0, s=0.05m. \n1. Work-Energy Theorem: ΔK = Work done by friction -> (1/2)mu² = F * s. \n2. F = (0.5 * 0.02 * 500²) / 0.05 = (0.01 * 250,000) / 0.05 = 2500 / 0.05 = 50,000 N."
         },
         {
-          question: `Which of the following dimensionless ratios is most critical when scaling up a problem related to ${topic} for JEE Advanced levels?`,
+          question: "A variable force F = (3t² + 2t) N acts on a particle of mass 2 kg, starting from rest. What is the velocity of the particle at t = 2 s?",
           options: [
-            "A. The proportionality constant alpha.",
-            "B. The Reynolds-equivalent for ${subject} systems.",
-            "C. The ratio of internal to external resistive forces.",
-            "D. None of these; ${topic} is scale-invariant."
+            "A. 4 m/s",
+            "B. 8 m/s",
+            "C. 6 m/s",
+            "D. 12 m/s"
           ],
           correctIndex: 2,
-          explanation: `Advancing from Mains to Advanced requires looking at ratios. For ${topic}, the balance between internal and external factors is often the key to solving the 'Challenge' sections.`
+          explanation: "Given: m=2kg, F=3t²+2t. \n1. Acceleration a = F/m = (3t² + 2t)/2 = 1.5t² + t. \n2. Integrate: v = ∫a dt = ∫(1.5t² + t) dt = 0.5t³ + 0.5t². \n3. At t=2: v = 0.5(8) + 0.5(4) = 4 + 2 = 6 m/s."
+        },
+        {
+          question: "A 2 kg mass is moving in a circle of radius 1 m on a horizontal frictionless table. It is attached to a string passing through a hole with tension 32 N. What is the angular velocity of the mass?",
+          options: [
+            "A. 2 rad/s",
+            "B. 4 rad/s",
+            "C. 8 rad/s",
+            "D. 16 rad/s"
+          ],
+          correctIndex: 1,
+          explanation: "Given: m=2kg, r=1m, Centripetal Force (T)=32N. \n1. Formula: T = m * ω² * r. \n2. 32 = 2 * ω² * 1 -> ω² = 16 -> ω = 4 rad/s."
         }
       ];
 
-      // Simple pseudo-random index based on topic length and characters
-      const index = (topic.length + topic.charCodeAt(0)) % questions.length;
+      // Use a consistent index based on the topic to avoid immediate repetition
+      const seed = topic ? topic.length : 0;
+      const index = seed % questions.length;
       return questions[index];
     }
   }, [language]);
