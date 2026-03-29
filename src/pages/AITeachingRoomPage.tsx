@@ -237,6 +237,25 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jeetu-chat`;
 /* ────────────────────────────────────────────────
    TYPEWRITER HOOK
 ──────────────────────────────────────────────── */
+/* Inject ink-appear keyframe once */
+const INK_STYLE_ID = 'setu-ink-keyframe';
+if (typeof document !== 'undefined' && !document.getElementById(INK_STYLE_ID)) {
+  const s = document.createElement('style');
+  s.id = INK_STYLE_ID;
+  s.textContent = `
+    @keyframes inkAppear {
+      0%   { opacity: 0; filter: blur(2px); transform: translateY(1px) scale(0.97); }
+      60%  { opacity: 0.85; filter: blur(0.4px); }
+      100% { opacity: 1;  filter: blur(0);   transform: translateY(0) scale(1); }
+    }
+    .ink-char {
+      display: inline;
+      animation: inkAppear 0.18s ease-out forwards;
+    }
+  `;
+  document.head.appendChild(s);
+}
+
 function useTypewriter(text: string, baseSpeed = 7, speedMultiplier = 1) {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
@@ -251,10 +270,26 @@ function useTypewriter(text: string, baseSpeed = 7, speedMultiplier = 1) {
       i++;
       setDisplayed(text.slice(0, i));
       if (i >= text.length) { setDone(true); return; }
-      // Add human-like random variation (±30% of base delay)
+      const ch = text[i - 1];
       const base = baseSpeed / speedMultiplier;
-      const jitter = (Math.random() - 0.5) * base * 0.6;
-      const delay = Math.max(1, base + jitter);
+      let delay: number;
+      if (ch === '\n') {
+        // Long pause after newlines (teacher moving to next point)
+        delay = base * 8 + Math.random() * base * 4;
+      } else if ('.!?'.includes(ch)) {
+        // Sentence-ending pause
+        delay = base * 5 + Math.random() * base * 2;
+      } else if (',;:'.includes(ch)) {
+        // Comma/clause pause
+        delay = base * 2.5 + Math.random() * base;
+      } else if (ch === ' ') {
+        // Word-boundary micro-pause
+        delay = base * 1.4 + Math.random() * base * 0.5;
+      } else {
+        // Normal char with ±35% jitter
+        const jitter = (Math.random() - 0.5) * base * 0.7;
+        delay = Math.max(1, base + jitter);
+      }
       timeoutId = setTimeout(tick, delay);
     };
     timeoutId = setTimeout(tick, baseSpeed / speedMultiplier);
@@ -265,8 +300,20 @@ function useTypewriter(text: string, baseSpeed = 7, speedMultiplier = 1) {
 }
 
 /* ────────────────────────────────────────────────
-   WHITEBOARD TEXT FORMATTER
+   WHITEBOARD TEXT FORMATTER  (ink-char render)
 ──────────────────────────────────────────────── */
+
+/** Render a string with each character wrapped in an ink-appear span */
+function InkText({ text, color }: { text: string; color?: string }) {
+  return (
+    <>
+      {text.split('').map((ch, i) => (
+        <span key={i} className="ink-char" style={color ? { color } : undefined}>{ch}</span>
+      ))}
+    </>
+  );
+}
+
 function WhiteboardText({ text }: { text: string }) {
   const DIAGRAM_RE = /\[DIAGRAM\]([\s\S]*?)\[\/DIAGRAM\]/g;
   const segments: Array<{ kind: 'text' | 'diagram'; content: string }> = [];
@@ -284,7 +331,7 @@ function WhiteboardText({ text }: { text: string }) {
   }
 
   return (
-    <div className="space-y-1.5 leading-relaxed">
+    <div className="space-y-1 leading-relaxed">
       {segments.map((seg, si) => {
         if (seg.kind === 'diagram') {
           return <DiagramRenderer key={si} raw={seg.content} />;
@@ -293,23 +340,31 @@ function WhiteboardText({ text }: { text: string }) {
           const headingMatch = line.match(/^#{1,3}\s+(.*)/);
           const rawLine = headingMatch ? headingMatch[1] : line;
           const isHeading = !!headingMatch;
-          const parts = rawLine.split(/(\*\*.*?\*\*)/g);
-          const rendered = parts.map((part, j) =>
-            part.startsWith('**') && part.endsWith('**')
-              ? <span key={j} className="font-bold" style={{ color: '#c0392b' }}>{part.slice(2, -2)}</span>
-              : <span key={j}>{part}</span>
-          );
+
+          /** Render a segment with bold/normal spans, ink-char per character */
+          const renderInkLine = (raw: string, baseColor: string) =>
+            raw.split(/(\*\*.*?\*\*)/g).map((part, j) =>
+              part.startsWith('**') && part.endsWith('**')
+                ? <span key={j} className="font-bold"><InkText text={part.slice(2, -2)} color="#b83030" /></span>
+                : <InkText key={j} text={part} color={baseColor} />
+            );
+
           if (isHeading) {
             return (
-              <p key={`${si}-${i}`} className="mt-5 mb-1 font-bold"
-                style={{ color: '#1e3a6e', fontSize: '1.1rem', borderBottom: '2px solid rgba(30,58,110,0.15)', paddingBottom: '3px' }}>
-                {rendered}
+              <p key={`${si}-${i}`} className="mt-5 mb-1.5 font-bold"
+                style={{
+                  color: '#1a2744',
+                  fontSize: '1.1rem',
+                  borderBottom: '2px solid rgba(26,39,68,0.18)',
+                  paddingBottom: '4px',
+                }}>
+                {renderInkLine(rawLine, '#1a2744')}
               </p>
             );
           }
           return (
             <p key={`${si}-${i}`} className={line.startsWith('Step') || line.startsWith('\u091a\u0930\u0923') ? 'mt-3' : ''}>
-              {rendered}
+              {renderInkLine(rawLine, '#111111')}
             </p>
           );
         });
@@ -319,21 +374,27 @@ function WhiteboardText({ text }: { text: string }) {
 }
 
 /* ────────────────────────────────────────────────
-   MARKER CURSOR (whiteboard)
+   MARKER CURSOR (whiteboard pen tip)
 ──────────────────────────────────────────────── */
 function MarkerCursor() {
   return (
     <motion.span
-      animate={{ opacity: [1, 0.2, 1] }}
-      transition={{ repeat: Infinity, duration: 0.75 }}
-      className="inline-block align-middle ml-0.5"
+      animate={{ 
+        opacity: [1, 0.4, 1],
+        scale: [1, 1.15, 1],
+        rotate: [-10, -15, -10]
+      }}
+      transition={{ repeat: Infinity, duration: 0.65 }}
+      className="inline-block align-middle ml-1"
       style={{
-        width: '3px',
-        height: '22px',
-        borderRadius: '2px',
-        background: 'linear-gradient(180deg, #1e3a6e 0%, #2563eb 100%)',
-        boxShadow: '0 0 6px rgba(37,99,235,0.4)',
-        transform: 'rotate(-8deg)',
+        width: '6.5px',
+        height: '6.5px',
+        borderRadius: '1.5px', // Fine chisel tip
+        background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)',
+        boxShadow: '0 1px 1.5px rgba(0,0,0,0.4)',
+        transform: 'rotate(-12deg)',
+        position: 'relative',
+        top: '-1.5px'
       }}
     />
   );
@@ -518,6 +579,7 @@ const AITeachingRoomPage: React.FC = () => {
 
   // The full text currently displayed (including streaming)
   const { displayed, done } = useTypewriter(isStreaming ? '' : boardContent, 7, playbackSpeed);
+  const isWriting = isStreaming || !done;
 
   // ── Welcome message on mount
   useEffect(() => {
@@ -1006,7 +1068,7 @@ const AITeachingRoomPage: React.FC = () => {
                   fontFamily: "'Caveat', 'Patrick Hand', cursive",
                   fontSize: 'clamp(17px, 2vw, 21px)',
                   lineHeight: 2.05,
-                  color: '#1a1a2e',
+                  color: '#111111',
                   letterSpacing: '0.02em',
                   fontWeight: 500,
                 }}
@@ -1049,9 +1111,22 @@ const AITeachingRoomPage: React.FC = () => {
 
         {/* ══ RIGHT: TEACHER PANEL (40%) ══ */}
         <div
-          className="flex-[2] flex flex-col min-h-0 border-l"
+          className="flex-[2] flex flex-col min-h-0 border-l relative"
           style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(8,11,18,0.8)' }}
         >
+          {/* Local dim overlay for panel */}
+          <AnimatePresence>
+            {isWriting && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.45 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/50 z-10 pointer-events-none"
+                style={{ backdropFilter: 'blur(0.5px)' }}
+              />
+            )}
+          </AnimatePresence>
+          
           <div className="flex-1 overflow-y-auto p-4 space-y-5">
             {/* ── Finish Session — Top Position for visibility ── */}
             <div className="flex justify-end">
@@ -1306,13 +1381,25 @@ const AITeachingRoomPage: React.FC = () => {
 
       {/* ── BOTTOM DOUBT BOX ── */}
       <div
-        className="flex-shrink-0"
+        className="flex-shrink-0 relative"
         style={{
           borderTop: '1px solid rgba(255,255,255,0.07)',
           background: 'rgba(8,11,18,0.95)',
           backdropFilter: 'blur(12px)',
         }}
       >
+        {/* Local dim overlay for input box */}
+        <AnimatePresence>
+          {isWriting && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.45 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/50 z-10 pointer-events-none"
+              style={{ backdropFilter: 'blur(0.5px)' }}
+            />
+          )}
+        </AnimatePresence>
         {/* ── Voice-first row ── */}
         <div className="flex items-center gap-2 px-4 pt-3 pb-2">
           {/* Speaker toggle */}
