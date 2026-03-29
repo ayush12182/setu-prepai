@@ -1171,6 +1171,7 @@ const AITeachingRoomPage: React.FC = () => {
                     className="mb-6"
                  >
                     <MCQCard
+                      key={mcq.questionNumber || 'initial'}
                       mcq={mcq}
                       accentColor={teacher.accent}
                       onSelectAnswer={selectMCQAnswer}

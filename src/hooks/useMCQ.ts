@@ -174,10 +174,14 @@ export function useMCQ(
         }
       ];
 
-      // Use a consistent index based on the topic to avoid immediate repetition
-      const seed = topic ? topic.length : 0;
-      const index = seed % questions.length;
-      return questions[index];
+      // Use the questionNum to pick a unique question from our pool of 5.
+      // questionNum is 1-based, so we subtract 1 for the 0-based array index.
+      const index = (questionNum - 1) % questions.length;
+      const q = questions[index];
+      
+      // Still track for the API part if needed, though fallback is deterministic here
+      previousQsRef.current.push(q.question);
+      return q;
     }
   }, [language]);
 
@@ -217,31 +221,45 @@ export function useMCQ(
   }, [onResult]);
 
   const nextQuestion = useCallback(async () => {
-    const current = mcq;
-    if (current.questionNumber >= TOTAL_QUESTIONS) {
+    // 1. Check if we've reached the limit
+    if (mcq.questionNumber >= TOTAL_QUESTIONS) {
       setMCQ(s => ({ ...s, status: 'complete' }));
       return;
     }
+
+    // 2. Set loading state and calculate next values
+    const nextNum = mcq.questionNumber + 1;
+    const nextDifficulty = mcq.currentDifficulty;
+
+    console.log("Index:", mcq.questionNumber);
+    console.log("Next Index Target:", nextNum);
+
     setMCQ(s => ({
       ...s,
       status: 'loading',
       selectedIndex: null,
       isCorrect: null,
-      questionNumber: s.questionNumber + 1,
+      questionNumber: nextNum,
     }));
 
+    // 3. Fetch the next question
     const q = await fetchQuestion(
       topicRef.current,
       subjectRef.current,
-      current.currentDifficulty,
-      current.questionNumber + 1,
+      nextDifficulty,
+      nextNum,
     );
+
+    console.log("Question:", q);
+
     if (!q) {
       setMCQ(s => ({ ...s, status: 'complete' }));
       return;
     }
+
+    // 4. Set the new question as active
     setMCQ(s => ({ ...s, status: 'active', currentQuestion: q }));
-  }, [mcq, fetchQuestion]);
+  }, [mcq.questionNumber, mcq.currentDifficulty, fetchQuestion]);
 
   const skipMCQ = useCallback(() => {
     setMCQ(s => ({ ...s, status: 'idle' }));

@@ -106,7 +106,14 @@ export const MCQCard: React.FC<MCQCardProps> = ({
 
               {/* Active Quiz Content */}
               {(mcq.status === 'active' || mcq.status === 'feedback') && mcq.currentQuestion && (
-                <div className="space-y-4">
+                <motion.div 
+                  key={mcq.questionNumber}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4"
+                >
                   {/* Question text */}
                   <p className="text-sm font-medium text-white leading-relaxed">
                     {mcq.currentQuestion.question}
@@ -194,7 +201,7 @@ export const MCQCard: React.FC<MCQCardProps> = ({
                       </button>
                     </motion.div>
                   )}
-                </div>
+                </motion.div>
               )}
             </div>
           </motion.div>
