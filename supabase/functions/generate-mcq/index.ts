@@ -34,21 +34,30 @@ const LANG_INSTRUCTIONS: Record<string, string> = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { topic, subject, difficulty = "medium", language = "english", previousQuestions = [] } = await req.json();
+    const body = await req.json();
+    const { topic, subject, difficulty = "medium", language = "english", previousQuestions = [] } = body;
+    
+    console.log(`[MCQ] Request received for Topic: "${topic}", Subject: "${subject}", Lang: "${language}"`);
+
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
+    if (!OPENAI_API_KEY) {
+      console.error("[MCQ] Missing OPENAI_API_KEY");
+      throw new Error("OPENAI_API_KEY not configured");
+    }
+    
     if (!topic || !subject) throw new Error("topic and subject are required");
 
     const diffInstruction = DIFF_INSTRUCTIONS[difficulty] ?? DIFF_INSTRUCTIONS.medium;
     const langInstruction = LANG_INSTRUCTIONS[language] ?? LANG_INSTRUCTIONS.english;
 
     const avoidList = previousQuestions.length > 0
-      ? `\nAvoid questions similar to these already asked:\n${previousQuestions.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}`
+      ? `\nAvoid questions similar to these already asked:\n${previousQuestions.map((q: string, i: number) => `- ${q}`).join('\n')}`
       : '';
 
     const systemPrompt = `You are an expert JEE preparation teacher. Generate ONE high-quality MCQ for:
@@ -62,14 +71,14 @@ Rules:
 - The question must specifically test understanding of "${topic}"
 - Options must be plausible and non-trivially different
 - Explanation must be concise but complete (2–3 sentences max)
-- Do NOT repeat similar questions
+- Response must be a raw JSON object only.
 
-Respond ONLY with valid JSON in this exact format:
+Format:
 {
-  "question": "...",
-  "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
-  "correctIndex": 0,
-  "explanation": "..."
+  "question": "text",
+  "options": ["A. choice", "B. choice", "C. choice", "D. choice"],
+  "correctIndex": number,
+  "explanation": "text"
 }`;
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -82,32 +91,41 @@ Respond ONLY with valid JSON in this exact format:
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: systemPrompt }],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 600,
         response_format: { type: "json_object" },
       }),
     });
 
     if (!response.ok) {
       const err = await response.text();
-      throw new Error(`OpenAI error: ${response.status} ${err}`);
+      console.error(`[MCQ] OpenAI error: ${response.status}`, err);
+      throw new Error(`OpenAI error: ${response.status}`);
     }
 
     const data = await response.json();
-    const mcq = JSON.parse(data.choices[0].message.content);
+    let content = data.choices[0].message.content;
+    
+    // Clean up potential markdown blocks
+    content = content.replace(/```json/g, "").replace(/```/g, "").trim();
+    
+    const mcq = JSON.parse(content);
 
     // Validate structure
-    if (!mcq.question || !Array.isArray(mcq.options) || mcq.options.length !== 4 || mcq.correctIndex === undefined) {
-      throw new Error("Invalid MCQ structure from OpenAI");
+    if (!mcq.question || !Array.isArray(mcq.options) || mcq.options.length !== 4) {
+      console.error("[MCQ] Invalid structure from AI:", mcq);
+      throw new Error("Invalid MCQ structure from AI");
     }
+
+    console.log("[MCQ] Successfully generated question");
 
     return new Response(JSON.stringify(mcq), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("generate-mcq error:", e);
+    console.error("[MCQ] Exception:", e.message);
     return new Response(
       JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

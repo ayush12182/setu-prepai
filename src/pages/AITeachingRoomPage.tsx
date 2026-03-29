@@ -237,20 +237,20 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jeetu-chat`;
 /* ────────────────────────────────────────────────
    TYPEWRITER HOOK
 ──────────────────────────────────────────────── */
-/* Inject ink-appear keyframe once */
-const INK_STYLE_ID = 'setu-ink-keyframe';
-if (typeof document !== 'undefined' && !document.getElementById(INK_STYLE_ID)) {
+/* Inject chalk-dust-appear keyframe once */
+const CHALK_STYLE_ID = 'setu-chalk-keyframe';
+if (typeof document !== 'undefined' && !document.getElementById(CHALK_STYLE_ID)) {
   const s = document.createElement('style');
-  s.id = INK_STYLE_ID;
+  s.id = CHALK_STYLE_ID;
   s.textContent = `
-    @keyframes inkAppear {
-      0%   { opacity: 0; filter: blur(2px); transform: translateY(1px) scale(0.97); }
-      60%  { opacity: 0.85; filter: blur(0.4px); }
+    @keyframes chalkAppear {
+      0%   { opacity: 0; filter: blur(3px); transform: translateY(1px) scale(0.98); }
+      50%  { opacity: 0.7; filter: blur(0.8px); }
       100% { opacity: 1;  filter: blur(0);   transform: translateY(0) scale(1); }
     }
-    .ink-char {
+    .chalk-char {
       display: inline;
-      animation: inkAppear 0.18s ease-out forwards;
+      animation: chalkAppear 0.2s ease-out forwards;
     }
   `;
   document.head.appendChild(s);
@@ -300,21 +300,21 @@ function useTypewriter(text: string, baseSpeed = 7, speedMultiplier = 1) {
 }
 
 /* ────────────────────────────────────────────────
-   WHITEBOARD TEXT FORMATTER  (ink-char render)
+   CHALK TEXT FORMATTER (chalk-char render)
 ──────────────────────────────────────────────── */
 
-/** Render a string with each character wrapped in an ink-appear span */
-function InkText({ text, color }: { text: string; color?: string }) {
+/** Render a string with each character wrapped in a chalk-dust span */
+function ChalkText({ text, color }: { text: string; color?: string }) {
   return (
     <>
       {text.split('').map((ch, i) => (
-        <span key={i} className="ink-char" style={color ? { color } : undefined}>{ch}</span>
+        <span key={i} className="chalk-char" style={color ? { color } : undefined}>{ch}</span>
       ))}
     </>
   );
 }
 
-function WhiteboardText({ text }: { text: string }) {
+function BlackboardText({ text }: { text: string }) {
   const DIAGRAM_RE = /\[DIAGRAM\]([\s\S]*?)\[\/DIAGRAM\]/g;
   const segments: Array<{ kind: 'text' | 'diagram'; content: string }> = [];
   let lastIndex = 0;
@@ -341,30 +341,30 @@ function WhiteboardText({ text }: { text: string }) {
           const rawLine = headingMatch ? headingMatch[1] : line;
           const isHeading = !!headingMatch;
 
-          /** Render a segment with bold/normal spans, ink-char per character */
-          const renderInkLine = (raw: string, baseColor: string) =>
+          /** Render a line with bold/normal spans, chalk-char per character */
+          const renderChalkLine = (raw: string, baseColor: string) =>
             raw.split(/(\*\*.*?\*\*)/g).map((part, j) =>
               part.startsWith('**') && part.endsWith('**')
-                ? <span key={j} className="font-bold"><InkText text={part.slice(2, -2)} color="#b83030" /></span>
-                : <InkText key={j} text={part} color={baseColor} />
+                ? <span key={j} className="font-bold"><ChalkText text={part.slice(2, -2)} color="#ff9a9a" /></span>
+                : <ChalkText key={j} text={part} color={baseColor} />
             );
 
           if (isHeading) {
             return (
               <p key={`${si}-${i}`} className="mt-5 mb-1.5 font-bold"
                 style={{
-                  color: '#1a2744',
+                  color: '#fff8d0',
                   fontSize: '1.1rem',
-                  borderBottom: '2px solid rgba(26,39,68,0.18)',
+                  borderBottom: '2px solid rgba(255,248,208,0.2)',
                   paddingBottom: '4px',
                 }}>
-                {renderInkLine(rawLine, '#1a2744')}
+                {renderChalkLine(rawLine, '#fff8d0')}
               </p>
             );
           }
           return (
             <p key={`${si}-${i}`} className={line.startsWith('Step') || line.startsWith('\u091a\u0930\u0923') ? 'mt-3' : ''}>
-              {renderInkLine(rawLine, '#111111')}
+              {renderChalkLine(rawLine, '#f8f8ee')}
             </p>
           );
         });
@@ -374,27 +374,27 @@ function WhiteboardText({ text }: { text: string }) {
 }
 
 /* ────────────────────────────────────────────────
-   MARKER CURSOR (whiteboard pen tip)
+   CHALK CURSOR (rectangular piece)
 ──────────────────────────────────────────────── */
-function MarkerCursor() {
+function ChalkCursor() {
   return (
     <motion.span
       animate={{ 
         opacity: [1, 0.4, 1],
-        scale: [1, 1.15, 1],
-        rotate: [-10, -15, -10]
+        scale: [1, 1.1, 1],
+        rotate: [-14, -18, -14]
       }}
-      transition={{ repeat: Infinity, duration: 0.65 }}
+      transition={{ repeat: Infinity, duration: 0.6 }}
       className="inline-block align-middle ml-1"
       style={{
-        width: '6.5px',
-        height: '6.5px',
-        borderRadius: '1.5px', // Fine chisel tip
-        background: 'linear-gradient(135deg, #000 0%, #1a1a1a 100%)',
-        boxShadow: '0 1px 1.5px rgba(0,0,0,0.4)',
-        transform: 'rotate(-12deg)',
+        width: '7px',
+        height: '16px',
+        borderRadius: '1px',
+        background: 'linear-gradient(180deg, #fff 0%, #eee 100%)',
+        boxShadow: '0 0 6px rgba(255,255,255,0.35)',
+        transform: 'rotate(-15deg)',
         position: 'relative',
-        top: '-1.5px'
+        top: '-1px'
       }}
     />
   );
@@ -426,7 +426,7 @@ function SpeakingIndicator() {
 }
 
 /* ────────────────────────────────────────────────
-   ERASE ANIMATION OVERLAY (whiteboard wipe)
+   ERASE ANIMATION OVERLAY (chalkboard wipe)
 ──────────────────────────────────────────────── */
 function EraseOverlay({ visible }: { visible: boolean }) {
   return (
@@ -437,10 +437,10 @@ function EraseOverlay({ visible }: { visible: boolean }) {
           animate={{ scaleX: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.3 } }}
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-          className="absolute inset-0 rounded-xl z-10 flex items-center justify-center"
-          style={{ background: 'linear-gradient(90deg, #f8f6f1 0%, #f0ede5 100%)' }}
+          className="absolute inset-0 rounded-xl z-20 flex items-center justify-center"
+          style={{ background: 'linear-gradient(90deg, #0d2916 0%, #0a1f10 100%)', opacity: 0.95 }}
         >
-          <div className="flex items-center gap-3" style={{ color: 'rgba(100,80,60,0.5)' }}>
+          <div className="flex items-center gap-3 text-emerald-100/60">
             <Eraser size={20} />
             <span className="text-sm font-medium" style={{ fontFamily: "'Caveat', cursive", fontSize: '18px' }}>Erasing board...</span>
           </div>
@@ -574,8 +574,13 @@ const AITeachingRoomPage: React.FC = () => {
   }, [sessionTracker, engagement]);
 
   // ── MCQ System
-  const { mcq, startMCQ, selectAnswer: selectMCQAnswer, nextQuestion: nextMCQQuestion, skipMCQ } =
-    useMCQ(language, sessionTracker.recordMCQResult);
+  const { 
+    mcq, startMCQ, selectAnswer: selectMCQAnswer, 
+    nextQuestion: nextMCQQuestion, skipMCQ, resetMCQ 
+  } = useMCQ(language, (topic, correct) => {
+    // ── Update session tracker with MCQ results ──
+    sessionTracker.recordMCQResult(topic, correct);
+  });
 
   // The full text currently displayed (including streaming)
   const { displayed, done } = useTypewriter(isStreaming ? '' : boardContent, 7, playbackSpeed);
@@ -893,8 +898,9 @@ const AITeachingRoomPage: React.FC = () => {
 
       // ── Trigger MCQ after explanation (not for internal adaptation messages)
       const isAdaptationMsg = userMessage.includes('dhyan') || userMessage.includes('distracted') || userMessage.includes('stay with me');
-      if (!isAdaptationMsg && mcq.status === 'idle') {
-        // Small delay so the board content settles before the quiz slides in
+      if (!isAdaptationMsg) {
+        // Reset and trigger new MCQ for this topic
+        resetMCQ();
         setTimeout(() => {
           startMCQ(
             teacher.chapters[selectedChapter]?.topics[selectedTopic] ?? 'General',
@@ -977,6 +983,7 @@ const AITeachingRoomPage: React.FC = () => {
     const topic = chapter.topics[selectedTopic];
     sessionTracker.recordInteraction('explain');
     sessionTracker.recordTopicChange(chapter.name, topic);
+    resetMCQ(); // ── Ensure previous quiz state is cleared ──
     // Build a simple explain prompt; the system prompt enforces the language
     const prompt = language === 'hindi'
       ? `${chapter.name} में "${topic}" समझाइए।`
@@ -993,6 +1000,7 @@ const AITeachingRoomPage: React.FC = () => {
     const q = doubtInput.trim();
     setDoubtInput('');
     sessionTracker.recordInteraction('typed'); // ── track typed interaction
+    resetMCQ(); // ── Ensure previous quiz state is cleared ──
     await callAI(q);
     setIsSendingDoubt(false);
   }, [doubtInput, isSendingDoubt, isStreaming, callAI, sessionTracker]);
@@ -1029,22 +1037,21 @@ const AITeachingRoomPage: React.FC = () => {
       {/* ── MAIN CONTENT ── */}
       <div className="flex overflow-hidden gap-0 rounded-xl" style={{ height: 'calc(100vh - 13rem)' }}>
 
-        {/* ══ LEFT: WHITEBOARD (60%) ══ */}
+        {/* ══ LEFT: BLACKBOARD (60%) ══ */}
         <div className="flex-[3] flex flex-col min-h-0 p-3 sm:p-4">
           <div
             className="relative flex-1 rounded-xl overflow-hidden"
             style={{
-              background: 'linear-gradient(145deg, #faf9f7 0%, #f7f5f1 50%, #f3f1ec 100%)',
-              border: '1.5px solid rgba(200,190,180,0.5)',
-              boxShadow: 'inset 0 2px 8px rgba(180,160,130,0.08), 0 2px 20px rgba(0,0,0,0.12), 0 0 0 1px rgba(200,190,180,0.2)',
+              background: 'linear-gradient(160deg, #0d2916 0%, #0a1f10 40%, #091a0e 100%)',
+              border: '2px solid rgba(255,255,255,0.07)',
+              boxShadow: 'inset 0 0 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03)',
             }}
           >
-            {/* Whiteboard ruled-line texture */}
+            {/* Blackboard slate texture overlay */}
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="absolute inset-0 pointer-events-none opacity-[0.04]"
               style={{
-                backgroundImage: 'repeating-linear-gradient(0deg, transparent 0px, transparent 31px, rgba(180,170,160,0.08) 31px, rgba(180,170,160,0.08) 32px)',
-                backgroundSize: '100% 32px',
+                backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.1) 0px, transparent 1px, transparent 28px, rgba(255,255,255,0.1) 29px)',
               }}
             />
 
@@ -1065,30 +1072,31 @@ const AITeachingRoomPage: React.FC = () => {
               {/* Chalk font styling */}
               <div
                 style={{
-                  fontFamily: "'Caveat', 'Patrick Hand', cursive",
+                  fontFamily: "'Caveat', cursive",
                   fontSize: 'clamp(17px, 2vw, 21px)',
                   lineHeight: 2.05,
-                  color: '#111111',
-                  letterSpacing: '0.02em',
+                  color: '#f8f8ee',
+                  textShadow: '0 0 12px rgba(255,255,240,0.2), 0 1px 0 rgba(0,0,0,0.4)',
+                  letterSpacing: '0.025em',
                   fontWeight: 500,
                 }}
               >
                 {isStreaming ? (
                   <>
-                    <WhiteboardText text={streamingContent} />
-                    <MarkerCursor />
+                    <BlackboardText text={streamingContent} />
+                    <ChalkCursor />
                   </>
                 ) : (
                   <>
-                    <WhiteboardText text={displayed} />
-                    {!done && <MarkerCursor />}
+                    <BlackboardText text={displayed} />
+                    {!done && <ChalkCursor />}
                   </>
                 )}
               </div>
 
-              {/* Loading: marker writing indicator */}
+              {/* Loading: chalk writing indicator */}
               {isStreaming && !streamingContent && (
-                <div className="flex items-center gap-2 mt-4" style={{ color: 'rgba(30,58,110,0.4)' }}>
+                <div className="flex items-center gap-2 mt-4" style={{ color: 'rgba(180,255,180,0.4)' }}>
                   <Loader2 size={14} className="animate-spin" />
                   <span style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', letterSpacing: '0.02em' }}>
                     {teacher.name} is writing on the board...
@@ -1097,15 +1105,15 @@ const AITeachingRoomPage: React.FC = () => {
               )}
             </div>
 
-            {/* Whiteboard shadow frames */}
-            <div className="absolute top-0 left-0 right-0 h-6 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(180,160,130,0.06), transparent)' }} />
-            <div className="absolute bottom-0 left-0 right-0 h-6 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(180,160,130,0.06), transparent)' }} />
+            {/* Blackboard shadow frames */}
+            <div className="absolute top-0 left-0 right-0 h-4 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.35), transparent)' }} />
+            <div className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.35), transparent)' }} />
           </div>
 
-          {/* Whiteboard marker ledge */}
+          {/* Chalk tray visual */}
           <div
             className="h-2.5 mx-2 rounded-b-lg flex-shrink-0"
-            style={{ background: 'linear-gradient(to bottom, #d4c9b8, #c0b09a)', boxShadow: '0 2px 4px rgba(0,0,0,0.08)' }}
+            style={{ background: 'linear-gradient(to bottom, #4a3728, #2a1f15)', opacity: 0.8 }}
           />
         </div>
 

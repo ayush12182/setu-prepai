@@ -99,6 +99,7 @@ export function useMCQ(
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'apikey': SUPABASE_KEY,
         },
         body: JSON.stringify({
           topic,
