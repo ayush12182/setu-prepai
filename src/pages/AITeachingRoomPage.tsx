@@ -466,6 +466,7 @@ const AITeachingRoomPage: React.FC = () => {
   const [selectedTopic, setSelectedTopic] = useState(0);
   const [chapterOpen, setChapterOpen] = useState(false);
   const [topicOpen, setTopicOpen] = useState(false);
+  const [quizReady, setQuizReady] = useState(false);
 
   // Blackboard
   const [boardContent, setBoardContent] = useState('');
@@ -608,17 +609,6 @@ const AITeachingRoomPage: React.FC = () => {
     chatHistoryRef.current = [];
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
-  
-  // ── Reactive Quiz Topic Sync: Trigger new MCQ when selection changes ──
-  useEffect(() => {
-    const topic = teacher.chapters[selectedChapter]?.topics[selectedTopic];
-    if (topic) {
-      console.log(`[MCQ] Selection changed to: ${topic}. Resetting and starting new quiz.`);
-      resetMCQ();
-      startMCQ(topic, teacher.subject);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedChapter, selectedTopic, teacher.subject]);
 
   // -- TTS function
   const speakText = useCallback(async (text: string) => {
@@ -917,8 +907,13 @@ const AITeachingRoomPage: React.FC = () => {
       // ── Record AI response in session tracker
       sessionTracker.recordAIResponse();
 
-      // ── Trigger MCQ after explanation (not for internal adaptation messages)
-      // (MCQ is now handled reactively by the useEffect on topic change)
+      // ── Trigger MCQ after explanation ──
+      const chapter = teacher.chapters[selectedChapter];
+      const topic = chapter?.topics[selectedTopic];
+      if (topic) {
+        startMCQ(topic, teacher.subject);
+        setQuizReady(true);
+      }
 
       if (avatarMode && avatarClientRef.current) {
           const cleanText = accumulated
@@ -1165,11 +1160,11 @@ const AITeachingRoomPage: React.FC = () => {
                  </div>
             {/* ── Active Quiz Section ── */}
             <AnimatePresence>
-               {(mcq.status !== 'idle' || !!mcq.error) && (
+               {quizReady && (mcq.status !== 'idle' || !!mcq.error) && (
                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
+                    initial={{ opacity: 0, x: 50, height: 0 }}
+                    animate={{ opacity: 1, x: 0, height: 'auto' }}
+                    exit={{ opacity: 0, x: 50, height: 0 }}
                     className="mb-6"
                  >
                     <MCQCard
