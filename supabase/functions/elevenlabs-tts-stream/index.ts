@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, voiceId } = await req.json();
+    const { text, voiceId, voiceSettings } = await req.json();
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     if (!ELEVENLABS_API_KEY) {
@@ -45,7 +45,7 @@ serve(async (req) => {
         body: JSON.stringify({
           text: cleanText,
           model_id: "eleven_multilingual_v2",
-          voice_settings: {
+          voice_settings: voiceSettings || {
             stability: 0.6,
             similarity_boost: 0.75,
             style: 0.3,
