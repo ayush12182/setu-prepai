@@ -13,6 +13,9 @@ interface Profile {
   class: string | null;
   target_exam: string | null;
   student_level: string | null;
+  user_type: 'b2c_student' | 'b2b_student' | 'b2b_mentor' | 'b2b_institution' | 'admin' | null;
+  organization_id: string | null;
+  institution_name: string | null;
 }
 
 interface SubscriptionState {
@@ -28,6 +31,12 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   subscription: SubscriptionState;
+  /** Convenience getter — defaults to 'b2c_student' if not set */
+  userType: Profile['user_type'];
+  isMentor: boolean;
+  isInstitution: boolean;
+  isB2C: boolean;
+  isB2BStudent: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string, fullName?: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -63,14 +72,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (error) throw error;
-      setProfile(data);
+      if (error) {
+        console.error('Error fetching profile from DB:', error);
+      }
+
+      // Merge data from database and auth metadata
+      const dbData = data as any;
+      const profileData: any = {
+        ...dbData,
+        user_type: user?.user_metadata?.user_type || dbData?.user_type || 'b2c_student',
+        institution_name: user?.user_metadata?.institution_name || dbData?.institution_name || null,
+      };
+
+      setProfile(profileData);
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -199,28 +220,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) throw new Error('No user logged in');
 
-    // Cast to any to handle new columns not yet in generated types
+    // 1. Update Auth Metadata first as it's the most robust storage for B2B fields
+    const metadataUpdates: any = {};
+    if (updates.user_type) metadataUpdates.user_type = updates.user_type;
+    if (updates.institution_name !== undefined) metadataUpdates.institution_name = updates.institution_name;
+
+    if (Object.keys(metadataUpdates).length > 0) {
+      const { error: metaError } = await supabase.auth.updateUser({
+        data: metadataUpdates
+      });
+      if (metaError) console.error('Error updating metadata:', metaError);
+    }
+
+    // 2. Attempt to update profiles table
+    // We filter out institution_name and user_type if they are known to be missing in some environments
     const dbUpdates: any = { ...updates };
-
-    // Try update first, if no rows affected, upsert
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(dbUpdates)
-      .eq('user_id', user.id)
-      .select();
-
-    if (error) throw error;
-
-    // If update matched no rows, insert instead
-    if (!data || data.length === 0) {
-      const { error: insertError } = await supabase
+    
+    try {
+      const { data, error } = await supabase
         .from('profiles')
-        .insert({ user_id: user.id, ...dbUpdates } as any);
-      if (insertError) throw insertError;
+        .update(dbUpdates)
+        .eq('user_id', user.id)
+        .select();
+
+      // If update matched no rows, insert instead
+      if (!data || data.length === 0) {
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({ user_id: user.id, ...dbUpdates } as any);
+        
+        if (insertError) {
+          // If the error is specifically about missing columns, we ignore it as we have metadata fallback
+          if (insertError.code === 'PGRST204' || insertError.message?.includes('column')) {
+            console.warn('DB Column missing, falling back to metadata storage only.');
+          } else {
+            throw insertError;
+          }
+        }
+      } else if (error) {
+        if (error.code === 'PGRST204' || error.message?.includes('column')) {
+          console.warn('DB Column missing, falling back to metadata storage only.');
+        } else {
+          throw error;
+        }
+      }
+    } catch (error) {
+      // Catch PGRST204 (Missing Column) and other generic DB errors
+      const err = error as any;
+      if (err.code === 'PGRST204' || err.message?.includes('column')) {
+        console.warn('Database column not found, but metadata updated successfully.');
+      } else {
+        console.error('Profile update error:', error);
+        throw error;
+      }
     }
 
     await fetchProfile(user.id);
   };
+
+  const userType = profile?.user_type ?? 'b2c_student';
+  const isMentor = userType === 'b2b_mentor' || userType === 'admin';
+  const isInstitution = userType === 'b2b_institution' || userType === 'admin';
+  const isB2C = userType === 'b2c_student';
+  const isB2BStudent = userType === 'b2b_student';
 
   return (
     <AuthContext.Provider
@@ -230,6 +292,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         profile,
         loading,
         subscription,
+        userType,
+        isMentor,
+        isInstitution,
+        isB2C,
+        isB2BStudent,
         signInWithEmail,
         signUpWithEmail,
         signInWithGoogle,

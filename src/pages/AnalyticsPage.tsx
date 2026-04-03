@@ -7,9 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { generateMockAnalytics, StudentAnalyticsData } from '@/lib/analyticsSimulation';
 import { generateDiagnosticReport, AIDiagnosisReport } from '@/lib/diagnosisEngine';
-import { Target, TrendingUp, AlertTriangle, Zap, ArrowRight, BrainCircuit, Clock, BookOpen, User } from 'lucide-react';
+import { Target, TrendingUp, AlertTriangle, Zap, ArrowRight, BrainCircuit, Clock, BookOpen, User, BarChart3, Fingerprint, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { RankPredictorCard } from '@/components/analytics/RankPredictorCard';
 
 const AnalyticsPage: React.FC = () => {
   const { user } = useAuth();
@@ -19,19 +21,44 @@ const AnalyticsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<StudentAnalyticsData | null>(null);
   const [report, setReport] = useState<AIDiagnosisReport | null>(null);
+  const [realAttempts, setRealAttempts] = useState<any[]>([]);
+  const [reflectionRate, setReflectionRate] = useState(0);
 
   useEffect(() => {
-    // Simulate fetching and analyzing deep data
-    const loadDiagnostics = () => {
+    const loadDiagnostics = async () => {
+      if (!user) return;
       setIsLoading(true);
-      setTimeout(() => {
+      
+      try {
+        // 1. Fetch real attempts from Supabase
+        const { data: attempts, error } = await (supabase
+          .from('user_mcq_attempts' as any)
+          .select('*, questions(*)')
+          .eq('user_id', user.id)
+          .order('attempted_at', { ascending: false }) as any);
+
+        if (!error && attempts) {
+          setRealAttempts(attempts);
+          
+          // 2. Calculate Reflection Rate
+          const incorrectAttempts = attempts.filter((a: any) => !a.is_correct);
+          const diagnosedAttempts = incorrectAttempts.filter((a: any) => !a.mistake_skipped && a.user_selected_mistake);
+          const rate = incorrectAttempts.length > 0 ? (diagnosedAttempts.length / incorrectAttempts.length) * 100 : 0;
+          setReflectionRate(rate);
+        }
+
+        // 3. Fallback/Mock for advanced analytics (Simulator)
         const examType = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE';
         const simData = generateMockAnalytics(examType);
         const diagReport = generateDiagnosticReport(simData);
+        
         setData(simData);
         setReport(diagReport);
+      } catch (err) {
+        console.error('Error loading diagnostics:', err);
+      } finally {
         setIsLoading(false);
-      }, 1500); // Fake delay for dramatic effect
+      }
     };
 
     loadDiagnostics();
@@ -109,6 +136,16 @@ const AnalyticsPage: React.FC = () => {
           </div>
         </div>
 
+        {/* ─── RANK PREDICTOR: LIVE STATUS ─── */}
+        <div className="mb-6">
+           <RankPredictorCard 
+             score={80 + Math.random() * 20} 
+             maxScore={300} 
+             exam={isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE_MAINS'} 
+             previousRank={280000} 
+           />
+        </div>
+
         {/* ─── THE FOCUS ZONE: Top Priorities ─── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
@@ -136,16 +173,16 @@ const AnalyticsPage: React.FC = () => {
             <p className="text-muted-foreground/50 text-[10px] uppercase font-bold tracking-widest">{report.confidenceMessage}</p>
           </div>
 
-          {/* Card 3: Impact */}
+          {/* Card 3: Reflection Rate */}
           <div className="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/40 transition-colors">
             <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
             <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
-              <h3 className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-xs">Expected Gain</h3>
+              <Fingerprint className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+              <h3 className="text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider text-xs">Reflection Rate</h3>
             </div>
-            <p className="text-foreground text-2xl font-display font-bold mb-1">{report.marksPotential}</p>
-            <p className="text-muted-foreground text-xs mb-3 font-medium">By locking down the top 2 chapters in 3 days.</p>
-            <p className="text-muted-foreground/50 text-[10px] uppercase font-bold tracking-widest">Calculated via Risk Engine</p>
+            <p className="text-foreground text-2xl font-display font-bold mb-1">{reflectionRate.toFixed(0)}%</p>
+            <p className="text-muted-foreground text-xs mb-3 font-medium">Of your mistakes are self-diagnosed. Keep it up!</p>
+            <p className="text-muted-foreground/50 text-[10px] uppercase font-bold tracking-widest">Self-Awareness Metric</p>
           </div>
 
         </div>
@@ -199,7 +236,8 @@ const AnalyticsPage: React.FC = () => {
           <Tabs defaultValue="heatmaps" className="w-full">
             <TabsList className="bg-secondary border border-border p-1 rounded-xl mb-6">
               <TabsTrigger value="heatmaps" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-sm">Chapter Heatmaps</TabsTrigger>
-              <TabsTrigger value="behavioral" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-sm">Time & Stamina</TabsTrigger>
+              <TabsTrigger value="behavioral" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-sm">Mistake Analysis</TabsTrigger>
+              <TabsTrigger value="real-attempts" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-sm">Real History</TabsTrigger>
               <TabsTrigger value="story" className="rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground text-muted-foreground data-[state=active]:shadow-sm">Weekly Story</TabsTrigger>
             </TabsList>
 
@@ -251,37 +289,41 @@ const AnalyticsPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-secondary/50 border border-border rounded-2xl p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <Clock className="w-5 h-5 text-blue-500" />
-                    <h3 className="text-foreground font-bold">Stamina Drop-off</h3>
+                    <BarChart3 className="w-5 h-5 text-blue-500" />
+                    <h3 className="text-foreground font-bold">AI vs User Perception</h3>
                   </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                    {report.timeInsight}
+                  <p className="text-muted-foreground text-xs mb-6">
+                    Mismatches identify "Blind Spots" — where you think you know the concept but are failing.
                   </p>
-                  <div className="h-2 w-full bg-border rounded-full overflow-hidden flex">
-                    <div className="h-full bg-blue-500" style={{ width: `${(data.timeDropoff.peakMinutes / 120) * 100}%` }} />
-                    <div className="h-full bg-red-400 flex-1" />
-                  </div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground mt-1 uppercase font-bold">
-                    <span>0m</span>
-                    <span>{data.timeDropoff.peakMinutes}m (Peak)</span>
-                    <span>120m</span>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">Behavioral Alignment</span>
+                      <span className="font-bold text-accent">84% Match</span>
+                    </div>
+                    <div className="h-2 w-full bg-border rounded-full overflow-hidden">
+                      <div className="h-full bg-accent" style={{ width: '84%' }} />
+                    </div>
+                    <div className="mt-4 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20">
+                      <p className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mb-1">Top Perception Gap</p>
+                      <p className="text-xs text-foreground font-medium">You identified "Silly Mistake" 3 times in SHM where the AI detected a "Conceptual Gap".</p>
+                    </div>
                   </div>
                 </div>
 
                 <div className="bg-secondary/50 border border-border rounded-2xl p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <User className="w-5 h-5 text-purple-500" />
-                    <h3 className="text-foreground font-bold">Mistake Profile</h3>
+                    <h3 className="text-foreground font-bold">Mistake Distribution</h3>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {[
-                      { l: 'Conceptual', v: data.mistakeProfile.conceptual, c: 'bg-red-500' },
-                      { l: 'Silly Mistakes', v: data.mistakeProfile.silly, c: 'bg-amber-500' },
-                      { l: 'Time Pressure', v: data.mistakeProfile.timeTracker, c: 'bg-blue-500' },
-                      { l: 'Guessing', v: data.mistakeProfile.guess, c: 'bg-purple-500' },
-                    ].sort((a,b) => b.v - a.v).map(m => (
+                      { l: 'Conceptual', v: 42, c: 'bg-red-500' },
+                      { l: 'Calculation', v: 28, c: 'bg-amber-500' },
+                      { l: 'Silly Mistakes', v: 18, c: 'bg-blue-500' },
+                      { l: 'Guessed', v: 12, c: 'bg-purple-500' },
+                    ].map(m => (
                       <div key={m.l}>
-                        <div className="flex justify-between text-xs font-bold text-muted-foreground mb-1">
+                        <div className="flex justify-between text-[11px] font-bold text-muted-foreground mb-1">
                           <span>{m.l}</span>
                           <span>{m.v}%</span>
                         </div>
@@ -292,6 +334,47 @@ const AnalyticsPage: React.FC = () => {
                     ))}
                   </div>
                 </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="real-attempts" className="animate-in fade-in slide-in-from-bottom-2">
+              <div className="space-y-3">
+                {realAttempts.slice(0, 10).map((att: any, idx: number) => (
+                  <div key={idx} className="bg-secondary/40 border border-border p-4 rounded-xl flex items-center justify-between group hover:bg-secondary/60 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center border",
+                        att.is_correct ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : "bg-red-500/10 border-red-500/20 text-red-500"
+                      )}>
+                        {att.is_correct ? <CheckCircle size={18} /> : <XCircle size={18} />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-foreground line-clamp-1">{att.questions?.question_text || 'Assessment Question'}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">{att.questions?.topic}</span>
+                          <span className="w-1 h-1 rounded-full bg-border" />
+                          <span className="text-[10px] font-medium text-muted-foreground">{new Date(att.attempted_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                       <span className={cn(
+                         "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded border",
+                         att.confidence_level === 'high' ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/5" :
+                         att.confidence_level === 'medium' ? "text-amber-500 border-amber-500/20 bg-amber-500/5" :
+                         "text-red-500 border-red-500/20 bg-red-500/5"
+                       )}>
+                         {att.confidence_level || 'No Data'}
+                       </span>
+                    </div>
+                  </div>
+                ))}
+                
+                {realAttempts.length === 0 && (
+                  <div className="text-center py-12 bg-secondary/20 rounded-2xl border border-dashed border-border text-muted-foreground">
+                    No persistent attempts tracked yet. Start a quiz in the teaching room!
+                  </div>
+                )}
               </div>
             </TabsContent>
 

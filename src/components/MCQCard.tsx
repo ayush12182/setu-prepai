@@ -8,13 +8,17 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, ChevronRight, SkipForward, Loader2, Trophy } from 'lucide-react';
-import { MCQState } from '@/hooks/useMCQ';
+import { 
+  CheckCircle, XCircle, ChevronRight, SkipForward, Loader2, Trophy, AlertCircle 
+} from 'lucide-react';
+import { MCQState, MistakeType, ConfidenceLevel } from '@/hooks/useMCQ';
 
 interface MCQCardProps {
   mcq: MCQState;
   accentColor: string;
   onSelectAnswer: (index: number) => void;
+  onSetMistake: (type: MistakeType) => void;
+  onSetConfidence: (level: ConfidenceLevel) => void;
   onNext: () => void;
   onSkip: () => void;
 }
@@ -22,7 +26,7 @@ interface MCQCardProps {
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
 
 export const MCQCard: React.FC<MCQCardProps> = ({
-  mcq, accentColor, onSelectAnswer, onNext, onSkip,
+  mcq, accentColor, onSelectAnswer, onSetMistake, onSetConfidence, onNext, onSkip,
 }) => {
   const isVisible = (mcq.status !== 'idle' || !!mcq.error) && mcq.status !== 'complete';
 
@@ -186,14 +190,109 @@ export const MCQCard: React.FC<MCQCardProps> = ({
                       </div>
 
                       {/* Explanation */}
-                      <p className="text-xs text-white/50 leading-relaxed px-1">
-                        {mcq.currentQuestion.explanation}
-                      </p>
+                      <div className="space-y-4 px-1 pb-2">
+                        {mcq.currentQuestion.solution_steps && mcq.currentQuestion.solution_steps.length > 0 ? (
+                          <div className="space-y-2">
+                             <p className="text-[10px] uppercase font-bold text-white/40 tracking-widest">Step-by-step Solution</p>
+                             <ul className="text-xs text-white/70 leading-relaxed list-decimal list-inside space-y-1">
+                               {mcq.currentQuestion.solution_steps.map((step, idx) => (
+                                 <li key={idx}>{step}</li>
+                               ))}
+                             </ul>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-white/50 leading-relaxed">
+                            {mcq.currentQuestion.explanation}
+                          </p>
+                        )}
+
+                        {mcq.currentQuestion.common_mistake && (
+                          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
+                             <div className="flex items-center gap-1.5 mb-1 text-red-400">
+                               <AlertCircle className="w-3.5 h-3.5" />
+                               <span className="text-[10px] uppercase font-bold tracking-widest">Where students go wrong ({mcq.currentQuestion.mistake_type || 'Common Error'})</span>
+                             </div>
+                             <p className="text-xs text-red-200/80 leading-relaxed">{mcq.currentQuestion.common_mistake}</p>
+                          </div>
+                        )}
+
+                        {mcq.currentQuestion.concept && (
+                           <div className="flex items-center gap-2">
+                             <span className="text-[10px] px-2 py-1 bg-white/5 text-white/50 rounded-md border border-white/10 uppercase tracking-wider font-bold">
+                               Concept: {mcq.currentQuestion.concept}
+                             </span>
+                           </div>
+                        )}
+                      </div>
+
+                      {/* --- CONFIDENCE TRACKING --- */}
+                      <div className="pt-2">
+                        <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest mb-2">How confident were you?</p>
+                        <div className="flex gap-2">
+                          {(['low', 'medium', 'high'] as ConfidenceLevel[]).map((level) => (
+                            <button
+                              key={level}
+                              onClick={() => onSetConfidence(level)}
+                              className="flex-1 py-1.5 rounded-lg text-[10px] font-bold border transition-all uppercase tracking-wider"
+                              style={{
+                                background: mcq.confidenceLevel === level ? `${accentColor}20` : 'transparent',
+                                borderColor: mcq.confidenceLevel === level ? accentColor : 'rgba(255,255,255,0.1)',
+                                color: mcq.confidenceLevel === level ? accentColor : 'rgba(255,255,255,0.4)',
+                              }}
+                            >
+                              {level}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* --- MISTAKE CLASSIFICATION (Only for incorrect) --- */}
+                      {mcq.isCorrect === false && (
+                        <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                          <p className="text-[10px] uppercase font-bold text-white/30 tracking-widest mb-2">Why did you get this wrong?</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { id: 'conceptual', label: 'Concept not clear' },
+                              { id: 'calculation', label: 'Calculation mistake' },
+                              { id: 'silly', label: 'Silly mistake' },
+                              { id: 'guessed', label: 'I guessed it' },
+                            ].map((m) => (
+                              <button
+                                key={m.id}
+                                onClick={() => onSetMistake(m.id as MistakeType)}
+                                className="px-3 py-2 rounded-lg text-[10px] font-bold border transition-all text-left"
+                                style={{
+                                  background: mcq.selectedMistake === m.id ? `${accentColor}20` : 'rgba(255,255,255,0.03)',
+                                  borderColor: mcq.selectedMistake === m.id ? accentColor : 'rgba(255,255,255,0.05)',
+                                  color: mcq.selectedMistake === m.id ? accentColor : 'rgba(255,255,255,0.5)',
+                                }}
+                              >
+                                {m.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* --- INLINE FRICTION PROMPT --- */}
+                      {mcq.hasShownFriction && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="px-3 py-2 rounded-lg border flex items-center gap-2 animate-bounce-subtle"
+                          style={{ background: `${accentColor}10`, borderColor: `${accentColor}30` }}
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: accentColor }} />
+                          <p className="text-[11px] font-medium" style={{ color: accentColor }}>
+                            Helps us pinpoint exactly where you’re losing marks
+                          </p>
+                        </motion.div>
+                      )}
 
                       {/* Next button */}
                       <button
                         onClick={onNext}
-                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90"
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all hover:opacity-90 active:scale-[0.98]"
                         style={{ background: accentColor, color: '#fff' }}
                       >
                         {mcq.questionNumber >= 5 ? 'Finish Session' : 'Next Question'}

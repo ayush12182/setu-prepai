@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Mail, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Loader2, Check, BookOpen, GraduationCap, Sparkles, Rocket, Zap, Brain } from 'lucide-react';
+import { Mail, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Loader2, Check, BookOpen, GraduationCap, Sparkles, Rocket, Zap, Brain, Users, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -18,19 +18,22 @@ const phoneSchema = z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid
 
 type AuthMode = 'login' | 'signup' | 'phone' | 'otp' | 'forgot-password';
 type OnboardingStep = 0 | 1 | 2 | 3;
-type ProgramType = 'foundation' | 'jee_core' | 'jee_advanced' | '';
+type StreamType = 'foundation' | 'jee' | 'neet' | 'cuet' | 'commerce' | '';
 
 interface OnboardingData {
-  program: ProgramType;
+  userType: 'b2c_student' | 'b2b_student';
+  institutionName?: string;
+  referenceCode?: string;
+  stream: StreamType;
   studentClass: string;
   examGoal: string;
 }
 
-const PROGRAM_OPTIONS = [
+const STREAM_OPTIONS = [
   {
-    value: 'foundation' as ProgramType,
+    value: 'foundation' as StreamType,
     label: 'SETU Foundation',
-    desc: 'Conceptual learning in Maths & Science',
+    subjects: 'Maths, Science, Mental Ability',
     badge: 'Classes 6–10',
     emoji: '🧠',
     icon: Brain,
@@ -39,10 +42,10 @@ const PROGRAM_OPTIONS = [
     accentColor: 'text-emerald-400',
   },
   {
-    value: 'jee_core' as ProgramType,
-    label: 'SETU JEE Core',
-    desc: 'JEE Main + Advanced fundamentals',
-    badge: 'Class 11',
+    value: 'jee' as StreamType,
+    label: 'JEE Main & Advanced',
+    subjects: 'Physics, Chemistry, Mathematics',
+    badge: 'Class 11–12',
     emoji: '🚀',
     icon: Rocket,
     color: 'from-amber-500/20 to-orange-500/20',
@@ -50,15 +53,37 @@ const PROGRAM_OPTIONS = [
     accentColor: 'text-amber-400',
   },
   {
-    value: 'jee_advanced' as ProgramType,
-    label: 'SETU JEE Advanced',
-    desc: 'Advanced problem solving & full mock tests',
-    badge: 'Class 12',
-    emoji: '⚡',
+    value: 'neet' as StreamType,
+    label: 'NEET',
+    subjects: 'Physics, Chemistry, Biology',
+    badge: 'Class 11–12',
+    emoji: '🔬',
     icon: Zap,
+    color: 'from-green-500/20 to-emerald-500/20',
+    borderColor: 'border-green-500/30',
+    accentColor: 'text-green-400',
+  },
+  {
+    value: 'cuet' as StreamType,
+    label: 'CUET',
+    subjects: 'General Test, Language, Domains',
+    badge: 'Class 12',
+    emoji: '🏛️',
+    icon: GraduationCap,
     color: 'from-violet-500/20 to-purple-500/20',
     borderColor: 'border-violet-500/30',
     accentColor: 'text-violet-400',
+  },
+  {
+    value: 'commerce' as StreamType,
+    label: 'Commerce / CA Foundation',
+    subjects: 'Accounts, Economics, Business Studies',
+    badge: 'Class 11–12',
+    emoji: '📊',
+    icon: Sparkles,
+    color: 'from-blue-500/20 to-cyan-500/20',
+    borderColor: 'border-blue-500/30',
+    accentColor: 'text-blue-400',
   },
 ];
 
@@ -68,6 +93,11 @@ const FOUNDATION_CLASS_OPTIONS = [
   { value: '8', label: 'Class 8', emoji: '📐', tag: 'Foundation' },
   { value: '9', label: 'Class 9', emoji: '📖', tag: 'Board Prep' },
   { value: '10', label: 'Class 10', emoji: '🎯', tag: 'Board Prep' },
+];
+
+const SENIOR_CLASS_OPTIONS = [
+  { value: '11', label: 'Class 11', emoji: '📚', tag: 'Just Starting' },
+  { value: '12', label: 'Class 12', emoji: '🎯', tag: 'Board + Entrance' },
 ];
 
 const AuthPage: React.FC = () => {
@@ -85,13 +115,32 @@ const AuthPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const [searchParams] = useSearchParams();
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(1);
-  const [onboardingData, setOnboardingData] = useState<OnboardingData>({
-    program: '',
-    studentClass: '',
-    examGoal: '',
+  const [onboardingData, setOnboardingData] = useState<OnboardingData>(() => {
+    const typeParam = searchParams.get('type');
+    const orgName = searchParams.get('org_name');
+    const orgId = searchParams.get('org_id');
+    
+    return {
+      userType: typeParam === 'coaching' || orgId || orgName ? 'b2b_student' : 'b2c_student',
+      institutionName: orgName || undefined,
+      stream: '',
+      studentClass: '',
+      examGoal: '',
+    };
   });
+
+  // Start at step 0 (who are you?) unless auto-detected as B2B from URL
+  const getInitialStep = (): OnboardingStep => {
+    const typeParam = searchParams.get('type');
+    const orgName = searchParams.get('org_name');
+    if (typeParam === 'coaching' || orgName) return 1; // Already know they're coaching
+    return 0;
+  };
+  const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(getInitialStep());
+
+  const isFoundationStream = () => onboardingData.stream === 'foundation';
 
   useEffect(() => {
     if (user && !authLoading) {
@@ -174,9 +223,10 @@ const AuthPage: React.FC = () => {
     finally { setLoading(false); }
   };
 
-  const isFoundationProgram = () => onboardingData.program === 'foundation';
+  const isFoundationProgram = () => onboardingData.stream === 'foundation';
 
   const getStudentLevel = () => {
+    if (onboardingData.stream !== 'foundation') return '11-12';
     const cls = parseInt(onboardingData.studentClass);
     if (isNaN(cls)) return '11-12';
     if (cls <= 8) return '6-8';
@@ -184,22 +234,28 @@ const AuthPage: React.FC = () => {
     return '11-12';
   };
 
+  const getExamGoalFromStream = (stream: StreamType) => {
+    switch (stream) {
+      case 'jee': return 'JEE Main';
+      case 'neet': return 'NEET';
+      case 'cuet': return 'CUET';
+      case 'commerce': return 'CA Foundation';
+      case 'foundation': return 'Foundation';
+      default: return 'JEE Main';
+    }
+  };
+
   const handleOnboardingComplete = async () => {
     setLoading(true);
     try {
-      let examGoal = 'Foundation';
-      let studentClass = onboardingData.studentClass;
+      const stream = onboardingData.stream;
+      const examGoal = getExamGoalFromStream(stream as StreamType);
+      const studentClass = onboardingData.studentClass || '11';
 
-      if (onboardingData.program === 'jee_core') {
-        examGoal = 'JEE Main';
-        studentClass = '11';
-      } else if (onboardingData.program === 'jee_advanced') {
-        examGoal = 'JEE Main';
-        studentClass = '12';
-      }
-
-      if (examGoal === 'JEE Main') setExamMode('jee');
-      else setExamMode('jee'); // Foundation mode handled by ClassContext
+      if (stream === 'jee') setExamMode('jee');
+      else if (stream === 'neet') setExamMode('neet');
+      else if (stream === 'cuet') setExamMode('cuet');
+      else setExamMode('jee');
 
       const studentLevel = getStudentLevel();
 
@@ -208,15 +264,12 @@ const AuthPage: React.FC = () => {
         target_exam: examGoal,
         class: studentClass,
         student_level: studentLevel,
-      });
-
-      // Also store program in user metadata
-      await supabase.auth.updateUser({
-        data: { program: onboardingData.program }
+        user_type: onboardingData.userType,
+        institution_name: onboardingData.institutionName || null,
       });
 
       toast.success('All set! Let\'s begin your journey 🚀');
-      navigate('/diagnostic-test');
+      navigate('/foundation-assessment');
     } catch (error) {
       console.error('Onboarding error:', error);
       toast.error('Profile update failed, please try again');
@@ -224,29 +277,25 @@ const AuthPage: React.FC = () => {
   };
 
   const handleOnboardingNext = () => {
-    // Step 1: Program selection
-    if (onboardingStep === 1 && !onboardingData.program) {
-      toast.error('Please select your program');
+    if (onboardingStep === 0 && !onboardingData.userType) {
+      toast.error('Please select your student type');
       return;
     }
-    // Step 2: Class selection (Foundation only)
+    if (onboardingStep === 1 && !onboardingData.stream) {
+      toast.error('Please select your stream');
+      return;
+    }
     if (onboardingStep === 2 && !onboardingData.studentClass) {
       toast.error('Please select your class');
       return;
     }
 
-    if (onboardingStep === 1) {
-      if (isFoundationProgram()) {
-        setOnboardingStep(2); // Go to class selection
-      } else {
-        handleOnboardingComplete(); // JEE Core/Advanced auto-completes
-      }
-    } else if (onboardingStep === 2) {
-      handleOnboardingComplete();
-    }
+    if (onboardingStep === 0) setOnboardingStep(1);
+    else if (onboardingStep === 1) setOnboardingStep(2);
+    else if (onboardingStep === 2) handleOnboardingComplete();
   };
 
-  const totalSteps = isFoundationProgram() ? 2 : 1;
+  const totalSteps = 3;
 
   if (authLoading) {
     return (
@@ -290,54 +339,123 @@ const AuthPage: React.FC = () => {
             </div>
 
             <div className="bg-white/[0.05] backdrop-blur-2xl rounded-3xl p-6 sm:p-8 border border-white/[0.08] shadow-2xl">
-              {/* Step 1: Program Selection */}
-              {onboardingStep === 1 && (
-                <div className="space-y-5">
-                  <div className="text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-4">
-                      <Sparkles className="h-3.5 w-3.5 text-accent" />
-                      <span className="text-xs font-medium text-accent">Step 1 of {totalSteps}</span>
-                    </div>
-                    <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white mb-2">
-                      Choose your Program
+              {/* Step 0: Coaching or Individual */}
+              {onboardingStep === 0 && (
+                <div className="space-y-6">
+                  <div className="text-center space-y-2 mt-2">
+                    <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                      Welcome to SETU
                     </h2>
-                    <p className="text-white/50 text-sm">
-                      Your entire learning journey adapts to this
+                    <p className="text-white/40 text-sm">
+                      Let's set up your learning experience
                     </p>
                   </div>
 
                   <div className="space-y-3">
-                    {PROGRAM_OPTIONS.map((prog) => {
-                      const selected = onboardingData.program === prog.value;
-                      const IconComp = prog.icon;
+                    {/* Individual Student */}
+                    <button
+                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'b2c_student', institutionName: undefined }))}
+                      className={`w-full p-5 rounded-2xl border text-left transition-all duration-200 flex items-center gap-4
+                        ${onboardingData.userType === 'b2c_student'
+                          ? 'border-accent bg-accent/5 ring-1 ring-accent/30'
+                          : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]'
+                        }`}
+                    >
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                        onboardingData.userType === 'b2c_student' ? 'bg-accent/20' : 'bg-white/[0.06]'
+                      }`}>
+                        <Users className="w-6 h-6 text-accent" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-white text-base">Individual Student</p>
+                        <p className="text-xs text-white/40 mt-0.5">Studying on my own, self-paced</p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                        onboardingData.userType === 'b2c_student' ? 'bg-accent border-accent' : 'border-white/20'
+                      }`}>
+                        {onboardingData.userType === 'b2c_student' && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                      </div>
+                    </button>
+
+                    {/* Coaching Student */}
+                    <button
+                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'b2b_student' }))}
+                      className={`w-full p-5 rounded-2xl border text-left transition-all duration-200 flex items-center gap-4
+                        ${onboardingData.userType === 'b2b_student'
+                          ? 'border-accent bg-accent/5 ring-1 ring-accent/30'
+                          : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]'
+                        }`}
+                    >
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                        onboardingData.userType === 'b2b_student' ? 'bg-accent/20' : 'bg-white/[0.06]'
+                      }`}>
+                        <Building2 className="w-6 h-6 text-accent" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-white text-base">Coaching Student</p>
+                        <p className="text-xs text-white/40 mt-0.5">Enrolled in a coaching centre / institute</p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                        onboardingData.userType === 'b2b_student' ? 'bg-accent border-accent' : 'border-white/20'
+                      }`}>
+                        {onboardingData.userType === 'b2b_student' && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                      </div>
+                    </button>
+
+                    {/* Coaching name field */}
+                    {onboardingData.userType === 'b2b_student' && (
+                      <div className="mt-2 pt-2">
+                        <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Coaching Centre Name (optional)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Allen, Resonance, Sri Chaitanya…"
+                          value={onboardingData.institutionName || ''}
+                          onChange={e => setOnboardingData(prev => ({ ...prev, institutionName: e.target.value }))}
+                          className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 1: Stream Selection */}
+              {onboardingStep === 1 && (
+                <div className="space-y-6">
+                  {/* Clean, minimalist header */}
+                  <div className="text-center space-y-1 mt-2">
+                    <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                      Choose Your Goal
+                    </h2>
+                    <p className="text-white/40 text-sm">
+                      Select one to personalize your journey
+                    </p>
+                  </div>
+
+                  {/* Flat stream cards sequence */}
+                  <div className="space-y-3 max-h-[420px] overflow-y-auto px-1 pb-1">
+                    {STREAM_OPTIONS.map((stream) => {
+                      const selected = onboardingData.stream === stream.value;
                       return (
                         <button
-                          key={prog.value}
-                          onClick={() => setOnboardingData(prev => ({ ...prev, program: prog.value, studentClass: '', examGoal: '' }))}
-                          className={`w-full p-4 rounded-2xl border-2 text-left transition-all duration-200 group
+                          key={stream.value}
+                          onClick={() => setOnboardingData(prev => ({ ...prev, stream: stream.value, studentClass: '', examGoal: '' }))}
+                          className={`w-full p-4 rounded-xl border text-left transition-all duration-200 flex items-center justify-between
                             ${selected
-                              ? `${prog.borderColor} bg-gradient-to-br ${prog.color} shadow-lg`
-                              : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04]'
+                              ? 'border-accent bg-accent/5 ring-1 ring-accent/30'
+                              : 'border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.02] bg-white/[0.01]'
                             }`}
                         >
-                          <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${prog.color} flex items-center justify-center shrink-0`}>
-                              <IconComp className={`w-6 h-6 ${selected ? prog.accentColor : 'text-white/60'}`} />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-0.5">
-                                <span className="font-bold text-white text-base">{prog.label}</span>
-                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${selected ? `${prog.accentColor} bg-white/10` : 'text-white/30 bg-white/5'}`}>
-                                  {prog.badge}
-                                </span>
-                              </div>
-                              <span className="text-sm text-white/50">{prog.desc}</span>
-                            </div>
-                            {selected && (
-                              <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center shrink-0">
-                                <Check className="h-3.5 w-3.5 text-white" />
-                              </div>
-                            )}
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-semibold text-white text-base tracking-tight">{stream.label}</span>
+                            <span className="text-xs text-white/40">{stream.subjects}</span>
+                          </div>
+                          
+                          {/* Selection indicator */}
+                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors
+                            ${selected ? 'border-accent bg-accent text-white' : 'border-white/20'}`}
+                          >
+                            {selected && <Check className="w-3 h-3 stroke-[3]" />}
                           </div>
                         </button>
                       );
@@ -346,44 +464,44 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 2: Foundation Class Selection */}
+              {/* Step 2: Class Selection — Foundation gets 6-10, others get 11-12 */}
               {onboardingStep === 2 && (
                 <div className="space-y-5">
                   <div className="text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
-                      <GraduationCap className="h-3.5 w-3.5 text-emerald-400" />
-                      <span className="text-xs font-medium text-emerald-400">Step 2 of 2</span>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-4">
+                      <GraduationCap className="h-3.5 w-3.5 text-accent" />
+                      <span className="text-xs font-medium text-accent">Step 2 of 2</span>
                     </div>
                     <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white mb-2">
-                      What class are you in?
+                      Which class are you in?
                     </h2>
                     <p className="text-white/50 text-sm">
-                      We'll load the exact NCERT syllabus for your class
+                      {isFoundationProgram() ? "We'll load your exact NCERT syllabus" : 'Your assessment will be tailored to your class'}
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-2.5">
-                    {FOUNDATION_CLASS_OPTIONS.map((cls) => {
+                    {(isFoundationProgram() ? FOUNDATION_CLASS_OPTIONS : SENIOR_CLASS_OPTIONS).map((cls) => {
                       const selected = onboardingData.studentClass === cls.value;
                       return (
                         <button
                           key={cls.value}
                           onClick={() => setOnboardingData(prev => ({ ...prev, studentClass: cls.value }))}
-                          className={`relative p-3.5 rounded-2xl border-2 text-left transition-all duration-200 group
+                          className={`relative p-4 rounded-2xl border-2 text-left transition-all duration-200
                             ${selected
-                              ? 'border-emerald-500/50 bg-emerald-500/10 shadow-lg shadow-emerald-500/10'
+                              ? 'border-accent/60 bg-accent/10 shadow-lg shadow-accent/10'
                               : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.04]'
                             }`}
                         >
                           <div className="flex items-center gap-3">
                             <span className="text-2xl">{cls.emoji}</span>
                             <div className="flex-1 min-w-0">
-                              <span className="font-semibold text-white text-sm block">{cls.label}</span>
-                              <span className={`text-[10px] font-medium uppercase tracking-wider ${selected ? 'text-emerald-400' : 'text-white/30'}`}>
+                              <span className="font-bold text-white text-base block">{cls.label}</span>
+                              <span className={`text-[10px] font-medium uppercase tracking-wider ${selected ? 'text-accent' : 'text-white/30'}`}>
                                 {cls.tag}
                               </span>
                             </div>
                             {selected && (
-                              <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                              <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center shrink-0">
                                 <Check className="h-3 w-3 text-white" />
                               </div>
                             )}
@@ -395,57 +513,82 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Psychological UX reassurance */}
+              <div className="mt-8 mb-4 text-center">
+                <p className="text-xs font-medium text-white/40">
+                  Takes 10–15 mins • No marks • AI-powered report
+                </p>
+              </div>
+
               {/* Nav buttons */}
-              <div className="flex items-center gap-3 mt-7">
-                {onboardingStep > 1 && (
-                  <Button
-                    variant="outline"
-                    onClick={() => setOnboardingStep((prev) => (prev - 1) as OnboardingStep)}
-                    className="flex-1 h-12 rounded-xl border-white/15 text-white hover:bg-white/10 bg-transparent"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" /> Back
-                  </Button>
-                )}
+              <div className="flex flex-col gap-3">
                 <Button
                   onClick={handleOnboardingNext}
-                  disabled={loading}
-                  className="flex-1 h-12 rounded-xl bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white font-semibold shadow-lg shadow-accent/25 transition-all"
+                  disabled={loading || (onboardingStep === 1 && !onboardingData.stream)}
+                  className="w-full h-14 rounded-xl bg-accent hover:bg-accent/90 text-[hsl(213,28%,20%)] font-bold text-lg shadow-[0_0_20px_rgba(232,154,60,0.2)] hover:shadow-[0_0_30px_rgba(232,154,60,0.3)] transition-all disabled:opacity-50 disabled:shadow-none"
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : onboardingStep === 2 ? (
-                    <>Start Diagnostic Test <ArrowRight className="h-4 w-4 ml-2" /></>
+                    <>Start Assessment <ArrowRight className="h-5 w-5 ml-2" /></>
                   ) : isFoundationProgram() ? (
-                    <>Select Class <ArrowRight className="h-4 w-4 ml-2" /></>
+                    <>Select Class <ArrowRight className="h-5 w-5 ml-2" /></>
                   ) : (
-                    <>Start Diagnostic Test <ArrowRight className="h-4 w-4 ml-2" /></>
+                    <>Start Assessment <ArrowRight className="h-5 w-5 ml-2" /></>
                   )}
                 </Button>
+                
+                {onboardingStep > 0 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setOnboardingStep((prev) => (prev - 1) as OnboardingStep)}
+                    className="w-full h-10 text-white/50 hover:text-white hover:bg-white/5 rounded-xl"
+                  >
+                    Back
+                  </Button>
+                )}
               </div>
             </div>
 
-            {/* Program hint */}
-            {onboardingStep === 1 && onboardingData.program === 'foundation' && (
-              <div className="mt-5 flex items-start gap-3 bg-emerald-500/[0.08] rounded-2xl p-4 border border-emerald-500/15">
+
+            {/* Stream hints */}
+            {onboardingStep === 1 && onboardingData.stream === 'foundation' && (
+              <div className="mt-4 flex items-start gap-3 bg-emerald-500/[0.08] rounded-2xl p-4 border border-emerald-500/15">
                 <span className="text-lg mt-0.5">🧠</span>
                 <p className="text-white/60 text-sm leading-relaxed">
                   <span className="text-emerald-400 font-medium">SETU Foundation:</span> Build strong fundamentals in Maths & Science from Class 6–10. Perfect preparation for JEE, NEET & Olympiads — without competitive pressure.
                 </p>
               </div>
             )}
-            {onboardingStep === 1 && onboardingData.program === 'jee_core' && (
-              <div className="mt-5 flex items-start gap-3 bg-amber-500/[0.08] rounded-2xl p-4 border border-amber-500/15">
+            {onboardingStep === 1 && onboardingData.stream === 'jee' && (
+              <div className="mt-4 flex items-start gap-3 bg-amber-500/[0.08] rounded-2xl p-4 border border-amber-500/15">
                 <span className="text-lg mt-0.5">🚀</span>
                 <p className="text-white/60 text-sm leading-relaxed">
-                  <span className="text-amber-400 font-medium">JEE Core (Class 11):</span> Master Physics, Chemistry & Mathematics fundamentals with a structured 21-day cycle approach.
+                  <span className="text-amber-400 font-medium">JEE Main & Advanced:</span> Master Physics, Chemistry & Mathematics with adaptive practice, CAT-style diagnostics, and 10k+ verified questions.
                 </p>
               </div>
             )}
-            {onboardingStep === 1 && onboardingData.program === 'jee_advanced' && (
-              <div className="mt-5 flex items-start gap-3 bg-violet-500/[0.08] rounded-2xl p-4 border border-violet-500/15">
-                <span className="text-lg mt-0.5">⚡</span>
+            {onboardingStep === 1 && onboardingData.stream === 'neet' && (
+              <div className="mt-4 flex items-start gap-3 bg-green-500/[0.08] rounded-2xl p-4 border border-green-500/15">
+                <span className="text-lg mt-0.5">🔬</span>
                 <p className="text-white/60 text-sm leading-relaxed">
-                  <span className="text-violet-400 font-medium">JEE Advanced (Class 12):</span> Advanced problem solving, full mock tests, and targeted weak-area elimination for top-tier ranks.
+                  <span className="text-green-400 font-medium">NEET:</span> Biology, Physics and Chemistry questions curated for NEET. Adaptive diagnostics identify your weak chapters instantly.
+                </p>
+              </div>
+            )}
+            {onboardingStep === 1 && onboardingData.stream === 'cuet' && (
+              <div className="mt-4 flex items-start gap-3 bg-violet-500/[0.08] rounded-2xl p-4 border border-violet-500/15">
+                <span className="text-lg mt-0.5">🏛️</span>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  <span className="text-violet-400 font-medium">CUET:</span> Subject-specific practice for Central University entrance. English, domain subjects, and general test tailored to your stream.
+                </p>
+              </div>
+            )}
+            {onboardingStep === 1 && onboardingData.stream === 'commerce' && (
+              <div className="mt-4 flex items-start gap-3 bg-blue-500/[0.08] rounded-2xl p-4 border border-blue-500/15">
+                <span className="text-lg mt-0.5">📊</span>
+                <p className="text-white/60 text-sm leading-relaxed">
+                  <span className="text-blue-400 font-medium">Commerce / CA Foundation:</span> Deeply adaptive questions in Accounts, Economics and Business Studies. Built for Class 11–12 and CA Foundation aspirants.
                 </p>
               </div>
             )}

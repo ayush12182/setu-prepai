@@ -13,36 +13,46 @@ import {
   X,
   Sparkles,
   Users,
-  GraduationCap
+  GraduationCap,
+  Building2,
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const getNavItems = (isFoundation: boolean) => [
+const getNavItems = (isFoundation: boolean, isB2B: boolean) => [
   { path: '/dashboard', icon: Home, label: 'Home', emoji: '🏠' },
   { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📖' },
-  ...(!isFoundation ? [{ path: '/teacher-dashboard', icon: GraduationCap, label: 'AI Teachers', emoji: '👨🏫' }] : []),
+  ...(!isFoundation && !isB2B ? [{ path: '/teacher-dashboard', icon: GraduationCap, label: 'AI Teachers', emoji: '👨‍🏫' }] : []),
   { path: '/practice', icon: PenTool, label: isFoundation ? 'School Practice' : 'Practice', emoji: '✏️' },
   { path: '/test', icon: ClipboardCheck, label: isFoundation ? 'Chapter Test' : 'Test', emoji: '📝' },
   { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄' },
-  { path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬' },
+  ...(!isB2B ? [{ path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬' }] : []),
   { path: '/ask-jeetu', icon: MessageCircle, label: isFoundation ? 'Ask SETU Mentor' : { jee: 'Ask Jeetu Bhaiya', neet: 'Ask NEET Mentor', cuet: 'Ask CUET Mentor' }, emoji: '💬' },
-  ...(!isFoundation ? [{ path: '/circles', icon: Users, label: 'SETU Commune', emoji: '👥', badge: 'New' }] : []),
+  ...(!isFoundation && !isB2B ? [{ path: '/circles', icon: Users, label: 'SETU Commune', emoji: '👥', badge: 'New' }] : []),
   { path: '/analytics', icon: BarChart3, label: isFoundation ? 'Progress' : 'Analytics', emoji: '📊' },
   { path: '/profile', icon: User, label: 'My Profile', emoji: '👤' },
+];
+
+const getB2BNavItems = (isMentor: boolean, isInstitution: boolean) => [
+  ...(isMentor ? [{ path: '/mentor', icon: Users, label: 'Mentor Dashboard', emoji: '🎓', badge: 'B2B' }] : []),
+  ...(isInstitution ? [{ path: '/institution', icon: Building2, label: 'Institution Hub', emoji: '🏫', badge: 'B2B' }, { path: '/settings/org', icon: Settings, label: 'Org Settings', emoji: '⚙️', badge: 'Admin' }] : []),
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { config, isNeet, isCuet, examMode } = useExamMode();
   const { isFoundation, classLabel } = useClassContext();
-  const navItems = getNavItems(isFoundation);
+  const { isMentor, isInstitution, isB2BStudent } = useAuth();
+  const navItems = getNavItems(isFoundation, isB2BStudent);
+  const b2bItems = getB2BNavItems(isMentor, isInstitution);
 
   return (
     <>
@@ -168,6 +178,40 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               );
             })}
           </nav>
+
+          {/* B2B Nav (Role-Aware) */}
+          {b2bItems.length > 0 && (
+            <>
+              <div className="mx-5 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-1" />
+              <div className="px-3 pb-1">
+                <p className="text-[9px] font-black uppercase tracking-widest text-white/25 px-1 mb-1">Institution</p>
+                <nav className="space-y-0.5">
+                  {b2bItems.map(item => (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={onClose}
+                      className={({ isActive }) => cn(
+                        'group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 relative',
+                        'text-white/80 hover:text-white font-medium',
+                        isActive
+                          ? 'bg-gradient-to-r from-accent/80 to-accent/60 text-white font-semibold shadow-lg shadow-accent/20'
+                          : 'hover:bg-white/[0.06]'
+                      )}
+                    >
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-white/[0.06] group-hover:bg-white/10 transition-all">
+                        <item.icon className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm">{item.label}</span>
+                      <span className="ml-auto px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-accent/20 text-accent/90">
+                        {item.badge}
+                      </span>
+                    </NavLink>
+                  ))}
+                </nav>
+              </div>
+            </>
+          )}
 
           {/* Mentor Card */}
           <div className="p-4">

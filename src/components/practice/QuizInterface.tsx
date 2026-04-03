@@ -17,13 +17,16 @@ import {
 import { cn } from '@/lib/utils';
 import { JeeQuestion, JeeOption, JeeSolution } from '@/lib/jeeMathRenderer';
 
+import { ConfidenceLevel } from '@/hooks/useMCQ';
+import ConfidenceRating from './ConfidenceRating';
+
 interface QuizInterfaceProps {
   questions: Question[];
   subchapterName: string;
   difficulty: 'easy' | 'medium' | 'hard';
   onComplete: (results: QuizResult) => void;
   onGetSimilar: (question: Question) => Promise<SimilarQuestion[] | null>;
-  onRecordAttempt: (questionId: string, selected: 'A' | 'B' | 'C' | 'D', isCorrect: boolean, time: number) => void;
+  onRecordAttempt: (questionId: string, selected: 'A' | 'B' | 'C' | 'D', isCorrect: boolean, time: number, confidence: ConfidenceLevel) => void;
 }
 
 export interface QuizResult {
@@ -56,6 +59,9 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
   });
   const [practiceQuestion, setPracticeQuestion] = useState<SimilarQuestion | null>(null);
   const [similarQueueIndex, setSimilarQueueIndex] = useState(0);
+  const [confidence, setConfidence] = useState<ConfidenceLevel | null>(null);
+
+
 
   const baseQuestion = questions[currentIndex];
   // Use practice question if available, otherwise use the base question
@@ -89,8 +95,8 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
 
     const correct = selectedOption === currentQuestion.correct_option;
     
-    // Record the attempt
-    onRecordAttempt(currentQuestion.id, selectedOption, correct, timeTaken);
+    // Record the attempt using unified b2b/b2c stats engine
+    onRecordAttempt(currentQuestion.id, selectedOption, correct, timeTaken, confidence!);
 
     if (correct) {
       setResults(prev => ({ ...prev, correct: prev.correct + 1 }));
@@ -113,6 +119,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
       setSimilarQuestions(null);
       setPracticeQuestion(null);
       setSimilarQueueIndex(0);
+      setConfidence(null);
     } else {
       // Quiz complete
       onComplete({
@@ -124,6 +131,32 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
       });
     }
   };
+
+  // Keyboard Shortcuts hook
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input (if any existed here)
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+
+      if (!hasSubmitted) {
+        if (e.key === '1') handleOptionSelect('A');
+        if (e.key === '2') handleOptionSelect('B');
+        if (e.key === '3') handleOptionSelect('C');
+        if (e.key === '4') handleOptionSelect('D');
+        if (e.key === 'Enter' && selectedOption && confidence) {
+          handleSubmit();
+        }
+      } else {
+        if (e.key === 'Enter') {
+          handleNext();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    // disable exhaustive-deps warning because we don't want to re-bind continuously if functions change unnecessarily
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasSubmitted, selectedOption, confidence]);
 
   const getOptionClass = (option: 'A' | 'B' | 'C' | 'D') => {
     if (!hasSubmitted) {
@@ -169,11 +202,16 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
       <Progress value={((currentIndex + 1) / questions.length) * 100} className="h-2" />
 
       {/* Question */}
-      <div className="bg-card border border-border rounded-xl p-6">
+      <div className="bg-card border border-border rounded-xl p-6 relative">
         <JeeQuestion 
           question={currentQuestion.question_text}
           className="text-lg font-medium text-foreground"
         />
+        {!hasSubmitted && (
+           <p className="absolute top-4 right-4 text-[10px] uppercase font-bold text-muted-foreground bg-secondary px-2 py-1 rounded">
+             Shortcuts: 1-4 to pick, Enter to submit
+           </p>
+        )}
       </div>
 
       {/* Options */}
@@ -217,13 +255,21 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
 
       {/* Submit / Next Button */}
       {!hasSubmitted ? (
-        <Button 
-          onClick={handleSubmit} 
-          disabled={!selectedOption}
-          className="w-full h-12 text-base"
-        >
-          Submit Answer
-        </Button>
+        <div className="space-y-4 animate-fade-in">
+          {selectedOption && (
+            <ConfidenceRating 
+              selected={confidence}
+              onSelect={setConfidence}
+            />
+          )}
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!selectedOption || !confidence}
+            className="w-full h-12 text-base transition-all"
+          >
+            {(!selectedOption || !confidence) ? 'Select an answer and your confidence first' : 'Submit Answer'}
+          </Button>
+        </div>
       ) : (
         <div className="space-y-4">
           {/* Result Banner */}
@@ -306,6 +352,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
                   setSelectedOption(null);
                   setHasSubmitted(false);
                   setShowExplanation(false);
+                  setConfidence(null);
                   setQuestionStartTime(Date.now());
                 }}
                 disabled={!similarQuestions || similarQuestions.length === 0}

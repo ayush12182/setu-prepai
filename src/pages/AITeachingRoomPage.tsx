@@ -576,6 +576,7 @@ const AITeachingRoomPage: React.FC = () => {
   // ── MCQ System
   const { 
     mcq, startMCQ, selectAnswer: selectMCQAnswer, 
+    setMistakeType, setConfidence,
     nextQuestion: nextMCQQuestion, skipMCQ, resetMCQ 
   } = useMCQ(language, (topic, correct) => {
     // ── Update session tracker with MCQ results ──
@@ -1172,10 +1173,12 @@ const AITeachingRoomPage: React.FC = () => {
                     className="mb-6"
                  >
                     <MCQCard
-                      key={mcq.questionNumber || 'initial'}
+                      key={`${mcq.questionNumber}-${mcq.currentQuestion?.id}`}
                       mcq={mcq}
                       accentColor={teacher.accent}
                       onSelectAnswer={selectMCQAnswer}
+                      onSetMistake={setMistakeType}
+                      onSetConfidence={setConfidence}
                       onNext={nextMCQQuestion}
                       onSkip={skipMCQ}
                     />

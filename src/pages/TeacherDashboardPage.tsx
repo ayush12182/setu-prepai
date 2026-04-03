@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, Users, ArrowRight, Sparkles, GraduationCap, Atom, FlaskConical, FunctionSquare, Clock, Zap } from 'lucide-react';
+import { Star, Users, ArrowRight, Sparkles, GraduationCap, Atom, FlaskConical, FunctionSquare, Clock, Zap, ChevronRight } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { Button } from '@/components/ui/button';
 import { useExamMode } from '@/contexts/ExamModeContext';
 
 /* ────────────────────────────────────────────────
@@ -204,30 +205,35 @@ const stats = [
 ──────────────────────────────────────────────── */
 const TeacherDashboardPage: React.FC = () => {
   const { config } = useExamMode();
+  const navigate = useNavigate();
 
   return (
     <MainLayout title="AI Teachers">
       <div className="max-w-5xl mx-auto space-y-6">
-        {/* ── Page header ── */}
+        {/* --- Mentor Access Banner --- */}
         <motion.div
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="space-y-1"
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative group cursor-pointer overflow-hidden rounded-3xl border border-accent/20 bg-accent/5 p-6 transition-all hover:bg-accent/10"
+          onClick={() => navigate('/mentor')}
         >
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[hsl(32_79%_57%/0.15)] flex items-center justify-center">
-              <GraduationCap size={16} className="text-accent" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center text-white shadow-xl shadow-accent/20">
+                <Users size={32} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Institutional Mentor Access</h2>
+                <p className="text-sm text-white/60 mt-1 max-w-sm">
+                  View batch-level behavioral data, identify class-wide concept gaps, and manage your students with high-precision metrics.
+                </p>
+              </div>
             </div>
-            <h1 className="text-xl font-bold text-foreground">AI Teachers</h1>
-            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[hsl(32_79%_57%/0.12)] text-accent border border-accent/20">
-              <Sparkles size={10} />
-              Powered by AI
-            </span>
+            <Button className="rounded-xl bg-accent text-white h-12 px-8 font-bold border-none shadow-lg shadow-accent/20 flex items-center gap-2 group-hover:gap-3 transition-all">
+              Go to Dashboard <ChevronRight size={18} />
+            </Button>
           </div>
-          <p className="text-muted-foreground text-sm">
-            Choose your subject teacher. Ask doubts, get explanations, learn like you're in a real classroom.
-          </p>
         </motion.div>
 
         {/* ── Stats bar ── */}

@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, Brain, Clock, CheckCircle2, XCircle, ArrowRight, Sparkles, Lightbulb, Network, Gauge, Target, BookOpen, Zap, ShieldCheck, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
+import { ProctoringOverlay, ProctoringState } from '@/components/diagnostic/ProctoringOverlay';
 
 export interface DiagnosticQuestion {
   id: string;
@@ -57,6 +58,7 @@ const DiagnosticTestPage: React.FC = () => {
   }, [diagnosticCompleted, navigate]);
 
   const [testStarted, setTestStarted] = useState(false);
+  
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<DiagnosticQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -72,6 +74,16 @@ const DiagnosticTestPage: React.FC = () => {
   const studentClass = profile?.class || '11';
   const studentLevel = profile?.student_level || '11-12';
   const gradeRange = ['6', '7', '8'].includes(studentClass) ? '6-8' : ['9', '10'].includes(studentClass) ? '9-10' : '11-12';
+  
+  // Stream from onboarding metadata
+  const stream: string = (user as any)?.user_metadata?.stream || 'jee';
+
+  // Proctoring state
+  const [proctoringState, setProctoringState] = useState<ProctoringState>({
+    tabSwitchCount: 0, fullscreenExitCount: 0, copyAttemptCount: 0,
+    cameraInactiveSeconds: 0, events: [], integrityScore: 100,
+  });
+  const isProctored = !['foundation'].includes(stream);
 
   const isClass6 = studentClass === '6';
   const activeSections = isClass6 ? FOUNDATION_SECTIONS : SECTIONS;
@@ -110,7 +122,7 @@ const DiagnosticTestPage: React.FC = () => {
 
       if (!bankQuestions || bankQuestions.length === 0) {
         const { data: generated, error: genError } = await supabase.functions.invoke('generate-diagnostic-test', {
-          body: { gradeRange, studentLevel, count: 50, studentClass }
+          body: { gradeRange, studentLevel, count: 50, studentClass, stream }
         });
         if (genError) throw genError;
         if (generated?.questions) {
@@ -294,6 +306,13 @@ const DiagnosticTestPage: React.FC = () => {
         correct_answers: totalCorrect,
         total_time_seconds: totalTime,
         completed_at: new Date().toISOString(),
+        // @ts-ignore stream & proctoring fields are from recent un-synced migration
+        stream,
+        tab_switch_count: proctoringState.tabSwitchCount,
+        fullscreen_exit_count: proctoringState.fullscreenExitCount,
+        copy_attempt_count: proctoringState.copyAttemptCount,
+        camera_inactive_seconds: proctoringState.cameraInactiveSeconds,
+        proctoring_events: proctoringState.events,
       }).eq('id', attemptId!);
 
       const { data: profileData, error: profileError } = await supabase.functions.invoke('generate-learning-profile', {
@@ -385,7 +404,7 @@ const DiagnosticTestPage: React.FC = () => {
                   onClick={() => { setTestStarted(true); setLoading(true); }}
                   className="h-14 px-8 rounded-2xl bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white font-semibold shadow-[0_0_40px_rgba(232,154,60,0.3)] hover:shadow-[0_0_60px_rgba(232,154,60,0.4)] transition-all duration-300 text-base gap-2"
                 >
-                  Begin Assessment <ArrowRight className="h-5 w-5" />
+                  Begin Foundation Assessment <ArrowRight className="h-5 w-5" />
                 </Button>
 
                 <div className="flex sm:flex-col gap-4 sm:gap-1 text-white/40 text-[11px] font-medium uppercase tracking-wider">
@@ -455,7 +474,7 @@ const DiagnosticTestPage: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
         <div className="text-center space-y-4">
           <Brain className="w-12 h-12 text-accent mx-auto animate-pulse" />
-          <h2 className="text-xl font-semibold text-white">Preparing Your Assessment</h2>
+          <h2 className="text-xl font-semibold text-white">Preparing Your Foundation Assessment</h2>
           <p className="text-white/40 text-sm">Building a personalized question set for you…</p>
           <Loader2 className="w-6 h-6 animate-spin mx-auto text-accent" />
         </div>
@@ -496,7 +515,7 @@ const DiagnosticTestPage: React.FC = () => {
                 <div className="w-16 h-16 rounded-2xl bg-accent/15 flex items-center justify-center mx-auto">
                   <Brain className="w-8 h-8 text-accent" />
                 </div>
-                <h2 className="text-2xl font-bold text-white">Assessment Complete! 🎉</h2>
+                <h2 className="text-2xl font-bold text-white">Foundation Assessment Complete! 🎉</h2>
                 <p className="text-white/40 text-sm">Here's a quick snapshot before your full profile</p>
 
                 {/* Section breakdown */}
@@ -561,6 +580,7 @@ const DiagnosticTestPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <ProctoringOverlay enabled={isProctored} onStateChange={setProctoringState} />
       {/* Header */}
       <div className="sticky top-0 z-10 bg-slate-950/90 backdrop-blur-md border-b border-white/[0.06] px-4 py-3">
         <div className="max-w-2xl mx-auto">

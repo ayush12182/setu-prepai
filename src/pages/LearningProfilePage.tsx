@@ -17,6 +17,19 @@ interface LearningProfile {
   strong_topics: string[];
   prerequisite_gaps: string[];
   overall_level: string;
+  metadata?: {
+    mistake_patterns?: {
+      conceptual?: string;
+      calculation?: string;
+    };
+    time_analysis?: string;
+    subject_performance?: Record<string, string>;
+    action_plan?: {
+      what_to_study?: string;
+      where_to_start?: string;
+      practice_plan?: string;
+    };
+  };
 }
 
 const LearningProfilePage: React.FC = () => {
@@ -37,15 +50,17 @@ const LearningProfilePage: React.FC = () => {
 
         if (error) throw error;
         if (data) {
+          const profileData = data as any;
           setProfile({
-            concept_score: Number(data.concept_score) || 0,
-            accuracy_score: Number(data.accuracy_score) || 0,
-            speed_score: Number(data.speed_score) || 0,
-            confidence_score: Number(data.confidence_score) || 0,
-            weak_topics: (data.weak_topics as string[]) || [],
-            strong_topics: (data.strong_topics as string[]) || [],
-            prerequisite_gaps: (data.prerequisite_gaps as string[]) || [],
-            overall_level: (data.overall_level as string) || 'beginner',
+            concept_score: Number(profileData.concept_score) || 0,
+            accuracy_score: Number(profileData.accuracy_score) || 0,
+            speed_score: Number(profileData.speed_score) || 0,
+            confidence_score: Number(profileData.confidence_score) || 0,
+            weak_topics: (profileData.weak_topics as string[]) || [],
+            strong_topics: (profileData.strong_topics as string[]) || [],
+            prerequisite_gaps: (profileData.prerequisite_gaps as string[]) || [],
+            overall_level: (profileData.overall_level as string) || 'beginner',
+            metadata: (profileData.metadata as any) || {},
           });
         }
       } catch (err) {
@@ -140,7 +155,7 @@ const LearningProfilePage: React.FC = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-6">
             <Shield className="h-4 w-4 text-accent" />
-            <span className="text-[11px] font-semibold text-accent uppercase tracking-wider">Diagnostic Report</span>
+            <span className="text-[11px] font-semibold text-accent uppercase tracking-wider">Foundation Assessment Report</span>
           </div>
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-accent/25">
             <Brain className="w-8 h-8 text-white" />
@@ -169,6 +184,91 @@ const LearningProfilePage: React.FC = () => {
             <p className="text-white/40 text-sm font-medium">Composite score across all cognitive dimensions</p>
           </div>
         </motion.div>
+
+        {/* ═══════════ SUBJECT WISE PERFORMANCE ═══════════ */}
+        {profile.metadata?.subject_performance && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-6">
+            <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+              <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
+                <Target className="w-4 h-4 text-accent" /> Subject Proficiency
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {Object.entries(profile.metadata.subject_performance).map(([subj, level]) => (
+                  <div key={subj} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 text-center">
+                    <p className="text-white/40 text-[10px] mb-1">{subj}</p>
+                    <span className={`text-xs font-bold uppercase ${
+                      level === 'strong' ? 'text-emerald-400' :
+                      level === 'weak' ? 'text-rose-400' : 'text-amber-400'
+                    }`}>
+                      {level}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ═══════════ AI ANALYSIS: MISTAKE PATTERNS & TIME ═══════════ */}
+        {(profile.metadata?.mistake_patterns || profile.metadata?.time_analysis) && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex flex-col">
+              <h4 className="text-[11px] font-bold text-white/40 uppercase mb-3 flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-amber-400" /> Mistake Patterns
+              </h4>
+              <p className="text-xs text-white/70 leading-relaxed italic">
+                {profile.metadata?.mistake_patterns?.conceptual || profile.metadata?.mistake_patterns?.calculation || "Analyzing your cognitive footprint..."}
+              </p>
+            </div>
+            <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex flex-col">
+              <h4 className="text-[11px] font-bold text-white/40 uppercase mb-3 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-sky-400" /> Time Analysis
+              </h4>
+              <p className="text-xs text-white/70 leading-relaxed">
+                {profile.metadata?.time_analysis || "Consistent response times detected across core topics."}
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ═══════════ AI ACTION PLAN ═══════════ */}
+        {profile.metadata?.action_plan && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mb-6">
+            <div className="p-6 rounded-3xl bg-gradient-to-br from-accent/10 via-amber-600/5 to-transparent border border-accent/20 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Sparkles className="w-16 h-16 text-accent" />
+              </div>
+              <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-accent" /> Your Foundation Roadmap
+              </h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-[10px] font-bold text-accent uppercase mb-1">What to study</h4>
+                  <p className="text-xs text-white/80 leading-relaxed">
+                    {profile.metadata.action_plan.what_to_study}
+                  </p>
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="flex-1 p-3 rounded-xl bg-accent/10 border border-accent/10">
+                    <h4 className="text-[10px] font-bold text-accent uppercase mb-1">Where to start</h4>
+                    <p className="text-sm font-semibold text-white">
+                      {profile.metadata.action_plan.where_to_start}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+                  <h4 className="text-[10px] font-bold text-white/40 uppercase mb-2">Practice Plan</h4>
+                  <p className="text-xs text-white/60 leading-relaxed italic">
+                    {profile.metadata.action_plan.practice_plan}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* ═══════════ SCORE CARDS ═══════════ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">

@@ -24,10 +24,16 @@ import { useNavigate } from "react-router-dom";
 
 const Index: React.FC = () => {
   const { getMentorName, language } = useLanguage();
-  const { user, profile, updateProfile } = useAuth();
+  const { user, profile, updateProfile, isB2BStudent } = useAuth();
   const { config, isNeet, isCuet, examMode, setExamMode } = useExamMode();
   const { isFoundation, classLabel } = useClassContext();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (isB2BStudent) {
+      navigate('/student-hub', { replace: true });
+    }
+  }, [isB2BStudent, navigate]);
 
   const { dailyFocus, smartFocus, isLoading, streak } = useTodaysFocus();
   const { transitionMessage, isReadyForTransition } = useProgressiveLearning();
@@ -184,7 +190,7 @@ const Index: React.FC = () => {
               <div className="flex flex-col gap-4">
                 <MajorTestCountdown />
                 <ExamReminders />
-                <CirclesDashboardCard />
+                {!isB2BStudent && <CirclesDashboardCard />}
               </div>
             </div>
 

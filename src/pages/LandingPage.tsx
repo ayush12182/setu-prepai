@@ -12,6 +12,7 @@ import { HowItWorksSection } from '@/components/landing/HowItWorksSection';
 import { PricingSection } from '@/components/landing/PricingSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
+import { B2BSection } from '@/components/landing/B2BSection';
 
 const LandingPage: React.FC = () => {
   return (
@@ -27,6 +28,7 @@ const LandingPage: React.FC = () => {
       <HowItWorksSection />
       <TrustSection />
       <PricingSection />
+      <B2BSection />
       <CTASection />
       <LandingFooter />
     </div>

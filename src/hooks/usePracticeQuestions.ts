@@ -58,7 +58,7 @@ export const usePracticeQuestions = () => {
         .limit(count);
 
       if (cachedQuestions && cachedQuestions.length >= count) {
-        const qs = (cachedQuestions.slice(0, count) as Question[]).map(shuffleQuestionOptions);
+        const qs = (cachedQuestions.slice(0, count) as Question[]).map(q => shuffleQuestionOptions(q as any) as unknown as Question);
         setQuestions(qs);
         return qs;
       }
@@ -103,7 +103,7 @@ export const usePracticeQuestions = () => {
         return null;
       }
 
-      const mappedQuestions = (data.questions as Question[]).map(shuffleQuestionOptions);
+      const mappedQuestions = (data.questions as Question[]).map(q => shuffleQuestionOptions(q as any) as unknown as Question);
       setQuestions(mappedQuestions);
       return mappedQuestions;
     } catch (err) {
@@ -139,7 +139,7 @@ export const usePracticeQuestions = () => {
         return null;
       }
 
-      return (data.questions as SimilarQuestion[]).map(shuffleQuestionOptions);
+      return (data.questions as SimilarQuestion[]).map(q => shuffleQuestionOptions(q as any) as unknown as SimilarQuestion);
     } catch (err) {
       toast.error('Failed to get similar questions');
       return null;
@@ -150,18 +150,22 @@ export const usePracticeQuestions = () => {
     questionId: string,
     selectedOption: 'A' | 'B' | 'C' | 'D',
     isCorrect: boolean,
-    timeTakenSeconds: number
+    timeTakenSeconds: number,
+    confidenceLevel: 'low' | 'medium' | 'high'
   ) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      await supabase.from('question_attempts').insert({
+      // Unified B2B/B2C approach: log everything into user_mcq_attempts
+      await supabase.from('user_mcq_attempts' as any).insert({
         user_id: user.id,
         question_id: questionId,
-        selected_option: selectedOption,
         is_correct: isCorrect,
-        time_taken_seconds: timeTakenSeconds
+        time_taken_ms: timeTakenSeconds * 1000,
+        confidence_level: confidenceLevel,
+        user_selected_mistake: 'none',
+        ai_predicted_mistake: 'none'
       });
     } catch (err) {
       console.error('Failed to record attempt:', err);

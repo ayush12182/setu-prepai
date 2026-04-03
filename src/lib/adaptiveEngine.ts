@@ -1,115 +1,130 @@
-import { StudentAnalyticsData } from './analyticsSimulation';
-import { AIDiagnosisReport } from './diagnosisEngine';
+import { supabase } from "@/integrations/supabase/client";
 
-export type DifficultyLevel = 'Easy' | 'Medium' | 'Hard';
-export type PracticeMode = 'Focus' | 'WeaknessAttack' | 'SmartMixed';
-export type TestMode = 'FullMock' | 'WeaknessBased' | 'SpeedRun';
+export function evaluateSession(mode: string, accuracy: number, avgTime: number, baselineTime: number) {
+  let accuracyChange = 0;
+  let behavioralFlag = null;
+  let nextActionRecommend = '';
+
+  if (accuracy >= 80) {
+    accuracyChange = 5;
+    nextActionRecommend = 'Move up to Hard difficulty for this subtopic.';
+  } else if (accuracy >= 50) {
+    accuracyChange = 2;
+    if (avgTime > baselineTime) {
+      behavioralFlag = 'You are taking longer than the ideal time. Focus on speed.';
+      nextActionRecommend = 'Review formulas and practice timed drills.';
+    } else {
+      nextActionRecommend = 'Solid pace. Review mistakes and push for 80%.';
+    }
+  } else {
+    accuracyChange = -3;
+    behavioralFlag = 'Accuracy drop detected. Potential conceptual gap.';
+    nextActionRecommend = 'Switch to study mode and re-read the chapter notes.';
+  }
+
+  return { accuracyChange, behavioralFlag, nextActionRecommend };
+}
 
 export interface DailyMission {
   title: string;
   description: string;
   targetChapter: string;
   questionCount: number;
-  rewardPoints: number;
-  isCompleted: boolean;
 }
 
-export interface AdaptiveQuestion {
-  id: string;
-  chapter: string;
-  concept: string;
-  difficulty: DifficultyLevel;
-  expectedTimeSeconds: number;
-  mistakeTags: string[]; // e.g., 'Conceptual', 'Silly', 'Time'
-}
-
-export interface SessionSummary {
-  accuracyChange: number; // e.g. +12
-  overallAccuracy: number;
-  behavioralFlag: string | null; // e.g. "You rushed 4 questions."
-  nextActionRecommend: string; // e.g. "Review Coordinate Geometry before continuing."
-  completedQuestions: number;
-}
-
-/**
- * INTELLIGENT ROUTER: Generates the Daily Mission based on the AI Diagnosis.
- * It directly attacks the #1 blocked chapter identified by the Priority Engine.
- */
-export function generateDailyMission(report: AIDiagnosisReport | null): DailyMission {
-  if (!report || !report.isReliable || report.topWeakChapters.length === 0) {
-    return {
-      title: "Diagnostic Required",
-      description: "Complete a mock test to unlock AI missions.",
-      targetChapter: "Mixed Concept",
-      questionCount: 15,
-      rewardPoints: 50,
-      isCompleted: false
-    };
-  }
-
-  const primaryBlocker = report.topWeakChapters[0];
-
+export function generateDailyMission(diagReport: any): DailyMission {
+  // Graceful fallback for the demo UI
   return {
-    title: `Fix ${primaryBlocker.chapter}`,
-    description: `You are losing ${primaryBlocker.marksLost} marks here. Let's fix this leak today.`,
-    targetChapter: primaryBlocker.chapter,
-    questionCount: 10,
-    rewardPoints: 100,
-    isCompleted: false
+    title: "Overcome " + (diagReport?.weak_areas?.[0] || "Kinematics"),
+    description: "Your recent accuracy dipped in this particular topic. Let's tackle 10 focused questions to bridge the conceptual gap.",
+    targetChapter: diagReport?.weak_areas?.[0] || "Kinematics",
+    questionCount: 10
   };
 }
 
-/**
- * ADAPTIVE DIFFICULTY SCALING (MOCK)
- * Simulated logic showing how the engine assesses a student's rolling accuracy 
- * to dial difficulty up or down mid-session.
- */
-export function scaleDifficulty(recentAccuracy: number, currentDifficulty: DifficultyLevel): DifficultyLevel {
-  if (recentAccuracy >= 80) {
-    if (currentDifficulty === 'Easy') return 'Medium';
-    if (currentDifficulty === 'Medium') return 'Hard';
-  }
-  if (recentAccuracy <= 40) {
-    if (currentDifficulty === 'Hard') return 'Medium';
-    if (currentDifficulty === 'Medium') return 'Easy';
-  }
-  return currentDifficulty; // Stay the same if 41-79%
-}
+export class AdaptiveEngine {
+  /**
+   * Evaluates the student's weakness map and returns the next target subtopic.
+   */
+  static async getNextSubtopic(studentId: string): Promise<string | null> {
+    const { data: map, error } = await (supabase as any)
+      .from('student_weakness_map')
+      .select('*')
+      .eq('student_id', studentId)
+      .order('accuracy_percent', { ascending: true }) // Lowest accuracy first
+      .limit(1)
+      .single();
 
-/**
- * SESSION EVALUATOR
- * Analyzes a completed session to generate the post-match behavioral summary.
- */
-export function evaluateSession(
-  mode: PracticeMode | TestMode, 
-  accuracy: number, 
-  avgTime: number, 
-  expectedAvgTime: number
-): SessionSummary {
+    if (error || !map) return null;
+    return map.subtopic;
+  }
+
+  /**
+   * Fetches an adaptive question batch.
+   * If the student has weaknesses, it targets them dynamically.
+   * Otherwise, it loads a curated set of random verified questions.
+   */
+  static async generateAdaptiveSprint(studentId: string, count: number = 20): Promise<any[]> {
+    const targetSubtopic = await this.getNextSubtopic(studentId);
+
+    let query = (supabase as any).from('questions').select('*').eq('is_verified', true);
+    
+    if (targetSubtopic) {
+        // Bias heavily toward their weakness but allow a mix to prevent extreme frustration.
+        // For simplicity, we just pull from the weak subtopic in this engine version.
+        query = query.eq('subtopic', targetSubtopic);
+    }
+    
+    // In production, we'd use `.order('RANDOM()')` via an RPC. 
+    // Here we use updated_at to spoof some randomness or just take the top rows.
+    query = query.limit(count);
+
+    const { data } = await query;
+    return data || [];
+  }
   
-  let behavioralFlag: string | null = null;
-  if (avgTime < (expectedAvgTime * 0.5) && accuracy < 60) {
-    behavioralFlag = "You rushed heavily. Your average time was half the expected time, destroying accuracy.";
-  } else if (avgTime > (expectedAvgTime * 1.5) && accuracy < 60) {
-    behavioralFlag = "You are overthinking. High time spent with low accuracy indicates a core conceptual gap.";
-  } else if (accuracy >= 80) {
-    behavioralFlag = "Excellent pacing and accuracy. You have mastered this tier.";
-  }
+  /**
+   * Core recursive hook: Once a student answers a question, we update their weakness map.
+   */
+  static async logAttemptAndUpdateMap(studentId: string, question: any, isCorrect: boolean, timeSeconds: number) {
+     // 1. Log attempt
+     await (supabase as any).from('user_mcq_attempts').insert({
+       user_id: studentId,
+       question_id: question.id,
+       is_correct: isCorrect,
+       time_taken_ms: timeSeconds * 1000,
+       ai_predicted_mistake: isCorrect ? 'none' : question.mistake_type || 'conceptual',
+       selected_option: -1 // Assume caught separately
+     });
 
-  let nextAction = "";
-  if (mode === 'SpeedRun') {
-    nextAction = "Take a 10 minute break, then review exactly which questions forced you to guess.";
-  } else if (accuracy < 50) {
-    nextAction = "Stop practicing. Go back to Lecture SETU and review the theory.";
-  } else {
-    nextAction = "Progress to Hard difficulty questions in the next session.";
-  }
+     // 2. Fetch existing weakness entry
+     const { data: existing } = await (supabase as any).from('student_weakness_map').select('*').eq('student_id', studentId).eq('subtopic', question.subtopic).single();
 
-  return {
-    accuracyChange: accuracy > 60 ? +8 : -4, // Mock change
-    overallAccuracy: accuracy,
-    behavioralFlag,
-    nextActionRecommend: nextAction,
-    completedQuestions: mode === 'SpeedRun' ? 50 : 15
-  };
+     if (existing) {
+        // Recalculate rolling accuracy
+        const newAttempts = existing.attempts_count + 1;
+        const correctCount = (existing.accuracy_percent / 100) * existing.attempts_count;
+        const newAccuracy = ((correctCount + (isCorrect ? 1 : 0)) / newAttempts) * 100;
+        
+        // Recalculate moving average time
+        const newAvgTime = ((existing.avg_time_seconds * existing.attempts_count) + timeSeconds) / newAttempts;
+
+        await (supabase as any).from('student_weakness_map').update({
+           accuracy_percent: newAccuracy,
+           avg_time_seconds: Math.round(newAvgTime),
+           attempts_count: newAttempts,
+           last_attempted: new Date().toISOString()
+        }).eq('id', existing.id);
+
+     } else {
+        // First time seeing this subtopic
+        await (supabase as any).from('student_weakness_map').insert({
+           student_id: studentId,
+           subtopic: question.subtopic,
+           accuracy_percent: isCorrect ? 100 : 0,
+           avg_time_seconds: timeSeconds,
+           attempts_count: 1
+        });
+     }
+  }
 }

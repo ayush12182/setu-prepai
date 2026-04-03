@@ -14,6 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ActionItem {
   icon: React.ElementType;
@@ -29,6 +30,7 @@ export const QuickActions: React.FC = () => {
   const navigate = useNavigate();
   const { isNeet } = useExamMode();
   const { isFoundation } = useClassContext();
+  const { isB2BStudent } = useAuth();
 
   const actions: ActionItem[] = isFoundation
     ? [
@@ -45,11 +47,11 @@ export const QuickActions: React.FC = () => {
       { icon: PenTool, title: 'Practice', description: isNeet ? 'NCERT MCQs' : 'MCQs by difficulty', path: '/practice', gradient: 'from-emerald-500 to-teal-500', emoji: '✍️' },
       { icon: ClipboardCheck, title: 'Test', description: isNeet ? 'Biology-heavy tests' : 'Chapter & PYQ tests', path: '/test', gradient: 'from-violet-500 to-purple-500', emoji: '📋' },
       { icon: RotateCcw, title: 'Revision', description: isNeet ? 'NCERT flashcards' : 'Formula sheets', path: '/revision', gradient: 'from-amber-500 to-orange-500', emoji: '🔄' },
-      { icon: Video, title: 'Lecture SETU', description: 'Video → structured notes', path: '/lecture-setu', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' },
+      ...(!isB2BStudent ? [{ icon: Video, title: 'Lecture SETU', description: 'Video → structured notes', path: '/lecture-setu', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' }] as ActionItem[] : []),
       { icon: MessageCircle, title: isNeet ? 'Ask NEET Mentor' : 'Ask Jeetu Bhaiya', description: 'Doubts & strategy', path: '/ask-jeetu', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
       { icon: BarChart3, title: 'Analytics', description: 'Accuracy & trends', path: '/analytics', gradient: 'from-teal-500 to-cyan-500', emoji: '📊' },
-      { icon: Users, title: 'SETU Circles', description: 'Live study rooms', path: '/circles', gradient: 'from-amber-500 via-rose-500 to-violet-500', emoji: '🔥', badge: 'Live' },
-    ];
+      ...(!isB2BStudent ? [{ icon: Users, title: 'SETU Circles', description: 'Live study rooms', path: '/circles', gradient: 'from-amber-500 via-rose-500 to-violet-500', emoji: '🔥', badge: 'Live' }] as ActionItem[] : []),
+    ].filter(a => !isB2BStudent || !['/lecture-setu', '/circles', '/teacher-dashboard'].includes(a.path));
 
   return (
     <div className="w-full mx-auto">

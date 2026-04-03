@@ -10,7 +10,7 @@ import QuizInterface, { QuizResult } from '@/components/practice/QuizInterface';
 import QuizResults from '@/components/practice/QuizResults';
 import TestModeQuiz, { TestAnswer } from '@/components/practice/TestModeQuiz';
 import TestResults from '@/components/practice/TestResults';
-import { Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle } from 'lucide-react';
+import { Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { generateMockAnalytics } from '@/lib/analyticsSimulation';
 import { generateDiagnosticReport } from '@/lib/diagnosisEngine';
 import { generateDailyMission, DailyMission } from '@/lib/adaptiveEngine';
+import { SnapAndSolveModal } from '@/components/practice/SnapAndSolveModal';
 
 type PracticeMode = 'practice' | 'test';
 
@@ -39,6 +40,7 @@ const PracticePage: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
   const [mode, setMode] = useState<PracticeMode>('practice');
   const [mission, setMission] = useState<DailyMission | null>(null);
+  const [isSnapModalOpen, setIsSnapModalOpen] = useState(false);
 
   const { questions, loading, error, generateQuestions, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
 
@@ -114,9 +116,14 @@ const PracticePage: React.FC = () => {
         {state.step === 'select-mode' && mission && (
           <div className="animate-fade-in">
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-display font-bold text-foreground">Training Center</h1>
-              <p className="text-muted-foreground mt-1 text-lg">Your adaptive practice engine tailored by AI.</p>
+            <div className="mb-8 flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-display font-bold text-foreground">Training Center</h1>
+                <p className="text-muted-foreground mt-1 text-lg">Your adaptive practice engine tailored by AI.</p>
+              </div>
+              <Button onClick={() => setIsSnapModalOpen(true)} className="gap-2 h-12 rounded-xl bg-accent text-primary font-bold shadow-lg shadow-accent/20 hover:shadow-accent/40 hover:-translate-y-0.5 transition-all">
+                <Camera size={20} /> Snap & Solve
+              </Button>
             </div>
 
             {/* Daily Mission Hero */}
@@ -226,6 +233,8 @@ const PracticePage: React.FC = () => {
         )}
 
       </div>
+      
+      {isSnapModalOpen && <SnapAndSolveModal onClose={() => setIsSnapModalOpen(false)} />}
     </MainLayout>
   );
 };

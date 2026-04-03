@@ -43,11 +43,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     user &&
     !skipDiagnosticCheck &&
     !diagnosticCompleted &&
-    location.pathname !== '/diagnostic-test' &&
+    location.pathname !== '/foundation-assessment' &&
+    location.pathname !== '/entrance-assessment' &&
     location.pathname !== '/select-exam' &&
     location.pathname !== '/profile'
   ) {
-    return <Navigate to="/diagnostic-test" replace />;
+    return <Navigate to="/foundation-assessment" replace />;
   }
 
   // Block foundation students from competitive-only routes

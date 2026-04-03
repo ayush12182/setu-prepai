@@ -32,13 +32,31 @@ import TermsPage from "./pages/TermsPage";
 import NotFound from "./pages/NotFound";
 import SetuCirclesPage from "./pages/SetuCirclesPage";
 import CircleFocusRoomPage from "./pages/CircleFocusRoomPage";
-import DiagnosticTestPage from "./pages/DiagnosticTestPage";
+import FoundationAssessmentPage from "./pages/FoundationAssessmentPage";
 import LearningProfilePage from "./pages/LearningProfilePage";
 import ConceptGraphPage from "./pages/ConceptGraphPage";
 import LearningRoadmapPage from "./pages/LearningRoadmapPage";
 import TeacherDashboardPage from "./pages/TeacherDashboardPage";
+import StudentHubPage from "./pages/StudentHubPage";
 import AITeachingRoomPage from "./pages/AITeachingRoomPage";
 import PricingPage from "./pages/PricingPage";
+
+// B2B Pages
+import B2BOverview from "./pages/B2B/B2BOverview";
+import B2BBatches from "./pages/B2B/B2BBatches";
+import B2BStudents from "./pages/B2B/B2BStudents";
+import B2BTests from "./pages/B2B/B2BTests";
+import B2BAnalytics from "./pages/B2B/B2BAnalytics";
+import B2BInviteStudents from "./pages/B2B/B2BInviteStudents";
+import B2BSettings from "./pages/B2B/B2BSettings";
+import JoinBatchPage from "./pages/B2B/JoinBatchPage";
+
+// Admin
+import QuestionQCPanel from "./pages/Admin/QuestionQCPanel";
+
+// Assess
+import AssessmentFlowPage from "./pages/Assess/AssessmentFlowPage";
+import B2BLiveMonitor from "./pages/B2B/B2BLiveMonitor";
 
 const queryClient = new QueryClient();
 
@@ -78,11 +96,35 @@ const App = () => (
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/circles" element={<SetuCirclesPage />} />
                     <Route path="/circles/:roomId" element={<CircleFocusRoomPage />} />
-                    <Route path="/diagnostic-test" element={<DiagnosticTestPage />} />
+                    <Route path="/foundation-assessment" element={<FoundationAssessmentPage />} />
+                    <Route path="/diagnostic-test" element={<FoundationAssessmentPage />} /> {/* Legacy fallback */}
                     <Route path="/learning-profile" element={<LearningProfilePage />} />
                     <Route path="/concept-graph" element={<ConceptGraphPage />} />
                     <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
                     <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
+                    
+                    {/* B2B Dashboard Routes */}
+                    <Route path="/b2b">
+                      <Route index element={<B2BOverview />} />
+                      <Route path="batches" element={<B2BBatches />} />
+                      <Route path="students" element={<B2BStudents />} />
+                      <Route path="tests" element={<B2BTests />} />
+                      <Route path="monitor/:sessionId" element={<B2BLiveMonitor />} />
+                      <Route path="analytics" element={<B2BAnalytics />} />
+                      <Route path="invite" element={<B2BInviteStudents />} />
+                      <Route path="settings" element={<B2BSettings />} />
+                    </Route>
+                    
+                    {/* Student Join Route */}
+                    <Route path="/join/:inviteCode" element={<JoinBatchPage />} />
+                    
+                    {/* Assessment Link Flow */}
+                    <Route path="/assess/:sessionId" element={<AssessmentFlowPage />} />
+                    
+                    {/* Admin Routes */}
+                    <Route path="/admin/qc" element={<QuestionQCPanel />} />
+                    
+                    <Route path="/student-hub" element={<StudentHubPage />} />
                     <Route path="/teaching-room/:teacherId" element={<AITeachingRoomPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/premium" element={<PricingPage />} />

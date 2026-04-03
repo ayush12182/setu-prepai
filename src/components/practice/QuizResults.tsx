@@ -17,6 +17,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { RankPredictorCard } from '@/components/analytics/RankPredictorCard';
 
 interface QuizResultsProps {
   result: QuizResult;
@@ -83,6 +84,15 @@ const QuizResults: React.FC<QuizResultsProps> = ({
           <p className="text-3xl font-bold text-amber-500">{avgTimePerQuestion}s</p>
           <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-1">Avg Time</p>
         </div>
+      </div>
+
+      {/* ─── LIVE RANK PREDICTION ─── */}
+      <div className="mt-8">
+         <RankPredictorCard 
+           score={Math.round((accuracy / 100) * 300)} // Mock scaled score
+           maxScore={300}
+           exam="JEE_MAINS"
+         />
       </div>
 
       {/* ─── AI SESSION SUMMARY ─── */}
