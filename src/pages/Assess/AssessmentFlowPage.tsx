@@ -34,7 +34,7 @@ export default function AssessmentFlowPage() {
 
   useEffect(() => {
     if (!user) {
-      navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`, { replace: true });
+      navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}&type=coaching`, { replace: true });
       return;
     }
     

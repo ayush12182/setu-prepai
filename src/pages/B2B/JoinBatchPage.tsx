@@ -25,8 +25,8 @@ export default function JoinBatchPage() {
     }
 
     if (!user) {
-      // Unauthenticated -> Redirect to auth with return URL
-      navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}`, { replace: true });
+      // Unauthenticated -> Redirect to auth with return URL and explicitly tag as coaching
+      navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}&type=coaching`, { replace: true });
       return;
     }
 
