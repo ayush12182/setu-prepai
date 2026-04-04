@@ -215,7 +215,7 @@ const TeacherDashboardPage: React.FC = () => {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           className="relative group cursor-pointer overflow-hidden rounded-3xl border border-accent/20 bg-accent/5 p-6 transition-all hover:bg-accent/10"
-          onClick={() => navigate('/mentor')}
+          onClick={() => navigate('/b2b')}
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">

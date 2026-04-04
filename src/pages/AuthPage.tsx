@@ -145,10 +145,17 @@ const AuthPage: React.FC = () => {
   useEffect(() => {
     if (user && !authLoading) {
       if (showOnboarding) return;
-      if (profile && !profile.class) {
-        setShowOnboarding(true);
-      } else if (profile?.class) {
-        navigate('/dashboard');
+      if (profile) {
+        if (profile.user_type === 'b2b_mentor' || profile.user_type === 'b2b_institution' || profile.user_type === 'admin') {
+          navigate('/b2b');
+          return;
+        }
+
+        if (!profile.class) {
+          setShowOnboarding(true);
+        } else {
+          navigate('/dashboard');
+        }
       }
     }
   }, [user, profile, authLoading, navigate, showOnboarding]);

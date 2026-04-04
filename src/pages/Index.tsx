@@ -24,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 
 const Index: React.FC = () => {
   const { getMentorName, language } = useLanguage();
-  const { user, profile, updateProfile, isB2BStudent } = useAuth();
+  const { user, profile, updateProfile, isB2BStudent, isMentor, isInstitution } = useAuth();
   const { config, isNeet, isCuet, examMode, setExamMode } = useExamMode();
   const { isFoundation, classLabel } = useClassContext();
   const navigate = useNavigate();
@@ -32,8 +32,10 @@ const Index: React.FC = () => {
   React.useEffect(() => {
     if (isB2BStudent) {
       navigate('/student-hub', { replace: true });
+    } else if (isMentor || isInstitution) {
+      navigate('/b2b', { replace: true });
     }
-  }, [isB2BStudent, navigate]);
+  }, [isB2BStudent, isMentor, isInstitution, navigate]);
 
   const { dailyFocus, smartFocus, isLoading, streak } = useTodaysFocus();
   const { transitionMessage, isReadyForTransition } = useProgressiveLearning();
