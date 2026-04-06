@@ -98,6 +98,7 @@ const FOUNDATION_CLASS_OPTIONS = [
 const SENIOR_CLASS_OPTIONS = [
   { value: '11', label: 'Class 11', emoji: '📚', tag: 'Just Starting' },
   { value: '12', label: 'Class 12', emoji: '🎯', tag: 'Board + Entrance' },
+  { value: '13', label: 'Dropper / Repeater', emoji: '🔁', tag: 'Full Focus Year' },
 ];
 
 const AuthPage: React.FC = () => {
@@ -297,8 +298,9 @@ const AuthPage: React.FC = () => {
       return;
     }
 
+    // Always go through all steps — class is required for every stream
     if (onboardingStep === 0) setOnboardingStep(1);
-    else if (onboardingStep === 1) setOnboardingStep(2);
+    else if (onboardingStep === 1) setOnboardingStep(2); // always show class step
     else if (onboardingStep === 2) handleOnboardingComplete();
   };
 
@@ -531,17 +533,15 @@ const AuthPage: React.FC = () => {
               <div className="flex flex-col gap-3">
                 <Button
                   onClick={handleOnboardingNext}
-                  disabled={loading || (onboardingStep === 1 && !onboardingData.stream)}
+                  disabled={loading || (onboardingStep === 1 && !onboardingData.stream) || (onboardingStep === 2 && !onboardingData.studentClass)}
                   className="w-full h-14 rounded-xl bg-accent hover:bg-accent/90 text-[hsl(213,28%,20%)] font-bold text-lg shadow-[0_0_20px_rgba(232,154,60,0.2)] hover:shadow-[0_0_30px_rgba(232,154,60,0.3)] transition-all disabled:opacity-50 disabled:shadow-none"
                 >
                   {loading ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : onboardingStep === 2 ? (
                     <>Start Assessment <ArrowRight className="h-5 w-5 ml-2" /></>
-                  ) : isFoundationProgram() ? (
-                    <>Select Class <ArrowRight className="h-5 w-5 ml-2" /></>
                   ) : (
-                    <>Start Assessment <ArrowRight className="h-5 w-5 ml-2" /></>
+                    <>Next <ArrowRight className="h-5 w-5 ml-2" /></>
                   )}
                 </Button>
                 
