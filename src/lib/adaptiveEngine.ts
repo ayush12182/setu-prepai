@@ -32,12 +32,22 @@ export interface DailyMission {
   questionCount: number;
 }
 
-export function generateDailyMission(diagReport: any): DailyMission {
-  // Graceful fallback for the demo UI
+export type ExamType = 'JEE' | 'NEET' | 'CUET';
+
+// Default topic when no diagnostic data is available — must be contextually relevant
+const DEFAULT_MISSION_TOPIC: Record<ExamType, string> = {
+  JEE: 'Kinematics',
+  NEET: 'Human Physiology',
+  CUET: 'Consumer Behaviour & Demand Analysis',
+};
+
+export function generateDailyMission(diagReport: any, examType: ExamType = 'JEE'): DailyMission {
+  const fallback = DEFAULT_MISSION_TOPIC[examType];
+  const targetTopic = diagReport?.weak_areas?.[0] || diagReport?.whatToFixFirst || fallback;
   return {
-    title: "Overcome " + (diagReport?.weak_areas?.[0] || "Kinematics"),
+    title: "Overcome " + targetTopic,
     description: "Your recent accuracy dipped in this particular topic. Let's tackle 10 focused questions to bridge the conceptual gap.",
-    targetChapter: diagReport?.weak_areas?.[0] || "Kinematics",
+    targetChapter: targetTopic,
     questionCount: 10
   };
 }

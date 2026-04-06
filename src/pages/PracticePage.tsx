@@ -45,10 +45,11 @@ const PracticePage: React.FC = () => {
   const { questions, loading, error, generateQuestions, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
 
   useEffect(() => {
-    // Generate the adaptive mission for today
-    const simData = generateMockAnalytics(isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE');
+    // Generate the adaptive mission for today — exam-type aware
+    const examType = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE';
+    const simData = generateMockAnalytics(examType);
     const diagReport = generateDiagnosticReport(simData);
-    setMission(generateDailyMission(diagReport));
+    setMission(generateDailyMission(diagReport, examType));
   }, [isNeet, isCuet]);
 
   useEffect(() => {
