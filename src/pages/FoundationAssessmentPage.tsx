@@ -154,6 +154,67 @@ const FoundationAssessmentPage: React.FC = () => {
     }
   };
 
+  // ─── LOCAL PROFILE GENERATOR (fallback when edge function is unavailable) ───
+  const generateLocalProfile = () => {
+    const totalCorrect = answers.filter(a => a.isCorrect).length;
+    const totalTime = answers.reduce((sum, a) => sum + a.time, 0);
+    const accuracy = answers.length > 0 ? (totalCorrect / answers.length) * 100 : 0;
+    const avgTime = answers.length > 0 ? totalTime / answers.length : 60;
+
+    // Compute per-subject accuracy
+    const subjectMap: Record<string, { correct: number; total: number; topics: Record<string, { correct: number; total: number }> }> = {};
+    for (const a of answers) {
+      if (!subjectMap[a.subject]) subjectMap[a.subject] = { correct: 0, total: 0, topics: {} };
+      subjectMap[a.subject].total++;
+      if (a.isCorrect) subjectMap[a.subject].correct++;
+      if (!subjectMap[a.subject].topics[a.topic]) subjectMap[a.subject].topics[a.topic] = { correct: 0, total: 0 };
+      subjectMap[a.subject].topics[a.topic].total++;
+      if (a.isCorrect) subjectMap[a.subject].topics[a.topic].correct++;
+    }
+
+    const weakTopics: string[] = [];
+    const strongTopics: string[] = [];
+    const subjectPerformance: Record<string, string> = {};
+
+    for (const [subj, stats] of Object.entries(subjectMap)) {
+      const subjectAcc = stats.total > 0 ? (stats.correct / stats.total) * 100 : 0;
+      subjectPerformance[subj] = subjectAcc >= 70 ? 'strong' : subjectAcc >= 40 ? 'moderate' : 'weak';
+      for (const [topic, topicStats] of Object.entries(stats.topics)) {
+        const topicAcc = topicStats.total > 0 ? (topicStats.correct / topicStats.total) * 100 : 0;
+        if (topicAcc < 40) weakTopics.push(topic);
+        else if (topicAcc >= 70) strongTopics.push(topic);
+      }
+    }
+
+    const speedScore = avgTime < 30 ? 90 : avgTime < 60 ? 75 : avgTime < 90 ? 55 : 35;
+    const conceptScore = Math.round(accuracy * 0.9);
+    const confidenceScore = Math.round((accuracy + speedScore) / 2);
+    const overallLevel = accuracy >= 70 ? 'advanced' : accuracy >= 45 ? 'intermediate' : 'beginner';
+
+    return {
+      concept_score: Math.round(conceptScore),
+      accuracy_score: Math.round(accuracy),
+      speed_score: Math.round(speedScore),
+      confidence_score: Math.round(confidenceScore),
+      weak_topics: weakTopics.slice(0, 5),
+      strong_topics: strongTopics.slice(0, 5),
+      prerequisite_gaps: weakTopics.slice(0, 3),
+      overall_level: overallLevel,
+      metadata: {
+        subject_performance: subjectPerformance,
+        mistake_patterns: {
+          conceptual: accuracy < 50 ? 'You are making more conceptual errors than calculation errors. Focus on understanding the "why" behind concepts before solving problems.' : 'Your conceptual foundation is solid. Work on reducing silly errors under time pressure.',
+        },
+        time_analysis: avgTime < 45 ? 'You are answering quickly — good speed, but double-check your work to avoid rushing.' : 'You take your time with each question. Work on increasing pace for simpler questions.',
+        action_plan: {
+          what_to_study: weakTopics.length > 0 ? `Priority focus on: ${weakTopics.slice(0, 3).join(', ')}` : 'You are performing well across topics. Focus on advanced problem-solving techniques.',
+          where_to_start: weakTopics[0] || strongTopics[0] || 'Algebra',
+          practice_plan: `Start with 20 questions daily on your weak topics, then attempt a full mock test every weekend. Review your mistakes carefully before moving on.`,
+        }
+      }
+    };
+  };
+
   const handleTestComplete = async () => {
     setTestComplete(true);
     setGeneratingProfile(true);
@@ -177,31 +238,41 @@ const FoundationAssessmentPage: React.FC = () => {
         proctoring_events: proctoringState.events,
       }).eq('id', attemptId!);
 
-      // Update Edge Function call to trigger new AI Report format
-      const { data: profileData, error: profileError } = await supabase.functions.invoke('generate-learning-profile', {
-        body: { attemptId, answers, questions, stream }
-      });
+      // Try edge function first, fall back to local if it fails
+      let profileToSave: ReturnType<typeof generateLocalProfile> | null = null;
 
-      if (profileError) throw profileError;
+      try {
+        const { data: profileData, error: profileError } = await supabase.functions.invoke('generate-learning-profile', {
+          body: { attemptId, answers, questions, stream }
+        });
+        if (!profileError && profileData?.profile) {
+          profileToSave = profileData.profile;
+        } else {
+          throw profileError || new Error('No profile data returned');
+        }
+      } catch (edgeFnErr) {
+        console.warn('Edge function unavailable — using local profile generator:', edgeFnErr);
+        profileToSave = generateLocalProfile();
+      }
 
-      if (profileData?.profile) {
+      if (profileToSave) {
         await supabase.from('learning_profiles').upsert({
           user_id: user!.id,
           diagnostic_attempt_id: attemptId!,
           diagnostic_completed: true,
-          concept_score: profileData.profile.concept_score,
-          accuracy_score: profileData.profile.accuracy_score,
-          speed_score: profileData.profile.speed_score,
-          confidence_score: profileData.profile.confidence_score,
-          weak_topics: profileData.profile.weak_topics,
-          strong_topics: profileData.profile.strong_topics,
-          prerequisite_gaps: profileData.profile.prerequisite_gaps,
-          overall_level: profileData.profile.overall_level,
+          concept_score: profileToSave.concept_score,
+          accuracy_score: profileToSave.accuracy_score,
+          speed_score: profileToSave.speed_score,
+          confidence_score: profileToSave.confidence_score,
+          weak_topics: profileToSave.weak_topics,
+          strong_topics: profileToSave.strong_topics,
+          prerequisite_gaps: profileToSave.prerequisite_gaps,
+          overall_level: profileToSave.overall_level,
           metadata: {
-            action_plan: profileData.profile.metadata?.action_plan || profileData.profile.action_plan,
-            mistake_patterns: profileData.profile.metadata?.mistake_patterns || profileData.profile.mistake_patterns,
-            time_analysis: profileData.profile.metadata?.time_analysis || "",
-            subject_performance: profileData.profile.metadata?.subject_performance || {},
+            action_plan: (profileToSave.metadata as any)?.action_plan,
+            mistake_patterns: (profileToSave.metadata as any)?.mistake_patterns,
+            time_analysis: (profileToSave.metadata as any)?.time_analysis || '',
+            subject_performance: (profileToSave.metadata as any)?.subject_performance || {},
           }
         });
 
