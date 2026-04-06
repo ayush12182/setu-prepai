@@ -27,6 +27,7 @@ export interface StudentAnalyticsData {
   overallAccuracy: number;
   totalTimeStudied: number; // minutes
   questionsAttempted: number;
+  notesStudied: number;
   mistakeProfile: {
     conceptual: number;
     silly: number;
@@ -52,6 +53,7 @@ export function generateMockAnalytics(examType: ExamType = 'JEE'): StudentAnalyt
       overallAccuracy: 58,
       totalTimeStudied: 1420,
       questionsAttempted: 845,
+      notesStudied: 42,
       mistakeProfile: {
         conceptual: 45,
         silly: 25,
@@ -112,6 +114,7 @@ export function generateMockAnalytics(examType: ExamType = 'JEE'): StudentAnalyt
     overallAccuracy: 72,
     totalTimeStudied: 1850,
     questionsAttempted: 1200,
+    notesStudied: 65,
     mistakeProfile: {
       conceptual: 20,
       silly: 40,

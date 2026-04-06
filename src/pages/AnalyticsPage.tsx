@@ -139,10 +139,19 @@ const AnalyticsPage: React.FC = () => {
         {/* ─── RANK PREDICTOR: LIVE STATUS ─── */}
         <div className="mb-6">
            <RankPredictorCard 
-             score={80 + Math.random() * 20} 
-             maxScore={300} 
+             score={(() => {
+                const max = isNeet ? 720 : 300;
+                const volMultiplier = Math.min(data.questionsAttempted / 2000, 1);
+                const timeMultiplier = Math.min(data.totalTimeStudied / 3000, 1);
+                const notesMultiplier = Math.min(data.notesStudied / 80, 1);
+                
+                const baseScore = data.overallAccuracy * (max / 100);
+                const behavioralBoost = baseScore * ((volMultiplier * 0.15) + (timeMultiplier * 0.05) + (notesMultiplier * 0.05));
+                return Math.min(baseScore + behavioralBoost, max);
+             })()} 
+             maxScore={isNeet ? 720 : 300} 
              exam={isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE_MAINS'} 
-             previousRank={280000} 
+             previousRank={280000 - (data.questionsAttempted * 10)} 
            />
         </div>
 
