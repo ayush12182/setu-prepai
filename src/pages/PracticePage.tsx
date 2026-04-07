@@ -17,7 +17,7 @@ import { useClassContext } from '@/contexts/ClassContext';
 import { Button } from '@/components/ui/button';
 import { generateMockAnalytics } from '@/lib/analyticsSimulation';
 import { generateDiagnosticReport } from '@/lib/diagnosisEngine';
-import { generateDailyMission, DailyMission } from '@/lib/adaptiveEngine';
+import { generateDailyMission, generateDailyMissionAsync, DailyMission } from '@/lib/adaptiveEngine';
 import { SnapAndSolveModal } from '@/components/practice/SnapAndSolveModal';
 
 type PracticeMode = 'practice' | 'test';
@@ -45,12 +45,11 @@ const PracticePage: React.FC = () => {
   const { questions, loading, error, generateQuestions, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
 
   useEffect(() => {
-    // Generate the adaptive mission for today — exam-type aware
+    if (!user?.id) return;
+    // Generate mission from REAL attempt history (async), falls back to date-rotating pool
     const examType = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE';
-    const simData = generateMockAnalytics(examType);
-    const diagReport = generateDiagnosticReport(simData);
-    setMission(generateDailyMission(diagReport, examType));
-  }, [isNeet, isCuet]);
+    generateDailyMissionAsync(user.id, examType).then(setMission);
+  }, [user?.id, isNeet, isCuet]);
 
   useEffect(() => {
     if (initialized) return;

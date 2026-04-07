@@ -34,21 +34,101 @@ export interface DailyMission {
 
 export type ExamType = 'JEE' | 'NEET' | 'CUET';
 
-// Default topic when no diagnostic data is available — must be contextually relevant
-const DEFAULT_MISSION_TOPIC: Record<ExamType, string> = {
-  JEE: 'Kinematics',
-  NEET: 'Human Physiology',
-  CUET: 'Consumer Behaviour & Demand Analysis',
+// Rotating topic pools — cycles daily so new users always get a fresh mission
+const ROTATING_TOPICS: Record<ExamType, string[]> = {
+  JEE: [
+    'Kinematics', 'Thermodynamics', 'Electrostatics', 'Organic Chemistry',
+    'Coordinate Geometry', 'Integration', 'Waves & Sound', 'Electrochemistry',
+    'Rotational Motion', 'Chemical Bonding', 'Matrices & Determinants', 'Optics',
+  ],
+  NEET: [
+    'Human Physiology', 'Genetics & Evolution', 'Cell Biology', 'Plant Kingdom',
+    'Laws of Motion', 'Chemical Thermodynamics', 'Reproduction in Organisms',
+    'Ecology', 'Biomolecules', 'Organic Chemistry', 'Human Reproduction', 'Photosynthesis',
+  ],
+  CUET: [
+    'Consumer Behaviour & Demand Analysis', 'Journal Entries & Ledger',
+    'Business Environment', 'National Income Accounting',
+    'Marketing Management', 'Depreciation & Provisions',
+    'Money & Banking', 'Forms of Business Organisation',
+    'Elasticity of Demand', 'Financial Statements', 'Consumer Protection', 'Indian Economy',
+  ],
 };
 
+/** Returns a deterministic index based on today's date — rotates daily */
+function getDailyIndex(poolLength: number): number {
+  const today = new Date();
+  const dayOfYear = Math.floor(
+    (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  return dayOfYear % poolLength;
+}
+
+/** Sync fallback — used when Supabase is unavailable */
 export function generateDailyMission(diagReport: any, examType: ExamType = 'JEE'): DailyMission {
-  const fallback = DEFAULT_MISSION_TOPIC[examType];
-  const targetTopic = diagReport?.weak_areas?.[0] || diagReport?.whatToFixFirst || fallback;
+  const pool = ROTATING_TOPICS[examType];
+  const dailyFallback = pool[getDailyIndex(pool.length)];
+  const targetTopic = diagReport?.weak_areas?.[0] || diagReport?.whatToFixFirst || dailyFallback;
   return {
-    title: "Overcome " + targetTopic,
+    title: 'Overcome ' + targetTopic,
     description: "Your recent accuracy dipped in this particular topic. Let's tackle 10 focused questions to bridge the conceptual gap.",
     targetChapter: targetTopic,
-    questionCount: 10
+    questionCount: 10,
+  };
+}
+
+/** Async version — pulls REAL worst topic from Supabase attempt history */
+export async function generateDailyMissionAsync(
+  userId: string,
+  examType: ExamType = 'JEE'
+): Promise<DailyMission> {
+  const pool = ROTATING_TOPICS[examType];
+  const dailyFallback = pool[getDailyIndex(pool.length)];
+
+  try {
+    // Find the topic with the lowest accuracy from real attempts
+    const { data: attempts, error } = await (supabase as any)
+      .from('user_mcq_attempts')
+      .select('questions(topic, subject), is_correct')
+      .eq('user_id', userId)
+      .not('questions', 'is', null)
+      .order('attempted_at', { ascending: false })
+      .limit(200);
+
+    if (!error && attempts && attempts.length > 0) {
+      // Aggregate accuracy per topic
+      const topicMap: Record<string, { correct: number; total: number }> = {};
+      for (const a of attempts) {
+        const topic = a.questions?.topic;
+        if (!topic) continue;
+        if (!topicMap[topic]) topicMap[topic] = { correct: 0, total: 0 };
+        topicMap[topic].total++;
+        if (a.is_correct) topicMap[topic].correct++;
+      }
+      // Find the weakest topic (min accuracy, min 3 attempts for reliability)
+      const weakest = Object.entries(topicMap)
+        .filter(([, s]) => s.total >= 3)
+        .sort(([, a], [, b]) => (a.correct / a.total) - (b.correct / b.total))[0];
+
+      if (weakest) {
+        return {
+          title: 'Overcome ' + weakest[0],
+          description: `You've got ${Math.round((weakest[1].correct / weakest[1].total) * 100)}% accuracy here. Let's close that gap with 10 targeted questions.`,
+          targetChapter: weakest[0],
+          questionCount: 10,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Daily mission: falling back to rotating pool', err);
+  }
+
+  // No real data — use rotating daily topic
+  return {
+    title: 'Overcome ' + dailyFallback,
+    description: "Today's focus topic. Tackle 10 questions to strengthen this concept.",
+    targetChapter: dailyFallback,
+    questionCount: 10,
   };
 }
 
