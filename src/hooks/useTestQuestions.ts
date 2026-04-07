@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Question } from './usePracticeQuestions';
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 export interface ChapterSelection {
   chapterId: string;
@@ -16,6 +17,8 @@ export const useTestQuestions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { examMode, isCuet, isNeet } = useExamMode();
+  const examModeUpper = examMode.toUpperCase() as 'JEE' | 'NEET' | 'CUET';
 
   // Fetch questions for mixed test (multiple chapters)
   const fetchMixedTestQuestions = async (
@@ -63,7 +66,8 @@ export const useTestQuestions = () => {
               chapterName: chapter.chapterName,
               subject: chapter.subject,
               difficulty: 'medium',
-              count: questionsPerChapter
+              count: questionsPerChapter,
+              examMode: examModeUpper,
             }
           });
 
@@ -134,13 +138,20 @@ export const useTestQuestions = () => {
         return shuffled;
       }
 
-      // If no PYQs found, generate PYQ-style questions
+      // If no PYQs found, generate PYQ-style questions using the correct exam mode
+      const defaultYearRange = isCuet
+        ? { start: 2022, end: 2024 }
+        : isNeet
+        ? { start: 2013, end: 2024 }
+        : { start: 2004, end: 2024 };
+
       const { data, error: fnError } = await supabase.functions.invoke('generate-pyq-questions', {
         body: {
           subject,
           chapterId,
-          yearRange: yearRange || { start: 2004, end: 2024 },
-          count
+          yearRange: yearRange || defaultYearRange,
+          count,
+          examMode: examModeUpper,
         }
       });
 
@@ -159,7 +170,7 @@ export const useTestQuestions = () => {
       }
 
       // Fallback: inform user no PYQs available
-      toast.info('No PYQs found. Generating JEE-style questions...');
+      toast.info(`No PYQs found. Generating ${examMode}-style questions...`);
       return [];
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load PYQ questions';
