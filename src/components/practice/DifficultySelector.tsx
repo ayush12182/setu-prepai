@@ -21,18 +21,22 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
   onSelectDifficulty,
   onBack
 }) => {
-  const { isNeet, jeeSubMode } = useExamMode();
+  const { isNeet, isCuet, jeeSubMode } = useExamMode();
 
   const getMediumDesc = () => {
     if (isNeet) return 'NEET UG level';
+    if (isCuet) return 'CUET standard level';
     if (jeeSubMode === 'advanced') return 'JEE Advanced level';
     return 'JEE Main level';
   };
   const getHardDesc = () => {
     if (isNeet) return 'NEET challenge level';
+    if (isCuet) return 'CUET high-difficulty application';
     if (jeeSubMode === 'main') return 'JEE Main hard variant';
     return 'JEE Advanced level';
   };
+
+  const examLabel = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE';
 
   const difficulties = [
     {
@@ -114,7 +118,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
 
       {/* Topic Preview */}
       <div className="bg-secondary/50 rounded-xl p-4">
-        <h4 className="font-medium text-sm mb-2">What {isNeet ? 'NEET' : 'JEE'} asks in this topic:</h4>
+        <h4 className="font-medium text-sm mb-2">What {examLabel} asks in this topic:</h4>
         <ul className="space-y-1">
           {subchapter.jeeAsks.slice(0, 3).map((point, idx) => (
             <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
