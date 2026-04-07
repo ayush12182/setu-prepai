@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import type { Subchapter } from '@/data/subchapters';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 interface SubchapterCardProps {
   subchapter: Subchapter;
@@ -52,6 +53,8 @@ export const SubchapterCard: React.FC<SubchapterCardProps> = ({
   isCompleted = false
 }) => {
   const navigate = useNavigate();
+  const { isNeet, isCuet } = useExamMode();
+  const examLabel = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE';
   const styles = subjectStyles[subject as keyof typeof subjectStyles] || subjectStyles.physics;
 
   return (

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { JeeQuestion, JeeOption, JeeSolution } from '@/lib/jeeMathRenderer';
+import { useExamMode } from '@/contexts/ExamModeContext';
 
 interface TestResultsProps {
   answers: TestAnswer[];
@@ -41,6 +42,8 @@ const TestResults: React.FC<TestResultsProps> = ({
   onPracticeMistakes
 }) => {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
+  const { isNeet, isCuet } = useExamMode();
+  const nextLevelLabel = isNeet ? 'NEET challenge level' : isCuet ? 'CUET high-difficulty application' : 'JEE Advanced level';
 
   const correct = answers.filter(a => a.isCorrect).length;
   const incorrect = answers.filter(a => !a.isCorrect && a.selectedOption).length;
@@ -276,7 +279,7 @@ const TestResults: React.FC<TestResultsProps> = ({
           <BookOpen className="w-5 h-5 text-setu-saffron flex-shrink-0 mt-0.5" />
           <p className="text-sm text-muted-foreground">
             {accuracy >= 80 
-              ? "Bahut badhiya beta! Ab ek level upar try karo. JEE Advanced level lagao."
+              ? `Bahut badhiya beta! Ab ek level upar try karo. ${nextLevelLabel} lagao.`
               : accuracy >= 50
               ? "Accha attempt tha. Jo galat hua, usse ache se dekho - concept samjho, common mistakes note karo. Phir practice karo."
               : "Pehle notes padho, concepts crystal clear karo. Har galti se seekho - yahi real preparation hai. Phir dobara attempt karo."
