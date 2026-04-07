@@ -1,239 +1,571 @@
 import React, { useState, useEffect } from 'react';
 import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
-import { ClipboardList, Plus, QrCode, Copy, Upload, Clock, Loader2, ArrowRight } from 'lucide-react';
+import {
+  ClipboardList, Plus, QrCode, Copy, Clock, Loader2, ArrowRight,
+  ArrowLeft, CheckCircle2, Sparkles, BookOpen, Target, Zap, Brain,
+  Users, BarChart3, Link2, ChevronRight, X,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { CUET_SUBJECTS, getCuetChaptersBySubject } from '@/data/cuetSyllabus';
+import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
+import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
+import { getSubchaptersByChapterId } from '@/data/subchapters';
+import QRCode from 'qrcode';
+
+type BuilderStep = 'topic' | 'configure' | 'generating' | 'share';
+type ExamType = 'JEE' | 'NEET' | 'CUET';
+type Difficulty = 'easy' | 'medium' | 'hard' | 'mixed';
+
+interface AssessmentConfig {
+  examType: ExamType;
+  subject: string;
+  chapterId: string;
+  chapterName: string;
+  subchapterId: string;
+  subchapterName: string;
+  difficulty: Difficulty;
+  questionCount: number;
+  timeLimitMinutes: number;
+}
+
+const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; desc: string; color: string }[] = [
+  { value: 'easy', label: 'Easy', desc: 'NCERT basics / direct recall', color: 'border-emerald-500/40 bg-emerald-500/5 text-emerald-400' },
+  { value: 'medium', label: 'Medium', desc: 'Standard exam level', color: 'border-amber-500/40 bg-amber-500/5 text-amber-400' },
+  { value: 'hard', label: 'Hard', desc: 'Advanced application', color: 'border-red-500/40 bg-red-500/5 text-red-400' },
+  { value: 'mixed', label: 'Mixed', desc: '30% easy · 40% medium · 30% hard', color: 'border-violet-500/40 bg-violet-500/5 text-violet-400' },
+];
 
 export default function B2BTests() {
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [batches, setBatches] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  
-  // Session Configuration State
-  const [config, setConfig] = useState({
-    batch_id: '',
-    exam_type: 'JEE Mains',
-    class: '12',
-    subjects: ['Physics', 'Chemistry', 'Mathematics'],
-    question_count: 30,
-    time_limit_minutes: 60
-  });
+  const { user } = useAuth();
+  const { examMode, isCuet, isNeet } = useExamMode();
+  const [step, setStep] = useState<BuilderStep>('topic');
+  const [showBuilder, setShowBuilder] = useState(false);
 
+  // Past sessions
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(true);
+
+  // Builder state
+  const [selectedExamType, setSelectedExamType] = useState<ExamType>(
+    isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE'
+  );
+  const [selectedSubject, setSelectedSubject] = useState('');
+  const [selectedChapter, setSelectedChapter] = useState<any>(null);
+  const [selectedSubchapter, setSelectedSubchapter] = useState<any>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>('mixed');
+  const [questionCount, setQuestionCount] = useState(20);
+  const [timeLimit, setTimeLimit] = useState(30);
+  const [generating, setGenerating] = useState(false);
   const [generatedLink, setGeneratedLink] = useState('');
-  const [createdSessionId, setCreatedSessionId] = useState('');
+  const [sessionId, setSessionId] = useState('');
+  const [qrDataUrl, setQrDataUrl] = useState('');
 
-  // Mock fetching batches
   useEffect(() => {
-    setBatches([
-      { id: 'batch-1', name: 'Dropper Supreme - JEE 2026' },
-      { id: 'batch-2', name: 'Class 11 Foundation' }
-    ]);
-    setConfig(c => ({ ...c, batch_id: 'batch-1' }));
+    loadSessions();
   }, []);
 
-  const handleCreateSession = async () => {
-    setLoading(true);
-    // Since RLS is public and we're mocking the admin ID right now
-    const dummyAdminId = '00000000-0000-0000-0000-000000000000'; 
+  const loadSessions = async () => {
+    setLoadingSessions(true);
     try {
-      const { data, error } = await (supabase as any).from('assessment_sessions').insert({
-        created_by: dummyAdminId,
-        batch_id: null, // Bypassing foreign key constraint for demo
-        exam_type: config.exam_type,
-        class: config.class,
-        subjects: config.subjects,
-        question_count: config.question_count,
-        time_limit_minutes: config.time_limit_minutes,
-        status: 'PENDING'
-      }).select().single();
-
-      if (error) {
-        // Fallback to local state if migration hasn't been pushed
-        console.error('DB Insert failed, using local mock ID:', error);
-        const mockId = 'demo-session-' + Date.now();
-        setCreatedSessionId(mockId);
-        setGeneratedLink(`${window.location.origin}/assess/${mockId}`);
-      } else {
-        setCreatedSessionId(data.id);
-        setGeneratedLink(`${window.location.origin}/assess/${data.id}`);
-      }
-      toast.success('Assessment Session Created!');
-    } catch(e) { console.error(e); }
-    setLoading(false);
+      const { data } = await (supabase as any)
+        .from('assessment_sessions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      setSessions(data || []);
+    } catch { setSessions([]); }
+    finally { setLoadingSessions(false); }
   };
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(generatedLink);
-    toast.success('Link copied to clipboard!');
+  // ─── SUBJECT DATA ───
+  const getSubjects = () => {
+    if (selectedExamType === 'CUET') {
+      return CUET_SUBJECTS.filter(s => getCuetChaptersBySubject(s.key).length > 0)
+        .map(s => ({ id: s.key, name: s.label }));
+    }
+    if (selectedExamType === 'NEET') {
+      return [
+        { id: 'biology', name: 'Biology' },
+        { id: 'chemistry', name: 'Chemistry' },
+        { id: 'physics', name: 'Physics' },
+      ];
+    }
+    return [
+      { id: 'physics', name: 'Physics' },
+      { id: 'chemistry', name: 'Chemistry' },
+      { id: 'maths', name: 'Mathematics' },
+    ];
   };
 
-  const openMonitor = () => {
-    window.open(`/b2b/monitor/${createdSessionId}`, '_blank');
+  const getChapters = () => {
+    if (selectedExamType === 'CUET') return getCuetChaptersBySubject(selectedSubject);
+    if (selectedExamType === 'NEET') {
+      if (selectedSubject === 'biology') return neetBiologyChapters;
+      if (selectedSubject === 'chemistry') return neetChemistryChapters;
+      return neetPhysicsChapters;
+    }
+    if (selectedSubject === 'physics') return physicsChapters;
+    if (selectedSubject === 'chemistry') return chemistryChapters;
+    return mathsChapters;
   };
 
+  const getSubchapters = () => {
+    if (!selectedChapter) return [];
+    return getSubchaptersByChapterId(selectedChapter.id);
+  };
+
+  // ─── GENERATE TEST ───
+  const handleGenerate = async () => {
+    if (!selectedSubchapter) return;
+    setGenerating(true);
+    setStep('generating');
+
+    try {
+      // 1. Create session record
+      const { data: session, error } = await (supabase as any)
+        .from('assessment_sessions')
+        .insert({
+          created_by: user?.id,
+          exam_type: selectedExamType,
+          subjects: [selectedSubject],
+          question_count: questionCount,
+          time_limit_minutes: timeLimit,
+          status: 'ACTIVE',
+          metadata: {
+            subchapterId: selectedSubchapter.id,
+            subchapterName: selectedSubchapter.name,
+            chapterId: selectedChapter.id,
+            chapterName: selectedChapter.name,
+            subject: selectedSubject,
+            difficulty,
+            examType: selectedExamType,
+          },
+        })
+        .select()
+        .single();
+
+      const sid = session?.id || `b2b-${Date.now()}`;
+
+      // 2. Pre-generate first batch in background (non-blocking for UX)
+      supabase.functions.invoke('generate-questions', {
+        body: {
+          subchapterId: selectedSubchapter.id,
+          subchapterName: selectedSubchapter.name,
+          chapterId: selectedChapter.id,
+          chapterName: selectedChapter.name,
+          subject: selectedSubject,
+          difficulty: difficulty === 'mixed' ? 'medium' : difficulty,
+          examMode: selectedExamType,
+          count: Math.min(10, questionCount),
+          forceNew: true,
+          seed: Date.now(),
+          sessionId: sid,
+        },
+      }).catch(console.warn);
+
+      const link = `${window.location.origin}/assess/${sid}`;
+      setSessionId(sid);
+      setGeneratedLink(link);
+
+      // Generate QR
+      const qr = await QRCode.toDataURL(link, { width: 256, margin: 2, color: { dark: '#ffffff', light: '#0f172a' } });
+      setQrDataUrl(qr);
+
+      toast.success('Assessment created successfully!');
+      loadSessions();
+      setStep('share');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to create assessment. Trying offline mode…');
+      const fallbackId = `b2b-${Date.now()}`;
+      const link = `${window.location.origin}/assess/${fallbackId}`;
+      setSessionId(fallbackId);
+      setGeneratedLink(link);
+      const qr = await QRCode.toDataURL(link, { width: 256, margin: 2, color: { dark: '#ffffff', light: '#0f172a' } }).catch(() => '');
+      setQrDataUrl(qr);
+      setStep('share');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const resetBuilder = () => {
+    setStep('topic');
+    setSelectedSubject('');
+    setSelectedChapter(null);
+    setSelectedSubchapter(null);
+    setDifficulty('mixed');
+    setQuestionCount(20);
+    setTimeLimit(30);
+    setGeneratedLink('');
+    setQrDataUrl('');
+    setShowBuilder(false);
+  };
+
+  // ─── RENDER ───
   return (
-    <B2BSidebarLayout title="Tests & Assignments">
+    <B2BSidebarLayout title="Tests & Assessments">
       <div className="space-y-6 max-w-6xl">
+
+        {/* Header */}
         <div className="flex justify-between items-end">
           <div>
-            <h1 className="text-3xl font-display font-bold">Live Assessments</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Generate unique test links and monitor student progression in real-time.</p>
-          </div>
-          <Button onClick={() => setShowCreateModal(true)} className="bg-accent text-white h-11 px-6 shadow-lg shadow-accent/20">
-            <Plus size={18} className="mr-2"/> Create Session
-          </Button>
-        </div>
-        
-        {!generatedLink ? (
-          <div className="bg-card border border-border rounded-3xl p-12 text-center shadow-sm">
-            <div className="w-16 h-16 bg-accent/10 text-accent rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Upload className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-bold">No Active Sessions</h3>
-            <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto leading-relaxed">
-              Generate an assessment link, broadcast it to your class or Whatsapp group, and monitor their live attempts on the grid.
+            <h1 className="text-3xl font-display font-bold">AI Assessments</h1>
+            <p className="text-muted-foreground mt-1">
+              Generate unlimited topic-wise tests · AI creates fresh questions every time
             </p>
           </div>
-        ) : (
-          <div className="bg-gradient-to-br from-emerald-500/10 via-card to-card border border-emerald-500/20 rounded-3xl p-8 relative overflow-hidden transition-all">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-            
-            <div className="flex justify-between items-start relative z-10">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold text-sm tracking-wider uppercase">Session Ready to Broadcast</span>
-                </div>
-                <h3 className="text-2xl font-bold font-display text-foreground">{config.exam_type} Mock Test</h3>
-                <p className="text-muted-foreground mt-1 flex items-center gap-4 text-sm font-medium">
-                  <span>Class {config.class}</span>
-                  <span>•</span>
-                  <span>{config.question_count} Questions</span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1"><Clock size={14}/> {config.time_limit_minutes} mins</span>
-                </p>
-              </div>
-            </div>
+          <Button
+            onClick={() => setShowBuilder(true)}
+            className="bg-accent hover:bg-accent/90 gap-2 h-11 px-6 font-bold shadow-lg shadow-accent/20"
+          >
+            <Plus className="w-4 h-4" /> Create Assessment
+          </Button>
+        </div>
 
-            <div className="mt-8 grid md:grid-cols-2 gap-8">
-              {/* Link Distribution Box */}
-              <div className="bg-secondary/50 border border-border rounded-2xl p-6">
-                <p className="font-bold text-foreground mb-4">Share this link with students:</p>
-                <div className="flex gap-2">
-                  <input 
-                    type="text" 
-                    readOnly 
-                    value={generatedLink} 
-                    className="flex-1 bg-background border border-border rounded-xl px-4 py-3 text-sm text-muted-foreground"
-                  />
-                  <Button onClick={copyLink} className="h-[46px] w-[46px] shrink-0 bg-accent hover:bg-accent/90">
-                    <Copy size={18} className="text-white" />
-                  </Button>
-                </div>
-                
-                {/* Dummy QR Placeholder */}
-                <div className="mt-6 flex items-center justify-center border-t border-border pt-6">
-                   <div className="w-48 h-48 bg-white border border-border rounded-xl flex flex-col items-center justify-center p-4 shadow-sm relative">
-                     <QrCode className="w-32 h-32 text-slate-800" />
-                     <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">Scan to join</p>
-                   </div>
-                </div>
-              </div>
-
-              {/* Admin Actions */}
-              <div className="flex flex-col justify-center gap-4">
-                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 p-4 rounded-xl text-sm font-medium leading-relaxed">
-                  Students will remain in "WAITING" mode until they click "Start Assessment". Once a student submits, their analytics will immediately populate the Live Grid.
-                </div>
-                
-                <Button 
-                  onClick={openMonitor}
-                  className="w-full h-14 text-lg font-bold bg-foreground text-background hover:bg-foreground/90 mt-4 shadow-xl"
-                >
-                  Enter Live Monitor Grid <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </div>
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: 'Tests Created', value: sessions.length, icon: ClipboardList, color: 'text-accent' },
+            { label: 'AI Questions', value: '∞', icon: Sparkles, color: 'text-violet-400' },
+            { label: 'Topics Covered', value: sessions.length > 0 ? new Set(sessions.map((s: any) => s.metadata?.subchapterId)).size : 0, icon: BookOpen, color: 'text-emerald-400' },
+          ].map(stat => (
+            <div key={stat.label} className="bg-card border border-border rounded-2xl p-5 text-center">
+              <stat.icon className={cn('w-6 h-6 mx-auto mb-2', stat.color)} />
+              <p className="text-2xl font-black">{stat.value}</p>
+              <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
             </div>
+          ))}
+        </div>
+
+        {/* Past Sessions */}
+        <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="p-5 border-b border-border flex items-center justify-between">
+            <h2 className="font-bold text-lg">Recent Assessments</h2>
+            <span className="text-xs text-muted-foreground">{sessions.length} total</span>
           </div>
-        )}
-
+          {loadingSessions ? (
+            <div className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" /></div>
+          ) : sessions.length === 0 ? (
+            <div className="p-10 text-center">
+              <Brain className="w-10 h-10 mx-auto text-muted-foreground mb-3 opacity-50" />
+              <p className="text-muted-foreground text-sm">No assessments yet. Create your first one!</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {sessions.map((s: any) => (
+                <div key={s.id} className="p-4 flex items-center justify-between hover:bg-secondary/20 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                      <ClipboardList className="w-5 h-5 text-accent" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">{s.metadata?.subchapterName || 'Assessment'}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {s.exam_type} · {s.question_count}Q · {s.time_limit_minutes}min · {new Date(s.created_at).toLocaleDateString('en-IN')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border',
+                      s.status === 'ACTIVE' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : 'border-border text-muted-foreground'
+                    )}>{s.status}</span>
+                    <Button
+                      size="sm" variant="ghost"
+                      onClick={() => navigator.clipboard.writeText(`${window.location.origin}/assess/${s.id}`).then(() => toast.success('Link copied!'))}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="sm" variant="ghost"
+                      onClick={() => window.open(`/b2b/monitor/${s.id}`, '_blank')}
+                      className="h-8 w-8 p-0"
+                    >
+                      <BarChart3 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Creation Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-card w-full max-w-2xl rounded-[2rem] border border-border shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-8 border-b border-border bg-secondary/30">
-              <h2 className="text-2xl font-bold font-display">Configure Assessment</h2>
-              <p className="text-muted-foreground mt-1 text-sm">Design the parameters for this live session.</p>
-            </div>
-            
-            <div className="p-8 overflow-y-auto space-y-6">
-              
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-bold text-foreground mb-2">Target Audience</label>
-                  <select 
-                    className="w-full bg-secondary border border-border rounded-xl px-4 py-3 outline-none focus:border-accent"
-                    value={config.batch_id} onChange={e => setConfig({...config, batch_id: e.target.value})}
-                  >
-                    {batches.map(b => (
-                      <option key={b.id} value={b.id}>{b.name}</option>
-                    ))}
-                    <option value="open">Open Link (Anyone can join)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-foreground mb-2">Exam Type</label>
-                  <select 
-                    className="w-full bg-secondary border border-border rounded-xl px-4 py-3 outline-none focus:border-accent"
-                    value={config.exam_type} onChange={e => setConfig({...config, exam_type: e.target.value})}
-                  >
-                    <option value="JEE Mains">JEE Mains</option>
-                    <option value="NEET">NEET</option>
-                    <option value="CUET">CUET</option>
-                    <option value="Class 10 Board">Class 10 Board</option>
-                  </select>
-                </div>
-              </div>
-
+      {/* ─── BUILDER MODAL ─── */}
+      {showBuilder && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={step === 'share' ? resetBuilder : undefined} />
+          <div className="relative z-10 bg-[#0f172a] border border-white/10 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-[#0f172a]/95 backdrop-blur-md border-b border-white/10 px-6 py-4 flex items-center justify-between z-10">
               <div>
-                <label className="block text-sm font-bold text-foreground mb-2">Structure</label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-secondary/50 border border-border rounded-xl p-4 flex justify-between items-center">
-                    <span className="text-sm font-medium">Question Count</span>
-                    <select className="bg-background border-none outline-none font-bold text-accent" value={config.question_count} onChange={e => setConfig({...config, question_count: Number(e.target.value)})}>
-                      <option value={10}>10 Qs</option>
-                      <option value={20}>20 Qs</option>
-                      <option value={30}>30 Qs</option>
-                      <option value={90}>Full Mock (90 Qs)</option>
-                    </select>
-                  </div>
-                  <div className="bg-secondary/50 border border-border rounded-xl p-4 flex justify-between items-center">
-                    <span className="text-sm font-medium">Time Limit</span>
-                    <select className="bg-background border-none outline-none font-bold text-emerald-500" value={config.time_limit_minutes} onChange={e => setConfig({...config, time_limit_minutes: Number(e.target.value)})}>
-                      <option value={15}>15 Mins</option>
-                      <option value={30}>30 Mins</option>
-                      <option value={60}>60 Mins</option>
-                      <option value={180}>180 Mins</option>
-                    </select>
-                  </div>
-                </div>
+                <h2 className="font-bold text-lg text-white">Create Assessment</h2>
+                <p className="text-xs text-white/40">
+                  {step === 'topic' ? 'Select topic' : step === 'configure' ? 'Configure test' : step === 'generating' ? 'Generating…' : 'Share with students'}
+                </p>
               </div>
-
+              <button onClick={resetBuilder} className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <div className="p-6 border-t border-border bg-secondary/30 flex justify-end gap-3">
-              <Button variant="outline" className="rounded-xl font-bold bg-background" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-              <Button disabled={loading} onClick={handleCreateSession} className="rounded-xl font-bold bg-accent text-white px-8">
-                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Generate Link"}
-              </Button>
+            <div className="p-6 space-y-6">
+
+              {/* STEP: Topic Selection */}
+              {step === 'topic' && (
+                <div className="space-y-6">
+                  {/* Exam Type */}
+                  <div>
+                    <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-3 block">Exam Type</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['JEE', 'NEET', 'CUET'] as ExamType[]).map(et => (
+                        <button
+                          key={et}
+                          onClick={() => { setSelectedExamType(et); setSelectedSubject(''); setSelectedChapter(null); setSelectedSubchapter(null); }}
+                          className={cn('p-3 rounded-xl border text-sm font-bold transition-all',
+                            selectedExamType === et ? 'border-accent bg-accent/10 text-accent' : 'border-white/10 text-white/50 hover:border-white/20'
+                          )}
+                        >
+                          {et}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Subject */}
+                  <div>
+                    <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-3 block">Subject</label>
+                    <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                      {getSubjects().map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => { setSelectedSubject(s.id); setSelectedChapter(null); setSelectedSubchapter(null); }}
+                          className={cn('p-3 rounded-xl border text-sm font-medium text-left transition-all',
+                            selectedSubject === s.id ? 'border-accent bg-accent/10 text-white' : 'border-white/10 text-white/50 hover:border-white/20'
+                          )}
+                        >
+                          {s.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Chapter */}
+                  {selectedSubject && (
+                    <div>
+                      <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-3 block">Chapter</label>
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                        {getChapters().map((ch: any) => (
+                          <button
+                            key={ch.id}
+                            onClick={() => { setSelectedChapter(ch); setSelectedSubchapter(null); }}
+                            className={cn('w-full p-3 rounded-xl border text-sm font-medium text-left transition-all flex items-center justify-between',
+                              selectedChapter?.id === ch.id ? 'border-accent bg-accent/10 text-white' : 'border-white/10 text-white/50 hover:border-white/20'
+                            )}
+                          >
+                            {ch.name}
+                            <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Subchapter */}
+                  {selectedChapter && (
+                    <div>
+                      <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-3 block">Topic</label>
+                      <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                        {getSubchapters().length === 0 ? (
+                          <button
+                            onClick={() => setSelectedSubchapter({ id: `${selectedChapter.id}-full`, name: selectedChapter.name })}
+                            className={cn('w-full p-3 rounded-xl border text-sm font-medium text-left transition-all',
+                              selectedSubchapter ? 'border-accent bg-accent/10 text-white' : 'border-white/10 text-white/50 hover:border-white/20'
+                            )}
+                          >
+                            Full Chapter Practice
+                          </button>
+                        ) : getSubchapters().map((sub: any) => (
+                          <button
+                            key={sub.id}
+                            onClick={() => setSelectedSubchapter(sub)}
+                            className={cn('w-full p-3 rounded-xl border text-sm font-medium text-left transition-all',
+                              selectedSubchapter?.id === sub.id ? 'border-accent bg-accent/10 text-white' : 'border-white/10 text-white/50 hover:border-white/20'
+                            )}
+                          >
+                            {sub.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <Button
+                    onClick={() => setStep('configure')}
+                    disabled={!selectedSubchapter}
+                    className="w-full h-12 bg-accent text-white font-bold gap-2"
+                  >
+                    Configure Test <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+
+              {/* STEP: Configure */}
+              {step === 'configure' && (
+                <div className="space-y-6">
+                  {/* Selected topic summary */}
+                  <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10">
+                    <p className="text-xs text-white/40 mb-1">Topic</p>
+                    <p className="font-bold text-white">{selectedSubchapter?.name}</p>
+                    <p className="text-xs text-white/50">{selectedExamType} · {selectedChapter?.name}</p>
+                  </div>
+
+                  {/* Difficulty */}
+                  <div>
+                    <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-3 block">Difficulty</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {DIFFICULTY_OPTIONS.map(d => (
+                        <button
+                          key={d.value}
+                          onClick={() => setDifficulty(d.value)}
+                          className={cn('p-3 rounded-xl border text-left transition-all',
+                            difficulty === d.value ? d.color : 'border-white/10 text-white/40 hover:border-white/20'
+                          )}
+                        >
+                          <p className="font-bold text-sm">{d.label}</p>
+                          <p className="text-[10px] mt-0.5 opacity-70">{d.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Question Count */}
+                  <div>
+                    <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-3 block">
+                      Questions: <span className="text-accent">{questionCount}</span>
+                      <span className="ml-2 text-white/30 font-normal normal-case">AI generates fresh each time</span>
+                    </label>
+                    <div className="flex gap-2 flex-wrap">
+                      {[10, 20, 30, 50, 75, 100].map(n => (
+                        <button
+                          key={n}
+                          onClick={() => setQuestionCount(n)}
+                          className={cn('px-4 py-2 rounded-xl border text-sm font-bold transition-all',
+                            questionCount === n ? 'border-accent bg-accent/10 text-accent' : 'border-white/10 text-white/50 hover:border-white/20'
+                          )}
+                        >
+                          {n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Time Limit */}
+                  <div>
+                    <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-3 block">
+                      Time Limit: <span className="text-accent">{timeLimit} min</span>
+                    </label>
+                    <div className="flex gap-2 flex-wrap">
+                      {[15, 20, 30, 45, 60, 90].map(n => (
+                        <button
+                          key={n}
+                          onClick={() => setTimeLimit(n)}
+                          className={cn('px-4 py-2 rounded-xl border text-sm font-bold transition-all',
+                            timeLimit === n ? 'border-accent bg-accent/10 text-accent' : 'border-white/10 text-white/50 hover:border-white/20'
+                          )}
+                        >
+                          {n}m
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button variant="ghost" onClick={() => setStep('topic')} className="flex-1 h-12 text-white/60">
+                      <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                    </Button>
+                    <Button onClick={handleGenerate} className="flex-2 h-12 bg-accent text-white font-bold gap-2 flex-1">
+                      <Sparkles className="w-4 h-4" /> Generate Assessment
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP: Generating */}
+              {step === 'generating' && (
+                <div className="text-center py-12 space-y-4">
+                  <div className="relative mx-auto w-20 h-20">
+                    <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl animate-pulse" />
+                    <div className="relative w-20 h-20 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center">
+                      <Brain className="w-10 h-10 text-accent" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Generating Assessment…</h3>
+                  <p className="text-white/40 text-sm max-w-xs mx-auto">
+                    AI is crafting {questionCount} fresh {selectedExamType} questions on {selectedSubchapter?.name}
+                  </p>
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto text-accent" />
+                </div>
+              )}
+
+              {/* STEP: Share */}
+              {step === 'share' && (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+                      <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white">Assessment Ready!</h3>
+                    <p className="text-white/40 text-sm mt-1">{questionCount} questions · {timeLimit} min · {selectedExamType}</p>
+                  </div>
+
+                  {/* QR Code */}
+                  {qrDataUrl && (
+                    <div className="flex justify-center">
+                      <div className="p-4 bg-[#0f172a] rounded-2xl border border-white/10">
+                        <img src={qrDataUrl} alt="QR Code" className="w-48 h-48" />
+                        <p className="text-center text-[10px] text-white/40 mt-2">Scan to start test</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Share Link */}
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 font-mono text-xs text-white/60 truncate">
+                      {generatedLink}
+                    </div>
+                    <Button
+                      onClick={() => navigator.clipboard.writeText(generatedLink).then(() => toast.success('Copied!'))}
+                      className="h-12 w-12 p-0 bg-accent text-white rounded-xl"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button
+                      variant="ghost"
+                      onClick={() => window.open(`/b2b/monitor/${sessionId}`, '_blank')}
+                      className="flex-1 h-12 text-white/60 border border-white/10 hover:bg-white/5 gap-2"
+                    >
+                      <BarChart3 className="w-4 h-4" /> Live Monitor
+                    </Button>
+                    <Button onClick={resetBuilder} className="flex-1 h-12 bg-accent text-white font-bold gap-2">
+                      <Plus className="w-4 h-4" /> New Assessment
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
-
     </B2BSidebarLayout>
   );
 }

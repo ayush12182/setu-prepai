@@ -56,6 +56,7 @@ import QuestionQCPanel from "./pages/Admin/QuestionQCPanel";
 
 // Assess
 import AssessmentFlowPage from "./pages/Assess/AssessmentFlowPage";
+import B2BAssessmentTakerPage from "./pages/Assess/B2BAssessmentTakerPage";
 import B2BLiveMonitor from "./pages/B2B/B2BLiveMonitor";
 
 const queryClient = new QueryClient();
@@ -98,6 +99,8 @@ const App = () => (
                     <Route path="/circles/:roomId" element={<CircleFocusRoomPage />} />
                     <Route path="/foundation-assessment" element={<FoundationAssessmentPage />} />
                     <Route path="/diagnostic-test" element={<FoundationAssessmentPage />} /> {/* Legacy fallback */}
+                    {/* B2B Assessment Taker - accessible without auth (students use share link) */}
+                    <Route path="/assess/:sessionId" element={<B2BAssessmentTakerPage />} />
                     <Route path="/learning-profile" element={<LearningProfilePage />} />
                     <Route path="/concept-graph" element={<ConceptGraphPage />} />
                     <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />

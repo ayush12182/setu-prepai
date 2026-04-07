@@ -15,7 +15,15 @@ interface QuestionRequest {
   difficulty: "easy" | "medium" | "hard";
   type?: "MCQ" | "INTEGER" | "MATCH";
   count?: number;
-  examMode?: "JEE" | "NEET";
+  examMode?: "JEE" | "NEET" | "CUET";
+  /** B2B flag: skip cache, always generate fresh questions */
+  forceNew?: boolean;
+  /** IDs the student has already seen — never return these */
+  excludeIds?: string[];
+  /** Entropy seed for uniqueness (e.g. timestamp) */
+  seed?: number;
+  /** Assessment session ID this batch belongs to */
+  sessionId?: string;
 }
 
 serve(async (req) => {
@@ -24,125 +32,138 @@ serve(async (req) => {
   }
 
   try {
-    const { subchapterId, subchapterName, chapterId, chapterName, subject, difficulty, type = "MCQ", count = 5, examMode = "JEE" }: QuestionRequest = await req.json();
+    const {
+      subchapterId,
+      subchapterName,
+      chapterId,
+      chapterName,
+      subject,
+      difficulty,
+      type = "MCQ",
+      count = 5,
+      examMode = "JEE",
+      forceNew = false,
+      excludeIds = [],
+      seed = Date.now(),
+      sessionId,
+    }: QuestionRequest = await req.json();
+
     const isNeet = examMode === "NEET";
     const isCuet = examMode === "CUET";
     const examLabel = isCuet ? "CUET UG" : isNeet ? "NEET UG" : "JEE";
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check if we already have questions for this subchapter and difficulty
-    const { data: existingQuestions, error: fetchError } = await supabase
-      .from("questions")
-      .select("*")
-      .eq("subchapter_id", subchapterId)
-      .eq("difficulty", difficulty)
-      .eq("type", type)
-      .limit(count);
+    // ─── CACHE LOOKUP (skipped for B2B forceNew) ───
+    if (!forceNew) {
+      let query = supabase
+        .from("questions")
+        .select("*")
+        .eq("subchapter_id", subchapterId)
+        .eq("difficulty", difficulty)
+        .eq("type", type);
 
-    if (fetchError) {
-      console.error("Error fetching existing questions:", fetchError);
+      if (excludeIds.length > 0) {
+        query = query.not("id", "in", `(${excludeIds.map(id => `"${id}"`).join(",")})`);
+      }
+
+      const { data: cachedQuestions } = await query.limit(count);
+
+      if (cachedQuestions && cachedQuestions.length >= count) {
+        return new Response(JSON.stringify({ questions: cachedQuestions.slice(0, count), cached: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
-    // If we have enough questions, return them
-    if (existingQuestions && existingQuestions.length >= count) {
-      return new Response(JSON.stringify({ questions: existingQuestions.slice(0, count) }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Determine prompts based on question type
-    let systemPrompt = "";
-    let userPrompt = "";
-
+    // ─── AI GENERATION ───
     const difficultyMap: Record<string, string> = {
-      easy: isNeet ? "NCERT level, single-concept, direct recall" : examMode === "CUET" ? "NCERT level, direct recall, 30-45s solve time" : "NCERT level, single-concept, 30-60s solve time",
-      medium: isNeet ? "NEET UG level, 2-3 concepts, 1-2 min" : examMode === "CUET" ? "CUET level, NCERT application, 45-60s solve time" : "JEE Mains level, 2-3 concepts, 1-2 min",
-      hard: isNeet ? "NEET advanced, multi-concept, 2-4 min" : examMode === "CUET" ? "CUET challenging, multi-concept NCERT, 1-2 min" : "JEE Advanced level, multi-concept, 2-4 min"
+      easy: isCuet
+        ? "NCERT direct recall, 30-45s solve time, Class 12 level"
+        : isNeet
+        ? "NCERT level, single-concept, direct recall"
+        : "NCERT level, single-concept, 30-60s solve time",
+      medium: isCuet
+        ? "CUET standard application level, NCERT-based, 45-75s solve time"
+        : isNeet
+        ? "NEET UG level, 2-3 concepts, 1-2 min"
+        : "JEE Mains level, 2-3 concepts, 1-2 min",
+      hard: isCuet
+        ? "CUET challenging multi-concept, requires analysis, 1.5-2 min"
+        : isNeet
+        ? "NEET advanced, multi-concept, 2-4 min"
+        : "JEE Advanced level, multi-concept, 2-4 min",
     };
 
-    const MATH_SYNTAX = `
+    // Uniqueness instruction seeded by timestamp to prevent AI repeating cached patterns
+    const uniquenessInstruction = `SEED: ${seed}. Generate COMPLETELY FRESH questions not typically seen in standard question banks. Vary the scenario, numbers, and angle of testing.`;
+
+    // ─── CUET-SPECIFIC SYSTEM PROMPT ───
+    const getCuetSystemPrompt = () => `You are an expert CUET UG question designer. Create authentic CUET UG MCQs.
+
+CUET STANDARDS:
+- Strictly NCERT Class 11-12 syllabus aligned
+- Focus on recall, comprehension, and application (NOT derivations or complex numericals)
+- Questions must test conceptual understanding, definitions, and NCERT examples
+- Each wrong option must represent a genuine student misconception
+- Difficulty: ${difficulty} (${difficultyMap[difficulty]})
+- Subject: ${subject} > ${chapterName} > ${subchapterName}
+- DO NOT mention JEE, NEET, or any other exam anywhere in the content
+- ${uniquenessInstruction}`;
+
+    // ─── JEE SYSTEM PROMPT ───
+    const getJeeSystemPrompt = () => `You are an expert JEE question designer. Create authentic JEE-style MCQs.
+
 STRICT JEE AUTHENTICITY:
 - NUMERICAL VALUES: Use realistic mass (2 kg), force (10 N), velocity (500 m/s), etc. NO placeholders.
-- GIVEN/REQUIRED: State GIVEN data clearly and what is REQUIRED (e.g., "Find the acceleration...").
-- NO VAGUE THEORY: Avoid "which best describes" or "recent trends". Test measurable relationships.
-- MATH NOTATION: Use V = IR, F = ma, x², (a+b)/c. No LaTeX.
-- SYMBOLS: Use Unicode (α, β, θ, λ, μ, ρ, ω, ε, Δ, π, v₁, ε₀).
-- SOLUTIONS: Step 1 → Step 2 → Final Answer: [expression].
-`;
-
-    if (type === "INTEGER") {
-      systemPrompt = `You are a ${examLabel} question designer. Create Integer Type numerical questions.
-${MATH_SYNTAX}
-- Answer MUST be a single integer or decimal value.
-- No options.
+- GIVEN/REQUIRED: State GIVEN data clearly and what is REQUIRED.
+- NO VAGUE THEORY: Test measurable relationships only.
+- MATH NOTATION: Use V = IR, F = ma, x². No LaTeX. Use Unicode (α, β, θ, λ, μ, ρ, ω, ε, Δ, π).
 - Difficulty: ${difficulty} (${difficultyMap[difficulty]})
 - Topic: ${subject} > ${chapterName} > ${subchapterName}
-${isNeet ? "- Focus on NCERT-based numericals for NEET UG. Do NOT use the word JEE anywhere." : ""}`;
+- ${uniquenessInstruction}`;
 
-      userPrompt = `Generate ${count} Integer Type questions for "${subchapterName}" (${examLabel}).
-Return JSON array:
-[{
-  "question_text": "...",
-  "integer_answer": 42,
-  "tolerance": 0,
-  "explanation": "Step-by-step solution...",
-  "concept_tested": "Concept",
-  "common_mistake": "Common error..."
-}]`;
-    } else if (type === "MATCH") {
-      systemPrompt = `You are a ${examLabel} question designer. Create Match the Following questions.
-${MATH_SYNTAX}
-- Two columns: Left (Items) and Right (Options).
-- Complexity suitable for ${difficulty} level.
+    // ─── NEET SYSTEM PROMPT ───
+    const getNeetSystemPrompt = () => `You are an expert NEET UG question designer. Create authentic NEET-style MCQs.
+
+NEET STANDARDS:
+- Strictly NCERT-based, no questions that go beyond NCERT scope
+- Biology: diagrams, definitions, organisms, functions, processes
+- Chemistry: reactions, mechanisms, properties as per NCERT
+- Physics: numericals and conceptual questions from NCERT
+- Each wrong option must stem from a real NCERT misconception
+- Difficulty: ${difficulty} (${difficultyMap[difficulty]})
 - Topic: ${subject} > ${chapterName} > ${subchapterName}
-${isNeet ? "- Focus on NCERT-based matching: organisms, functions, diagrams, definitions. Do NOT use the word JEE." : ""}`;
+- ${uniquenessInstruction}`;
 
-      userPrompt = `Generate ${count} Match the Following questions for "${subchapterName}" (${examLabel}).
-Return JSON array:
-[{
-  "question_text": "Match the following:",
-  "match_pairs": {
-    "left": ["Item A", "Item B", "Item C", "Item D"],
-    "right": ["Option P", "Option Q", "Option R", "Option S"],
-    "mapping": { "Item A": "Option Q", "Item B": "Option R", "Item C": "Option S", "Item D": "Option P" }
-  },
-  "explanation": "Reasoning for each match...",
-  "concept_tested": "Concept",
-  "common_mistake": "Confusing similar items..."
-}]`;
-      // Default MCQ
-      systemPrompt = `You are an expert ${examLabel} question designer. Create AUTHENTIC JEE Main style MCQs for ${subject}.
-${MATH_SYNTAX}
-- STYLE: Numerical or conceptual application-based. No abstract/philosophical wording.
-- DIFFICULTY: ${difficulty} (${difficultyMap[difficulty]}).
-- Each wrong option MUST stem from a real student mistake (e.g., sign error, reciprocal error).
-- Exactly ONE correct answer.
-- Explanation: Concise, step-by-step logic starting with Given data.
-Topic: ${chapterName} > ${subchapterName}
-${isCuet ? "IMPORTANT: This is CUET UG, NOT JEE or NEET. Strictly NCERT-aligned. Focus on speed and recall." : isNeet ? "IMPORTANT: This is NEET UG, not JEE. Focus on NCERT factual/conceptual questions." : ""}`;
+    const systemPrompt = isCuet
+      ? getCuetSystemPrompt()
+      : isNeet
+      ? getNeetSystemPrompt()
+      : getJeeSystemPrompt();
 
-      userPrompt = `Generate ${count} MCQ questions for "${subchapterName}" (${subject} — ${chapterName}) at ${difficulty} difficulty.
+    const userPrompt = `Generate exactly ${count} MCQ questions for "${subchapterName}" (${subject} — ${chapterName}) at ${difficulty} difficulty for ${examLabel}.
 
-Return ONLY a JSON array (no markdown, no code fences):
+Return ONLY a valid JSON array (no markdown, no code fences):
 [{
   "question_text": "...",
   "option_a": "...", "option_b": "...", "option_c": "...", "option_d": "...",
   "correct_option": "A/B/C/D",
-  "explanation": "Brief step-by-step: Given → Formula → Calculation → Answer: (X)",
-  "concept_tested": "Concept name",
-  "common_mistake": "Error → wrong option"
+  "explanation": "Brief step-by-step explanation (max 120 words)",
+  "concept_tested": "Specific concept name",
+  "common_mistake": "What students typically get wrong here"
 }]
 
-Rules: Unicode notation (subscripts/superscripts), no LaTeX, keep explanations under 150 words each.`;
-    }
+Rules:
+- Exactly ${count} items in the array
+- All 4 options must be plausible (no obviously wrong distractors)
+- No question should repeat a scenario already tested — vary the angle
+- Keep question_text under 80 words`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -156,93 +177,63 @@ Rules: Unicode notation (subscripts/superscripts), no LaTeX, keep explanations u
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.5,
+        temperature: forceNew ? 0.85 : 0.5, // Higher temp for B2B fresh generation
       }),
     });
 
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add credits." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: "AI credits exhausted." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
     const aiResponse = await response.json();
     const content = aiResponse.choices?.[0]?.message?.content;
+    if (!content) throw new Error("No content in AI response");
 
-    if (!content) {
-      throw new Error("No content in AI response");
-    }
-
-    // Parse the JSON from AI response
+    // ─── PARSE JSON ───
     let questions;
     try {
-      // Remove markdown code fences if present
       let jsonContent = content.trim();
-
-      // Handle ```json ... ``` or ``` ... ``` format
       const codeBlockMatch = jsonContent.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (codeBlockMatch) {
-        jsonContent = codeBlockMatch[1].trim();
-      }
+      if (codeBlockMatch) jsonContent = codeBlockMatch[1].trim();
 
-      // Try parsing directly first
       try {
         questions = JSON.parse(jsonContent);
       } catch {
-        // If direct parse fails, sanitize control chars inside string values only
-        // Replace unescaped newlines/tabs inside JSON strings by processing char by char
-        let sanitized = '';
+        let sanitized = "";
         let inString = false;
         let escaped = false;
         for (let i = 0; i < jsonContent.length; i++) {
           const ch = jsonContent[i];
-          if (escaped) {
-            sanitized += ch;
-            escaped = false;
-            continue;
-          }
-          if (ch === '\\' && inString) {
-            sanitized += ch;
-            escaped = true;
-            continue;
-          }
-          if (ch === '"') {
-            inString = !inString;
-            sanitized += ch;
-            continue;
-          }
+          if (escaped) { sanitized += ch; escaped = false; continue; }
+          if (ch === "\\" && inString) { sanitized += ch; escaped = true; continue; }
+          if (ch === '"') { inString = !inString; sanitized += ch; continue; }
           if (inString) {
-            if (ch === '\n') { sanitized += '\\n'; continue; }
-            if (ch === '\r') { continue; }
-            if (ch === '\t') { sanitized += '\\t'; continue; }
+            if (ch === "\n") { sanitized += "\\n"; continue; }
+            if (ch === "\r") continue;
+            if (ch === "\t") { sanitized += "\\t"; continue; }
           }
           sanitized += ch;
         }
         questions = JSON.parse(sanitized);
       }
 
-      if (!Array.isArray(questions)) {
-        throw new Error("Response is not an array");
-      }
+      if (!Array.isArray(questions)) throw new Error("Response is not an array");
     } catch (parseError) {
-      console.error("Failed to parse AI response. Error:", parseError);
-      console.error("Content received:", content.substring(0, 500));
+      console.error("Failed to parse AI response:", parseError, content.substring(0, 300));
       throw new Error("Failed to parse questions from AI");
     }
 
-    // Store questions in database
+    // ─── STORE IN DB ───
     const questionsToInsert = questions.map((q: any) => ({
       subchapter_id: subchapterId,
       chapter_id: chapterId,
@@ -250,22 +241,20 @@ Rules: Unicode notation (subscripts/superscripts), no LaTeX, keep explanations u
       difficulty,
       type,
       question_text: q.question_text,
-      // MCQ fields
       option_a: q.option_a || null,
       option_b: q.option_b || null,
       option_c: q.option_c || null,
       option_d: q.option_d || null,
       correct_option: q.correct_option ? q.correct_option.toUpperCase() : null,
-      // Integer fields
       integer_answer: q.integer_answer !== undefined ? q.integer_answer : null,
       tolerance: q.tolerance !== undefined ? q.tolerance : 0,
-      // Match fields
       match_pairs: q.match_pairs || null,
-
       explanation: q.explanation,
       concept_tested: q.concept_tested,
       common_mistake: q.common_mistake || null,
-      source: "ai_generated",
+      source: forceNew ? "ai_b2b" : "ai_generated",
+      // Tag with session if B2B
+      ...(sessionId ? { session_id: sessionId } : {}),
     }));
 
     const { data: insertedQuestions, error: insertError } = await supabase
@@ -275,8 +264,7 @@ Rules: Unicode notation (subscripts/superscripts), no LaTeX, keep explanations u
 
     if (insertError) {
       console.error("Error inserting questions:", insertError);
-      // Return the generated questions even if insert fails
-      return new Response(JSON.stringify({ questions: questionsToInsert, cached: false }), {
+      return new Response(JSON.stringify({ questions: questionsToInsert.map((q, i) => ({ ...q, id: `temp-${seed}-${i}` })), cached: false }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -289,10 +277,7 @@ Rules: Unicode notation (subscripts/superscripts), no LaTeX, keep explanations u
     console.error("generate-questions error:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });
