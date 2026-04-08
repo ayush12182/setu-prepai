@@ -96,8 +96,8 @@ const PracticePage: React.FC = () => {
       await generateQuestions(subchapter.id, adaptiveMode || subchapter.name, chapter.id, chapter.name, subject, difficulty === 'mixed' ? 'medium' : difficulty, 10);
     } else {
       // Overall mode
-      const mockChapter: Chapter = { id: 'adaptive', name: 'Overall Syllabus', subject: 'Mixed' as any };
-      const mockSub: Subchapter = { id: 'adaptive-sub', chapterId: 'adaptive', name: 'Overall Syllabus', jeeAsks: [], pyqFocus: { trends:[], patterns:[], traps:[] }, commonMistakes: [], jeetuLine: "Show me what you got." };
+      const mockChapter = { id: 'adaptive', name: 'Overall Syllabus', subject: 'Mixed' } as unknown as Chapter;
+      const mockSub = { id: 'adaptive-sub', chapterId: 'adaptive', name: 'Overall Syllabus', jeeAsks: [], pyqFocus: { trends:[], patterns:[], traps:[] }, commonMistakes: [], jeetuLine: "Show me what you got." } as unknown as Subchapter;
       await generateQuestions(mockSub.id, adaptiveMode || 'Mixed', mockChapter.id, mockChapter.name, mockChapter.subject, difficulty === 'mixed' ? 'medium' : difficulty, 10);
     }
   };
@@ -109,8 +109,8 @@ const PracticePage: React.FC = () => {
 
   const launchAdaptiveSession = async (title: string, modeName: string, intensity: 'easy' | 'medium' | 'hard' | 'mixed' = 'medium') => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mockChapter: Chapter = { id: 'adaptive', name: title, subject: 'Mixed' as any };
-    const mockSub: Subchapter = { id: 'adaptive-sub', chapterId: 'adaptive', name: title, jeeAsks: [], pyqFocus: { trends:[], patterns:[], traps:[] }, commonMistakes: [], jeetuLine: "Show me what you got." };
+    const mockChapter = { id: 'adaptive', name: title, subject: 'Mixed' } as unknown as Chapter;
+    const mockSub = { id: 'adaptive-sub', chapterId: 'adaptive', name: title, jeeAsks: [], pyqFocus: { trends:[], patterns:[], traps:[] }, commonMistakes: [], jeetuLine: "Show me what you got." } as unknown as Subchapter;
     
     setState({ step: 'quiz', subchapter: mockSub, chapter: mockChapter, subject: mockChapter.subject, difficulty: intensity, adaptiveMode: modeName });
     await generateQuestions(mockSub.id, modeName, mockChapter.id, title, mockChapter.subject, intensity === 'mixed' ? 'medium' : intensity, 10);

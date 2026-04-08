@@ -148,7 +148,7 @@ const AuthPage: React.FC = () => {
       if (showOnboarding) return;
       if (profile) {
         if (profile.user_type === 'b2b_mentor' || profile.user_type === 'b2b_institution' || profile.user_type === 'admin') {
-          navigate('/b2b');
+          navigate('/teacher-dashboard');
           return;
         }
 
@@ -272,7 +272,7 @@ const AuthPage: React.FC = () => {
           institution_name: onboardingData.institutionName || null,
         });
         toast.success('Teacher portal ready! Welcome to SETU 👨‍🏫');
-        navigate('/b2b');
+        navigate('/teacher-dashboard');
         return;
       }
 
@@ -296,11 +296,32 @@ const AuthPage: React.FC = () => {
         institution_name: onboardingData.institutionName || null,
       });
 
+      // Inject Mock Priority Task so they can immediately test the Outcomes Engine
+      if (onboardingData.userType === 'b2c_student') {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await (supabase.from as any)('assigned_tasks').insert({
+              student_id: user.id,
+              teacher_id: user.id, // Bypass FK by assigning to self
+              topic: examGoal === 'NEET' ? 'Cell Biology' : 'Kinematics',
+              subtopic: examGoal === 'NEET' ? 'Cell Cycle and Cell Division' : 'Motion in 1D',
+              status: 'pending',
+              initial_accuracy: 45.5,
+            });
+          }
+        } catch (e) {
+          console.warn('Mock task creation failed', e);
+        }
+      }
+
       toast.success('All set! Let\'s begin your journey 🚀');
       
       // Route by user type after onboarding
       if (onboardingData.userType === 'b2b_student') {
         navigate('/student-hub');
+      } else if (onboardingData.userType === 'b2c_student') {
+        navigate('/dashboard');
       } else {
         navigate('/foundation-assessment');
       }
