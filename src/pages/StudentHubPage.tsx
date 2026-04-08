@@ -12,55 +12,13 @@ import { cn } from '@/lib/utils';
 import { StudentProgressView } from '@/components/student/StudentProgressView';
 import { useB2BManager } from '@/hooks/useB2BManager';
 import { toast } from 'sonner';
+import { getSubjectsForExam } from '@/lib/streamSubjects';
 
 type Tab = 'notes' | 'practice' | 'progress';
 
-// ─── NOTES (static scaffold — connect to org syllabus later) ───
-const DEMO_NOTES = [
-  {
-    subject: 'Accounts',
-    color: 'text-violet-400',
-    bg: 'from-violet-500/20 to-purple-500/10',
-    chapters: [
-      { title: 'Introduction to Accounting', completed: true, pages: 12 },
-      { title: 'Accounting Equation', completed: true, pages: 8 },
-      { title: 'Journal Entries', completed: false, pages: 18 },
-      { title: 'Ledger', completed: false, pages: 14 },
-      { title: 'Trial Balance', completed: false, pages: 10 },
-    ]
-  },
-  {
-    subject: 'Economics',
-    color: 'text-cyan-400',
-    bg: 'from-cyan-500/20 to-sky-500/10',
-    chapters: [
-      { title: 'Introduction to Economics', completed: true, pages: 9 },
-      { title: 'Consumer Behaviour', completed: false, pages: 16 },
-      { title: 'Demand Analysis', completed: false, pages: 14 },
-      { title: 'Supply Analysis', completed: false, pages: 12 },
-    ]
-  },
-  {
-    subject: 'Business Studies',
-    color: 'text-pink-400',
-    bg: 'from-pink-500/20 to-rose-500/10',
-    chapters: [
-      { title: 'Nature of Business', completed: true, pages: 10 },
-      { title: 'Forms of Organisation', completed: false, pages: 20 },
-      { title: 'Planning', completed: false, pages: 14 },
-    ]
-  },
-];
 
-// ─── PRACTICE TOPICS ───
-const DEMO_PRACTICE = [
-  { subject: 'Accounts', topic: 'Journal Entries', subtopic: 'Compound Entries', difficulty: 'medium', qCount: 40 },
-  { subject: 'Accounts', topic: 'Ledger', subtopic: 'Balancing Accounts', difficulty: 'easy', qCount: 35 },
-  { subject: 'Economics', topic: 'Demand Analysis', subtopic: 'Price Elasticity', difficulty: 'hard', qCount: 28 },
-  { subject: 'Economics', topic: 'Consumer Behaviour', subtopic: 'Indifference Curve', difficulty: 'medium', qCount: 22 },
-  { subject: 'Business Studies', topic: 'Planning', subtopic: 'Process of Planning', difficulty: 'easy', qCount: 30 },
-];
 
+// ─── DIFFICULTY COLORS ───
 const DIFF_COLORS: Record<string, string> = {
   easy: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
@@ -71,7 +29,26 @@ const StudentHubPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('notes');
-  const [expandedSubject, setExpandedSubject] = useState<string | null>('Accounts');
+
+  // ─── Dynamic subjects based on student's target_exam ───
+  const streamSubjects = getSubjectsForExam(profile?.target_exam);
+  const DEMO_NOTES = streamSubjects.map(s => ({
+    subject: s.label,
+    color: s.color,
+    bg: s.bg,
+    chapters: s.chapters.map((ch, i) => ({ ...ch, completed: i === 0 }))
+  }));
+  const DEMO_PRACTICE = streamSubjects.flatMap(s =>
+    s.chapters.slice(0, 2).map(ch => ({
+      subject: s.label,
+      topic: ch.title,
+      subtopic: ch.title,
+      difficulty: (['easy', 'medium', 'hard'] as const)[Math.floor(Math.random() * 3)],
+      qCount: 20 + Math.floor(Math.random() * 20),
+    }))
+  );
+
+  const [expandedSubject, setExpandedSubject] = useState<string | null>(streamSubjects[0]?.label || null);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinCode, setJoinCode] = useState('');
   const { joinBatchByCode, loading } = useB2BManager();

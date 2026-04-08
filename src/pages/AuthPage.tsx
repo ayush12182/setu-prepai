@@ -261,10 +261,11 @@ const AuthPage: React.FC = () => {
   const handleOnboardingComplete = async () => {
     setLoading(true);
     try {
-      // --- Teacher fast-track: skip stream/class ---
+      // --- Teacher: save their teaching stream as target_exam ---
       if (onboardingData.userType === 'b2b_mentor') {
+        const examGoal = getExamGoalFromStream(onboardingData.stream as StreamType) || 'JEE Main';
         await updateProfile({
-          target_exam: 'Teacher',
+          target_exam: examGoal,
           class: 'teacher',
           student_level: '11-12',
           user_type: 'b2b_mentor',
@@ -310,9 +311,9 @@ const AuthPage: React.FC = () => {
   };
 
   const handleOnboardingNext = () => {
-    // Teacher: skip stream + class steps entirely
+    // Teacher: go to stream selection (step 1) to pick what they teach
     if (onboardingStep === 0 && onboardingData.userType === 'b2b_mentor') {
-      handleOnboardingComplete();
+      setOnboardingStep(1); // show stream selector to pick teaching subject
       return;
     }
 
@@ -330,7 +331,14 @@ const AuthPage: React.FC = () => {
     }
 
     if (onboardingStep === 0) setOnboardingStep(1);
-    else if (onboardingStep === 1) setOnboardingStep(2);
+    else if (onboardingStep === 1) {
+      // Teachers skip the class step — go straight to complete
+      if (onboardingData.userType === 'b2b_mentor') {
+        handleOnboardingComplete();
+      } else {
+        setOnboardingStep(2);
+      }
+    }
     else if (onboardingStep === 2) handleOnboardingComplete();
   };
 

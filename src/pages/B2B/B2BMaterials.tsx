@@ -1,23 +1,27 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Plus, FileText, Upload, Link as LinkIcon, Trash2, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Plus, FileText, Upload, Link as LinkIcon, Trash2 } from 'lucide-react';
 import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { getSubjectLabels, getSubjectsForExam } from '@/lib/streamSubjects';
 
-// Mock data matching the student-hub output
-const INITIAL_MATERIALS = [
-  { id: '1', batch: 'JEE 2026 – Alpha', subject: 'Accounts', chapter: 'Introduction to Accounting', type: 'pdf', title: 'Chapter 1 Complete Notes.pdf', pages: 12, date: 'Oct 12, 2025' },
-  { id: '2', batch: 'JEE 2026 – Beta', subject: 'Accounts', chapter: 'Accounting Equation', type: 'link', title: 'Interactive Board Notes', pages: 8, date: 'Oct 15, 2025' },
-  { id: '3', batch: 'Crash Course', subject: 'Economics', chapter: 'Microeconomics Basics', type: 'pdf', title: 'Short Summary Notes.pdf', pages: 15, date: 'Nov 02, 2025' },
+// Initial mock materials — will be replaced with live Supabase data
+const BASE_MATERIALS = [
+  { id: '1', batch: 'Batch A', subject: 'Physics', chapter: 'Kinematics', type: 'pdf', title: 'Chapter 1 Complete Notes.pdf', pages: 12, date: 'Oct 12, 2025' },
+  { id: '2', batch: 'Batch B', subject: 'Chemistry', chapter: 'Atomic Structure', type: 'link', title: 'Interactive Board Notes', pages: 8, date: 'Oct 15, 2025' },
+  { id: '3', batch: 'Crash Course', subject: 'Mathematics', chapter: 'Calculus – Limits', type: 'pdf', title: 'Short Summary Notes.pdf', pages: 15, date: 'Nov 02, 2025' },
 ];
 
 export default function B2BMaterials() {
-  const [materials, setMaterials] = useState(INITIAL_MATERIALS);
-  const [showUpload, setShowUpload] = useState(false);
+  const { profile } = useAuth();
+  const subjects = getSubjectLabels(profile?.target_exam);
+  const firstSubject = subjects[0] || 'Physics';
 
-  // Form State
-  const [uploadForm, setUploadForm] = useState({ subject: 'Accounts', chapter: '', title: '', pages: 10, type: 'pdf' });
+  const [materials, setMaterials] = useState(BASE_MATERIALS.map(m => ({ ...m, subject: subjects[0] || m.subject })));
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadForm, setUploadForm] = useState({ subject: firstSubject, chapter: '', title: '', pages: 10, type: 'pdf' });
 
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +44,7 @@ export default function B2BMaterials() {
     setMaterials([newDoc, ...materials]);
     toast.success('Study material distributed successfully to all student hubs!');
     setShowUpload(false);
-    setUploadForm({ subject: 'Accounts', chapter: '', title: '', pages: 10, type: 'pdf' });
+    setUploadForm({ subject: firstSubject, chapter: '', title: '', pages: 10, type: 'pdf' });
   };
 
   const deleteMaterial = (id: string) => {
@@ -73,12 +77,9 @@ export default function B2BMaterials() {
                   value={uploadForm.subject} onChange={e => setUploadForm({...uploadForm, subject: e.target.value})}
                   className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-accent"
                 >
-                  <option value="Accounts">Accounts</option>
-                  <option value="Economics">Economics</option>
-                  <option value="Business Studies">Business Studies</option>
-                  <option value="Physics">Physics</option>
-                  <option value="Chemistry">Chemistry</option>
-                  <option value="Mathematics">Mathematics</option>
+                  {subjects.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
                 </select>
               </div>
 
