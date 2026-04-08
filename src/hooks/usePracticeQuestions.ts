@@ -4,9 +4,10 @@ import { toast } from 'sonner';
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
 import { logStudentActivity } from '@/lib/studentActivity';
 
+// The interface expected by QuizInterface components
 export interface Question {
   id: string;
-  subchapter_id: string;
+  subchapter_id: string; // mapped to subtopic
   chapter_id: string;
   subject: string;
   difficulty: 'easy' | 'medium' | 'hard';
@@ -19,6 +20,8 @@ export interface Question {
   explanation: string;
   concept_tested: string;
   common_mistake: string | null;
+  is_verified?: boolean;
+  generation_model?: string;
 }
 
 export interface SimilarQuestion {
@@ -32,6 +35,27 @@ export interface SimilarQuestion {
   difficulty_note: string;
 }
 
+const mapQuestionBankToInterface = (qbItem: any): Question => {
+  return {
+    id: qbItem.question_id,
+    subchapter_id: qbItem.subtopic || qbItem.ncert_chapter || 'adaptive',
+    chapter_id: qbItem.ncert_chapter || 'adaptive',
+    subject: qbItem.subject,
+    difficulty: qbItem.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard',
+    question_text: qbItem.question_text,
+    option_a: qbItem.options?.A || qbItem.options?.a || '',
+    option_b: qbItem.options?.B || qbItem.options?.b || '',
+    option_c: qbItem.options?.C || qbItem.options?.c || '',
+    option_d: qbItem.options?.D || qbItem.options?.d || '',
+    correct_option: qbItem.correct_option as 'A' | 'B' | 'C' | 'D',
+    explanation: qbItem.explanation?.short || qbItem.explanation || '',
+    concept_tested: qbItem.micro_concept || qbItem.topic || 'General',
+    common_mistake: qbItem.distractor_logic ? JSON.stringify(qbItem.distractor_logic) : null,
+    is_verified: qbItem.is_verified,
+    generation_model: qbItem.generation_model,
+  };
+};
+
 export const usePracticeQuestions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
@@ -44,69 +68,104 @@ export const usePracticeQuestions = () => {
     chapterName: string,
     subject: string,
     difficulty: 'easy' | 'medium' | 'hard',
-    count: number = 5
+    count: number = 5,
+    exam: string = 'CUET'
   ) => {
     setLoading(true);
     setError(null);
 
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+    const CapDifficulty = capitalize(difficulty);
+
     try {
-      // First try to get cached questions from the database
-      const { data: cachedQuestions } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('subchapter_id', subchapterId)
-        .eq('difficulty', difficulty)
-        .limit(count);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
 
-      if (cachedQuestions && cachedQuestions.length >= count) {
-        const qs = (cachedQuestions.slice(0, count) as Question[]).map(q => shuffleQuestionOptions(q as any) as unknown as Question);
-        setQuestions(qs);
-        return qs;
-      }
-
-      // If not enough cached, try generating via edge function
-      const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
-        body: {
-          subchapterId,
-          subchapterName,
-          chapterId,
-          chapterName,
-          subject,
-          difficulty,
-          count
-        }
+      // 1. Try to fetch strictly using the RPC priority hybrid loader
+      const { data: rpcQuestions, error: rpcErr } = await supabase.rpc('serve_practice_questions', {
+        p_student_id: user.id,
+        p_exam: exam,
+        p_subject: subject,
+        p_chapter: chapterName,
+        p_subtopic: subchapterName,
+        p_count: count,
+        p_difficulty: CapDifficulty,
       });
 
-      if (fnError) {
-        // If generation fails but we have SOME cached questions, use them
-        if (cachedQuestions && cachedQuestions.length > 0) {
-          setQuestions(cachedQuestions as Question[]);
-          toast.info(`Loaded ${cachedQuestions.length} available questions.`);
-          return cachedQuestions as Question[];
-        }
-        throw new Error('Failed to generate questions. Please check your AI credits in Settings → Workspace → Usage.');
+      if (rpcErr) {
+        console.error("RPC Error:", rpcErr);
+        throw new Error("Failed to fetch questions from bank.");
       }
 
-      if (data?.error) {
-        // If AI error but we have some cached questions, use them
-        if (cachedQuestions && cachedQuestions.length > 0) {
-          setQuestions(cachedQuestions as Question[]);
-          toast.info(`Loaded ${cachedQuestions.length} available questions.`);
-          return cachedQuestions as Question[];
+      let qbData = rpcQuestions || [];
+
+      // 2. If ZERO available, wait max 4s while triggering background gen
+      if (qbData.length === 0) {
+        toast.info("No questions found, triggering AI generator...");
+        
+        // Trigger Edge Function Sync to wait max N seconds
+        const genPromise = supabase.functions.invoke('generate-cuet-questions', {
+          body: {
+            exam,
+            subject,
+            chapter: chapterName,
+            subtopic: subchapterName,
+            difficulty_mix: difficulty === 'easy' ? { Easy: 100, Medium: 0, Hard: 0 } 
+                         : difficulty === 'hard' ? { Easy: 0, Medium: 0, Hard: 100 }
+                         : { Easy: 0, Medium: 100, Hard: 0 },
+            count: count,
+            exam_stage: 'practice',
+            save_to_db: true,
+          }
+        });
+
+        // Promise that resolves early if AI is fast, or throws Timeout after 4s
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('timeout'), 4000));
+        
+        try {
+          const { data: genData } = await Promise.race([genPromise, timeoutPromise]) as any;
+          if (genData?.success && genData.questions?.length > 0) {
+            // Re-fetch from RPC to get the saved ones to maintain same format
+            const { data: refetched } = await supabase.rpc('serve_practice_questions', {
+              p_student_id: user.id, p_exam: exam, p_subject: subject, p_chapter: chapterName, p_subtopic: subchapterName, p_count: count, p_difficulty: CapDifficulty
+            });
+            qbData = refetched || [];
+          }
+        } catch (e) {
+          // Timeout reached, the Edge function is still running in background.
+          // Don't error out, just return empty array if still 0.
         }
-        const errMsg = data.error.includes('credits')
-          ? 'AI credits exhausted. Add credits in Settings → Workspace → Usage.'
-          : data.error.includes('Rate limit')
-            ? 'Too many requests. Please wait a moment.'
-            : data.error;
-        setError(errMsg);
-        toast.error(errMsg);
-        return null;
+      } else if (qbData.length < count) {
+        // We have some questions, but not enough! Fire off generator IN BACKGROUND (non-blocking)
+        toast.info(`Found ${qbData.length} available questions. Generating more in the background!`);
+        supabase.functions.invoke('generate-cuet-questions', {
+          body: {
+            exam, subject, chapter: chapterName, subtopic: subchapterName,
+            difficulty_mix: difficulty === 'easy' ? { Easy: 100, Medium: 0, Hard: 0 } 
+                         : difficulty === 'hard' ? { Easy: 0, Medium: 0, Hard: 100 }
+                         : { Easy: 0, Medium: 100, Hard: 0 },
+            count: count - qbData.length,
+            exam_stage: 'practice',
+            save_to_db: true,
+          }
+        }).catch(err => console.error("Background AI failed:", err));
       }
 
-      const mappedQuestions = (data.questions as Question[]).map(q => shuffleQuestionOptions(q as any) as unknown as Question);
-      setQuestions(mappedQuestions);
-      return mappedQuestions;
+      if (qbData.length === 0) {
+        setError('No questions currently available. AI is generating them, please refresh in 10 seconds.');
+        setLoading(false);
+        return [];
+      }
+
+      // Map and Shuffle
+      const qs = qbData.map((q: any) => {
+        const mapped = mapQuestionBankToInterface(q);
+        return shuffleQuestionOptions(mapped as any) as unknown as Question;
+      });
+
+      setQuestions(qs);
+      return qs;
+
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load questions';
       setError(message);
@@ -114,6 +173,37 @@ export const usePracticeQuestions = () => {
       return null;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const submitPracticeReport = async (
+    exam: string,
+    subject: string,
+    chapter: string,
+    subtopic: string | undefined,
+    totalQuestions: number,
+    correctCount: number,
+    timeSpentSeconds: number,
+    answers: Array<{ topic: string; subtopic: string; isCorrect: boolean }>,
+    taskId?: string
+  ) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      
+      const { data, error } = await supabase.functions.invoke('submit-practice-report', {
+        body: {
+          exam, subject, chapter, subtopic,
+          total_questions: totalQuestions,
+          correct_count: correctCount,
+          time_spent_seconds: timeSpentSeconds,
+          answers,
+          task_id: taskId
+        }
+      });
+      if (error) console.error("Submit Practice Report edge function error:", error);
+    } catch (e) {
+      console.error("Submit practice report failed:", e);
     }
   };
 
@@ -153,7 +243,6 @@ export const usePracticeQuestions = () => {
     isCorrect: boolean,
     timeTakenSeconds: number,
     confidenceLevel: 'low' | 'medium' | 'high',
-    // Optional context for analytics bridge
     context?: {
       subject?: string;
       topic?: string;
@@ -166,7 +255,7 @@ export const usePracticeQuestions = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Existing: log to user_mcq_attempts
+      // Existing: log to user_mcq_attempts (b2c stats component)
       await supabase.from('user_mcq_attempts' as any).insert({
         user_id: user.id,
         question_id: questionId,
@@ -177,7 +266,7 @@ export const usePracticeQuestions = () => {
         ai_predicted_mistake: 'none'
       });
 
-      // NEW: bridge to teacher analytics (silent, non-blocking)
+      // Bridge to teacher analytics and adaptive system
       if (context?.subject && context?.topic) {
         logStudentActivity({
           question_id:        questionId,
@@ -201,6 +290,7 @@ export const usePracticeQuestions = () => {
     loading,
     error,
     generateQuestions,
+    submitPracticeReport,
     getSimilarQuestions,
     recordAttempt
   };

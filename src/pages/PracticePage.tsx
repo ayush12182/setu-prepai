@@ -10,8 +10,9 @@ import QuizInterface, { QuizResult } from '@/components/practice/QuizInterface';
 import QuizResults from '@/components/practice/QuizResults';
 import TestModeQuiz, { TestAnswer } from '@/components/practice/TestModeQuiz';
 import TestResults from '@/components/practice/TestResults';
-import { Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter } from 'lucide-react';
+import { ArrowRight, Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { Button } from '@/components/ui/button';
@@ -40,15 +41,27 @@ const PracticePage: React.FC = () => {
   const [initialized, setInitialized] = useState(false);
   const [mode, setMode] = useState<PracticeMode>('practice');
   const [mission, setMission] = useState<DailyMission | null>(null);
+  const [pendingTasks, setPendingTasks] = useState<any[]>([]);
   const [isSnapModalOpen, setIsSnapModalOpen] = useState(false);
 
-  const { questions, loading, error, generateQuestions, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
+  const { questions, loading, error, generateQuestions, submitPracticeReport, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
 
   useEffect(() => {
     if (!user?.id) return;
     // Generate mission from REAL attempt history (async), falls back to date-rotating pool
     const examType = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE';
     generateDailyMissionAsync(user.id, examType).then(setMission);
+
+    // Fetch assigned tasks specifically for this user
+    const fetchTasks = async () => {
+      const { data } = await (supabase.from as any)('assigned_tasks')
+        .select('*')
+        .eq('student_id', user.id)
+        .eq('status', 'pending')
+        .limit(3);
+      if (data && data.length > 0) setPendingTasks(data);
+    };
+    fetchTasks();
   }, [user?.id, isNeet, isCuet]);
 
   useEffect(() => {
@@ -106,6 +119,30 @@ const PracticePage: React.FC = () => {
   const handleQuizComplete = (result: QuizResult) => {
     if (state.step !== 'quiz') return;
     setState({ ...state, step: 'results', result });
+
+    // Submit the practice report via Edge Function
+    if (state.chapter && state.subject) {
+      const answers = questions.map(q => {
+        const isWrong = result.wrongQuestions.some(wq => wq.id === q.id);
+        return {
+          topic: q.concept_tested || state.chapter!.name,
+          subtopic: q.subchapter_id,
+          isCorrect: !isWrong
+        };
+      });
+
+      submitPracticeReport(
+        isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
+        state.subject,
+        state.chapter.name,
+        state.subchapter?.name,
+        result.totalQuestions,
+        result.correct,
+        result.timeTakenSeconds,
+        answers,
+        state.adaptiveMode === 'task' ? state.subchapter?.name : undefined // passing task identifier if we launched a task
+      );
+    }
   };
 
   const handleTestComplete = (answers: TestAnswer[], totalTime: number) => {
@@ -145,6 +182,29 @@ const PracticePage: React.FC = () => {
                 <Camera size={20} /> Snap & Solve
               </Button>
             </div>
+
+            {/* Assigned Tasks / Recommendations */}
+            {pendingTasks.length > 0 && (
+              <div 
+                onClick={() => launchAdaptiveSession(pendingTasks[0].subtopic, 'task')}
+                className="bg-card border-2 border-accent/50 rounded-3xl p-6 mb-6 cursor-pointer group hover:bg-accent/5 transition-all relative overflow-hidden"
+              >
+                <div className="flex items-center justify-between z-10 relative">
+                  <div>
+                    <span className="flex items-center gap-2 text-xs font-bold text-accent uppercase tracking-widest mb-1">
+                      <Target className="w-4 h-4" /> Priority assigned by Teacher
+                    </span>
+                    <h3 className="text-xl font-bold text-foreground group-hover:text-amber-500 transition-colors">
+                      {pendingTasks[0].subtopic} Review
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">Complete this targeted practice to improve your baseline accuracy.</p>
+                  </div>
+                  <Button className="shrink-0 rounded-xl font-bold" variant="outline">
+                    Start Task <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Daily Mission Hero */}
             <div 

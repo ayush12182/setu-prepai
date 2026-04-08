@@ -51,6 +51,18 @@ const QuizResults: React.FC<QuizResultsProps> = ({
 
   const performance = getPerformanceLevel();
 
+  // Highlight weakest topic
+  const weakTopics = result.wrongQuestions.reduce((acc, q) => {
+    const concept = q.concept_tested || subchapterName;
+    acc[concept] = (acc[concept] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const weakestConcept = Object.entries(weakTopics).sort((a, b) => b[1] - a[1])[0]?.[0] || subchapterName;
+  const weakestCount = weakTopics[weakestConcept] || 0;
+  // Estimate accuracy naively based on total
+  const estAccuracy = Math.max(0, 100 - Math.round((weakestCount / Math.max(1, result.totalQuestions / 2)) * 100));
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto animate-fade-in pb-10">
       {/* Performance Header */}
@@ -101,24 +113,20 @@ const QuizResults: React.FC<QuizResultsProps> = ({
         
         <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
           <BrainCircuit className="w-5 h-5 text-accent" />
-          Session Intelligence Report
+          Session Intelligence
         </h3>
 
         <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <Trophy className={cn("w-5 h-5 mt-0.5", summary.accuracyChange > 0 ? "text-emerald-500" : "text-red-500")} />
-            <div>
-              <p className="font-semibold text-foreground">Performance Shift</p>
-              <p className="text-sm text-muted-foreground">We project a {summary.accuracyChange > 0 ? '+' : ''}{summary.accuracyChange}% accuracy shift based on this session's mastery rate.</p>
-            </div>
-          </div>
-
-          {summary.behavioralFlag && (
-            <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 p-3 rounded-xl mt-3">
-              <AlertTriangle className="w-5 h-5 text-red-500 mt-0.5" />
+          
+          {/* Weakness Detector */}
+          {weakestCount > 0 && (
+            <div className="flex items-start gap-3 bg-card border border-border p-4 rounded-2xl shadow-sm">
+              <AlertTriangle className="w-6 h-6 text-red-500 mt-1 flex-shrink-0" />
               <div>
-                <p className="font-semibold text-red-600 dark:text-red-400">Behavioral Warning</p>
-                <p className="text-sm text-red-500/80">{summary.behavioralFlag}</p>
+                <p className="font-bold text-foreground">You are weak in: <span className="text-red-500">{weakestConcept}</span></p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  You missed {weakestCount} questions here. Estimated accuracy for this concept dropped to {estAccuracy}%.
+                </p>
               </div>
             </div>
           )}
@@ -126,11 +134,11 @@ const QuizResults: React.FC<QuizResultsProps> = ({
           <div className="flex items-start gap-3 mt-4 pt-4 border-t border-border">
             <Zap className="w-5 h-5 text-amber-500 mt-0.5" />
             <div className="flex-1">
-              <p className="font-semibold text-foreground">AI Control Loop: Next Step</p>
-              <p className="text-sm text-muted-foreground">{summary.nextActionRecommend}</p>
+              <p className="font-semibold text-foreground">Recommended Next Action</p>
+              <p className="text-sm text-muted-foreground">Focus exclusively on your weak spots to immediately improve overall accuracy.</p>
             </div>
-            <Button className="bg-accent text-primary-foreground font-bold shrink-0 shadow-lg shadow-accent/20">
-              Execute <ArrowRight className="w-4 h-4 ml-2" />
+            <Button onClick={onRetry} className="bg-accent text-primary-foreground font-bold shrink-0 shadow-lg shadow-accent/20 hover:scale-105 transition-transform">
+              Target {weakestConcept} <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
         </div>

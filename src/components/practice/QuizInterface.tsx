@@ -12,7 +12,8 @@ import {
   AlertTriangle,
   RefreshCw,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { JeeQuestion, JeeOption, JeeSolution } from '@/lib/jeeMathRenderer';
@@ -192,10 +193,19 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
           </span>
           <span className="text-sm text-muted-foreground">{subchapterName}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="w-4 h-4" />
-          <span>Q {currentIndex + 1}/{questions.length}</span>
-        </div>
+          {currentQuestion.is_verified ? (
+            <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+              <CheckCircle className="w-3 h-3" /> Verified
+            </span>
+          ) : currentQuestion.generation_model ? (
+            <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-violet-500 bg-violet-500/10 px-1.5 py-0.5 rounded border border-violet-500/20">
+              <Sparkles className="w-3 h-3" /> AI Generated
+            </span>
+          ) : null}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground ml-2">
+            <Clock className="w-4 h-4" />
+            <span>Q {currentIndex + 1}/{questions.length}</span>
+          </div>
       </div>
 
       {/* Progress */}

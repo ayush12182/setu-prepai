@@ -59,9 +59,11 @@ interface QuestionJSON {
   };
   distractor_logic:      Record<string, string>;
   tags:                  string[];
+  micro_concept?:        string;
   estimated_time_seconds: number;
   pyq_similar:           boolean;
   pyq_year_reference?:   string;
+  confidence_score?:     number;
 }
 
 interface QualityGateResult {
@@ -328,6 +330,54 @@ async function callClaude(userPrompt: string, anthropicKey: string): Promise<Que
 }
 
 // ─────────────────────────────────────────────────────────────
+// SECONDARY VALIDATION PASS (Stage 2)
+// ─────────────────────────────────────────────────────────────
+async function validateQuestionWithAI(q: QuestionJSON, anthropicKey: string): Promise<{ score: number; valid: boolean }> {
+  const prompt = `As a senior NTA examiner, review this generated question:
+Question: ${q.question_text}
+Options: ${JSON.stringify(q.options)}
+Correct Option: ${q.correct_option}
+Explanation: ${q.explanation.short}
+
+Does this exactly match CUET quality standards? Specifically check:
+1. Is the correct answer 100% correct without ambiguity?
+2. Are the wrong options plausible but clearly incorrect?
+3. Is the language formal and error-free?
+
+Reply with a strict JSON format exactly like: {"score": 95, "valid": true}
+Assign a score from 0 to 100. Be extremely harsh. Any ambiguity means score < 80.`;
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": anthropicKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-3-haiku-20240307", // use faster cheaper model for validation
+      max_tokens: 150,
+      system: "You output only JSON.",
+      messages: [{ role: "user", content: prompt }],
+    }),
+  });
+
+  if (!response.ok) return { score: 0, valid: false };
+  const data = await response.json();
+  const text = data.content?.[0]?.text ?? "";
+  try {
+    const jsonMatch = text.match(/\\{[\s\S]*\\}/);
+    if (jsonMatch) {
+      const res = JSON.parse(jsonMatch[0]);
+      return { score: res.score ?? 0, valid: res.score >= 85 };
+    }
+  } catch (e) {
+    // Ignore parse errors, just fail it
+  }
+  return { score: 0, valid: false };
+}
+
+// ─────────────────────────────────────────────────────────────
 // BUILD USER PROMPT
 // ─────────────────────────────────────────────────────────────
 function buildUserPrompt(req: GenerateRequest, batchSize: number, excludeTexts: string[]): string {
@@ -394,6 +444,7 @@ RETURN: A JSON array of exactly ${batchSize} question objects matching this exac
     "D": "Why D is wrong"
   },
   "tags": ["tag1", "tag2"],
+  "micro_concept": "specific micro concept tested",
   "estimated_time_seconds": 30,
   "pyq_similar": ${isPYQ ? "true" : "false"},
   "pyq_year_reference": "CUET 2023 or null"
@@ -500,9 +551,22 @@ serve(async (req) => {
       }
 
       const quality = await runQualityGate(q, existingTexts);
+      
+      let finalConfidenceScore = 0;
+      let stage2Passed = false;
+      if (quality.passed) {
+        // Stage 2 Validation
+        const aiCheck = await validateQuestionWithAI(q, anthropicKey);
+        finalConfidenceScore = aiCheck.score;
+        stage2Passed = aiCheck.valid;
+        if (!stage2Passed) {
+          quality.passed = false;
+          quality.notes.push(`FAIL: AI Validation Confidence Score ${finalConfidenceScore} < 85`);
+        }
+      }
 
       let saved = false;
-      if (quality.passed && saveToDb) {
+      if (quality.passed && stage2Passed && saveToDb) {
         const { error: saveErr } = await supabase.from("questions_bank").upsert(
           {
             question_id:           q.question_id,
@@ -526,9 +590,11 @@ serve(async (req) => {
             estimated_time_seconds: q.estimated_time_seconds,
             pyq_similar:           q.pyq_similar ?? false,
             pyq_year_reference:    q.pyq_year_reference ?? null,
+            confidence_score:      finalConfidenceScore,
+            micro_concept:         q.micro_concept ?? null,
             quality_gate_passed:   true,
             quality_gate_log:      quality,
-            ai_quality_score:      1.0,
+            ai_quality_score:      finalConfidenceScore / 100,
             generation_model:      "claude-opus-4-5",
             generation_attempt:    attempt,
             is_verified:           false,
@@ -546,7 +612,8 @@ serve(async (req) => {
         } else {
           console.error("[CUET-GEN] Save error:", saveErr.message);
         }
-      } else if (quality.passed && !saveToDb) {
+      } else if (quality.passed && stage2Passed && !saveToDb) {
+        q.confidence_score = finalConfidenceScore;
         totalGenerated++;
         saved = false;
       }
