@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Layers, ClipboardList,
-  LineChart, UserPlus, Settings, Menu, X, LogOut, ChevronLeft
+  LineChart, UserPlus, Settings, Menu, X, LogOut, ChevronLeft, BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -18,6 +18,7 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
     { icon: LayoutDashboard, label: 'Overview', path: '/b2b' },
     { icon: Users, label: 'Students', path: '/b2b/students' },
     { icon: Layers, label: 'Batches', path: '/b2b/batches' },
+    { icon: BookOpen, label: 'Study Materials', path: '/b2b/materials' },
     { icon: ClipboardList, label: 'Tests', path: '/b2b/tests' },
     { icon: LineChart, label: 'Analytics', path: '/b2b/analytics' },
     { icon: UserPlus, label: 'Invite Students', path: '/b2b/invite' },
@@ -30,7 +31,7 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
       <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card">
         <div className="flex items-center gap-2">
           <span className="font-display font-black tracking-tighter text-xl scale-y-110">SETU.</span>
-          <span className="text-xs font-bold uppercase tracking-widest text-accent bg-accent/10 px-2 py-0.5 rounded-full">B2B</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">Teacher</span>
         </div>
         <button onClick={() => setSidebarOpen(true)} className="p-2 text-foreground">
           <Menu size={24} />
@@ -60,7 +61,7 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-display font-black tracking-tighter text-2xl scale-y-110">SETU.</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-full mt-1">B2B Admin</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full mt-1">Teacher Portal</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="md:hidden p-2 text-muted-foreground hover:text-foreground">
             <X size={20} />

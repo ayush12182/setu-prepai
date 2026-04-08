@@ -2,10 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ExamModeProvider } from "@/contexts/ExamModeContext";
 import { ClassProvider } from "@/contexts/ClassContext";
 import LandingPage from "./pages/LandingPage";
@@ -44,6 +44,7 @@ import PricingPage from "./pages/PricingPage";
 // B2B Pages
 import B2BOverview from "./pages/B2B/B2BOverview";
 import B2BBatches from "./pages/B2B/B2BBatches";
+import B2BMaterials from "./pages/B2B/B2BMaterials";
 import B2BStudents from "./pages/B2B/B2BStudents";
 import B2BTests from "./pages/B2B/B2BTests";
 import B2BAnalytics from "./pages/B2B/B2BAnalytics";
@@ -60,6 +61,31 @@ import B2BAssessmentTakerPage from "./pages/Assess/B2BAssessmentTakerPage";
 import B2BLiveMonitor from "./pages/B2B/B2BLiveMonitor";
 
 const queryClient = new QueryClient();
+
+// ─── Route Guards ─────────────────────────────────────────────
+
+/** Only teachers/mentors/admins can access the Teacher Portal (/b2b) */
+const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
+  const { profile, loading } = useAuth();
+  if (loading) return null;
+  const type = profile?.user_type;
+  if (!type) return <Navigate to="/auth" replace />;
+  if (type === 'b2b_student') return <Navigate to="/student-hub" replace />;
+  if (type === 'b2c_student') return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+};
+
+/** Only enrolled B2B students can access the Student Hub (/student-hub) */
+const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
+  const { profile, loading } = useAuth();
+  if (loading) return null;
+  const type = profile?.user_type;
+  if (!type) return <Navigate to="/auth" replace />;
+  if (type === 'b2b_mentor' || type === 'b2b_institution' || type === 'admin') 
+    return <Navigate to="/b2b" replace />;
+  if (type === 'b2c_student') return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -106,16 +132,17 @@ const App = () => (
                     <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
                     <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
                     
-                    {/* B2B Dashboard Routes */}
-                    <Route path="/b2b">
-                      <Route index element={<B2BOverview />} />
-                      <Route path="batches" element={<B2BBatches />} />
-                      <Route path="students" element={<B2BStudents />} />
-                      <Route path="tests" element={<B2BTests />} />
-                      <Route path="monitor/:sessionId" element={<B2BLiveMonitor />} />
-                      <Route path="analytics" element={<B2BAnalytics />} />
-                      <Route path="invite" element={<B2BInviteStudents />} />
-                      <Route path="settings" element={<B2BSettings />} />
+                    {/* B2B Dashboard Routes — Teacher Portal (mentors only) */}
+                    <Route path="/b2b" element={<TeacherRoute><span /></TeacherRoute>}>
+                      <Route index element={<TeacherRoute><B2BOverview /></TeacherRoute>} />
+                      <Route path="batches" element={<TeacherRoute><B2BBatches /></TeacherRoute>} />
+                      <Route path="materials" element={<TeacherRoute><B2BMaterials /></TeacherRoute>} />
+                      <Route path="students" element={<TeacherRoute><B2BStudents /></TeacherRoute>} />
+                      <Route path="tests" element={<TeacherRoute><B2BTests /></TeacherRoute>} />
+                      <Route path="monitor/:sessionId" element={<TeacherRoute><B2BLiveMonitor /></TeacherRoute>} />
+                      <Route path="analytics" element={<TeacherRoute><B2BAnalytics /></TeacherRoute>} />
+                      <Route path="invite" element={<TeacherRoute><B2BInviteStudents /></TeacherRoute>} />
+                      <Route path="settings" element={<TeacherRoute><B2BSettings /></TeacherRoute>} />
                     </Route>
                     
                     {/* Student Join Route */}
@@ -127,7 +154,8 @@ const App = () => (
                     {/* Admin Routes */}
                     <Route path="/admin/qc" element={<QuestionQCPanel />} />
                     
-                    <Route path="/student-hub" element={<StudentHubPage />} />
+                    {/* Student Hub — B2B students only */}
+                    <Route path="/student-hub" element={<StudentHubRoute><StudentHubPage /></StudentHubRoute>} />
                     <Route path="/teaching-room/:teacherId" element={<AITeachingRoomPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/premium" element={<PricingPage />} />

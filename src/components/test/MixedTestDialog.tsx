@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
 import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
+import { cuetAccountancyChapters, cuetEconomicsChapters, cuetBusinessStudiesChapters, cuetHistoryChapters, cuetPoliticalScienceChapters, cuetGeographyChapters, cuetPsychologyChapters, cuetSociologyChapters, cuetEnglishChapters, cuetGeneralTestChapters } from '@/data/cuetSyllabus';
 import { ChapterSelection } from '@/hooks/useTestQuestions';
 import { toast } from 'sonner';
 import { useExamMode } from '@/contexts/ExamModeContext';
@@ -36,7 +37,7 @@ const MixedTestDialog: React.FC<MixedTestDialogProps> = ({
   onOpenChange,
   onStart
 }) => {
-  const { isNeet } = useExamMode();
+  const { isNeet, isCuet } = useExamMode();
   const { isFoundation, studentClass } = useClassContext();
 
   const subjectsData = isFoundation
@@ -46,7 +47,24 @@ const MixedTestDialog: React.FC<MixedTestDialogProps> = ({
       chapters: getSchoolChapters(studentClass, s.key).map(c => ({ id: c.id, name: c.name })),
       color: `bg-${s.key.replace('_', '')}/20 text-${s.key.replace('_', '')}`
     }))
-    : isNeet
+    : isCuet
+      ? [
+        { id: 'physics', name: 'Physics', chapters: physicsChapters, color: 'bg-physics/20 text-physics' },
+        { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters, color: 'bg-chemistry/20 text-chemistry' },
+        { id: 'maths', name: 'Mathematics', chapters: mathsChapters, color: 'bg-maths/20 text-maths' },
+        { id: 'biology', name: 'Biology', chapters: neetBiologyChapters, color: 'bg-green-500/20 text-green-700' },
+        { id: 'accountancy', name: 'Accountancy', chapters: cuetAccountancyChapters, color: 'bg-accent/20 text-accent' },
+        { id: 'business_studies', name: 'Business Studies', chapters: cuetBusinessStudiesChapters, color: 'bg-orange-500/20 text-orange-500' },
+        { id: 'economics', name: 'Economics', chapters: cuetEconomicsChapters, color: 'bg-yellow-500/20 text-yellow-500' },
+        { id: 'history', name: 'History', chapters: cuetHistoryChapters, color: 'bg-amber-700/20 text-amber-700' },
+        { id: 'political_science', name: 'Political Science', chapters: cuetPoliticalScienceChapters, color: 'bg-red-700/20 text-red-700' },
+        { id: 'geography', name: 'Geography', chapters: cuetGeographyChapters, color: 'bg-teal-500/20 text-teal-500' },
+        { id: 'psychology', name: 'Psychology', chapters: cuetPsychologyChapters, color: 'bg-pink-500/20 text-pink-500' },
+        { id: 'sociology', name: 'Sociology', chapters: cuetSociologyChapters, color: 'bg-purple-700/20 text-purple-700' },
+        { id: 'english', name: 'English', chapters: cuetEnglishChapters, color: 'bg-indigo-500/20 text-indigo-500' },
+        { id: 'general_test', name: 'General Test', chapters: cuetGeneralTestChapters, color: 'bg-blue-400/20 text-blue-400' },
+      ]
+      : isNeet
       ? [
         { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters, color: 'bg-physics/20 text-physics' },
         { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters, color: 'bg-chemistry/20 text-chemistry' },

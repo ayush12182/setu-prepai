@@ -37,8 +37,27 @@ const PYQTestDialog: React.FC<PYQTestDialogProps> = ({
   onOpenChange,
   onStart
 }) => {
-  const { isNeet } = useExamMode();
-  const subjectsData = isNeet
+  const { isNeet, isCuet } = useExamMode();
+  
+  const subjectsData = isCuet 
+    ? [
+      { id: 'all', name: 'All Subjects (Mixed)' },
+      { id: 'accountancy', name: 'Accountancy' },
+      { id: 'business_studies', name: 'Business Studies' },
+      { id: 'economics', name: 'Economics' },
+      { id: 'history', name: 'History' },
+      { id: 'political_science', name: 'Political Science' },
+      { id: 'geography', name: 'Geography' },
+      { id: 'psychology', name: 'Psychology' },
+      { id: 'sociology', name: 'Sociology' },
+      { id: 'physics', name: 'Physics' },
+      { id: 'chemistry', name: 'Chemistry' },
+      { id: 'mathematics', name: 'Mathematics' },
+      { id: 'biology', name: 'Biology' },
+      { id: 'english', name: 'English' },
+      { id: 'general_test', name: 'General Test' },
+    ]
+    : isNeet
     ? [
       { id: 'all', name: 'All Subjects (Mixed)' },
       { id: 'physics', name: 'Physics' },
@@ -51,11 +70,29 @@ const PYQTestDialog: React.FC<PYQTestDialogProps> = ({
       { id: 'chemistry', name: 'Chemistry' },
       { id: 'maths', name: 'Mathematics' },
     ];
+
+  // Specific Year Presets per exam
+  const yearPresets = isCuet 
+    ? [
+        { label: 'All Time (2022-2024)', start: 2022, end: 2024 }
+      ]
+    : isNeet
+    ? [
+        { label: 'Last 5 Years (2020-2024)', start: 2020, end: 2024 },
+        { label: 'Last 10 Years (2015-2024)', start: 2015, end: 2024 },
+        { label: 'All Time (2013-2024)', start: 2013, end: 2024 },
+      ]
+    : [
+        { label: 'Last 5 Years (2020-2024)', start: 2020, end: 2024 },
+        { label: 'Last 10 Years (2015-2024)', start: 2015, end: 2024 },
+        { label: 'Last 15 Years (2010-2024)', start: 2010, end: 2024 },
+        { label: 'All Time (2004-2024)', start: 2004, end: 2024 },
+    ];
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
-  const [yearPreset, setYearPreset] = useState<number>(1); // Default to last 10 years
+  const [yearPreset, setYearPreset] = useState<number>(0); 
   const [questionCount, setQuestionCount] = useState<number>(25);
 
-  const currentYearRange = yearPresets[yearPreset];
+  const currentYearRange = yearPresets[yearPreset] || yearPresets[0];
 
   const handleStart = () => {
     onStart({
@@ -65,7 +102,7 @@ const PYQTestDialog: React.FC<PYQTestDialogProps> = ({
     });
     // Reset to defaults
     setSelectedSubject('all');
-    setYearPreset(1);
+    setYearPreset(0);
     setQuestionCount(25);
   };
 
@@ -78,7 +115,11 @@ const PYQTestDialog: React.FC<PYQTestDialogProps> = ({
             PYQ Test (Previous Year Questions)
           </DialogTitle>
           <DialogDescription>
-            Practice with actual JEE Mains & Advanced questions from 2004-2024
+            {isCuet 
+              ? 'Practice with actual NTA CUET UG questions from 2022-2024'
+              : isNeet
+              ? 'Practice with actual NEET UG questions from 2013-2024'
+              : 'Practice with actual JEE Mains & Advanced questions from 2004-2024'}
           </DialogDescription>
         </DialogHeader>
 

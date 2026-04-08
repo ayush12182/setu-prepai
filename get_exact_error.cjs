@@ -11,7 +11,7 @@ const puppeteer = require('puppeteer');
   });
   
   try {
-    await page.goto('http://localhost:8080/teaching-room/pk-sir');
+    await page.goto('http://localhost:5173/b2b');
     await new Promise(r => setTimeout(r, 2000));
   } catch(e) {
     console.log("Nav failed", e);

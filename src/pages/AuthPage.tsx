@@ -21,7 +21,7 @@ type OnboardingStep = 0 | 1 | 2 | 3;
 type StreamType = 'foundation' | 'jee' | 'neet' | 'cuet' | 'commerce' | '';
 
 interface OnboardingData {
-  userType: 'b2c_student' | 'b2b_student';
+  userType: 'b2c_student' | 'b2b_student' | 'b2b_mentor';
   institutionName?: string;
   referenceCode?: string;
   stream: StreamType;
@@ -152,6 +152,11 @@ const AuthPage: React.FC = () => {
           return;
         }
 
+        if (profile.user_type === 'b2b_student') {
+          navigate('/student-hub');
+          return;
+        }
+
         if (!profile.class) {
           setShowOnboarding(true);
         } else {
@@ -256,6 +261,20 @@ const AuthPage: React.FC = () => {
   const handleOnboardingComplete = async () => {
     setLoading(true);
     try {
+      // --- Teacher fast-track: skip stream/class ---
+      if (onboardingData.userType === 'b2b_mentor') {
+        await updateProfile({
+          target_exam: 'Teacher',
+          class: 'teacher',
+          student_level: '11-12',
+          user_type: 'b2b_mentor',
+          institution_name: onboardingData.institutionName || null,
+        });
+        toast.success('Teacher portal ready! Welcome to SETU 👨‍🏫');
+        navigate('/b2b');
+        return;
+      }
+
       const stream = onboardingData.stream;
       const examGoal = getExamGoalFromStream(stream as StreamType);
       const studentClass = onboardingData.studentClass || '11';
@@ -277,7 +296,13 @@ const AuthPage: React.FC = () => {
       });
 
       toast.success('All set! Let\'s begin your journey 🚀');
-      navigate('/foundation-assessment');
+      
+      // Route by user type after onboarding
+      if (onboardingData.userType === 'b2b_student') {
+        navigate('/student-hub');
+      } else {
+        navigate('/foundation-assessment');
+      }
     } catch (error) {
       console.error('Onboarding error:', error);
       toast.error('Profile update failed, please try again');
@@ -285,8 +310,14 @@ const AuthPage: React.FC = () => {
   };
 
   const handleOnboardingNext = () => {
+    // Teacher: skip stream + class steps entirely
+    if (onboardingStep === 0 && onboardingData.userType === 'b2b_mentor') {
+      handleOnboardingComplete();
+      return;
+    }
+
     if (onboardingStep === 0 && !onboardingData.userType) {
-      toast.error('Please select your student type');
+      toast.error('Please select your role');
       return;
     }
     if (onboardingStep === 1 && !onboardingData.stream) {
@@ -298,9 +329,8 @@ const AuthPage: React.FC = () => {
       return;
     }
 
-    // Always go through all steps — class is required for every stream
     if (onboardingStep === 0) setOnboardingStep(1);
-    else if (onboardingStep === 1) setOnboardingStep(2); // always show class step
+    else if (onboardingStep === 1) setOnboardingStep(2);
     else if (onboardingStep === 2) handleOnboardingComplete();
   };
 
@@ -414,14 +444,48 @@ const AuthPage: React.FC = () => {
                     {/* Coaching name field */}
                     {onboardingData.userType === 'b2b_student' && (
                       <div className="mt-2 pt-2">
-                        <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Coaching Centre Name (optional)</label>
+                        <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Batch Code / Teacher ID (Required)</label>
                         <input
                           type="text"
-                          placeholder="e.g. Allen, Resonance, Sri Chaitanya…"
+                          placeholder="e.g. ENG25CS0428"
                           value={onboardingData.institutionName || ''}
-                          onChange={e => setOnboardingData(prev => ({ ...prev, institutionName: e.target.value }))}
-                          className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all"
+                          onChange={e => setOnboardingData(prev => ({ ...prev, institutionName: e.target.value.toUpperCase() }))}
+                          className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all font-mono"
                         />
+                      </div>
+                    )}
+
+                    {/* Teacher / Mentor Card */}
+                    <button
+                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'b2b_mentor', institutionName: undefined }))}
+                      className={`w-full p-5 rounded-2xl border text-left transition-all duration-200 flex items-center gap-4
+                        ${onboardingData.userType === 'b2b_mentor'
+                          ? 'border-violet-500 bg-violet-500/5 ring-1 ring-violet-500/30'
+                          : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]'
+                        }`}
+                    >
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                        onboardingData.userType === 'b2b_mentor' ? 'bg-violet-500/20' : 'bg-white/[0.06]'
+                      }`}>
+                        <GraduationCap className="w-6 h-6 text-violet-400" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-white text-base">Teacher / Mentor</p>
+                        <p className="text-xs text-white/40 mt-0.5">I teach students and manage a batch</p>
+                      </div>
+                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
+                        onboardingData.userType === 'b2b_mentor' ? 'bg-violet-500 border-violet-500' : 'border-white/20'
+                      }`}>
+                        {onboardingData.userType === 'b2b_mentor' && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                      </div>
+                    </button>
+
+                    {/* Teacher name/school field */}
+                    {onboardingData.userType === 'b2b_mentor' && (
+                      <div className="mt-2 pt-2 p-4 rounded-2xl bg-violet-500/5 border border-violet-500/20">
+                        <p className="text-xs text-violet-300/80 leading-relaxed">
+                          👨‍🏫 You'll get access to the <span className="font-bold text-violet-300">Teacher Portal</span> where you can manage students, create tests, and distribute chapter-wise notes.
+                        </p>
                       </div>
                     )}
                   </div>
