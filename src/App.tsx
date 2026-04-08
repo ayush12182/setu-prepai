@@ -54,6 +54,7 @@ import JoinBatchPage from "./pages/B2B/JoinBatchPage";
 
 // Admin
 import QuestionQCPanel from "./pages/Admin/QuestionQCPanel";
+import QuestionGeneratorPage from "./pages/Admin/QuestionGeneratorPage";
 
 // Assess
 import AssessmentFlowPage from "./pages/Assess/AssessmentFlowPage";
@@ -153,6 +154,7 @@ const App = () => (
                     
                     {/* Admin Routes */}
                     <Route path="/admin/qc" element={<QuestionQCPanel />} />
+                    <Route path="/admin/question-generator" element={<QuestionGeneratorPage />} />
                     
                     {/* Student Hub — B2B students only */}
                     <Route path="/student-hub" element={<StudentHubRoute><StudentHubPage /></StudentHubRoute>} />
