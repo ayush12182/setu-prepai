@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
+import { logStudentActivity } from '@/lib/studentActivity';
 
 export interface Question {
   id: string;
@@ -151,13 +152,21 @@ export const usePracticeQuestions = () => {
     selectedOption: 'A' | 'B' | 'C' | 'D',
     isCorrect: boolean,
     timeTakenSeconds: number,
-    confidenceLevel: 'low' | 'medium' | 'high'
+    confidenceLevel: 'low' | 'medium' | 'high',
+    // Optional context for analytics bridge
+    context?: {
+      subject?: string;
+      topic?: string;
+      subtopic?: string;
+      difficulty?: 'easy' | 'medium' | 'hard';
+      exam_stage?: 'practice' | 'mock_test' | 'chapter_test' | 'previous_year';
+    }
   ) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Unified B2B/B2C approach: log everything into user_mcq_attempts
+      // Existing: log to user_mcq_attempts
       await supabase.from('user_mcq_attempts' as any).insert({
         user_id: user.id,
         question_id: questionId,
@@ -167,6 +176,21 @@ export const usePracticeQuestions = () => {
         user_selected_mistake: 'none',
         ai_predicted_mistake: 'none'
       });
+
+      // NEW: bridge to teacher analytics (silent, non-blocking)
+      if (context?.subject && context?.topic) {
+        logStudentActivity({
+          question_id:        questionId,
+          subject:            context.subject,
+          topic:              context.topic,
+          subtopic:           context.subtopic,
+          difficulty:         context.difficulty === 'easy' ? 'Easy' : context.difficulty === 'hard' ? 'Hard' : 'Medium',
+          exam_stage:         context.exam_stage ?? 'practice',
+          is_correct:         isCorrect,
+          time_spent_seconds: timeTakenSeconds,
+          question_type:      'MCQ',
+        });
+      }
     } catch (err) {
       console.error('Failed to record attempt:', err);
     }

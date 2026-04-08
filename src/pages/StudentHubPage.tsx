@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen, PenTool, BarChart3, ChevronRight,
   Layers, Target, Zap, Brain, ShieldCheck,
-  ClipboardList, ArrowRight, Play
+  ClipboardList, ArrowRight, Play, Link, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,8 @@ import { StudentProgressView } from '@/components/student/StudentProgressView';
 import { useB2BManager } from '@/hooks/useB2BManager';
 import { toast } from 'sonner';
 import { getSubjectsForExam } from '@/lib/streamSubjects';
+import { joinTeacherByCode } from '@/lib/studentActivity';
+import { supabase } from '@/integrations/supabase/client';
 
 type Tab = 'notes' | 'practice' | 'progress';
 
@@ -51,7 +53,40 @@ const StudentHubPage: React.FC = () => {
   const [expandedSubject, setExpandedSubject] = useState<string | null>(streamSubjects[0]?.label || null);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinCode, setJoinCode] = useState('');
+  const [joiningCode, setJoiningCode] = useState(false);
+  const [myTeachers, setMyTeachers] = useState<any[]>([]);
   const { joinBatchByCode, loading } = useB2BManager();
+
+  // Fetch linked teachers
+  useEffect(() => {
+    if (!user) return;
+    (supabase.from as any)('student_teacher_links')
+      .select('teacher_id, subject, exam_type, joined_at')
+      .eq('student_id', user.id)
+      .eq('is_active', true)
+      .then(({ data }: any) => setMyTeachers(data || []));
+  }, [user]);
+
+  const handleJoinTeacher = async () => {
+    if (!joinCode.trim()) { toast.error('Enter a code'); return; }
+    setJoiningCode(true);
+    const result = await joinTeacherByCode(joinCode);
+    if (result.success) {
+      toast.success(result.message);
+      setJoinCode('');
+      // Refresh teachers
+      if (user) {
+        const { data } = await (supabase.from as any)('student_teacher_links')
+          .select('teacher_id, subject, exam_type, joined_at')
+          .eq('student_id', user.id)
+          .eq('is_active', true);
+        setMyTeachers(data || []);
+      }
+    } else {
+      toast.error(result.message);
+    }
+    setJoiningCode(false);
+  };
 
   const handleJoinByCode = async () => {
     if (!joinCode || joinCode.length !== 6) {
@@ -301,12 +336,55 @@ const StudentHubPage: React.FC = () => {
 
           {/* ═══════════ PROGRESS TAB ═══════════ */}
           {activeTab === 'progress' && (
-            <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
-              <div className="flex items-center justify-between mb-2">
+            <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
+
+              {/* Join Teacher */}
+              <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/5 border border-violet-500/20 rounded-2xl p-5">
+                <h2 className="text-base font-bold text-foreground mb-1 flex items-center gap-2">
+                  <Link className="w-4 h-4 text-violet-400" /> Join Your Teacher
+                </h2>
+                <p className="text-xs text-muted-foreground mb-3">Enter the class code your teacher shared with you.</p>
+                <div className="flex gap-2">
+                  <input
+                    value={joinCode}
+                    onChange={e => setJoinCode(e.target.value.toUpperCase())}
+                    placeholder="e.g. NEET7K"
+                    maxLength={6}
+                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-violet-400/50"
+                  />
+                  <Button onClick={handleJoinTeacher} disabled={joiningCode} className="bg-violet-500 hover:bg-violet-400 text-white px-5">
+                    {joiningCode ? '⏳' : 'Join'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* My Teachers */}
+              {myTeachers.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold text-foreground mb-3">My Teachers</h3>
+                  <div className="grid grid-cols-1 gap-2">
+                    {myTeachers.map((t: any, i: number) => (
+                      <div key={i} className="flex items-center justify-between bg-card border border-border rounded-xl p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-accent/20 text-accent font-black flex items-center justify-center text-xs">T</div>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{t.subject}</p>
+                            <p className="text-xs text-muted-foreground">{(t.exam_type || '').replace('_', ' ')} · Joined {new Date(t.joined_at).toLocaleDateString('en-IN')}</p>
+                          </div>
+                        </div>
+                        <span className="text-xs text-violet-400 font-bold flex items-center gap-1">
+                          <Eye className="w-3 h-3" /> Watching
+                        </span>
+                      </div>
+                    ))}
+                    <p className="text-xs text-muted-foreground text-center mt-1">📊 Your teacher can see your progress in real time</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-foreground">My Progress</h2>
-                <span className="text-[10px] font-bold text-muted-foreground bg-secondary/50 px-2 py-1 rounded-lg border border-border uppercase tracking-wider">
-                  Live Data
-                </span>
+                <span className="text-[10px] font-bold text-muted-foreground bg-secondary/50 px-2 py-1 rounded-lg border border-border uppercase tracking-wider">Live Data</span>
               </div>
               <StudentProgressView />
             </motion.div>

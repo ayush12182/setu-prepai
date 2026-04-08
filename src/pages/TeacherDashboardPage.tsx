@@ -1,282 +1,966 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Star, Users, ArrowRight, Sparkles, GraduationCap, Atom, FlaskConical, FunctionSquare, Clock, Zap, ChevronRight } from 'lucide-react';
-import { MainLayout } from '@/components/layout/MainLayout';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Users, BookOpen, Target, TrendingUp, Clock, Zap,
+  Plus, Copy, QrCode, Trash2, ToggleLeft, ToggleRight,
+  ChevronRight, ChevronLeft, X, AlertTriangle, CheckCircle,
+  BarChart2, Brain, Calendar, Filter, Search, RefreshCw,
+  ArrowUpRight, Award, FileText, Wifi
+} from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
+} from 'recharts';
 import { Button } from '@/components/ui/button';
-import { useExamMode } from '@/contexts/ExamModeContext';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
-/* ────────────────────────────────────────────────
-   DATA
-──────────────────────────────────────────────── */
-const teachers = [
-  {
-    id: 'pk-sir',
-    name: 'P.K. Sir',
-    subject: 'Physics',
-    tagline: 'Master of Mechanics & Electrostatics',
-    experience: '12+ years JEE experience',
-    rating: 4.9,
-    reviews: 3240,
-    status: 'live' as const,
-    icon: Atom,
-    image: undefined as string | undefined,
-    students: '3.2K',
-    topics: ["Newton's Laws", 'Electrostatics', 'Optics', 'Modern Physics'],
-    accent: 'hsl(213 60% 55%)',
-    accentMuted: 'hsl(213 60% 55% / 0.15)',
-    accentBorder: 'hsl(213 60% 55% / 0.25)',
-    accentText: 'hsl(213 80% 75%)',
-  },
-  {
-    id: 'vk-sir',
-    name: 'V.K. Sir',
-    subject: 'Chemistry',
-    tagline: 'Organic & Physical Chemistry Expert',
-    experience: '10+ years JEE experience',
-    rating: 4.8,
-    reviews: 2890,
-    status: 'available' as const,
-    icon: FlaskConical,
-    students: '2.8K',
-    topics: ['Organic Reactions', 'Thermodynamics', 'Equilibrium', 'Electrochemistry'],
-    accent: 'hsl(145 50% 45%)',
-    accentMuted: 'hsl(145 50% 45% / 0.15)',
-    accentBorder: 'hsl(145 50% 45% / 0.25)',
-    accentText: 'hsl(145 60% 70%)',
-  },
-  {
-    id: 'ak-sir',
-    name: 'A.K. Sir',
-    subject: 'Maths',
-    tagline: 'Calculus & Algebra Specialist',
-    experience: '15+ years JEE experience',
-    rating: 4.9,
-    reviews: 4150,
-    status: 'available' as const,
-    icon: FunctionSquare,
-    image: '/images/ak-sir.jpg',
-    students: '4.1K',
-    topics: ['Integration', 'Matrices', 'Coordinate Geometry', 'Limits'],
-    accent: 'hsl(32 79% 57%)',
-    accentMuted: 'hsl(32 79% 57% / 0.15)',
-    accentBorder: 'hsl(32 79% 57% / 0.25)',
-    accentText: 'hsl(32 100% 80%)',
-  },
-];
+// ─── Types ────────────────────────────────────────────────────
+type ExamFilter = 'ALL' | 'JEE_MAINS' | 'JEE_ADVANCED' | 'NEET' | 'CUET';
+type DateFilter = 'today' | 'week' | 'month' | 'all';
 
-/* ────────────────────────────────────────────────
-   TEACHER CARD — matches SETU dark sidebar palette
-──────────────────────────────────────────────── */
-function TeacherCard({ teacher, index }: { teacher: typeof teachers[0]; index: number }) {
-  const [hovered, setHovered] = useState(false);
-  const navigate = useNavigate();
-  const Icon = teacher.icon;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      className="rounded-2xl overflow-hidden flex flex-col"
-      style={{
-        background: hovered
-          ? 'linear-gradient(145deg, hsl(213 25% 18%) 0%, hsl(213 25% 15%) 100%)'
-          : 'linear-gradient(145deg, hsl(213 25% 16%) 0%, hsl(213 25% 13%) 100%)',
-        border: `1px solid ${hovered ? teacher.accentBorder : 'hsl(213 20% 22%)'}`,
-        boxShadow: hovered ? `0 8px 32px hsl(0 0% 0% / 0.35), 0 0 0 1px ${teacher.accentBorder}` : '0 2px 8px hsl(0 0% 0% / 0.2)',
-        transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
-        transition: 'all 0.28s cubic-bezier(0.22, 1, 0.36, 1)',
-      }}
-    >
-      {/* Colour stripe at top */}
-      <div className="h-1 w-full" style={{ background: teacher.accent }} />
-
-      <div className="p-5 flex flex-col flex-1 gap-4">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3">
-          {/* Avatar */}
-          <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
-            style={{ background: teacher.accentMuted, border: `1px solid ${teacher.accentBorder}` }}
-          >
-            {teacher.image ? (
-              <img src={teacher.image} alt={teacher.name} className="w-full h-full object-cover" />
-            ) : (
-              <Icon size={26} style={{ color: teacher.accent }} />
-            )}
-          </div>
-
-          <div className="flex flex-col items-end gap-1.5">
-            {/* Status badge */}
-            <span
-              className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
-              style={
-                teacher.status === 'live'
-                  ? { background: 'hsl(0 65% 48% / 0.15)', color: 'hsl(0 80% 72%)', border: '1px solid hsl(0 65% 48% / 0.3)' }
-                  : { background: teacher.accentMuted, color: teacher.accentText, border: `1px solid ${teacher.accentBorder}` }
-              }
-            >
-              {teacher.status === 'live' ? (
-                <><span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />Live Now</>
-              ) : (
-                <><Clock size={9} />Available</>
-              )}
-            </span>
-
-            {/* Subject badge */}
-            <span
-              className="px-2 py-0.5 rounded-md text-[11px] font-semibold"
-              style={{ background: teacher.accentMuted, color: teacher.accentText, border: `1px solid ${teacher.accentBorder}` }}
-            >
-              {teacher.subject}
-            </span>
-          </div>
-        </div>
-
-        {/* Teacher info */}
-        <div>
-          <h3 className="text-base font-bold text-white">{teacher.name}</h3>
-          <p className="text-sm mt-0.5 font-medium" style={{ color: teacher.accentText }}>{teacher.tagline}</p>
-          <p className="text-xs text-white/40 mt-1">{teacher.experience}</p>
-        </div>
-
-        {/* Rating row */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1">
-            <Star size={12} fill="hsl(32 90% 65%)" color="hsl(32 90% 65%)" />
-            <span className="text-sm font-bold text-white">{teacher.rating}</span>
-            <span className="text-xs text-white/40">({(teacher.reviews / 1000).toFixed(1)}K)</span>
-          </div>
-          <div className="w-px h-3 bg-white/10" />
-          <div className="flex items-center gap-1 text-xs text-white/40">
-            <Users size={10} />
-            <span>{teacher.students} students</span>
-          </div>
-        </div>
-
-        {/* Topic chips */}
-        <div className="flex flex-wrap gap-1">
-          {teacher.topics.map(t => (
-            <span
-              key={t}
-              className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-              style={{ background: 'hsl(213 20% 22%)', color: 'hsl(213 10% 65%)' }}
-            >
-              {t}
-            </span>
-          ))}
-        </div>
-
-        {/* Divider */}
-        <div className="h-px" style={{ background: 'hsl(213 20% 22%)' }} />
-
-        {/* CTA */}
-        <button
-          onClick={() => navigate(`/teaching-room/${teacher.id}`)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all duration-200"
-          style={{
-            background: hovered ? teacher.accent : teacher.accentMuted,
-            color: hovered ? '#0f172a' : teacher.accentText,
-            border: `1px solid ${hovered ? 'transparent' : teacher.accentBorder}`,
-          }}
-        >
-          Start Learning
-          <ArrowRight size={14} />
-        </button>
-      </div>
-    </motion.div>
-  );
+interface TeacherCode {
+  id: string;
+  code: string;
+  label: string | null;
+  exam_type: string;
+  subject: string;
+  is_active: boolean;
+  created_at: string;
+  expires_at: string | null;
+  max_students: number | null;
+  joined_count: number;
 }
 
-/* ────────────────────────────────────────────────
-   STATS BAR
-──────────────────────────────────────────────── */
-const stats = [
-  { value: '3', label: 'AI Teachers', icon: GraduationCap, color: 'hsl(213 60% 65%)' },
-  { value: '500+', label: 'Topics Covered', icon: Zap, color: 'hsl(32 90% 65%)' },
-  { value: '10K+', label: 'Students Learning', icon: Users, color: 'hsl(145 60% 60%)' },
-];
+interface StudentRow {
+  student_id: string;
+  name: string;
+  target_exam: string;
+  total_questions: number;
+  accuracy_pct: number;
+  weak_topics: string[];
+  strong_topics: string[];
+  last_active: string;
+  subject: string;
+  neg_marks_lost?: number;
+}
 
-/* ────────────────────────────────────────────────
-   PAGE
-──────────────────────────────────────────────── */
-const TeacherDashboardPage: React.FC = () => {
-  const { config } = useExamMode();
+interface StudentActivity {
+  subject: string;
+  topic: string;
+  subtopic: string | null;
+  question_type: string;
+  difficulty: string;
+  is_correct: boolean;
+  time_spent_seconds: number | null;
+  marks_obtained: number;
+  marks_possible: number;
+  negative_marking: boolean;
+  attempted_at: string;
+}
+
+// ─── Palette ──────────────────────────────────────────────────
+const EXAM_COLORS: Record<string, string> = {
+  JEE_MAINS:    'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  JEE_ADVANCED: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+  NEET:         'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  CUET:         'bg-violet-500/10 text-violet-400 border-violet-500/20',
+  OTHER:        'bg-gray-500/10 text-gray-400 border-gray-500/20',
+};
+
+const CHART_COLORS = ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444'];
+
+// ─────────────────────────────────────────────────────────────
+const TeacherDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
 
+  // Access guard
+  useEffect(() => {
+    if (profile && profile.user_type !== 'b2b_mentor' && profile.user_type !== 'admin') {
+      navigate('/dashboard');
+    }
+  }, [profile, navigate]);
+
+  const [activeTab, setActiveTab] = useState<'overview' | 'codes'>('overview');
+  const [examFilter, setExamFilter] = useState<ExamFilter>('ALL');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('week');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState<StudentRow | null>(null);
+  const [studentActivity, setStudentActivity] = useState<StudentActivity[]>([]);
+  const [teacherNote, setTeacherNote] = useState('');
+  const [pastNotes, setPastNotes] = useState<any[]>([]);
+  const [savingNote, setSavingNote] = useState(false);
+  const [liveCount, setLiveCount] = useState(0);
+
+  // Data
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [codes, setCodes] = useState<TeacherCode[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [codesLoading, setCodesLoading] = useState(true);
+
+  // Code generation form
+  const [showCodeForm, setShowCodeForm] = useState(false);
+  const [codeForm, setCodeForm] = useState({ label: '', exam_type: 'JEE_MAINS', subject: 'Physics', max_students: '', expires_days: '' });
+  const [generatingCode, setGeneratingCode] = useState(false);
+
+  // ─── Fetch students linked to this teacher ──────────────────
+  const fetchStudents = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { data: links } = await (supabase.from as any)('student_teacher_links')
+        .select('student_id, subject, exam_type')
+        .eq('teacher_id', user.id)
+        .eq('is_active', true);
+
+      if (!links || links.length === 0) { setStudents([]); setLoading(false); return; }
+
+      const studentIds = [...new Set(links.map((l: any) => l.student_id))];
+
+      const { data: profiles } = await (supabase.from as any)('student_profiles')
+        .select('*')
+        .in('student_id', studentIds);
+
+      const { data: authProfiles } = await supabase
+        .from('profiles' as any)
+        .select('id, full_name')
+        .in('id', studentIds);
+
+      const rows: StudentRow[] = studentIds.map((sid: string) => {
+        const sp = (profiles || []).find((p: any) => p.student_id === sid);
+        const ap = (authProfiles || []).find((p: any) => p.id === sid);
+        const link = links.find((l: any) => l.student_id === sid);
+        return {
+          student_id:      sid,
+          name:            (ap as any)?.full_name || 'Student',
+          target_exam:     link?.exam_type || sp?.target_exam || 'OTHER',
+          total_questions: sp?.total_questions || 0,
+          accuracy_pct:    sp?.accuracy_pct || 0,
+          weak_topics:     sp?.weak_topics || [],
+          strong_topics:   sp?.strong_topics || [],
+          last_active:     sp?.last_active || '',
+          subject:         link?.subject || '',
+          neg_marks_lost:  0,
+        };
+      });
+
+      setStudents(rows);
+    } catch { /* silent */ }
+    setLoading(false);
+  }, [user]);
+
+  // ─── Fetch teacher codes ────────────────────────────────────
+  const fetchCodes = useCallback(async () => {
+    if (!user) return;
+    setCodesLoading(true);
+    try {
+      const { data } = await (supabase.from as any)('teacher_codes')
+        .select('*')
+        .eq('teacher_id', user.id)
+        .order('created_at', { ascending: false });
+      setCodes(data || []);
+    } catch { /* silent */ }
+    setCodesLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    fetchStudents();
+    fetchCodes();
+  }, [fetchStudents, fetchCodes]);
+
+  // ─── Real-time subscription ─────────────────────────────────
+  useEffect(() => {
+    if (!user) return;
+    const channel = (supabase as any).channel('teacher-activity-feed')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'student_activity',
+        filter: `teacher_id=eq.${user.id}`,
+      }, () => {
+        setLiveCount(c => c + 1);
+        fetchStudents();
+      })
+      .subscribe();
+    return () => { (supabase as any).removeChannel(channel); };
+  }, [user, fetchStudents]);
+
+  // ─── Fetch individual student activity ─────────────────────
+  const fetchStudentActivity = async (studentId: string) => {
+    try {
+      const { data } = await (supabase.from as any)('student_activity')
+        .select('*')
+        .eq('student_id', studentId)
+        .eq('teacher_id', user?.id)
+        .order('attempted_at', { ascending: false })
+        .limit(200);
+      setStudentActivity(data || []);
+    } catch { setStudentActivity([]); }
+  };
+
+  const fetchStudentNotes = async (studentId: string) => {
+    try {
+      const { data } = await (supabase.from as any)('teacher_student_notes')
+        .select('*')
+        .eq('teacher_id', user?.id)
+        .eq('student_id', studentId)
+        .order('created_at', { ascending: false });
+      setPastNotes(data || []);
+    } catch { setPastNotes([]); }
+  };
+
+  const handleSelectStudent = (student: StudentRow) => {
+    setSelectedStudent(student);
+    fetchStudentActivity(student.student_id);
+    fetchStudentNotes(student.student_id);
+    setTeacherNote('');
+  };
+
+  // ─── Generate teacher code ──────────────────────────────────
+  const handleGenerateCode = async () => {
+    setGeneratingCode(true);
+    try {
+      const { data: codeStr } = await (supabase.rpc as any)('generate_teacher_code');
+      if (!codeStr) throw new Error('Failed to generate code');
+
+      const exp = codeForm.expires_days
+        ? new Date(Date.now() + parseInt(codeForm.expires_days) * 86400000).toISOString()
+        : null;
+
+      await (supabase.from as any)('teacher_codes').insert({
+        teacher_id:   user!.id,
+        code:         codeStr,
+        label:        codeForm.label || null,
+        exam_type:    codeForm.exam_type,
+        subject:      codeForm.subject,
+        max_students: codeForm.max_students ? parseInt(codeForm.max_students) : null,
+        expires_at:   exp,
+      });
+
+      toast.success(`Code ${codeStr} created!`);
+      setShowCodeForm(false);
+      setCodeForm({ label: '', exam_type: 'JEE_MAINS', subject: 'Physics', max_students: '', expires_days: '' });
+      await fetchCodes();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to generate code');
+    }
+    setGeneratingCode(false);
+  };
+
+  const handleToggleCode = async (code: TeacherCode) => {
+    await (supabase.from as any)('teacher_codes')
+      .update({ is_active: !code.is_active })
+      .eq('id', code.id);
+    fetchCodes();
+  };
+
+  const handleDeleteCode = async (code: TeacherCode) => {
+    await (supabase.from as any)('teacher_codes').delete().eq('id', code.id);
+    toast.success('Code removed');
+    fetchCodes();
+  };
+
+  const handleSaveNote = async () => {
+    if (!teacherNote.trim() || !selectedStudent) return;
+    setSavingNote(true);
+    try {
+      await (supabase.from as any)('teacher_student_notes').insert({
+        teacher_id: user!.id,
+        student_id: selectedStudent.student_id,
+        note_text:  teacherNote.trim(),
+      });
+      toast.success('Note saved');
+      setTeacherNote('');
+      fetchStudentNotes(selectedStudent.student_id);
+    } catch { toast.error('Failed to save'); }
+    setSavingNote(false);
+  };
+
+  // ─── Computed analytics ─────────────────────────────────────
+  const filteredStudents = students.filter(s => {
+    const examMatch = examFilter === 'ALL' || s.target_exam === examFilter;
+    const searchMatch = !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return examMatch && searchMatch;
+  });
+
+  const classOverview = {
+    totalStudents:   filteredStudents.length,
+    totalAttempts:   filteredStudents.reduce((a, s) => a + s.total_questions, 0),
+    avgAccuracy:     filteredStudents.length
+      ? Math.round(filteredStudents.reduce((a, s) => a + s.accuracy_pct, 0) / filteredStudents.length)
+      : 0,
+    weakTopics:      (() => {
+      const counts: Record<string, number> = {};
+      filteredStudents.forEach(s => s.weak_topics.forEach(t => { counts[t] = (counts[t] || 0) + 1; }));
+      return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
+    })(),
+    activeToday: filteredStudents.filter(s => {
+      if (!s.last_active) return false;
+      return new Date(s.last_active) > new Date(Date.now() - 86400000);
+    }).length,
+  };
+
+  // ─── Student activity analytics ─────────────────────────────
+  const subjectData = (() => {
+    const map: Record<string, { correct: number; wrong: number }> = {};
+    studentActivity.forEach(a => {
+      if (!map[a.subject]) map[a.subject] = { correct: 0, wrong: 0 };
+      if (a.is_correct) map[a.subject].correct++;
+      else map[a.subject].wrong++;
+    });
+    return Object.entries(map).map(([subject, v]) => ({ subject, ...v }));
+  })();
+
+  const qTypeData = (() => {
+    const map: Record<string, { total: number; correct: number }> = {};
+    studentActivity.forEach(a => {
+      const t = a.question_type || 'MCQ';
+      if (!map[t]) map[t] = { total: 0, correct: 0 };
+      map[t].total++;
+      if (a.is_correct) map[t].correct++;
+    });
+    return Object.entries(map).map(([name, v]) => ({
+      name,
+      value: Math.round(v.correct / Math.max(v.total, 1) * 100),
+    }));
+  })();
+
+  const topicHeatmap = (() => {
+    const map: Record<string, { attempts: number; wrong: number }> = {};
+    studentActivity.forEach(a => {
+      if (!map[a.topic]) map[a.topic] = { attempts: 0, wrong: 0 };
+      map[a.topic].attempts++;
+      if (!a.is_correct) map[a.topic].wrong++;
+    });
+    return Object.entries(map)
+      .map(([topic, v]) => ({ topic, ...v, errorRate: v.wrong / Math.max(v.attempts, 1) }))
+      .sort((a, b) => b.wrong - a.wrong);
+  })();
+
+  const mistakeConcentration = (() => {
+    const map: Record<string, { wrong: number; easy: number; medium: number; hard: number }> = {};
+    studentActivity.filter(a => !a.is_correct).forEach(a => {
+      const sub = a.subtopic || a.topic;
+      if (!map[sub]) map[sub] = { wrong: 0, easy: 0, medium: 0, hard: 0 };
+      map[sub].wrong++;
+      const d = (a.difficulty || '').toLowerCase();
+      if (d === 'easy') map[sub].easy++;
+      else if (d === 'hard') map[sub].hard++;
+      else map[sub].medium++;
+    });
+    return Object.entries(map)
+      .sort((a, b) => b[1].wrong - a[1].wrong)
+      .slice(0, 5)
+      .map(([sub, v]) => ({ sub, ...v }));
+  })();
+
+  const avgTimeData = (() => {
+    const map: Record<string, number[]> = {};
+    studentActivity.forEach(a => {
+      if (a.time_spent_seconds) {
+        if (!map[a.subject]) map[a.subject] = [];
+        map[a.subject].push(a.time_spent_seconds);
+      }
+    });
+    return Object.entries(map).map(([subject, times]) => ({
+      subject,
+      avg: Math.round(times.reduce((a, b) => a + b, 0) / times.length),
+    }));
+  })();
+
+  const totalCorrect = studentActivity.filter(a => a.is_correct).length;
+  const totalWrong = studentActivity.filter(a => !a.is_correct).length;
+  const totalTime = studentActivity.reduce((a, b) => a + (b.time_spent_seconds || 0), 0);
+  const negMarksLost = studentActivity
+    .filter(a => !a.is_correct && a.negative_marking)
+    .reduce((a, b) => a + (b.marks_possible * 0.25), 0);
+
+  // ─── Skeleton ─────────────────────────────────────────────
+  const Skeleton = ({ className }: { className?: string }) => (
+    <div className={cn('bg-muted/40 animate-pulse rounded-xl', className)} />
+  );
+
+  // ─── RENDER ──────────────────────────────────────────────
   return (
-    <MainLayout title="AI Teachers">
-      <div className="max-w-5xl mx-auto space-y-6">
-        {/* --- Mentor Access Banner --- */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="relative group cursor-pointer overflow-hidden rounded-3xl border border-accent/20 bg-accent/5 p-6 transition-all hover:bg-accent/10"
-          onClick={() => navigate('/b2b')}
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-            <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center text-white shadow-xl shadow-accent/20">
-                <Users size={32} />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">Institutional Mentor Access</h2>
-                <p className="text-sm text-white/60 mt-1 max-w-sm">
-                  View batch-level behavioral data, identify class-wide concept gaps, and manage your students with high-precision metrics.
-                </p>
-              </div>
-            </div>
-            <Button className="rounded-xl bg-accent text-white h-12 px-8 font-bold border-none shadow-lg shadow-accent/20 flex items-center gap-2 group-hover:gap-3 transition-all">
-              Go to Dashboard <ChevronRight size={18} />
-            </Button>
+    <div className="min-h-screen bg-background">
+      {/* ── Top Bar ── */}
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="font-display font-black text-2xl tracking-tighter">SETU.</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-violet-400 bg-violet-500/10
+              border border-violet-500/20 px-2 py-0.5 rounded-full">Teacher</span>
           </div>
-        </motion.div>
 
-        {/* ── Stats bar ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.08 }}
-          className="grid grid-cols-3 gap-3"
-        >
-          {stats.map((s, i) => {
-            const Icon = s.icon;
-            return (
-              <div
-                key={i}
-                className="rounded-xl p-3 flex items-center gap-3"
-                style={{ background: 'hsl(213 25% 16%)', border: '1px solid hsl(213 20% 22%)' }}
-              >
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: s.color.replace(')', ' / 0.15)').replace('hsl(', 'hsl(') }}
-                >
-                  <Icon size={14} style={{ color: s.color }} />
-                </div>
-                <div>
-                  <p className="text-base font-extrabold text-white leading-none">{s.value}</p>
-                  <p className="text-[11px] text-white/40 mt-0.5">{s.label}</p>
-                </div>
-              </div>
-            );
-          })}
-        </motion.div>
+          <div className="flex items-center gap-2 flex-1 max-w-xs">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search students..."
+                className="w-full pl-9 pr-3 py-2 text-sm bg-secondary/50 border border-border rounded-xl
+                  focus:outline-none focus:border-accent"
+              />
+            </div>
+          </div>
 
-        {/* ── Teacher cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {teachers.map((t, i) => <TeacherCard key={t.id} teacher={t} index={i} />)}
+          <div className="flex items-center gap-2">
+            {liveCount > 0 && (
+              <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10
+                px-2 py-1 rounded-full border border-emerald-500/20 animate-pulse">
+                <Wifi className="w-3 h-3" /> {liveCount} live
+              </span>
+            )}
+            <span className="text-xs text-muted-foreground hidden sm:block">
+              {profile?.full_name || 'Teacher'} · {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+            </span>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/b2b')}>← B2B Portal</Button>
+          </div>
         </div>
 
-        <p className="text-center text-xs text-muted-foreground pb-2">
-          SETU AI Teachers are available 24/7 • All explanations are JEE-aligned
-        </p>
+        {/* Sub tabs */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-1 pb-0">
+          {(['overview', 'codes'] as const).map(t => (
+            <button key={t}
+              onClick={() => setActiveTab(t)}
+              className={cn('px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors capitalize',
+                activeTab === t ? 'border-accent text-accent' : 'border-transparent text-muted-foreground hover:text-foreground'
+              )}>
+              {t === 'codes' ? '🔑 Class Codes' : '📊 Analytics'}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* ═══════════════════════════════════════
+            TAB: ANALYTICS (Overview + Students)
+        ═══════════════════════════════════════ */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
+
+            {/* ─ Exam Filter + Date ─ */}
+            <div className="flex flex-wrap items-center gap-2">
+              {(['ALL', 'JEE_MAINS', 'JEE_ADVANCED', 'NEET', 'CUET'] as ExamFilter[]).map(ex => (
+                <button key={ex}
+                  onClick={() => setExamFilter(ex)}
+                  className={cn('px-3 py-1.5 rounded-full text-xs font-bold border transition-all',
+                    examFilter === ex
+                      ? 'bg-accent text-black border-accent'
+                      : 'border-border text-muted-foreground hover:border-accent/50'
+                  )}>
+                  {ex === 'ALL' ? 'All Exams' : ex.replace('_', ' ')}
+                </button>
+              ))}
+              <div className="ml-auto flex gap-1">
+                {(['today', 'week', 'month', 'all'] as DateFilter[]).map(d => (
+                  <button key={d}
+                    onClick={() => setDateFilter(d)}
+                    className={cn('px-3 py-1.5 rounded-full text-xs font-bold border transition-all capitalize',
+                      dateFilter === d
+                        ? 'bg-accent text-black border-accent'
+                        : 'border-border text-muted-foreground hover:border-accent/50'
+                    )}>
+                    {d === 'all' ? 'All Time' : d === 'week' ? 'This Week' : d === 'month' ? 'This Month' : 'Today'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ─ Section A: Class Overview Cards ─ */}
+            {loading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                {Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-28" />)}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                {[
+                  { label: 'Students', value: classOverview.totalStudents, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                  { label: 'Total Attempted', value: classOverview.totalAttempts.toLocaleString(), icon: Target, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+                  { label: 'Avg Accuracy', value: `${classOverview.avgAccuracy}%`, icon: TrendingUp, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                  { label: 'Most Struggling', value: classOverview.weakTopics, icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10', small: true },
+                  { label: 'Active Today', value: classOverview.activeToday, icon: Zap, color: 'text-violet-400', bg: 'bg-violet-500/10' },
+                ].map((card) => (
+                  <motion.div key={card.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    className="bg-card border border-border rounded-2xl p-4 flex flex-col gap-2">
+                    <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center', card.bg)}>
+                      <card.icon className={cn('w-4 h-4', card.color)} />
+                    </div>
+                    <p className={cn('font-black', card.small ? 'text-sm' : 'text-2xl', card.color)}>{card.value}</p>
+                    <p className="text-xs text-muted-foreground">{card.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+
+            {/* ─ Section B: Student Table ─ */}
+            <div className="bg-card border border-border rounded-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                <h2 className="font-bold text-foreground">Students</h2>
+                <button onClick={fetchStudents} className="p-2 hover:bg-secondary rounded-lg transition-colors">
+                  <RefreshCw className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-border bg-muted/30 text-xs uppercase tracking-wider text-muted-foreground">
+                    <tr>
+                      <th className="px-5 py-3">Student</th>
+                      <th className="px-5 py-3">Exam</th>
+                      <th className="px-5 py-3">Attempted</th>
+                      <th className="px-5 py-3">Accuracy</th>
+                      <th className="px-5 py-3 hidden md:table-cell">Weak Topics</th>
+                      <th className="px-5 py-3 hidden lg:table-cell">Last Active</th>
+                      <th className="px-5 py-3"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {loading ? Array(4).fill(0).map((_, i) => (
+                      <tr key={i}>
+                        {Array(7).fill(0).map((__, j) => (
+                          <td key={j} className="px-5 py-3"><Skeleton className="h-4 w-full" /></td>
+                        ))}
+                      </tr>
+                    )) : filteredStudents.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-5 py-12 text-center text-muted-foreground">
+                          <Users className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                          <p>No students yet. Share a class code to get started!</p>
+                        </td>
+                      </tr>
+                    ) : filteredStudents.map(student => (
+                      <tr key={student.student_id}
+                        className="hover:bg-muted/20 transition-colors cursor-pointer"
+                        onClick={() => handleSelectStudent(student)}>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-accent/20 text-accent font-bold
+                              flex items-center justify-center text-xs flex-shrink-0">
+                              {student.name[0].toUpperCase()}
+                            </div>
+                            <span className="font-semibold text-foreground">{student.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3">
+                          <span className={cn('text-xs font-bold px-2 py-1 rounded-md border',
+                            EXAM_COLORS[student.target_exam] || EXAM_COLORS.OTHER)}>
+                            {student.target_exam.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 font-mono text-foreground">{student.total_questions}</td>
+                        <td className="px-5 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-muted rounded-full max-w-[60px]">
+                              <div className={cn('h-full rounded-full',
+                                student.accuracy_pct >= 75 ? 'bg-emerald-500' :
+                                student.accuracy_pct >= 50 ? 'bg-amber-500' : 'bg-red-500'
+                              )} style={{ width: `${student.accuracy_pct}%` }} />
+                            </div>
+                            <span className="text-xs font-bold text-foreground">{Math.round(student.accuracy_pct)}%</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3 hidden md:table-cell">
+                          <div className="flex flex-wrap gap-1">
+                            {student.weak_topics.slice(0, 2).map(t => (
+                              <span key={t} className="text-xs px-1.5 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-5 py-3 text-xs text-muted-foreground hidden lg:table-cell">
+                          {student.last_active ? new Date(student.last_active).toLocaleDateString('en-IN') : '—'}
+                        </td>
+                        <td className="px-5 py-3">
+                          <button className="text-xs text-accent hover:underline flex items-center gap-1 font-semibold">
+                            View <ChevronRight className="w-3 h-3" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════
+            TAB: CLASS CODES
+        ═══════════════════════════════════════ */}
+        {activeTab === 'codes' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">Class Codes</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Generate unique codes for students to join your class.
+                </p>
+              </div>
+              <Button onClick={() => setShowCodeForm(!showCodeForm)} className="bg-accent text-black">
+                <Plus className="w-4 h-4 mr-2" /> New Code
+              </Button>
+            </div>
+
+            {/* Code Form */}
+            <AnimatePresence>
+              {showCodeForm && (
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                  className="bg-card border border-border rounded-2xl p-6">
+                  <h3 className="font-bold text-foreground mb-4">Generate New Class Code</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Label (optional)</label>
+                      <input value={codeForm.label}
+                        onChange={e => setCodeForm(f => ({ ...f, label: e.target.value }))}
+                        placeholder="e.g. Morning Batch JEE"
+                        className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm
+                          focus:outline-none focus:border-accent" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Exam Type</label>
+                      <select value={codeForm.exam_type}
+                        onChange={e => setCodeForm(f => ({ ...f, exam_type: e.target.value }))}
+                        className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent">
+                        <option value="JEE_MAINS">JEE Mains</option>
+                        <option value="JEE_ADVANCED">JEE Advanced</option>
+                        <option value="NEET">NEET</option>
+                        <option value="CUET">CUET</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Subject</label>
+                      <select value={codeForm.subject}
+                        onChange={e => setCodeForm(f => ({ ...f, subject: e.target.value }))}
+                        className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent">
+                        <option>Physics</option>
+                        <option>Chemistry</option>
+                        <option>Mathematics</option>
+                        <option>Biology</option>
+                        <option>Accounts</option>
+                        <option>Economics</option>
+                        <option>Business Studies</option>
+                        <option>English</option>
+                        <option>General</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Max Students (optional)</label>
+                      <input type="number" value={codeForm.max_students}
+                        onChange={e => setCodeForm(f => ({ ...f, max_students: e.target.value }))}
+                        placeholder="∞ unlimited"
+                        className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Expires in (days, optional)</label>
+                      <input type="number" value={codeForm.expires_days}
+                        onChange={e => setCodeForm(f => ({ ...f, expires_days: e.target.value }))}
+                        placeholder="Never"
+                        className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent" />
+                    </div>
+                    <div className="flex items-end">
+                      <Button onClick={handleGenerateCode} disabled={generatingCode}
+                        className="w-full bg-accent text-black h-12">
+                        {generatingCode ? '⏳ Generating...' : '⚡ Generate Code'}
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Code cards */}
+            {codesLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-44" />)}
+              </div>
+            ) : codes.length === 0 ? (
+              <div className="text-center py-16 text-muted-foreground">
+                <QrCode className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                <p>No codes yet. Create your first class code!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {codes.map(code => (
+                  <motion.div key={code.id} layout
+                    className={cn('bg-card border rounded-2xl p-5 space-y-3',
+                      code.is_active ? 'border-border' : 'border-border/40 opacity-60')}>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="text-3xl font-black tracking-widest text-accent font-mono">{code.code}</p>
+                        {code.label && <p className="text-xs text-muted-foreground mt-0.5">{code.label}</p>}
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => { navigator.clipboard.writeText(code.code); toast.success('Copied!'); }}
+                          className="p-2 hover:bg-secondary rounded-lg transition-colors">
+                          <Copy className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                        <button onClick={() => handleToggleCode(code)}
+                          className="p-2 hover:bg-secondary rounded-lg transition-colors">
+                          {code.is_active
+                            ? <ToggleRight className="w-4 h-4 text-emerald-400" />
+                            : <ToggleLeft className="w-4 h-4 text-muted-foreground" />}
+                        </button>
+                        <button onClick={() => handleDeleteCode(code)}
+                          className="p-2 hover:bg-red-500/10 hover:text-red-400 text-muted-foreground rounded-lg transition-colors">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1">
+                      <span className={cn('text-xs font-bold px-2 py-0.5 rounded border',
+                        EXAM_COLORS[code.exam_type] || EXAM_COLORS.OTHER)}>
+                        {code.exam_type.replace('_', ' ')}
+                      </span>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded border border-border text-muted-foreground">
+                        {code.subject}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>👥 {code.joined_count}{code.max_students ? ` / ${code.max_students}` : ''} students</span>
+                      {code.expires_at && (
+                        <span className={new Date(code.expires_at) < new Date() ? 'text-red-400' : ''}>
+                          Expires {new Date(code.expires_at).toLocaleDateString('en-IN')}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className={cn('text-center py-1 rounded-lg text-xs font-bold',
+                      code.is_active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-muted text-muted-foreground')}>
+                      {code.is_active ? '✅ Active' : '⏸ Paused'}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
-    </MainLayout>
+
+      {/* ═══════════════════════════════════════
+          SIDE PANEL: Individual Student Deep Dive
+      ═══════════════════════════════════════ */}
+      <AnimatePresence>
+        {selectedStudent && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black z-40" onClick={() => setSelectedStudent(null)} />
+            <motion.aside
+              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25 }}
+              className="fixed right-0 top-0 h-screen w-full max-w-2xl bg-card border-l border-border z-50
+                flex flex-col overflow-hidden shadow-2xl">
+
+              {/* Side panel header */}
+              <div className="flex items-center justify-between p-5 border-b border-border flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-accent/20 text-accent font-bold text-sm
+                    flex items-center justify-center">
+                    {selectedStudent.name[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-bold text-foreground">{selectedStudent.name}</p>
+                    <div className="flex items-center gap-2">
+                      <span className={cn('text-xs font-bold px-1.5 py-0.5 rounded border',
+                        EXAM_COLORS[selectedStudent.target_exam] || EXAM_COLORS.OTHER)}>
+                        {selectedStudent.target_exam.replace('_', ' ')}
+                      </span>
+                      <span className="text-xs text-muted-foreground">· {selectedStudent.subject}</span>
+                    </div>
+                  </div>
+                </div>
+                <button onClick={() => setSelectedStudent(null)}
+                  className="p-2 hover:bg-secondary rounded-xl transition-colors">
+                  <X className="w-5 h-5 text-muted-foreground" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-5 space-y-6">
+
+                {/* 1. Summary Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { label: 'Total', value: studentActivity.length || selectedStudent.total_questions, color: 'text-foreground' },
+                    { label: 'Correct', value: totalCorrect, color: 'text-emerald-400' },
+                    { label: 'Wrong', value: totalWrong, color: 'text-red-400' },
+                    { label: 'Accuracy', value: `${Math.round(selectedStudent.accuracy_pct)}%`, color: 'text-accent' },
+                  ].map(c => (
+                    <div key={c.label} className="bg-secondary/30 border border-border rounded-xl p-3 text-center">
+                      <p className={cn('text-2xl font-black', c.color)}>{c.value}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{c.label}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Extra stats */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-secondary/30 border border-border rounded-xl p-3">
+                    <p className="text-xs text-muted-foreground">Time Spent</p>
+                    <p className="font-bold text-foreground mt-1">
+                      {Math.floor(totalTime / 3600)}h {Math.floor((totalTime % 3600) / 60)}m
+                    </p>
+                  </div>
+                  <div className="bg-secondary/30 border border-border rounded-xl p-3">
+                    <p className="text-xs text-muted-foreground">Neg. Marks Lost</p>
+                    <p className="font-bold text-red-400 mt-1">-{negMarksLost.toFixed(1)}</p>
+                  </div>
+                </div>
+
+                {/* 2. Subject-wise Accuracy */}
+                {subjectData.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground mb-3">Subject-wise Accuracy</h3>
+                    <ResponsiveContainer width="100%" height={140}>
+                      <BarChart data={subjectData} layout="vertical" margin={{ left: 10, right: 20 }}>
+                        <XAxis type="number" tick={{ fontSize: 10, fill: '#888' }} />
+                        <YAxis type="category" dataKey="subject" tick={{ fontSize: 11, fill: '#ccc' }} width={70} />
+                        <Tooltip contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8, fontSize: 12 }} />
+                        <Bar dataKey="correct" name="Correct" fill="#10b981" radius={[0, 4, 4, 0]} />
+                        <Bar dataKey="wrong" name="Wrong" fill="#ef4444" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                {/* 3. Weak Topics Heatmap */}
+                {topicHeatmap.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground mb-3">Topic Heatmap</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {topicHeatmap.map(t => {
+                        const intensity = t.errorRate;
+                        const bg = intensity > 0.7 ? 'bg-red-500/30 border-red-500/50 text-red-300'
+                          : intensity > 0.4 ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                          : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400';
+                        return (
+                          <span key={t.topic}
+                            className={cn('text-xs px-2.5 py-1.5 rounded-xl border font-semibold', bg)}
+                            style={{ fontSize: Math.min(14, 10 + t.attempts) }}>
+                            {intensity > 0.7 ? '🔴 ' : intensity > 0.4 ? '⚠️ ' : ''}{t.topic}
+                            <span className="ml-1 opacity-60">{t.attempts}</span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Question Type Donut */}
+                {qTypeData.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground mb-3">Question Type Accuracy</h3>
+                    <ResponsiveContainer width="100%" height={160}>
+                      <PieChart>
+                        <Pie data={qTypeData} dataKey="value" nameKey="name" cx="50%" cy="50%"
+                          innerRadius={40} outerRadius={65} paddingAngle={3}
+                          label={({ name, value }) => `${name}: ${value}%`} labelLine={false}>
+                          {qTypeData.map((_, i) => (
+                            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(v: any) => [`${v}% accuracy`]} contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8, fontSize: 12 }} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                {/* 5. Mistake Concentration */}
+                {mistakeConcentration.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground mb-3">Top Mistake Spots</h3>
+                    <div className="space-y-2">
+                      {mistakeConcentration.map((m, i) => (
+                        <div key={m.sub} className="bg-secondary/30 border border-border rounded-xl p-3">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-semibold text-foreground">
+                              {i + 1}. {m.sub}
+                            </span>
+                            <span className="text-xs font-bold text-red-400">{m.wrong} wrong</span>
+                          </div>
+                          <div className="flex gap-1 mb-1.5">
+                            {m.easy > 0 && <span className="text-xs px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded">Easy ×{m.easy}</span>}
+                            {m.medium > 0 && <span className="text-xs px-1.5 py-0.5 bg-amber-500/10 text-amber-400 rounded">Med ×{m.medium}</span>}
+                            {m.hard > 0 && <span className="text-xs px-1.5 py-0.5 bg-red-500/10 text-red-400 rounded">Hard ×{m.hard}</span>}
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            💡 Needs more practice on <strong className="text-foreground">{m.sub}</strong>
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. Time Analysis */}
+                {avgTimeData.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground mb-3">Avg Time per Question</h3>
+                    <div className="space-y-2">
+                      {avgTimeData.map(t => {
+                        const flag = t.avg > 180 ? { icon: '🟡', text: 'Slow — spending too long', color: 'text-amber-400' }
+                          : t.avg < 30 ? { icon: '🔴', text: 'Too fast — likely guessing', color: 'text-red-400' }
+                          : { icon: '🟢', text: 'Good pace', color: 'text-emerald-400' };
+                        return (
+                          <div key={t.subject} className="flex items-center justify-between bg-secondary/30 border border-border rounded-xl p-3">
+                            <div>
+                              <p className="text-sm font-semibold text-foreground">{t.subject}</p>
+                              <p className={cn('text-xs', flag.color)}>{flag.icon} {flag.text}</p>
+                            </div>
+                            <p className="font-mono font-bold text-foreground text-sm">
+                              {Math.floor(t.avg / 60)}:{String(t.avg % 60).padStart(2, '0')}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 7. Teacher Notes */}
+                <div>
+                  <h3 className="text-sm font-bold text-foreground mb-3">Private Notes</h3>
+                  <textarea
+                    value={teacherNote}
+                    onChange={e => setTeacherNote(e.target.value)}
+                    placeholder={`Write notes about ${selectedStudent.name}...`}
+                    rows={3}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm
+                      text-foreground focus:outline-none focus:border-accent resize-none"
+                  />
+                  <Button onClick={handleSaveNote} disabled={savingNote || !teacherNote.trim()}
+                    className="mt-2 bg-accent text-black w-full">
+                    {savingNote ? 'Saving...' : 'Save Note'}
+                  </Button>
+                  {pastNotes.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {pastNotes.map((n: any) => (
+                        <div key={n.id} className="bg-secondary/20 border border-border rounded-xl p-3">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            {new Date(n.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                          <p className="text-sm text-foreground">{n.note_text}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
-export default TeacherDashboardPage;
+export default TeacherDashboard;
