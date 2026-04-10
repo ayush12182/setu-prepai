@@ -216,8 +216,8 @@ serve(async (req) => {
     // Determine year range
     const effectiveYearRange = yearRange ||
       (isCuet ? CUET_YEAR_RANGE :
-       isNeet ? { start: 2013, end: 2024 } :
-       { start: 2004, end: 2024 });
+       isNeet ? { start: 1998, end: 2024 } :
+       { start: 1998, end: 2024 });
 
     // ─── CHECK DB CACHE ───
     let query = supabase
@@ -331,8 +331,9 @@ ${JEE_SYNTAX_RULES}
 
 JEE ERA PATTERNS:
 - Post-NTA (2019-2024): Application-heavy, assertion-reason, data interpretation
-- JEE Advanced (2013-2024): Multi-concept, paragraph-based adapted to MCQ
-- AIEEE/Old (2004-2012): Formula-driven, straightforward computation
+- JEE Advanced (2013-2018): Multi-concept, paragraph-based adapted to MCQ
+- AIEEE (2002-2012): Formula-driven, straightforward computation
+- IIT-JEE Classic (1998-2001): Tough conceptual problems, multi-step reasoning, famous "IIT level" questions
 
 SUBJECT DISTRIBUTION:
 PHYSICS: Mechanics 20%, Electrodynamics 25%, Optics 20%, Waves 15%, Magnetism 10%, Properties 10%
