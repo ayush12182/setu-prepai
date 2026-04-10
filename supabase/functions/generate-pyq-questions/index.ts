@@ -216,8 +216,8 @@ serve(async (req) => {
     // Determine year range
     const effectiveYearRange = yearRange ||
       (isCuet ? CUET_YEAR_RANGE :
-       isNeet ? { start: 2013, end: 2024 } :
-       { start: 2004, end: 2024 });
+       isNeet ? { start: 1998, end: 2024 } :
+       { start: 1998, end: 2024 });
 
     // ─── CHECK DB CACHE ───
     let query = supabase
