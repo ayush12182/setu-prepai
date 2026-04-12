@@ -24,7 +24,7 @@ const sectionMeta: Record<string, { icon: React.ReactNode; color: string; bg: st
 };
 
 function matchSectionMeta(title: string) {
-  const clean = title.replace(/[💡🧠📐⚠️🎯✅⚡]/g, '').trim();
+  const clean = title.replace(/[\u{1F4A1}\u{1F9E0}\u{1F4D0}\u{26A0}\u{1F3AF}\u{2705}\u{26A1}]/gu, '').trim();
   for (const key of Object.keys(sectionMeta)) {
     if (clean.toLowerCase().includes(key.toLowerCase())) return sectionMeta[key];
   }
@@ -72,7 +72,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({
         yPosition += 5;
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
-        doc.text(line.replace('## ', '').replace(/[💡🧠📐⚠️🎯✅⚡]/g, '').trim(), margin, yPosition);
+        doc.text(line.replace('## ', '').replace(/[\u{1F4A1}\u{1F9E0}\u{1F4D0}\u{26A0}\u{1F3AF}\u{2705}\u{26A1}]/gu, '').trim(), margin, yPosition);
         yPosition += lineHeight + 3;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
@@ -197,7 +197,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({
           <div className={`${meta.bg} px-5 py-3 flex items-center gap-3`}>
             <div className={meta.color}>{meta.icon}</div>
             <h3 className="text-base font-semibold text-foreground">
-              {rawTitle.replace(/[💡🧠📐⚠️🎯✅⚡]/g, '').trim()}
+              {rawTitle.replace(/[\u{1F4A1}\u{1F9E0}\u{1F4D0}\u{26A0}\u{1F3AF}\u{2705}\u{26A1}]/gu, '').trim()}
             </h3>
           </div>
           {/* Section body */}

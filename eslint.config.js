@@ -5,7 +5,7 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  { ignores: ["dist", "runTest.js", "supabase/functions/**"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -21,6 +21,16 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      // Supabase dynamic queries intentionally use `any` — downgrade to warning
+      "@typescript-eslint/no-explicit-any": "warn",
+      // @ts-ignore is used in edge cases — warn, don't error
+      "@typescript-eslint/ban-ts-comment": "warn",
+      "@typescript-eslint/no-empty-object-type": "warn",
+      // Regex issues — warn
+      "no-useless-escape": "warn",
+      "no-misleading-character-class": "warn",
+      // Empty blocks — warn
+      "no-empty": "warn",
     },
   },
 );

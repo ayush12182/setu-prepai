@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, ChevronRight, Layers, LogIn, ExternalLink, XCircle } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Layers, LogIn, XCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useB2BManager } from '@/hooks/useB2BManager';
@@ -25,7 +25,6 @@ export default function JoinBatchPage() {
     }
 
     if (!user) {
-      // Unauthenticated -> Redirect to auth with return URL and explicitly tag as coaching
       navigate(`/auth?redirect=${encodeURIComponent(location.pathname)}&type=coaching`, { replace: true });
       return;
     }
@@ -35,7 +34,6 @@ export default function JoinBatchPage() {
 
   const verifyInvite = async () => {
     try {
-      // Find batch by ID (inviteCode is batchId in our link generator)
       const { data: batchData, error: batchErr } = await (supabase as any).from('batches')
         .select('*')
         .eq('id', inviteCode)
@@ -47,31 +45,38 @@ export default function JoinBatchPage() {
       
       setBatchInfo(batch);
 
-      // Get org details optionally
       if (batch.organization_id) {
         const { data: org } = await (supabase as any).from('organizations').select('*').eq('id', batch.organization_id).single();
         if (org) setOrgInfo(org);
       }
 
       setStatus('verified');
-
     } catch (err) {
       setStatus('invalid');
     }
   };
 
   const handleJoin = async () => {
-    if (!batchInfo) return;
+    if (!batchInfo || !user) return;
     const success = await joinBatchById(batchInfo.id);
     if (success) {
+      // Update user_type to b2b_student in auth metadata
+      await supabase.auth.updateUser({ data: { user_type: 'b2b_student' } });
+
+      // Also persist to profiles table
+      await (supabase as any)
+        .from('profiles')
+        .update({ user_type: 'b2b_student' })
+        .eq('user_id', user.id);
+
       setStatus('joined');
       setTimeout(() => {
-        navigate('/dashboard'); // Take them to B2C Student Dashboard
+        navigate('/student-hub'); // Correct destination for B2B students
       }, 2000);
     }
   };
 
-  if (!user) return null; // Redirecting in useEffect
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
@@ -139,7 +144,7 @@ export default function JoinBatchPage() {
                <CheckCircle2 size={36} />
              </div>
              <h2 className="text-2xl font-bold text-foreground mb-2">Successfully Joined!</h2>
-             <p className="text-sm text-muted-foreground">Heading to your dashboard...</p>
+             <p className="text-sm text-muted-foreground">Taking you to your Student Hub...</p>
           </motion.div>
         )}
       </AnimatePresence>

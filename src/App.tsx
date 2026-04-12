@@ -57,7 +57,6 @@ import QuestionQCPanel from "./pages/Admin/QuestionQCPanel";
 import QuestionGeneratorPage from "./pages/Admin/QuestionGeneratorPage";
 
 // Assess
-import AssessmentFlowPage from "./pages/Assess/AssessmentFlowPage";
 import B2BAssessmentTakerPage from "./pages/Assess/B2BAssessmentTakerPage";
 import B2BLiveMonitor from "./pages/B2B/B2BLiveMonitor";
 
@@ -148,9 +147,6 @@ const App = () => (
                     
                     {/* Student Join Route */}
                     <Route path="/join/:inviteCode" element={<JoinBatchPage />} />
-                    
-                    {/* Assessment Link Flow */}
-                    <Route path="/assess/:sessionId" element={<AssessmentFlowPage />} />
                     
                     {/* Admin Routes */}
                     <Route path="/admin/qc" element={<QuestionQCPanel />} />

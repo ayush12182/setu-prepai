@@ -10,7 +10,12 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed:pyqs": "node scripts/seed-pyqs.js --batch-size 50 --concurrency 3",
+    "seed:pyqs:jee": "node scripts/seed-pyqs.js --exam JEE --batch-size 50 --concurrency 3",
+    "seed:pyqs:neet": "node scripts/seed-pyqs.js --exam NEET --batch-size 50 --concurrency 3",
+    "seed:pyqs:cuet": "node scripts/seed-pyqs.js --exam CUET --batch-size 50 --concurrency 3",
+    "seed:pyqs:dry": "node scripts/seed-pyqs.js --dry-run"
   },
   "dependencies": {
     "@cashfreepayments/cashfree-js": "^1.0.6",
