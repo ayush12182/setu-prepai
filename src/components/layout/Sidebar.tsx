@@ -31,7 +31,7 @@ interface SidebarProps {
 const getNavItems = (isFoundation: boolean, isB2B: boolean) => [
   { path: '/dashboard', icon: Home, label: 'Home', emoji: '🏠' },
   { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📖' },
-  ...(!isFoundation && !isB2B ? [{ path: '/teacher-dashboard', icon: GraduationCap, label: 'AI Teachers', emoji: '👨‍🏫' }] : []),
+  ...(!isFoundation && !isB2B ? [{ path: '/ai-teachers', icon: GraduationCap, label: 'AI Teachers', emoji: '👨‍🏫' }] : []),
   { path: '/practice', icon: PenTool, label: isFoundation ? 'School Practice' : 'Practice', emoji: '✏️' },
   { path: '/test', icon: ClipboardCheck, label: isFoundation ? 'Chapter Test' : 'Test', emoji: '📝' },
   { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄' },

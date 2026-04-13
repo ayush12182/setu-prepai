@@ -51,7 +51,7 @@ export const QuickActions: React.FC = () => {
       { icon: MessageCircle, title: isNeet ? 'Ask NEET Mentor' : 'Ask Jeetu Bhaiya', description: 'Doubts & strategy', path: '/ask-jeetu', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
       { icon: BarChart3, title: 'Analytics', description: 'Accuracy & trends', path: '/analytics', gradient: 'from-teal-500 to-cyan-500', emoji: '📊' },
       ...(!isB2BStudent ? [{ icon: Users, title: 'SETU Circles', description: 'Live study rooms', path: '/circles', gradient: 'from-amber-500 via-rose-500 to-violet-500', emoji: '🔥', badge: 'Live' }] as ActionItem[] : []),
-    ].filter(a => !isB2BStudent || !['/lecture-setu', '/circles', '/teacher-dashboard'].includes(a.path));
+    ].filter(a => !isB2BStudent || !['/lecture-setu', '/circles', '/ai-teachers'].includes(a.path));
 
   return (
     <div className="w-full mx-auto">

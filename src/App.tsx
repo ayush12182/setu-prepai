@@ -39,6 +39,7 @@ import LearningRoadmapPage from "./pages/LearningRoadmapPage";
 import TeacherDashboardPage from "./pages/TeacherDashboardPage";
 import StudentHubPage from "./pages/StudentHubPage";
 import AITeachingRoomPage from "./pages/AITeachingRoomPage";
+import AITeachersDirectoryPage from "./pages/AITeachersDirectoryPage";
 import PricingPage from "./pages/PricingPage";
 
 // B2B Pages
@@ -154,6 +155,7 @@ const App = () => (
                     
                     {/* Student Hub — B2B students only */}
                     <Route path="/student-hub" element={<StudentHubRoute><StudentHubPage /></StudentHubRoute>} />
+                    <Route path="/ai-teachers" element={<AITeachersDirectoryPage />} />
                     <Route path="/teaching-room/:teacherId" element={<AITeachingRoomPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/premium" element={<PricingPage />} />
