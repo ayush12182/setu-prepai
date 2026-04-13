@@ -152,8 +152,8 @@ const TEACHERS = {
     icon: Atom,
     accent: '#3B82F6',
     accentDark: '#1D4ED8',
-    voiceId: 'onwK4e9ZLuTAKqWW03F9',
-    voiceSettings: { stability: 0.45, similarity_boost: 0.80, style: 0.55 },
+    voiceId: 'TX3LPaxL7no3S8GAsAnr', // Clyde - Mature & Resonant
+    voiceSettings: { stability: 0.35, similarity_boost: 0.80, style: 0.50 },
     avatarId: 'josh_lite3_20230714',
     systemPrompt: (lang: LanguageMode) =>
 `${BASE_TEACHING_PROMPT}
@@ -191,8 +191,8 @@ OUTPUT STRUCTURE (always follow):
     icon: FlaskConical,
     accent: '#10B981',
     accentDark: '#047857',
-    voiceId: 'onwK4e9ZLuTAKqWW03F9',
-    voiceSettings: { stability: 0.35, similarity_boost: 0.75, style: 0.70 },
+    voiceId: 'D38z5qBF8C9EwMS36Ssw', // Fin - High Energy & Enthusiastic
+    voiceSettings: { stability: 0.30, similarity_boost: 0.75, style: 0.70 },
     avatarId: 'josh_lite3_20230714',
     systemPrompt: (lang: LanguageMode) =>
 `${BASE_TEACHING_PROMPT}
@@ -231,8 +231,8 @@ OUTPUT STRUCTURE (always follow):
     icon: FunctionSquare,
     accent: '#F59E0B',
     accentDark: '#B45309',
-    voiceId: 'onwK4e9ZLuTAKqWW03F9',
-    voiceSettings: { stability: 0.50, similarity_boost: 0.82, style: 0.45 },
+    voiceId: 'GBv7mTt0atIp3Br8iCZE', // Thomas - Sharp & Intellectual
+    voiceSettings: { stability: 0.45, similarity_boost: 0.82, style: 0.45 },
     avatarId: 'josh_lite3_20230714',
     systemPrompt: (lang: LanguageMode) =>
 `${BASE_TEACHING_PROMPT}
