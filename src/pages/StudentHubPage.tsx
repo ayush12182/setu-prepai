@@ -54,38 +54,46 @@ const StudentHubPage: React.FC = () => {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinCode, setJoinCode] = useState('');
   const [joiningCode, setJoiningCode] = useState(false);
-  const [myTeachers, setMyTeachers] = useState<any[]>([]);
-  const { joinBatchByCode, loading } = useB2BManager();
+  const [myBatches, setMyBatches] = useState<any[]>([]);
+  const [realMaterials, setRealMaterials] = useState<any[]>([]);
+  const [realTests, setRealTests] = useState<any[]>([]);
+  const { joinBatchByCode, loading: joiningBatch } = useB2BManager();
 
-  // Fetch linked teachers
+  // Fetch linked batches and their content
   useEffect(() => {
     if (!user) return;
-    (supabase.from as any)('student_teacher_links')
-      .select('teacher_id, subject, exam_type, joined_at')
-      .eq('student_id', user.id)
-      .eq('is_active', true)
-      .then(({ data }: any) => setMyTeachers(data || []));
+    loadStudentBatchData();
   }, [user]);
 
-  const handleJoinTeacher = async () => {
-    if (!joinCode.trim()) { toast.error('Enter a code'); return; }
-    setJoiningCode(true);
-    const result = await joinTeacherByCode(joinCode);
-    if (result.success) {
-      toast.success(result.message);
-      setJoinCode('');
-      // Refresh teachers
-      if (user) {
-        const { data } = await (supabase.from as any)('student_teacher_links')
-          .select('teacher_id, subject, exam_type, joined_at')
-          .eq('student_id', user.id)
-          .eq('is_active', true);
-        setMyTeachers(data || []);
+  const loadStudentBatchData = async () => {
+    try {
+      // 1. Fetch batches student is member of
+      const { data: batches } = await (supabase.from as any)('batch_members')
+        .select('batch_id, batches(*)')
+        .eq('student_id', user?.id);
+      
+      const batchList = (batches || []).map((b: any) => b.batches);
+      setMyBatches(batchList);
+
+      if (batchList.length > 0) {
+        const batchIds = batchList.map((b: any) => b.id);
+
+        // 2. Fetch materials for these batches
+        const { data: materials } = await (supabase.from as any)('batch_materials')
+          .select('*')
+          .in('batch_id', batchIds);
+        setRealMaterials(materials || []);
+
+        // 3. Fetch active assessments for these batches
+        const { data: tests } = await (supabase.from as any)('assessment_sessions')
+          .select('*')
+          .in('batch_id', batchIds)
+          .eq('status', 'ACTIVE');
+        setRealTests(tests || []);
       }
-    } else {
-      toast.error(result.message);
+    } catch (err) {
+      console.error('Error loading student hub data:', err);
     }
-    setJoiningCode(false);
   };
 
   const handleJoinByCode = async () => {
@@ -93,11 +101,17 @@ const StudentHubPage: React.FC = () => {
       toast.error('Please enter a 6-digit join code');
       return;
     }
-    const batch = await joinBatchByCode(joinCode);
-    if (batch) {
+    setJoiningCode(true);
+    const result = await joinTeacherByCode(joinCode);
+    if (result.success) {
+      toast.success(result.message);
       setShowJoinModal(false);
       setJoinCode('');
+      loadStudentBatchData();
+    } else {
+      toast.error(result.message);
     }
+    setJoiningCode(false);
   };
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Student';
@@ -156,7 +170,7 @@ const StudentHubPage: React.FC = () => {
         <AnimatePresence>
           {showJoinModal && (
             <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !loading && setShowJoinModal(false)} />
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !joiningBatch && setShowJoinModal(false)} />
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="relative z-10 bg-card border border-border rounded-3xl shadow-2xl w-full max-w-sm p-6 overflow-hidden">
                 <div className="text-center mb-6">
                   <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
@@ -175,9 +189,9 @@ const StudentHubPage: React.FC = () => {
                     className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 font-mono text-2xl tracking-[0.25em] text-center text-foreground uppercase focus:outline-none focus:ring-2 focus:ring-accent/40 mb-4" 
                   />
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={() => setShowJoinModal(false)} disabled={loading}>Cancel</Button>
-                    <Button className="flex-1 h-11 rounded-xl bg-accent text-white font-bold" onClick={handleJoinByCode} disabled={loading || joinCode.length !== 6}>
-                      {loading ? 'Joining...' : 'Join'}
+                    <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={() => setShowJoinModal(false)} disabled={joiningBatch}>Cancel</Button>
+                    <Button className="flex-1 h-11 rounded-xl bg-accent text-white font-bold" onClick={handleJoinByCode} disabled={joiningBatch || joinCode.length !== 6}>
+                      {joiningBatch ? 'Joining...' : 'Join'}
                     </Button>
                   </div>
                 </div>
@@ -192,12 +206,36 @@ const StudentHubPage: React.FC = () => {
           {activeTab === 'notes' && (
             <motion.div key="notes" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-bold text-foreground">Chapter-wise Notes</h2>
+                <h2 className="text-lg font-bold text-foreground">Learning Materials</h2>
                 <span className="text-xs text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full border border-border">
-                  {DEMO_NOTES.reduce((s, sub) => s + sub.chapters.filter(c => c.completed).length, 0)} / {DEMO_NOTES.reduce((s, sub) => s + sub.chapters.length, 0)} chapters read
+                  Live Syllabus
                 </span>
               </div>
 
+              {/* Institutional Materials */}
+              {realMaterials.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest px-1">Institutional Materials</h3>
+                  {realMaterials.map(mat => (
+                    <div key={mat.id} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between hover:border-accent/40 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                          <Layers className="w-5 h-5 text-accent" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-foreground">{mat.title}</p>
+                          <p className="text-[10px] text-muted-foreground">{mat.subject} • {mat.chapter} • {mat.type.toUpperCase()}</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => window.open(mat.url, '_blank')} className="gap-2 h-8 text-xs font-bold text-accent hover:bg-accent/10">
+                        <Eye className="w-3.5 h-3.5" /> View
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest px-1 mt-6">General Chapters</h3>
               {DEMO_NOTES.map(subject => (
                 <div key={subject.subject} className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
                   <button
@@ -252,10 +290,42 @@ const StudentHubPage: React.FC = () => {
           {/* ═══════════ PRACTICE TAB ═══════════ */}
           {activeTab === 'practice' && (
             <motion.div key="practice" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-bold text-foreground">Practice Questions</h2>
+              {/* ─── Assigned Assessments ─── */}
+              {realTests.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest px-1">Assigned by Mentor</h3>
+                  {realTests.map(test => (
+                    <div key={test.id}
+                      className="bg-card border-2 border-accent/20 rounded-2xl p-4 flex items-center justify-between gap-3 hover:border-accent/50 transition-all group shadow-lg shadow-accent/5"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-accent">
+                            LIVE TEST
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-medium">{test.exam_type}</span>
+                        </div>
+                        <p className="font-bold text-sm text-foreground">{test.title || 'Topic Assessment'}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {test.question_count} Questions • {test.time_limit_minutes} min limit
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => navigate(`/assess/${test.id}`)}
+                        size="sm"
+                        className="h-10 px-4 rounded-xl bg-accent text-white font-bold hover:scale-105 transition-all shadow-lg shadow-accent/20"
+                      >
+                        Start Test
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between mb-2 mt-4">
+                <h2 className="text-lg font-bold text-foreground">Self-Practice</h2>
                 <span className="text-xs text-muted-foreground bg-secondary/50 px-3 py-1 rounded-full border border-border">
-                  10k+ Verified
+                  AI Adaptive
                 </span>
               </div>
 
@@ -339,45 +409,47 @@ const StudentHubPage: React.FC = () => {
             <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
 
               {/* Join Teacher */}
-              <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/5 border border-violet-500/20 rounded-2xl p-5">
+              <div className="bg-gradient-to-br from-accent/10 to-amber-500/5 border border-accent/20 rounded-2xl p-5">
                 <h2 className="text-base font-bold text-foreground mb-1 flex items-center gap-2">
-                  <Link className="w-4 h-4 text-violet-400" /> Join Your Teacher
+                  <Link className="w-4 h-4 text-accent" /> Join Another Batch
                 </h2>
-                <p className="text-xs text-muted-foreground mb-3">Enter the class code your teacher shared with you.</p>
+                <p className="text-xs text-muted-foreground mb-3">Enter the 6-digit join code shared by your mentor.</p>
                 <div className="flex gap-2">
                   <input
                     value={joinCode}
                     onChange={e => setJoinCode(e.target.value.toUpperCase())}
-                    placeholder="e.g. NEET7K"
+                    placeholder="e.g. JB7K2X"
                     maxLength={6}
-                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-violet-400/50"
+                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder:text-white/30 focus:outline-none focus:border-accent/50"
                   />
-                  <Button onClick={handleJoinTeacher} disabled={joiningCode} className="bg-violet-500 hover:bg-violet-400 text-white px-5">
-                    {joiningCode ? '⏳' : 'Join'}
+                  <Button onClick={handleJoinByCode} disabled={joiningBatch} className="bg-accent hover:bg-accent/90 text-white px-5">
+                    {joiningBatch ? '⏳' : 'Join'}
                   </Button>
                 </div>
               </div>
 
-              {/* My Teachers */}
-              {myTeachers.length > 0 && (
+              {/* My Batches */}
+              {myBatches.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-bold text-foreground mb-3">My Teachers</h3>
+                  <h3 className="text-sm font-bold text-foreground mb-3">My Batches & Mentors</h3>
                   <div className="grid grid-cols-1 gap-2">
-                    {myTeachers.map((t: any, i: number) => (
+                    {myBatches.map((b: any, i: number) => (
                       <div key={i} className="flex items-center justify-between bg-card border border-border rounded-xl p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-accent/20 text-accent font-black flex items-center justify-center text-xs">T</div>
+                          <div className="w-8 h-8 rounded-full bg-accent/20 text-accent font-black flex items-center justify-center text-xs">
+                            {b.name.charAt(0)}
+                          </div>
                           <div>
-                            <p className="text-sm font-semibold text-foreground">{t.subject}</p>
-                            <p className="text-xs text-muted-foreground">{(t.exam_type || '').replace('_', ' ')} · Joined {new Date(t.joined_at).toLocaleDateString('en-IN')}</p>
+                            <p className="text-sm font-semibold text-foreground">{b.name}</p>
+                            <p className="text-xs text-muted-foreground">{b.subject || 'All Subjects'} · Joined {new Date(b.created_at).toLocaleDateString('en-IN')}</p>
                           </div>
                         </div>
-                        <span className="text-xs text-violet-400 font-bold flex items-center gap-1">
-                          <Eye className="w-3 h-3" /> Watching
+                        <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                          <ShieldCheck className="w-3 h-3" /> Connected
                         </span>
                       </div>
                     ))}
-                    <p className="text-xs text-muted-foreground text-center mt-1">📊 Your teacher can see your progress in real time</p>
+                    <p className="text-xs text-muted-foreground text-center mt-1">📊 Your mentor can see your progress in real time</p>
                   </div>
                 </div>
               )}

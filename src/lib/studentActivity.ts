@@ -44,21 +44,42 @@ export async function logStudentActivity(payload: ActivityPayload): Promise<void
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Find teacher_id from student_teacher_links (match by subject)
+    // Find batch_id and organization_id from B2B model
     let teacher_id: string | null = null;
+    let batch_id: string | null = null;
+    let organization_id: string | null = null;
+
     try {
-      const { data: link } = await (supabase.from as any)('student_teacher_links')
-        .select('teacher_id')
-        .eq('student_id', user.id)
-        .eq('subject', payload.subject)
-        .eq('is_active', true)
+      // 1. Get student's profile for org_id
+      const { data: profile } = await supabase
+        .from('profiles' as any)
+        .select('organization_id')
+        .eq('user_id', user.id)
         .maybeSingle();
-      teacher_id = link?.teacher_id ?? null;
+      
+      organization_id = (profile as any)?.organization_id ?? null;
+
+      // 2. Find relevant batch for this subject
+      const { data: batchMember } = await (supabase.from as any)('batch_members')
+        .select('batch_id, batches(mentor_id, subject)')
+        .eq('student_id', user.id)
+        .maybeSingle();
+
+      if (batchMember) {
+        const bm = batchMember as any;
+        // If subject matches or no specific subject batch found, use this one
+        if (bm.batches?.subject === payload.subject) {
+          batch_id = bm.batch_id;
+          teacher_id = bm.batches.mentor_id;
+        }
+      }
     } catch { /* silent */ }
 
     const row = {
       student_id:         user.id,
       teacher_id,
+      batch_id,
+      organization_id,
       question_id:        payload.question_id ?? null,
       exam_type:          payload.exam_type ?? 'OTHER',
       subject:            payload.subject,
@@ -81,7 +102,8 @@ export async function logStudentActivity(payload: ActivityPayload): Promise<void
 }
 
 /**
- * Join a teacher by entering their class code.
+ * Join a batch by entering its 6-digit join code.
+ * (Unified with B2B Batches model)
  */
 export async function joinTeacherByCode(code: string): Promise<{ success: boolean; message: string; teacherName?: string }> {
   try {
@@ -90,57 +112,45 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
 
     const normalCode = code.toUpperCase().trim();
 
-    const { data: tcData, error: tcErr } = await (supabase.from as any)('teacher_codes')
-      .select('id, teacher_id, exam_type, subject, is_active, expires_at, max_students, joined_count')
-      .eq('code', normalCode)
+    // 1. Find the batch
+    const { data: batch, error: batchErr } = await (supabase.from as any)('batches')
+      .select('id, name, mentor_id, organization_id')
+      .eq('join_code', normalCode)
+      .eq('is_active', true)
       .maybeSingle();
 
-    if (tcErr || !tcData) return { success: false, message: '❌ Code not found. Check with your teacher.' };
-    if (!tcData.is_active) return { success: false, message: '❌ This code is no longer active.' };
-    if (tcData.expires_at && new Date(tcData.expires_at) < new Date()) {
-      return { success: false, message: '❌ This code has expired. Ask your teacher for a new one.' };
+    if (batchErr || !batch) return { success: false, message: '❌ Invalid or expired join code.' };
+
+    // 2. Add member
+    const { error: joinErr } = await (supabase.from as any)('batch_members')
+      .insert({ batch_id: batch.id, student_id: user.id });
+
+    if (joinErr) {
+      if (joinErr.code === '23505') return { success: false, message: "You're already in this batch!" };
+      throw joinErr;
     }
-    if (tcData.max_students && tcData.joined_count >= tcData.max_students) {
-      return { success: false, message: '❌ This class is full. Contact your teacher.' };
-    }
 
-    const { data: existing } = await (supabase.from as any)('student_teacher_links')
-      .select('id')
-      .eq('student_id', user.id)
-      .eq('teacher_id', tcData.teacher_id)
-      .eq('subject', tcData.subject)
-      .maybeSingle();
+    // 3. Update student user_type and org_id
+    await supabase.auth.updateUser({ data: { user_type: 'b2b_student', organization_id: batch.organization_id } });
+    await (supabase.from as any)('profiles')
+      .update({ user_type: 'b2b_student', organization_id: batch.organization_id })
+      .eq('user_id', user.id);
 
-    if (existing) return { success: false, message: "You're already in this class!" };
-
-    const { error: linkErr } = await (supabase.from as any)('student_teacher_links')
-      .insert({
-        student_id: user.id,
-        teacher_id: tcData.teacher_id,
-        code_used:  normalCode,
-        exam_type:  tcData.exam_type,
-        subject:    tcData.subject,
-      });
-
-    if (linkErr) throw linkErr;
-
-    await (supabase.from as any)('teacher_codes')
-      .update({ joined_count: (tcData.joined_count ?? 0) + 1 })
-      .eq('id', tcData.id);
-
+    // 4. Get teacher name
     const { data: teacherProfile } = await supabase
       .from('profiles' as any)
       .select('full_name')
-      .eq('id', tcData.teacher_id)
+      .eq('user_id', batch.mentor_id)
       .maybeSingle();
 
-    const teacherName = (teacherProfile as any)?.full_name ?? 'your teacher';
+    const teacherName = (teacherProfile as any)?.full_name ?? 'your mentor';
     return {
       success: true,
-      message: `✅ You've joined ${teacherName}'s ${tcData.subject} class for ${tcData.exam_type.replace('_', ' ')}!`,
+      message: `✅ You've joined ${batch.name}! Your mentor is ${teacherName}.`,
       teacherName,
     };
-  } catch {
+  } catch (err) {
+    console.error('Join batch error:', err);
     return { success: false, message: 'Something went wrong. Please try again.' };
   }
 }

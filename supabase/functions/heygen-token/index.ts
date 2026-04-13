@@ -21,13 +21,26 @@ serve(async (req) => {
       method: "POST",
       headers: {
         "x-api-key": HEYGEN_API_KEY,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({}),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("HeyGen Token error:", response.status, errorText);
-      throw new Error(`HeyGen Token failed: ${response.status} ${errorText}`);
+      console.error("HeyGen Token API Error:", response.status, errorText);
+      // Return the actual HeyGen error to the client for better debugging
+      return new Response(
+        JSON.stringify({ 
+          error: "HeyGen API Error", 
+          details: errorText,
+          status: response.status 
+        }), 
+        { 
+          status: response.status, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
     }
 
     const data = await response.json();
@@ -36,9 +49,12 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    console.error("HeyGen token stream error:", e);
+    console.error("HeyGen edge function internal error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ 
+        error: "Internal Server Error", 
+        message: e instanceof Error ? e.message : "Unknown error" 
+      }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

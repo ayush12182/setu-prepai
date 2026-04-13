@@ -5,6 +5,7 @@ import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { toast } from 'sonner';
 
 export default function B2BOverview() {
   const { profile } = useAuth();
@@ -28,117 +29,35 @@ export default function B2BOverview() {
     setLoading(true);
     try {
       const orgId = profile?.organization_id;
-
-      // 1. Fetch batches
-      const { data: batchData } = await (supabase as any)
-        .from('batches')
-        .select('id, name, subject, is_active')
-        .eq('is_active', true)
-        .eq('organization_id', orgId || '00000000-0000-0000-0000-000000000000');
-
-      const fetchedBatches = batchData || [];
-
-      // 2. For each batch, count members + get avg accuracy from session_participants
-      const batchesWithStats = await Promise.all(
-        fetchedBatches.map(async (b: any) => {
-          const { count: memberCount } = await (supabase as any)
-            .from('batch_members')
-            .select('*', { count: 'exact', head: true })
-            .eq('batch_id', b.id);
-
-          // Get avg accuracy from participants in sessions for this batch
-          const { data: sessions } = await (supabase as any)
-            .from('assessment_sessions')
-            .select('id')
-            .eq('batch_id', b.id);
-
-          let avgAccuracy = 0;
-          if (sessions && sessions.length > 0) {
-            const sessionIds = sessions.map((s: any) => s.id);
-            const { data: parts } = await (supabase as any)
-              .from('session_participants')
-              .select('live_accuracy')
-              .in('session_id', sessionIds)
-              .eq('status', 'SUBMITTED');
-
-            if (parts && parts.length > 0) {
-              avgAccuracy = Math.round(
-                parts.reduce((acc: number, p: any) => acc + (p.live_accuracy || 0), 0) / parts.length
-              );
-            }
-          }
-
-          return {
-            id: b.id,
-            name: b.name,
-            students: memberCount || 0,
-            avgAccuracy,
-          };
-        })
-      );
-
-      // 3. Count total students (unique across all batches)
-      const totalStudents = batchesWithStats.reduce((acc, b) => acc + b.students, 0);
-
-      // 4. Count assessment_sessions
-      const { count: sessionsCount } = await (supabase as any)
-        .from('assessment_sessions')
-        .select('*', { count: 'exact', head: true });
-
-      // 5. Compute overall avg accuracy
-      const { data: allParts } = await (supabase as any)
-        .from('session_participants')
-        .select('live_accuracy')
-        .eq('status', 'SUBMITTED');
-
-      const overallAccuracy =
-        allParts && allParts.length > 0
-          ? (allParts.reduce((acc: number, p: any) => acc + (p.live_accuracy || 0), 0) / allParts.length).toFixed(1)
-          : 0;
-
-      // 6. Topic-wise accuracy from session_participants weak_topics and session metadata
-      const { data: sessionMeta } = await (supabase as any)
-        .from('assessment_sessions')
-        .select('metadata, id')
-        .limit(50);
-
-      // Build topic accuracy from participants
-      const topicMap: Record<string, { total: number; sum: number }> = {};
-      if (sessionMeta) {
-        for (const sess of sessionMeta) {
-          const subject = sess.metadata?.subject || sess.metadata?.subjects?.[0];
-          if (!subject) continue;
-
-          const { data: pts } = await (supabase as any)
-            .from('session_participants')
-            .select('live_accuracy')
-            .eq('session_id', sess.id)
-            .eq('status', 'SUBMITTED');
-
-          if (pts && pts.length > 0) {
-            if (!topicMap[subject]) topicMap[subject] = { total: 0, sum: 0 };
-            topicMap[subject].total += pts.length;
-            topicMap[subject].sum += pts.reduce((a: number, p: any) => a + (p.live_accuracy || 0), 0);
-          }
-        }
+      if (!orgId) {
+        setLoading(false);
+        return;
       }
 
-      const topicAccuracyData = Object.entries(topicMap)
-        .map(([topic, { total, sum }], i) => ({
-          topic: topic.charAt(0).toUpperCase() + topic.slice(1),
-          accuracy: Math.round(sum / total),
-          color: COLORS[i % COLORS.length],
-        }))
-        .sort((a, b) => b.accuracy - a.accuracy)
-        .slice(0, 6);
+      const { data, error } = await (supabase as any).rpc('get_b2b_overview_stats', {
+        p_organization_id: orgId
+      });
+
+      if (error) throw error;
 
       setStats({
-        totalStudents,
-        activeBatches: fetchedBatches.length,
-        testsCreated: sessionsCount || 0,
-        avgAccuracy: Number(overallAccuracy),
+        totalStudents: data.totalStudents,
+        activeBatches: data.activeBatches,
+        testsCreated: data.testsCreated,
+        avgAccuracy: data.avgAccuracy,
       });
-      setBatches(batchesWithStats);
+
+      setBatches(data.batches || []);
+
+      const topicAccuracyData = (data.topicAccuracy || [])
+        .map((t: any, i: number) => ({
+          ...t,
+          topic: t.topic.charAt(0).toUpperCase() + t.topic.slice(1),
+          color: COLORS[i % COLORS.length],
+        }))
+        .sort((a: any, b: any) => b.accuracy - a.accuracy)
+        .slice(0, 6);
+
       setTopicAccuracy(
         topicAccuracyData.length > 0
           ? topicAccuracyData
@@ -150,6 +69,7 @@ export default function B2BOverview() {
       );
     } catch (e) {
       console.error('Overview fetch error', e);
+      toast.error('Failed to load dashboard analytics');
     } finally {
       setLoading(false);
     }

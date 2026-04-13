@@ -731,8 +731,18 @@ const AITeachingRoomPage: React.FC = () => {
     try {
       const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/heygen-token`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        }
       });
-      if (!resp.ok) throw new Error("Failed to get HeyGen token");
+
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        console.error("🔴 HeyGen Token Fetch Failed:", resp.status, errData);
+        throw new Error(`Failed to get HeyGen token: ${resp.status} ${errData.details || errData.message || ''}`);
+      }
       const { data: { token } } = await resp.json();
       
       const avatar = new StreamingAvatar({ token });

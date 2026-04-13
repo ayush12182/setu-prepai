@@ -1,7 +1,7 @@
 // B2BBatches.tsx — Real data from Supabase
 import React, { useEffect, useState } from 'react';
 import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
-import { Layers, Plus, Users, GraduationCap, ChevronRight, Loader2, X } from 'lucide-react';
+import { Layers, Plus, Users, GraduationCap, ChevronRight, Loader2, X, Ticket, Copy, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 
 export default function B2BBatches() {
   const { profile, user } = useAuth();
-  const { createBatch, loading: creating } = useB2BManager();
+  const { createBatch, generateInviteDetails, loading: creating } = useB2BManager();
   const [batches, setBatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -85,10 +85,23 @@ export default function B2BBatches() {
     if (!form.name.trim()) { toast.error('Batch name is required'); return; }
     const result = await createBatch(form.name, form.subject);
     if (result) {
+      toast.success('Batch created! Now generate a join code to invite students.');
       setShowCreate(false);
       setForm({ name: '', subject: 'Physics', targetExam: 'JEE' });
       fetchBatches();
     }
+  };
+
+  const handleGenerateCode = async (batchId: string) => {
+    const updated = await generateInviteDetails(batchId);
+    if (updated) {
+      fetchBatches();
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Code copied to clipboard!');
   };
 
   return (
@@ -166,22 +179,57 @@ export default function B2BBatches() {
               const acc = accuracyMap[b.id] ?? 0;
               const accColor = acc >= 65 ? 'text-emerald-400' : acc >= 50 ? 'text-amber-400' : 'text-red-400';
               return (
-                <div key={b.id} className="bg-card border border-border rounded-3xl p-6 shadow-sm hover:border-accent/30 transition-all flex flex-col">
+                <div key={b.id} className="bg-card border border-border rounded-3xl p-6 shadow-sm hover:border-accent/30 transition-all flex flex-col group/card">
                   <div className="flex justify-between items-start mb-4">
-                    <span className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">active</span>
+                    <div className="flex flex-col gap-1">
+                      {b.join_code ? (
+                        <span className="flex items-center gap-1 text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <CheckCircle2 size={10} /> Ready to Join
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                          <AlertCircle size={10} /> Needs Setup
+                        </span>
+                      )}
+                    </div>
                     <div className="text-right">
-                      <p className={`text-2xl font-bold ${accColor}`}>{acc}%</p>
-                      <p className="text-[10px] text-muted-foreground">avg accuracy</p>
+                      <p className={`text-2xl font-bold font-display ${accColor}`}>{acc}%</p>
+                      <p className="text-[9px] uppercase font-black tracking-tighter text-muted-foreground">Class AI Accuracy</p>
                     </div>
                   </div>
-                  <h3 className="text-lg font-bold">{b.name}</h3>
-                  <p className="text-xs text-muted-foreground">{b.subject || 'All Subjects'} · {b.target_exam || 'JEE'}</p>
+                  
+                  <h3 className="text-lg font-bold text-foreground leading-tight">{b.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{b.subject || 'All Subjects'} · {b.target_exam || 'JEE'}</p>
+
+                  <div className="flex-1 min-h-[12px]" />
+
+                  {/* Join Credential Slot */}
+                  {b.join_code ? (
+                    <div className="mt-4 p-3 bg-secondary/30 border border-border rounded-2xl flex items-center justify-between group/code hover:border-accent/30 transition-colors">
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase font-black">Classroom Code</p>
+                        <p className="text-base font-mono font-bold text-accent tracking-widest">{b.join_code}</p>
+                      </div>
+                      <Button variant="ghost" size="icon" onClick={() => copyToClipboard(b.join_code)} className="h-8 w-8 rounded-lg hover:bg-accent/10 hover:text-accent">
+                        <Copy size={13} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button 
+                      onClick={() => handleGenerateCode(b.id)}
+                      className="mt-4 w-full bg-accent/5 hover:bg-accent/10 text-accent border border-accent/20 font-bold gap-2 h-11 rounded-2xl"
+                    >
+                      <Ticket size={16} /> Generate Join Code
+                    </Button>
+                  )}
+
                   <div className="mt-4 pt-4 border-t border-border flex justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1"><Users size={12} /> {memberCounts[b.id] ?? 0} students</div>
+                    <div className="flex items-center gap-1"><Users size={12} /> <span className="font-bold text-foreground">{memberCounts[b.id] ?? 0}</span> students</div>
                     <div className="flex items-center gap-1"><GraduationCap size={12} /> {b.profiles?.full_name || 'Unassigned'}</div>
                   </div>
-                  <Button variant="ghost" className="w-full mt-4 justify-between group" onClick={() => window.location.href = `/b2b/invite`}>
-                    Invite Students <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  
+                  <Button variant="ghost" className="w-full mt-3 justify-between group py-2 h-auto text-xs font-bold text-muted-foreground hover:text-accent hover:bg-accent/5" onClick={() => window.location.href = `/b2b/invite`}>
+                    View Invite Link <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </div>
               );

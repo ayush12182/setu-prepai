@@ -13,17 +13,23 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { joinTeacherByCode } from '@/lib/studentActivity';
+import { ShieldCheck, Key, LogIn, UserPlus } from 'lucide-react';
 
-type TakerState = 'loading' | 'intro' | 'active' | 'review' | 'complete';
+type TakerState = 'loading' | 'enrolling' | 'intro' | 'active' | 'review' | 'complete';
 
 export default function B2BAssessmentTakerPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const engine = useAssessmentEngine();
 
   const [takerState, setTakerState] = useState<TakerState>('loading');
   const [sessionConfig, setSessionConfig] = useState<any>(null);
+  const [batchInfo, setBatchInfo] = useState<any>(null);
+  const [joinCode, setJoinCode] = useState('');
+  const [joining, setJoining] = useState(false);
+  
   const [selectedOption, setSelectedOption] = useState<'A' | 'B' | 'C' | 'D' | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
@@ -34,39 +40,66 @@ export default function B2BAssessmentTakerPage() {
   // ─── LOAD SESSION ───
   useEffect(() => {
     if (!sessionId) return;
-    (async () => {
-      try {
-        const { data, error } = await (supabase as any)
-          .from('assessment_sessions')
-          .select('*')
-          .eq('id', sessionId)
-          .maybeSingle();
+    loadSession();
+  }, [sessionId, user]);
 
-        if (error || !data) {
-          // Graceful fallback for demo/offline sessions
-          setSessionConfig({
-            exam_type: 'JEE',
-            question_count: 20,
-            time_limit_minutes: 30,
-            metadata: {
-              subchapterId: sessionId || 'demo',
-              subchapterName: 'Practice Session',
-              chapterId: 'demo',
-              chapterName: 'General',
-              subject: 'physics',
-              difficulty: 'mixed',
-              examType: 'JEE',
-            },
-          });
-        } else {
-          setSessionConfig(data);
-        }
-      } catch {
-        setSessionConfig(null);
+  const loadSession = async () => {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('assessment_sessions')
+        .select('*, batches(id, name, join_code)')
+        .eq('id', sessionId)
+        .maybeSingle();
+
+      if (error || !data) {
+        // Fallback for demo
+        setTakerState('intro');
+        return;
       }
+
+      setSessionConfig(data);
+      const batch = (data as any).batches;
+
+      if (batch) {
+        setBatchInfo(batch);
+        
+        // CHECK ENROLLMENT
+        if (user) {
+          const { data: member } = await (supabase.from as any)('batch_members')
+            .select('id')
+            .eq('batch_id', batch.id)
+            .eq('student_id', user.id)
+            .maybeSingle();
+
+          if (member) {
+            setTakerState('intro');
+          } else {
+            setTakerState('enrolling');
+          }
+        } else {
+          // No user, must join/login
+          setTakerState('enrolling');
+        }
+      } else {
+        setTakerState('intro');
+      }
+    } catch {
       setTakerState('intro');
-    })();
-  }, [sessionId]);
+    }
+  };
+
+  const handleJoinBatch = async () => {
+    if (!joinCode.trim()) return;
+    setJoining(true);
+    const result = await joinTeacherByCode(joinCode);
+    if (result.success) {
+      toast.success('Successfully joined batch!');
+      loadSession(); // Re-verify and move to intro
+    } else {
+      toast.error(result.message);
+    }
+    setJoining(false);
+  };
 
   // ─── COUNTDOWN TIMER ───
   const startTimer = useCallback((minutes: number) => {
@@ -145,6 +178,63 @@ export default function B2BAssessmentTakerPage() {
   const totalRequired = sessionConfig?.question_count || 20;
   const progress = (engine.totalAnswered / totalRequired) * 100;
   const isLowTime = timeLeft < 120;
+
+  // ─── ENROLLING VIEW ───
+  if (takerState === 'enrolling') {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm">
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-accent/15 flex items-center justify-center mx-auto">
+              <ShieldCheck className="w-8 h-8 text-accent" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">Join {batchInfo?.name || 'Classroom'}</h2>
+              <p className="text-white/50 text-xs mt-1">This assessment is privatly held for this batch. Enter your join code to proceed.</p>
+            </div>
+
+            {!user ? (
+               <div className="space-y-4">
+                 <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-left">
+                   <p className="text-xs text-amber-200/70 leading-relaxed">
+                     <LogIn className="w-3 h-3 inline mr-1" /> <strong>Authentication Required</strong>: Please sign in or create an account to join this batch and track your progress.
+                   </p>
+                 </div>
+                 <Button onClick={() => navigate('/auth', { state: { returnTo: window.location.pathname }})} className="w-full h-12 bg-white text-black font-bold">
+                   Sign In to Continue
+                 </Button>
+               </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest block text-left px-1">6-Digit Join Code</label>
+                  <div className="relative">
+                    <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                    <input 
+                      type="text"
+                      value={joinCode}
+                      onChange={e => setJoinCode(e.target.value.toUpperCase())}
+                      placeholder="XXXXXX"
+                      maxLength={6}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white font-mono text-xl tracking-[0.2em] focus:outline-none focus:border-accent/50 transition-colors"
+                    />
+                  </div>
+                </div>
+                <Button 
+                  onClick={handleJoinBatch} 
+                  disabled={joining || joinCode.length !== 6}
+                  className="w-full h-12 bg-accent text-white font-bold"
+                >
+                  {joining ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Join & Start Test'}
+                </Button>
+                <p className="text-[10px] text-white/30">Ask your mentor if you don't have the code.</p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   // ─── LOADING ───
   if (takerState === 'loading') {
