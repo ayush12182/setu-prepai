@@ -342,7 +342,7 @@ function useTypewriter(text: string, baseSpeed = 7, speedMultiplier = 1) {
 function ChalkText({ text, color }: { text: string; color?: string }) {
   return (
     <>
-      {text.split('').map((ch, i) => (
+      {text?.split('').map((ch, i) => (
         <span key={i} className="chalk-char" style={color ? { color } : undefined}>{ch}</span>
       ))}
     </>
@@ -367,18 +367,18 @@ function BlackboardText({ text }: { text: string }) {
 
   return (
     <div className="space-y-1 leading-relaxed">
-      {segments.map((seg, si) => {
+      {segments?.map((seg, si) => {
         if (seg.kind === 'diagram') {
           return <DiagramRenderer key={si} raw={seg.content} />;
         }
-        return seg.content.split('\n').map((line, i) => {
+        return seg.content?.split('\n').map((line, i) => {
           const headingMatch = line.match(/^#{1,3}\s+(.*)/);
           const rawLine = headingMatch ? headingMatch[1] : line;
           const isHeading = !!headingMatch;
 
           /** Render a line with bold/normal spans, chalk-char per character */
           const renderChalkLine = (raw: string, baseColor: string) =>
-            raw.split(/(\*\*.*?\*\*)/g).map((part, j) =>
+            (raw || '').split(/(\*\*.*?\*\*)/g).map((part, j) =>
               part.startsWith('**') && part.endsWith('**')
                 ? <span key={j} className="font-bold"><ChalkText text={part.slice(2, -2)} color="#ff9a9a" /></span>
                 : <ChalkText key={j} text={part} color={baseColor} />
@@ -1348,7 +1348,7 @@ const AITeachingRoomPage: React.FC = () => {
                     color: 'rgba(255,255,255,0.85)',
                   }}
                 >
-                  <span className="truncate">{currentChapter.name}</span>
+                  <span className="truncate">{currentChapter?.name || 'Loading Chapters...'}</span>
                   <ChevronDown size={14} className={`flex-shrink-0 transition-transform ${chapterOpen ? 'rotate-180' : ''}`} />
                 </button>
                 <AnimatePresence>
@@ -1360,7 +1360,7 @@ const AITeachingRoomPage: React.FC = () => {
                       className="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden z-40"
                       style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.12)' }}
                     >
-                      {teacher.chapters.map((ch, i) => (
+                      {teacher?.chapters?.map((ch, i) => (
                         <button
                           key={i}
                           onClick={() => { setSelectedChapter(i); setSelectedTopic(0); setChapterOpen(false); }}
@@ -1389,7 +1389,7 @@ const AITeachingRoomPage: React.FC = () => {
                     color: 'rgba(255,255,255,0.85)',
                   }}
                 >
-                  <span className="truncate">{currentChapter.topics[selectedTopic]}</span>
+                  <span className="truncate">{currentChapter?.topics?.[selectedTopic] || 'Select Topic'}</span>
                   <ChevronDown size={14} className={`flex-shrink-0 transition-transform ${topicOpen ? 'rotate-180' : ''}`} />
                 </button>
                 <AnimatePresence>
@@ -1401,7 +1401,7 @@ const AITeachingRoomPage: React.FC = () => {
                       className="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden z-40"
                       style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.12)' }}
                     >
-                      {currentChapter.topics.map((t, i) => (
+                      {currentChapter?.topics?.map((t, i) => (
                         <button
                           key={i}
                           onClick={() => { setSelectedTopic(i); setTopicOpen(false); }}
