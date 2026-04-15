@@ -1,4 +1,3 @@
-
 -- Questions Table: A persistent bank for verified assessment content
 CREATE TABLE IF NOT EXISTS public.questions (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -14,6 +13,32 @@ CREATE TABLE IF NOT EXISTS public.questions (
     tags text[] DEFAULT '{}',
     created_at timestamp WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Ensure all columns exist if the table was created by a previous migration
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='questions' AND column_name='topic') THEN
+        ALTER TABLE public.questions ADD COLUMN topic text DEFAULT 'General' NOT NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='questions' AND column_name='subtopic') THEN
+        ALTER TABLE public.questions ADD COLUMN subtopic text DEFAULT 'General' NOT NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='questions' AND column_name='concept') THEN
+        ALTER TABLE public.questions ADD COLUMN concept text DEFAULT '' NOT NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='questions' AND column_name='options') THEN
+        ALTER TABLE public.questions ADD COLUMN options jsonb DEFAULT '[]'::jsonb NOT NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='questions' AND column_name='correct_index') THEN
+        ALTER TABLE public.questions ADD COLUMN correct_index integer DEFAULT 0 NOT NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='questions' AND column_name='is_verified') THEN
+        ALTER TABLE public.questions ADD COLUMN is_verified boolean DEFAULT false;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='questions' AND column_name='tags') THEN
+        ALTER TABLE public.questions ADD COLUMN tags text[] DEFAULT '{}';
+    END IF;
+END $$;
 
 -- User MCQ Attempts: Detailed tracking for student diagnostics
 CREATE TABLE IF NOT EXISTS public.user_mcq_attempts (

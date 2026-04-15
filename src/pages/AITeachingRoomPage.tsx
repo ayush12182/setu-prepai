@@ -23,54 +23,54 @@ import StreamingAvatar, { AvatarQuality, StreamingEvents, TaskType, TaskMode } f
 ──────────────────────────────────────────────── */
 // Maps LanguageMode → native name for the instruction in the system prompt
 const LANG_INSTRUCTION: Record<LanguageMode, string> = {
-  english:  'English only',
+  english: 'English only',
   hinglish: 'Hinglish — a natural mix of Hindi and English (Roman script for Hindi words)',
-  hindi:    'pure Hindi using Devanagari script only',
-  kannada:  'Kannada (ಕನ್ನಡ) script only',
-  telugu:   'Telugu (తెలుగు) script only',
-  punjabi:  'Punjabi (ਪੰਜਾਬੀ) using Gurmukhi script only',
-  marathi:  'Marathi (मराठी) using Devanagari script only',
-  tamil:    'Tamil (தமிழ்) script only',
+  hindi: 'pure Hindi using Devanagari script only',
+  kannada: 'Kannada (ಕನ್ನಡ) script only',
+  telugu: 'Telugu (తెలుగు) script only',
+  punjabi: 'Punjabi (ਪੰਜਾਬੀ) using Gurmukhi script only',
+  marathi: 'Marathi (मराठी) using Devanagari script only',
+  tamil: 'Tamil (தமிழ்) script only',
   gujarati: 'Gujarati (ગુજરાતી) script only',
 };
 
 // BCP-47 language codes for the browser SpeechSynthesis API
 const LANG_BCP47: Record<LanguageMode, string> = {
-  english:  'en-IN',
+  english: 'en-IN',
   hinglish: 'hi-IN',
-  hindi:    'hi-IN',
-  kannada:  'kn-IN',
-  telugu:   'te-IN',
-  punjabi:  'pa-IN',
-  marathi:  'mr-IN',
-  tamil:    'ta-IN',
+  hindi: 'hi-IN',
+  kannada: 'kn-IN',
+  telugu: 'te-IN',
+  punjabi: 'pa-IN',
+  marathi: 'mr-IN',
+  tamil: 'ta-IN',
   gujarati: 'gu-IN',
 };
 
 // HeyGen supported language codes (limited set)
 const HEYGEN_LANG_CODE: Record<LanguageMode, string> = {
-  english:  'en',
+  english: 'en',
   hinglish: 'hi',
-  hindi:    'hi',
-  kannada:  'hi', // fallback: HeyGen doesn't support Kannada natively
-  telugu:   'hi',
-  punjabi:  'hi',
-  marathi:  'hi',
-  tamil:    'ta',
+  hindi: 'hi',
+  kannada: 'hi', // fallback: HeyGen doesn't support Kannada natively
+  telugu: 'hi',
+  punjabi: 'hi',
+  marathi: 'hi',
+  tamil: 'ta',
   gujarati: 'hi',
 };
 
 // Welcome messages for each language
 const getWelcome = (name: string, subject: string, lang: LanguageMode): string => {
   const maps: Record<LanguageMode, string> = {
-    english:  `Hello! I'm ${name} — your ${subject} teacher.\n\nWhat would you like to learn today? Select a chapter and click "Explain", or ask me your doubt directly! 🎓`,
+    english: `Hello! I'm ${name} — your ${subject} teacher.\n\nWhat would you like to learn today? Select a chapter and click "Explain", or ask me your doubt directly! 🎓`,
     hinglish: `Namaste! Main hoon ${name} — aapka ${subject} teacher.\n\nAaj kya padhna hai? Ek chapter select karo aur "Explain" dabao. Ya seedha apna doubt pooch sakte ho! 🎓`,
-    hindi:    `नमस्ते! मैं हूं ${name} — आपका ${subject} शिक्षक।\n\nआज क्या पढ़ना है? एक अध्याय चुनें और "Explain" दबाएं। या सीधे अपना प्रश्न पूछें! 🎓`,
-    kannada:  `ನಮಸ್ಕಾರ! ನಾನು ${name} — ನಿಮ್ಮ ${subject} ಶಿಕ್ಷಕ.\n\nಇಂದು ಏನು ಕಲಿಯಲು ಬಯಸುತ್ತೀರಿ? ಒಂದು ಅಧ್ಯಾಯ ಆಯ್ಕೆ ಮಾಡಿ ಮತ್ತು "Explain" ಒತ್ತಿ. ಅಥವಾ ನೇರವಾಗಿ ನಿಮ್ಮ ಸಂದೇಹ ಕೇಳಿ! 🎓`,
-    telugu:   `నమస్కారం! నేను ${name} — మీ ${subject} ఉపాధ్యాయుడు.\n\nఈరోజు ఏమి నేర్చుకోవాలి? ఒక అధ్యాయం ఎంచుకుని "Explain" నొక్కండి. లేదా నేరుగా మీ సందేహం అడగండి! 🎓`,
-    punjabi:  `ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਹਾਂ ${name} — ਤੁਹਾਡਾ ${subject} ਅਧਿਆਪਕ।\n\nਅੱਜ ਕੀ ਪੜ੍ਹਨਾ ਹੈ? ਇੱਕ ਅਧਿਆਇ ਚੁਣੋ ਅਤੇ "Explain" ਦਬਾਓ। ਜਾਂ ਸਿੱਧਾ ਆਪਣਾ ਸਵਾਲ ਪੁੱਛੋ! 🎓`,
-    marathi:  `नमस्कार! मी आहे ${name} — तुमचा ${subject} शिक्षक।\n\nआज काय शिकायचे आहे? एक अध्याय निवडा आणि "Explain" दाबा. किंवा थेट तुमचा प्रश्न विचारा! 🎓`,
-    tamil:    `வணக்கம்! நான் ${name} — உங்கள் ${subject} ஆசிரியர்.\n\nஇன்று என்ன கற்றுக்கொள்ள விரும்புகிறீர்கள்? ஒரு அத்தியாயம் தேர்ந்தெடுத்து "Explain" அழுத்துங்கள். அல்லது நேரடியாக உங்கள் சந்தேகம் கேளுங்கள்! 🎓`,
+    hindi: `नमस्ते! मैं हूं ${name} — आपका ${subject} शिक्षक।\n\nआज क्या पढ़ना है? एक अध्याय चुनें और "Explain" दबाएं। या सीधे अपना प्रश्न पूछें! 🎓`,
+    kannada: `ನಮಸ್ಕಾರ! ನಾನು ${name} — ನಿಮ್ಮ ${subject} ಶಿಕ್ಷಕ.\n\nಇಂದು ಏನು ಕಲಿಯಲು ಬಯಸುತ್ತೀರಿ? ಒಂದು ಅಧ್ಯಾಯ ಆಯ್ಕೆ ಮಾಡಿ ಮತ್ತು "Explain" ಒತ್ತಿ. ಅಥವಾ ನೇರವಾಗಿ ನಿಮ್ಮ ಸಂದೇಹ ಕೇಳಿ! 🎓`,
+    telugu: `నమస్కారం! నేను ${name} — మీ ${subject} ఉపాధ్యాయుడు.\n\nఈరోజు ఏమి నేర్చుకోవాలి? ఒక అధ్యాయం ఎంచుకుని "Explain" నొక్కండి. లేదా నేరుగా మీ సందేహం అడగండి! 🎓`,
+    punjabi: `ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਹਾਂ ${name} — ਤੁਹਾਡਾ ${subject} ਅਧਿਆਪਕ।\n\nਅੱਜ ਕੀ ਪੜ੍ਹਨਾ ਹੈ? ਇੱਕ ਅਧਿਆਇ ਚੁਣੋ ਅਤੇ "Explain" ਦਬਾਓ। ਜਾਂ ਸਿੱਧਾ ਆਪਣਾ ਸਵਾਲ ਪੁੱਛੋ! 🎓`,
+    marathi: `नमस्कार! मी आहे ${name} — तुमचा ${subject} शिक्षक।\n\nआज काय शिकायचे आहे? एक अध्याय निवडा आणि "Explain" दाबा. किंवा थेट तुमचा प्रश्न विचारा! 🎓`,
+    tamil: `வணக்கம்! நான் ${name} — உங்கள் ${subject} ஆசிரியர்.\n\nஇன்று என்ன கற்றுக்கொள்ள விரும்புகிறீர்கள்? ஒரு அத்தியாயம் தேர்ந்தெடுத்து "Explain" அழுத்துங்கள். அல்லது நேரடியாக உங்கள் சந்தேகம் கேளுங்கள்! 🎓`,
     gujarati: `નમસ્તે! હું ${name} — તમારો ${subject} શિક્ષક.\n\nઆજે શું ભણવું છે? એક પ્રકરણ પસંદ કરો અને "Explain" દબાવો. અથવા સીધો તમારો પ્રશ્ન પૂછો! 🎓`,
   };
   return maps[lang];
@@ -79,14 +79,14 @@ const getWelcome = (name: string, subject: string, lang: LanguageMode): string =
 // Quick doubt chip labels for each language
 const getChips = (lang: LanguageMode): [string, string, string] => {
   const maps: Record<LanguageMode, [string, string, string]> = {
-    english:  ['What is the formula?', 'Give an example', 'JEE exam tip'],
+    english: ['What is the formula?', 'Give an example', 'JEE exam tip'],
     hinglish: ['Formula kya hai?', 'Ek example do', 'JEE tip batao'],
-    hindi:    ['सूत्र क्या है?', 'एक उदाहरण दें', 'JEE टिप बताएं'],
-    kannada:  ['ಸೂತ್ರ ಏನು?', 'ಒಂದು ಉದಾಹರಣೆ ಕೊಡಿ', 'JEE ಟಿಪ್ ಹೇಳಿ'],
-    telugu:   ['సూత్రం ఏమిటి?', 'ఒక ఉదాహరణ ఇవ్వండి', 'JEE చిట్కా చెప్పండి'],
-    punjabi:  ['ਫਾਰਮੂਲਾ ਕੀ ਹੈ?', 'ਇੱਕ ਮਿਸਾਲ ਦਿਓ', 'JEE ਟਿਪ ਦੱਸੋ'],
-    marathi:  ['सूत्र काय आहे?', 'एक उदाहरण द्या', 'JEE टिप सांगा'],
-    tamil:    ['சூத்திரம் என்ன?', 'ஒரு உதாரணம் கொடுங்கள்', 'JEE குறிப்பு சொல்லுங்கள்'],
+    hindi: ['सूत्र क्या है?', 'एक उदाहरण दें', 'JEE टिप बताएं'],
+    kannada: ['ಸೂತ್ರ ಏನು?', 'ಒಂದು ಉದಾಹರಣೆ ಕೊಡಿ', 'JEE ಟಿಪ್ ಹೇಳಿ'],
+    telugu: ['సూత్రం ఏమిటి?', 'ఒక ఉదాహరణ ఇవ్వండి', 'JEE చిట్కా చెప్పండి'],
+    punjabi: ['ਫਾਰਮੂਲਾ ਕੀ ਹੈ?', 'ਇੱਕ ਮਿਸਾਲ ਦਿਓ', 'JEE ਟਿਪ ਦੱਸੋ'],
+    marathi: ['सूत्र काय आहे?', 'एक उदाहरण द्या', 'JEE टिप सांगा'],
+    tamil: ['சூத்திரம் என்ன?', 'ஒரு உதாரணம் கொடுங்கள்', 'JEE குறிப்பு சொல்லுங்கள்'],
     gujarati: ['સૂત્ર શું છે?', 'એક ઉદાહરણ આપો', 'JEE ટિપ જણાવો'],
   };
   return maps[lang];
@@ -95,14 +95,14 @@ const getChips = (lang: LanguageMode): [string, string, string] => {
 // Doubt placeholder text per language
 const getDoubtPlaceholder = (name: string, lang: LanguageMode): string => {
   const maps: Record<LanguageMode, string> = {
-    english:  `Ask your doubt to ${name}...`,
+    english: `Ask your doubt to ${name}...`,
     hinglish: `${name} se apna doubt pooch...`,
-    hindi:    `${name} से अपना प्रश्न पूछें...`,
-    kannada:  `${name} ಅವರಿಗೆ ನಿಮ್ಮ ಸಂದೇಹ ಕೇಳಿ...`,
-    telugu:   `${name} కి మీ సందేహం అడగండి...`,
-    punjabi:  `${name} ਨੂੰ ਆਪਣਾ ਸਵਾਲ ਪੁੱਛੋ...`,
-    marathi:  `${name} ला तुमचा प्रश्न विचारा...`,
-    tamil:    `${name} கிட்ட உங்கள் சந்தேகம் கேளுங்கள்...`,
+    hindi: `${name} से अपना प्रश्न पूछें...`,
+    kannada: `${name} ಅವರಿಗೆ ನಿಮ್ಮ ಸಂದೇಹ ಕೇಳಿ...`,
+    telugu: `${name} కి మీ సందేహం అడగండి...`,
+    punjabi: `${name} ਨੂੰ ਆਪਣਾ ਸਵਾਲ ਪੁੱਛੋ...`,
+    marathi: `${name} ला तुमचा प्रश्न विचारा...`,
+    tamil: `${name} கிட்ட உங்கள் சந்தேகம் கேளுங்கள்...`,
     gujarati: `${name} ને તમારો પ્રશ્ન પૂછો...`,
   };
   return maps[lang];
@@ -156,7 +156,7 @@ const TEACHERS = {
     voiceSettings: { stability: 0.35, similarity_boost: 0.80, style: 0.50 },
     avatarId: 'josh_lite3_20230714',
     systemPrompt: (lang: LanguageMode) =>
-`${BASE_TEACHING_PROMPT}
+      `${BASE_TEACHING_PROMPT}
 
 You are P.K. Sir — Physics teacher.
 You are strict but deeply passionate about Physics. You treat Physics like art — every law has a story, every formula has a soul.
@@ -195,7 +195,7 @@ OUTPUT STRUCTURE (always follow):
     voiceSettings: { stability: 0.30, similarity_boost: 0.75, style: 0.70 },
     avatarId: 'josh_lite3_20230714',
     systemPrompt: (lang: LanguageMode) =>
-`${BASE_TEACHING_PROMPT}
+      `${BASE_TEACHING_PROMPT}
 
 You are V.K. Sir — Chemistry teacher.
 You are the most enthusiastic person in any room. You make Chemistry feel like magic.
@@ -235,7 +235,7 @@ OUTPUT STRUCTURE (always follow):
     voiceSettings: { stability: 0.45, similarity_boost: 0.82, style: 0.45 },
     avatarId: 'josh_lite3_20230714',
     systemPrompt: (lang: LanguageMode) =>
-`${BASE_TEACHING_PROMPT}
+      `${BASE_TEACHING_PROMPT}
 
 You are A.K. Sir — Maths teacher.
 You are fast, sharp, and no-nonsense but never cold. You respect students who think.
@@ -265,7 +265,7 @@ OUTPUT STRUCTURE (always follow):
   },
 } as const;
 
-const TTS_URL = `/api/elevenlabs-tts-stream`;
+const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts-stream`;
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jeetu-chat`;
 
 
@@ -349,12 +349,12 @@ function ChalkText({ text, color }: { text: string; color?: string }) {
   );
 }
 
-function BlackboardText({ text }: { text: string }) {
+function BlackboardText({ text = '' }: { text: string }) {
   const DIAGRAM_RE = /\[DIAGRAM\]([\s\S]*?)\[\/DIAGRAM\]/g;
   const segments: Array<{ kind: 'text' | 'diagram'; content: string }> = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
-  while ((match = DIAGRAM_RE.exec(text)) !== null) {
+  while ((match = DIAGRAM_RE.exec(text || '')) !== null) {
     if (match.index > lastIndex) {
       segments.push({ kind: 'text', content: text.slice(lastIndex, match.index) });
     }
@@ -414,7 +414,7 @@ function BlackboardText({ text }: { text: string }) {
 function ChalkCursor() {
   return (
     <motion.span
-      animate={{ 
+      animate={{
         opacity: [1, 0.4, 1],
         scale: [1, 1.1, 1],
         rotate: [-14, -18, -14]
@@ -548,7 +548,7 @@ const AITeachingRoomPage: React.FC = () => {
   const lastAdaptationRef = useRef<number>(0);
   // callAIRef allows the engagement effect to reference callAI without a declaration-order issue
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const callAIRef = useRef<(msg: string) => Promise<void>>(async () => {});
+  const callAIRef = useRef<(msg: string) => Promise<void>>(async () => { });
 
   // Monitor engagement score and trigger AI adaptation when student is distracted
   useEffect(() => {
@@ -600,9 +600,9 @@ const AITeachingRoomPage: React.FC = () => {
   // ── Finish Session handler (after engagement hooks are declared)
   const handleFinishSession = useCallback(() => {
     const report = sessionTracker.compileReport({
-      engagementScore:    engagement.engagementScore,
-      attentivePercent:   engagement.sessionStats?.attentivePercent ?? 0,
-      distractedPercent:  engagement.sessionStats?.distractedPercent ?? 0,
+      engagementScore: engagement.engagementScore,
+      attentivePercent: engagement.sessionStats?.attentivePercent ?? 0,
+      distractedPercent: engagement.sessionStats?.distractedPercent ?? 0,
       engagementTimeline: engagement.sessionStats?.engagementTimeline ?? [],
     });
     setCompiledReport(report);
@@ -610,10 +610,10 @@ const AITeachingRoomPage: React.FC = () => {
   }, [sessionTracker, engagement]);
 
   // ── MCQ System
-  const { 
-    mcq, startMCQ, selectAnswer: selectMCQAnswer, 
+  const {
+    mcq, startMCQ, selectAnswer: selectMCQAnswer,
     setMistakeType, setConfidence,
-    nextQuestion: nextMCQQuestion, skipMCQ, resetMCQ 
+    nextQuestion: nextMCQQuestion, skipMCQ, resetMCQ
   } = useMCQ(language, (topic, correct) => {
     // ── Update session tracker with MCQ results ──
     sessionTracker.recordMCQResult(topic, correct);
@@ -635,14 +635,14 @@ const AITeachingRoomPage: React.FC = () => {
   // ── Welcome message on mount
   useEffect(() => {
     setBoardContent(getWelcome(teacher.name, teacher.subject, language));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teacher.name, teacher.subject]);
 
   // Update welcome when language changes
   useEffect(() => {
     setBoardContent(getWelcome(teacher.name, teacher.subject, language));
     chatHistoryRef.current = [];
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [language]);
 
   // -- TTS function
@@ -665,10 +665,10 @@ const AITeachingRoomPage: React.FC = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ 
-          text: clean.slice(0, 600), 
+        body: JSON.stringify({
+          text: clean.slice(0, 600),
           voiceId: teacher.voiceId,
-          voiceSettings: teacher.voiceSettings 
+          voiceSettings: teacher.voiceSettings
         }),
       });
 
@@ -744,15 +744,15 @@ const AITeachingRoomPage: React.FC = () => {
         throw new Error(`Failed to get HeyGen token: ${resp.status} ${errData.details || errData.message || ''}`);
       }
       const { data: { token } } = await resp.json();
-      
+
       const avatar = new StreamingAvatar({ token });
       avatarClientRef.current = avatar;
-      
+
       avatar.on(StreamingEvents.STREAM_READY, (event: { detail?: MediaStream }) => {
         if (event.detail && videoRef.current) {
           videoRef.current.srcObject = event.detail;
           videoRef.current.onloadedmetadata = () => {
-             videoRef.current?.play().catch(console.error);
+            videoRef.current?.play().catch(console.error);
           };
         }
       });
@@ -819,14 +819,14 @@ const AITeachingRoomPage: React.FC = () => {
 
     // 0.5 Interrupt avatar
     if (avatarMode && avatarClientRef.current) {
-      avatarClientRef.current.interrupt().catch(() => {});
+      avatarClientRef.current.interrupt().catch(() => { });
     }
 
     // 0.6 Unlock audio context synchronously on user gesture
     if (audioRef.current && !avatarMode) {
       // Tiny 1-sample silent WAV to register a user-initiated play
       audioRef.current.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
-      audioRef.current.play().catch(() => {});
+      audioRef.current.play().catch(() => { });
     }
 
     // 1. Erase board
@@ -864,8 +864,8 @@ const AITeachingRoomPage: React.FC = () => {
                 // ── Engagement context: passes real-time facial signal state to the AI
                 (engagementEnabled
                   ? `\n\n[STUDENT ENGAGEMENT STATE: ${engagement.engagementState}. Score: ${engagement.engagementScore}/100. ` +
-                    `Adjust your teaching tone accordingly — if distracted/away, be more engaging and hook attention; ` +
-                    `if focused, maintain depth and flow; if confused/distracted, simplify and check in.]`
+                  `Adjust your teaching tone accordingly — if distracted/away, be more engaging and hook attention; ` +
+                  `if focused, maintain depth and flow; if confused/distracted, simplify and check in.]`
                   : ''),
             },
             ...chatHistoryRef.current,
@@ -906,14 +906,14 @@ const AITeachingRoomPage: React.FC = () => {
                   .replace(/\[DIAGRAM\][\s\S]*?(?:\[\/DIAGRAM\]|$)/g, '')
                   .replace(/[*_`#]/g, '')
                   .replace(/\n{2,}/g, '. ');
-                
+
                 const unspoken = cleanText.slice(spokenCursor);
                 const match = unspoken.match(/([^.?!]+[.?!]+)/);
                 if (match) {
                   const sentence = match[0];
                   spokenCursor += match.index! + sentence.length;
                   if (sentence.trim().length > 3) {
-                     avatarClientRef.current.speak({ text: sentence.trim(), taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch((e) => console.error('Avatar speak error', e));
+                    avatarClientRef.current.speak({ text: sentence.trim(), taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch((e) => console.error('Avatar speak error', e));
                   }
                 }
               }
@@ -939,12 +939,12 @@ const AITeachingRoomPage: React.FC = () => {
       // Only append if engagement tracking was active during this explanation
       const closingMsg = engagementEnabled
         ? getClosingFeedback(
-            {
-              engagementScore: engagement.engagementScore,
-              distractedPercent: engagement.sessionStats?.distractedPercent ?? 0,
-            },
-            language,
-          )
+          {
+            engagementScore: engagement.engagementScore,
+            distractedPercent: engagement.sessionStats?.distractedPercent ?? 0,
+          },
+          language,
+        )
         : null;
 
       const finalContent = closingMsg
@@ -965,24 +965,24 @@ const AITeachingRoomPage: React.FC = () => {
       }
 
       if (avatarMode && avatarClientRef.current) {
-          const cleanText = accumulated
-                  .replace(/\[DIAGRAM\][\s\S]*?(?:\[\/DIAGRAM\]|$)/g, '')
-                  .replace(/[*_`#]/g, '')
-                  .replace(/\n{2,}/g, '. ');
-          const unspoken = cleanText.slice(spokenCursor).trim();
-          if (unspoken.length > 2) {
-             avatarClientRef.current.speak({ text: unspoken, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch(() => {});
-          }
-          // Speak the closing message via avatar too
-          if (closingMsg) {
-            setTimeout(() => {
-              avatarClientRef.current?.speak({ text: closingMsg, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch(() => {});
-            }, 1200);
-          }
+        const cleanText = accumulated
+          .replace(/\[DIAGRAM\][\s\S]*?(?:\[\/DIAGRAM\]|$)/g, '')
+          .replace(/[*_`#]/g, '')
+          .replace(/\n{2,}/g, '. ');
+        const unspoken = cleanText.slice(spokenCursor).trim();
+        if (unspoken.length > 2) {
+          avatarClientRef.current.speak({ text: unspoken, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch(() => { });
+        }
+        // Speak the closing message via avatar too
+        if (closingMsg) {
+          setTimeout(() => {
+            avatarClientRef.current?.speak({ text: closingMsg, taskType: TaskType.REPEAT, taskMode: TaskMode.SYNC }).catch(() => { });
+          }, 1200);
+        }
       } else {
-          // 5. Speak accumulated + closing with regular TTS
-          const toSpeak = closingMsg ? `${accumulated} ... ${closingMsg}` : accumulated;
-          speakText(toSpeak);
+        // 5. Speak accumulated + closing with regular TTS
+        const toSpeak = closingMsg ? `${accumulated} ... ${closingMsg}` : accumulated;
+        speakText(toSpeak);
       }
     }
   }, [language, teacher, speakText, stopAll, avatarMode]);
@@ -1028,7 +1028,7 @@ const AITeachingRoomPage: React.FC = () => {
     };
 
     recognition.onerror = () => setIsListening(false);
-    recognition.onend   = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
     recognition.start();
   }, [isListening, callAI, stopAudio]);
 
@@ -1175,17 +1175,17 @@ const AITeachingRoomPage: React.FC = () => {
                 flex-[3] flex flex-col min-h-0 border-l relative overflow-y-auto z-50
                 ${window.innerWidth < 1024 ? 'fixed inset-x-0 bottom-0 h-[80vh] rounded-t-3xl border-t' : ''}
               `}
-              style={{ 
-                borderColor: 'rgba(255,255,255,0.06)', 
+              style={{
+                borderColor: 'rgba(255,255,255,0.06)',
                 background: 'rgba(8,11,18,0.98)',
               }}
             >
               {/* Mobile Close Handle */}
               <div className="lg:hidden w-full flex justify-center py-3">
-                 <button 
+                <button
                   onClick={() => setIsMobileSidebarOpen(false)}
-                  className="w-12 h-1.5 rounded-full bg-white/20 hover:bg-white/40 transition-colors" 
-                 />
+                  className="w-12 h-1.5 rounded-full bg-white/20 hover:bg-white/40 transition-colors"
+                />
               </div>
 
               {/* Local dim overlay for panel */}
@@ -1200,309 +1200,309 @@ const AITeachingRoomPage: React.FC = () => {
                   />
                 )}
               </AnimatePresence>
-              
+
               <div className="flex-1 p-4 lg:p-6 space-y-6">
-                 {/* Mobile Close Button (Alternative) */}
-                 <div className="lg:hidden flex justify-between items-center mb-2">
-                    <span className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Interaction Panel</span>
-                    <button onClick={() => setIsMobileSidebarOpen(false)} className="text-white/40 hover:text-white"><X size={18}/></button>
-                 </div>
-            {/* ── Active Quiz Section ── */}
-            <AnimatePresence>
-               {quizReady && (mcq.status !== 'idle' || !!mcq.error) && (
-                 <motion.div
-                    initial={{ opacity: 0, x: 50, height: 0 }}
-                    animate={{ opacity: 1, x: 0, height: 'auto' }}
-                    exit={{ opacity: 0, x: 50, height: 0 }}
-                    className="mb-6"
-                 >
-                    <MCQCard
-                      key={`${mcq.questionNumber}-${mcq.currentQuestion?.id}`}
-                      mcq={mcq}
-                      accentColor={teacher.accent}
-                      onSelectAnswer={selectMCQAnswer}
-                      onSetMistake={setMistakeType}
-                      onSetConfidence={setConfidence}
-                      onNext={nextMCQQuestion}
-                      onSkip={skipMCQ}
-                    />
-                 </motion.div>
-               )}
-            </AnimatePresence>
-
-            {/* ── Finish Session — Top Position for visibility ── */}
-            <div className="flex justify-end">
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={handleFinishSession}
-                className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-red-500/30 hover:bg-red-500/10 text-red-500 flex items-center gap-1.5"
-                style={{ background: 'rgba(239, 68, 68, 0.05)' }}
-              >
-                <Flag size={12} /> Finish Session
-              </motion.button>
-            </div>
-
-            {/* ── Teacher Avatar ── */}
-            <div className="flex flex-col items-center pt-3">
-              <motion.div
-                animate={isSpeaking ? { scale: [1, 1.04, 1] } : {}}
-                transition={{ repeat: Infinity, duration: 0.8 }}
-                className="relative"
-              >
-                {avatarMode ? (
-                  <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden" 
-                       style={{ border: `3px solid ${teacher.accent}88`, boxShadow: `0 0 24px ${teacher.accent}45` }}>
-                     <video
-                        ref={videoRef}
-                        className="absolute inset-0 w-full h-full object-cover bg-black"
-                        autoPlay
-                        playsInline
-                     />
-                     {isAvatarLoading && (
-                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-10 text-white text-xs gap-2">
-                          <Loader2 size={16} className="animate-spin text-emerald-400" />
-                          <span>Connecting...</span>
-                       </div>
-                     )}
-                  </div>
-                ) : (
-                  <>
-                    {/* Avatar glow */}
-                    {isSpeaking && (
-                      <div
-                        className="absolute inset-0 rounded-full animate-pulse"
-                        style={{ background: `radial-gradient(circle, ${teacher.accent}30 0%, transparent 70%)`, transform: 'scale(1.3)' }}
+                {/* Mobile Close Button (Alternative) */}
+                <div className="lg:hidden flex justify-between items-center mb-2">
+                  <span className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Interaction Panel</span>
+                  <button onClick={() => setIsMobileSidebarOpen(false)} className="text-white/40 hover:text-white"><X size={18} /></button>
+                </div>
+                {/* ── Active Quiz Section ── */}
+                <AnimatePresence>
+                  {quizReady && (mcq.status !== 'idle' || !!mcq.error) && (
+                    <motion.div
+                      initial={{ opacity: 0, x: 50, height: 0 }}
+                      animate={{ opacity: 1, x: 0, height: 'auto' }}
+                      exit={{ opacity: 0, x: 50, height: 0 }}
+                      className="mb-6"
+                    >
+                      <MCQCard
+                        key={`${mcq.questionNumber}-${mcq.currentQuestion?.id}`}
+                        mcq={mcq}
+                        accentColor={teacher.accent}
+                        onSelectAnswer={selectMCQAnswer}
+                        onSetMistake={setMistakeType}
+                        onSetConfidence={setConfidence}
+                        onNext={nextMCQQuestion}
+                        onSkip={skipMCQ}
                       />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* ── Finish Session — Top Position for visibility ── */}
+                <div className="flex justify-end">
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleFinishSession}
+                    className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border border-red-500/30 hover:bg-red-500/10 text-red-500 flex items-center gap-1.5"
+                    style={{ background: 'rgba(239, 68, 68, 0.05)' }}
+                  >
+                    <Flag size={12} /> Finish Session
+                  </motion.button>
+                </div>
+
+                {/* ── Teacher Avatar ── */}
+                <div className="flex flex-col items-center pt-3">
+                  <motion.div
+                    animate={isSpeaking ? { scale: [1, 1.04, 1] } : {}}
+                    transition={{ repeat: Infinity, duration: 0.8 }}
+                    className="relative"
+                  >
+                    {avatarMode ? (
+                      <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden"
+                        style={{ border: `3px solid ${teacher.accent}88`, boxShadow: `0 0 24px ${teacher.accent}45` }}>
+                        <video
+                          ref={videoRef}
+                          className="absolute inset-0 w-full h-full object-cover bg-black"
+                          autoPlay
+                          playsInline
+                        />
+                        {isAvatarLoading && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-10 text-white text-xs gap-2">
+                            <Loader2 size={16} className="animate-spin text-emerald-400" />
+                            <span>Connecting...</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        {/* Avatar glow */}
+                        {isSpeaking && (
+                          <div
+                            className="absolute inset-0 rounded-full animate-pulse"
+                            style={{ background: `radial-gradient(circle, ${teacher.accent}30 0%, transparent 70%)`, transform: 'scale(1.3)' }}
+                          />
+                        )}
+                        <div
+                          className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black relative"
+                          style={{
+                            background: `radial-gradient(circle at 35% 35%, ${teacher.accent}55, ${teacher.accentDark}88)`,
+                            border: `2px solid ${teacher.accent}55`,
+                            boxShadow: `0 0 24px ${teacher.accent}25`,
+                            color: '#fff',
+                            letterSpacing: '-0.02em',
+                          }}
+                        >
+                          {teacher.initials}
+                        </div>
+                      </>
                     )}
-                    <div
-                      className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black relative"
+                  </motion.div>
+
+                  <div className="mt-4 text-center">
+                    <h2 className="text-base font-bold text-white flex items-center justify-center gap-2">
+                      {teacher.name}
+                      <button
+                        onClick={() => setAvatarMode(!avatarMode)}
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider transition-colors ${avatarMode ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
+                        title={avatarMode ? "Disable Video Avatar" : "Enable Video Avatar"}
+                      >
+                        {avatarMode ? "Video ON" : "Video OFF"}
+                      </button>
+                    </h2>
+                    <p className="text-xs mt-0.5" style={{ color: teacher.accent }}>{teacher.subject} Teacher</p>
+                  </div>
+
+                  {/* Speaking indicator */}
+                  <div className="mt-2 h-8 flex items-center">
+                    {isSpeaking ? <SpeakingIndicator /> : (
+                      <span className="text-xs text-slate-500">
+                        {isStreaming ? 'Writing on board...' : 'Ready to teach'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── Engagement / Focus Mode ── */}
+                <div className="flex flex-col items-center">
+                  {/* Hidden video element used by MediaPipe — not displayed */}
+                  <video
+                    ref={cameraVideoRef}
+                    muted
+                    playsInline
+                    className="hidden"
+                    style={{ width: 320, height: 240 }}
+                  />
+                  <EngagementOverlay
+                    cameraStream={engagement.cameraStream}
+                    engagementScore={engagement.engagementScore}
+                    engagementState={engagement.engagementState}
+                    facePresent={engagement.facePresent}
+                    isPermissionGranted={engagement.isPermissionGranted}
+                    isDetectorReady={engagement.isDetectorReady}
+                    isEnabled={engagementEnabled}
+                    onEnable={handleEnableEngagement}
+                    onDisable={handleDisableEngagement}
+                  />
+                </div>
+
+                {/* ── Divider ── */}
+                <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+
+                {/* ── Chapter/Topic Selector ── */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    <BookOpen size={11} />
+                    Select Topic
+                  </div>
+
+                  {/* Chapter dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setChapterOpen(o => !o)}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
                       style={{
-                        background: `radial-gradient(circle at 35% 35%, ${teacher.accent}55, ${teacher.accentDark}88)`,
-                        border: `2px solid ${teacher.accent}55`,
-                        boxShadow: `0 0 24px ${teacher.accent}25`,
-                        color: '#fff',
-                        letterSpacing: '-0.02em',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'rgba(255,255,255,0.85)',
                       }}
                     >
-                      {teacher.initials}
-                    </div>
-                  </>
-                )}
-              </motion.div>
-
-              <div className="mt-4 text-center">
-                <h2 className="text-base font-bold text-white flex items-center justify-center gap-2">
-                   {teacher.name}
-                   <button 
-                     onClick={() => setAvatarMode(!avatarMode)}
-                     className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider transition-colors ${avatarMode ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}
-                     title={avatarMode ? "Disable Video Avatar" : "Enable Video Avatar"}
-                   >
-                     {avatarMode ? "Video ON" : "Video OFF"}
-                   </button>
-                </h2>
-                <p className="text-xs mt-0.5" style={{ color: teacher.accent }}>{teacher.subject} Teacher</p>
-              </div>
-
-              {/* Speaking indicator */}
-              <div className="mt-2 h-8 flex items-center">
-                {isSpeaking ? <SpeakingIndicator /> : (
-                  <span className="text-xs text-slate-500">
-                    {isStreaming ? 'Writing on board...' : 'Ready to teach'}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* ── Engagement / Focus Mode ── */}
-            <div className="flex flex-col items-center">
-              {/* Hidden video element used by MediaPipe — not displayed */}
-              <video
-                ref={cameraVideoRef}
-                muted
-                playsInline
-                className="hidden"
-                style={{ width: 320, height: 240 }}
-              />
-              <EngagementOverlay
-                cameraStream={engagement.cameraStream}
-                engagementScore={engagement.engagementScore}
-                engagementState={engagement.engagementState}
-                facePresent={engagement.facePresent}
-                isPermissionGranted={engagement.isPermissionGranted}
-                isDetectorReady={engagement.isDetectorReady}
-                isEnabled={engagementEnabled}
-                onEnable={handleEnableEngagement}
-                onDisable={handleDisableEngagement}
-              />
-            </div>
-
-            {/* ── Divider ── */}
-            <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-
-            {/* ── Chapter/Topic Selector ── */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                <BookOpen size={11} />
-                Select Topic
-              </div>
-
-              {/* Chapter dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setChapterOpen(o => !o)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'rgba(255,255,255,0.85)',
-                  }}
-                >
-                  <span className="truncate">{currentChapter?.name || 'Loading Chapters...'}</span>
-                  <ChevronDown size={14} className={`flex-shrink-0 transition-transform ${chapterOpen ? 'rotate-180' : ''}`} />
-                </button>
-                <AnimatePresence>
-                  {chapterOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      className="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden z-40"
-                      style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.12)' }}
-                    >
-                      {teacher?.chapters?.map((ch, i) => (
-                        <button
-                          key={i}
-                          onClick={() => { setSelectedChapter(i); setSelectedTopic(0); setChapterOpen(false); }}
-                          className="w-full text-left px-4 py-2.5 text-sm transition-colors"
-                          style={{
-                            color: selectedChapter === i ? teacher.accent : 'rgba(255,255,255,0.7)',
-                            background: selectedChapter === i ? `${teacher.accent}15` : 'transparent',
-                          }}
+                      <span className="truncate">{currentChapter?.name || 'Loading Chapters...'}</span>
+                      <ChevronDown size={14} className={`flex-shrink-0 transition-transform ${chapterOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {chapterOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          className="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden z-40"
+                          style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.12)' }}
                         >
-                          {ch.name}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                          {teacher?.chapters?.map((ch, i) => (
+                            <button
+                              key={i}
+                              onClick={() => { setSelectedChapter(i); setSelectedTopic(0); setChapterOpen(false); }}
+                              className="w-full text-left px-4 py-2.5 text-sm transition-colors"
+                              style={{
+                                color: selectedChapter === i ? teacher.accent : 'rgba(255,255,255,0.7)',
+                                background: selectedChapter === i ? `${teacher.accent}15` : 'transparent',
+                              }}
+                            >
+                              {ch.name}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
-              {/* Topic dropdown */}
-              <div className="relative">
-                <button
-                  onClick={() => setTopicOpen(o => !o)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'rgba(255,255,255,0.85)',
-                  }}
-                >
-                  <span className="truncate">{currentChapter?.topics?.[selectedTopic] || 'Select Topic'}</span>
-                  <ChevronDown size={14} className={`flex-shrink-0 transition-transform ${topicOpen ? 'rotate-180' : ''}`} />
-                </button>
-                <AnimatePresence>
-                  {topicOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      className="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden z-40"
-                      style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.12)' }}
+                  {/* Topic dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setTopicOpen(o => !o)}
+                      className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium transition-all"
+                      style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'rgba(255,255,255,0.85)',
+                      }}
                     >
-                      {currentChapter?.topics?.map((t, i) => (
-                        <button
-                          key={i}
-                          onClick={() => { setSelectedTopic(i); setTopicOpen(false); }}
-                          className="w-full text-left px-4 py-2.5 text-sm transition-colors"
-                          style={{
-                            color: selectedTopic === i ? teacher.accent : 'rgba(255,255,255,0.7)',
-                            background: selectedTopic === i ? `${teacher.accent}15` : 'transparent',
-                          }}
+                      <span className="truncate">{currentChapter?.topics?.[selectedTopic] || 'Select Topic'}</span>
+                      <ChevronDown size={14} className={`flex-shrink-0 transition-transform ${topicOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {topicOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          className="absolute left-0 right-0 top-full mt-1 rounded-xl overflow-hidden z-40"
+                          style={{ background: '#141822', border: '1px solid rgba(255,255,255,0.12)' }}
                         >
-                          {t}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                          {currentChapter?.topics?.map((t, i) => (
+                            <button
+                              key={i}
+                              onClick={() => { setSelectedTopic(i); setTopicOpen(false); }}
+                              className="w-full text-left px-4 py-2.5 text-sm transition-colors"
+                              style={{
+                                color: selectedTopic === i ? teacher.accent : 'rgba(255,255,255,0.7)',
+                                background: selectedTopic === i ? `${teacher.accent}15` : 'transparent',
+                              }}
+                            >
+                              {t}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
-              {/* Explain button */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handleExplain}
-                disabled={isStreaming || isErasing}
-                className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: isStreaming ? 'rgba(255,255,255,0.05)' : `linear-gradient(135deg, ${teacher.accent}, ${teacher.accentDark})`,
-                  color: isStreaming ? 'rgba(255,255,255,0.4)' : '#fff',
-                  boxShadow: isStreaming ? 'none' : `0 4px 16px ${teacher.accent}40`,
-                }}
-              >
-                {isStreaming ? (
-                  <><Loader2 size={14} className="animate-spin" /> Explaining...</>
-                ) : (
-                  <><BookOpen size={14} /> Explain This Topic</>
-                )}
-              </motion.button>
-            </div>
-
-            {/* ── Divider ── */}
-            <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-
-            {/* Quick chips */}
-            <div className="space-y-2">
-              <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Quick doubts</p>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  language === 'hinglish' ? 'Formula kya hai?' : language === 'hindi' ? 'सूत्र क्या है?' : 'What is the formula?',
-                  language === 'hinglish' ? 'Ek example do' : language === 'hindi' ? 'एक उदाहरण दें' : 'Give an example',
-                  language === 'hinglish' ? 'JEE tip batao' : language === 'hindi' ? 'JEE टिप बताएं' : 'JEE exam tip',
-                ].map((chip, i) => (
-                  <button
-                    key={i}
-                    onClick={() => { sessionTracker.recordInteraction('chip'); callAI(chip); }}
-                    disabled={isStreaming}
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all disabled:opacity-40"
+                  {/* Explain button */}
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
+                    onClick={handleExplain}
+                    disabled={isStreaming || isErasing}
+                    className="w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
-                      background: `${teacher.accent}15`,
-                      color: teacher.accent,
-                      border: `1px solid ${teacher.accent}30`,
+                      background: isStreaming ? 'rgba(255,255,255,0.05)' : `linear-gradient(135deg, ${teacher.accent}, ${teacher.accentDark})`,
+                      color: isStreaming ? 'rgba(255,255,255,0.4)' : '#fff',
+                      boxShadow: isStreaming ? 'none' : `0 4px 16px ${teacher.accent}40`,
                     }}
                   >
-                    {chip}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-        )}
-      </AnimatePresence>
+                    {isStreaming ? (
+                      <><Loader2 size={14} className="animate-spin" /> Explaining...</>
+                    ) : (
+                      <><BookOpen size={14} /> Explain This Topic</>
+                    )}
+                  </motion.button>
+                </div>
 
-      {/* ── Mobile Floating Toggle Tab ── */}
-      <AnimatePresence>
-         {!isMobileSidebarOpen && (mcq.status === 'active' || mcq.status === 'feedback') && (
-           <motion.button
-             initial={{ y: 50, opacity: 0 }}
-             animate={{ y: 0, opacity: 1 }}
-             exit={{ y: 50, opacity: 0 }}
-             onClick={() => setIsMobileSidebarOpen(true)}
-             className="lg:hidden fixed bottom-24 right-4 z-40 px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 border border-emerald-500/30"
-             style={{ background: teacher.accent, color: '#fff' }}
-           >
-             <BookOpen size={16} />
-             <span className="text-xs font-bold uppercase tracking-wider">Open Assessment</span>
-             <motion.div 
-               animate={{ scale: [1, 1.2, 1] }} 
-               transition={{ repeat: Infinity, duration: 1 }}
-               className="w-2 h-2 rounded-full bg-white shadow-glow" 
-             />
-           </motion.button>
-         )}
-      </AnimatePresence>
+                {/* ── Divider ── */}
+                <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+
+                {/* Quick chips */}
+                <div className="space-y-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Quick doubts</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      language === 'hinglish' ? 'Formula kya hai?' : language === 'hindi' ? 'सूत्र क्या है?' : 'What is the formula?',
+                      language === 'hinglish' ? 'Ek example do' : language === 'hindi' ? 'एक उदाहरण दें' : 'Give an example',
+                      language === 'hinglish' ? 'JEE tip batao' : language === 'hindi' ? 'JEE टिप बताएं' : 'JEE exam tip',
+                    ].map((chip, i) => (
+                      <button
+                        key={i}
+                        onClick={() => { sessionTracker.recordInteraction('chip'); callAI(chip); }}
+                        disabled={isStreaming}
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all disabled:opacity-40"
+                        style={{
+                          background: `${teacher.accent}15`,
+                          color: teacher.accent,
+                          border: `1px solid ${teacher.accent}30`,
+                        }}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Mobile Floating Toggle Tab ── */}
+        <AnimatePresence>
+          {!isMobileSidebarOpen && (mcq.status === 'active' || mcq.status === 'feedback') && (
+            <motion.button
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="lg:hidden fixed bottom-24 right-4 z-40 px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 border border-emerald-500/30"
+              style={{ background: teacher.accent, color: '#fff' }}
+            >
+              <BookOpen size={16} />
+              <span className="text-xs font-bold uppercase tracking-wider">Open Assessment</span>
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ repeat: Infinity, duration: 1 }}
+                className="w-2 h-2 rounded-full bg-white shadow-glow"
+              />
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* ── BOTTOM DOUBT BOX ── */}

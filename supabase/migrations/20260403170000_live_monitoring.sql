@@ -5,7 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Table: assessment_sessions
 CREATE TABLE IF NOT EXISTS public.assessment_sessions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_by UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
     batch_id UUID REFERENCES public.batches(id) ON DELETE SET NULL,
     exam_type TEXT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS public.assessment_sessions (
 
 -- Table: session_participants
 CREATE TABLE IF NOT EXISTS public.session_participants (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     session_id UUID REFERENCES public.assessment_sessions(id) ON DELETE CASCADE,
     student_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL, -- Nullable for Guest Onboarding
     student_name TEXT NOT NULL,

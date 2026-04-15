@@ -1,4 +1,4 @@
-project_id = "cdgysuewybntfbbudxca"
+project_id = "osbpdjlywgydidzurpsb"
 
 [functions.process-lecture]
 verify_jwt = false

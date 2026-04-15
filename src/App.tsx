@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -134,7 +134,7 @@ const App = () => (
                     <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
                     
                     {/* B2B Dashboard Routes — Teacher Portal (mentors only) */}
-                    <Route path="/b2b" element={<TeacherRoute><span /></TeacherRoute>}>
+                    <Route path="/b2b" element={<TeacherRoute><Outlet /></TeacherRoute>}>
                       <Route index element={<TeacherRoute><B2BOverview /></TeacherRoute>} />
                       <Route path="batches" element={<TeacherRoute><B2BBatches /></TeacherRoute>} />
                       <Route path="materials" element={<TeacherRoute><B2BMaterials /></TeacherRoute>} />

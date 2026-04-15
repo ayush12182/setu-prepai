@@ -188,7 +188,7 @@ const AuthPage: React.FC = () => {
         await signUpWithEmail(email, password, fullName);
         toast.success('Account created! Let\'s set up your learning profile 🎯');
         setShowOnboarding(true);
-        setOnboardingStep(1);
+        setOnboardingStep(getInitialStep());
       } else {
         await signInWithEmail(email, password);
       }

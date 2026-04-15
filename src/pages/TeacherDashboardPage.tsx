@@ -288,14 +288,25 @@ const TeacherDashboard: React.FC = () => {
   const handleGenerateCode = async () => {
     setGeneratingCode(true);
     try {
-      const { data: codeStr } = await (supabase.rpc as any)('generate_teacher_code');
-      if (!codeStr) throw new Error('Failed to generate code');
+      let codeStr = '';
+      const { data, error: rpcError } = await (supabase.rpc as any)('generate_teacher_code');
+      
+      if (data && !rpcError) {
+        codeStr = data;
+      } else {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        for (let i = 0; i < 6; i++) {
+          codeStr += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+      }
+
+      if (!codeStr) throw new Error('Failed to generate code context');
 
       const exp = codeForm.expires_days
         ? new Date(Date.now() + parseInt(codeForm.expires_days) * 86400000).toISOString()
         : null;
 
-      await (supabase.from as any)('teacher_codes').insert({
+      const { error: insertError } = await (supabase.from as any)('teacher_codes').insert({
         teacher_id:   user!.id,
         code:         codeStr,
         label:        codeForm.label || null,
@@ -304,6 +315,10 @@ const TeacherDashboard: React.FC = () => {
         max_students: codeForm.max_students ? parseInt(codeForm.max_students) : null,
         expires_at:   exp,
       });
+
+      if (insertError) {
+        throw insertError;
+      }
 
       toast.success(`Code ${codeStr} created!`);
       setShowCodeForm(false);

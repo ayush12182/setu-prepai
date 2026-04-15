@@ -23,7 +23,7 @@ CREATE POLICY "Anyone authenticated can read orgs"
 
 -- 2. EXTEND PROFILES — add user_type and organization linkage
 ALTER TABLE public.profiles
-    ADD COLUMN IF NOT EXISTS user_type TEXT DEFAULT 'b2c'
+    ADD COLUMN IF NOT EXISTS user_type TEXT DEFAULT 'b2c_student'
         CHECK (user_type IN ('b2c_student', 'b2b_student', 'b2b_mentor', 'b2b_institution', 'admin')),
     ADD COLUMN IF NOT EXISTS organization_id UUID REFERENCES public.organizations(id) ON DELETE SET NULL;
 
