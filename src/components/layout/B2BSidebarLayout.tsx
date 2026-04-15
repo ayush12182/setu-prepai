@@ -111,7 +111,7 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
           </Button>
           
           <Button variant="ghost" asChild className="w-full justify-start text-muted-foreground mt-1">
-            <Link to="/dashboard">
+            <Link to="/student-hub">
               <ChevronLeft size={16} className="mr-2" /> View Student App
             </Link>
           </Button>

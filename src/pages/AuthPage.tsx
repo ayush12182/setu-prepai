@@ -261,16 +261,39 @@ const AuthPage: React.FC = () => {
   const handleOnboardingComplete = async () => {
     setLoading(true);
     try {
-      // --- Teacher: save their teaching stream as target_exam ---
+      // --- Teacher: auto-create org, save profile ---
       if (onboardingData.userType === 'b2b_mentor') {
         const examGoal = getExamGoalFromStream(onboardingData.stream as StreamType) || 'JEE Main';
+        
+        // Create an organization for this teacher
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        let orgId: string | null = null;
+        if (currentUser) {
+          const institutionLabel = onboardingData.institutionName?.trim() || `${(fullName || currentUser.email?.split('@')[0] || 'Teacher').split(' ')[0]}'s Institute`;
+          const { data: newOrg } = await (supabase as any)
+            .from('organizations')
+            .insert({ name: institutionLabel, exam_type: examGoal })
+            .select('id')
+            .single();
+          if (newOrg) {
+            orgId = (newOrg as any).id;
+          }
+        }
+
         await updateProfile({
           target_exam: examGoal,
           class: 'teacher',
           student_level: '11-12',
           user_type: 'b2b_mentor',
-          institution_name: onboardingData.institutionName || null,
-        });
+          institution_name: onboardingData.institutionName?.trim() || null,
+          organization_id: orgId,
+        } as any);
+
+        // Also store org_id in auth metadata so it persists across sessions
+        if (orgId) {
+          await supabase.auth.updateUser({ data: { user_type: 'b2b_mentor', organization_id: orgId } });
+        }
+
         toast.success('Teacher portal ready! Welcome to SETU 👨‍🏫');
         navigate('/teacher-dashboard');
         return;
@@ -320,10 +343,8 @@ const AuthPage: React.FC = () => {
       // Route by user type after onboarding
       if (onboardingData.userType === 'b2b_student') {
         navigate('/student-hub');
-      } else if (onboardingData.userType === 'b2c_student') {
-        navigate('/dashboard');
       } else {
-        navigate('/foundation-assessment');
+        navigate('/dashboard');
       }
     } catch (error) {
       console.error('Onboarding error:', error);

@@ -28,48 +28,67 @@ export default function B2BOverview() {
   const fetchOverviewData = async () => {
     setLoading(true);
     try {
-      const orgId = profile?.organization_id;
+      const orgId = (profile as any)?.organization_id;
       if (!orgId) {
+        // New teacher — no org yet. Still show empty dashboard
+        setStats({ totalStudents: 0, activeBatches: 0, testsCreated: 0, avgAccuracy: 0 });
+        setBatches([]);
+        setTopicAccuracy([
+          { topic: 'Physics', accuracy: 0, color: '#3b82f6' },
+          { topic: 'Chemistry', accuracy: 0, color: '#f59e0b' },
+        ]);
         setLoading(false);
         return;
       }
 
+      // Try RPC first, fall back to direct queries
       const { data, error } = await (supabase as any).rpc('get_b2b_overview_stats', {
         p_organization_id: orgId
       });
 
-      if (error) throw error;
+      if (!error && data) {
+        setStats({
+          totalStudents: data.totalStudents ?? 0,
+          activeBatches: data.activeBatches ?? 0,
+          testsCreated: data.testsCreated ?? 0,
+          avgAccuracy: data.avgAccuracy ?? 0,
+        });
+        setBatches(data.batches || []);
+        const topicData = (data.topicAccuracy || [])
+          .map((t: any, i: number) => ({ ...t, topic: t.topic.charAt(0).toUpperCase() + t.topic.slice(1), color: COLORS[i % COLORS.length] }))
+          .sort((a: any, b: any) => b.accuracy - a.accuracy)
+          .slice(0, 6);
+        setTopicAccuracy(topicData.length > 0 ? topicData : [
+          { topic: 'Physics', accuracy: 0, color: '#3b82f6' },
+          { topic: 'Chemistry', accuracy: 0, color: '#f59e0b' },
+        ]);
+      } else {
+        // RPC not available — direct queries
+        const { count: studentCount } = await (supabase as any)
+          .from('batch_members').select('*', { count: 'exact', head: true })
+          .eq('batches.organization_id', orgId);
 
-      setStats({
-        totalStudents: data.totalStudents,
-        activeBatches: data.activeBatches,
-        testsCreated: data.testsCreated,
-        avgAccuracy: data.avgAccuracy,
-      });
+        const { count: batchCount } = await (supabase as any)
+          .from('batches').select('*', { count: 'exact', head: true })
+          .eq('organization_id', orgId).eq('is_active', true);
 
-      setBatches(data.batches || []);
+        const { data: batchList } = await (supabase as any)
+          .from('batches').select('id, name').eq('organization_id', orgId).eq('is_active', true);
 
-      const topicAccuracyData = (data.topicAccuracy || [])
-        .map((t: any, i: number) => ({
-          ...t,
-          topic: t.topic.charAt(0).toUpperCase() + t.topic.slice(1),
-          color: COLORS[i % COLORS.length],
-        }))
-        .sort((a: any, b: any) => b.accuracy - a.accuracy)
-        .slice(0, 6);
-
-      setTopicAccuracy(
-        topicAccuracyData.length > 0
-          ? topicAccuracyData
-          : [
-              { topic: 'Physics', accuracy: 68, color: '#3b82f6' },
-              { topic: 'Chemistry', accuracy: 52, color: '#f59e0b' },
-              { topic: 'Maths', accuracy: 74, color: '#10b981' },
-            ]
-      );
+        setStats({
+          totalStudents: studentCount ?? 0,
+          activeBatches: batchCount ?? 0,
+          testsCreated: 0,
+          avgAccuracy: 0,
+        });
+        setBatches((batchList || []).map((b: any) => ({ ...b, students: 0, avgAccuracy: 0 })));
+        setTopicAccuracy([
+          { topic: 'Physics', accuracy: 0, color: '#3b82f6' },
+          { topic: 'Chemistry', accuracy: 0, color: '#f59e0b' },
+        ]);
+      }
     } catch (e) {
       console.error('Overview fetch error', e);
-      toast.error('Failed to load dashboard analytics');
     } finally {
       setLoading(false);
     }

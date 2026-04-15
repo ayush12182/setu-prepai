@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useB2BManager } from '@/hooks/useB2BManager';
 import { toast } from 'sonner';
+import { getSubjectLabels } from '@/lib/streamSubjects';
 
 export default function B2BBatches() {
   const { profile, user } = useAuth();
@@ -14,7 +15,22 @@ export default function B2BBatches() {
   const [batches, setBatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState({ name: '', subject: 'Physics', targetExam: 'JEE' });
+
+  // Default exam from teacher profile
+  const defaultExam = (() => {
+    const te = (profile?.target_exam || '').toUpperCase();
+    if (te.includes('CUET')) return 'CUET';
+    if (te.includes('NEET')) return 'NEET';
+    if (te.includes('ADVANCED')) return 'JEE_ADVANCED';
+    if (te.includes('JEE')) return 'JEE_MAINS';
+    return 'JEE_MAINS';
+  })();
+  const defaultSubjects = getSubjectLabels(defaultExam);
+  const [form, setForm] = useState({
+    name: '',
+    subject: defaultSubjects[0] || 'Physics',
+    targetExam: defaultExam
+  });
   const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
   const [accuracyMap, setAccuracyMap] = useState<Record<string, number>>({});
 
@@ -87,7 +103,8 @@ export default function B2BBatches() {
     if (result) {
       toast.success('Batch created! Now generate a join code to invite students.');
       setShowCreate(false);
-      setForm({ name: '', subject: 'Physics', targetExam: 'JEE' });
+      const defaultSubs = getSubjectLabels(defaultExam);
+      setForm({ name: '', subject: defaultSubs[0] || 'Physics', targetExam: defaultExam });
       fetchBatches();
     }
   };
@@ -140,25 +157,34 @@ export default function B2BBatches() {
                   />
                 </div>
                 <div>
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">Target Exam</label>
+                  <select
+                    value={form.targetExam}
+                    onChange={e => {
+                      const exam = e.target.value;
+                      const subs = getSubjectLabels(exam);
+                      setForm({ ...form, targetExam: exam, subject: subs[0] || 'General' });
+                    }}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
+                  >
+                    <option value="JEE_MAINS">JEE Mains</option>
+                    <option value="JEE_ADVANCED">JEE Advanced</option>
+                    <option value="NEET">NEET</option>
+                    <option value="CUET">CUET</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+                <div>
                   <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">Primary Subject</label>
                   <select
                     value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })}
                     className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
                   >
-                    {['Physics', 'Chemistry', 'Mathematics', 'Biology', 'All Subjects'].map(s => (
+                    {getSubjectLabels(form.targetExam).map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">Target Exam</label>
-                  <select
-                    value={form.targetExam}
-                    onChange={e => setForm({ ...form, targetExam: e.target.value })}
-                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
-                  >
-                    {['JEE', 'NEET', 'CUET'].map(e => <option key={e} value={e}>{e}</option>)}
+                    <option value="All Subjects">All Subjects</option>
                   </select>
                 </div>
                 <Button type="submit" disabled={creating} className="w-full h-12 bg-accent text-white font-bold rounded-xl">
