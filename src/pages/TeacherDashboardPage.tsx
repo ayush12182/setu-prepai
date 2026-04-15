@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { getSubjectLabels } from '@/lib/streamSubjects';
 
 // ─── Types ────────────────────────────────────────────────────
 type ExamFilter = 'ALL' | 'JEE_MAINS' | 'JEE_ADVANCED' | 'NEET' | 'CUET';
@@ -119,7 +120,32 @@ const TeacherDashboard: React.FC = () => {
 
   // Code generation form
   const [showCodeForm, setShowCodeForm] = useState(false);
-  const [codeForm, setCodeForm] = useState({ label: '', exam_type: 'JEE_MAINS', subject: 'Physics', max_students: '', expires_days: '' });
+  const [codeForm, setCodeForm] = useState({
+    label: '',
+    exam_type: 'JEE_MAINS',
+    subject: 'Physics',
+    max_students: '',
+    expires_days: ''
+  });
+
+  // Watch for profile to load and initialize form defaults based on target_exam
+  useEffect(() => {
+    if (profile?.target_exam) {
+      const te = profile.target_exam.toUpperCase();
+      let initExam = 'JEE_MAINS';
+      if (te.includes('CUET')) initExam = 'CUET';
+      if (te.includes('NEET')) initExam = 'NEET';
+      if (te.includes('ADVANCED')) initExam = 'JEE_ADVANCED';
+      if (te.includes('CA') || te.includes('COMMERCE')) initExam = 'OTHER';
+
+      const allowSubjects = getSubjectLabels(initExam);
+      setCodeForm(f => ({
+        ...f,
+        exam_type: initExam,
+        subject: allowSubjects[0] || 'General'
+      }));
+    }
+  }, [profile?.target_exam]);
   const [generatingCode, setGeneratingCode] = useState(false);
 
   // ─── Fetch students linked to this teacher ──────────────────
@@ -322,7 +348,7 @@ const TeacherDashboard: React.FC = () => {
 
       toast.success(`Code ${codeStr} created!`);
       setShowCodeForm(false);
-      setCodeForm({ label: '', exam_type: 'JEE_MAINS', subject: 'Physics', max_students: '', expires_days: '' });
+      setCodeForm(f => ({ ...f, label: '', max_students: '', expires_days: '' }));
       await fetchCodes();
     } catch (e: any) {
       toast.error(e.message || 'Failed to generate code');
@@ -795,7 +821,11 @@ const TeacherDashboard: React.FC = () => {
                     <div>
                       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Exam Type</label>
                       <select value={codeForm.exam_type}
-                        onChange={e => setCodeForm(f => ({ ...f, exam_type: e.target.value }))}
+                        onChange={e => {
+                          const newExam = e.target.value;
+                          const newSubjects = getSubjectLabels(newExam);
+                          setCodeForm(f => ({ ...f, exam_type: newExam, subject: newSubjects[0] || 'General' }));
+                        }}
                         className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent">
                         <option value="JEE_MAINS">JEE Mains</option>
                         <option value="JEE_ADVANCED">JEE Advanced</option>
@@ -809,15 +839,10 @@ const TeacherDashboard: React.FC = () => {
                       <select value={codeForm.subject}
                         onChange={e => setCodeForm(f => ({ ...f, subject: e.target.value }))}
                         className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent">
-                        <option>Physics</option>
-                        <option>Chemistry</option>
-                        <option>Mathematics</option>
-                        <option>Biology</option>
-                        <option>Accounts</option>
-                        <option>Economics</option>
-                        <option>Business Studies</option>
-                        <option>English</option>
-                        <option>General</option>
+                        {getSubjectLabels(codeForm.exam_type).map(sub => (
+                          <option key={sub} value={sub}>{sub}</option>
+                        ))}
+                        <option value="General">General</option>
                       </select>
                     </div>
                     <div>
