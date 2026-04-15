@@ -56,6 +56,7 @@ import JoinBatchPage from "./pages/B2B/JoinBatchPage";
 // Admin
 import QuestionQCPanel from "./pages/Admin/QuestionQCPanel";
 import QuestionGeneratorPage from "./pages/Admin/QuestionGeneratorPage";
+import BulkPYQGenerator from "./pages/Admin/BulkPYQGenerator";
 
 // Assess
 import B2BAssessmentTakerPage from "./pages/Assess/B2BAssessmentTakerPage";
@@ -152,6 +153,7 @@ const App = () => (
                     {/* Admin Routes */}
                     <Route path="/admin/qc" element={<QuestionQCPanel />} />
                     <Route path="/admin/question-generator" element={<QuestionGeneratorPage />} />
+                    <Route path="/admin/bulk-pyq-generator" element={<BulkPYQGenerator />} />
                     
                     {/* Student Hub — B2B students only */}
                     <Route path="/student-hub" element={<StudentHubRoute><StudentHubPage /></StudentHubRoute>} />
