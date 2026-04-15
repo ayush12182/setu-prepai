@@ -57,6 +57,8 @@ import JoinBatchPage from "./pages/B2B/JoinBatchPage";
 import QuestionQCPanel from "./pages/Admin/QuestionQCPanel";
 import QuestionGeneratorPage from "./pages/Admin/QuestionGeneratorPage";
 import BulkPYQGenerator from "./pages/Admin/BulkPYQGenerator";
+import AdaptivePracticePage from "./pages/AdaptivePracticePage";
+import StudentAnalyticsPage from "./pages/B2B/StudentAnalyticsPage";
 
 // Assess
 import B2BAssessmentTakerPage from "./pages/Assess/B2BAssessmentTakerPage";
@@ -154,6 +156,12 @@ const App = () => (
                     <Route path="/admin/qc" element={<QuestionQCPanel />} />
                     <Route path="/admin/question-generator" element={<QuestionGeneratorPage />} />
                     <Route path="/admin/bulk-pyq-generator" element={<BulkPYQGenerator />} />
+                    
+                    {/* Adaptive Practice Engine */}
+                    <Route path="/practice/adaptive" element={<AdaptivePracticePage />} />
+
+                    {/* Teacher analytics */}
+                    <Route path="/teacher/student-analytics" element={<StudentAnalyticsPage />} />
                     
                     {/* Student Hub — B2B students only */}
                     <Route path="/student-hub" element={<StudentHubRoute><StudentHubPage /></StudentHubRoute>} />

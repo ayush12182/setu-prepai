@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Layers, ClipboardList,
-  LineChart, UserPlus, Settings, Menu, X, LogOut, ChevronLeft, BookOpen
+  LineChart, UserPlus, Settings, Menu, X, LogOut, ChevronLeft, BookOpen, Brain
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -21,6 +21,7 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
     { icon: BookOpen, label: 'Study Materials', path: '/b2b/materials' },
     { icon: ClipboardList, label: 'Tests', path: '/b2b/tests' },
     { icon: LineChart, label: 'Analytics', path: '/b2b/analytics' },
+    { icon: Brain, label: 'Student Analytics', path: '/teacher/student-analytics' },
     { icon: UserPlus, label: 'Invite Students', path: '/b2b/invite' },
     { icon: Settings, label: 'Settings', path: '/b2b/settings' },
   ];
