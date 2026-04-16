@@ -15,41 +15,49 @@ export const useB2BManager = () => {
     if (!user) return null;
 
     try {
-      // Check if an org already exists for this user but isn't linked
-      const { data: existingOrg } = await (supabase as any)
-        .from('organizations')
-        .select('id')
-        .eq('created_by', user.id)
+      // Fetch latest profile from DB (not stale context)
+      const { data: freshProfile } = await (supabase as any)
+        .from('profiles')
+        .select('organization_id, full_name')
+        .eq('user_id', user.id)
         .maybeSingle();
 
-      let resolvedOrgId: string;
+      if (freshProfile?.organization_id) {
+        return freshProfile.organization_id;
+      }
 
-      if (existingOrg?.id) {
-        resolvedOrgId = existingOrg.id;
-      } else {
-        // Create a new org
-        const displayName = profile?.full_name || user.email?.split('@')[0] || 'My Institute';
-        const { data: newOrg, error: orgErr } = await (supabase as any)
-          .from('organizations')
-          .insert({ name: `${displayName}'s Institute`, created_by: user.id })
-          .select('id')
-          .single();
-        if (orgErr || !newOrg) throw new Error(orgErr?.message || 'Failed to create organization');
-        resolvedOrgId = newOrg.id;
+      // Create a brand new org for this teacher
+      const displayName = freshProfile?.full_name || profile?.full_name || user.email?.split('@')[0] || 'Teacher';
+      const slug = `${displayName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`;
+
+      const { data: newOrg, error: orgErr } = await (supabase as any)
+        .from('organizations')
+        .insert({
+          name: `${displayName}'s Institute`,
+          slug,
+          created_by: user.id,
+        })
+        .select('id')
+        .single();
+
+      if (orgErr || !newOrg) {
+        console.error('Org insert error:', orgErr);
+        throw new Error(orgErr?.message || 'Failed to create organization');
       }
 
       // Link org to profile
       await (supabase as any)
         .from('profiles')
-        .update({ organization_id: resolvedOrgId })
+        .update({ organization_id: newOrg.id })
         .eq('user_id', user.id);
 
-      return resolvedOrgId;
+      return newOrg.id;
     } catch (err: any) {
       console.error('ensureOrganization failed:', err);
       return null;
     }
   };
+
 
   const createBatch = async (name: string, subject: string, mentorId?: string) => {
     setLoading(true);
