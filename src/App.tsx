@@ -134,7 +134,7 @@ const App = () => (
                     <Route path="/learning-profile" element={<LearningProfilePage />} />
                     <Route path="/concept-graph" element={<ConceptGraphPage />} />
                     <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
-                    <Route path="/teacher-dashboard" element={<TeacherDashboardPage />} />
+                    <Route path="/teacher-dashboard" element={<Navigate to="/b2b" replace />} />
                     
                     {/* B2B Dashboard Routes — Teacher Portal (mentors only) */}
                     <Route path="/b2b" element={<TeacherRoute><Outlet /></TeacherRoute>}>
