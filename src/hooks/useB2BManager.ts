@@ -9,23 +9,67 @@ export const useB2BManager = () => {
 
   const orgId = profile?.organization_id;
 
-  const createBatch = async (name: string, subject: string, mentorId?: string) => {
-    if (!orgId) {
-      toast.error('No organization linked to your profile.');
+  /** Ensures teacher has an org — creates one if missing (handles pre-fix signups) */
+  const ensureOrganization = async (): Promise<string | null> => {
+    if (orgId) return orgId;
+    if (!user) return null;
+
+    try {
+      // Check if an org already exists for this user but isn't linked
+      const { data: existingOrg } = await (supabase as any)
+        .from('organizations')
+        .select('id')
+        .eq('created_by', user.id)
+        .maybeSingle();
+
+      let resolvedOrgId: string;
+
+      if (existingOrg?.id) {
+        resolvedOrgId = existingOrg.id;
+      } else {
+        // Create a new org
+        const displayName = profile?.full_name || user.email?.split('@')[0] || 'My Institute';
+        const { data: newOrg, error: orgErr } = await (supabase as any)
+          .from('organizations')
+          .insert({ name: `${displayName}'s Institute`, created_by: user.id })
+          .select('id')
+          .single();
+        if (orgErr || !newOrg) throw new Error(orgErr?.message || 'Failed to create organization');
+        resolvedOrgId = newOrg.id;
+      }
+
+      // Link org to profile
+      await (supabase as any)
+        .from('profiles')
+        .update({ organization_id: resolvedOrgId })
+        .eq('user_id', user.id);
+
+      return resolvedOrgId;
+    } catch (err: any) {
+      console.error('ensureOrganization failed:', err);
       return null;
     }
+  };
+
+  const createBatch = async (name: string, subject: string, mentorId?: string) => {
     setLoading(true);
     try {
+      const resolvedOrgId = await ensureOrganization();
+      if (!resolvedOrgId) {
+        toast.error('Could not link an organization to your profile. Please try again.');
+        return null;
+      }
+
       const { data, error } = await supabase.from('batches' as any).insert({
         name,
         subject,
         mentor_id: mentorId || user?.id,
-        organization_id: orgId,
+        organization_id: resolvedOrgId,
         is_active: true
       }).select().single();
 
       if (error) throw error;
-      toast.success(`Batch ${name} created successfully.`);
+      toast.success(`Batch "${name}" created successfully.`);
       return data;
     } catch (err: any) {
       console.error('Error creating batch:', err);
@@ -35,6 +79,7 @@ export const useB2BManager = () => {
       setLoading(false);
     }
   };
+
 
   const createTest = async (params: {
     batch_id: string;
