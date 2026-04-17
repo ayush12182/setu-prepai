@@ -387,10 +387,38 @@ const AuthPage: React.FC = () => {
     } finally { setLoading(false); }
   };
 
-  const handleOnboardingNext = () => {
-    // Teacher: go to stream selection (step 1) to pick what they teach
+  const handleOnboardingNext = async () => {
+    // ── Coaching Student: validate + join batch immediately at Step 0 ──
+    if (onboardingStep === 0 && onboardingData.userType === 'b2b_student') {
+      const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
+      if (!joinCode || joinCode.length !== 6) {
+        toast.error('Please enter the 6-character batch code from your teacher');
+        return;
+      }
+      setLoading(true);
+      try {
+        const { joinTeacherByCode } = await import('@/lib/studentActivity');
+        const result = await joinTeacherByCode(joinCode);
+        if (!result.success) {
+          toast.error(result.message || 'Invalid code. Ask your teacher for the correct code.');
+          return;
+        }
+        // Code valid — update user_type in auth + profile context
+        await supabase.auth.updateUser({ data: { user_type: 'b2b_student' } });
+        await updateProfile({ user_type: 'b2b_student' } as any);
+        toast.success(`${result.message} — Welcome to your batch! 🎉`);
+        navigate('/student-hub');
+      } catch (e) {
+        toast.error('Something went wrong. Try again.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // ── Teacher: go to stream selection ──
     if (onboardingStep === 0 && onboardingData.userType === 'b2b_mentor') {
-      setOnboardingStep(1); // show stream selector to pick teaching subject
+      setOnboardingStep(1);
       return;
     }
 
@@ -409,7 +437,6 @@ const AuthPage: React.FC = () => {
 
     if (onboardingStep === 0) setOnboardingStep(1);
     else if (onboardingStep === 1) {
-      // Teachers skip the class step — go straight to complete
       if (onboardingData.userType === 'b2b_mentor') {
         handleOnboardingComplete();
       } else {
@@ -418,6 +445,8 @@ const AuthPage: React.FC = () => {
     }
     else if (onboardingStep === 2) handleOnboardingComplete();
   };
+
+
 
   const totalSteps = 3;
 
