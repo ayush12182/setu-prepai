@@ -471,7 +471,9 @@ const AuthPage: React.FC = () => {
   }
 
   // ─── ONBOARDING ───
-  if (showOnboarding && user) {
+  // Note: We render onboarding even if user hasn't fully synced to context yet 
+  // because Supabase session sync can have a slight delay after signup.
+  if (showOnboarding) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden flex flex-col">
         {/* Ambient background */}
