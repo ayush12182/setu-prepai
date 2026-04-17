@@ -246,7 +246,31 @@ const StudentHubPage: React.FC = () => {
           {activeTab === 'notes' && (
             <motion.div key="notes" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5 mt-4">
 
-              {/* Teacher materials */}
+          {/* ── No-batch CTA ── */}
+              {myBatches.length === 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                  className="relative overflow-hidden rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/10 via-accent/5 to-amber-500/5 p-5"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+                      <GraduationCap className="w-6 h-6 text-accent" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-foreground text-sm">Join your batch to unlock teacher content</p>
+                      <p className="text-xs text-muted-foreground mt-1">Enter the 6-digit code your mentor shared — notes, live tests, and mentor assignments will appear here.</p>
+                      <Button
+                        size="sm"
+                        onClick={() => setShowJoinModal(true)}
+                        className="mt-3 h-9 px-4 bg-accent text-white font-bold rounded-xl text-xs"
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1.5" /> Enter Join Code
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {realMaterials.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
