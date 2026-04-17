@@ -27,8 +27,9 @@ const DIFF_COLORS: Record<string, string> = {
 
 const StudentHubPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('notes');
+
 
   // Fall back to auth user metadata when profile hasn't reloaded yet (e.g. right after onboarding)
   const targetExam = profile?.target_exam || (user as any)?.user_metadata?.target_exam || null;
@@ -105,12 +106,14 @@ const StudentHubPage: React.FC = () => {
     if (result.success) {
       toast.success(result.message);
       setShowJoinModal(false); setJoinCode('');
+      await refreshProfile(); // refresh so header shows batch name immediately
       loadStudentBatchData();
     } else {
       toast.error(result.message);
     }
     setJoiningCode(false);
   };
+
 
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Student';
   const primaryBatch = myBatches[0];

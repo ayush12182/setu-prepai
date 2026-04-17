@@ -8,11 +8,12 @@ import { useB2BManager } from '@/hooks/useB2BManager';
 import { Button } from '@/components/ui/button';
 
 export default function JoinBatchPage() {
-  const { inviteCode } = useParams(); // which is actually the batchId from the invite_link generator
-  const { user, profile } = useAuth();
+  const { inviteCode } = useParams();
+  const { user, profile, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { joinBatchById, loading } = useB2BManager();
+
   
   const [batchInfo, setBatchInfo] = useState<any>(null);
   const [orgInfo, setOrgInfo] = useState<any>(null);
@@ -60,21 +61,21 @@ export default function JoinBatchPage() {
     if (!batchInfo || !user) return;
     const success = await joinBatchById(batchInfo.id);
     if (success) {
-      // Update user_type to b2b_student in auth metadata
-      await supabase.auth.updateUser({ data: { user_type: 'b2b_student' } });
-
-      // Also persist to profiles table
+      // Update user_type in both auth metadata and profiles table
+      await supabase.auth.updateUser({ data: { user_type: 'b2b_student', organization_id: batchInfo.organization_id } });
       await (supabase as any)
         .from('profiles')
-        .update({ user_type: 'b2b_student' })
+        .update({ user_type: 'b2b_student', organization_id: batchInfo.organization_id })
         .eq('user_id', user.id);
 
+      // Force-refresh profile in context so route guard re-evaluates immediately
+      await refreshProfile();
+
       setStatus('joined');
-      setTimeout(() => {
-        navigate('/student-hub'); // Correct destination for B2B students
-      }, 2000);
+      setTimeout(() => navigate('/student-hub'), 1500);
     }
   };
+
 
   if (!user) return null;
 

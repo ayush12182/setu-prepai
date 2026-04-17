@@ -85,11 +85,13 @@ const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
   if (loading) return null;
   const type = profile?.user_type;
   if (!type) return <Navigate to="/auth" replace />;
-  if (type === 'b2b_mentor' || type === 'b2b_institution' || type === 'admin') 
+  // Teachers go to teacher portal
+  if (type === 'b2b_mentor' || type === 'b2b_institution' || type === 'admin')
     return <Navigate to="/b2b" replace />;
-  if (type === 'b2c_student') return <Navigate to="/dashboard" replace />;
+  // Allow b2c_student AND b2b_student — b2c students can join a batch from here
   return <>{children}</>;
 };
+
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

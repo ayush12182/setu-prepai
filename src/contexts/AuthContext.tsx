@@ -46,7 +46,10 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
   checkSubscription: () => Promise<void>;
+  /** Force re-fetch the profile from DB — call after user_type changes (e.g. joining a batch) */
+  refreshProfile: () => Promise<void>;
 }
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -306,7 +309,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signOut,
         updateProfile,
         checkSubscription,
+        refreshProfile: () => user ? fetchProfile(user.id) : Promise.resolve(),
       }}
+
     >
       {children}
     </AuthContext.Provider>
