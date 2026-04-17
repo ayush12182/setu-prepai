@@ -75,12 +75,14 @@ export default function B2BTests() {
       const { data } = await (supabase as any)
         .from('assessment_sessions')
         .select('*')
+        .eq('created_by', user?.id)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(20);
       setSessions(data || []);
     } catch { setSessions([]); }
     finally { setLoadingSessions(false); }
   };
+
 
   // ─── SUBJECT DATA ───
   const getSubjects = () => {
@@ -189,6 +191,7 @@ export default function B2BTests() {
       const qr = await QRCode.toDataURL(link, { width: 256, margin: 2, color: { dark: '#ffffff', light: '#0f172a' } }).catch(() => '');
       setQrDataUrl(qr);
       setStep('share');
+      loadSessions(); // refresh even on fallback
     } finally {
       setGenerating(false);
     }
@@ -205,7 +208,9 @@ export default function B2BTests() {
     setGeneratedLink('');
     setQrDataUrl('');
     setShowBuilder(false);
+    loadSessions(); // always refresh list when closing modal
   };
+
 
   // ─── RENDER ───
   return (
