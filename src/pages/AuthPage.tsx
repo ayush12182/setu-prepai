@@ -186,6 +186,15 @@ const AuthPage: React.FC = () => {
     try {
       if (mode === 'signup') {
         await signUpWithEmail(email, password, fullName);
+        
+        // Force sign in immediately after sign up to guarantee an active local session 
+        // (fixes Supabase quirk where session is sometimes null immediately after signup)
+        try {
+          await signInWithEmail(email, password);
+        } catch (signInErr) {
+          console.warn("Auto sign-in after sign-up failed, user may need to log in manually", signInErr);
+        }
+        
         toast.success('Account created! Let\'s set up your learning profile 🎯');
         setShowOnboarding(true);
         setOnboardingStep(getInitialStep());
