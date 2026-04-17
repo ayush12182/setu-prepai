@@ -31,15 +31,13 @@ export default function B2BInviteStudents() {
         .from('batches').select('*').eq('is_active', true).order('created_at', { ascending: false });
       if (data && data.length > 0) {
         setBatches(data); setSelectedBatch(data[0]);
-      } else {
-        const mock = { id: 'demo-batch-1', name: 'Dropper Supreme - JEE 2026', subject: 'All Subjects', invite_link: null, join_code: null };
-        setBatches([mock]); setSelectedBatch(mock);
       }
-    } catch {
-      const mock = { id: 'demo-batch-1', name: 'Dropper Supreme - JEE 2026', subject: 'All Subjects', invite_link: null, join_code: null };
-      setBatches([mock]); setSelectedBatch(mock);
+      // No fallback to demo — show empty state if no real batches
+    } catch (err) {
+      console.error('Failed to fetch batches:', err);
     }
   };
+
 
   const startEditing = (batch: any, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -70,10 +68,9 @@ export default function B2BInviteStudents() {
 
   const handleGenerate = async () => {
     if (!selectedBatch) return;
+    // Never generate for demo batches
     if (selectedBatch.id.startsWith('demo')) {
-      const updated = { ...selectedBatch, join_code: 'Z8X9WQ', invite_link: `${window.location.origin}/join/Z8X9WQ` };
-      setSelectedBatch(updated);
-      setBatches(batches.map(b => b.id === updated.id ? updated : b));
+      toast.error('Please create a real batch from the Batches page first');
       return;
     }
     const updated = await generateInviteDetails(selectedBatch.id);
@@ -82,6 +79,7 @@ export default function B2BInviteStudents() {
       setBatches(batches.map(b => b.id === (updated as any).id ? updated : b));
     }
   };
+
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -101,8 +99,11 @@ export default function B2BInviteStudents() {
         {batches.length === 0 ? (
           <div className="bg-card border border-border rounded-3xl p-10 text-center">
             <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-bold">No active batches</h3>
-            <p className="text-sm text-muted-foreground mt-2">Create a batch first to invite students.</p>
+            <h3 className="text-lg font-bold">No batches yet</h3>
+            <p className="text-sm text-muted-foreground mt-2 mb-5">Create a batch first, then come back here to generate a join code for your students.</p>
+            <Button onClick={() => window.location.href = '/b2b/batches'} className="bg-accent text-white font-bold rounded-xl px-6">
+              Go to Batches → Create One
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
