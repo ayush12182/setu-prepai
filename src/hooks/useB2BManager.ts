@@ -11,22 +11,45 @@ export const useB2BManager = () => {
 
   /** Ensures teacher has an org — creates one if missing (handles pre-fix signups) */
   const ensureOrganization = async (): Promise<string | null> => {
-    if (orgId) return orgId;
     if (!user) return null;
 
+    // 1. Check context profile first (fast path)
+    if (orgId) return orgId;
+
     try {
-      // Fetch latest profile from DB (not stale context)
-      const { data: freshProfile } = await (supabase as any)
+      // 2. Fetch fresh profile from DB 
+      const { data: freshProfile, error: profileErr } = await (supabase as any)
         .from('profiles')
         .select('organization_id, full_name')
         .eq('user_id', user.id)
         .maybeSingle();
 
+      if (profileErr) {
+        toast.error(`Profile read failed: ${profileErr.message}`);
+        return null;
+      }
+
       if (freshProfile?.organization_id) {
         return freshProfile.organization_id;
       }
 
-      // Create a brand new org for this teacher
+      // 3. Check if teacher already has an org in the organizations table
+      const { data: existingOrg } = await (supabase as any)
+        .from('organizations')
+        .select('id')
+        .eq('created_by', user.id)
+        .maybeSingle();
+
+      if (existingOrg?.id) {
+        // Already created — just link the profile and return
+        await (supabase as any)
+          .from('profiles')
+          .update({ organization_id: existingOrg.id })
+          .eq('user_id', user.id);
+        return existingOrg.id;
+      }
+
+      // 4. Create a brand new org for this teacher
       const displayName = freshProfile?.full_name || profile?.full_name || user.email?.split('@')[0] || 'Teacher';
       const slug = `${displayName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`;
 
@@ -41,30 +64,39 @@ export const useB2BManager = () => {
         .single();
 
       if (orgErr || !newOrg) {
+        // Show real error so we know exactly what's failing
+        toast.error(`Org creation failed: ${orgErr?.message || orgErr?.code || 'unknown error'}`);
         console.error('Org insert error:', orgErr);
-        throw new Error(orgErr?.message || 'Failed to create organization');
+        return null;
       }
 
-      // Link org to profile
-      await (supabase as any)
+      // 5. Link org to profile
+      const { error: updateErr } = await (supabase as any)
         .from('profiles')
-        .update({ organization_id: newOrg.id })
+        .update({ organization_id: newOrg.id, user_type: 'b2b_mentor' })
         .eq('user_id', user.id);
+
+      if (updateErr) {
+        toast.error(`Profile update failed: ${updateErr.message}`);
+        console.error('Profile update error:', updateErr);
+      }
 
       return newOrg.id;
     } catch (err: any) {
       console.error('ensureOrganization failed:', err);
+      toast.error(`Setup error: ${err.message || 'unknown'}`);
       return null;
     }
   };
 
 
-  const createBatch = async (name: string, subject: string, mentorId?: string) => {
+
+  const createBatch = async (name: string, subject: string, mentorId?: string, targetExam?: string) => {
     setLoading(true);
     try {
       const resolvedOrgId = await ensureOrganization();
       if (!resolvedOrgId) {
-        toast.error('Could not link an organization to your profile. Please try again.');
+        // ensureOrganization already showed the specific error toast
         return null;
       }
 
@@ -73,6 +105,7 @@ export const useB2BManager = () => {
         subject,
         mentor_id: mentorId || user?.id,
         organization_id: resolvedOrgId,
+        target_exam: targetExam || 'JEE',
         is_active: true
       }).select().single();
 
@@ -87,6 +120,7 @@ export const useB2BManager = () => {
       setLoading(false);
     }
   };
+
 
 
   const createTest = async (params: {
