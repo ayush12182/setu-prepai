@@ -240,32 +240,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (metaError) console.error('Error updating metadata:', metaError);
     }
 
-    // 2. Attempt to update profiles table
-    // We filter out institution_name and user_type if they are known to be missing in some environments
-    const dbUpdates: any = { ...updates };
+    // 2. Attempt to update profiles table using an atomic upsert
+    const dbUpdates: any = { user_id: user.id, ...updates, updated_at: new Date().toISOString() };
     
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('profiles')
-        .update(dbUpdates)
-        .eq('user_id', user.id)
-        .select();
+        .upsert(dbUpdates, { onConflict: 'user_id' });
 
-      // If update matched no rows, insert instead
-      if (!data || data.length === 0) {
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({ user_id: user.id, ...dbUpdates } as any);
-        
-        if (insertError) {
-          // If the error is specifically about missing columns, we ignore it as we have metadata fallback
-          if (insertError.code === 'PGRST204' || insertError.message?.includes('column')) {
-            console.warn('DB Column missing, falling back to metadata storage only.');
-          } else {
-            throw insertError;
-          }
-        }
-      } else if (error) {
+      if (error) {
         if (error.code === 'PGRST204' || error.message?.includes('column')) {
           console.warn('DB Column missing, falling back to metadata storage only.');
         } else {
