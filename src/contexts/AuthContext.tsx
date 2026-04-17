@@ -87,14 +87,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // Merge data from database and auth metadata
+      // Auth metadata is set immediately on onboarding; DB might lag slightly
       const dbData = data as any;
+      const meta = user?.user_metadata || {};
       const profileData: any = {
         ...dbData,
-        user_type: user?.user_metadata?.user_type || dbData?.user_type || 'b2c_student',
-        institution_name: user?.user_metadata?.institution_name || dbData?.institution_name || null,
+        user_type: meta.user_type || dbData?.user_type || 'b2c_student',
+        target_exam: meta.target_exam || dbData?.target_exam || null,
+        institution_name: meta.institution_name || dbData?.institution_name || null,
+        organization_id: meta.organization_id || dbData?.organization_id || null,
       };
 
       setProfile(profileData);
+
     } catch (error) {
       console.error('Error fetching profile:', error);
     }

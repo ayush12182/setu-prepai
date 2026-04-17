@@ -88,7 +88,8 @@ const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
   // Teachers go to teacher portal
   if (type === 'b2b_mentor' || type === 'b2b_institution' || type === 'admin')
     return <Navigate to="/b2b" replace />;
-  // Allow b2c_student AND b2b_student — b2c students can join a batch from here
+  // Only b2b_student can access student hub — b2c students use regular dashboard
+  if (type === 'b2c_student') return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
 

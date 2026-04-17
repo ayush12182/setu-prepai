@@ -302,8 +302,34 @@ const AuthPage: React.FC = () => {
         return;
       }
 
+      // If coaching student with a join code — actually join the batch right here
+      if (onboardingData.userType === 'b2b_student') {
+        const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
+        if (!joinCode || joinCode.length !== 6) {
+          toast.error('Please enter a valid 6-character batch code from your mentor');
+          setLoading(false);
+          return;
+        }
+        // Join the batch — this also sets target_exam + org_id
+        const { joinTeacherByCode } = await import('@/lib/studentActivity');
+        const joinResult = await joinTeacherByCode(joinCode);
+        if (!joinResult.success) {
+          // Code invalid — stop and show error
+          toast.error(joinResult.message || 'Invalid batch code. Get the correct code from your teacher.');
+          setLoading(false);
+          return;
+        }
+        // Batch joined — profile already updated with target_exam by joinTeacherByCode
+        // Update user_type in context
+        await supabase.auth.updateUser({ data: { user_type: 'b2b_student' } });
+        await updateProfile({ user_type: 'b2b_student' } as any);
+        toast.success(`${joinResult.message} Let's begin 🚀`);
+        navigate('/student-hub');
+        return;
+      }
 
       const stream = onboardingData.stream;
+
       const examGoal = getExamGoalFromStream(stream as StreamType);
       const studentClass = onboardingData.studentClass || '11';
 
@@ -503,16 +529,19 @@ const AuthPage: React.FC = () => {
                     {/* Coaching name field */}
                     {onboardingData.userType === 'b2b_student' && (
                       <div className="mt-2 pt-2">
-                        <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Batch Code / Teacher ID (Required)</label>
+                        <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Batch Join Code (6 characters — from your mentor)</label>
                         <input
                           type="text"
-                          placeholder="e.g. ENG25CS0428"
+                          placeholder="e.g. K8ZX2W"
                           value={onboardingData.institutionName || ''}
-                          onChange={e => setOnboardingData(prev => ({ ...prev, institutionName: e.target.value.toUpperCase() }))}
-                          className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all font-mono"
+                          maxLength={6}
+                          onChange={e => setOnboardingData(prev => ({ ...prev, institutionName: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') }))}
+                          className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all font-mono tracking-widest"
                         />
+                        <p className="text-[11px] text-white/30 mt-1.5">Ask your teacher for the 6-digit code from their dashboard</p>
                       </div>
                     )}
+
 
                     {/* Teacher / Mentor Card */}
                     <button
