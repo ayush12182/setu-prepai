@@ -269,14 +269,19 @@ const AuthPage: React.FC = () => {
         const { data: { user: currentUser } } = await supabase.auth.getUser();
         let orgId: string | null = null;
         if (currentUser) {
-          const institutionLabel = onboardingData.institutionName?.trim() || `${(fullName || currentUser.email?.split('@')[0] || 'Teacher').split(' ')[0]}'s Institute`;
-          const { data: newOrg } = await (supabase as any)
+          const displayName = fullName || currentUser.email?.split('@')[0] || 'Teacher';
+          const institutionLabel = onboardingData.institutionName?.trim() || `${displayName.split(' ')[0]}'s Institute`;
+          // slug must be unique — use timestamp suffix
+          const slug = institutionLabel.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').slice(0, 40) + '-' + Date.now();
+          const { data: newOrg, error: orgErr } = await (supabase as any)
             .from('organizations')
-            .insert({ name: institutionLabel, exam_type: examGoal })
+            .insert({ name: institutionLabel, slug, created_by: currentUser.id })
             .select('id')
             .single();
-          if (newOrg) {
+          if (!orgErr && newOrg) {
             orgId = (newOrg as any).id;
+          } else {
+            console.warn('Org insert error (non-fatal):', orgErr?.message);
           }
         }
 
@@ -289,20 +294,20 @@ const AuthPage: React.FC = () => {
           organization_id: orgId,
         } as any);
 
-        // Also store org_id in auth metadata so it persists across sessions
-        if (orgId) {
-          await supabase.auth.updateUser({ data: { user_type: 'b2b_mentor', organization_id: orgId } });
-        }
+        // Persist in auth metadata
+        await supabase.auth.updateUser({ data: { user_type: 'b2b_mentor', organization_id: orgId, target_exam: examGoal } });
 
-        toast.success('Teacher portal ready! Welcome to SETU 👨‍🏫');
-        navigate('/teacher-dashboard');
+        toast.success('Teacher portal ready! Welcome to SETU 👨\u200d\uD83C\uDFEB');
+        navigate('/b2b');
         return;
       }
+
 
       const stream = onboardingData.stream;
       const examGoal = getExamGoalFromStream(stream as StreamType);
       const studentClass = onboardingData.studentClass || '11';
 
+      // Set exam mode FIRST so context is correct immediately after navigation
       if (stream === 'jee') setExamMode('jee');
       else if (stream === 'neet') setExamMode('neet');
       else if (stream === 'cuet') setExamMode('cuet');
@@ -310,7 +315,7 @@ const AuthPage: React.FC = () => {
 
       const studentLevel = getStudentLevel();
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       await updateProfile({
         target_exam: examGoal,
         class: studentClass,
@@ -318,6 +323,10 @@ const AuthPage: React.FC = () => {
         user_type: onboardingData.userType,
         institution_name: onboardingData.institutionName || null,
       });
+
+      // Persist exam in auth metadata so it's available immediately without profile refetch
+      await supabase.auth.updateUser({ data: { target_exam: examGoal, user_type: onboardingData.userType } });
+
 
       // Inject Mock Priority Task so they can immediately test the Outcomes Engine
       if (onboardingData.userType === 'b2c_student') {

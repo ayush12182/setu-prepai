@@ -33,7 +33,9 @@ const StudentHubPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('notes');
 
   // ─── Dynamic subjects based on student's target_exam ───
-  const streamSubjects = getSubjectsForExam(profile?.target_exam);
+  // Fall back to auth user metadata when profile hasn't reloaded yet (e.g. right after onboarding)
+  const targetExam = profile?.target_exam || (user as any)?.user_metadata?.target_exam || null;
+  const streamSubjects = getSubjectsForExam(targetExam);
   const DEMO_NOTES = streamSubjects.map(s => ({
     subject: s.label,
     color: s.color,
@@ -51,6 +53,7 @@ const StudentHubPage: React.FC = () => {
   );
 
   const [expandedSubject, setExpandedSubject] = useState<string | null>(streamSubjects[0]?.label || null);
+
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [joinCode, setJoinCode] = useState('');
   const [joiningCode, setJoiningCode] = useState(false);

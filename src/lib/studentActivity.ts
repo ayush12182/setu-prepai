@@ -112,9 +112,9 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
 
     const normalCode = code.toUpperCase().trim();
 
-    // 1. Find the batch
+    // 1. Find the batch (include subject for exam routing)
     const { data: batch, error: batchErr } = await (supabase.from as any)('batches')
-      .select('id, name, mentor_id, organization_id')
+      .select('id, name, mentor_id, organization_id, subject')
       .eq('join_code', normalCode)
       .eq('is_active', true)
       .maybeSingle();
@@ -130,13 +130,19 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
       throw joinErr;
     }
 
-    // 3. Update student user_type and org_id
-    await supabase.auth.updateUser({ data: { user_type: 'b2b_student', organization_id: batch.organization_id } });
+    // 3. Infer target_exam from batch subject
+    const subj = (batch.subject || '').toLowerCase();
+    let targetExam = 'JEE Main';
+    if (subj.includes('biology') || subj.includes('neet')) targetExam = 'NEET';
+    else if (subj.includes('cuet') || subj.includes('economics') || subj.includes('business')) targetExam = 'CUET';
+    
+    // 4. Update student profile — user_type, org, and exam
+    await supabase.auth.updateUser({ data: { user_type: 'b2b_student', organization_id: batch.organization_id, target_exam: targetExam } });
     await (supabase.from as any)('profiles')
-      .update({ user_type: 'b2b_student', organization_id: batch.organization_id })
+      .update({ user_type: 'b2b_student', organization_id: batch.organization_id, target_exam: targetExam })
       .eq('user_id', user.id);
 
-    // 4. Get teacher name
+    // 5. Get teacher name
     const { data: teacherProfile } = await supabase
       .from('profiles' as any)
       .select('full_name')
@@ -154,3 +160,4 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
     return { success: false, message: 'Something went wrong. Please try again.' };
   }
 }
+
