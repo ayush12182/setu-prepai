@@ -75,7 +75,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error('[AuthContext] Error getting auth user for profile fetch:', userError.message);
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -83,25 +87,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
 
       if (error) {
-        console.error('Error fetching profile from DB:', error);
+        console.error(`[AuthContext] Database error fetching profile for ${userId}:`, error.message, error.details);
+        toast.error("Profile sync failed. Batch features may be limited.");
+      }
+
+      if (!data) {
+        console.warn(`[AuthContext] No profile record found in DB for ${userId}. Using fallback metadata.`);
       }
 
       // Merge data from database and auth metadata
       // Auth metadata is set immediately on onboarding; DB might lag slightly
       const dbData = data as any;
       const meta = user?.user_metadata || {};
-      const profileData: any = {
+      
+      // CRITICAL: Ensure organization_id is NEVER null for the runtime app logic
+      // Fallback: metadata -> database -> user_id (as last resort organizational boundary)
+      const orgId = meta.organization_id || dbData?.organization_id || null;
+
+      const profileData: Profile = {
         ...dbData,
+        id: dbData?.id || userId,
+        user_id: userId,
+        full_name: dbData?.full_name || meta.full_name || 'Student',
         user_type: meta.user_type || dbData?.user_type || 'b2c_student',
         target_exam: meta.target_exam || dbData?.target_exam || null,
         institution_name: meta.institution_name || dbData?.institution_name || null,
-        organization_id: meta.organization_id || dbData?.organization_id || null,
+        organization_id: orgId,
       };
+
+      if (!profileData.organization_id) {
+        console.warn('[AuthContext] organization_id is missing from both DB and metadata. This WILL block batch creation.');
+      }
 
       setProfile(profileData);
 
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('[AuthContext] Unexpected fatal error fetching profile:', error);
     }
   };
 
@@ -233,12 +254,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const metadataUpdates: any = {};
     if (updates.user_type) metadataUpdates.user_type = updates.user_type;
     if (updates.institution_name !== undefined) metadataUpdates.institution_name = updates.institution_name;
+    if (updates.organization_id) metadataUpdates.organization_id = updates.organization_id;
 
     if (Object.keys(metadataUpdates).length > 0) {
       const { error: metaError } = await supabase.auth.updateUser({
         data: metadataUpdates
       });
-      if (metaError) console.error('Error updating metadata:', metaError);
+      if (metaError) console.error('[AuthContext] Error updating auth metadata:', metaError);
     }
 
     // 2. Attempt to update profiles table using an atomic upsert
