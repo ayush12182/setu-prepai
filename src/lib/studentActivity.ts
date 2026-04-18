@@ -53,7 +53,7 @@ export async function logStudentActivity(payload: ActivityPayload): Promise<void
       // 1. Get student's profile for org_id
       const { data: profile } = await supabase
         .from('profiles' as any)
-        .select('organization_id')
+        .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
       
@@ -152,7 +152,7 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
       }, { onConflict: 'student_id,teacher_id,subject', ignoreDuplicates: true });
 
       const { data: teacherProfile } = await (supabase as any)
-        .from('profiles').select('full_name').eq('user_id', batch.mentor_id).maybeSingle();
+        .from('profiles').select('*').eq('user_id', batch.mentor_id).maybeSingle();
       const teacherName = (teacherProfile as any)?.full_name ?? 'your mentor';
 
       return { success: true, message: `✅ You've joined ${batch.name}! Your mentor is ${teacherName}.`, teacherName };
@@ -206,7 +206,7 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
       .eq('user_id', user.id);
 
     const { data: teacherProfile } = await (supabase as any)
-      .from('profiles').select('full_name').eq('user_id', teacherCode.teacher_id).maybeSingle();
+      .from('profiles').select('*').eq('user_id', teacherCode.teacher_id).maybeSingle();
     const teacherName = (teacherProfile as any)?.full_name ?? 'your mentor';
 
     return { success: true, message: `✅ You're now connected to ${teacherName}!`, teacherName };

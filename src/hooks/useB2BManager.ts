@@ -28,7 +28,7 @@ export const useB2BManager = () => {
       // 2. Try fetching from profiles table once more (with potential DB lag fix)
       const { data: freshProfile, error: profileErr } = await (supabase as any)
         .from('profiles')
-        .select('organization_id, id, full_name')
+        .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
