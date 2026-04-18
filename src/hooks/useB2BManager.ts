@@ -122,31 +122,41 @@ export const useB2BManager = () => {
     try {
       const resolvedOrgId = await ensureOrganization();
       if (!resolvedOrgId) {
-        // ensureOrganization already showed the specific error toast
+        console.error('[useB2BManager] organization_id resolution failed. Aborting batch creation.');
         return null;
       }
 
+      // 1. Generate join code immediately (User requirement: always generated)
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const join_code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+
+      // 2. Build EXACT payload matching DB columns
+      // Columns: name, target_exam, description, organization_id, mentor_id, join_code, is_active
       const payload = {
-        name,
-        subject,
-        mentor_id: mentorId || user?.id,
+        name: name.trim(),
+        target_exam: targetExam || 'JEE_MAINS',
+        description: `Batch for ${subject}`,
         organization_id: resolvedOrgId,
-        target_exam: targetExam || 'JEE',
-        is_active: true
+        mentor_id: mentorId || user?.id,
+        join_code: join_code,
+        is_active: true,
+        subject: subject // Added just in case it's in schema (previous migrations show it is)
       };
 
-      console.log('[useB2BManager] Creating batch with payload:', payload);
+      console.log('[useB2BManager] FINAL PAYLOAD BEFORE INSERT:', JSON.stringify(payload, null, 2));
 
       const { data, error } = await supabase.from('batches' as any).insert(payload).select().single();
 
       if (error) {
-        console.error('[useB2BManager] Batch insert failed:', error);
+        console.error('[useB2BManager] FULL SUPABASE ERROR RESPONSE:', JSON.stringify(error, null, 2));
         throw error;
       }
+
+      console.log('[useB2BManager] BATCH CREATED SUCCESS:', data);
       toast.success(`Batch "${name}" created successfully.`);
       return data;
     } catch (err: any) {
-      console.error('[useB2BManager] Batch creation crash:', err);
+      console.error('[useB2BManager] FATAL CATCH in createBatch:', err);
       toast.error(err.message || 'Failed to create batch');
       return null;
     } finally {

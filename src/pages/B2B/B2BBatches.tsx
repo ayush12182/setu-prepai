@@ -128,32 +128,15 @@ export default function B2BBatches() {
     if (!form.name.trim()) { toast.error('Batch name is required'); return; }
 
     const result = await createBatch(form.name.trim(), 'All Subjects', user?.id, form.targetExam);
-    if (!result) return; // createBatch already shows error toast
+    if (!result) return; 
 
-    // Auto-generate a join code for the new batch immediately
-    let joinCode: string | null = null;
-    try {
-      const { data: codeData } = await (supabase.rpc as any)('generate_teacher_code');
-      joinCode = codeData || null;
-      if (!joinCode) {
-        // Fallback: client-side 6-char code
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        joinCode = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-      }
-      await (supabase as any).from('batches')
-        .update({ join_code: joinCode })
-        .eq('id', result.id);
-    } catch (err) {
-      console.warn('Auto join-code generation failed (non-fatal):', err);
-    }
-
-    // Optimistic update — add instantly to list
+    // createBatch already generates join_code and organization_id
     const newBatch: Batch = {
       id: result.id,
       name: result.name,
       subject: result.subject || null,
       target_exam: result.target_exam || form.targetExam || null,
-      join_code: joinCode,
+      join_code: result.join_code,
       is_active: true,
       created_at: result.created_at || new Date().toISOString(),
       organization_id: result.organization_id || null,
@@ -161,11 +144,10 @@ export default function B2BBatches() {
       studentCount: 0,
       accuracy: 0,
     };
+    
     setBatches(prev => [newBatch, ...prev]);
-
     setShowCreate(false);
     setForm({ name: '', targetExam: defaultExam, description: '' });
-    toast.success(`🎉 Batch "${result.name}" created with code ${joinCode || '(pending)'}!`);
   };
 
   // ─── Regenerate join code for existing batch ─────────────────
