@@ -7,6 +7,8 @@ export interface StudentStats {
   totalSolved: number;
   streak: number;
   todayDone: number;
+  weakTopic?: string;
+  lastActivityTopic?: string;
   loading: boolean;
 }
 
@@ -95,6 +97,27 @@ export const useStudentStats = () => {
         totalSolved,
         streak,
         todayDone,
+        weakTopic: undefined,
+        lastActivityTopic: undefined,
+        loading: true
+      });
+
+      // 3. Fetch most recent report for weak topic / context
+      const { data: latestReport } = await supabase
+        .from('practice_reports')
+        .select('chapter, weak_topics')
+        .eq('student_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      setStats({
+        accuracy,
+        totalSolved,
+        streak,
+        todayDone,
+        weakTopic: latestReport?.weak_topics?.[0],
+        lastActivityTopic: latestReport?.chapter,
         loading: false
       });
     } catch (err) {

@@ -74,6 +74,8 @@ const StudentHubPage: React.FC = () => {
     streak: realStreak, 
     totalSolved: realTotalSolved, 
     todayDone: realTodayDone,
+    weakTopic,
+    lastActivityTopic,
     loading: statsLoading 
   } = useStudentStats();
 
@@ -247,17 +249,30 @@ const StudentHubPage: React.FC = () => {
   const resumeTask = inProgressTasks[0] || null;
   const nextMissionTask = pendingTasksList[0] || null;
   const dailyGoal = 20;
-  // ── Smart Daily Hint  ──
-  const smartHint = (() => {
-    if (isCycleTestDay) return "Today is your Full Syllabus Test day. Give it your best shot!";
-    if (realStreak >= 7) return "You've been consistent — try a mixed full-length test today.";
-    if (realAccuracy > 0 && realAccuracy < 55) return `Your accuracy is ${realAccuracy}% — focus on fewer topics and consolidate first.`;
-    if (realAccuracy >= 55 && realAccuracy < 75) return "A 20-minute targeted practice session can push your accuracy above 75%.";
-    if (realTodayDone === 0 && realTotalSolved > 5) return "You haven't practiced today — even 10 questions keeps the momentum going.";
-    if (realTodayDone > 0 && realTodayDone < dailyGoal) return `${realTodayDone} questions done — ${dailyGoal - realTodayDone} more to hit your daily goal.`;
-    if (!effectiveExam) return null;
-    return `Keep going — consistent daily practice is the fastest path to ${effectiveExam}.`;
-  })();
+  
+  // ── Smart Actionable Hint (Requirement 4) ──
+  const smartHint = useMemo(() => {
+    if (isCycleTestDay) return { 
+      text: "Today is your Full Syllabus Test day. Give it your best shot!",
+      type: 'priority'
+    };
+    if (weakTopic) return {
+      text: `Focus on ${weakTopic} today — your accuracy is slightly lower here.`,
+      type: 'weakness'
+    };
+    if (realStreak >= 7) return {
+      text: "You've been consistent — try a mixed test today to switch things up.",
+      type: 'streak'
+    };
+    if (realAccuracy > 0 && realAccuracy < 60) return {
+      text: "Accuracy is below 60%. Try practicing Easy level questions for a bit.",
+      type: 'accuracy'
+    };
+    return {
+      text: `Keep going — consistent daily practice is the fastest path to ${effectiveExam || 'success'}.`,
+      type: 'general'
+    };
+  }, [isCycleTestDay, weakTopic, realStreak, realAccuracy, effectiveExam]);
 
   const isFullTestSoon = !isCycleTestDay && cycleDaysLeft <= 3;
 
@@ -348,271 +363,191 @@ const StudentHubPage: React.FC = () => {
           ═══════════════════════════════════════════════════ */}
         <AnimatePresence mode="wait">
           {activeTab === 'home' && (
-            <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5">
+            <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
 
-              {/* ── HERO: Today's Mission / Smart Resume / Full Syllabus Test ── */}
-              {isCycleTestDay ? (
-                // PRIORITY: 21-Day Full Syllabus Test
-                <div className="relative overflow-hidden rounded-2xl border-2 border-amber-500 bg-gradient-to-br from-amber-500/20 via-amber-500/5 to-transparent p-5 sm:p-6 group hover:shadow-xl hover:shadow-amber-500/10 transition-all">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-                  <div className="relative">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-500 animate-pulse">
-                        ⭐ Major Milestone
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">Full Syllabus Test</span>
-                    </div>
-                    <h2 className="text-xl sm:text-2xl font-black text-foreground mb-1">
-                      21-Day Cycle Test is Ready
-                    </h2>
-                    <p className="text-sm text-muted-foreground mb-4 max-w-md">
-                      Your standard full-length assessment is due. This test benchmarks your progress across all recent chapters.
-                    </p>
-                    <Button onClick={() => navigate('/practice?mode=full-syllabus')} size="lg"
-                      className="bg-amber-500 hover:bg-amber-600 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-amber-500/30 group-hover:scale-[1.02] transition-all">
-                      <Trophy className="w-5 h-5 mr-2" /> Start Full Test
-                    </Button>
-                  </div>
-                </div>
-              ) : resumeTask ? (
-                // RESUME: unfinished session
-                <div className="relative overflow-hidden rounded-2xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-500/12 via-amber-500/5 to-transparent p-5 sm:p-6 group hover:shadow-xl hover:shadow-amber-500/10 transition-all">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-                  <div className="relative">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 animate-pulse">
-                        ⏳ Continue
-                      </span>
-                      <span className="text-[10px] text-muted-foreground">{resumeTask.topic}</span>
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-black text-foreground mb-1">
-                      Resume: {resumeTask.subtopic || resumeTask.topic}
-                    </h2>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Pick up where you left off — don't lose momentum.
-                    </p>
-                    <Button onClick={() => navigate('/practice')} size="lg"
-                      className="bg-amber-500 hover:bg-amber-600 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-amber-500/30 group-hover:scale-[1.02] transition-all">
-                      <Play className="w-5 h-5 mr-2" /> Continue Practice
-                    </Button>
-                  </div>
-                </div>
-              ) : nextMissionTask ? (
-                // MISSION: assigned by teacher
-                <div className="relative overflow-hidden rounded-2xl border-2 border-accent/40 bg-gradient-to-br from-accent/12 via-accent/5 to-transparent p-5 sm:p-6 group hover:shadow-xl hover:shadow-accent/10 transition-all">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-                  <div className="relative">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent/20 border border-accent/40 text-accent">
-                        🎯 Today's Mission
-                      </span>
-                      {teacherCtx && (
-                        <span className="text-[10px] text-muted-foreground">from {teacherCtx.teacherName}</span>
-                      )}
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-black text-foreground mb-1">
-                      {nextMissionTask.subtopic || nextMissionTask.topic}
-                    </h2>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-                      <span className="flex items-center gap-1"><Target className="w-3.5 h-3.5" /> 10 Questions</span>
-                      <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> ~20 min</span>
-                      <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" /> {nextMissionTask.topic}</span>
-                    </div>
-                    <Button onClick={() => navigate('/practice')} size="lg"
-                      className="bg-accent hover:bg-accent/90 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-accent/30 group-hover:scale-[1.02] transition-all">
-                      <Rocket className="w-5 h-5 mr-2" /> Start Mission
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                // FALLBACK: AI-powered practice CTA
-                <div className="relative overflow-hidden rounded-2xl border-2 border-accent/30 bg-gradient-to-br from-accent/10 via-purple-500/5 to-transparent p-5 sm:p-6 group hover:shadow-xl hover:shadow-accent/10 transition-all">
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-accent/8 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-                  <div className="relative">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent/15 border border-accent/30 text-accent">
-                        {realTodayDone > 0 ? '🔥 Keep Going' : '🚀 Start Today'}
-                      </span>
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-black text-foreground mb-1">
-                      {realTodayDone > 0
-                        ? `You've done ${realTodayDone} today — keep the streak!`
-                        : 'Ready to practice?'}
-                    </h2>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      AI will generate personalized {effectiveExam || 'exam'} questions based on your weak areas.
-                    </p>
-                    <Button onClick={() => navigate('/practice')} size="lg"
-                      className="bg-accent hover:bg-accent/90 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-accent/30 group-hover:scale-[1.02] transition-all">
-                      <Sparkles className="w-5 h-5 mr-2" /> Start Practice
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* ── Teacher Context Card ── */}
-              {teacherCtx && (
-                <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 hover:border-accent/30 hover:shadow-lg transition-all">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent/25 to-accent/10 border border-accent/25 flex items-center justify-center shrink-0">
-                    <span className="font-black text-accent text-lg">
-                      {(teacherCtx.teacherName || 'T').charAt(0)}
+              {/* ── 🔥 HERO SECTION (Requirement 1) ── */}
+              <div className="relative overflow-hidden rounded-3xl border border-accent/20 bg-gradient-to-br from-accent/10 via-background to-background p-6 sm:p-8 group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-accent text-primary">
+                      {isCycleTestDay ? 'Milestone' : 'Next Step'}
                     </span>
+                    {weakTopic && !isCycleTestDay && (
+                      <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                        Weak Area Detected
+                      </span>
+                    )}
+                  </div>
+
+                  <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-2">
+                    {isCycleTestDay 
+                      ? "Major Milestone: Full Test" 
+                      : weakTopic 
+                        ? `${weakTopic} needs attention` 
+                        : "Let’s continue your prep"}
+                  </h2>
+                  
+                  <p className="text-muted-foreground text-sm sm:text-base max-w-md mb-6 leading-relaxed">
+                    {isCycleTestDay 
+                      ? "Your 21-day cycle test is ready. This benchmarks your total syllabus progress."
+                      : weakTopic 
+                        ? `You recently struggled with ${weakTopic}. Start a targeted 10-question sprint to fix it.`
+                        : lastActivityTopic 
+                          ? `Pick up where you left off in ${lastActivityTopic} or try something new.`
+                          : `Set your daily target and start practicing ${effectiveExam} concepts.`}
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <Button 
+                      onClick={() => navigate(isCycleTestDay ? '/practice?mode=full-syllabus' : '/practice')} 
+                      size="lg"
+                      className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-primary font-bold h-12 px-8 rounded-2xl shadow-xl shadow-accent/20 transition-all hover:scale-105"
+                    >
+                      {isCycleTestDay ? <Trophy className="w-5 h-5 mr-2" /> : <Sparkles className="w-5 h-5 mr-2" />}
+                      {isCycleTestDay ? "Start Full Test" : "Start Practice"}
+                    </Button>
+                    
+                    {resumeTask && (
+                      <Button 
+                        variant="outline" 
+                        onClick={() => navigate('/practice')}
+                        className="w-full sm:w-auto h-12 px-6 rounded-2xl font-bold border-white/10 hover:bg-white/5"
+                      >
+                        Resume {resumeTask.topic}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── 📊 PROGRESS STRIP (Requirement 2) ── */}
+              <div className="rounded-3xl border border-border bg-card/50 backdrop-blur-sm p-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center divide-y sm:divide-y-0 sm:divide-x divide-border">
+                  {/* Daily Goal */}
+                  <div className="flex-1 p-4 flex items-center justify-between sm:justify-center gap-4 group">
+                    <div className="relative w-12 h-12 shrink-0">
+                      <svg className="w-12 h-12 -rotate-90" viewBox="0 0 48 48">
+                        <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="none" className="text-secondary" />
+                        <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="4" fill="none"
+                          className="text-accent"
+                          strokeDasharray={`${Math.min(100, (realTodayDone / dailyGoal) * 100) * 1.256} 125.6`}
+                          strokeLinecap="round" />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black">
+                        {Math.round((realTodayDone / dailyGoal) * 100)}%
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Daily Goal</p>
+                      <p className="text-sm font-black text-foreground">
+                        {realTodayDone >= dailyGoal ? "Goal Hit! 🎉" : `${realTodayDone}/${dailyGoal} Solved`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Streak */}
+                  <div className="flex-1 p-4 flex items-center justify-between sm:justify-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
+                      <Flame className={cn('w-5 h-5', realStreak > 0 ? 'text-orange-400' : 'text-muted-foreground/30')} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Day Streak</p>
+                      <p className="text-sm font-black text-foreground">{realStreak} Days</p>
+                    </div>
+                  </div>
+
+                  {/* Accuracy */}
+                  <div className="flex-1 p-4 flex items-center justify-between sm:justify-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                      <Zap className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Accuracy</p>
+                      <p className="text-sm font-black text-foreground">{realAccuracy}%</p>
+                    </div>
+                  </div>
+
+                  {/* 21-Day Test Module (Requirement 3) */}
+                  <div className="flex-1 p-4 flex items-center justify-between sm:justify-center gap-4 bg-accent/5 sm:bg-transparent">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <CalendarDays className={cn('w-5 h-5', isCycleTestDay ? 'text-amber-400 animate-pulse' : 'text-muted-foreground/50')} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Full Test</p>
+                      <p className={cn("text-sm font-black", isCycleTestDay ? "text-amber-400" : "text-foreground")}>
+                        {isCycleTestDay ? "Due Today" : `${cycleDaysLeft}d Left`}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── 🧠 SMART HINT (Requirement 4) ── */}
+              <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-secondary/20 px-5 py-4 transition-all hover:bg-secondary/30">
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-accent" />
+                </div>
+                <p className="text-sm text-foreground/80 leading-snug font-medium">
+                  {smartHint.text}
+                </p>
+              </div>
+
+              {/* ── 👨‍🏫 TEACHER CARD (Requirement 5) ── */}
+              {teacherCtx && teacherCtx.teacherName !== 'Your Mentor' && (
+                <div className="flex items-center gap-4 rounded-3xl border border-border bg-card/30 p-4 hover:border-accent/30 transition-all">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-6 h-6 text-accent" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-bold text-foreground text-sm">
-                        {teacherCtx.teacherName}
-                        {teacherCtx.coachingName && (
-                          <span className="text-muted-foreground font-normal"> — {teacherCtx.coachingName}</span>
-                        )}
-                      </p>
-                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
-                        ✓ Enrolled
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {teacherCtx.batchName} • <span className="text-accent font-semibold">{teacherCtx.examType}</span>
+                    <p className="font-bold text-foreground text-sm truncate">
+                      {teacherCtx.teacherName}
+                      {teacherCtx.coachingName && (
+                        <span className="text-muted-foreground font-normal text-xs"> — {teacherCtx.coachingName}</span>
+                      )}
                     </p>
-                    {teacherCtx.teacherMessage && (
-                      <p className="text-xs text-foreground/70 mt-1.5 italic bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10">
-                        💬 "{teacherCtx.teacherMessage}"
-                      </p>
-                    )}
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5 font-bold">
+                      {teacherCtx.batchName} • {teacherCtx.examType}
+                    </p>
                   </div>
-                  {allTeachers.length > 1 && (
-                    <span className="text-[10px] text-muted-foreground shrink-0">+{allTeachers.length - 1} more</span>
-                  )}
+                  <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400">
+                    Teacher Linked
+                  </div>
                 </div>
               )}
 
-              {/* ── Daily Performance Ring + Streak + Stats + 21-day chip ── */}
-              <div className="grid grid-cols-3 gap-3">
-                {/* Daily Progress Ring */}
-                <div className="bg-card border border-border rounded-2xl p-4 text-center hover:border-accent/30 hover:scale-[1.02] hover:shadow-lg hover:shadow-accent/5 transition-all duration-300 relative overflow-hidden">
-                  <div className="w-14 h-14 mx-auto mb-2 relative">
-                    <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
-                      <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none" className="text-border" />
-                      <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none"
-                        className="text-accent"
-                        strokeDasharray={`${Math.min(100, (realTodayDone / dailyGoal) * 100) * 1.508} 150.8`}
-                        strokeLinecap="round" />
-                    </svg>
-                    <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-foreground">
-                      {Math.round((realTodayDone / dailyGoal) * 100)}%
-                    </span>
+              {/* ── Instant Missions (Requirement 7) ── */}
+              {assignedTasks.length > 0 && (
+                <div className="space-y-4 pt-2">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                      <ClipboardList className="w-4 h-4" /> Assigned by Teacher
+                    </h2>
                   </div>
-                  <p className="text-[10px] text-muted-foreground">Daily Goal</p>
-                  {/* 21-day chip */}
-                  {!isCycleTestDay && cycleDaysLeft <= 7 && (
-                    <div className={`mt-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
-                      isFullTestSoon
-                        ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-                        : 'bg-secondary border-border text-muted-foreground'
-                    }`}>
-                      Next in {cycleDaysLeft}d
-                    </div>
-                  )}
-                  {isCycleTestDay && (
-                    <div className="mt-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full border bg-amber-500 border-amber-600 text-white animate-pulse">
-                      TEST DAY
-                    </div>
-                  )}
-                </div>
-
-                {/* Streak */}
-                <div className="bg-card border border-border rounded-2xl p-4 text-center hover:border-accent/30 hover:scale-[1.02] hover:shadow-lg hover:shadow-accent/5 transition-all duration-300">
-                  <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-orange-500/15 flex items-center justify-center">
-                    <Flame className={cn('w-5 h-5', realStreak > 0 ? 'text-orange-400' : 'text-muted-foreground/40')} />
-                  </div>
-                  <p className="font-black text-foreground text-xl">{realStreak}</p>
-                  <p className="text-[10px] text-muted-foreground">Day Streak</p>
-                </div>
-
-                {/* Accuracy */}
-                <div className="bg-card border border-border rounded-2xl p-4 text-center hover:border-accent/30 hover:scale-[1.02] hover:shadow-lg hover:shadow-accent/5 transition-all duration-300">
-                  <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <p className="font-black text-foreground text-xl">{realAccuracy}%</p>
-                  <p className="text-[10px] text-muted-foreground">Accuracy</p>
-                </div>
-              </div>
-
-              {/* ── Smart Daily Hint ── */}
-              {smartHint && (
-                <div className="flex items-start gap-3 rounded-xl border border-border bg-secondary/20 px-4 py-3">
-                  <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-                  <p className="text-xs text-foreground/80 leading-relaxed">{smartHint}</p>
-                </div>
-              )}
-
-              {/* ── Today's Tasks or Smart Empty ── */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                    <ClipboardList className="w-4 h-4 text-accent" />
-                    Assigned Tasks
-                    {pendingTasksList.length > 0 && (
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25">
-                        {pendingTasksList.length} pending
-                      </span>
-                    )}
-                  </h2>
-                </div>
-
-                {assignedTasks.length > 0 ? (
-                  <div className="space-y-2">
-                    {assignedTasks.slice(0, 5).map((task: any) => {
-                      const cfg = TASK_STATUS_CONFIG[task.status as keyof typeof TASK_STATUS_CONFIG] || TASK_STATUS_CONFIG.pending;
-                      return (
-                        <div key={task.id}
-                          className={cn('rounded-2xl border p-4 flex items-center gap-3 transition-all hover:border-accent/30', cfg.bg,
-                            task.status === 'completed' ? 'border-emerald-500/20' : task.status === 'in_progress' ? 'border-amber-500/20' : 'border-border'
-                          )}>
-                          <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shrink-0',
-                            task.status === 'completed' ? 'bg-emerald-500/15' : task.status === 'in_progress' ? 'bg-amber-500/15' : 'bg-muted/30')}>
-                            <cfg.Icon className={cn('w-5 h-5', cfg.color)} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm text-foreground truncate">{task.topic}</p>
-                            <p className="text-[11px] text-muted-foreground truncate">
-                              {task.subtopic || 'Practice Set'}
-                              {task.initial_accuracy != null ? ` • Baseline: ${task.initial_accuracy}%` : ''}
-                            </p>
-                          </div>
-                          <Button size="sm"
-                            onClick={() => navigate('/practice')}
-                            disabled={task.status === 'completed'}
-                            className={cn('h-9 px-3 rounded-xl text-xs font-bold shrink-0',
-                              task.status === 'completed'
-                                ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                                : 'bg-accent text-white hover:scale-105 transition-all shadow-lg shadow-accent/20'
-                            )}>
-                            {task.status === 'completed' ? '✓ Done' : task.status === 'in_progress' ? 'Resume' : 'Start →'}
-                          </Button>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {assignedTasks.slice(0, 4).map((task: any) => (
+                      <div key={task.id}
+                        onClick={() => navigate('/practice')}
+                        className="group relative flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:border-accent/50 cursor-pointer overflow-hidden">
+                        <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0 group-hover:bg-accent/10 transition-colors">
+                          <Target className="w-5 h-5 text-muted-foreground group-hover:text-accent" />
                         </div>
-                      );
-                    })}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-sm text-foreground truncate">{task.topic}</p>
+                          <p className="text-[10px] text-muted-foreground truncate uppercase tracking-tighter">
+                            {task.subtopic || 'Practice Session'}
+                          </p>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                      </div>
+                    ))}
                   </div>
-                ) : (
-                  // Smart empty: CTA to practice
-                  <div className="rounded-2xl border border-border bg-secondary/20 p-5 flex items-center gap-4 hover:border-accent/30 transition-all">
-                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
-                      <Sparkles className="w-5 h-5 text-accent" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-foreground">No tasks assigned yet</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Start practicing on your own — AI will adapt to your level.
-                      </p>
-                    </div>
-                    <Button size="sm" onClick={() => navigate('/practice')}
-                      className="h-9 px-4 bg-accent text-white font-bold rounded-xl text-xs shrink-0">
-                      Practice Now →
-                    </Button>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
+
+            </motion.div>
+          )}
 
               {/* ── Live Tests ── */}
               {realTests.length > 0 && (

@@ -348,17 +348,22 @@ const PracticePage: React.FC = () => {
                   ? 'Questions are being compiled and quality-checked. This takes up to 30 seconds on first run.'
                   : 'Selecting the perfect difficulty tier based on your accuracy.'}
               </p>
-              {/* Skeleton cards */}
-              <div className="w-full max-w-2xl mt-8 space-y-3">
+              {/* Premium Skeleton Loader */}
+              <div className="w-full max-w-3xl mt-8 space-y-6">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="h-4 bg-muted rounded-full w-32 animate-pulse" />
+                  <div className="h-4 bg-muted rounded-full w-24 animate-pulse" />
+                </div>
                 {[1,2,3].map(i => (
-                  <div key={i} className="bg-card border border-border rounded-2xl p-5 animate-pulse">
-                    <div className="h-4 bg-muted rounded w-3/4 mb-3" />
-                    <div className="h-3 bg-muted rounded w-1/2 mb-4" />
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="h-10 bg-muted rounded-xl" />
-                      <div className="h-10 bg-muted rounded-xl" />
-                      <div className="h-10 bg-muted rounded-xl" />
-                      <div className="h-10 bg-muted rounded-xl" />
+                  <div key={i} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 animate-pulse relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                    <div className="h-5 bg-muted rounded-xl w-5/6 mb-4" />
+                    <div className="h-3 bg-muted rounded-xl w-1/2 mb-8" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
+                      <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
+                      <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
+                      <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
                     </div>
                   </div>
                 ))}
