@@ -34,7 +34,7 @@ type PracticeState =
 const PracticePage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { isNeet, isCuet } = useExamMode();
   const { isFoundation } = useClassContext();
   const [state, setState] = useState<PracticeState>({ step: 'select-mode' });
@@ -165,6 +165,15 @@ const PracticePage: React.FC = () => {
     if (state.step !== 'quiz') return null;
     return getSimilarQuestions(question.concept_tested, state.subchapter?.name || 'Mixed', state.subject || 'Mixed', question.question_text);
   };
+
+  if (authLoading || !user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-accent mb-4" />
+        <p className="text-muted-foreground text-sm font-medium">Loading your practice space...</p>
+      </div>
+    );
+  }
 
   return (
     <MainLayout title={isFoundation ? 'School Practice' : 'Adaptive Practice'}>
