@@ -264,6 +264,7 @@ const StudentHubPage: React.FC = () => {
         {/* ═══════════════════════════════════════════════════
               HOME TAB
           ═══════════════════════════════════════════════════ */}
+        <AnimatePresence mode="wait">
           {activeTab === 'home' && (
             <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5 mt-2">
 
