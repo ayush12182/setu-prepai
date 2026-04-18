@@ -1,22 +1,54 @@
-// B2BBatches.tsx — Real data from Supabase
-import React, { useEffect, useState } from 'react';
+// B2BBatches.tsx — Full classroom system with optimistic UI
+import React, { useEffect, useState, useCallback } from 'react';
 import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
-import { Layers, Plus, Users, GraduationCap, ChevronRight, Loader2, X, Ticket, Copy, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+  Layers, Plus, Users, GraduationCap, ChevronRight,
+  Loader2, X, Ticket, Copy, CheckCircle2, AlertCircle,
+  RefreshCw, Trash2, BarChart2
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useB2BManager } from '@/hooks/useB2BManager';
 import { toast } from 'sonner';
-import { getSubjectLabels } from '@/lib/streamSubjects';
+import { EXAM_CONFIG } from '@/config/examConfig';
+import { cn } from '@/lib/utils';
 
+// ─── Types ────────────────────────────────────────────────────
+interface Batch {
+  id: string;
+  name: string;
+  subject: string | null;
+  target_exam: string | null;
+  join_code: string | null;
+  is_active: boolean;
+  created_at: string;
+  organization_id: string | null;
+  mentor_id: string | null;
+  studentCount: number;
+  accuracy: number;
+}
+
+const EXAM_OPTIONS = [
+  { value: 'JEE_MAINS',    label: 'JEE Main' },
+  { value: 'JEE_ADVANCED', label: 'JEE Advanced' },
+  { value: 'NEET',         label: 'NEET' },
+  { value: 'CUET',         label: 'CUET' },
+  { value: 'OTHER',        label: 'Other / General' },
+];
+
+// ─── Component ────────────────────────────────────────────────
 export default function B2BBatches() {
   const { profile, user } = useAuth();
   const { createBatch, generateInviteDetails, loading: creating } = useB2BManager();
-  const [batches, setBatches] = useState<any[]>([]);
+
+  const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
+  const [regeneratingCodeFor, setRegeneratingCodeFor] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Default exam from teacher profile
+  // Derive default exam from teacher profile
   const defaultExam = (() => {
     const te = (profile?.target_exam || '').toUpperCase();
     if (te.includes('CUET')) return 'CUET';
@@ -25,109 +57,180 @@ export default function B2BBatches() {
     if (te.includes('JEE')) return 'JEE_MAINS';
     return 'JEE_MAINS';
   })();
-  const defaultSubjects = getSubjectLabels(defaultExam);
+
   const [form, setForm] = useState({
     name: '',
-    subject: defaultSubjects[0] || 'Physics',
-    targetExam: defaultExam
+    targetExam: defaultExam,
+    description: '',
   });
-  const [memberCounts, setMemberCounts] = useState<Record<string, number>>({});
-  const [accuracyMap, setAccuracyMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchBatches();
-  }, [profile]);
+  }, [user]);
 
-  const fetchBatches = async () => {
+  // ─── Fetch all batches for this teacher ─────────────────────
+  const fetchBatches = useCallback(async () => {
+    if (!user) return;
     setLoading(true);
     try {
-      const orgId = profile?.organization_id;
-      const { data } = await (supabase as any)
+      // Query by teacher's user ID directly — no org dependency
+      const { data, error } = await (supabase as any)
         .from('batches')
-        .select('*, profiles!batches_mentor_id_fkey(full_name)')
+        .select('*')
+        .eq('mentor_id', user.id)
         .eq('is_active', true)
-        .eq('organization_id', orgId || '00000000-0000-0000-0000-000000000000')
         .order('created_at', { ascending: false });
 
-      const rows = data || [];
-      setBatches(rows);
+      if (error) throw error;
 
-      // Fetch member counts
-      const counts: Record<string, number> = {};
-      const accs: Record<string, number> = {};
-      await Promise.all(
+      const rows = (data || []) as any[];
+
+      // Enrich with student counts in parallel
+      const enriched = await Promise.all(
         rows.map(async (b: any) => {
-          const { count } = await (supabase as any)
-            .from('batch_members')
-            .select('*', { count: 'exact', head: true })
-            .eq('batch_id', b.id);
-          counts[b.id] = count || 0;
+          let studentCount = 0;
+          try {
+            const { count } = await (supabase as any)
+              .from('batch_members')
+              .select('*', { count: 'exact', head: true })
+              .eq('batch_id', b.id);
+            studentCount = count || 0;
+          } catch { /* non-fatal */ }
 
-          // Avg accuracy
-          const { data: sessions } = await (supabase as any)
-            .from('assessment_sessions')
-            .select('id')
-            .eq('batch_id', b.id);
-          if (sessions && sessions.length > 0) {
-            const ids = sessions.map((s: any) => s.id);
-            const { data: pts } = await (supabase as any)
-              .from('session_participants')
-              .select('live_accuracy')
-              .in('session_id', ids)
-              .eq('status', 'SUBMITTED');
-            if (pts && pts.length > 0) {
-              accs[b.id] = Math.round(
-                pts.reduce((a: number, p: any) => a + (p.live_accuracy || 0), 0) / pts.length
-              );
-            } else {
-              accs[b.id] = 0;
-            }
-          } else {
-            accs[b.id] = 0;
-          }
+          return {
+            id: b.id,
+            name: b.name,
+            subject: b.subject || null,
+            target_exam: b.target_exam || null,
+            join_code: b.join_code || null,
+            is_active: b.is_active,
+            created_at: b.created_at,
+            organization_id: b.organization_id || null,
+            mentor_id: b.mentor_id || null,
+            studentCount,
+            accuracy: 0, // analytics can be added later
+          } as Batch;
         })
       );
-      setMemberCounts(counts);
-      setAccuracyMap(accs);
-    } catch (e) {
-      console.error(e);
+
+      setBatches(enriched);
+    } catch (e: any) {
+      console.error('fetchBatches error:', e);
+      toast.error(`Could not load batches: ${e.message}`);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
+  // ─── Create batch + auto-generate join code ──────────────────
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim()) { toast.error('Batch name is required'); return; }
-    const result = await createBatch(form.name, form.subject);
-    if (result) {
-      toast.success('Batch created! Now generate a join code to invite students.');
-      setShowCreate(false);
-      const defaultSubs = getSubjectLabels(defaultExam);
-      setForm({ name: '', subject: defaultSubs[0] || 'Physics', targetExam: defaultExam });
-      fetchBatches();
+
+    const result = await createBatch(form.name.trim(), 'All Subjects', user?.id, form.targetExam);
+    if (!result) return; // createBatch already shows error toast
+
+    // Auto-generate a join code for the new batch immediately
+    let joinCode: string | null = null;
+    try {
+      const { data: codeData } = await (supabase.rpc as any)('generate_teacher_code');
+      joinCode = codeData || null;
+      if (!joinCode) {
+        // Fallback: client-side 6-char code
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        joinCode = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      }
+      await (supabase as any).from('batches')
+        .update({ join_code: joinCode })
+        .eq('id', result.id);
+    } catch (err) {
+      console.warn('Auto join-code generation failed (non-fatal):', err);
+    }
+
+    // Optimistic update — add instantly to list
+    const newBatch: Batch = {
+      id: result.id,
+      name: result.name,
+      subject: result.subject || null,
+      target_exam: result.target_exam || form.targetExam || null,
+      join_code: joinCode,
+      is_active: true,
+      created_at: result.created_at || new Date().toISOString(),
+      organization_id: result.organization_id || null,
+      mentor_id: result.mentor_id || user?.id || null,
+      studentCount: 0,
+      accuracy: 0,
+    };
+    setBatches(prev => [newBatch, ...prev]);
+
+    setShowCreate(false);
+    setForm({ name: '', targetExam: defaultExam, description: '' });
+    toast.success(`🎉 Batch "${result.name}" created with code ${joinCode || '(pending)'}!`);
+  };
+
+  // ─── Regenerate join code for existing batch ─────────────────
+  const handleRegenerateCode = async (batch: Batch) => {
+    setRegeneratingCodeFor(batch.id);
+    try {
+      let newCode: string;
+      const { data: codeData } = await (supabase.rpc as any)('generate_teacher_code');
+      newCode = codeData || Array.from({ length: 6 }, () =>
+        'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]
+      ).join('');
+
+      const { error } = await (supabase as any)
+        .from('batches')
+        .update({ join_code: newCode })
+        .eq('id', batch.id);
+
+      if (error) throw error;
+
+      // Instant UI update
+      setBatches(prev => prev.map(b => b.id === batch.id ? { ...b, join_code: newCode } : b));
+      toast.success(`Code regenerated: ${newCode}`);
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to regenerate code');
+    } finally {
+      setRegeneratingCodeFor(null);
     }
   };
 
-  const handleGenerateCode = async (batchId: string) => {
-    const updated = await generateInviteDetails(batchId);
-    if (updated) {
-      fetchBatches();
+  // ─── Delete batch ────────────────────────────────────────────
+  const handleDelete = async (batchId: string) => {
+    if (!confirm('Delete this batch? Students will no longer see it.')) return;
+    setDeletingId(batchId);
+    try {
+      const { error } = await (supabase as any)
+        .from('batches')
+        .update({ is_active: false })
+        .eq('id', batchId);
+      if (error) throw error;
+      setBatches(prev => prev.filter(b => b.id !== batchId));
+      toast.success('Batch deleted');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to delete batch');
+    } finally {
+      setDeletingId(null);
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Code copied to clipboard!');
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success(`Code ${code} copied!`);
   };
 
+  // ─── Render ──────────────────────────────────────────────────
   return (
     <B2BSidebarLayout title="Batches">
       <div className="space-y-6">
+
+        {/* Header */}
         <div className="flex justify-between items-end">
           <div>
             <h1 className="text-3xl font-display font-bold">Manage Batches</h1>
-            <p className="text-muted-foreground mt-1 text-sm">View or create class groups for your students.</p>
+            <p className="text-muted-foreground mt-1 text-sm">
+              {batches.length} batch{batches.length !== 1 ? 'es' : ''} · Each batch has a unique join code for students
+            </p>
           </div>
           <Button onClick={() => setShowCreate(true)} className="bg-accent hover:bg-accent/90 gap-2">
             <Plus size={16} /> New Batch
@@ -137,130 +240,176 @@ export default function B2BBatches() {
         {/* Create Modal */}
         {showCreate && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCreate(false)} />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => !creating && setShowCreate(false)} />
             <div className="relative z-10 bg-card border border-border rounded-3xl p-8 w-full max-w-md shadow-2xl">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Create New Batch</h2>
-                <button onClick={() => setShowCreate(false)} className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground">
+                <div>
+                  <h2 className="text-xl font-bold">Create New Batch</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">A join code is automatically generated</p>
+                </div>
+                <button onClick={() => setShowCreate(false)}
+                  className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center text-muted-foreground hover:text-foreground">
                   <X size={16} />
                 </button>
               </div>
               <form onSubmit={handleCreate} className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">Batch Name</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">
+                    Batch Name <span className="text-red-400">*</span>
+                  </label>
                   <input
-                    required
-                    placeholder="e.g. JEE 2026 – Alpha"
+                    required autoFocus
+                    placeholder="e.g. JEE 2026 – Alpha Batch"
                     value={form.name}
                     onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">Target Exam</label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">
+                    Target Exam <span className="text-red-400">*</span>
+                  </label>
                   <select
                     value={form.targetExam}
-                    onChange={e => {
-                      const exam = e.target.value;
-                      const subs = getSubjectLabels(exam);
-                      setForm({ ...form, targetExam: exam, subject: subs[0] || 'General' });
-                    }}
+                    onChange={e => setForm({ ...form, targetExam: e.target.value })}
                     className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
                   >
-                    <option value="JEE_MAINS">JEE Mains</option>
-                    <option value="JEE_ADVANCED">JEE Advanced</option>
-                    <option value="NEET">NEET</option>
-                    <option value="CUET">CUET</option>
-                    <option value="OTHER">Other</option>
+                    {EXAM_OPTIONS.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">Primary Subject</label>
-                  <select
-                    value={form.subject}
-                    onChange={e => setForm({ ...form, subject: e.target.value })}
-                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
-                  >
-                    {getSubjectLabels(form.targetExam).map(s => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                    <option value="All Subjects">All Subjects</option>
-                  </select>
+                  <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">
+                    Description <span className="text-muted-foreground/50">(optional)</span>
+                  </label>
+                  <input
+                    placeholder="e.g. Crash course batch for JEE 2026 droppers"
+                    value={form.description}
+                    onChange={e => setForm({ ...form, description: e.target.value })}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 transition-all"
+                  />
+                </div>
+                <div className="pt-1 p-3 rounded-xl bg-accent/5 border border-accent/20 text-xs text-accent/80">
+                  ✨ A unique 6-character join code will be auto-generated for this batch
                 </div>
                 <Button type="submit" disabled={creating} className="w-full h-12 bg-accent text-white font-bold rounded-xl">
-                  {creating ? <Loader2 className="animate-spin" size={16} /> : 'Create Batch'}
+                  {creating ? <Loader2 className="animate-spin" size={16} /> : '🚀 Create Batch'}
                 </Button>
               </form>
             </div>
           </div>
         )}
 
+        {/* Main content */}
         {loading ? (
           <div className="flex items-center justify-center h-48">
             <Loader2 className="w-8 h-8 animate-spin text-accent" />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+            {/* Batch cards */}
             {batches.map(b => {
-              const acc = accuracyMap[b.id] ?? 0;
-              const accColor = acc >= 65 ? 'text-emerald-400' : acc >= 50 ? 'text-amber-400' : 'text-red-400';
+              const examLabel = EXAM_OPTIONS.find(e => e.value === b.target_exam)?.label || b.target_exam || 'General';
+              const isRegenning = regeneratingCodeFor === b.id;
+              const isDeleting = deletingId === b.id;
+
               return (
                 <div key={b.id} className="bg-card border border-border rounded-3xl p-6 shadow-sm hover:border-accent/30 transition-all flex flex-col group/card">
+
+                  {/* Card header */}
                   <div className="flex justify-between items-start mb-4">
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col gap-1.5">
                       {b.join_code ? (
-                        <span className="flex items-center gap-1 text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          <CheckCircle2 size={10} /> Ready to Join
+                        <span className="flex items-center gap-1 text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 w-fit">
+                          <CheckCircle2 size={9} /> Active
                         </span>
                       ) : (
-                        <span className="flex items-center gap-1 text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                          <AlertCircle size={10} /> Needs Setup
+                        <span className="flex items-center gap-1 text-[9px] uppercase font-black tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 w-fit">
+                          <AlertCircle size={9} /> Needs Setup
                         </span>
                       )}
+                      <span className="text-[10px] text-muted-foreground">{examLabel}</span>
                     </div>
-                    <div className="text-right">
-                      <p className={`text-2xl font-bold font-display ${accColor}`}>{acc}%</p>
-                      <p className="text-[9px] uppercase font-black tracking-tighter text-muted-foreground">Class AI Accuracy</p>
+                    <div className="flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleDelete(b.id)}
+                        disabled={isDeleting}
+                        className="w-7 h-7 rounded-lg hover:bg-red-500/10 hover:text-red-400 text-muted-foreground flex items-center justify-center transition-colors"
+                      >
+                        {isDeleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />}
+                      </button>
                     </div>
                   </div>
-                  
-                  <h3 className="text-lg font-bold text-foreground leading-tight">{b.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{b.subject || 'All Subjects'} · {b.target_exam || 'JEE'}</p>
+
+                  {/* Batch name */}
+                  <h3 className="text-lg font-bold text-foreground leading-tight mb-1">{b.name}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Created {new Date(b.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </p>
 
                   <div className="flex-1 min-h-[12px]" />
 
-                  {/* Join Credential Slot */}
-                  {b.join_code ? (
-                    <div className="mt-4 p-3 bg-secondary/30 border border-border rounded-2xl flex items-center justify-between group/code hover:border-accent/30 transition-colors">
-                      <div>
-                        <p className="text-[9px] text-muted-foreground uppercase font-black">Classroom Code</p>
-                        <p className="text-base font-mono font-bold text-accent tracking-widest">{b.join_code}</p>
+                  {/* Join Code slot */}
+                  <div className="mt-4">
+                    {b.join_code ? (
+                      <div className="p-3 bg-secondary/30 border border-border rounded-2xl">
+                        <p className="text-[9px] text-muted-foreground uppercase font-black mb-1">Join Code</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-xl font-mono font-bold text-accent tracking-widest">{b.join_code}</p>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => copyCode(b.join_code!)}
+                              className="w-8 h-8 rounded-lg hover:bg-accent/10 hover:text-accent text-muted-foreground flex items-center justify-center transition-colors"
+                              title="Copy code"
+                            >
+                              <Copy size={13} />
+                            </button>
+                            <button
+                              onClick={() => handleRegenerateCode(b)}
+                              disabled={isRegenning}
+                              className="w-8 h-8 rounded-lg hover:bg-accent/10 hover:text-accent text-muted-foreground flex items-center justify-center transition-colors"
+                              title="Regenerate code"
+                            >
+                              {isRegenning ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Students enter this code to join the batch
+                        </p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => copyToClipboard(b.join_code)} className="h-8 w-8 rounded-lg hover:bg-accent/10 hover:text-accent">
-                        <Copy size={13} />
+                    ) : (
+                      <Button
+                        onClick={() => handleRegenerateCode(b)}
+                        disabled={isRegenning}
+                        className="w-full bg-accent/5 hover:bg-accent/10 text-accent border border-accent/20 font-bold gap-2 h-11 rounded-2xl"
+                      >
+                        {isRegenning ? <Loader2 size={14} className="animate-spin" /> : <Ticket size={14} />}
+                        Generate Join Code
                       </Button>
-                    </div>
-                  ) : (
-                    <Button 
-                      onClick={() => handleGenerateCode(b.id)}
-                      className="mt-4 w-full bg-accent/5 hover:bg-accent/10 text-accent border border-accent/20 font-bold gap-2 h-11 rounded-2xl"
-                    >
-                      <Ticket size={16} /> Generate Join Code
-                    </Button>
-                  )}
-
-                  <div className="mt-4 pt-4 border-t border-border flex justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1"><Users size={12} /> <span className="font-bold text-foreground">{memberCounts[b.id] ?? 0}</span> students</div>
-                    <div className="flex items-center gap-1"><GraduationCap size={12} /> {b.profiles?.full_name || 'Unassigned'}</div>
+                    )}
                   </div>
-                  
-                  <Button variant="ghost" className="w-full mt-3 justify-between group py-2 h-auto text-xs font-bold text-muted-foreground hover:text-accent hover:bg-accent/5" onClick={() => window.location.href = `/b2b/invite`}>
-                    View Invite Link <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                  </Button>
+
+                  {/* Footer stats */}
+                  <div className="mt-4 pt-4 border-t border-border flex justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Users size={12} />
+                      <span className="font-bold text-foreground">{b.studentCount}</span> students
+                    </div>
+                    <button
+                      onClick={() => window.location.href = `/b2b/invite`}
+                      className="flex items-center gap-1 text-accent hover:underline font-semibold"
+                    >
+                      Manage <ChevronRight size={12} />
+                    </button>
+                  </div>
                 </div>
               );
             })}
 
+            {/* New Batch card (always visible) */}
             <button
               onClick={() => setShowCreate(true)}
               className="bg-card/50 border-2 border-dashed border-border rounded-3xl p-6 flex flex-col items-center justify-center gap-3 hover:border-accent/40 hover:bg-accent/5 transition-all group min-h-[200px]"
@@ -269,6 +418,7 @@ export default function B2BBatches() {
                 <Plus size={24} />
               </div>
               <p className="font-bold text-muted-foreground group-hover:text-foreground">Create New Batch</p>
+              <p className="text-xs text-muted-foreground text-center">Auto-generates a unique join code</p>
             </button>
           </div>
         )}
