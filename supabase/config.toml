@@ -42,5 +42,41 @@ verify_jwt = false
 [functions.generate-mcq]
 verify_jwt = false
 
+[functions.generate-notes]
+verify_jwt = false
+
+[functions.generate-subchapter-notes]
+verify_jwt = false
+
+[functions.generate-question]
+verify_jwt = false
+
+[functions.generate-questions]
+verify_jwt = false
+
+[functions.generate-pyq-questions]
+verify_jwt = false
+
+[functions.generate-cuet-questions]
+verify_jwt = false
+
+[functions.generate-adaptive-test]
+verify_jwt = false
+
+[functions.generate-revision-content]
+verify_jwt = false
+
+[functions.get-similar-questions]
+verify_jwt = false
+
+[functions.submit-practice-report]
+verify_jwt = false
+
+[functions.parse-questions-ai]
+verify_jwt = false
+
+[functions.heygen-token]
+verify_jwt = false
+
 [functions.bulk-generate-pyqs]
 verify_jwt = false
