@@ -11,6 +11,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 import { Mail, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Loader2, Check, BookOpen, GraduationCap, Sparkles, Rocket, Zap, Brain, Users, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { EXAM_CONFIG, STREAM_TO_EXAM } from '@/config/examConfig';
 
 const emailSchema = z.string().email('Please enter a valid email');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -256,15 +257,8 @@ const AuthPage: React.FC = () => {
     return '11-12';
   };
 
-  const getExamGoalFromStream = (stream: StreamType) => {
-    switch (stream) {
-      case 'jee': return 'JEE Main';
-      case 'neet': return 'NEET';
-      case 'cuet': return 'CUET';
-      case 'commerce': return 'CA Foundation';
-      case 'foundation': return 'Foundation';
-      default: return 'JEE Main';
-    }
+  const getExamGoalFromStream = (stream: StreamType): string => {
+    return STREAM_TO_EXAM[stream as string] ?? 'JEE Main';
   };
 
   const handleOnboardingComplete = async () => {
@@ -425,9 +419,19 @@ const AuthPage: React.FC = () => {
       return;
     }
 
-    // ── Teacher: go to stream selection ──
+    // ── Teacher: go to exam selection ──
     if (onboardingStep === 0 && onboardingData.userType === 'b2b_mentor') {
       setOnboardingStep(1);
+      return;
+    }
+
+    // ── Teacher at exam step: no class step needed, complete immediately ──
+    if (onboardingStep === 1 && onboardingData.userType === 'b2b_mentor') {
+      if (!onboardingData.stream) {
+        toast.error('Please select the exam you teach');
+        return;
+      }
+      handleOnboardingComplete();
       return;
     }
 
@@ -620,16 +624,18 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 1: Stream Selection */}
+              {/* Step 1: Stream/Exam Selection */}
               {onboardingStep === 1 && (
                 <div className="space-y-6">
                   {/* Clean, minimalist header */}
                   <div className="text-center space-y-1 mt-2">
                     <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                      Choose Your Goal
+                      {onboardingData.userType === 'b2b_mentor' ? 'Which exam do you teach?' : 'Choose Your Goal'}
                     </h2>
                     <p className="text-white/40 text-sm">
-                      Select one to personalize your journey
+                      {onboardingData.userType === 'b2b_mentor'
+                        ? 'Your teacher dashboard will adapt to this exam'
+                        : 'Select one to personalize your journey'}
                     </p>
                   </div>
 
