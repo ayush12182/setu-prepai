@@ -400,18 +400,15 @@ const AuthPage: React.FC = () => {
   };
 
   const handleOnboardingNext = async () => {
-    // ── Coaching Student: validate code FORMAT at Step 0, then go to sign up ──
+    // ── Coaching Student: validate code format at Step 0, then show inline auth ──
     if (onboardingStep === 0 && onboardingData.userType === 'b2b_student') {
       const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
       if (!joinCode || joinCode.length < 6) {
         toast.error('Please enter the 6-character batch code from your teacher');
         return;
       }
-      // Close onboarding overlay → show the auth (sign up) form.
-      // The join code is saved in onboardingData.institutionName.
-      // handleOnboardingComplete will use it after the user creates an account.
-      setMode('signup');
-      setShowOnboarding(false);
+      // Step 3 = inline signup form inside onboarding (showOnboarding stays true)
+      setOnboardingStep(3);
       return;
     }
 
@@ -716,7 +713,103 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Psychological UX reassurance */}
+              {/* Step 3: Inline Auth (B2B Student — post code validation) */}
+              {onboardingStep === 3 && onboardingData.userType === 'b2b_student' && (
+                <div className="space-y-5">
+                  <div className="text-center space-y-1 mt-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-2">
+                      <Check className="h-3.5 w-3.5 text-accent" />
+                      <span className="text-xs font-medium text-accent">Code accepted: {onboardingData.institutionName}</span>
+                    </div>
+                    <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                      Create your account
+                    </h2>
+                    <p className="text-white/40 text-sm">You'll be added to your teacher's batch automatically</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Full Name</label>
+                      <input
+                        type="text" placeholder="Your name"
+                        value={fullName}
+                        onChange={e => setFullName(e.target.value)}
+                        className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Email</label>
+                      <input
+                        type="email" placeholder="you@email.com"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Password</label>
+                      <input
+                        type="password" placeholder="Min 6 characters"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={async () => {
+                      if (!fullName.trim()) { toast.error('Enter your name'); return; }
+                      if (!validateEmail(email)) { toast.error('Enter a valid email'); return; }
+                      if (!validatePassword(password)) { toast.error('Password must be at least 6 characters'); return; }
+                      setLoading(true);
+                      try {
+                        await signUpWithEmail(email, password, fullName);
+                        try { await signInWithEmail(email, password); } catch {}
+                        toast.success('Account created! Joining your batch...');
+                        await handleOnboardingComplete();
+                      } catch (err: any) {
+                        // If account already exists, sign in and join
+                        if (err?.message?.includes('already')) {
+                          try {
+                            await signInWithEmail(email, password);
+                            await handleOnboardingComplete();
+                          } catch {
+                            toast.error('Sign in failed. Check your password.');
+                          }
+                        } else {
+                          toast.error(err?.message || 'Account creation failed');
+                        }
+                      } finally { setLoading(false); }
+                    }}
+                    disabled={loading}
+                    className="w-full h-14 rounded-xl bg-accent hover:bg-accent/90 text-[hsl(213,28%,20%)] font-bold text-base shadow-[0_0_20px_rgba(232,154,60,0.2)] transition-all"
+                  >
+                    {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <>Join Batch & Start Learning <ArrowRight className="h-5 w-5 ml-2" /></>}
+                  </Button>
+
+                  <p className="text-center text-xs text-white/30">
+                    Already have an account?{' '}
+                    <button
+                      onClick={async () => {
+                        if (!validateEmail(email) || !validatePassword(password)) { toast.error('Enter email and password'); return; }
+                        setLoading(true);
+                        try {
+                          await signInWithEmail(email, password);
+                          await handleOnboardingComplete();
+                        } catch (err: any) {
+                          toast.error(err?.message || 'Login failed');
+                        } finally { setLoading(false); }
+                      }}
+                      className="text-accent underline font-medium"
+                    >
+                      Sign in instead
+                    </button>
+                  </p>
+                </div>
+              )}
+
+              {onboardingStep !== 3 && (<>
               <div className="mt-8 mb-4 text-center">
                 <p className="text-xs font-medium text-white/40">
                   Takes 10–15 mins • No marks • AI-powered report
@@ -750,6 +843,7 @@ const AuthPage: React.FC = () => {
                 )}
               </div>
             </div>
+            </>)}
 
 
             {/* Stream hints */}
