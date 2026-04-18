@@ -27,6 +27,7 @@ interface TeacherContext {
   batchName: string;
   examType: string;
   institutionName?: string;
+  coachingName?: string;
   joinedAt?: string;
   teacherMessage?: string;
 }
@@ -124,7 +125,7 @@ const StudentHubPage: React.FC = () => {
       if (teacherIds.length > 0) {
         const { data } = await (supabase as any)
           .from('profiles')
-          .select('user_id, full_name, institution_name')
+          .select('user_id, full_name, institution_name, coaching_name')
           .in('user_id', teacherIds);
         tProfiles = data || [];
       }
@@ -166,6 +167,7 @@ const StudentHubPage: React.FC = () => {
           batchName: primary.batch_name || 'Your Batch',
           examType: primary.exam_type || effectiveExam || 'General',
           institutionName: primary.profile?.institution_name || undefined,
+          coachingName: primary.profile?.coaching_name || undefined,
           joinedAt: primary.joined_at,
         };
         setTeacherCtx(ctx);
@@ -243,11 +245,26 @@ const StudentHubPage: React.FC = () => {
   const pendingTasksList = assignedTasks.filter(t => t.status === 'pending');
   const inProgressTasks = assignedTasks.filter(t => t.status === 'in_progress');
 
-  // The "next thing to do" — in-progress > pending > generic mission
   const resumeTask = inProgressTasks[0] || null;
   const nextMissionTask = pendingTasksList[0] || null;
   const dailyGoal = 20;
   const dailyProgress = Math.min(100, Math.round((practiceStats.todayDone / dailyGoal) * 100));
+
+  // ── Smart Daily Hint (computed from real stats, no API call needed) ──
+  const smartHint = (() => {
+    if (practiceStats.streak >= 7) return "You've been consistent — try a mixed full-length test today.";
+    if (practiceStats.accuracy > 0 && practiceStats.accuracy < 55) return `Your accuracy is ${practiceStats.accuracy}% — focus on fewer topics and consolidate first.`;
+    if (practiceStats.accuracy >= 55 && practiceStats.accuracy < 75) return "A 20-minute targeted practice session can push your accuracy above 75%.";
+    if (practiceStats.todayDone === 0 && practiceStats.attempted > 5) return "You haven't practiced today — even 10 questions keeps the momentum going.";
+    if (practiceStats.todayDone > 0 && dailyProgress < 50) return `${practiceStats.todayDone} questions done — ${dailyGoal - practiceStats.todayDone} more to hit your daily goal.`;
+    if (!effectiveExam) return null; // no hint if no exam context
+    return `Keep going — consistent daily practice is the fastest path to ${effectiveExam}.`;
+  })();
+
+  // ── 21-day cycle: simple date-based (no DB needed) ──
+  const dayOfCycle = ((new Date().getDate() - 1) % 21) + 1;
+  const daysToFullTest = 21 - dayOfCycle;
+  const isFullTestSoon = daysToFullTest <= 3;
 
   // ─── Guards ─────────────────────────────────────────────────
   if (loading || !user) {
@@ -425,14 +442,18 @@ const StudentHubPage: React.FC = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-bold text-foreground text-sm">{teacherCtx.teacherName}</p>
+                      <p className="font-bold text-foreground text-sm">
+                        {teacherCtx.teacherName}
+                        {teacherCtx.coachingName && (
+                          <span className="text-muted-foreground font-normal"> — {teacherCtx.coachingName}</span>
+                        )}
+                      </p>
                       <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
                         ✓ Enrolled
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {teacherCtx.batchName} • <span className="text-accent font-semibold">{teacherCtx.examType}</span>
-                      {teacherCtx.institutionName && ` • ${teacherCtx.institutionName}`}
                     </p>
                     {teacherCtx.teacherMessage && (
                       <p className="text-xs text-foreground/70 mt-1.5 italic bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10">
@@ -446,7 +467,7 @@ const StudentHubPage: React.FC = () => {
                 </div>
               )}
 
-              {/* ── Daily Performance Ring + Streak + Stats ── */}
+              {/* ── Daily Performance Ring + Streak + Stats + 21-day chip ── */}
               <div className="grid grid-cols-3 gap-3">
                 {/* Daily Progress Ring */}
                 <div className="bg-card border border-border rounded-2xl p-4 text-center hover:border-accent/30 hover:scale-[1.02] hover:shadow-lg hover:shadow-accent/5 transition-all duration-300 relative overflow-hidden">
@@ -463,6 +484,16 @@ const StudentHubPage: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-[10px] text-muted-foreground">Daily Goal</p>
+                  {/* 21-day chip */}
+                  {daysToFullTest <= 7 && (
+                    <div className={`mt-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
+                      isFullTestSoon
+                        ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                        : 'bg-border/50 border-border text-muted-foreground'
+                    }`}>
+                      {isFullTestSoon ? `Full test in ${daysToFullTest}d` : `Full test in ${daysToFullTest}d`}
+                    </div>
+                  )}
                 </div>
 
                 {/* Streak */}
@@ -483,6 +514,14 @@ const StudentHubPage: React.FC = () => {
                   <p className="text-[10px] text-muted-foreground">Accuracy</p>
                 </div>
               </div>
+
+              {/* ── Smart Daily Hint ── */}
+              {smartHint && (
+                <div className="flex items-start gap-3 rounded-xl border border-border bg-secondary/20 px-4 py-3">
+                  <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                  <p className="text-xs text-foreground/80 leading-relaxed">{smartHint}</p>
+                </div>
+              )}
 
               {/* ── Today's Tasks or Smart Empty ── */}
               <div className="space-y-3">
@@ -705,6 +744,33 @@ const StudentHubPage: React.FC = () => {
                   </div>
                   <p className="text-xs text-muted-foreground mb-4 flex-1">Timed exam environment. Full pattern.</p>
                   <Button variant="outline" onClick={() => navigate('/practice?mode=static')} className="w-full font-bold">Take Full Test</Button>
+                </div>
+                {/* 21-Day Full Syllabus Test */}
+                <div className="sm:col-span-2 bg-secondary/30 border border-border rounded-2xl p-5 flex items-center justify-between gap-3 hover:border-amber-500/30 hover:bg-amber-500/5 transition-all group">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                      <CalendarDays className="w-4 h-4 text-amber-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="text-sm font-bold">Full Syllabus Test</p>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 uppercase tracking-wide">21-Day Cycle</span>
+                        {isFullTestSoon && <span className="text-[9px] font-bold text-amber-400 animate-pulse">Soon</span>}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {daysToFullTest === 0
+                          ? 'Full test day — take now!'
+                          : `Next test in ${daysToFullTest} day${daysToFullTest !== 1 ? 's' : ''}. Standard full-length, all recent chapters.`}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant={daysToFullTest === 0 ? 'default' : 'outline'}
+                    onClick={() => navigate('/practice?mode=full-syllabus')}
+                    className={`shrink-0 font-bold text-xs rounded-xl h-9 px-4 ${daysToFullTest === 0 ? 'bg-amber-500 text-white border-amber-500' : ''}`}
+                  >
+                    {daysToFullTest === 0 ? 'Take Now' : 'Preview'}
+                  </Button>
                 </div>
               </div>
 

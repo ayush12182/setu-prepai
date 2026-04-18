@@ -14,6 +14,7 @@ export default function B2BSettings() {
   const [city, setCity] = useState('');
   const [fullName, setFullName] = useState('');
   const [targetExam, setTargetExam] = useState('');
+  const [coachingName, setCoachingName] = useState('');
 
   // Load real data from profile on mount
   useEffect(() => {
@@ -21,6 +22,7 @@ export default function B2BSettings() {
       setFullName(profile.full_name || '');
       setTargetExam(profile.target_exam || 'JEE Main');
       setOrgName(profile.institution_name || '');
+      setCoachingName((profile as any).coaching_name || '');
     }
   }, [profile]);
 
@@ -46,6 +48,7 @@ export default function B2BSettings() {
         full_name: fullName,
         target_exam: targetExam,
         institution_name: orgName,
+        coaching_name: coachingName,
       } as any);
 
       // Update organization row if it exists
@@ -126,6 +129,17 @@ export default function B2BSettings() {
               placeholder="e.g. Allen Career Institute"
               className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
             />
+          </div>
+          <div>
+            <label className="text-xs uppercase font-bold text-muted-foreground block mb-1">Coaching / Brand Name <span className="text-muted-foreground font-normal normal-case">(shown to students)</span></label>
+            <input
+              type="text"
+              value={coachingName}
+              onChange={e => setCoachingName(e.target.value)}
+              placeholder="e.g. Physics Wallah, Motion IIT"
+              className="w-full bg-secondary/50 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Students will see: <em>{fullName || 'Your Name'} — {coachingName || 'Your Coaching'}</em></p>
           </div>
           <div>
             <label className="text-xs uppercase font-bold text-muted-foreground block mb-1">City</label>
