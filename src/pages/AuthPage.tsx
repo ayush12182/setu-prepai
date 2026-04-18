@@ -809,41 +809,42 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {onboardingStep !== 3 && (<>
-              <div className="mt-8 mb-4 text-center">
-                <p className="text-xs font-medium text-white/40">
-                  Takes 10–15 mins • No marks • AI-powered report
-                </p>
-              </div>
+              {onboardingStep !== 3 && (
+                <div className="mt-8 mb-4 text-center">
+                  <p className="text-xs font-medium text-white/40">
+                    Takes 10–15 mins • No marks • AI-powered report
+                  </p>
+                </div>
+              )}
 
               {/* Nav buttons */}
-              <div className="flex flex-col gap-3">
-                <Button
-                  onClick={handleOnboardingNext}
-                  disabled={loading || (onboardingStep === 1 && !onboardingData.stream) || (onboardingStep === 2 && !onboardingData.studentClass)}
-                  className="w-full h-14 rounded-xl bg-accent hover:bg-accent/90 text-[hsl(213,28%,20%)] font-bold text-lg shadow-[0_0_20px_rgba(232,154,60,0.2)] hover:shadow-[0_0_30px_rgba(232,154,60,0.3)] transition-all disabled:opacity-50 disabled:shadow-none"
-                >
-                  {loading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : onboardingStep === 2 ? (
-                    <>Start Assessment <ArrowRight className="h-5 w-5 ml-2" /></>
-                  ) : (
-                    <>Next <ArrowRight className="h-5 w-5 ml-2" /></>
-                  )}
-                </Button>
-                
-                {onboardingStep > 0 && (
+              {onboardingStep !== 3 && (
+                <div className="flex flex-col gap-3">
                   <Button
-                    variant="ghost"
-                    onClick={() => setOnboardingStep((prev) => (prev - 1) as OnboardingStep)}
-                    className="w-full h-10 text-white/50 hover:text-white hover:bg-white/5 rounded-xl"
+                    onClick={handleOnboardingNext}
+                    disabled={loading || (onboardingStep === 1 && !onboardingData.stream) || (onboardingStep === 2 && !onboardingData.studentClass)}
+                    className="w-full h-14 rounded-xl bg-accent hover:bg-accent/90 text-[hsl(213,28%,20%)] font-bold text-lg shadow-[0_0_20px_rgba(232,154,60,0.2)] hover:shadow-[0_0_30px_rgba(232,154,60,0.3)] transition-all disabled:opacity-50 disabled:shadow-none"
                   >
-                    Back
+                    {loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : onboardingStep === 2 ? (
+                      <>Start Assessment <ArrowRight className="h-5 w-5 ml-2" /></>
+                    ) : (
+                      <>Next <ArrowRight className="h-5 w-5 ml-2" /></>
+                    )}
                   </Button>
-                )}
-              </div>
-            </div>
-            </>)}
+                  
+                  {onboardingStep > 0 && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => setOnboardingStep((prev) => (prev - 1) as OnboardingStep)}
+                      className="w-full h-10 text-white/50 hover:text-white hover:bg-white/5 rounded-xl"
+                    >
+                      Back
+                    </Button>
+                  )}
+                </div>
+              )}
 
 
             {/* Stream hints */}
@@ -887,6 +888,7 @@ const AuthPage: React.FC = () => {
                 </p>
               </div>
             )}
+            </div>
           </div>
         </main>
       </div>
