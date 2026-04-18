@@ -16,8 +16,8 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL      = 'https://cdgysuewybntfbbudxca.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkZ3lzdWV3eWJudGZiYnVkeGNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkxMDI5NDksImV4cCI6MjA4NDY3ODk0OX0.oE2l84rfjBcj_Hq2Dd0YTo7Pl1tIWPBAsg13pYwoyTg';
+const SUPABASE_URL      = process.env.VITE_SUPABASE_URL || 'https://osbpdjlywgydidzurpsb.supabase.co';
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_p8e6J1Hb34XvSCM8vFSfMw_IKObb-6a';
 
 // ─── CLI ──────────────────────────────────────────────────────────────
 const args       = process.argv.slice(2);
