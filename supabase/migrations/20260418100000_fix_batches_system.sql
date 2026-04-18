@@ -8,14 +8,27 @@ ALTER TABLE public.batches ADD COLUMN IF NOT EXISTS target_exam TEXT;
 ALTER TABLE public.batches ADD COLUMN IF NOT EXISTS join_code TEXT;
 ALTER TABLE public.batches ADD COLUMN IF NOT EXISTS mentor_id UUID;
 ALTER TABLE public.batches ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.batches ADD COLUMN IF NOT EXISTS invite_link TEXT;
 
--- ─── 2. Unique constraint on join_code ───────────────────────
--- Allows NULL but enforces uniqueness on non-null values
+-- ─── 2. Backfill mentor_id from created_by (legacy rows) ─────
+-- Safely sets mentor_id where it's currently null but created_by exists
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'batches' AND column_name = 'created_by'
+  ) THEN
+    UPDATE public.batches SET mentor_id = created_by
+    WHERE mentor_id IS NULL AND created_by IS NOT NULL;
+  END IF;
+END $$;
+
+-- ─── 3. Unique constraint on join_code ───────────────────────
 CREATE UNIQUE INDEX IF NOT EXISTS batches_join_code_key
   ON public.batches (join_code)
   WHERE join_code IS NOT NULL;
 
--- ─── 3. RLS — teachers can manage their own batches ──────────
+-- ─── 4. RLS — teachers manage their own batches ──────────────
 ALTER TABLE public.batches ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "teachers_manage_own_batches" ON public.batches;
@@ -23,21 +36,15 @@ CREATE POLICY "teachers_manage_own_batches" ON public.batches
   USING (auth.uid() = mentor_id)
   WITH CHECK (auth.uid() = mentor_id);
 
-DROP POLICY IF EXISTS "org_members_view_batches" ON public.batches;
-CREATE POLICY "org_members_view_batches" ON public.batches
+-- Allow SELECT for org members + students looking up by join_code
+DROP POLICY IF EXISTS "org_or_code_view_batches" ON public.batches;
+CREATE POLICY "org_or_code_view_batches" ON public.batches
   FOR SELECT USING (
     auth.uid() = mentor_id
+    OR (join_code IS NOT NULL AND is_active = true)
     OR organization_id IN (
       SELECT organization_id FROM public.profiles WHERE user_id = auth.uid()
     )
-  );
-
--- ─── 4. Students can look up batches by join code ─────────────
-DROP POLICY IF EXISTS "students_join_by_code" ON public.batches;
-CREATE POLICY "students_join_by_code" ON public.batches
-  FOR SELECT USING (
-    join_code IS NOT NULL
-    AND is_active = true
   );
 
 -- ─── 5. batch_members RLS ────────────────────────────────────

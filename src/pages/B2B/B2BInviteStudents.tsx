@@ -4,10 +4,12 @@ import { Link2, Copy, RefreshCw, Users, ShieldCheck, Ticket, Pencil, Check, X } 
 import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
 import { Button } from '@/components/ui/button';
 import { useB2BManager } from '@/hooks/useB2BManager';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export default function B2BInviteStudents() {
+  const { user } = useAuth();
   const [batches, setBatches] = useState<any[]>([]);
   const [selectedBatch, setSelectedBatch] = useState<any>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -16,7 +18,7 @@ export default function B2BInviteStudents() {
   const editInputRef = useRef<HTMLInputElement>(null);
   const { generateInviteDetails, loading } = useB2BManager();
 
-  useEffect(() => { fetchBatches(); }, []);
+  useEffect(() => { if (user) fetchBatches(); }, [user]);
 
   useEffect(() => {
     if (editingId && editInputRef.current) {
@@ -26,15 +28,23 @@ export default function B2BInviteStudents() {
   }, [editingId]);
 
   const fetchBatches = async () => {
+    if (!user) return;
     try {
-      const { data } = await (supabase as any)
-        .from('batches').select('*').eq('is_active', true).order('created_at', { ascending: false });
+      // Filter by mentor_id so RLS lets us update join_code later
+      const { data, error } = await (supabase as any)
+        .from('batches')
+        .select('*')
+        .eq('mentor_id', user.id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
       if (data && data.length > 0) {
-        setBatches(data); setSelectedBatch(data[0]);
+        setBatches(data);
+        setSelectedBatch(data[0]);
       }
-      // No fallback to demo — show empty state if no real batches
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to fetch batches:', err);
+      toast.error(`Could not load batches: ${err.message}`);
     }
   };
 
@@ -67,16 +77,38 @@ export default function B2BInviteStudents() {
   };
 
   const handleGenerate = async () => {
-    if (!selectedBatch) return;
-    // Never generate for demo batches
+    if (!selectedBatch || !user) return;
     if (selectedBatch.id.startsWith('demo')) {
       toast.error('Please create a real batch from the Batches page first');
       return;
     }
-    const updated = await generateInviteDetails(selectedBatch.id);
-    if (updated) {
-      setSelectedBatch(updated as any);
-      setBatches(batches.map(b => b.id === (updated as any).id ? updated : b));
+    try {
+      // Generate unique code via DB function
+      let newCode: string;
+      const { data: codeData } = await (supabase.rpc as any)('generate_teacher_code');
+      newCode = codeData || Array.from({ length: 6 }, () =>
+        'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]
+      ).join('');
+
+      const inviteLink = `${window.location.origin}/join/${selectedBatch.id}`;
+
+      const { data: updated, error } = await (supabase as any)
+        .from('batches')
+        .update({ join_code: newCode, invite_link: inviteLink })
+        .eq('id', selectedBatch.id)
+        .eq('mentor_id', user.id)           // explicit ownership check
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const fresh = updated as any;
+      setSelectedBatch(fresh);
+      setBatches(prev => prev.map(b => b.id === fresh.id ? fresh : b));
+      toast.success(`✅ Code generated: ${newCode}`);
+    } catch (e: any) {
+      console.error('generate invite error:', e);
+      toast.error(e.message || 'Failed to generate invite');
     }
   };
 
