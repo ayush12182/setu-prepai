@@ -326,11 +326,17 @@ const TeacherDashboard: React.FC = () => {
         }
       }
 
-      if (!codeStr) throw new Error('Failed to generate code context');
+      if (!codeStr) throw new Error('Failed to generate code');
 
-      const exp = codeForm.expires_days
-        ? new Date(Date.now() + parseInt(codeForm.expires_days) * 86400000).toISOString()
-        : null;
+      // ── One active code rule: deactivate all previous codes ──
+      await (supabase.from as any)('teacher_codes')
+        .update({ is_active: false })
+        .eq('teacher_id', user!.id)
+        .eq('is_active', true);
+
+      // Default 7-day expiry
+      const expiryDays = codeForm.expires_days ? parseInt(codeForm.expires_days) : 7;
+      const exp = new Date(Date.now() + expiryDays * 86400000).toISOString();
 
       const { error: insertError } = await (supabase.from as any)('teacher_codes').insert({
         teacher_id:   user!.id,
@@ -340,13 +346,12 @@ const TeacherDashboard: React.FC = () => {
         subject:      codeForm.subject,
         max_students: codeForm.max_students ? parseInt(codeForm.max_students) : null,
         expires_at:   exp,
+        is_active:    true,
       });
 
-      if (insertError) {
-        throw insertError;
-      }
+      if (insertError) throw insertError;
 
-      toast.success(`Code ${codeStr} created!`);
+      toast.success(`✅ Code ${codeStr} created! Previous code deactivated.`);
       setShowCodeForm(false);
       setCodeForm(f => ({ ...f, label: '', max_students: '', expires_days: '' }));
       await fetchCodes();
