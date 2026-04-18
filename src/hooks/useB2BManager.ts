@@ -156,16 +156,27 @@ export const useB2BManager = () => {
         organization_id: profile?.organization_id || null // still optional but not blocking
       };
 
-      console.log('[useB2BManager] Simpler Payload:', JSON.stringify(payload, null, 2));
+      console.log('[useB2BManager] Calling RPC create_batch_v1 with:', JSON.stringify(payload, null, 2));
 
-      const { data, error } = await supabase.from('batches' as any).insert(payload).select().single();
+      // Use RPC to bypass PostgREST cache issues
+      const { data, error } = await supabase.rpc('create_batch_v1', {
+        p_name: payload.name,
+        p_mentor_id: payload.mentor_id,
+        p_join_code: payload.join_code,
+        p_target_exam: payload.target_exam,
+        p_description: payload.description,
+        p_subject: payload.subject
+      });
 
       if (error) {
-        console.error('[useB2BManager] Insert Error:', error);
-        throw error;
+        console.error('[useB2BManager] RPC Error:', error);
+        // Fallback to direct insert if RPC is missing
+        const { data: directData, error: directErr } = await supabase.from('batches' as any).insert(payload).select().single();
+        if (directErr) throw directErr;
+        return directData;
       }
 
-      toast.success(`Batch "${name}" created with code ${join_code}`);
+      toast.success(`Batch "${name}" created via secure channel!`);
       return data;
     } catch (err: any) {
       console.error('[useB2BManager] Error in createBatch:', err);
