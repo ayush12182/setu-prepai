@@ -126,20 +126,27 @@ export const useB2BManager = () => {
         return null;
       }
 
-      const { data, error } = await supabase.from('batches' as any).insert({
+      const payload = {
         name,
         subject,
         mentor_id: mentorId || user?.id,
         organization_id: resolvedOrgId,
         target_exam: targetExam || 'JEE',
         is_active: true
-      }).select().single();
+      };
 
-      if (error) throw error;
+      console.log('[useB2BManager] Creating batch with payload:', payload);
+
+      const { data, error } = await supabase.from('batches' as any).insert(payload).select().single();
+
+      if (error) {
+        console.error('[useB2BManager] Batch insert failed:', error);
+        throw error;
+      }
       toast.success(`Batch "${name}" created successfully.`);
       return data;
     } catch (err: any) {
-      console.error('Error creating batch:', err);
+      console.error('[useB2BManager] Batch creation crash:', err);
       toast.error(err.message || 'Failed to create batch');
       return null;
     } finally {
