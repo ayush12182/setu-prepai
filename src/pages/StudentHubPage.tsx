@@ -8,7 +8,7 @@ import {
   Play, Link, Eye, GraduationCap, Users, FileText,
   Sparkles, Plus, CheckCircle2, Clock, Circle, LogOut,
   Trophy, AlertCircle, BookMarked, FlameKindling, Flame,
-  TrendingUp, Lock
+  TrendingUp, Lock, Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -72,14 +72,16 @@ const StudentHubPage: React.FC = () => {
   const effectiveExam = lockedExam || profile?.target_exam || (user as any)?.user_metadata?.target_exam || null;
   const streamSubjects = getSubjectsForExam(effectiveExam);
 
-  const PRACTICE_TOPICS = streamSubjects.flatMap(s =>
-    s.chapters.slice(0, 2).map(ch => ({
-      subject: s.label, topic: ch.title,
-      difficulty: ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)] as 'easy' | 'medium' | 'hard',
-      qCount: 15 + Math.floor(Math.random() * 25),
-      color: s.color, emoji: s.emoji,
-    }))
-  );
+  const PRACTICE_TOPICS = streamSubjects && Array.isArray(streamSubjects) 
+    ? streamSubjects.flatMap(s =>
+        s.chapters.slice(0, 2).map(ch => ({
+          subject: s.label, topic: ch.title,
+          difficulty: ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)] as 'easy' | 'medium' | 'hard',
+          qCount: 15 + Math.floor(Math.random() * 25),
+          color: s.color, emoji: s.emoji,
+        }))
+      )
+    : [];
 
   useEffect(() => {
     if (!user) return;
@@ -228,8 +230,51 @@ const StudentHubPage: React.FC = () => {
   const completedTasks = assignedTasks.filter(t => t.status === 'completed').length;
   const pendingTasks   = assignedTasks.filter(t => t.status === 'pending').length;
 
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-accent mb-4" />
+        <p className="text-muted-foreground text-sm font-medium">Loading your hub...</p>
+      </div>
+    );
+  }
+
+  console.log("teacher:", teacherCtx);
+  console.log("batch:", teacherCtx?.batchName);
+
+  // Safe Rendering Guard (User Request 3)
+  if (!loading && (!teacherCtx || !teacherCtx.batchName)) {
+    return (
+      <MainLayout title="Student Hub">
+        <div className="max-w-2xl mx-auto py-10 px-4">
+          <div className="relative overflow-hidden rounded-2xl border border-dashed border-accent/40 bg-accent/5 p-6 md:p-10 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-accent/15 flex items-center justify-center mx-auto mb-5 shadow-inner">
+              <GraduationCap className="w-8 h-8 text-accent" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground mb-2">Connect with your Teacher</h2>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+              Enter the 6-character code your teacher shared to access your personalized classroom, assignments, and tests.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-sm mx-auto">
+              <input 
+                value={joinCode} 
+                onChange={e => setJoinCode(e.target.value.toUpperCase())}
+                placeholder="e.g. A3WAVB" 
+                maxLength={8}
+                className="w-full bg-background border border-border rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-accent/50 shadow-sm"
+              />
+              <Button onClick={handleJoinByCode} disabled={joiningCode} className="w-full sm:w-auto bg-accent text-white font-bold h-11 px-8 rounded-xl shadow-lg shadow-accent/20">
+                {joiningCode ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Join Class'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
-    <MainLayout title={teacherCtx ? `${teacherCtx.teacherName}'s Classroom` : 'Student Hub'}>
+    <MainLayout title={teacherCtx?.teacherName ? `${teacherCtx.teacherName}'s Classroom` : 'Student Hub'}>
       <div className="max-w-5xl mx-auto space-y-6">
 
         {/* ── HEADER TABS ── */}
@@ -279,7 +324,7 @@ const StudentHubPage: React.FC = () => {
                     {/* Avatar initial */}
                     <div className="w-13 h-13 rounded-xl bg-gradient-to-br from-accent/30 to-accent/10 border border-accent/30 flex items-center justify-center shrink-0 w-[52px] h-[52px]">
                       <span className="font-black text-accent text-xl">
-                        {teacherCtx.teacherName.charAt(0)}
+                        {(teacherCtx?.teacherName || 'T').charAt(0)}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -288,14 +333,14 @@ const StudentHubPage: React.FC = () => {
                         <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
                           ✓ Enrolled
                         </span>
-                        <span className="text-[10px] text-muted-foreground font-semibold">{teacherCtx.examType}</span>
+                        <span className="text-[10px] text-muted-foreground font-semibold">{teacherCtx?.examType || 'General'}</span>
                       </div>
                       <p className="font-bold text-foreground text-base leading-tight">
-                        {teacherCtx.teacherName}
+                        {teacherCtx?.teacherName || "Your Teacher"}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Batch: <span className="text-foreground/70 font-semibold">{teacherCtx.batchName}</span>
-                        {teacherCtx.institutionName && ` • ${teacherCtx.institutionName}`}
+                        Batch: <span className="text-foreground/70 font-semibold">{teacherCtx?.batchName || "N/A"}</span>
+                        {teacherCtx?.institutionName && ` • ${teacherCtx.institutionName}`}
                       </p>
                     </div>
                     {allTeachers.length > 1 && (
@@ -343,28 +388,15 @@ const StudentHubPage: React.FC = () => {
 
               {/* ── SECTION 2: Big CTA — Start Learning ── */}
               {teacherCtx && (
-                <button
-                  onClick={() => setActiveTab('practice')}
-                  className="w-full relative overflow-hidden rounded-2xl bg-gradient-to-r from-accent to-amber-500 p-5 text-left group hover:shadow-2xl hover:shadow-accent/25 transition-all duration-300"
-                >
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="relative flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-bold text-white/70 uppercase tracking-widest mb-1">
-                        {effectiveExam} • {teacherCtx.batchName}
-                      </p>
-                      <p className="font-black text-white text-xl">
-                        Continue Practice →
-                      </p>
-                      <p className="text-white/60 text-xs mt-1">
-                        {streamSubjects.length} subjects • AI adaptive
-                      </p>
-                    </div>
-                    <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
-                      <Flame className="w-7 h-7 text-white" />
+                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                    <Button onClick={() => setActiveTab('practice')} size="lg" className="flex-1 bg-accent hover:bg-accent/90 text-white font-bold h-12 rounded-xl shadow-lg shadow-accent/20 group">
+                      <Zap className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                      Continue Practice
+                    </Button>
+                    <div className="flex-1 bg-accent/10 border border-accent/20 rounded-xl px-4 py-2 flex items-center justify-center text-xs text-accent font-semibold text-center leading-tight">
+                      {effectiveExam} • {teacherCtx?.batchName || "Your Batch"}
                     </div>
                   </div>
-                </button>
               )}
 
               {/* ── SECTION 3: Today's Tasks ── */}
@@ -547,9 +579,9 @@ const StudentHubPage: React.FC = () => {
               {effectiveExam && (
                 <div className="flex items-center gap-2 px-3 py-2 bg-accent/8 border border-accent/20 rounded-xl">
                   <Lock className="w-3.5 h-3.5 text-accent shrink-0" />
-                  <p className="text-xs text-foreground font-semibold">
+                  <p className="text-xs text-muted-foreground max-w-sm mt-1">
                     Locked to <span className="text-accent">{effectiveExam}</span>
-                    {teacherCtx ? ` (set by ${teacherCtx.teacherName})` : ''}
+                    {teacherCtx?.teacherName ? ` (set by ${teacherCtx.teacherName})` : ''}
                   </p>
                 </div>
               )}
