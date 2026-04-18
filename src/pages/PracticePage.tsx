@@ -20,6 +20,7 @@ import { generateMockAnalytics } from '@/lib/analyticsSimulation';
 import { generateDiagnosticReport } from '@/lib/diagnosisEngine';
 import { generateDailyMission, generateDailyMissionAsync, DailyMission } from '@/lib/adaptiveEngine';
 import { SnapAndSolveModal } from '@/components/practice/SnapAndSolveModal';
+import { useStudentCycle } from '@/hooks/useStudentCycle';
 
 type PracticeMode = 'practice' | 'test';
 
@@ -45,6 +46,7 @@ const PracticePage: React.FC = () => {
   const [isSnapModalOpen, setIsSnapModalOpen] = useState(false);
 
   const { questions, loading, error, generationStatus, generateQuestions, submitPracticeReport, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
+  const { markComplete: markCycleComplete } = useStudentCycle();
 
   // Derive correct exam string from context
   const examParam = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE_MAINS';
@@ -70,6 +72,8 @@ const PracticePage: React.FC = () => {
   useEffect(() => {
     if (initialized) return;
     const subchapterId = searchParams.get('subchapter');
+    const modeParam = searchParams.get('mode');
+
     if (subchapterId) {
       const subchapter = getSubchapterById(subchapterId);
       if (subchapter) {
@@ -78,6 +82,8 @@ const PracticePage: React.FC = () => {
           setState({ step: 'select-difficulty', subchapter, chapter, subject: chapter.subject });
         }
       }
+    } else if (modeParam === 'full-syllabus') {
+      launchAdaptiveSession('Full Syllabus Test', 'Full Syllabus (21-Day)', 'mixed');
     }
     setInitialized(true);
   }, [searchParams, initialized]);
@@ -145,6 +151,11 @@ const PracticePage: React.FC = () => {
         answers,
         state.adaptiveMode === 'task' ? state.subchapter?.name : undefined // passing task identifier if we launched a task
       );
+
+      // ── 21-Day Cycle Completion ──
+      if (state.adaptiveMode === 'Full Syllabus (21-Day)') {
+        markCycleComplete();
+      }
     }
   };
 

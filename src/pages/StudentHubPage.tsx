@@ -18,6 +18,8 @@ import { getSubjectsForExam } from '@/lib/streamSubjects';
 import { joinTeacherByCode } from '@/lib/studentActivity';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { useStudentStats } from '@/hooks/useStudentStats';
+import { useStudentCycle } from '@/hooks/useStudentCycle';
 
 // ─── Types ────────────────────────────────────────────────────
 type Tab = 'home' | 'practice' | 'progress';
@@ -62,10 +64,21 @@ const StudentHubPage: React.FC = () => {
   // Locked exam from teacher (falls back to profile)
   const [lockedExam, setLockedExam] = useState<string | null>(null);
 
-  // Data
-  const [assignedTasks, setAssignedTasks] = useState<any[]>([]);
-  const [realTests, setRealTests] = useState<any[]>([]);
-  const [practiceStats, setPracticeStats] = useState({ attempted: 0, accuracy: 0, streak: 0, todayDone: 0 });
+  // Real Data Hooks
+  const { 
+    accuracy: realAccuracy, 
+    streak: realStreak, 
+    totalSolved: realTotalSolved, 
+    todayDone: realTodayDone,
+    loading: statsLoading 
+  } = useStudentStats();
+
+  const {
+    days_left: cycleDaysLeft,
+    is_test_day: isCycleTestDay,
+    loading: cycleLoading,
+    markComplete: markCycleComplete
+  } = useStudentCycle();
 
   // UI
   const [loading, setLoading] = useState(true);
@@ -162,8 +175,14 @@ const StudentHubPage: React.FC = () => {
 
       if (teacherList.length > 0) {
         const primary = teacherList[0];
+        const rawName = primary.profile?.full_name;
+        // Clean 'xyz' or placeholder names
+        const cleanName = (!rawName || rawName.toLowerCase() === 'xyz' || rawName.toLowerCase().includes('teacher')) 
+          ? 'Your Mentor' 
+          : rawName;
+
         const ctx: TeacherContext = {
-          teacherName: primary.profile?.full_name || 'Your Teacher',
+          teacherName: cleanName,
           batchName: primary.batch_name || 'Your Batch',
           examType: primary.exam_type || effectiveExam || 'General',
           institutionName: primary.profile?.institution_name || undefined,
@@ -190,32 +209,8 @@ const StudentHubPage: React.FC = () => {
         setRealTests(tests || []);
       }
 
-      // ── 6. Practice stats + streak ──────────────────────────
-      try {
-        const { data: sessions } = await (supabase.from as any)('session_participants')
-          .select('live_accuracy, status, submitted_at')
-          .eq('student_id', user!.id)
-          .eq('status', 'SUBMITTED')
-          .order('submitted_at', { ascending: false })
-          .limit(50);
-        if (sessions && sessions.length > 0) {
-          const acc = Math.round(sessions.reduce((a: number, s: any) => a + (s.live_accuracy || 0), 0) / sessions.length);
-          // Streak: count consecutive days with at least one session
-          const today = new Date().toDateString();
-          const todayCount = sessions.filter((s: any) => new Date(s.submitted_at).toDateString() === today).length;
-          let streak = todayCount > 0 ? 1 : 0;
-          const dayMs = 86400000;
-          let checkDate = new Date();
-          if (todayCount === 0) checkDate = new Date(Date.now() - dayMs);
-          for (let d = 1; d <= 30; d++) {
-            const dateStr = new Date(checkDate.getTime() - d * dayMs).toDateString();
-            if (sessions.some((s: any) => new Date(s.submitted_at).toDateString() === dateStr)) {
-              streak++;
-            } else break;
-          }
-          setPracticeStats({ attempted: sessions.length, accuracy: acc, streak, todayDone: todayCount });
-        }
-      } catch { /* non-critical */ }
+      // ── 6. Practice stats + streak moved to useStudentStats hook ──
+
 
     } catch (err) {
       console.error('Error loading student hub:', err);
@@ -248,23 +243,19 @@ const StudentHubPage: React.FC = () => {
   const resumeTask = inProgressTasks[0] || null;
   const nextMissionTask = pendingTasksList[0] || null;
   const dailyGoal = 20;
-  const dailyProgress = Math.min(100, Math.round((practiceStats.todayDone / dailyGoal) * 100));
-
-  // ── Smart Daily Hint (computed from real stats, no API call needed) ──
+  // ── Smart Daily Hint  ──
   const smartHint = (() => {
-    if (practiceStats.streak >= 7) return "You've been consistent — try a mixed full-length test today.";
-    if (practiceStats.accuracy > 0 && practiceStats.accuracy < 55) return `Your accuracy is ${practiceStats.accuracy}% — focus on fewer topics and consolidate first.`;
-    if (practiceStats.accuracy >= 55 && practiceStats.accuracy < 75) return "A 20-minute targeted practice session can push your accuracy above 75%.";
-    if (practiceStats.todayDone === 0 && practiceStats.attempted > 5) return "You haven't practiced today — even 10 questions keeps the momentum going.";
-    if (practiceStats.todayDone > 0 && dailyProgress < 50) return `${practiceStats.todayDone} questions done — ${dailyGoal - practiceStats.todayDone} more to hit your daily goal.`;
-    if (!effectiveExam) return null; // no hint if no exam context
+    if (isCycleTestDay) return "Today is your Full Syllabus Test day. Give it your best shot!";
+    if (realStreak >= 7) return "You've been consistent — try a mixed full-length test today.";
+    if (realAccuracy > 0 && realAccuracy < 55) return `Your accuracy is ${realAccuracy}% — focus on fewer topics and consolidate first.`;
+    if (realAccuracy >= 55 && realAccuracy < 75) return "A 20-minute targeted practice session can push your accuracy above 75%.";
+    if (realTodayDone === 0 && realTotalSolved > 5) return "You haven't practiced today — even 10 questions keeps the momentum going.";
+    if (realTodayDone > 0 && realTodayDone < dailyGoal) return `${realTodayDone} questions done — ${dailyGoal - realTodayDone} more to hit your daily goal.`;
+    if (!effectiveExam) return null;
     return `Keep going — consistent daily practice is the fastest path to ${effectiveExam}.`;
   })();
 
-  // ── 21-day cycle: simple date-based (no DB needed) ──
-  const dayOfCycle = ((new Date().getDate() - 1) % 21) + 1;
-  const daysToFullTest = 21 - dayOfCycle;
-  const isFullTestSoon = daysToFullTest <= 3;
+  const isFullTestSoon = !isCycleTestDay && cycleDaysLeft <= 3;
 
   // ─── Guards ─────────────────────────────────────────────────
   if (loading || !user) {
@@ -355,8 +346,31 @@ const StudentHubPage: React.FC = () => {
           {activeTab === 'home' && (
             <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5">
 
-              {/* ── HERO: Today's Mission / Smart Resume ── */}
-              {resumeTask ? (
+              {/* ── HERO: Today's Mission / Smart Resume / Full Syllabus Test ── */}
+              {isCycleTestDay ? (
+                // PRIORITY: 21-Day Full Syllabus Test
+                <div className="relative overflow-hidden rounded-2xl border-2 border-amber-500 bg-gradient-to-br from-amber-500/20 via-amber-500/5 to-transparent p-5 sm:p-6 group hover:shadow-xl hover:shadow-amber-500/10 transition-all">
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-500 animate-pulse">
+                        ⭐ Major Milestone
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">Full Syllabus Test</span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-black text-foreground mb-1">
+                      21-Day Cycle Test is Ready
+                    </h2>
+                    <p className="text-sm text-muted-foreground mb-4 max-w-md">
+                      Your standard full-length assessment is due. This test benchmarks your progress across all recent chapters.
+                    </p>
+                    <Button onClick={() => navigate('/practice?mode=full-syllabus')} size="lg"
+                      className="bg-amber-500 hover:bg-amber-600 text-white font-bold h-12 px-8 rounded-xl shadow-lg shadow-amber-500/30 group-hover:scale-[1.02] transition-all">
+                      <Trophy className="w-5 h-5 mr-2" /> Start Full Test
+                    </Button>
+                  </div>
+                </div>
+              ) : resumeTask ? (
                 // RESUME: unfinished session
                 <div className="relative overflow-hidden rounded-2xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-500/12 via-amber-500/5 to-transparent p-5 sm:p-6 group hover:shadow-xl hover:shadow-amber-500/10 transition-all">
                   <div className="absolute top-0 right-0 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
@@ -413,12 +427,12 @@ const StudentHubPage: React.FC = () => {
                   <div className="relative">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-accent/15 border border-accent/30 text-accent">
-                        {practiceStats.todayDone > 0 ? '🔥 Keep Going' : '🚀 Start Today'}
+                        {realTodayDone > 0 ? '🔥 Keep Going' : '🚀 Start Today'}
                       </span>
                     </div>
                     <h2 className="text-lg sm:text-xl font-black text-foreground mb-1">
-                      {practiceStats.todayDone > 0
-                        ? `You've done ${practiceStats.todayDone} today — keep the streak!`
+                      {realTodayDone > 0
+                        ? `You've done ${realTodayDone} today — keep the streak!`
                         : 'Ready to practice?'}
                     </h2>
                     <p className="text-sm text-muted-foreground mb-4">
@@ -476,22 +490,27 @@ const StudentHubPage: React.FC = () => {
                       <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none" className="text-border" />
                       <circle cx="28" cy="28" r="24" stroke="currentColor" strokeWidth="4" fill="none"
                         className="text-accent"
-                        strokeDasharray={`${dailyProgress * 1.508} 150.8`}
+                        strokeDasharray={`${Math.min(100, (realTodayDone / dailyGoal) * 100) * 1.508} 150.8`}
                         strokeLinecap="round" />
                     </svg>
                     <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-foreground">
-                      {dailyProgress}%
+                      {Math.round((realTodayDone / dailyGoal) * 100)}%
                     </span>
                   </div>
                   <p className="text-[10px] text-muted-foreground">Daily Goal</p>
                   {/* 21-day chip */}
-                  {daysToFullTest <= 7 && (
+                  {!isCycleTestDay && cycleDaysLeft <= 7 && (
                     <div className={`mt-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${
                       isFullTestSoon
                         ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-                        : 'bg-border/50 border-border text-muted-foreground'
+                        : 'bg-secondary border-border text-muted-foreground'
                     }`}>
-                      {isFullTestSoon ? `Full test in ${daysToFullTest}d` : `Full test in ${daysToFullTest}d`}
+                      Next in {cycleDaysLeft}d
+                    </div>
+                  )}
+                  {isCycleTestDay && (
+                    <div className="mt-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full border bg-amber-500 border-amber-600 text-white animate-pulse">
+                      TEST DAY
                     </div>
                   )}
                 </div>
@@ -499,9 +518,9 @@ const StudentHubPage: React.FC = () => {
                 {/* Streak */}
                 <div className="bg-card border border-border rounded-2xl p-4 text-center hover:border-accent/30 hover:scale-[1.02] hover:shadow-lg hover:shadow-accent/5 transition-all duration-300">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-orange-500/15 flex items-center justify-center">
-                    <Flame className={cn('w-5 h-5', practiceStats.streak > 0 ? 'text-orange-400' : 'text-muted-foreground/40')} />
+                    <Flame className={cn('w-5 h-5', realStreak > 0 ? 'text-orange-400' : 'text-muted-foreground/40')} />
                   </div>
-                  <p className="font-black text-foreground text-xl">{practiceStats.streak || 0}</p>
+                  <p className="font-black text-foreground text-xl">{realStreak}</p>
                   <p className="text-[10px] text-muted-foreground">Day Streak</p>
                 </div>
 
@@ -510,7 +529,7 @@ const StudentHubPage: React.FC = () => {
                   <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-emerald-500/15 flex items-center justify-center">
                     <TrendingUp className="w-5 h-5 text-emerald-400" />
                   </div>
-                  <p className="font-black text-foreground text-xl">{practiceStats.accuracy ? `${practiceStats.accuracy}%` : '—'}</p>
+                  <p className="font-black text-foreground text-xl">{realAccuracy}%</p>
                   <p className="text-[10px] text-muted-foreground">Accuracy</p>
                 </div>
               </div>
@@ -684,9 +703,9 @@ const StudentHubPage: React.FC = () => {
               {/* Session stats */}
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { label: "Today's Goal", value: `${practiceStats.todayDone}/${dailyGoal}`, icon: Target,       color: 'text-accent' },
-                  { label: 'Sessions',     value: practiceStats.attempted || '0', icon: ClipboardList, color: 'text-emerald-400' },
-                  { label: 'Accuracy',     value: practiceStats.accuracy ? `${practiceStats.accuracy}%` : '—', icon: Zap, color: 'text-amber-400' },
+                  { label: "Today's Goal", value: `${realTodayDone}/${dailyGoal}`, icon: Target,       color: 'text-accent' },
+                  { label: 'Total Solved', value: realTotalSolved || '0', icon: ClipboardList, color: 'text-emerald-400' },
+                  { label: 'Accuracy',     value: `${realAccuracy}%`, icon: Zap, color: 'text-amber-400' },
                 ].map(card => (
                   <div key={card.label} className="bg-card border border-border rounded-2xl p-4 text-center hover:border-accent/30 hover:scale-[1.02] transition-all">
                     <card.icon className={cn('w-5 h-5 mx-auto mb-1.5', card.color)} />
@@ -755,21 +774,21 @@ const StudentHubPage: React.FC = () => {
                       <div className="flex items-center gap-2 mb-0.5">
                         <p className="text-sm font-bold">Full Syllabus Test</p>
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 uppercase tracking-wide">21-Day Cycle</span>
-                        {isFullTestSoon && <span className="text-[9px] font-bold text-amber-400 animate-pulse">Soon</span>}
+                        {isCycleTestDay && <span className="text-[9px] font-bold text-amber-500 animate-pulse">Test Day</span>}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {daysToFullTest === 0
-                          ? 'Full test day — take now!'
-                          : `Next test in ${daysToFullTest} day${daysToFullTest !== 1 ? 's' : ''}. Standard full-length, all recent chapters.`}
+                        {isCycleTestDay
+                          ? 'Today is your major milestone test. Good luck!'
+                          : `Next test in ${cycleDaysLeft} day${cycleDaysLeft !== 1 ? 's' : ''}. Standard full-length assessment.`}
                       </p>
                     </div>
                   </div>
                   <Button
-                    variant={daysToFullTest === 0 ? 'default' : 'outline'}
+                    variant={isCycleTestDay ? 'default' : 'outline'}
                     onClick={() => navigate('/practice?mode=full-syllabus')}
-                    className={`shrink-0 font-bold text-xs rounded-xl h-9 px-4 ${daysToFullTest === 0 ? 'bg-amber-500 text-white border-amber-500' : ''}`}
+                    className={`shrink-0 font-bold text-xs rounded-xl h-9 px-4 ${isCycleTestDay ? 'bg-amber-500 text-white border-amber-500' : ''}`}
                   >
-                    {daysToFullTest === 0 ? 'Take Now' : 'Preview'}
+                    {isCycleTestDay ? 'Take Now' : 'Preview'}
                   </Button>
                 </div>
               </div>
@@ -798,7 +817,7 @@ const StudentHubPage: React.FC = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-sm text-foreground truncate">
-                          {t.profile?.full_name || 'Teacher'}
+                          {(!t.profile?.full_name || t.profile.full_name.toLowerCase() === 'xyz') ? 'Your Mentor' : t.profile.full_name}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
                           {t.exam_type || effectiveExam}

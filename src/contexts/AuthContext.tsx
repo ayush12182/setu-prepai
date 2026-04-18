@@ -141,7 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         if (event === 'SIGNED_IN') {
-          toast.success('Welcome back bhai 👋 Jeetu Bhaiya ready hai.');
+          // No toast on sign-in — SIGNED_IN fires on every token refresh too
         }
       }
     );
@@ -222,7 +222,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    toast.success('Phir milenge bhai! 👋');
+    toast.success('Signed out successfully.');
+    localStorage.removeItem('preferredLanguage');
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
