@@ -241,7 +241,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // 2. Attempt to update profiles table using an atomic upsert
-    const dbUpdates: any = { user_id: user.id, ...updates, updated_at: new Date().toISOString() };
+    // Strip out any keys that are explicitly null/undefined to avoid overwriting existing data
+    const rawUpdates: any = { user_id: user.id, ...updates, updated_at: new Date().toISOString() };
+    const dbUpdates: any = Object.fromEntries(
+      Object.entries(rawUpdates).filter(([, v]) => v !== undefined && v !== null)
+    );
+    // Always keep user_id
+    dbUpdates.user_id = user.id;
     
     try {
       const { error } = await supabase

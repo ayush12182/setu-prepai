@@ -296,8 +296,7 @@ const AuthPage: React.FC = () => {
 
         await updateProfile({
           target_exam: examGoal,
-          class: 'teacher',
-          student_level: '11-12',
+          class: null,           // Teachers don't have a class — avoids DB constraint
           user_type: 'b2b_mentor',
           institution_name: onboardingData.institutionName?.trim() || null,
           organization_id: orgId,
@@ -392,7 +391,8 @@ const AuthPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Onboarding error:', error);
-      toast.error('Profile update failed, please try again');
+      const errMsg = error instanceof Error ? error.message : typeof error === 'object' && error !== null && 'message' in error ? (error as any).message : 'Unknown error';
+      toast.error(`Profile update failed: ${errMsg}`);
     } finally { setLoading(false); }
   };
 
