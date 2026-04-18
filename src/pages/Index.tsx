@@ -39,14 +39,14 @@ const Index: React.FC = () => {
 
   const { dailyFocus, smartFocus, isLoading, streak } = useTodaysFocus();
   const { transitionMessage, isReadyForTransition } = useProgressiveLearning();
-  const displayName = profile?.full_name || user?.email?.split("@")[0] || "Bhai";
+  const displayName = profile?.full_name || user?.email?.split("@")[0] || "Learner";
 
   const getGreeting = () => {
     if (isFoundation) {
       return language === 'hindi' ? 'आज कुछ नया सीखते हैं!' : "Let's learn something new today!";
     }
     const mentorName = getMentorName();
-    const mentorLabel = isCuet ? 'CUET Mentor' : isNeet ? 'NEET Mentor' : mentorName;
+    const mentorLabel = isCuet ? 'AI CUET Mentor' : isNeet ? 'AI NEET Mentor' : `AI ${mentorName}`;
     return language === 'hindi'
       ? `${mentorLabel} तैयार है आपकी मदद के लिए।`
       : `${mentorLabel} is ready to help you.`;

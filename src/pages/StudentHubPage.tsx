@@ -182,21 +182,28 @@ const StudentHubPage: React.FC = () => {
       if (teacherList.length > 0) {
         const primary = teacherList[0];
         const rawName = primary.profile?.full_name;
-        // Clean 'xyz' or placeholder names
-        const cleanName = (!rawName || rawName.toLowerCase() === 'xyz' || rawName.toLowerCase().includes('teacher')) 
-          ? 'Your Mentor' 
-          : rawName;
+        
+        // Remove Hinglish slang and placeholders. 
+        // If name is generic (xyz, teacher, etc), we treat as unidentified and hide the card.
+        const isGeneric = !rawName || 
+                         rawName.toLowerCase() === 'xyz' || 
+                         rawName.toLowerCase().includes('teacher') ||
+                         rawName.toLowerCase() === 'your mentor';
 
-        const ctx: TeacherContext = {
-          teacherName: cleanName,
-          batchName: primary.batch_name || 'Your Batch',
-          examType: primary.exam_type || effectiveExam || 'General',
-          institutionName: primary.profile?.institution_name || undefined,
-          coachingName: primary.profile?.coaching_name || undefined,
-          joinedAt: primary.joined_at,
-        };
-        setTeacherCtx(ctx);
-        setLockedExam(ctx.examType);
+        if (!isGeneric) {
+          const ctx: TeacherContext = {
+            teacherName: rawName!,
+            batchName: primary.batch_name || 'Your Batch',
+            examType: primary.exam_type || effectiveExam || 'General',
+            institutionName: primary.profile?.institution_name || undefined,
+            coachingName: primary.profile?.coaching_name || undefined,
+            joinedAt: primary.joined_at,
+          };
+          setTeacherCtx(ctx);
+          setLockedExam(ctx.examType);
+        } else {
+          setTeacherCtx(null);
+        }
       }
 
       // ── 4. Assigned tasks ───────────────────────────────────
@@ -495,7 +502,7 @@ const StudentHubPage: React.FC = () => {
               </div>
 
               {/* ── 👨‍🏫 TEACHER CARD (Requirement 5) ── */}
-              {teacherCtx && teacherCtx.teacherName !== 'Your Mentor' && (
+              {teacherCtx && (
                 <div className="flex items-center gap-4 rounded-3xl border border-border bg-card/30 p-4 hover:border-accent/30 transition-all">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center shrink-0">
                     <GraduationCap className="w-6 h-6 text-accent" />
