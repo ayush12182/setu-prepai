@@ -156,7 +156,7 @@ const StudentHubPage: React.FC = () => {
           <GraduationCap className="w-16 h-16 mx-auto text-accent" />
           <h2 className="text-xl font-bold">Join your Class</h2>
           <div className="flex gap-2">
-            <input value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase())} className="flex-1 border p-3 rounded-xl" placeholder="Code" />
+            <input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} className="flex-1 border p-3 rounded-xl" placeholder="Code" />
             <Button onClick={handleJoinByCode} disabled={joiningCode} className="bg-accent">Join</Button>
           </div>
         </div>
@@ -174,8 +174,9 @@ const StudentHubPage: React.FC = () => {
     <MainLayout title="Student Hub">
       <div className="max-w-5xl mx-auto space-y-6 pb-20">
         
+        {/* Navigation Tabs */}
         <div className="flex items-center gap-1 bg-secondary/30 p-1 rounded-xl border border-border w-max">
-          {TABS.map(tab => (
+          {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -189,66 +190,67 @@ const StudentHubPage: React.FC = () => {
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
-          {activeTab === 'home' && (
-            <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-6">
-              <div className="rounded-3xl border border-accent/20 bg-gradient-to-br from-accent/10 to-background p-8">
-                <h2 className="text-2xl font-black mb-2">Welcome back, {profile?.full_name || 'Student'}</h2>
-                <p className="text-muted-foreground mb-6">Continue your journey towards {effectiveExam || 'success'}.</p>
-                <Button onClick={() => navigate('/practice')} size="lg" className="bg-accent text-primary font-bold px-8 rounded-xl">Start Learning</Button>
-              </div>
+        {/* Home Tab Content */}
+        {activeTab === 'home' && (
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-accent/20 bg-gradient-to-br from-accent/10 to-background p-8">
+              <h2 className="text-2xl font-black mb-2">Welcome back, {profile?.full_name || 'Student'}</h2>
+              <p className="text-muted-foreground mb-6">Continue your journey towards {effectiveExam || 'success'}.</p>
+              <Button onClick={() => navigate('/practice')} size="lg" className="bg-accent text-primary font-bold px-8 rounded-xl">Start Learning</Button>
+            </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[
-                  { label: 'Today', value: `${realTodayDone}/20`, icon: Target, color: 'text-accent' },
-                  { label: 'Streak', value: `${realStreak} Days`, icon: Flame, color: 'text-orange-400' },
-                  { label: 'Accuracy', value: `${realAccuracy}%`, icon: Zap, color: 'text-emerald-400' },
-                  { label: 'Exam', value: effectiveExam || 'SETU', icon: Lock, color: 'text-amber-400' },
-                ].map((stat, i) => (
-                  <div key={i} className="bg-card border border-border rounded-2xl p-4 text-center">
-                    <stat.icon className={cn('w-5 h-5 mx-auto mb-2', stat.color)} />
-                    <p className="text-lg font-black">{stat.value}</p>
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              {assignedTasks.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-sm font-bold uppercase text-muted-foreground">Missions</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {assignedTasks.map((task: any) => (
-                      <div key={task.id} onClick={() => navigate('/practice')} className="bg-card border border-border rounded-2xl p-4 flex justify-between items-center cursor-pointer">
-                        <p className="font-bold text-sm">{task.topic}</p>
-                        <ArrowRight className="w-4 h-4" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {activeTab === 'practice' && (
-            <motion.div key="practice" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {PRACTICE_TOPICS.map((topic, i) => (
-                <div key={i} onClick={() => navigate('/practice')} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{topic.emoji}</span>
-                    <p className="font-bold text-sm">{topic.topic}</p>
-                  </div>
-                  <Play className="w-4 h-4 text-accent" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { label: 'Today', value: `${realTodayDone}/20`, icon: Target, color: 'text-accent' },
+                { label: 'Streak', value: `${realStreak} Days`, icon: Flame, color: 'text-orange-400' },
+                { label: 'Accuracy', value: `${realAccuracy}%`, icon: Zap, color: 'text-emerald-400' },
+                { label: 'Exam', value: effectiveExam || 'SETU', icon: Lock, color: 'text-amber-400' },
+              ].map((stat, i) => (
+                <div key={i} className="bg-card border border-border rounded-2xl p-4 text-center">
+                  <stat.icon className={cn('w-5 h-5 mx-auto mb-2', stat.color)} />
+                  <p className="text-lg font-black">{stat.value}</p>
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground">{stat.label}</p>
                 </div>
               ))}
-            </motion.div>
-          )}
+            </div>
 
-          {activeTab === 'progress' && (
-            <motion.div key="progress" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-              <StudentProgressView />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {assignedTasks.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold uppercase text-muted-foreground">Missions</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {assignedTasks.map((task: any) => (
+                    <div key={task.id} onClick={() => navigate('/practice')} className="bg-card border border-border rounded-2xl p-4 flex justify-between items-center cursor-pointer">
+                      <p className="font-bold text-sm">{task.topic}</p>
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Practice Tab Content */}
+        {activeTab === 'practice' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {PRACTICE_TOPICS.map((topic, i) => (
+              <div key={i} onClick={() => navigate('/practice')} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{topic.emoji}</span>
+                  <p className="font-bold text-sm">{topic.topic}</p>
+                </div>
+                <Play className="w-4 h-4 text-accent" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Progress Tab Content */}
+        {activeTab === 'progress' && (
+          <div>
+            <StudentProgressView />
+          </div>
+        )}
       </div>
     </MainLayout>
   );
