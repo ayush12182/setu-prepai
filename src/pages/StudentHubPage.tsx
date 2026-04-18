@@ -57,6 +57,10 @@ const StudentHubPage: React.FC = () => {
   const { user, profile, refreshProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('home');
 
+  useEffect(() => {
+    console.log("[SETU] Universal Deployment v2.1 — Active");
+  }, []);
+
   // Primary teacher context (from DB)
   const [teacherCtx, setTeacherCtx] = useState<TeacherContext | null>(null);
   const [allTeachers, setAllTeachers] = useState<any[]>([]);
@@ -180,6 +184,8 @@ const StudentHubPage: React.FC = () => {
       }
 
       setAllTeachers(teacherList);
+      
+      const isB2C = profile?.user_type === 'b2c_student';
 
       if (teacherList.length > 0) {
         const primary = teacherList[0];
@@ -203,9 +209,23 @@ const StudentHubPage: React.FC = () => {
           };
           setTeacherCtx(ctx);
           setLockedExam(ctx.examType);
+        } else if (isB2C) {
+          // Fallback for B2C if generic name
+          setTeacherCtx({
+            teacherName: 'AI SETU Mentor',
+            batchName: 'Self-Study Mode',
+            examType: effectiveExam || 'General'
+          });
         } else {
           setTeacherCtx(null);
         }
+      } else if (isB2C) {
+        // Default context for B2C
+        setTeacherCtx({
+          teacherName: 'AI SETU Mentor',
+          batchName: 'Self-Study Mode',
+          examType: effectiveExam || 'General'
+        });
       }
 
       // ── 4. Assigned tasks ───────────────────────────────────
@@ -323,8 +343,10 @@ const StudentHubPage: React.FC = () => {
     );
   }
 
-  // No teacher connected — onboarding
-  if (!loading && (!teacherCtx || !teacherCtx.batchName)) {
+  const isB2C = profile?.user_type === 'b2c_student';
+
+  // No teacher connected — onboarding (B2B only)
+  if (!loading && !isB2C && (!teacherCtx || !teacherCtx.batchName)) {
     return (
       <MainLayout title="Student Hub">
         <div className="max-w-2xl mx-auto py-10 px-4">

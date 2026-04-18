@@ -145,8 +145,9 @@ serve(async (req) => {
     });
 
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 400,
+    console.error("[BackendFix] Practice Report Error:", err);
+    return new Response(JSON.stringify({ error: err.message || "Internal server error" }), {
+      status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
