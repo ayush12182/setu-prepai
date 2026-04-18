@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { getSubjectsForExam } from '@/lib/streamSubjects';
 import { joinTeacherByCode } from '@/lib/studentActivity';
 import { supabase } from '@/integrations/supabase/client';
+import { MainLayout } from '@/components/layout/MainLayout';
 
 // ─── Types ────────────────────────────────────────────────────
 type Tab = 'home' | 'practice' | 'progress';
@@ -228,51 +229,39 @@ const StudentHubPage: React.FC = () => {
   const pendingTasks   = assignedTasks.filter(t => t.status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <MainLayout title={teacherCtx ? `${teacherCtx.teacherName}'s Classroom` : 'Student Hub'}>
+      <div className="max-w-5xl mx-auto space-y-6">
 
-      {/* ── STICKY HEADER ── */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          {/* Brand + context */}
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center shadow-lg shadow-accent/20 shrink-0">
-              <Brain className="w-5 h-5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="font-bold text-foreground text-sm leading-tight truncate">
-                {teacherCtx ? `${teacherCtx.teacherName}'s Classroom` : 'SETU Student Hub'}
-              </h1>
-              <p className="text-[11px] text-muted-foreground truncate">
-                {teacherCtx ? `${teacherCtx.examType} • ${teacherCtx.batchName}` : displayName}
-              </p>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex items-center gap-1 bg-secondary/30 p-1 rounded-xl border border-border">
+        {/* ── HEADER TABS ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-1 bg-secondary/30 p-1.5 rounded-xl border border-border w-max">
             {TABS.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all',
+                  'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all',
                   activeTab === tab.id
                     ? 'bg-card text-foreground shadow-sm border border-border'
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                 )}
               >
                 <span>{tab.icon}</span>
-                <span className="hidden sm:inline">{tab.label}</span>
+                <span>{tab.label}</span>
               </button>
             ))}
           </div>
+          
+          {/* Join Teacher Context info */}
+          {!teacherCtx && (
+            <Button variant="outline" onClick={() => setShowJoinInput(true)}
+              className="h-10 rounded-xl border-accent/20 bg-accent/5 text-accent hover:bg-accent/10 font-bold px-4">
+              <Plus className="w-4 h-4 mr-2" /> Join a Teacher
+            </Button>
+          )}
         </div>
-      </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-4 pb-24 space-y-0">
-        <AnimatePresence mode="wait">
-
-          {/* ═══════════════════════════════════════════════════
+        {/* ═══════════════════════════════════════════════════
               HOME TAB
           ═══════════════════════════════════════════════════ */}
           {activeTab === 'home' && (
@@ -282,7 +271,7 @@ const StudentHubPage: React.FC = () => {
               {loading ? (
                 <div className="h-20 rounded-2xl bg-secondary/30 animate-pulse" />
               ) : teacherCtx ? (
-                <div className="relative overflow-hidden rounded-2xl border border-accent/30 bg-gradient-to-r from-accent/12 via-accent/6 to-transparent p-4">
+                <div className="relative overflow-hidden rounded-2xl border border-accent/30 bg-gradient-to-r from-accent/12 via-accent/6 to-transparent p-4 group hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5 transition-all">
                   {/* Subtle glow */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
                   <div className="relative flex items-center gap-4">
@@ -432,7 +421,7 @@ const StudentHubPage: React.FC = () => {
                   </div>
                 ) : (
                   // Smart empty state
-                  <div className="rounded-2xl border border-border bg-secondary/20 p-5">
+                  <div className="rounded-2xl border border-border bg-secondary/20 p-5 hover:border-accent/30 transition-all hover:bg-secondary/30">
                     {teacherCtx ? (
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-muted/30 flex items-center justify-center shrink-0">
@@ -463,7 +452,7 @@ const StudentHubPage: React.FC = () => {
                     <Zap className="w-4 h-4 text-accent" /> Live Tests
                   </h2>
                   {realTests.map((test: any) => (
-                    <div key={test.id} className="bg-card border-2 border-accent/25 rounded-2xl p-4 flex items-center justify-between gap-3">
+                    <div key={test.id} className="bg-card border-2 border-accent/25 rounded-2xl p-4 flex items-center justify-between gap-3 hover:shadow-lg hover:border-accent/50 hover:scale-[1.01] transition-all">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-accent">LIVE</span>
@@ -492,7 +481,7 @@ const StudentHubPage: React.FC = () => {
                     { label: 'Sessions',    value: practiceStats.attempted || '—', icon: Target,       color: 'text-accent' },
                     { label: 'Accuracy',    value: practiceStats.accuracy ? `${practiceStats.accuracy}%` : '—', icon: TrendingUp, color: 'text-amber-400' },
                   ].map(card => (
-                    <div key={card.label} className="bg-card border border-border rounded-2xl p-4 text-center">
+                    <div key={card.label} className="bg-card border border-border rounded-2xl p-4 text-center hover:border-accent/30 hover:scale-[1.02] hover:shadow-lg hover:shadow-accent/5 transition-all duration-300">
                       <card.icon className={cn('w-5 h-5 mx-auto mb-1.5', card.color)} />
                       <p className="font-black text-foreground text-xl">{card.value}</p>
                       <p className="text-[10px] text-muted-foreground mt-0.5">{card.label}</p>
@@ -502,7 +491,7 @@ const StudentHubPage: React.FC = () => {
               </div>
 
               {/* ── SECTION 6: AI Practice CTA ── */}
-              <div className="bg-gradient-to-br from-accent/10 to-amber-500/5 border border-accent/20 rounded-2xl p-5 flex items-start gap-4">
+              <div className="bg-gradient-to-br from-accent/10 to-amber-500/5 border border-accent/20 rounded-2xl p-5 flex items-start gap-4 hover:shadow-xl hover:shadow-accent/10 hover:border-accent/40 transition-all duration-300 group">
                 <div className="w-11 h-11 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
                   <Sparkles className="w-6 h-6 text-accent" />
                 </div>
@@ -612,7 +601,7 @@ const StudentHubPage: React.FC = () => {
 
               {/* Mode cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-accent/10 to-amber-500/5 border border-accent/20 rounded-2xl p-5 flex flex-col">
+                <div className="bg-gradient-to-br from-accent/10 to-amber-500/5 border border-accent/20 rounded-2xl p-5 flex flex-col hover:border-accent/40 hover:shadow-lg hover:shadow-accent/10 transition-all">
                   <div className="flex items-center gap-2 mb-2">
                     <Zap className="w-5 h-5 text-accent" />
                     <p className="text-sm font-bold">Adaptive Sprints</p>
@@ -620,7 +609,7 @@ const StudentHubPage: React.FC = () => {
                   <p className="text-xs text-muted-foreground mb-4 flex-1">AI selects questions based on your weakness map.</p>
                   <Button onClick={() => navigate('/practice?mode=adaptive')} className="w-full bg-accent text-white font-bold">Start Sprint</Button>
                 </div>
-                <div className="bg-secondary/40 border border-border rounded-2xl p-5 flex flex-col">
+                <div className="bg-secondary/40 border border-border rounded-2xl p-5 flex flex-col hover:border-accent/30 hover:bg-secondary/60 transition-all">
                   <div className="flex items-center gap-2 mb-2">
                     <ClipboardList className="w-5 h-5 text-muted-foreground" />
                     <p className="text-sm font-bold">Full Mock Test</p>
@@ -646,7 +635,7 @@ const StudentHubPage: React.FC = () => {
                     <Users className="w-4 h-4 text-accent" /> My Teachers
                   </h3>
                   {allTeachers.map((t: any, i: number) => (
-                    <div key={i} className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4">
+                    <div key={i} className="flex items-center gap-4 bg-card border border-border rounded-2xl p-4 hover:border-accent/30 hover:shadow-lg transition-all">
                       <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center shrink-0">
                         <span className="text-base font-black text-accent">
                           {t.profile?.full_name?.charAt(0) || 'T'}
@@ -698,7 +687,7 @@ const StudentHubPage: React.FC = () => {
 
         </AnimatePresence>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

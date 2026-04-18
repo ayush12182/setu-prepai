@@ -214,34 +214,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           )}
 
           {/* Mentor Card */}
-          <div className="p-4">
-            <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.03] rounded-2xl p-4 border border-white/[0.08]">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className={cn("w-3.5 h-3.5", isCuet ? "text-[hsl(260_50%_55%)]" : isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")} />
-                <p className="text-white/50 text-[11px] font-semibold tracking-wider uppercase">Your Mentor</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className={cn(
-                  "w-10 h-10 rounded-full bg-gradient-to-br flex items-center justify-center border",
-                  isFoundation
-                    ? "from-[hsl(210_60%_50%/0.3)] to-[hsl(210_60%_40%/0.1)] border-[hsl(210_60%_50%/0.3)]"
-                    : isCuet
-                    ? "from-[hsl(260_50%_55%/0.3)] to-[hsl(260_60%_40%/0.1)] border-[hsl(260_50%_55%/0.3)]"
-                    : isNeet
-                    ? "from-[hsl(145_50%_38%/0.3)] to-[hsl(145_60%_35%/0.1)] border-[hsl(145_50%_38%/0.3)]"
-                    : "from-[hsl(36_80%_55%/0.3)] to-[hsl(36_90%_45%/0.1)] border-[hsl(36_80%_55%/0.3)]"
-                )}>
-                  <span className={cn("font-bold text-sm", isFoundation ? "text-[hsl(210_60%_50%)]" : isCuet ? "text-[hsl(260_50%_55%)]" : isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")}>
-                    {isFoundation ? 'SM' : isCuet ? 'CM' : isNeet ? 'NM' : 'JB'}
-                  </span>
+          {!isB2BStudent && (
+            <div className="p-4">
+              <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.03] rounded-2xl p-4 border border-white/[0.08]">
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className={cn("w-3.5 h-3.5", isCuet ? "text-[hsl(260_50%_55%)]" : isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")} />
+                  <p className="text-white/50 text-[11px] font-semibold tracking-wider uppercase">Your Mentor</p>
                 </div>
-                <div>
-                  <p className="text-white font-semibold text-sm">{isFoundation ? 'SETU Mentor' : config.mentorName}</p>
-                  <p className="text-white/40 text-xs">Always here to help</p>
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "w-10 h-10 rounded-full bg-gradient-to-br flex items-center justify-center border",
+                    isFoundation
+                      ? "from-[hsl(210_60%_50%/0.3)] to-[hsl(210_60%_40%/0.1)] border-[hsl(210_60%_50%/0.3)]"
+                      : isCuet
+                      ? "from-[hsl(260_50%_55%/0.3)] to-[hsl(260_60%_40%/0.1)] border-[hsl(260_50%_55%/0.3)]"
+                      : isNeet
+                      ? "from-[hsl(145_50%_38%/0.3)] to-[hsl(145_60%_35%/0.1)] border-[hsl(145_50%_38%/0.3)]"
+                      : "from-[hsl(36_80%_55%/0.3)] to-[hsl(36_90%_45%/0.1)] border-[hsl(36_80%_55%/0.3)]"
+                  )}>
+                    <span className={cn("font-bold text-sm", isFoundation ? "text-[hsl(210_60%_50%)]" : isCuet ? "text-[hsl(260_50%_55%)]" : isNeet ? "text-[hsl(145_50%_45%)]" : "text-[hsl(36_80%_55%)]")}>
+                      {isFoundation ? 'SM' : isCuet ? 'CM' : isNeet ? 'NM' : 'JB'}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold text-sm">{isFoundation ? 'SETU Mentor' : config.mentorName}</p>
+                    <p className="text-white/40 text-xs">Always here to help</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </aside>
     </>
