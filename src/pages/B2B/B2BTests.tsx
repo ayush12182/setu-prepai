@@ -3,7 +3,7 @@ import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
 import {
   ClipboardList, Plus, QrCode, Copy, Clock, Loader2, ArrowRight,
   ArrowLeft, CheckCircle2, Sparkles, BookOpen, Target, Zap, Brain,
-  Users, BarChart3, Link2, ChevronRight, X,
+  Users, BarChart3, Link2, ChevronRight, X, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';

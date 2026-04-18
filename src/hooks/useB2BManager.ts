@@ -117,7 +117,7 @@ export const useB2BManager = () => {
 
 
 
-  const createBatch = async (name: string, subject: string, mentorId?: string, targetExam?: string) => {
+  const createBatch = async (name: string, subject: string, mentorId?: string, targetExam?: string, description?: string) => {
     setLoading(true);
     try {
       const resolvedOrgId = await ensureOrganization();
@@ -126,21 +126,40 @@ export const useB2BManager = () => {
         return null;
       }
 
-      // 1. Generate join code immediately (User requirement: always generated)
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      const join_code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      // 1. Generate unique 6-character alphanumeric uppercase join code
+      const generateUniqueCode = async (): Promise<string> => {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No ambiguous chars
+        let code = '';
+        let isUnique = false;
+        let attempts = 0;
+
+        while (!isUnique && attempts < 10) {
+          code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+          
+          const { data } = await supabase
+            .from('batches')
+            .select('id')
+            .eq('join_code', code)
+            .maybeSingle();
+            
+          if (!data) isUnique = true;
+          attempts++;
+        }
+        return code;
+      };
+
+      const join_code = await generateUniqueCode();
 
       // 2. Build EXACT payload matching DB columns
-      // Columns: name, target_exam, description, organization_id, mentor_id, join_code, is_active
       const payload = {
         name: name.trim(),
         target_exam: targetExam || 'JEE_MAINS',
-        description: `Batch for ${subject}`,
+        description: description || `Batch for ${subject}`,
         organization_id: resolvedOrgId,
         mentor_id: mentorId || user?.id,
         join_code: join_code,
         is_active: true,
-        subject: subject // Added just in case it's in schema (previous migrations show it is)
+        subject: subject
       };
 
       console.log('[useB2BManager] FINAL PAYLOAD BEFORE INSERT:', JSON.stringify(payload, null, 2));

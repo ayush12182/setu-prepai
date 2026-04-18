@@ -6,7 +6,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { getChapterById } from '@/data/syllabus';
 import { getSubchaptersByChapterId } from '@/data/subchapters';
-import { AlertTriangle, Zap, BookOpen } from 'lucide-react';
+import { AlertTriangle, Zap, BookOpen, FileText, PenTool, CheckSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +15,6 @@ import { ChapterHeader } from '@/components/chapter/ChapterHeader';
 import { SubchapterCard } from '@/components/chapter/SubchapterCard';
 import { TrendingConcepts } from '@/components/chapter/TrendingConcepts';
 import { JeetuTip } from '@/components/chapter/JeetuTip';
-import { FileText, PenTool, CheckSquare } from 'lucide-react';
 
 
 const ChapterPage: React.FC = () => {

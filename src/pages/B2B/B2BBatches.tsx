@@ -127,7 +127,7 @@ export default function B2BBatches() {
     e.preventDefault();
     if (!form.name.trim()) { toast.error('Batch name is required'); return; }
 
-    const result = await createBatch(form.name.trim(), 'All Subjects', user?.id, form.targetExam);
+    const result = await createBatch(form.name.trim(), 'All Subjects', user?.id, form.targetExam, form.description);
     if (!result) return; 
 
     // createBatch already generates join_code and organization_id
@@ -148,6 +148,9 @@ export default function B2BBatches() {
     setBatches(prev => [newBatch, ...prev]);
     setShowCreate(false);
     setForm({ name: '', targetExam: defaultExam, description: '' });
+    
+    // Explicitly refresh after a short delay to ensure DB sync
+    setTimeout(fetchBatches, 500);
   };
 
   // ─── Regenerate join code for existing batch ─────────────────
@@ -288,6 +291,20 @@ export default function B2BBatches() {
           <div className="flex items-center justify-center h-48">
             <Loader2 className="w-8 h-8 animate-spin text-accent" />
           </div>
+        ) : batches.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 bg-card/50 border-2 border-dashed border-border rounded-3xl group cursor-pointer hover:border-accent/40 hover:bg-accent/5 transition-all"
+               onClick={() => setShowCreate(true)}>
+            <div className="w-16 h-16 rounded-2xl bg-accent/10 text-accent flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Plus size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-foreground">No Batches Yet</h3>
+            <p className="text-muted-foreground mt-2 max-w-xs text-center text-sm">
+              Create your first batch to start inviting students and conducting assessments.
+            </p>
+            <Button className="mt-6 bg-accent" onClick={(e) => { e.stopPropagation(); setShowCreate(true); }}>
+              Create Your First Batch
+            </Button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
@@ -316,6 +333,12 @@ export default function B2BBatches() {
                     </div>
                     <div className="flex items-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity">
                       <button
+                        onClick={() => toast.info('Edit functionality coming soon')}
+                        className="w-7 h-7 rounded-lg hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors"
+                      >
+                         <Layers size={12} />
+                      </button>
+                      <button
                         onClick={() => handleDelete(b.id)}
                         disabled={isDeleting}
                         className="w-7 h-7 rounded-lg hover:bg-red-500/10 hover:text-red-400 text-muted-foreground flex items-center justify-center transition-colors"
@@ -336,10 +359,13 @@ export default function B2BBatches() {
                   {/* Join Code slot */}
                   <div className="mt-4">
                     {b.join_code ? (
-                      <div className="p-3 bg-secondary/30 border border-border rounded-2xl">
+                      <div className="p-3 bg-secondary/30 border border-border rounded-2xl relative group/code">
                         <p className="text-[9px] text-muted-foreground uppercase font-black mb-1">Join Code</p>
                         <div className="flex items-center justify-between">
-                          <p className="text-xl font-mono font-bold text-accent tracking-widest">{b.join_code}</p>
+                          <p onClick={() => copyCode(b.join_code!)} 
+                             className="text-xl font-mono font-bold text-accent tracking-widest cursor-pointer hover:opacity-80 transition-opacity">
+                            {b.join_code}
+                          </p>
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => copyCode(b.join_code!)}
@@ -358,9 +384,6 @@ export default function B2BBatches() {
                             </button>
                           </div>
                         </div>
-                        <p className="text-[10px] text-muted-foreground mt-1">
-                          Students enter this code to join the batch
-                        </p>
                       </div>
                     ) : (
                       <Button
@@ -384,23 +407,22 @@ export default function B2BBatches() {
                       onClick={() => window.location.href = `/b2b/invite`}
                       className="flex items-center gap-1 text-accent hover:underline font-semibold"
                     >
-                      Manage <ChevronRight size={12} />
+                      Invite students <ChevronRight size={12} />
                     </button>
                   </div>
                 </div>
               );
             })}
 
-            {/* New Batch card (always visible) */}
+            {/* New Batch card (tail end) */}
             <button
               onClick={() => setShowCreate(true)}
-              className="bg-card/50 border-2 border-dashed border-border rounded-3xl p-6 flex flex-col items-center justify-center gap-3 hover:border-accent/40 hover:bg-accent/5 transition-all group min-h-[200px]"
+              className="bg-card/30 border-2 border-dashed border-border rounded-3xl p-6 flex flex-col items-center justify-center gap-2 hover:border-accent/40 hover:bg-accent/5 transition-all group min-h-[220px]"
             >
-              <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Plus size={24} />
+              <div className="w-10 h-10 rounded-xl bg-secondary text-muted-foreground flex items-center justify-center group-hover:scale-110 group-hover:bg-accent/10 group-hover:text-accent transition-all">
+                <Plus size={20} />
               </div>
-              <p className="font-bold text-muted-foreground group-hover:text-foreground">Create New Batch</p>
-              <p className="text-xs text-muted-foreground text-center">Auto-generates a unique join code</p>
+              <p className="font-bold text-muted-foreground group-hover:text-foreground">New Batch</p>
             </button>
           </div>
         )}
