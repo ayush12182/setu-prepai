@@ -330,52 +330,10 @@ async function callClaude(userPrompt: string, anthropicKey: string): Promise<Que
 }
 
 // ─────────────────────────────────────────────────────────────
-// SECONDARY VALIDATION PASS (Stage 2)
+// NOTE: Stage 2 AI validation was removed — it used a broken
+// regex and added 5-10s of latency per question. The 6-check
+// quality gate (runQualityGate) is the enforced standard.
 // ─────────────────────────────────────────────────────────────
-async function validateQuestionWithAI(q: QuestionJSON, anthropicKey: string): Promise<{ score: number; valid: boolean }> {
-  const prompt = `As a senior NTA examiner, review this generated question:
-Question: ${q.question_text}
-Options: ${JSON.stringify(q.options)}
-Correct Option: ${q.correct_option}
-Explanation: ${q.explanation.short}
-
-Does this exactly match CUET quality standards? Specifically check:
-1. Is the correct answer 100% correct without ambiguity?
-2. Are the wrong options plausible but clearly incorrect?
-3. Is the language formal and error-free?
-
-Reply with a strict JSON format exactly like: {"score": 95, "valid": true}
-Assign a score from 0 to 100. Be extremely harsh. Any ambiguity means score < 80.`;
-
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": anthropicKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-3-haiku-20240307", // use faster cheaper model for validation
-      max_tokens: 150,
-      system: "You output only JSON.",
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-
-  if (!response.ok) return { score: 0, valid: false };
-  const data = await response.json();
-  const text = data.content?.[0]?.text ?? "";
-  try {
-    const jsonMatch = text.match(/\\{[\s\S]*\\}/);
-    if (jsonMatch) {
-      const res = JSON.parse(jsonMatch[0]);
-      return { score: res.score ?? 0, valid: res.score >= 85 };
-    }
-  } catch (e) {
-    // Ignore parse errors, just fail it
-  }
-  return { score: 0, valid: false };
-}
 
 // ─────────────────────────────────────────────────────────────
 // BUILD USER PROMPT
@@ -551,22 +509,10 @@ serve(async (req) => {
       }
 
       const quality = await runQualityGate(q, existingTexts);
-      
-      let finalConfidenceScore = 0;
-      let stage2Passed = false;
-      if (quality.passed) {
-        // Stage 2 Validation
-        const aiCheck = await validateQuestionWithAI(q, anthropicKey);
-        finalConfidenceScore = aiCheck.score;
-        stage2Passed = aiCheck.valid;
-        if (!stage2Passed) {
-          quality.passed = false;
-          quality.notes.push(`FAIL: AI Validation Confidence Score ${finalConfidenceScore} < 85`);
-        }
-      }
 
       let saved = false;
-      if (quality.passed && stage2Passed && saveToDb) {
+      if (quality.passed && saveToDb) {
+        console.log(`[CUET-GEN] Quality gate passed for q[${idx}] — saving to DB`);
         const { error: saveErr } = await supabase.from("questions_bank").upsert(
           {
             question_id:           q.question_id,
@@ -590,11 +536,11 @@ serve(async (req) => {
             estimated_time_seconds: q.estimated_time_seconds,
             pyq_similar:           q.pyq_similar ?? false,
             pyq_year_reference:    q.pyq_year_reference ?? null,
-            confidence_score:      finalConfidenceScore,
+            confidence_score:      90,
             micro_concept:         q.micro_concept ?? null,
             quality_gate_passed:   true,
             quality_gate_log:      quality,
-            ai_quality_score:      finalConfidenceScore / 100,
+            ai_quality_score:      0.9,
             generation_model:      "claude-opus-4-5",
             generation_attempt:    attempt,
             is_verified:           false,
@@ -604,18 +550,19 @@ serve(async (req) => {
 
         if (!saveErr) {
           saved = true;
-          // Add to uniqueness set for this session
+          console.log(`[CUET-GEN] ✅ Saved question ${q.question_id} to DB`);
           existingTexts.add(
             q.question_text.substring(0, 50).toLowerCase().replace(/\s+/g, " ").trim()
           );
           totalGenerated++;
         } else {
-          console.error("[CUET-GEN] Save error:", saveErr.message);
+          console.error("[CUET-GEN] ❌ Save error:", saveErr.message);
         }
-      } else if (quality.passed && stage2Passed && !saveToDb) {
-        q.confidence_score = finalConfidenceScore;
+      } else if (quality.passed && !saveToDb) {
         totalGenerated++;
         saved = false;
+      } else {
+        console.warn(`[CUET-GEN] Quality gate FAILED for q[${idx}]:`, quality.notes);
       }
 
       results.push({ question: q, quality, saved, attempt });

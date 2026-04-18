@@ -44,7 +44,10 @@ const PracticePage: React.FC = () => {
   const [pendingTasks, setPendingTasks] = useState<any[]>([]);
   const [isSnapModalOpen, setIsSnapModalOpen] = useState(false);
 
-  const { questions, loading, error, generateQuestions, submitPracticeReport, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
+  const { questions, loading, error, generationStatus, generateQuestions, submitPracticeReport, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
+
+  // Derive correct exam string from context
+  const examParam = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE_MAINS';
 
   useEffect(() => {
     if (!user?.id) return;
@@ -93,12 +96,12 @@ const PracticePage: React.FC = () => {
     
     // For now use B2C practice question fetcher, we will upgrade this to AssessmentEngine
     if (subchapter && chapter && subject) {
-      await generateQuestions(subchapter.id, adaptiveMode || subchapter.name, chapter.id, chapter.name, subject, difficulty === 'mixed' ? 'medium' : difficulty, 10);
+      await generateQuestions(subchapter.id, adaptiveMode || subchapter.name, chapter.id, chapter.name, subject, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
     } else {
       // Overall mode
       const mockChapter = { id: 'adaptive', name: 'Overall Syllabus', subject: 'Mixed' } as unknown as Chapter;
       const mockSub = { id: 'adaptive-sub', chapterId: 'adaptive', name: 'Overall Syllabus', jeeAsks: [], pyqFocus: { trends:[], patterns:[], traps:[] }, commonMistakes: [], jeetuLine: "Show me what you got." } as unknown as Subchapter;
-      await generateQuestions(mockSub.id, adaptiveMode || 'Mixed', mockChapter.id, mockChapter.name, mockChapter.subject, difficulty === 'mixed' ? 'medium' : difficulty, 10);
+      await generateQuestions(mockSub.id, adaptiveMode || 'Mixed', mockChapter.id, mockChapter.name, mockChapter.subject, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
     }
   };
 
@@ -113,7 +116,7 @@ const PracticePage: React.FC = () => {
     const mockSub = { id: 'adaptive-sub', chapterId: 'adaptive', name: title, jeeAsks: [], pyqFocus: { trends:[], patterns:[], traps:[] }, commonMistakes: [], jeetuLine: "Show me what you got." } as unknown as Subchapter;
     
     setState({ step: 'quiz', subchapter: mockSub, chapter: mockChapter, subject: mockChapter.subject, difficulty: intensity, adaptiveMode: modeName });
-    await generateQuestions(mockSub.id, modeName, mockChapter.id, title, mockChapter.subject, intensity === 'mixed' ? 'medium' : intensity, 10);
+    await generateQuestions(mockSub.id, modeName, mockChapter.id, title, mockChapter.subject, intensity === 'mixed' ? 'medium' : intensity, 10, examParam);
   };
 
   const handleQuizComplete = (result: QuizResult) => {
@@ -155,9 +158,9 @@ const PracticePage: React.FC = () => {
     const { subchapter, chapter, subject, difficulty } = state;
     setState({ step: 'quiz', subchapter, chapter, subject, difficulty });
     if (subchapter && chapter && subject) {
-      await generateQuestions(subchapter.id, subchapter.name, chapter.id, chapter.name, subject, difficulty === 'mixed' ? 'medium' : difficulty, 10);
+      await generateQuestions(subchapter.id, subchapter.name, chapter.id, chapter.name, subject, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
     } else {
-      await generateQuestions('adaptive-sub', 'Mixed', 'adaptive', 'Overall Syllabus', 'Mixed', difficulty === 'mixed' ? 'medium' : difficulty, 10);
+      await generateQuestions('adaptive-sub', 'Mixed', 'adaptive', 'Overall Syllabus', 'Mixed', difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
     }
   };
 
@@ -320,21 +323,60 @@ const PracticePage: React.FC = () => {
         {state.step === 'quiz' && (
           <>
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-32 animate-fade-in">
-                <div className="w-16 h-16 rounded-full border-4 border-accent/20 border-t-accent animate-spin mb-6" />
-                <h2 className="text-xl font-bold text-foreground mb-2">
-                  {state.adaptiveMode ? `Adapting Engine for ${state.adaptiveMode}...` : 'Generating AI Questions...'}
-                </h2>
-                <p className="text-muted-foreground text-sm">Selecting the perfect difficulty tier based on your accuracy.</p>
+            <div className="flex flex-col items-center justify-center py-32 animate-fade-in">
+              <div className="w-16 h-16 rounded-full border-4 border-accent/20 border-t-accent animate-spin mb-6" />
+              <h2 className="text-xl font-bold text-foreground mb-2">
+                {generationStatus === 'generating'
+                  ? 'Generating your personalized questions...'
+                  : generationStatus === 'polling'
+                  ? 'AI is hard at work — almost ready...'
+                  : state.adaptiveMode ? `Adapting Engine for ${state.adaptiveMode}...` : 'Loading Questions...'}
+              </h2>
+              <p className="text-muted-foreground text-sm max-w-xs text-center">
+                {generationStatus === 'polling'
+                  ? 'Questions are being compiled and quality-checked. This takes up to 30 seconds on first run.'
+                  : 'Selecting the perfect difficulty tier based on your accuracy.'}
+              </p>
+              {/* Skeleton cards */}
+              <div className="w-full max-w-2xl mt-8 space-y-3">
+                {[1,2,3].map(i => (
+                  <div key={i} className="bg-card border border-border rounded-2xl p-5 animate-pulse">
+                    <div className="h-4 bg-muted rounded w-3/4 mb-3" />
+                    <div className="h-3 bg-muted rounded w-1/2 mb-4" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="h-10 bg-muted rounded-xl" />
+                      <div className="h-10 bg-muted rounded-xl" />
+                      <div className="h-10 bg-muted rounded-xl" />
+                      <div className="h-10 bg-muted rounded-xl" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : error ? (
-              <div className="text-center py-20">
-                <p className="text-destructive mb-4">{error}</p>
-                <Button onClick={() => handleDifficultySelect(state.difficulty)} variant="outline">Try again</Button>
+            </div>
+          ) : error === 'generation_failed' ? (
+            <div className="text-center py-20 animate-fade-in">
+              <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+                <Brain className="w-8 h-8 text-destructive" />
               </div>
-            ) : questions.length > 0 ? (
-              <QuizInterface questions={questions} subchapterName={state.subchapter?.name || 'Mixed Syllabus'} difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} onComplete={handleQuizComplete} onGetSimilar={handleGetSimilar} onRecordAttempt={recordAttempt} />
-            ) : null}
+              <h2 className="text-xl font-bold text-foreground mb-2">Generation timed out</h2>
+              <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
+                AI question generation can take up to 60 seconds on cold start. Click retry to try again.
+              </p>
+              <Button
+                onClick={() => handleDifficultySelect(state.difficulty)}
+                className="bg-accent text-primary-foreground rounded-xl font-bold"
+              >
+                Retry Generation
+              </Button>
+            </div>
+          ) : error ? (
+            <div className="text-center py-20">
+              <p className="text-destructive mb-4">{error}</p>
+              <Button onClick={() => handleDifficultySelect(state.difficulty)} variant="outline">Try again</Button>
+            </div>
+          ) : questions.length > 0 ? (
+            <QuizInterface questions={questions} subchapterName={state.subchapter?.name || 'Mixed Syllabus'} difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} onComplete={handleQuizComplete} onGetSimilar={handleGetSimilar} onRecordAttempt={recordAttempt} />
+          ) : null}
           </>
         )}
 
