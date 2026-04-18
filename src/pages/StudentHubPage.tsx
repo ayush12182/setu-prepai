@@ -64,6 +64,10 @@ const StudentHubPage: React.FC = () => {
   // Locked exam from teacher (falls back to profile)
   const [lockedExam, setLockedExam] = useState<string | null>(null);
 
+  // Data
+  const [assignedTasks, setAssignedTasks] = useState<any[]>([]);
+  const [realTests, setRealTests] = useState<any[]>([]);
+
   // Real Data Hooks
   const { 
     accuracy: realAccuracy, 
@@ -636,14 +640,14 @@ const StudentHubPage: React.FC = () => {
               )}
 
               {/* ── Weakness Engine ── */}
-              {practiceStats.attempted > 3 && practiceStats.accuracy < 70 && (
+              {realTotalSolved > 3 && realAccuracy < 70 && (
                 <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <AlertCircle className="w-4 h-4 text-red-400" />
                     <h3 className="text-sm font-bold text-foreground">Focus Areas</h3>
                   </div>
                   <p className="text-xs text-muted-foreground mb-3">
-                    Your accuracy is {practiceStats.accuracy}% — focus on weak topics to improve.
+                    Your accuracy is {realAccuracy}% — focus on weak topics to improve.
                   </p>
                   <Button size="sm" onClick={() => navigate('/practice?mode=adaptive')}
                     className="bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25 font-bold text-xs rounded-xl">
