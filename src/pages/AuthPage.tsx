@@ -195,7 +195,16 @@ const AuthPage: React.FC = () => {
         } catch (signInErr) {
           console.warn("Auto sign-in after sign-up failed, user may need to log in manually", signInErr);
         }
-        
+
+        // If they came from the b2b_student onboarding path (code already set),
+        // go straight to completion — no need to show onboarding screens again.
+        if (onboardingData.userType === 'b2b_student' && onboardingData.institutionName) {
+          toast.success("Account created! Joining your batch... 🎯");
+          setShowOnboarding(true); // Keep true so handleOnboardingComplete can run
+          await handleOnboardingComplete();
+          return;
+        }
+
         toast.success('Account created! Let\'s set up your learning profile 🎯');
         setShowOnboarding(true);
         setOnboardingStep(getInitialStep());
@@ -307,7 +316,7 @@ const AuthPage: React.FC = () => {
       // If coaching student with a join code — actually join the batch right here
       if (onboardingData.userType === 'b2b_student') {
         const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
-        if (!joinCode || joinCode.length !== 6) {
+        if (!joinCode || joinCode.length < 6) {
           toast.error('Please enter a valid 6-character batch code from your mentor');
           setLoading(false);
           return;
@@ -391,31 +400,18 @@ const AuthPage: React.FC = () => {
   };
 
   const handleOnboardingNext = async () => {
-    // ── Coaching Student: validate + join batch immediately at Step 0 ──
+    // ── Coaching Student: validate code FORMAT at Step 0, then go to sign up ──
     if (onboardingStep === 0 && onboardingData.userType === 'b2b_student') {
       const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
-      if (!joinCode || joinCode.length !== 6) {
+      if (!joinCode || joinCode.length < 6) {
         toast.error('Please enter the 6-character batch code from your teacher');
         return;
       }
-      setLoading(true);
-      try {
-        const { joinTeacherByCode } = await import('@/lib/studentActivity');
-        const result = await joinTeacherByCode(joinCode);
-        if (!result.success) {
-          toast.error(result.message || 'Invalid code. Ask your teacher for the correct code.');
-          return;
-        }
-        // Code valid — update user_type in auth + profile context
-        await supabase.auth.updateUser({ data: { user_type: 'b2b_student' } });
-        await updateProfile({ user_type: 'b2b_student' } as any);
-        toast.success(`${result.message} — Welcome to your batch! 🎉`);
-        navigate('/student-hub');
-      } catch (e) {
-        toast.error('Something went wrong. Try again.');
-      } finally {
-        setLoading(false);
-      }
+      // Close onboarding overlay → show the auth (sign up) form.
+      // The join code is saved in onboardingData.institutionName.
+      // handleOnboardingComplete will use it after the user creates an account.
+      setMode('signup');
+      setShowOnboarding(false);
       return;
     }
 
