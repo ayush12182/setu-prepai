@@ -605,8 +605,6 @@ const StudentHubPage: React.FC = () => {
                 </div>
               )}
 
-            </motion.div>
-          )}
 
               {/* ── Assigned Assessments (New System) ── */}
               {assignedAssessments.length > 0 && (
