@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.bulk-generate-pyqs]
 verify_jwt = false
+
+[functions.ai-proxy]
+verify_jwt = false
