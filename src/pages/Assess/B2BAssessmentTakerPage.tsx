@@ -143,6 +143,21 @@ export default function B2BAssessmentTakerPage() {
       batchSize: 10,
       sessionId: sessionId,
     });
+
+    // UPDATE ASSIGNMENT STATUS (Requirement 1)
+    if (user && sessionId) {
+      try {
+        await (supabase.from as any)('student_assessments')
+          .update({ 
+            status: 'in_progress', 
+            started_at: new Date().toISOString() 
+          })
+          .eq('student_id', user.id)
+          .eq('assessment_id', sessionId);
+      } catch (e) {
+        console.warn('Could not update status to in_progress:', e);
+      }
+    }
   };
 
   // ─── ANSWER ───
@@ -166,6 +181,21 @@ export default function B2BAssessmentTakerPage() {
     if (answeredSoFar >= totalRequired) {
       clearInterval(timerRef.current!);
       setTakerState('complete');
+      
+      // MARK COMPLETED (Requirement 1)
+      if (user && sessionId) {
+        try {
+          await (supabase.from as any)('student_assessments')
+            .update({ 
+              status: 'completed', 
+              completed_at: new Date().toISOString() 
+            })
+            .eq('student_id', user.id)
+            .eq('assessment_id', sessionId);
+        } catch (e) {
+          console.warn('Could not update status to completed:', e);
+        }
+      }
     }
   };
 

@@ -48,6 +48,7 @@ export default function B2BTests() {
 
   // Past sessions
   const [sessions, setSessions] = useState<any[]>([]);
+  const [materials, setMaterials] = useState<any[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
 
   // Builder state
@@ -72,14 +73,50 @@ export default function B2BTests() {
   const loadSessions = async () => {
     setLoadingSessions(true);
     try {
-      const { data } = await (supabase as any)
+      const { data: testSessions } = await (supabase as any)
         .from('assessment_sessions')
-        .select('*')
+        .select(`
+          *,
+          student_assessments(id, status)
+        `)
         .eq('created_by', user?.id)
         .order('created_at', { ascending: false })
         .limit(20);
-      setSessions(data || []);
-    } catch { setSessions([]); }
+      
+      const sessionWithStats = (testSessions || []).map((s: any) => {
+        const assignments = s.student_assessments || [];
+        return {
+          ...s,
+          stats: {
+            assigned: assignments.length,
+            completed: assignments.filter((a: any) => a.status === 'completed').size || assignments.filter((a: any) => a.status === 'completed').length,
+            in_progress: assignments.filter((a: any) => a.status === 'in_progress').length,
+          }
+        };
+      });
+
+      const { data: mats } = await (supabase as any)
+        .from('batch_materials')
+        .select(`
+          *,
+          material_access(id)
+        `)
+        .eq('uploaded_by', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      const matsWithStats = (mats || []).map((m: any) => ({
+        ...m,
+        views: (m.material_access || []).length
+      }));
+
+      setSessions(sessionWithStats);
+      setMaterials(matsWithStats);
+    } catch (err) { 
+      console.error(err);
+      setSessions([]); 
+      setMaterials([]);
+    }
     finally { setLoadingSessions(false); }
   };
 
@@ -276,29 +313,120 @@ export default function B2BTests() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border',
-                      s.status === 'ACTIVE' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : 'border-border text-muted-foreground'
-                    )}>{s.status}</span>
-                    <Button
-                      size="sm" variant="ghost"
-                      onClick={() => navigator.clipboard.writeText(`${window.location.origin}/assess/${s.id}`).then(() => toast.success('Link copied!'))}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm" variant="ghost"
-                      onClick={() => window.open(`/b2b/monitor/${s.id}`, '_blank')}
-                      className="h-8 w-8 p-0"
-                    >
-                      <BarChart3 className="w-4 h-4" />
-                    </Button>
+                  <div className="flex items-center gap-6">
+                    {/* Participation Stats */}
+                    <div className="hidden md:flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider">
+                      <div className="text-center">
+                        <p className="text-muted-foreground mb-0.5">Assigned</p>
+                        <p className="text-foreground">{s.stats?.assigned || 0}</p>
+                      </div>
+                      <div className="h-6 w-px bg-border/50" />
+                      <div className="text-center">
+                        <p className="text-amber-400/70 mb-0.5">Attempting</p>
+                        <p className="text-amber-400">{s.stats?.in_progress || 0}</p>
+                      </div>
+                      <div className="h-6 w-px bg-border/50" />
+                      <div className="text-center">
+                        <p className="text-emerald-400/70 mb-0.5">Done</p>
+                        <p className="text-emerald-400">{s.stats?.completed || 0}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full uppercase border',
+                        s.status === 'ACTIVE' ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : 'border-border text-muted-foreground'
+                      )}>{s.status}</span>
+                      <Button
+                        size="sm" variant="ghost"
+                        onClick={() => navigator.clipboard.writeText(`${window.location.origin}/assess/${s.id}`).then(() => toast.success('Link copied!'))}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm" variant="ghost"
+                        onClick={() => window.open(`/b2b/monitor/${s.id}`, '_blank')}
+                        className="h-8 w-8 p-0"
+                      >
+                        <BarChart3 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           )}
+        </div>
+
+        {/* Shared Content (Requirement 2) */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-lg flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-accent" /> Shared Content
+            </h2>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/b2b/materials')} className="text-accent hover:text-accent hover:bg-accent/10">
+              Manage All <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             {/* A. Notes Uploaded */}
+             <div className="bg-card border border-border rounded-2xl p-5">
+               <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
+                 <FileText className="w-4 h-4 text-rose-400" /> Study Materials (Notes)
+               </h3>
+               {materials.length === 0 ? (
+                 <p className="text-xs text-muted-foreground py-4 text-center">No materials shared yet.</p>
+               ) : (
+                 <div className="space-y-3">
+                   {materials.slice(0, 3).map(m => (
+                     <div key={m.id} className="flex items-center justify-between group">
+                       <div className="flex items-center gap-3">
+                         <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                           {m.type === 'pdf' ? <FileText className="w-4 h-4 text-rose-400" /> : <Link2 className="w-4 h-4 text-blue-400" />}
+                         </div>
+                         <div>
+                           <p className="text-xs font-bold truncate max-w-[140px] text-foreground">{m.title}</p>
+                           <p className="text-[10px] text-muted-foreground">{m.subject}</p>
+                         </div>
+                       </div>
+                       <div className="flex items-center gap-2">
+                         <div className="text-[10px] font-bold text-accent bg-accent/5 px-2 py-0.5 rounded border border-accent/20">
+                           {m.views || 0} views
+                         </div>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               )}
+             </div>
+
+             {/* B. Assessments Summary */}
+             <div className="bg-card border border-border rounded-2xl p-5">
+               <h3 className="font-bold text-sm mb-4 flex items-center gap-2">
+                 <ClipboardList className="w-4 h-4 text-emerald-400" /> Assessment Status
+               </h3>
+               <div className="space-y-4">
+                 <div className="flex justify-between items-end">
+                   <div className="space-y-1">
+                     <p className="text-2xl font-black text-foreground">{sessions.filter(s => s.status === 'ACTIVE').length}</p>
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Active Tests</p>
+                   </div>
+                   <div className="space-y-1 text-right">
+                     <p className="text-2xl font-black text-emerald-400">
+                       {sessions.reduce((acc, s) => acc + (s.stats?.completed || 0), 0)}
+                     </p>
+                     <p className="text-[10px] text-muted-foreground uppercase font-bold">Total Attempts</p>
+                   </div>
+                 </div>
+                 <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden flex">
+                    <div className="h-full bg-emerald-500" style={{ width: '65%' }} />
+                    <div className="h-full bg-amber-500" style={{ width: '20%' }} />
+                 </div>
+                 <p className="text-[10px] text-muted-foreground italic text-center">Data aggregated from all sessions</p>
+               </div>
+             </div>
+          </div>
         </div>
       </div>
 

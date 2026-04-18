@@ -66,6 +66,8 @@ const StudentHubPage: React.FC = () => {
 
   // Data
   const [assignedTasks, setAssignedTasks] = useState<any[]>([]);
+  const [assignedAssessments, setAssignedAssessments] = useState<any[]>([]);
+  const [sharedMaterials, setSharedMaterials] = useState<any[]>([]);
   const [realTests, setRealTests] = useState<any[]>([]);
 
   // Real Data Hooks
@@ -214,7 +216,23 @@ const StudentHubPage: React.FC = () => {
         .limit(10);
       setAssignedTasks(tasks || []);
 
-      // ── 5. Live tests from teacher batches ──────────────────
+      // ── 5. Assigned Assessments (Requirement 1) ───────────
+      const { data: assignedTests } = await (supabase.from as any)('student_assessments')
+        .select('*, assessment_sessions(*)')
+        .eq('student_id', user!.id)
+        .eq('status', 'not_started') // Only show unstarted tests here
+        .order('assigned_at', { ascending: false });
+      
+      setAssignedAssessments(assignedTests || []);
+
+      // ── 6. Study Materials (Requirement 2.A) ────────────────
+      const { data: sharedMats } = await (supabase.from as any)('batch_materials')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      setSharedMaterials(sharedMats || []);
+
+      // ── 7. Live/Direct batch tests ──────────────────────────
       if (myBatches.length > 0) {
         const batchIds = myBatches.map((b: any) => b.id);
         const { data: tests } = await (supabase.from as any)('assessment_sessions')
@@ -246,6 +264,18 @@ const StudentHubPage: React.FC = () => {
       toast.error(result.message);
     }
     setJoiningCode(false);
+  };
+
+  const trackMaterialAccess = async (materialId: string, url: string) => {
+    try {
+      await (supabase.from as any)('material_access').upsert({
+        material_id: materialId,
+        student_id: user!.id,
+        first_viewed_at: new Date().toISOString(),
+      }, { onConflict: 'material_id, student_id' });
+    } catch (e) { console.warn('Access log failed:', e); }
+
+    if (url) window.open(url, '_blank');
   };
 
   // ─── Derived data ───────────────────────────────────────────
@@ -556,24 +586,69 @@ const StudentHubPage: React.FC = () => {
             </motion.div>
           )}
 
-              {/* ── Live Tests ── */}
-              {realTests.length > 0 && (
+              {/* ── Assigned Assessments (New System) ── */}
+              {assignedAssessments.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4 text-accent" /> Assigned Assessments
+                  </h2>
+                  <div className="grid grid-cols-1 gap-3">
+                    {assignedAssessments.map((assignment: any) => {
+                      const test = assignment.assessment_sessions;
+                      if (!test) return null;
+                      return (
+                        <div key={assignment.id} className="bg-card border-2 border-accent/20 rounded-2xl p-4 flex items-center justify-between gap-3 hover:border-accent/50 transition-all group">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">ASSIGNED</span>
+                              <span className="text-[10px] text-muted-foreground uppercase">{test.exam_type}</span>
+                            </div>
+                            <p className="font-bold text-sm text-foreground group-hover:text-accent transition-colors">
+                              {test.metadata?.subchapterName || 'Topic Assessment'}
+                            </p>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                                <FileText className="w-3 h-3" /> {test.question_count} Questions
+                              </span>
+                              <span className="text-muted-foreground/30">•</span>
+                              <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                                <Clock className="w-3 h-3" /> {test.time_limit_minutes} Min
+                              </span>
+                            </div>
+                          </div>
+                          <Button 
+                            onClick={() => navigate(`/assess/${test.id}`)} 
+                            className="h-10 px-6 rounded-xl bg-accent text-white font-bold hover:scale-105 transition-all shadow-lg shadow-accent/20"
+                          >
+                            Start Test
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Live Tests (Legacy/Backup) ── */}
+              {realTests.length > 0 && assignedAssessments.length === 0 && (
                 <div className="space-y-3">
                   <h2 className="text-base font-bold text-foreground flex items-center gap-2">
                     <Zap className="w-4 h-4 text-accent" /> Live Tests
                   </h2>
                   {realTests.map((test: any) => (
-                    <div key={test.id} className="bg-card border-2 border-accent/25 rounded-2xl p-4 flex items-center justify-between gap-3 hover:shadow-lg hover:border-accent/50 hover:scale-[1.01] transition-all">
+                    <div key={test.id} className="bg-card border-2 border-accent/10 rounded-2xl p-4 flex items-center justify-between gap-3 hover:shadow-lg hover:border-accent/40 transition-all">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-accent/30 bg-accent/10 text-accent animate-pulse">LIVE</span>
                           <span className="text-[10px] text-muted-foreground">{test.exam_type}</span>
                         </div>
                         <p className="font-bold text-sm">{test.metadata?.subchapterName || 'Topic Assessment'}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{test.question_count} Q • {test.time_limit_minutes} min</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] text-muted-foreground">{test.question_count} Q • {test.time_limit_minutes} min</span>
+                        </div>
                       </div>
                       <Button onClick={() => navigate(`/assess/${test.id}`)} size="sm"
-                        className="h-10 px-4 rounded-xl bg-accent text-white font-bold hover:scale-105 transition-all shrink-0">
+                        className="h-9 px-4 rounded-xl bg-accent text-white font-bold hover:scale-105 transition-all shrink-0">
                         Start
                       </Button>
                     </div>
@@ -595,6 +670,38 @@ const StudentHubPage: React.FC = () => {
                     className="bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25 font-bold text-xs rounded-xl">
                     <Target className="w-3.5 h-3.5 mr-1.5" /> Practice Weak Areas
                   </Button>
+                </div>
+              )}
+
+              {/* ── Teacher Shared Notes (Requirement 2.A) ── */}
+              {sharedMaterials.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-rose-400" /> Study Materials
+                  </h2>
+                  <div className="space-y-2.5">
+                    {sharedMaterials.map((mat: any) => (
+                      <div key={mat.id} 
+                        onClick={() => trackMaterialAccess(mat.id, mat.url)}
+                        className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between gap-3 hover:border-rose-500/30 hover:bg-rose-500/[0.02] transition-all group cursor-pointer">
+                        <div className="flex items-center gap-4">
+                          <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                            mat.type === 'pdf' ? 'bg-rose-500/10 text-rose-500' : 'bg-blue-500/10 text-blue-500'
+                          )}>
+                            {mat.type === 'pdf' ? <FileText className="w-5 h-5" /> : <Link className="w-5 h-5" />}
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm text-foreground">{mat.title}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase">{mat.subject} • {mat.chapter}</p>
+                          </div>
+                        </div>
+                        <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-all">
+                          <Eye className="w-4 h-4" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -632,6 +739,49 @@ const StudentHubPage: React.FC = () => {
           ═══════════════════════════════════════════════════ */}
           {activeTab === 'practice' && (
             <motion.div key="practice" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5 mt-4">
+              
+              {/* ── Assigned by Teacher (Requirement 3) ── */}
+              {assignedAssessments.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5 text-accent" /> Assigned by Teacher
+                    </h2>
+                    <span className="text-[10px] text-muted-foreground bg-accent/5 px-2 py-1 rounded-full border border-accent/20">Active Tests</span>
+                  </div>
+                  <div className="space-y-2.5">
+                    {assignedAssessments.map((assignment: any) => {
+                      const test = assignment.assessment_sessions;
+                      if (!test) return null;
+                      return (
+                        <div key={assignment.id} 
+                          className="bg-card border border-accent/30 rounded-2xl p-4 flex items-center justify-between gap-3 hover:bg-accent/[0.02] transition-all group cursor-pointer"
+                          onClick={() => navigate(`/assess/${test.id}`)}>
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                              <FileText className="w-6 h-6 text-accent" />
+                            </div>
+                            <div>
+                              <p className="font-bold text-sm text-foreground">{test.metadata?.subchapterName || 'Topic Test'}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[10px] text-muted-foreground uppercase font-medium">{test.exam_type}</span>
+                                <span className="text-muted-foreground/30">•</span>
+                                <span className="text-[10px] text-muted-foreground">{test.question_count} Questions</span>
+                                <span className="text-muted-foreground/30">•</span>
+                                <span className="text-[10px] text-muted-foreground">{test.time_limit_minutes}m</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <Button size="sm" className="h-8 px-4 rounded-lg bg-accent text-white font-bold opacity-0 group-hover:opacity-100 transition-all">Start</Button>
+                             <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Exam lock badge */}
               {effectiveExam && (
