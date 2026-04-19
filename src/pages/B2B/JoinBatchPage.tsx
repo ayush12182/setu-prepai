@@ -62,10 +62,10 @@ export default function JoinBatchPage() {
     const success = await joinBatchById(batchInfo.id);
     if (success) {
       // Update user_type in both auth metadata and profiles table
-      await supabase.auth.updateUser({ data: { user_type: 'b2b_student', organization_id: batchInfo.organization_id } });
+      await supabase.auth.updateUser({ data: { user_type: 'student', organization_id: batchInfo.organization_id } });
       await (supabase as any)
         .from('profiles')
-        .update({ user_type: 'b2b_student', organization_id: batchInfo.organization_id })
+        .update({ user_type: 'student', organization_id: batchInfo.organization_id })
         .eq('user_id', user.id);
 
       // Force-refresh profile in context so route guard re-evaluates immediately
@@ -135,7 +135,7 @@ export default function JoinBatchPage() {
                {loading ? <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <>Join Batch <ChevronRight className="ml-1" /></>}
              </Button>
 
-             <p className="text-center text-[10px] text-muted-foreground mt-4">By joining, your mentor can track your assessment progress.</p>
+             <p className="text-center text-[10px] text-muted-foreground mt-4">By joining, your teacher can track your assessment progress.</p>
           </motion.div>
         )}
 

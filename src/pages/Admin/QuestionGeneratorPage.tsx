@@ -317,7 +317,7 @@ const QuestionGeneratorPage: React.FC = () => {
 
   // Admin guard
   React.useEffect(() => {
-    if (profile && profile.user_type !== 'admin' && profile.user_type !== 'b2b_mentor') {
+    if (profile && profile.user_type !== 'admin' && profile.user_type !== 'teacher') {
       navigate('/dashboard');
     }
   }, [profile, navigate]);

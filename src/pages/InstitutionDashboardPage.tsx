@@ -29,10 +29,10 @@ const ORG = {
 };
 
 const BATCHES = [
-  { id: 'b1', name: 'JEE 2026 – Alpha', subject: 'Physics + Maths', students: 32, mentor: 'Dr. Mehta', avgAccuracy: 64, status: 'active' as const },
-  { id: 'b2', name: 'JEE 2026 – Beta',  subject: 'All Subjects',   students: 28, mentor: 'Mrs. Kapoor', avgAccuracy: 71, status: 'active' as const },
-  { id: 'b3', name: 'JEE 2027 – Gamma', subject: 'Chemistry Focus', students: 36, mentor: 'Mr. Sharma', avgAccuracy: 58, status: 'active' as const },
-  { id: 'b4', name: 'Crash Course',     subject: 'Mixed',           students: 28, mentor: 'Dr. Mehta',  avgAccuracy: 47, status: 'paused' as const },
+  { id: 'b1', name: 'JEE 2026 – Alpha', subject: 'Physics + Maths', students: 32, teacher: 'Dr. Mehta', avgAccuracy: 64, status: 'active' as const },
+  { id: 'b2', name: 'JEE 2026 – Beta',  subject: 'All Subjects',   students: 28, teacher: 'Mrs. Kapoor', avgAccuracy: 71, status: 'active' as const },
+  { id: 'b3', name: 'JEE 2027 – Gamma', subject: 'Chemistry Focus', students: 36, teacher: 'Mr. Sharma', avgAccuracy: 58, status: 'active' as const },
+  { id: 'b4', name: 'Crash Course',     subject: 'Mixed',           students: 28, teacher: 'Dr. Mehta',  avgAccuracy: 47, status: 'paused' as const },
 ];
 
 const STUDENTS = [
@@ -439,7 +439,7 @@ const InstitutionDashboardPage: React.FC = () => {
             {/* Stat cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard label="Total Students"   value={ORG.totalStudents} sub="Across all batches"           icon={Users}        color="blue" />
-              <StatCard label="Active Batches"   value={ORG.activeBatches} sub="3 mentors assigned"          icon={Layers}       color="emerald" />
+              <StatCard label="Active Batches"   value={ORG.activeBatches} sub="3 teachers assigned"          icon={Layers}       color="emerald" />
               <StatCard label="Tests Created"    value={TESTS.length}      sub="2 scheduled this week"       icon={ClipboardList} color="amber" />
               <StatCard label="Avg. Accuracy"    value="62.7%"             sub="+3.2% vs last week"          icon={Target}        color="purple" />
             </div>
@@ -693,7 +693,7 @@ const InstitutionDashboardPage: React.FC = () => {
 
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <div className="flex items-center gap-1"><Users size={12} />{b.students} students</div>
-                  <div className="flex items-center gap-1"><GraduationCap size={12} />{b.mentor}</div>
+                  <div className="flex items-center gap-1"><GraduationCap size={12} />{b.teacher}</div>
                 </div>
 
                 <Button

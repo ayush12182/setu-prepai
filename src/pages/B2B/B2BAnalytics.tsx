@@ -49,7 +49,7 @@ export default function B2BAnalytics() {
 
       // 2. Total students
       const { count: studentCount } = await (supabase as any)
-        .from('batch_members')
+        .from('batch_students')
         .select('*', { count: 'exact', head: true })
         .in('batch_id', batchIds);
 
@@ -161,7 +161,7 @@ export default function B2BAnalytics() {
       );
     } catch (e) {
       console.error('Analytics fetch error', e);
-    } finally {
+     } finally {
       setLoading(false);
     }
   };

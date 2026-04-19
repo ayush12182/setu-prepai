@@ -92,7 +92,7 @@ const TeacherDashboard: React.FC = () => {
 
   // Access guard
   useEffect(() => {
-    if (profile && profile.user_type !== 'b2b_mentor' && profile.user_type !== 'admin') {
+    if (profile && profile.user_type !== 'teacher' && profile.user_type !== 'admin') {
       navigate('/dashboard');
     }
   }, [profile, navigate]);

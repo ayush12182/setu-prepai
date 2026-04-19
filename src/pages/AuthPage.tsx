@@ -22,7 +22,7 @@ type OnboardingStep = 0 | 1 | 2 | 3;
 type StreamType = 'foundation' | 'jee' | 'neet' | 'cuet' | 'commerce' | '';
 
 interface OnboardingData {
-  userType: 'b2c_student' | 'b2b_student' | 'b2b_mentor';
+  userType: 'student' | 'teacher';
   institutionName?: string;
   referenceCode?: string;
   stream: StreamType;
@@ -125,7 +125,7 @@ const AuthPage: React.FC = () => {
     const orgId = searchParams.get('org_id');
     
     return {
-      userType: typeParam === 'coaching' || orgId || orgName ? 'b2b_student' : 'b2c_student',
+      userType: typeParam === 'coaching' || orgId || orgName ? 'student' : 'student',
       institutionName: orgName || undefined,
       stream: '',
       studentClass: '',
@@ -148,12 +148,12 @@ const AuthPage: React.FC = () => {
     if (user && !authLoading) {
       if (showOnboarding) return;
       if (profile) {
-        if (profile.user_type === 'b2b_mentor' || profile.user_type === 'b2b_institution' || profile.user_type === 'admin') {
+        if (profile.user_type === 'teacher' || profile.user_type === 'b2b_institution' || profile.user_type === 'admin') {
           navigate('/teacher-dashboard');
           return;
         }
 
-        if (profile.user_type === 'b2b_student') {
+        if (profile.user_type === 'student') {
           navigate('/student-hub');
           return;
         }
@@ -168,15 +168,15 @@ const AuthPage: React.FC = () => {
   }, [user, profile, authLoading, navigate, showOnboarding]);
 
   const validateEmail = (value: string) => {
-    try { emailSchema.parse(value); setErrors(prev => ({ ...prev, email: '' })); return true; }
+    ; try { emailSchema.parse(value); setErrors(prev => ({ ...prev, email: '' })); return true; }
     catch (e) { if (e instanceof z.ZodError) setErrors(prev => ({ ...prev, email: e.errors[0].message })); return false; }
   };
   const validatePassword = (value: string) => {
-    try { passwordSchema.parse(value); setErrors(prev => ({ ...prev, password: '' })); return true; }
+    ; try { passwordSchema.parse(value); setErrors(prev => ({ ...prev, password: '' })); return true; }
     catch (e) { if (e instanceof z.ZodError) setErrors(prev => ({ ...prev, password: e.errors[0].message })); return false; }
   };
   const validatePhone = (value: string) => {
-    try { phoneSchema.parse(value); setErrors(prev => ({ ...prev, phone: '' })); return true; }
+    ; try { phoneSchema.parse(value); setErrors(prev => ({ ...prev, phone: '' })); return true; }
     catch (e) { if (e instanceof z.ZodError) setErrors(prev => ({ ...prev, phone: e.errors[0].message })); return false; }
   };
 
@@ -184,21 +184,21 @@ const AuthPage: React.FC = () => {
     e.preventDefault();
     if (!validateEmail(email) || !validatePassword(password)) return;
     setLoading(true);
-    try {
+    ; try {
       if (mode === 'signup') {
         await signUpWithEmail(email, password, fullName);
         
         // Force sign in immediately after sign up to guarantee an active local session 
         // (fixes Supabase quirk where session is sometimes null immediately after signup)
-        try {
+        ; try {
           await signInWithEmail(email, password);
         } catch (signInErr) {
           console.warn("Auto sign-in after sign-up failed, user may need to log in manually", signInErr);
         }
 
-        // If they came from the b2b_student onboarding path (code already set),
+        // If they came from the student onboarding path (code already set),
         // go straight to completion — no need to show onboarding screens again.
-        if (onboardingData.userType === 'b2b_student' && onboardingData.institutionName) {
+        if (onboardingData.userType === 'student' && onboardingData.institutionName) {
           toast.success("Account created! Joining your batch... 🎯");
           setShowOnboarding(true); // Keep true so handleOnboardingComplete can run
           await handleOnboardingComplete();
@@ -214,45 +214,50 @@ const AuthPage: React.FC = () => {
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Something went wrong, please try again';
       toast.error(msg);
-    } finally { setLoading(false); }
+    }
+       /* manual cleanup */  setLoading(false); }
+
   };
 
   const handleGoogleAuth = async () => {
     setLoading(true);
-    try { await signInWithGoogle(); } catch (error) { toast.error(error instanceof Error ? error.message : 'Google login failed'); setLoading(false); }
+    ; try { await signInWithGoogle(); } catch (error) { toast.error(error instanceof Error ? error.message : 'Google login failed'); setLoading(false); }
   };
   const handleAppleAuth = async () => {
     setLoading(true);
-    try { await signInWithApple(); } catch (error) { toast.error(error instanceof Error ? error.message : 'Apple login failed'); setLoading(false); }
+    ; try { await signInWithApple(); } catch (error) { toast.error(error instanceof Error ? error.message : 'Apple login failed'); setLoading(false); }
   };
 
   const handlePhoneAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validatePhone(phone)) return;
     setLoading(true);
-    try { await signInWithPhone(phone); toast.success('OTP sent! Check your phone.'); setMode('otp'); }
+    ; try { await signInWithPhone(phone); toast.success('OTP sent! Check your phone.'); setMode('otp'); }
     catch (error) { toast.error(error instanceof Error ? error.message : 'Failed to send OTP'); }
-    finally { setLoading(false); }
+       /* manual cleanup */  setLoading(false); }
+
   };
 
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) { toast.error('Enter complete OTP'); return; }
     setLoading(true);
-    try { await verifyOTP(phone, otp); } catch (error) { toast.error(error instanceof Error ? error.message : 'Invalid OTP'); }
-    finally { setLoading(false); }
+    ; try { await verifyOTP(phone, otp); } catch (error) { toast.error(error instanceof Error ? error.message : 'Invalid OTP'); }
+       /* manual cleanup */  setLoading(false); }
+
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(email)) return;
     setLoading(true);
-    try {
+    ; try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
       if (error) throw error;
       toast.success('Reset link sent! Check your email.');
       setMode('login');
     } catch (error) { toast.error(error instanceof Error ? error.message : 'Failed to send reset link'); }
-    finally { setLoading(false); }
+       /* manual cleanup */  setLoading(false); }
+
   };
 
   const isFoundationProgram = () => onboardingData.stream === 'foundation';
@@ -270,138 +275,176 @@ const AuthPage: React.FC = () => {
     return STREAM_TO_EXAM[stream as string] ?? 'JEE Main';
   };
 
+  /**
+   * Unified Signup & Join Orchestrator
+   * Ensures account creation, session sync, and batch join happen in order.
+   */
+  const handleUnifiedSignup = async () => {
+    if (!fullName.trim()) { toast.error('Enter your name'); return; }
+    if (!validateEmail(email)) { toast.error('Enter a valid email'); return; }
+    if (!validatePassword(password)) { toast.error('Password must be at least 6 characters'); return; }
+    
+    setLoading(true);
+    console.log("Starting unified signup for:", email);
+
+    try {
+      // 1. SIGNUP
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email, password, options: { data: { full_name: fullName, user_type: onboardingData.userType } }
+      });
+      
+      if (signUpError) {
+        if (signUpError.message.includes('already')) {
+          console.log("User already exists, attempting sign in recovery...");
+          await signInWithEmail(email, password);
+        } else {
+          throw signUpError;
+        }
+      }
+
+      // 2. SESSION SYNC WAIT
+      // Give Supabase a moment to persist the session in local storage
+      await new Promise(r => setTimeout(r, 800));
+
+      // 3. SIGNIN VERIFICATION
+      // Ensure we have an active session before proceeding
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log("No session after signup, forcing manual sign-in...");
+        await signInWithEmail(email, password);
+        await new Promise(r => setTimeout(r, 500));
+      }
+
+      toast.success('Account ready! Finalizing your setup...');
+      
+      // 4. ONBOARDING COMPLETION
+      // This will handle profile creation, batch join, and redirect
+      await handleOnboardingComplete();
+
+    } catch (error: any) {
+      console.error('CRITICAL Unified Signup Error:', error);
+      const msg = error.message || 'Something went wrong during signup. Please try again.';
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleOnboardingComplete = async () => {
     setLoading(true);
+    console.log("Finalizing onboarding for user type:", onboardingData.userType);
+
     try {
-      // --- Teacher: auto-create org, save profile ---
-      if (onboardingData.userType === 'b2b_mentor') {
+      // 1. TEACHER PATH
+      if (onboardingData.userType === 'teacher') {
         const examGoal = getExamGoalFromStream(onboardingData.stream as StreamType) || 'JEE Main';
-        
-        // Create an organization for this teacher
         const { data: { user: currentUser } } = await supabase.auth.getUser();
         let orgId: string | null = null;
+
         if (currentUser) {
           const displayName = fullName || currentUser.email?.split('@')[0] || 'Teacher';
           const institutionLabel = onboardingData.institutionName?.trim() || `${displayName.split(' ')[0]}'s Institute`;
-          // slug must be unique — use timestamp suffix
           const slug = institutionLabel.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').slice(0, 40) + '-' + Date.now();
+          
           const { data: newOrg, error: orgErr } = await (supabase as any)
             .from('organizations')
             .insert({ name: institutionLabel, slug, created_by: currentUser.id })
             .select('id')
             .single();
-          if (!orgErr && newOrg) {
-            orgId = (newOrg as any).id;
-          } else {
-            console.warn('Org insert error (non-fatal):', orgErr?.message);
-          }
+
+          if (!orgErr && newOrg) orgId = (newOrg as any).id;
+          else console.warn('Org insert error (non-fatal):', orgErr?.message);
         }
 
         await updateProfile({
           target_exam: examGoal,
-          class: null,           // Teachers don't have a class — avoids DB constraint
-          user_type: 'b2b_mentor',
+          class: null,
+          user_type: 'teacher',
           institution_name: onboardingData.institutionName?.trim() || null,
           organization_id: orgId,
         } as any);
 
-        // Persist in auth metadata
-        await supabase.auth.updateUser({ data: { user_type: 'b2b_mentor', organization_id: orgId, target_exam: examGoal } });
-
+        await supabase.auth.updateUser({ data: { user_type: 'teacher', organization_id: orgId, target_exam: examGoal } });
         toast.success('Teacher portal ready! Welcome to SETU 👨\u200d\uD83C\uDFEB');
         navigate('/b2b');
         return;
       }
 
-      // If coaching student with a join code — actually join the batch right here
-      if (onboardingData.userType === 'b2b_student') {
-        const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
-        if (!joinCode || joinCode.length < 6) {
-          toast.error('Please enter a valid 6-character batch code from your mentor');
-          setLoading(false);
-          return;
-        }
-        // Join the batch — this also sets target_exam + org_id
-        const { joinTeacherByCode } = await import('@/lib/studentActivity');
-        const joinResult = await joinTeacherByCode(joinCode);
-        if (!joinResult.success) {
-          // Code invalid — stop and show error
-          toast.error(joinResult.message || 'Invalid batch code. Get the correct code from your teacher.');
-          setLoading(false);
-          return;
-        }
-        // Batch joined — profile already updated with target_exam by joinTeacherByCode
-        // Update user_type in context
-        await supabase.auth.updateUser({ data: { user_type: 'b2b_student' } });
-        await updateProfile({ user_type: 'b2b_student' } as any);
-        toast.success(`${joinResult.message} Let's begin 🚀`);
-        navigate('/student-hub');
-        return;
-      }
-
+      // 2. STUDENT PATH (Unified Coaching + Individual)
       const stream = onboardingData.stream;
-
       const examGoal = getExamGoalFromStream(stream as StreamType);
       const studentClass = onboardingData.studentClass || '11';
+      const studentLevel = getStudentLevel();
 
-      // Set exam mode FIRST so context is correct immediately after navigation
+      // Set exam mode immediately
       if (stream === 'jee') setExamMode('jee');
       else if (stream === 'neet') setExamMode('neet');
       else if (stream === 'cuet') setExamMode('cuet');
       else setExamMode('jee');
 
-      const studentLevel = getStudentLevel();
+      console.log("Updating student profile:", { examGoal, studentClass, studentLevel });
 
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Create/Update profile
       await updateProfile({
         target_exam: examGoal,
         class: studentClass,
         student_level: studentLevel,
-        user_type: onboardingData.userType,
+        user_type: 'student',
         institution_name: onboardingData.institutionName || null,
       });
 
-      // Persist exam in auth metadata so it's available immediately without profile refetch
-      await supabase.auth.updateUser({ data: { target_exam: examGoal, user_type: onboardingData.userType } });
+      // BATCH JOIN (Only if code is provided)
+      const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
+      if (joinCode && joinCode.length === 6) {
+        console.log("Attempting batch join with code:", joinCode);
+        const { joinTeacherByCode } = await import('@/lib/studentActivity');
+        const joinResult = await joinTeacherByCode(joinCode);
+        
+        if (joinResult.success) {
+          toast.success(joinResult.message);
+        } else {
+          // If explicitly a coaching student who entered a code, we should warn if it fails
+          console.error("Batch join failed:", joinResult.message);
+          toast.error(`Account ready, but batch link failed: ${joinResult.message}`);
+        }
+      }
 
+      // Final synchronization
+      await refreshProfile();
+      await supabase.auth.updateUser({ data: { target_exam: examGoal, user_type: 'student' } });
 
-      // Inject Mock Priority Task so they can immediately test the Outcomes Engine
-      if (onboardingData.userType === 'b2c_student') {
+      // Inject Mock Task for first-time students
+      const { data: latestProfile } = await supabase.from('profiles').select('id').single();
+      if (latestProfile) {
         try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            await (supabase.from as any)('assigned_tasks').insert({
-              student_id: user.id,
-              teacher_id: user.id, // Bypass FK by assigning to self
-              topic: examGoal === 'NEET' ? 'Cell Biology' : 'Kinematics',
-              subtopic: examGoal === 'NEET' ? 'Cell Cycle and Cell Division' : 'Motion in 1D',
-              status: 'pending',
-              initial_accuracy: 45.5,
-            });
-          }
+          await (supabase.from as any)('assigned_tasks').insert({
+            student_id: latestProfile.id,
+            teacher_id: latestProfile.id,
+            topic: examGoal === 'NEET' ? 'Cell Biology' : 'Kinematics',
+            subtopic: examGoal === 'NEET' ? 'Cell Cycle and Cell Division' : 'Motion in 1D',
+            status: 'pending',
+            initial_accuracy: 45.5,
+          });
         } catch (e) {
-          console.warn('Mock task creation failed', e);
+          console.warn('Mock task creation failed(non-fatal)');
         }
       }
 
       toast.success('All set! Let\'s begin your journey 🚀');
-      
-      // Route by user type after onboarding
-      if (onboardingData.userType === 'b2b_student') {
-        navigate('/student-hub');
-      } else {
-        navigate('/dashboard');
-      }
-    } catch (error) {
-      console.error('Onboarding error:', error);
-      const errMsg = error instanceof Error ? error.message : typeof error === 'object' && error !== null && 'message' in error ? (error as any).message : 'Unknown error';
-      toast.error(`Profile update failed: ${errMsg}`);
-    } finally { setLoading(false); }
+      navigate('/student-hub');
+
+    } catch (error: any) {
+      console.error('CRITICAL Onboarding Failure:', error);
+      const errMsg = error.message || 'Something went wrong during profile setup.';
+      toast.error(`Onboarding failed: ${errMsg}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOnboardingNext = async () => {
     // ── Coaching Student: validate code format at Step 0, then show inline auth ──
-    if (onboardingStep === 0 && onboardingData.userType === 'b2b_student') {
+    if (onboardingStep === 0 && onboardingData.userType === 'student') {
       const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
       if (!joinCode || joinCode.length < 6) {
         toast.error('Please enter the 6-character batch code from your teacher');
@@ -413,13 +456,13 @@ const AuthPage: React.FC = () => {
     }
 
     // ── Teacher: go to exam selection ──
-    if (onboardingStep === 0 && onboardingData.userType === 'b2b_mentor') {
+    if (onboardingStep === 0 && onboardingData.userType === 'teacher') {
       setOnboardingStep(1);
       return;
     }
 
     // ── Teacher at exam step: no class step needed, complete immediately ──
-    if (onboardingStep === 1 && onboardingData.userType === 'b2b_mentor') {
+    if (onboardingStep === 1 && onboardingData.userType === 'teacher') {
       if (!onboardingData.stream) {
         toast.error('Please select the exam you teach');
         return;
@@ -443,7 +486,7 @@ const AuthPage: React.FC = () => {
 
     if (onboardingStep === 0) setOnboardingStep(1);
     else if (onboardingStep === 1) {
-      if (onboardingData.userType === 'b2b_mentor') {
+      if (onboardingData.userType === 'teacher') {
         handleOnboardingComplete();
       } else {
         setOnboardingStep(2);
@@ -515,15 +558,15 @@ const AuthPage: React.FC = () => {
                   <div className="space-y-3">
                     {/* Individual Student */}
                     <button
-                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'b2c_student', institutionName: undefined }))}
+                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'student', institutionName: undefined }))}
                       className={`w-full p-5 rounded-2xl border text-left transition-all duration-200 flex items-center gap-4
-                        ${onboardingData.userType === 'b2c_student'
+                        ${onboardingData.userType === 'student'
                           ? 'border-accent bg-accent/5 ring-1 ring-accent/30'
                           : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]'
                         }`}
                     >
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                        onboardingData.userType === 'b2c_student' ? 'bg-accent/20' : 'bg-white/[0.06]'
+                        onboardingData.userType === 'student' ? 'bg-accent/20' : 'bg-white/[0.06]'
                       }`}>
                         <Users className="w-6 h-6 text-accent" />
                       </div>
@@ -532,23 +575,23 @@ const AuthPage: React.FC = () => {
                         <p className="text-xs text-white/40 mt-0.5">Studying on my own, self-paced</p>
                       </div>
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
-                        onboardingData.userType === 'b2c_student' ? 'bg-accent border-accent' : 'border-white/20'
+                        onboardingData.userType === 'student' ? 'bg-accent border-accent' : 'border-white/20'
                       }`}>
-                        {onboardingData.userType === 'b2c_student' && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                        {onboardingData.userType === 'student' && <Check className="w-3 h-3 text-white stroke-[3]" />}
                       </div>
                     </button>
 
                     {/* Coaching Student */}
                     <button
-                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'b2b_student' }))}
+                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'student' }))}
                       className={`w-full p-5 rounded-2xl border text-left transition-all duration-200 flex items-center gap-4
-                        ${onboardingData.userType === 'b2b_student'
+                        ${onboardingData.userType === 'student'
                           ? 'border-accent bg-accent/5 ring-1 ring-accent/30'
                           : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]'
                         }`}
                     >
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                        onboardingData.userType === 'b2b_student' ? 'bg-accent/20' : 'bg-white/[0.06]'
+                        onboardingData.userType === 'student' ? 'bg-accent/20' : 'bg-white/[0.06]'
                       }`}>
                         <Building2 className="w-6 h-6 text-accent" />
                       </div>
@@ -557,16 +600,16 @@ const AuthPage: React.FC = () => {
                         <p className="text-xs text-white/40 mt-0.5">Enrolled in a coaching centre / institute</p>
                       </div>
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
-                        onboardingData.userType === 'b2b_student' ? 'bg-accent border-accent' : 'border-white/20'
+                        onboardingData.userType === 'student' ? 'bg-accent border-accent' : 'border-white/20'
                       }`}>
-                        {onboardingData.userType === 'b2b_student' && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                        {onboardingData.userType === 'student' && <Check className="w-3 h-3 text-white stroke-[3]" />}
                       </div>
                     </button>
 
                     {/* Coaching name field */}
-                    {onboardingData.userType === 'b2b_student' && (
+                    {onboardingData.userType === 'student' && (
                       <div className="mt-2 pt-2">
-                        <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Batch Join Code (6 characters — from your mentor)</label>
+                        <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Batch Join Code (6 characters — from your teacher)</label>
                         <input
                           type="text"
                           placeholder="e.g. K8ZX2W"
@@ -582,15 +625,15 @@ const AuthPage: React.FC = () => {
 
                     {/* Teacher / Mentor Card */}
                     <button
-                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'b2b_mentor', institutionName: undefined }))}
+                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'teacher', institutionName: undefined }))}
                       className={`w-full p-5 rounded-2xl border text-left transition-all duration-200 flex items-center gap-4
-                        ${onboardingData.userType === 'b2b_mentor'
+                        ${onboardingData.userType === 'teacher'
                           ? 'border-violet-500 bg-violet-500/5 ring-1 ring-violet-500/30'
                           : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]'
                         }`}
                     >
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                        onboardingData.userType === 'b2b_mentor' ? 'bg-violet-500/20' : 'bg-white/[0.06]'
+                        onboardingData.userType === 'teacher' ? 'bg-violet-500/20' : 'bg-white/[0.06]'
                       }`}>
                         <GraduationCap className="w-6 h-6 text-violet-400" />
                       </div>
@@ -599,14 +642,14 @@ const AuthPage: React.FC = () => {
                         <p className="text-xs text-white/40 mt-0.5">I teach students and manage a batch</p>
                       </div>
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
-                        onboardingData.userType === 'b2b_mentor' ? 'bg-violet-500 border-violet-500' : 'border-white/20'
+                        onboardingData.userType === 'teacher' ? 'bg-violet-500 border-violet-500' : 'border-white/20'
                       }`}>
-                        {onboardingData.userType === 'b2b_mentor' && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                        {onboardingData.userType === 'teacher' && <Check className="w-3 h-3 text-white stroke-[3]" />}
                       </div>
                     </button>
 
                     {/* Teacher name/school field */}
-                    {onboardingData.userType === 'b2b_mentor' && (
+                    {onboardingData.userType === 'teacher' && (
                       <div className="mt-2 pt-2 p-4 rounded-2xl bg-violet-500/5 border border-violet-500/20">
                         <p className="text-xs text-violet-300/80 leading-relaxed">
                           👨‍🏫 You'll get access to the <span className="font-bold text-violet-300">Teacher Portal</span> where you can manage students, create tests, and distribute chapter-wise notes.
@@ -623,10 +666,10 @@ const AuthPage: React.FC = () => {
                   {/* Clean, minimalist header */}
                   <div className="text-center space-y-1 mt-2">
                     <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                      {onboardingData.userType === 'b2b_mentor' ? 'Which exam do you teach?' : 'Choose Your Goal'}
+                      {onboardingData.userType === 'teacher' ? 'Which exam do you teach?' : 'Choose Your Goal'}
                     </h2>
                     <p className="text-white/40 text-sm">
-                      {onboardingData.userType === 'b2b_mentor'
+                      {onboardingData.userType === 'teacher'
                         ? 'Your teacher dashboard will adapt to this exam'
                         : 'Select one to personalize your journey'}
                     </p>
@@ -714,7 +757,7 @@ const AuthPage: React.FC = () => {
               )}
 
               {/* Step 3: Inline Auth (B2B Student — post code validation) */}
-              {onboardingStep === 3 && onboardingData.userType === 'b2b_student' && (
+              {onboardingStep === 3 && onboardingData.userType === 'student' && (
                 <div className="space-y-5">
                   <div className="text-center space-y-1 mt-2">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-2">
@@ -758,30 +801,7 @@ const AuthPage: React.FC = () => {
                   </div>
 
                   <Button
-                    onClick={async () => {
-                      if (!fullName.trim()) { toast.error('Enter your name'); return; }
-                      if (!validateEmail(email)) { toast.error('Enter a valid email'); return; }
-                      if (!validatePassword(password)) { toast.error('Password must be at least 6 characters'); return; }
-                      setLoading(true);
-                      try {
-                        await signUpWithEmail(email, password, fullName);
-                        try { await signInWithEmail(email, password); } catch {}
-                        toast.success('Account created! Joining your batch...');
-                        await handleOnboardingComplete();
-                      } catch (err: any) {
-                        // If account already exists, sign in and join
-                        if (err?.message?.includes('already')) {
-                          try {
-                            await signInWithEmail(email, password);
-                            await handleOnboardingComplete();
-                          } catch {
-                            toast.error('Sign in failed. Check your password.');
-                          }
-                        } else {
-                          toast.error(err?.message || 'Account creation failed');
-                        }
-                      } finally { setLoading(false); }
-                    }}
+                    onClick={handleUnifiedSignup}
                     disabled={loading}
                     className="w-full h-14 rounded-xl bg-accent hover:bg-accent/90 text-[hsl(213,28%,20%)] font-bold text-base shadow-[0_0_20px_rgba(232,154,60,0.2)] transition-all"
                   >
@@ -794,12 +814,14 @@ const AuthPage: React.FC = () => {
                       onClick={async () => {
                         if (!validateEmail(email) || !validatePassword(password)) { toast.error('Enter email and password'); return; }
                         setLoading(true);
-                        try {
+                        ; try {
                           await signInWithEmail(email, password);
                           await handleOnboardingComplete();
                         } catch (err: any) {
                           toast.error(err?.message || 'Login failed');
-                        } finally { setLoading(false); }
+                        }
+       /* manual cleanup */  setLoading(false); }
+
                       }}
                       className="text-accent underline font-medium"
                     >

@@ -10,7 +10,7 @@ export const TrialExpiredScreen: React.FC = () => {
 
     const features = [
         'Unlimited practice questions',
-        'Unlimited AI mentor explanations',
+        'Unlimited AI teacher explanations',
         'Full analytics & progress dashboard',
         'Adaptive learning & weak area targeting',
         'Mock tests & revision plans',

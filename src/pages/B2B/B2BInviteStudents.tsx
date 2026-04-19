@@ -16,26 +16,17 @@ export default function B2BInviteStudents() {
   const [editName, setEditName] = useState('');
   const [savingName, setSavingName] = useState(false);
   const editInputRef = useRef<HTMLInputElement>(null);
-  const { generateInviteDetails, loading } = useB2BManager();
+  const { createBatch } = useB2BManager();
 
   useEffect(() => { if (user) fetchBatches(); }, [user]);
-
-  useEffect(() => {
-    if (editingId && editInputRef.current) {
-      editInputRef.current.focus();
-      editInputRef.current.select();
-    }
-  }, [editingId]);
 
   const fetchBatches = async () => {
     if (!user) return;
     try {
-      // Filter by teacher_id so RLS lets us update join_code later
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('batches')
         .select('*')
         .eq('teacher_id', user.id)
-        .eq('is_active', true)
         .order('created_at', { ascending: false });
       if (error) throw error;
       if (data && data.length > 0) {
@@ -43,240 +34,84 @@ export default function B2BInviteStudents() {
         setSelectedBatch(data[0]);
       }
     } catch (err: any) {
-      console.error('Failed to fetch batches:', err);
       toast.error(`Could not load batches: ${err.message}`);
     }
   };
 
-
-  const startEditing = (batch: any, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingId(batch.id);
-    setEditName(batch.name);
-  };
-
-  const cancelEditing = () => { setEditingId(null); setEditName(''); };
-
-  const saveName = async (batch: any) => {
-    if (!editName.trim() || editName === batch.name) { cancelEditing(); return; }
-    setSavingName(true);
-    try {
-      if (!batch.id.startsWith('demo')) {
-        const { error } = await (supabase as any).from('batches').update({ name: editName.trim() }).eq('id', batch.id);
-        if (error) throw error;
-      }
-      const updated = { ...batch, name: editName.trim() };
-      setBatches(prev => prev.map(b => b.id === batch.id ? updated : b));
-      if (selectedBatch?.id === batch.id) setSelectedBatch(updated);
-      toast.success('Batch name updated!');
-    } catch {
-      toast.error('Failed to update batch name');
-    }
-    setSavingName(false);
-    setEditingId(null);
-  };
-
-  const handleGenerate = async () => {
-    if (!selectedBatch || !user) return;
-    if (selectedBatch.id.startsWith('demo')) {
-      toast.error('Please create a real batch from the Batches page first');
-      return;
-    }
-    try {
-      // Generate unique code via DB function
-      let newCode: string;
-      const { data: codeData } = await (supabase.rpc as any)('generate_teacher_code');
-      newCode = codeData || Array.from({ length: 6 }, () =>
-        'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]
-      ).join('');
-
-      const inviteLink = `${window.location.origin}/join/${selectedBatch.id}`;
-
-      const { data: updated, error } = await (supabase as any)
-        .from('batches')
-        .update({ join_code: newCode, invite_link: inviteLink })
-        .eq('id', selectedBatch.id)
-        .eq('teacher_id', user.id)           // explicit ownership check
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const fresh = updated as any;
-      setSelectedBatch(fresh);
-      setBatches(prev => prev.map(b => b.id === fresh.id ? fresh : b));
-      toast.success(`✅ Code generated: ${newCode}`);
-    } catch (e: any) {
-      console.error('generate invite error:', e);
-      toast.error(e.message || 'Failed to generate invite');
-    }
-  };
-
-
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(`${label} copied to clipboard!`);
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success('Join code copied!');
   };
 
   return (
     <B2BSidebarLayout title="Invite Students">
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-display font-bold text-foreground">Invite Students</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Generate unique invite links and classroom codes for your students to join batches directly.
-          </p>
+          <h1 className="text-2xl font-bold text-white">Invite Students</h1>
+          <p className="text-white/40 text-sm mt-1">Get your unique join code to onboard your class</p>
         </div>
 
-        {batches.length === 0 ? (
-          <div className="bg-card border border-border rounded-3xl p-10 text-center">
-            <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-bold">No batches yet</h3>
-            <p className="text-sm text-muted-foreground mt-2 mb-5">Create a batch first, then come back here to generate a join code for your students.</p>
-            <Button onClick={() => window.location.href = '/b2b/batches'} className="bg-accent text-white font-bold rounded-xl px-6">
-              Go to Batches → Create One
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            {/* ── Batch Selector ── */}
-            <div className="bg-card border border-border rounded-3xl p-6 shadow-sm">
-              <h2 className="text-base font-bold text-foreground mb-4">Target Batch</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white/[0.03] border border-white/[0.08] rounded-3xl p-8 space-y-8">
+            <div>
+              <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-4 block">Select Batch</label>
               <div className="space-y-3">
-                {batches.map(b => (
-                  <div
-                    key={b.id}
-                    onClick={() => { if (editingId !== b.id) setSelectedBatch(b); }}
-                    className={`w-full flex items-center gap-3 p-4 border rounded-2xl transition-all cursor-pointer group ${
-                      selectedBatch?.id === b.id
-                        ? 'border-accent bg-accent/5 ring-1 ring-accent/20'
-                        : 'border-border bg-secondary/30 hover:border-accent/40'
+                {batches.map(batch => (
+                  <button
+                    key={batch.id}
+                    onClick={() => setSelectedBatch(batch)}
+                    className={`w-full p-4 rounded-2xl border text-left transition-all ${
+                      selectedBatch?.id === batch.id
+                        ? 'bg-orange-500/10 border-orange-500/30'
+                        : 'border-white/[0.05] hover:bg-white/[0.02]'
                     }`}
                   >
-                    {/* Name / Inline Input */}
-                    <div className="flex-1 min-w-0">
-                      {editingId === b.id ? (
-                        <input
-                          ref={editInputRef}
-                          value={editName}
-                          onChange={e => setEditName(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter') saveName(b);
-                            if (e.key === 'Escape') cancelEditing();
-                          }}
-                          onClick={e => e.stopPropagation()}
-                          className="w-full bg-transparent border-b-2 border-accent text-foreground font-bold text-sm focus:outline-none py-0.5"
-                          placeholder="Batch name..."
-                        />
-                      ) : (
-                        <span className="font-bold text-foreground text-sm block truncate">{b.name}</span>
-                      )}
-                      <span className="text-xs text-muted-foreground mt-0.5 block">{b.subject || 'All Subjects'}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-white">{batch.name}</span>
+                      {selectedBatch?.id === batch.id && <ShieldCheck className="w-4 h-4 text-orange-400" />}
                     </div>
-
-                    {/* Edit / Save / Cancel */}
-                    <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                      {editingId === b.id ? (
-                        <>
-                          <button
-                            onClick={() => saveName(b)}
-                            disabled={savingName}
-                            className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
-                            title="Save"
-                          >
-                            <Check size={14} />
-                          </button>
-                          <button
-                            onClick={cancelEditing}
-                            className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
-                            title="Cancel"
-                          >
-                            <X size={14} />
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          onClick={e => startEditing(b, e)}
-                          className="p-1.5 rounded-lg text-muted-foreground hover:bg-accent/10 hover:text-accent transition-colors opacity-0 group-hover:opacity-100"
-                          title="Rename batch"
-                        >
-                          <Pencil size={13} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                  </button>
                 ))}
               </div>
-              <p className="text-[11px] text-muted-foreground mt-3 flex items-center gap-1.5">
-                <Pencil size={10} /> Hover a batch and click the pencil to rename
-              </p>
             </div>
 
-            {/* ── Credentials Panel ── */}
-            <div className="bg-card border border-border rounded-3xl p-6 shadow-sm flex flex-col">
-              <h2 className="text-base font-bold text-foreground mb-4 flex items-center gap-2">
-                <Ticket className="w-5 h-5 text-accent" /> Join Credentials
-              </h2>
-
-              {selectedBatch ? (
-                <div className="space-y-6 flex-1 flex flex-col justify-center">
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">Classroom Join Code (6-digit)</label>
-                    {selectedBatch.join_code ? (
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-secondary border border-border rounded-xl px-4 py-3 font-mono font-bold text-2xl tracking-[0.25em] text-center text-foreground">
-                          {selectedBatch.join_code}
-                        </div>
-                        <Button variant="outline" size="icon" className="h-14 w-14 rounded-xl" onClick={() => copyToClipboard(selectedBatch.join_code, 'Join code')}>
-                          <Copy size={20} />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="bg-secondary/50 border border-border border-dashed rounded-xl p-4 text-center text-muted-foreground text-sm">No code generated yet</div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2 block">Direct Invite Link (Share on WhatsApp/Email)</label>
-                    {selectedBatch.invite_link ? (
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-secondary border border-border rounded-xl px-4 py-3 font-mono text-sm text-foreground truncate">
-                          {selectedBatch.invite_link}
-                        </div>
-                        <Button variant="outline" size="icon" className="h-[46px] w-[46px] rounded-xl shrink-0" onClick={() => copyToClipboard(selectedBatch.invite_link, 'Invite link')}>
-                          <Link2 size={18} />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="bg-secondary/50 border border-border border-dashed rounded-xl p-4 text-center text-muted-foreground text-sm">No link generated yet</div>
-                    )}
-                  </div>
-
-                  <div className="mt-auto pt-6 border-t border-border">
-                    <Button onClick={handleGenerate} disabled={loading} className="w-full h-12 rounded-xl bg-accent text-white font-bold shadow-lg shadow-accent/20">
-                      {loading ? <RefreshCw className="mr-2 animate-spin" size={16} /> : <RefreshCw className="mr-2" size={16} />}
-                      {selectedBatch.join_code ? 'Regenerate Credentials' : 'Generate Invite Link & Code'}
-                    </Button>
-                  </div>
-
-                  <div className="flex items-start gap-2 bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl">
-                    <ShieldCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-400 font-medium">
-                      Students automatically skip onboarding and are placed into "{selectedBatch.name}" when successful.
-                    </p>
-                  </div>
+            {selectedBatch && (
+              <div className="pt-4 space-y-6">
+                <div className="bg-black/20 rounded-2xl p-6 border border-white/[0.05] text-center">
+                  <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest mb-3 text-center">Batch Join Code</p>
+                  <span className="text-4xl font-mono font-bold text-white tracking-[0.3em] block mb-6">{selectedBatch.join_code}</span>
+                  <Button onClick={() => copyCode(selectedBatch.join_code)} className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white gap-2 h-12 rounded-xl">
+                    <Copy className="w-4 h-4" /> Copy Code
+                  </Button>
                 </div>
-              ) : (
-                <div className="flex-1 flex items-center justify-center text-center opacity-50">
-                  <p className="text-sm">Select a batch to view or generate invites.</p>
-                </div>
-              )}
-            </div>
 
+                <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-start gap-3">
+                  <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <p className="text-xs text-emerald-400/80 leading-relaxed">Students will enter this code during signup to automatically join your <b>{selectedBatch.name}</b> batch.</p>
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </motion.div>
+
+          <div className="space-y-6">
+             <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-white/[0.08] rounded-3xl p-8">
+               <h3 className="text-lg font-bold text-white mb-4">How it works?</h3>
+               <div className="space-y-4">
+                 {[
+                   { step: 1, text: 'Share your unique join code with your students.' },
+                   { step: 2, text: 'Students enter the code when they create their SETU accounts.' },
+                   { step: 3, text: 'They are automatically added to your batch for tracking.' }
+                 ].map(s => (
+                   <div key={s.step} className="flex gap-4 items-start">
+                     <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5">{s.step}</span>
+                     <p className="text-white/60 text-sm leading-relaxed">{s.text}</p>
+                   </div>
+                 ))}
+               </div>
+             </div>
+          </div>
+        </div>
+      </div>
     </B2BSidebarLayout>
   );
 }

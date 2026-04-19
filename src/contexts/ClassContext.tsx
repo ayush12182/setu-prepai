@@ -9,7 +9,7 @@ export type LearningStage = 'curiosity_stage' | 'concept_stage' | 'analytical_st
 
 export type ContentTag = 'conceptual' | 'applied' | 'analytical' | 'competitive';
 
-export type TeachingTone = 'school_teacher' | 'advanced_mentor' | 'competitive_mentor';
+export type TeachingTone = 'school_teacher' | 'advanced_teacher' | 'competitive_teacher';
 
 function deriveLearningStage(studentClass: StudentClass): LearningStage {
   if (studentClass >= 6 && studentClass <= 7) return 'curiosity_stage';
@@ -29,8 +29,8 @@ function getAllowedContentTags(stage: LearningStage): ContentTag[] {
 
 function getTeachingTone(stage: LearningStage): TeachingTone {
   if (stage === 'curiosity_stage' || stage === 'concept_stage') return 'school_teacher';
-  if (stage === 'analytical_stage') return 'advanced_mentor';
-  return 'competitive_mentor';
+  if (stage === 'analytical_stage') return 'advanced_teacher';
+  return 'competitive_teacher';
 }
 
 interface ClassContextType {

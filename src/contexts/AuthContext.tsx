@@ -13,7 +13,7 @@ interface Profile {
   class: string | null;
   target_exam: string | null;
   student_level: string | null;
-  user_type: 'b2c_student' | 'b2b_student' | 'b2b_mentor' | 'b2b_institution' | 'admin' | null;
+  user_type: 'student' | 'teacher' | 'b2b_institution' | 'admin' | null;
   organization_id: string | null;
   institution_name: string | null;
 }
@@ -31,7 +31,7 @@ interface AuthContextType {
   profile: Profile | null;
   loading: boolean;
   subscription: SubscriptionState;
-  /** Convenience getter — defaults to 'b2c_student' if not set */
+  /** Convenience getter — defaults to 'student' if not set */
   userType: Profile['user_type'];
   isMentor: boolean;
   isInstitution: boolean;
@@ -80,40 +80,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('[AuthContext] Error getting auth user for profile fetch:', userError.message);
       }
 
-      const { data, error } = await supabase
+      // 1. Try to fetch existing profile
+      let { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (error) {
-        // Silently log instead of toasting during onboarding - it can be a temporary schema cache issue
-        console.warn(`[AuthContext] Database error fetching profile for ${userId}:`, error.message);
+      // 2. AUTO-RECOVERY: If no profile exists, create it immediately
+      if (!data && !error) {
+        console.log(`[AuthContext] No profile for ${userId}, auto-creating...`);
+        const { data: newData, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: userId,
+            full_name: user?.user_metadata?.full_name || 'New User',
+            user_type: user?.user_metadata?.user_type || 'student'
+          })
+          .select()
+          .single();
+        
+        if (!createError) data = newData;
+        else console.error('[AuthContext] Auto-creation failed:', createError.message);
       }
 
-      if (!data) {
-        console.warn(`[AuthContext] No profile record found in DB for ${userId}. Using fallback metadata.`);
-      }
-
-      // Merge data from database and auth metadata
-      // Auth metadata is set immediately on onboarding; DB might lag slightly
       const dbData = data as any;
       const meta = user?.user_metadata || {};
       
-      // CRITICAL: Ensure organization_id is NEVER null for the runtime app logic
-      // Fallback: metadata -> database -> user_id (as last resort organizational boundary)
-      const orgId = meta.organization_id || dbData?.organization_id || null;
-
       const profileData: Profile = {
         ...dbData,
         id: dbData?.id || userId,
         user_id: userId,
         full_name: dbData?.full_name || meta.full_name || 'Student',
-        user_type: meta.user_type || dbData?.user_type || 'b2c_student',
-        target_exam: meta.target_exam || dbData?.target_exam || null,
-        institution_name: meta.institution_name || dbData?.institution_name || null,
-        organization_id: orgId,
+        user_type: dbData?.user_type || meta.user_type || 'student',
+        organization_id: dbData?.organization_id || meta.organization_id || null,
       };
+
+      setProfile(profileData);
 
       if (!profileData.organization_id) {
         console.warn('[AuthContext] organization_id is missing from both DB and metadata. This WILL block batch creation.');
@@ -298,11 +301,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await fetchProfile(user.id);
   };
 
-  const userType = profile?.user_type ?? 'b2c_student';
-  const isMentor = userType === 'b2b_mentor' || userType === 'admin';
+  const userType = profile?.user_type ?? 'student';
+  const isMentor = userType === 'teacher' || userType === 'admin';
   const isInstitution = userType === 'b2b_institution' || userType === 'admin';
-  const isB2C = userType === 'b2c_student';
-  const isB2BStudent = userType === 'b2b_student';
+  const isB2C = userType === 'student';
+  const isB2BStudent = userType === 'student';
 
   return (
     <AuthContext.Provider

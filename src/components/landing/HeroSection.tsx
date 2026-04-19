@@ -183,7 +183,7 @@ export const HeroSection: React.FC = () => {
               size="lg"
               className="h-14 px-8 text-lg font-medium border-2 border-white/30 text-white bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/50 rounded-xl transition-all duration-300"
               onClick={() => {
-                document.getElementById('mentor-section')?.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('teacher-section')?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
               Watch Demo
@@ -200,7 +200,7 @@ export const HeroSection: React.FC = () => {
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold">
               Student-Friendly Pricing
             </span>
-            <span className="text-white/50 text-sm">Affordable AI mentorship designed for serious aspirants.</span>
+            <span className="text-white/50 text-sm">Affordable AI teachership designed for serious aspirants.</span>
           </motion.div>
 
           {/* Stats */}
@@ -229,7 +229,7 @@ export const HeroSection: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.8 }}
             className="mt-8 text-sm text-white/40 max-w-2xl leading-relaxed"
           >
-            Built with insights from aspirants across India's leading coaching institutes — guided by experienced faculty mentors.
+            Built with insights from aspirants across India's leading coaching institutes — guided by experienced faculty teachers.
           </motion.p>
         </div>
       </div>

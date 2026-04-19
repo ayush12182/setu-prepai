@@ -318,7 +318,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
 
       {/* Tips */}
       {!analysis && !isAnalyzing && (
-        <div className="mentor-tip">
+        <div className="teacher-tip">
           <p className="font-medium text-foreground mb-1">💡 Tips for best results</p>
           <ul className="text-sm text-muted-foreground space-y-1">
             <li>• Make sure your handwriting is clearly visible</li>

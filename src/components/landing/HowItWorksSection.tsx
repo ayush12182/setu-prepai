@@ -13,7 +13,7 @@ const steps = [
     number: '02',
     icon: Brain,
     title: 'Learn with Jeetu Bhaiya',
-    description: 'Get concept notes, formulas, and mentor-style explanations — like sitting in a Kota classroom.',
+    description: 'Get concept notes, formulas, and teacher-style explanations — like sitting in a Kota classroom.',
   },
   {
     number: '03',

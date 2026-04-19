@@ -7,7 +7,7 @@ import MajorTestResults from '@/components/major-test/MajorTestResults';
 import MajorTestMentorMessage from '@/components/major-test/MajorTestMentorMessage';
 import { Loader2 } from 'lucide-react';
 
-type TestPhase = 'warning' | 'loading' | 'exam' | 'results' | 'mentor';
+type TestPhase = 'warning' | 'loading' | 'exam' | 'results' | 'teacher';
 
 interface TestResultsData {
   totalScore: number;
@@ -105,13 +105,13 @@ const MajorTestPage: React.FC = () => {
         questions={questions}
         answers={answers}
         totalTime={totalTimeUsed}
-        onViewMentorMessage={() => setPhase('mentor')}
+        onViewMentorMessage={() => setPhase('teacher')}
         onGoHome={() => navigate('/dashboard')}
       />
     );
   }
 
-  if (phase === 'mentor' && results) {
+  if (phase === 'teacher' && results) {
     const weakChapters = results.chapterAnalysis.filter(c => c.strengthLevel === 'weak');
     const strongChapters = results.chapterAnalysis.filter(c => c.strengthLevel === 'strong');
     return (

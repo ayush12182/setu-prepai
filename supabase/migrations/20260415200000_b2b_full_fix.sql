@@ -76,7 +76,7 @@ END;
 $$;
 
 -- ─── 4. get_b2b_overview_stats RPC ───────────────────────────
--- Used by B2BOverview.tsx
+-- Used by Overview.tsx
 CREATE OR REPLACE FUNCTION public.get_b2b_overview_stats(p_organization_id UUID)
 RETURNS JSONB LANGUAGE plpgsql STABLE SECURITY DEFINER AS $$
 DECLARE

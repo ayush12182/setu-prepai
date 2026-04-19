@@ -29,14 +29,14 @@ export default function B2BStudents() {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const orgId = profile?.organization_id;
+      const teacherId = profile?.user_id;
 
-      // 1. Get all batches for this org
+      // 1. Get all batches for this teacher (SPEC)
       const { data: batchData } = await (supabase as any)
         .from('batches')
         .select('id, name')
         .eq('is_active', true)
-        .eq('organization_id', orgId || '00000000-0000-0000-0000-000000000000');
+        .eq('teacher_id', teacherId);
 
       if (!batchData || batchData.length === 0) {
         setStudents([]);
@@ -47,7 +47,7 @@ export default function B2BStudents() {
       // 2. Get all batch members
       const batchIds = batchData.map((b: any) => b.id);
       const { data: memberData } = await (supabase as any)
-        .from('batch_members')
+        .from('batch_students')
         .select('student_id, batch_id, joined_at')
         .in('batch_id', batchIds);
 
@@ -118,7 +118,7 @@ export default function B2BStudents() {
       setStudents(rows);
     } catch (e) {
       console.error(e);
-    } finally {
+     } finally {
       setLoading(false);
     }
   };

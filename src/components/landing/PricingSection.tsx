@@ -18,7 +18,7 @@ export const PricingSection: React.FC = () => {
   const trialFeatures = [
     'Complete syllabus — Maths, Science & more',
     'AI-powered practice questions',
-    'AI mentor explanations',
+    'AI teacher explanations',
     'Adaptive tests & weakness analysis',
     'Student dashboard & progress tracking',
     'Full platform access for 7 days',

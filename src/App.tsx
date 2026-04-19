@@ -43,7 +43,7 @@ import AITeachersDirectoryPage from "./pages/AITeachersDirectoryPage";
 import PricingPage from "./pages/PricingPage";
 
 // B2B Pages
-import B2BOverview from "./pages/B2B/B2BOverview";
+import Overview from "./pages/TeacherHub/Overview";
 import B2BBatches from "./pages/B2B/B2BBatches";
 import B2BMaterials from "./pages/B2B/B2BMaterials";
 import B2BStudents from "./pages/B2B/B2BStudents";
@@ -68,28 +68,31 @@ const queryClient = new QueryClient();
 
 // ─── Route Guards ─────────────────────────────────────────────
 
-/** Only teachers/mentors/admins can access the Teacher Portal (/b2b) */
+/** Only teachers/admins can access the Teacher Portal (/b2b) */
 const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading } = useAuth();
   if (loading) return null;
   const type = profile?.user_type;
   if (!type) return <Navigate to="/auth" replace />;
-  if (type === 'b2b_student') return <Navigate to="/student-hub" replace />;
-  if (type === 'b2c_student') return <Navigate to="/dashboard" replace />;
+  
+  // Students are directed to their hub
+  if (type === 'student') return <Navigate to="/student-hub" replace />;
+  
   return <>{children}</>;
 };
 
-/** Only enrolled B2B students can access the Student Hub (/student-hub) */
+/** Students go to /student-hub */
 const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading } = useAuth();
   if (loading) return null;
   const type = profile?.user_type;
   if (!type) return <Navigate to="/auth" replace />;
-  // Teachers go to teacher portal
-  if (type === 'b2b_mentor' || type === 'b2b_institution' || type === 'admin')
+
+  // Teachers and Admins go to the B2B portal
+  if (type === 'teacher' || type === 'admin') {
     return <Navigate to="/b2b" replace />;
-  // Only b2b_student can access student hub — b2c students use regular dashboard
-  if (type === 'b2c_student') return <Navigate to="/dashboard" replace />;
+  }
+
   return <>{children}</>;
 };
 
@@ -139,9 +142,9 @@ const App = () => (
                     <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
                     <Route path="/teacher-dashboard" element={<Navigate to="/b2b" replace />} />
                     
-                    {/* B2B Dashboard Routes — Teacher Portal (mentors only) */}
+                    {/* B2B Dashboard Routes — Teacher Portal (teachers only) */}
                     <Route path="/b2b" element={<TeacherRoute><Outlet /></TeacherRoute>}>
-                      <Route index element={<TeacherRoute><B2BOverview /></TeacherRoute>} />
+                      <Route index element={<TeacherRoute><Overview /></TeacherRoute>} />
                       <Route path="batches" element={<TeacherRoute><B2BBatches /></TeacherRoute>} />
                       <Route path="materials" element={<TeacherRoute><B2BMaterials /></TeacherRoute>} />
                       <Route path="students" element={<TeacherRoute><B2BStudents /></TeacherRoute>} />

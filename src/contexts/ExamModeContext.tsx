@@ -10,8 +10,8 @@ interface ExamModeConfig {
   fullLabel: string;
   emoji: string;
   subjects: { key: string; label: string; icon: string }[];
-  mentorName: string;
-  mentorTag: string;
+  teacherName: string;
+  teacherTag: string;
   accentHue: number;
   quickDoubts: string[];
   learningFlow: string;
@@ -28,8 +28,8 @@ const JEE_CONFIG: ExamModeConfig = {
     { key: 'chemistry', label: 'Chemistry', icon: '🧪' },
     { key: 'maths', label: 'Mathematics', icon: '📐' },
   ],
-  mentorName: 'Jeetu Bhaiya',
-  mentorTag: 'Your JEE Mentor',
+  teacherName: 'Jeetu Bhaiya',
+  teacherTag: 'Your JEE Mentor',
   accentHue: 32,
   learningFlow: 'Concept → Practice → Advanced → Analysis',
   notesStyle: 'deep-theory',
@@ -52,8 +52,8 @@ const NEET_CONFIG: ExamModeConfig = {
     { key: 'chemistry', label: 'Chemistry', icon: '🧪' },
     { key: 'physics', label: 'Physics', icon: '⚛️' },
   ],
-  mentorName: 'NEET Mentor',
-  mentorTag: 'Your NEET AI Mentor',
+  teacherName: 'NEET Mentor',
+  teacherTag: 'Your NEET AI Mentor',
   accentHue: 145,
   learningFlow: 'Concept → Practice → NCERT Review → Analysis',
   notesStyle: 'ncert-focus',
@@ -79,8 +79,8 @@ const CUET_CONFIG: ExamModeConfig = {
     { key: 'history', label: 'History', icon: '📜' },
     { key: 'psychology', label: 'Psychology', icon: '🧠' },
   ],
-  mentorName: 'CUET Mentor',
-  mentorTag: 'Your CUET AI Mentor',
+  teacherName: 'CUET Mentor',
+  teacherTag: 'Your CUET AI Mentor',
   accentHue: 260,
   learningFlow: 'Concept Summary → Quick MCQs → Revision Loop → Speed Test',
   notesStyle: 'ncert-concise',

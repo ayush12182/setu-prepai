@@ -43,7 +43,7 @@ const getNavItems = (isFoundation: boolean, isB2B: boolean) => [
 ];
 
 const getB2BNavItems = (isMentor: boolean, isInstitution: boolean) => [
-  ...(isMentor ? [{ path: '/mentor', icon: Users, label: 'Mentor Dashboard', emoji: '🎓', badge: 'B2B' }] : []),
+  ...(isMentor ? [{ path: '/teacher', icon: Users, label: 'Mentor Dashboard', emoji: '🎓', badge: 'B2B' }] : []),
   ...(isInstitution ? [{ path: '/institution', icon: Building2, label: 'Institution Hub', emoji: '🏫', badge: 'B2B' }, { path: '/settings/org', icon: Settings, label: 'Org Settings', emoji: '⚙️', badge: 'Admin' }] : []),
 ];
 
@@ -237,7 +237,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </span>
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">{isFoundation ? 'SETU Mentor' : config.mentorName}</p>
+                    <p className="text-white font-semibold text-sm">{isFoundation ? 'SETU Mentor' : config.teacherName}</p>
                     <p className="text-white/40 text-xs">Always here to help</p>
                   </div>
                 </div>

@@ -43,14 +43,14 @@ export interface Subchapter {
   id: string;
   chapterId: string;
   name: string;
-  jeeAsks: string[];        // What JEE asks - short mentor bullets
+  jeeAsks: string[];        // What JEE asks - short teacher bullets
   pyqFocus: {
     trends: string[];
     patterns: string[];
     traps: string[];
   };
   commonMistakes: string[];
-  jeetuLine: string;        // One calm mentor line
+  jeetuLine: string;        // One calm teacher line
 }
 
 // ==================== PHYSICS SUBCHAPTERS ====================

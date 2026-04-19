@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, Quote, Clock, Target, TrendingUp, BookOpen } from 'lucide-react';
 
-const mentorCards = [
+const teacherCards = [
   {
     title: 'Plans your study',
     desc: 'Daily + weekly realistic plan based on your capacity',
@@ -30,7 +30,7 @@ export const MentorSection: React.FC = () => {
   const [isMuted, setIsMuted] = useState(true);
 
   return (
-    <section id="mentor-section" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-setu-navy">
+    <section id="teacher-section" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-setu-navy">
       {/* Background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent rounded-full blur-[150px]" />
@@ -67,7 +67,7 @@ export const MentorSection: React.FC = () => {
             <div className="relative pl-6 border-l-2 border-accent/50 mb-8">
               <Quote className="absolute -left-3 -top-1 w-6 h-6 text-accent" />
               <p className="text-white/80 text-lg leading-relaxed italic">
-                "Padhai sirf notes se nahi hoti. Ek mentor chahiye jo tumhe samjhe,
+                "Padhai sirf notes se nahi hoti. Ek teacher chahiye jo tumhe samjhe,
                 tumhari galtiyon ko pakde, aur sahi direction de."
               </p>
               <p className="text-accent font-medium mt-4">— Jeetu Bhaiya's Philosophy</p>
@@ -75,7 +75,7 @@ export const MentorSection: React.FC = () => {
 
             {/* Mentor Cards - Compact */}
             <div className="grid grid-cols-2 gap-3">
-              {mentorCards.map((card, i) => (
+              {teacherCards.map((card, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 20 }}

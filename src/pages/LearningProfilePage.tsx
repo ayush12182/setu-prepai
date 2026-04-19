@@ -115,7 +115,7 @@ const LearningProfilePage: React.FC = () => {
     {
       icon: GraduationCap,
       title: 'Real Teachers, Real Guidance',
-      desc: 'SETU connects you with experienced teachers from top institutes who provide live doubt sessions, concept clarity calls, and personalized mentoring — just like a classroom, but flexible.',
+      desc: 'SETU connects you with experienced teachers from top institutes who provide live doubt sessions, concept clarity calls, and personalized teachering — just like a classroom, but flexible.',
       features: ['1-on-1 doubt solving sessions', 'Weekly concept clarity calls', 'Personalized study plan reviews'],
       color: 'text-sky-400',
       bg: 'bg-sky-500/10',
@@ -446,7 +446,7 @@ const LearningProfilePage: React.FC = () => {
                   <GraduationCap className="w-4 h-4 text-sky-400" />
                   <span className="text-sm font-semibold text-sky-50">Real Teachers</span>
                 </div>
-                {['Deep concept clarity', 'Emotional support', 'Exam strategy', 'Motivation & mentoring'].map(item => (
+                {['Deep concept clarity', 'Emotional support', 'Exam strategy', 'Motivation & teachering'].map(item => (
                   <div key={item} className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-sky-400" />
                     <span className="text-xs text-white/50 font-medium">{item}</span>

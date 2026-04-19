@@ -65,7 +65,7 @@ export default function B2BAssessmentTakerPage() {
         
         // CHECK ENROLLMENT
         if (user) {
-          const { data: member } = await (supabase.from as any)('batch_members')
+          const { data: member } = await (supabase.from as any)('batch_students')
             .select('id')
             .eq('batch_id', batch.id)
             .eq('student_id', user.id)
@@ -257,7 +257,7 @@ export default function B2BAssessmentTakerPage() {
                 >
                   {joining ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Join & Start Test'}
                 </Button>
-                <p className="text-[10px] text-white/30">Ask your mentor if you don't have the code.</p>
+                <p className="text-[10px] text-white/30">Ask your teacher if you don't have the code.</p>
               </div>
             )}
           </div>

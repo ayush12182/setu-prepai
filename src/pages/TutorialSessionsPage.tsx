@@ -125,7 +125,7 @@ const TutorialSessionsPage: React.FC = () => {
             </div>
             <p className="text-text-secondary max-w-2xl">
               Premium Kota-style notes curated from Allen, Resonance & PW. Each PDF is crafted 
-              like a senior mentor wrote it before your exam.
+              like a senior teacher wrote it before your exam.
             </p>
           </div>
           <Badge className="bg-accent/10 text-accent border-accent/30">

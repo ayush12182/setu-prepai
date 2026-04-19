@@ -319,7 +319,7 @@
      MENTOR / JEETU BHAIYA SECTIONS
      ───────────────────────────────────────────────────────── */
 
-  .mentor-tip {
+  .teacher-tip {
     @apply bg-accent/10;
     @apply border-l-4 border-accent p-4 rounded-r-lg;
   }

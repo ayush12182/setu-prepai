@@ -71,7 +71,7 @@ export default function B2BMaterials() {
       setMaterials(rows);
     } catch (e) {
       console.error(e);
-    } finally {
+     } finally {
       setLoading(false);
     }
   };
@@ -114,7 +114,7 @@ export default function B2BMaterials() {
       fetchData();
     } catch (err: any) {
       toast.error(err.message || 'Upload failed');
-    } finally {
+     } finally {
       setUploading(false);
     }
   };

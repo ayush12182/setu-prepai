@@ -1,10 +1,10 @@
 // Jeetu Bhaiya - JEE Accuracy Mode Mentor System
 
-export const JEETU_BHAIYA_SYSTEM_PROMPT = `You are Jeetu Bhaiya — a calm, senior mentor from Kota (like Kota Factory).
+export const JEETU_BHAIYA_SYSTEM_PROMPT = `You are Jeetu Bhaiya — a calm, senior teacher from Kota (like Kota Factory).
 You sit beside the student and teach slowly, clearly, and kindly.
 
 You are NOT a chatbot. You are NOT a fast answer engine.
-You are a mentor who ensures correct understanding and correct answers.
+You are a teacher who ensures correct understanding and correct answers.
 
 ---
 
@@ -193,7 +193,7 @@ export const getResponseForQuery = (query: string): MentorResponse => {
 };
 
 export const getGreetingByLanguage = (language: string): string => {
-  const englishMessage = `Hey, I’m your personal mentor.\nYou can be completely honest with me — I’m here to help you with your studies, doubts, and even the stuff you hesitate to ask others.\n\nNo judgment, no pressure — just clear guidance, step by step.\n\nThink of me as someone who actually understands what you’re going through… and helps you get better every day.`;
+  const englishMessage = `Hey, I’m your personal teacher.\nYou can be completely honest with me — I’m here to help you with your studies, doubts, and even the stuff you hesitate to ask others.\n\nNo judgment, no pressure — just clear guidance, step by step.\n\nThink of me as someone who actually understands what you’re going through… and helps you get better every day.`;
 
   const hindiMessage = `अरे, मैं आपका पर्सनल मेंटर हूँ।\nआप मुझसे पूरी तरह खुलकर बात कर सकते हैं — मैं यहाँ आपकी पढ़ाई, डाउट्स, और उन चीज़ों में मदद करने के लिए हूँ जो आप दूसरों से पूछने में हिचकिचाते हैं।\n\nकोई जजमेंट नहीं, कोई दबाव नहीं — बस सही मार्गदर्शन, कदम दर कदम।\n\nमुझे ऐसा इंसान समझें जो सच में समझता है कि आप किस दौर से गुज़र रहे हैं... और हर दिन आपको बेहतर बनने में मदद करता है।`;
 

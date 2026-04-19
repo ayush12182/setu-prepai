@@ -58,7 +58,7 @@ export default function OrganizationSettingsPage() {
               Institution Hub
             </h1>
             <p className="text-muted-foreground mt-1 text-sm">
-              Manage your custom syllabus, mentors, and global organization profile.
+              Manage your custom syllabus, teachers, and global organization profile.
             </p>
           </div>
         </div>

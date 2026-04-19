@@ -1,7 +1,7 @@
 /**
  * closingFeedback.ts
  *
- * Generates a short, mentor-like closing message at the end of each
+ * Generates a short, teacher-like closing message at the end of each
  * AI Teacher explanation, based on live engagement signals.
  *
  * Rules:

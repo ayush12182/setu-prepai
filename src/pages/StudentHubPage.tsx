@@ -102,7 +102,7 @@ const StudentHubPage: React.FC = () => {
     setLoading(true);
     try {
       const { data: links } = await supabase.from('student_teacher_links' as any).select('*').eq('student_id', user!.id);
-      const { data: batchMemberships } = await supabase.from('batch_members' as any).select('batches(*)').eq('student_id', user!.id);
+      const { data: batchMemberships } = await supabase.from('batch_students' as any).select('batches(*)').eq('student_id', user!.id);
       const myBatches = (batchMemberships || []).map((bm: any) => bm.batches).filter(Boolean);
 
       if (links && links.length > 0) {
@@ -147,7 +147,7 @@ const StudentHubPage: React.FC = () => {
 
   if (loading) return <div className="p-10 text-center">Loading...</div>;
 
-  const isB2C = profile?.user_type === 'b2c_student';
+  const isB2C = profile?.user_type === 'student';
 
   if (!isB2C && !teacherCtx) {
     return (
