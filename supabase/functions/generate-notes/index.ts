@@ -32,31 +32,42 @@ serve(async (req) => {
       Mode: ${smartMode}. Language: Hinglish.
     `;
 
-    // UPDATED: Standardizing on gemini-1.5-flash v1
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: `CONTEXT: ${prompt}` }] }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        },
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
-        ]
-      }),
-    });
+    const models = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"];
+    let response;
+    let data;
 
-    const data = await response.json();
-    
-    if (data.error || !data.candidates) {
-       console.error("[GenerateNotes] Google API Error:", data.error || "No candidates returned");
+    for (const model of models) {
+      try {
+        console.log(`[GenerateNotes] Attempting model: ${model}`);
+        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: `CONTEXT: ${prompt}` }] }],
+            generationConfig: {
+              temperature: 0.7,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 2048,
+            },
+            safetySettings: [
+              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+            ]
+          }),
+        });
+        
+        data = await response.json();
+        if (data.candidates && data.candidates.length > 0) break;
+      } catch (err) {
+        console.error(`[GenerateNotes] Network error with model ${model}:`, err);
+      }
+    }
+
+    if (!data?.candidates || data.candidates.length === 0) {
+       console.error("[GenerateNotes] ALL MODELS FAILED:", JSON.stringify(data));
        throw new Error("AI temporarily unavailable");
     }
 
