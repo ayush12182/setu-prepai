@@ -77,7 +77,7 @@ export default function B2BBatches() {
       const { data, error } = await (supabase as any)
         .from('batches')
         .select('*')
-        .eq('mentor_id', user.id)
+        .eq('teacher_id', user.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 

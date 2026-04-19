@@ -30,11 +30,11 @@ export default function B2BInviteStudents() {
   const fetchBatches = async () => {
     if (!user) return;
     try {
-      // Filter by mentor_id so RLS lets us update join_code later
+      // Filter by teacher_id so RLS lets us update join_code later
       const { data, error } = await (supabase as any)
         .from('batches')
         .select('*')
-        .eq('mentor_id', user.id)
+        .eq('teacher_id', user.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -96,7 +96,7 @@ export default function B2BInviteStudents() {
         .from('batches')
         .update({ join_code: newCode, invite_link: inviteLink })
         .eq('id', selectedBatch.id)
-        .eq('mentor_id', user.id)           // explicit ownership check
+        .eq('teacher_id', user.id)           // explicit ownership check
         .select()
         .single();
 

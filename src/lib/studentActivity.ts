@@ -114,7 +114,7 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
 
     // ── Path 1: Check batches.join_code (new system) ──────────
     const { data: batch } = await (supabase.from as any)('batches')
-      .select('id, name, mentor_id, organization_id, subject, target_exam')
+      .select('id, name, teacher_id, organization_id, subject, target_exam')
       .eq('join_code', normalCode)
       .eq('is_active', true)
       .maybeSingle();

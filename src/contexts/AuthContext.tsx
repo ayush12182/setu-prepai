@@ -87,8 +87,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .maybeSingle();
 
       if (error) {
-        console.error(`[AuthContext] Database error fetching profile for ${userId}:`, error.message, error.details);
-        toast.error("Profile sync failed. Batch features may be limited.");
+        // Silently log instead of toasting during onboarding - it can be a temporary schema cache issue
+        console.warn(`[AuthContext] Database error fetching profile for ${userId}:`, error.message);
       }
 
       if (!data) {
