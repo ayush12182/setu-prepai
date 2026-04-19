@@ -49,7 +49,7 @@ serve(async (req) => {
 
     const model = "gemini-flash-latest";
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -68,37 +68,35 @@ serve(async (req) => {
           ]
         }),
       });
-      
-      const data = await response.json();
-      
-      if (!data?.candidates || data.candidates.length === 0) {
-         console.error("[JeetuChat] API Error:", JSON.stringify(data));
-         throw new Error("No response from AI");
-      }
 
-      const resultText = data.candidates[0].content.parts[0].text;
+      if (!response.body) throw new Error("Response body is null");
 
-      const stream = new ReadableStream({
-        async start(controller) {
-          const words = resultText.split(' ');
-          for (const word of words) {
-            const payload = { choices: [{ delta: { content: word + ' ' } }] };
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
-            await new Promise(r => setTimeout(r, 10));
+      return new Response(response.body.pipeThrough(new TransformStream({
+        transform(chunk, controller) {
+          const text = new TextDecoder().decode(chunk);
+          const lines = text.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+               try {
+                 const data = JSON.parse(line.slice(6));
+                 if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                   const content = data.candidates[0].content.parts[0].text;
+                   controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`));
+                 }
+               } catch (e) { /* skip partials */ }
+            }
           }
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-          controller.close();
         },
-      });
-
-      return new Response(stream, {
+        flush(controller) {
+          controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
+        }
+      })), {
         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
 
     } catch (err) {
-      console.error("[JeetuChat] Request Failed:", err);
-      // FALLBACK: Show clean UI message
-      return new Response(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: "AI is temporarily unavailable. Bhai thoda wait kar le, system update ho raha hai." } }] })}\n\ndata: [DONE]\n\n`), {
+      console.error("[JeetuChat] Stream Error:", err);
+      return new Response(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: "AI is temporarily offline. Bhai ek baar refresh kar le." } }] })}\n\ndata: [DONE]\n\n`), {
         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
     }

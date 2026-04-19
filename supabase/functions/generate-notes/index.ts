@@ -35,7 +35,7 @@ serve(async (req) => {
     const model = "gemini-flash-latest";
     try {
       console.log(`[GenerateNotes] Attempting model: ${model}`);
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -55,31 +55,33 @@ serve(async (req) => {
         }),
       });
       
-      const data = await response.json();
-      if (!data.candidates || data.candidates.length === 0) {
-        throw new Error(`Model ${model} returned empty candidates`);
-      }
-      
-      const resultText = data.candidates[0].content.parts[0].text;
-      const stream = new ReadableStream({
-        async start(controller) {
-          const chunks = resultText.split(' ');
-          for (const word of chunks) {
-            const payload = { choices: [{ delta: { content: word + ' ' } }] };
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
-            await new Promise(r => setTimeout(r, 5));
-          }
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-          controller.close();
-        },
-      });
+      if (!response.body) throw new Error("No response body");
 
-      return new Response(stream, {
+      return new Response(response.body.pipeThrough(new TransformStream({
+        transform(chunk, controller) {
+          const text = new TextDecoder().decode(chunk);
+          const lines = text.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+               try {
+                 const data = JSON.parse(line.slice(6));
+                 if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                   const content = data.candidates[0].content.parts[0].text;
+                   controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`));
+                 }
+               } catch (e) { /* skip */ }
+            }
+          }
+        },
+        flush(controller) {
+          controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
+        }
+      })), {
         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
 
     } catch (err) {
-      console.error(`[GenerateNotes] Error with model ${model}:`, err);
+      console.error(`[GenerateNotes] Stream Error:`, err);
       return new Response(JSON.stringify({ error: "AI temporarily unavailable" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -22,7 +22,7 @@ serve(async (req) => {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
-    const { job_id, examMode, subject, chapterName, subchapterName, difficulty, count = 10 } = await req.json();
+    const { job_id, examMode, subject, chapterName, subchapterName, difficulty, count = 5 } = await req.json();
 
     console.log(`[UniversalEngine] Starting Gemini generation for ${examMode} (Job: ${job_id})`);
 
