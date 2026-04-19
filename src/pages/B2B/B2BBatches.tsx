@@ -4,7 +4,7 @@ import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
 import {
   Layers, Plus, Users, GraduationCap, ChevronRight,
   Loader2, X, Ticket, Copy, CheckCircle2, AlertCircle,
-  RefreshCw, Trash2, BarChart2, FileText
+  RefreshCw, Trash2, BarChart2, FileText, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
