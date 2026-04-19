@@ -156,59 +156,131 @@ const StudentHubPage: React.FC = () => {
 
 
   return (
-    <MainLayout fullHeight>
-      <div className="min-h-full bg-[#0F1117] text-white p-4 lg:p-8 font-sans">
-        <div className="max-w-7xl mx-auto space-y-6">
+    <MainLayout>
+      <div className="min-h-screen pb-20 pt-24 lg:pt-28">
+        <div className="max-container px-4">
           
-          {/* Top Greeting Card */}
+          {/* Hero Greeting & Tabs */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative bg-[#1A1F2C] rounded-[2rem] p-8 lg:p-10 border border-white/[0.05] overflow-hidden shadow-2xl"
+            className="mb-12"
           >
-            <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
-            
-            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">Dashboard</span>
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 w-fit">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Active Guidance</span>
                 </div>
-                <div>
-                  <h3 className="text-white/60 text-base font-medium mb-1">
-                    {mentorName 
-                      ? `Welcome back to ${mentorName}'s Classroom! 👋` 
-                      : profile?.teacher_id 
-                      ? "Welcome back to your Teacher's Classroom! 👋"
-                      : `Welcome back, ${profile?.full_name?.split(' ')[0] || 'Student'}! 👋`}
-                  </h3>
-                  <h1 className="text-2xl lg:text-4xl font-bold tracking-tight leading-tight">
-                    Your personalized learning <br className="hidden lg:block" /> path is ready for today
-                  </h1>
-                </div>
+                <h1 className="text-4xl lg:text-7xl font-bold tracking-tighter leading-[0.9]">
+                  {mentorName 
+                    ? `Welcome back to ${mentorName}'s Classroom! 👋` 
+                    : profile?.teacher_id 
+                    ? "Welcome back to your Teacher's Classroom! 👋"
+                    : `Welcome back, ${profile?.full_name?.split(' ')[0] || 'Student'}! 👋`}
+                </h1>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="px-5 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-500">
-                    <Flame className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Streak</p>
-                    <p className="text-lg font-black">{realStreak} Days</p>
-                  </div>
-                </div>
-                <div className="px-5 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-500">
-                    <Target className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Solved</p>
-                    <p className="text-lg font-black">{realTodayDone} Qs Today</p>
-                  </div>
-                </div>
+              {/* Tab Switcher */}
+              <div className="flex bg-white/[0.03] p-1.5 rounded-2xl border border-white/[0.05] h-fit self-start lg:self-end">
+                <button
+                  onClick={() => setActiveTab('home')}
+                  className={cn(
+                    "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                    activeTab === 'home' 
+                      ? "bg-accent text-primary shadow-lg shadow-accent/20" 
+                      : "text-white/40 hover:text-white/70"
+                  )}
+                >
+                  <Rocket className="w-3.5 h-3.5" /> Dashboard
+                </button>
+                <button
+                  onClick={() => setActiveTab('leaderboard')}
+                  className={cn(
+                    "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
+                    activeTab === 'leaderboard' 
+                      ? "bg-accent text-primary shadow-lg shadow-accent/20" 
+                      : "text-white/40 hover:text-white/70"
+                  )}
+                >
+                  <Trophy className="w-3.5 h-3.5" /> Leaderboard
+                </button>
               </div>
             </div>
+
+            <AnimatePresence mode="wait">
+              {activeTab === 'home' ? (
+                <motion.div
+                  key="home"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  className="p-8 lg:p-12 bg-gradient-to-br from-white/[0.05] to-transparent rounded-[3rem] border border-white/[0.08] relative overflow-hidden group"
+                >
+                  <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                  
+                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+                    <div className="flex-1 space-y-6">
+                      <div className="space-y-4">
+                        <h2 className="text-4xl lg:text-5xl font-bold tracking-tighter text-white">
+                          Your personalized learning path is ready for today
+                        </h2>
+                        <p className="text-white/40 text-lg lg:text-xl font-medium max-w-2xl leading-relaxed italic">
+                          "{examMode.toUpperCase()} preparation is a marathon. Stay consistent with your daily targets."
+                        </p>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-4 pt-4">
+                        <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
+                          <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500">
+                             <Flame className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Daily Streak</p>
+                            <p className="text-xl font-black">{realStreak} Days</p>
+                          </div>
+                        </div>
+                        <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
+                          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
+                             <Target className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Questions Solved</p>
+                            <p className="text-xl font-black">{realTodayDone} <span className="text-xs text-white/20">Today</span></p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-4 min-w-[280px]">
+                      <Button 
+                        onClick={() => navigate('/practice')}
+                        size="lg" 
+                        className="h-16 rounded-2xl bg-white text-primary hover:bg-white/90 font-black text-lg gap-3 shadow-xl transition-all duration-300 hover:scale-[1.02]"
+                      >
+                        <Play className="fill-current w-4 h-4" /> Start Daily Target
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => navigate('/learn')}
+                        className="h-16 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold"
+                      >
+                        View Full Syllabus
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="leaderboard"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                >
+                  <Leaderboard />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
           {/* Main Content Grid */}

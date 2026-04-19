@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
-import { Users, Search, Eye, Loader2, TrendingUp, AlertTriangle, CheckCircle, BarChart3 } from 'lucide-react';
+import { Users, Search, Eye, Loader2, TrendingUp, AlertTriangle, CheckCircle, BarChart3, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { getStudentBatchStats, formatTimeSpent } from '@/lib/analytics';
 
 interface StudentRow {
   id: string;
@@ -12,6 +13,7 @@ interface StudentRow {
   batch_id: string;
   accuracy: number;
   total_attempted: number;
+  total_time_spent: string;
   status: 'stable' | 'at-risk' | 'top';
   joined_at: string;
 }
@@ -32,33 +34,46 @@ export default function B2BStudents() {
       const teacherUserId = profile?.user_id;
       if (!teacherUserId) return;
 
-      // Fetch students linked to this teacher via profiles.teacher_id
+      // 1. Fetch students linked to this teacher
       const { data: studentProfiles, error: profileErr } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, batch_students(batch_id, batches(name))')
         .eq('teacher_id', teacherUserId)
         .eq('user_type', 'student');
 
       if (profileErr) throw profileErr;
-
       if (!studentProfiles || studentProfiles.length === 0) {
         setStudents([]);
-        setLoading(false);
         return;
       }
 
-      // Format rows
-      const rows: StudentRow[] = studentProfiles.map((p: any) => ({
-        id: p.id,
-        student_id: p.user_id,
-        full_name: p.full_name || 'Anonymous Student',
-        batch_name: p.exam_type || 'General',
-        batch_id: 'default',
-        accuracy: 0, // Placeholder for real stats
-        total_attempted: 0,
-        status: 'stable',
-        joined_at: p.created_at,
-      }));
+      // 2. Aggregate stats
+      const studentIds = studentProfiles.map(p => p.user_id);
+      const activityStats = await getStudentBatchStats(studentIds);
+
+      // 3. Format rows
+      const rows: StudentRow[] = studentProfiles.map((p: any) => {
+        const stats = activityStats[p.user_id] || { total_questions: 0, accuracy: 0, total_time_seconds: 0 };
+        
+        let status: StudentRow['status'] = 'stable';
+        if (stats.total_questions > 10) {
+          if (stats.accuracy >= 75) status = 'top';
+          else if (stats.accuracy < 40) status = 'at-risk';
+        }
+
+        return {
+          id: p.id,
+          student_id: p.user_id,
+          full_name: p.full_name || 'Anonymous Student',
+          batch_name: p.batch_students?.[0]?.batches?.name || 'Assigned',
+          batch_id: p.batch_students?.[0]?.batch_id || 'default',
+          accuracy: stats.accuracy,
+          total_attempted: stats.total_questions,
+          total_time_spent: formatTimeSpent(stats.total_time_seconds),
+          status,
+          joined_at: p.created_at,
+        };
+      });
 
       setStudents(rows);
     } catch (e) {
@@ -145,7 +160,8 @@ export default function B2BStudents() {
                   <th className="px-6 py-4">Student</th>
                   <th className="px-6 py-4">Batch</th>
                   <th className="px-6 py-4">Accuracy</th>
-                  <th className="px-6 py-4">Tests Taken</th>
+                  <th className="px-6 py-4">Total Time</th>
+                  <th className="px-6 py-4">Questions</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
@@ -176,7 +192,13 @@ export default function B2BStudents() {
                         <span className="font-bold text-sm text-accent">{s.accuracy}%</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-muted-foreground">{s.total_attempted}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span className="text-sm font-medium">{s.total_time_spent}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-white/70 font-bold">{s.total_attempted}</td>
                     <td className="px-6 py-4"><StatusBadge status={s.status} /></td>
                     <td className="px-6 py-4 text-right">
                       <button className="text-accent hover:text-white hover:bg-accent p-2 rounded-lg transition-colors">
