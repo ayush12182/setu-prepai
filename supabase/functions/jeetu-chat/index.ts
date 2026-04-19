@@ -47,68 +47,61 @@ serve(async (req) => {
       { role: 'user', parts: [{ text: String(message) }] }
     ];
 
-    const models = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"];
-    let response;
-    let data;
-
-    for (const model of models) {
-      try {
-        console.log(`[JeetuChat] Attempting model: ${model}`);
-        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            contents,
-            generationConfig: {
-              temperature: 0.8,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 1024,
-            },
-            safetySettings: [
-              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-            ]
-          }),
-        });
-        
-        data = await response.json();
-        if (data.candidates && data.candidates.length > 0) break;
-        console.warn(`[JeetuChat] Model ${model} failed or blocked. Trying next...`, JSON.stringify(data));
-      } catch (err) {
-        console.error(`[JeetuChat] Network error with model ${model}:`, err);
+    const model = "gemini-flash-latest";
+    try {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          contents,
+          generationConfig: {
+            temperature: 0.8,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+          },
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+          ]
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (!data?.candidates || data.candidates.length === 0) {
+         console.error("[JeetuChat] API Error:", JSON.stringify(data));
+         throw new Error("No response from AI");
       }
+
+      const resultText = data.candidates[0].content.parts[0].text;
+
+      const stream = new ReadableStream({
+        async start(controller) {
+          const words = resultText.split(' ');
+          for (const word of words) {
+            const payload = { choices: [{ delta: { content: word + ' ' } }] };
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+            await new Promise(r => setTimeout(r, 10));
+          }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        },
+      });
+
+      return new Response(stream, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      });
+
+    } catch (err) {
+      console.error("[JeetuChat] Request Failed:", err);
+      // FALLBACK: Show clean UI message
+      return new Response(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: "AI is temporarily unavailable. Bhai thoda wait kar le, system update ho raha hai." } }] })}\n\ndata: [DONE]\n\n`), {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+      });
     }
-    
-    if (!data?.candidates || data.candidates.length === 0) {
-       console.error("[JeetuChat] ALL MODELS FAILED:", JSON.stringify(data));
-       // FALLBACK: Show clean UI message
-       return new Response(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: "AI is temporarily unavailable. Bhai thoda wait kar le, system update ho raha hai." } }] })}\n\ndata: [DONE]\n\n`), {
-         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-       });
-    }
-
-    const resultText = data.candidates[0].content.parts[0].text;
-
-    const stream = new ReadableStream({
-      async start(controller) {
-        const words = resultText.split(' ');
-        for (const word of words) {
-          const payload = { choices: [{ delta: { content: word + ' ' } }] };
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
-          await new Promise(r => setTimeout(r, 10));
-        }
-        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-        controller.close();
-      },
-    });
-
-    return new Response(stream, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-    });
-
   } catch (error) {
     return new Response(JSON.stringify({ error: "AI temporarily unavailable." }), {
       status: 500,

@@ -30,34 +30,28 @@ serve(async (req) => {
     const userPrompt = `Generate ${count} questions for ${chapterName} - ${subchapterName}. Difficulty: ${difficulty}. 
     Each question must have: question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), and a clear explanation.`;
 
-    const models = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-pro"];
-    let response;
-    let data;
-
-    for (const model of models) {
-      try {
-        console.log(`[UniversalEngine] Attempting model: ${model}`);
-        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nTask: ${userPrompt}` }] }],
-            generationConfig: {
-              temperature: 0.1, // Low temperature for high JSON reliability
-              response_mime_type: "application/json",
-            }
-          }),
-        });
-        
-        data = await response.json();
-        if (data.candidates && data.candidates.length > 0) break;
-      } catch (err) {
-        console.error(`[UniversalEngine] Network error with model ${model}:`, err);
+    const model = "gemini-flash-latest";
+    try {
+      console.log(`[UniversalEngine] Attempting model: ${model}`);
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nTask: ${userPrompt}` }] }],
+          generationConfig: {
+            temperature: 0.1, // Low temperature for high JSON reliability
+            response_mime_type: "application/json",
+          }
+        }),
+      });
+      
+      data = await response.json();
+      if (!data.candidates || data.candidates.length === 0) {
+        throw new Error(`Model ${model} returned empty candidates`);
       }
-    }
-
-    if (!data?.candidates || data.candidates.length === 0) {
-       throw new Error(`Gemini API Error: ALL MODELS FAILED - ${JSON.stringify(data)}`);
+    } catch (err) {
+      console.error(`[UniversalEngine] Error with model ${model}:`, err);
+      throw err;
     }
 
     const resultText = data.candidates[0].content.parts[0].text;
