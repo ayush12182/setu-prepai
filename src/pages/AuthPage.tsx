@@ -157,8 +157,14 @@ const AuthPage: React.FC = () => {
         }
 
         if (profile.user_type === 'student') {
-          navigate('/student-hub');
-          return;
+          if (profile.class) {
+            navigate('/student-hub');
+            return;
+          } else {
+            console.log("Incomplete student profile, staying in onboarding.");
+            setShowOnboarding(true);
+            return;
+          }
         }
 
         if (!profile.class) {
