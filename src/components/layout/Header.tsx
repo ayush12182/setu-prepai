@@ -43,7 +43,7 @@ const examLabels: Record<ExamMode, { label: string; emoji: string }> = {
 export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) => {
   const { language, setLanguage } = useLanguage();
   const { user, profile, signOut, updateProfile } = useAuth();
-  const { examMode, setExamMode } = useExamMode();
+  const { examMode, setExamMode, isLocked } = useExamMode();
   const { isFoundation, classLabel } = useClassContext();
   const navigate = useNavigate();
 
