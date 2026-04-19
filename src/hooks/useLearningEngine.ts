@@ -5,7 +5,7 @@ export interface LearningNode {
   id: string;
   parent_id: string | null;
   name: string;
-  type: 'root' | 'chapter' | 'topic' | 'subtopic';
+  type: 'root' | 'chapter' | 'topic' | 'subtopic' | 'concept';
   exam_type: string;
   subject_node_id: string | null;
   sort_order: number;
