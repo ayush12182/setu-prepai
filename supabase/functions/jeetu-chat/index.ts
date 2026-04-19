@@ -1,7 +1,7 @@
 /**
  * jeetu-chat — Supabase Edge Function
  * 
- * UNIVERSAL ENGINE: Migrated to OpenAI GPT-4o
+ * ENGINE: Refactored to Google Gemini 1.5 Flash 
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -12,54 +12,69 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // 1. Standard CORS OPTIONS handling
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
-  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
   try {
-    const { messages, examMode, language = 'english' } = await req.json();
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const { message, history = [] } = await req.json();
 
-    if (!OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured");
-    }
+    const systemPrompt = `
+      You are Jeetu Bhaiya, a legendary mentor for JEE/NEET/CUET aspirants. 
+      Your style is firm but supportive, like a big brother. 
+      Use Hinglish (Hindi + English). 
+      Don't just solve problems—give 'Toka' (reality checks) and actionable study plans.
+      If a student is stressed, motivate them with realistic goal-setting.
+    `;
 
-    console.log(`[JeetuChat] Processing request for exam: ${examMode}, lang: ${language}`);
+    // Map history to Gemini format
+    const contents = [
+      { role: 'user', parts: [{ text: systemPrompt }] },
+      ...history.map((m: any) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      })),
+      { role: 'user', parts: [{ text: message }] }
+    ];
 
-    // Call OpenAI
-    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: "You are Jeetu Bhaiya, an elite Kota mentor. Explain concepts clearly. Maintain a friendly yet professional senior-mentor tone." },
-          ...messages,
-        ],
-        stream: true,
-      }),
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents }),
     });
 
-    if (!aiRes.ok) {
-       const errBody = await aiRes.text();
-       throw new Error(`OpenAI error: ${aiRes.status} - ${errBody}`);
-    }
+    const data = await response.json();
+    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Bhai, network down hai. Thoda wait kar le.";
 
-    return new Response(aiRes.body, {
+    // TRANSFORM: Wrap result in the streaming format the frontend expects
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        // We send it in small chunks to simulate streaming UX
+        const words = resultText.split(' ');
+        for (const word of words) {
+          const payload = {
+            choices: [{
+              delta: { content: word + ' ' }
+            }]
+          };
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+          // Tiny delay for realistic feel
+          await new Promise(r => setTimeout(r, 10));
+        }
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
 
   } catch (error) {
-    console.error("[JeetuChat] Error:", error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "Internal server error" 
-    }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

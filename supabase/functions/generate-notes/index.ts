@@ -1,7 +1,7 @@
 /**
  * generate-notes — Supabase Edge Function
  * 
- * UNIVERSAL ENGINE: Migrated to OpenAI GPT-4o-mini (for speed)
+ * ENGINE: Refactored to Google Gemini 1.5 Flash 
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -14,42 +14,71 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+  const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+  if (!GEMINI_API_KEY) {
+    return new Response(JSON.stringify({ error: "GEMINI_API_KEY not set" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   try {
-    const { chapterName, subject, topics = [], smartMode = 'default', language = 'hinglish', examMode = 'JEE' } = await req.json();
+    const { chapterName, subject, smartMode = 'default' } = await req.json();
 
-    console.log(`[UniversalEngine] Generating notes for ${chapterName} (${subject})`);
+    const prompt = `
+      You are an expert ${subject} teacher at a top Kota coaching institute. 
+      Create detailed, high-yield study notes for the chapter: "${chapterName}".
+      
+      Mode: ${smartMode} (if 'Only Formulas', focus on equations. if 'Beginner', simplify concepts).
+      Language: Hinglish (Professional, using common Hindi terms in Hinglish for better student connection).
 
-    const systemPrompt = `You are a Jeetu Bhaiya style teacher. Generate high-quality classroom notes. Use Hinglish if requested. Return markdown.`;
-    const userPrompt = `Subject: ${subject}, Chapter: ${chapterName}, Topics: ${topics.join(', ')}, Mode: ${smartMode}, Language: ${language}, Exam: ${examMode}. Use clear ## headers.`;
+      Structure the output with:
+      - Key Concepts (bullet points)
+      - Must-Know Formulas (LaTeX format)
+      - Common Student Mistakes
+      - A 1-minute quick revision summary
+    `;
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: "gpt-4o-mini", // Mini is perfect for notes, fast and cheap
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        stream: true,
+        contents: [{ parts: [{ text: prompt }] }]
       }),
     });
 
-    if (!response.ok) throw new Error(`OpenAI error: ${response.status}`);
+    const data = await response.json();
+    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Failed to generate notes.";
 
-    return new Response(response.body, {
+    // TRANSFORM: Wrap result in the streaming format the frontend expects
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        // We send it in small chunks to simulate streaming UX
+        const chunks = resultText.split(' ');
+        for (const word of chunks) {
+          const payload = {
+            choices: [{
+              delta: { content: word + ' ' }
+            }]
+          };
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+          // Tiny delay for better UX
+          await new Promise(r => setTimeout(r, 5));
+        }
+        controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
 
   } catch (error) {
-    console.error("[UniversalEngine] Notes Error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Internal Error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
