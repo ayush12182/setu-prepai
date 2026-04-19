@@ -16,7 +16,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+  const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
   const supabaseUrl  = Deno.env.get("SUPABASE_URL")!;
   const supabaseKey  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -24,37 +24,33 @@ serve(async (req) => {
   try {
     const { job_id, examMode, subject, chapterName, subchapterName, difficulty, count = 10 } = await req.json();
 
-    console.log(`[UniversalEngine] Starting generic generation for ${examMode} (Job: ${job_id})`);
+    console.log(`[UniversalEngine] Starting Gemini generation for ${examMode} (Job: ${job_id})`);
 
-    if (job_id) {
-      await supabase.from("bulk_generation_jobs").update({
-        status: "running",
-        started_at: new Date().toISOString()
-      }).eq("id", job_id);
-    }
+    const systemPrompt = `You are a world-class ${examMode} exam designer. Generate high-quality MCQs for ${subject}. Return ONLY a JSON object with a "questions" array. No markdown, no backticks.`;
+    const userPrompt = `Generate ${count} questions for ${chapterName} - ${subchapterName}. Difficulty: ${difficulty}. 
+    Each question must have: question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), and a clear explanation.`;
 
-    const systemPrompt = `You are a world-class ${examMode} exam designer. Generate high-quality MCQs for ${subject}. Return ONLY a JSON object with a "questions" array.`;
-    const userPrompt = `Generate ${count} questions for ${chapterName} - ${subchapterName}. Difficulty: ${difficulty}. Include options A-D, correct_option, and a clear explanation.`;
-
-    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: {
+          temperature: 0.1, // Low temperature for high JSON reliability
+          response_mime_type: "application/json",
+        }
       }),
     });
 
-    if (!aiRes.ok) throw new Error(`OpenAI error: ${aiRes.status}`);
-    const aiData = await aiRes.json();
-    const questions = JSON.parse(aiData.choices[0].message.content).questions;
+    if (!response.ok) {
+       const errBody = await response.text();
+       throw new Error(`Gemini API Error: ${response.status} - ${errBody}`);
+    }
+
+    const data = await response.json();
+    const resultText = data.candidates[0].content.parts[0].text;
+    const questions = JSON.parse(resultText).questions;
 
     const toInsert = questions.map((q: any) => ({
       exam: examMode,

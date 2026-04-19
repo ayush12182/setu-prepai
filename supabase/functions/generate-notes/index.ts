@@ -32,28 +32,35 @@ serve(async (req) => {
       Mode: ${smartMode}. Language: Hinglish.
     `;
 
-    // UPDATED: Standardizing on gemini-1.5-flash
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    // UPDATED: Standardizing on gemini-1.5-flash v1
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        },
         safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
         ]
       }),
     });
 
     const data = await response.json();
     
-    if (data.error) {
+    if (data.error || !data.candidates) {
+       console.error("[GenerateNotes] Google API Error:", data.error || "No candidates returned");
        throw new Error("AI temporarily unavailable");
     }
 
-    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "AI temporarily unavailable. Please refresh.";
+    const resultText = data.candidates[0].content.parts[0].text;
 
     const stream = new ReadableStream({
       async start(controller) {

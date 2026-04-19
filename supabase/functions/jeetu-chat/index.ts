@@ -45,32 +45,39 @@ serve(async (req) => {
       { role: 'user', parts: [{ text: String(message) }] }
     ];
 
-    // UPDATED: Standardizing on gemini-1.5-flash
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    // UPDATED: Standardizing on gemini-1.5-flash v1
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         contents,
         system_instruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        },
         safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" }
         ]
       }),
     });
 
     const data = await response.json();
     
-    if (data.error) {
+    if (data.error || !data.candidates) {
+       console.error("[JeetuChat] Google API Error:", data.error || "No candidates returned");
        // FALLBACK: Show clean UI message as requested
        return new Response(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: "AI is temporarily unavailable. Bhai thoda wait kar le, system update ho raha hai." } }] })}\n\ndata: [DONE]\n\n`), {
          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
        });
     }
 
-    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "AI temporarily unavailable. Try again in a moment.";
+    const resultText = data.candidates[0].content.parts[0].text;
 
     const stream = new ReadableStream({
       async start(controller) {
