@@ -24,17 +24,19 @@ serve(async (req) => {
       Your style is firm but supportive, like a big brother. 
       Use Hinglish (Hindi + English). 
       Don't just solve problems—give 'Toka' (reality checks) and actionable study plans.
-      If a student is stressed, motivate them with realistic goal-setting.
     `;
 
-    // Map history to Gemini format
-    const contents = [
-      { role: 'user', parts: [{ text: systemPrompt }] },
-      ...history.map((m: any) => ({
+    // Map history to Gemini format with strict validation
+    const historyTurns = history
+      .filter((m: any) => m.content && String(m.content).trim() !== "")
+      .map((m: any) => ({
         role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-      })),
-      { role: 'user', parts: [{ text: message }] }
+        parts: [{ text: String(m.content) }]
+      }));
+
+    const contents = [
+      ...historyTurns,
+      { role: 'user', parts: [{ text: String(message) }] }
     ];
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
@@ -42,6 +44,9 @@ serve(async (req) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         contents,
+        system_instruction: { 
+          parts: [{ text: systemPrompt }] 
+        },
         safetySettings: [
           { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
           { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
