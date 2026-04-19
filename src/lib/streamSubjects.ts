@@ -166,6 +166,7 @@ export const STREAM_SUBJECTS: Record<string, SubjectConfig[]> = {
  * Get subjects for a given target_exam string.
  * Falls back to CUET if unknown.
  */
+export function getSubjectsForExam(targetExam: string | null | undefined): Subject[] {
   // If no target exam, do not default to Commerce (CUET). 
   // This prevents NEET students from seeing Accounts/Economics during loading states.
   if (!targetExam) return [];
@@ -184,6 +185,7 @@ export const STREAM_SUBJECTS: Record<string, SubjectConfig[]> = {
   if (lowerExam.includes('ca') || lowerExam.includes('commerce') || lowerExam.includes('foundation')) return STREAM_SUBJECTS['CA Foundation'];
   
   return [];
+}
 
 /**
  * Get flat list of subject labels for use in dropdowns.
