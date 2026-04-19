@@ -184,28 +184,24 @@ const AuthPage: React.FC = () => {
     e.preventDefault();
     if (!validateEmail(email) || !validatePassword(password)) return;
     setLoading(true);
-    ; try {
+    try {
       if (mode === 'signup') {
         await signUpWithEmail(email, password, fullName);
         
-        // Force sign in immediately after sign up to guarantee an active local session 
-        // (fixes Supabase quirk where session is sometimes null immediately after signup)
-        ; try {
+        try {
           await signInWithEmail(email, password);
         } catch (signInErr) {
-          console.warn("Auto sign-in after sign-up failed, user may need to log in manually", signInErr);
+          console.warn("Auto sign-in after sign-up failed", signInErr);
         }
 
-        // If they came from the student onboarding path (code already set),
-        // go straight to completion — no need to show onboarding screens again.
         if (onboardingData.userType === 'student' && onboardingData.institutionName) {
           toast.success("Account created! Joining your batch... 🎯");
-          setShowOnboarding(true); // Keep true so handleOnboardingComplete can run
+          setShowOnboarding(true);
           await handleOnboardingComplete();
           return;
         }
 
-        toast.success('Account created! Let\'s set up your learning profile 🎯');
+        toast.success("Account created! Let's set up your learning profile 🎯");
         setShowOnboarding(true);
         setOnboardingStep(getInitialStep());
       } else {
@@ -214,50 +210,74 @@ const AuthPage: React.FC = () => {
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Something went wrong, please try again';
       toast.error(msg);
+    } finally {
+      setLoading(false);
     }
-       /* manual cleanup */  setLoading(false); }
-
   };
 
   const handleGoogleAuth = async () => {
     setLoading(true);
-    ; try { await signInWithGoogle(); } catch (error) { toast.error(error instanceof Error ? error.message : 'Google login failed'); setLoading(false); }
+    try { 
+      await signInWithGoogle(); 
+    } catch (error) { 
+      toast.error(error instanceof Error ? error.message : 'Google login failed'); 
+    } finally {
+      setLoading(false); 
+    }
   };
+
   const handleAppleAuth = async () => {
     setLoading(true);
-    ; try { await signInWithApple(); } catch (error) { toast.error(error instanceof Error ? error.message : 'Apple login failed'); setLoading(false); }
+    try { 
+      await signInWithApple(); 
+    } catch (error) { 
+      toast.error(error instanceof Error ? error.message : 'Apple login failed'); 
+    } finally {
+      setLoading(false); 
+    }
   };
 
   const handlePhoneAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validatePhone(phone)) return;
     setLoading(true);
-    ; try { await signInWithPhone(phone); toast.success('OTP sent! Check your phone.'); setMode('otp'); }
-    catch (error) { toast.error(error instanceof Error ? error.message : 'Failed to send OTP'); }
-       /* manual cleanup */  setLoading(false); }
-
+    try { 
+      await signInWithPhone(phone); 
+      toast.success('OTP sent! Check your phone.'); 
+      setMode('otp'); 
+    } catch (error) { 
+      toast.error(error instanceof Error ? error.message : 'Failed to send OTP'); 
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) { toast.error('Enter complete OTP'); return; }
     setLoading(true);
-    ; try { await verifyOTP(phone, otp); } catch (error) { toast.error(error instanceof Error ? error.message : 'Invalid OTP'); }
-       /* manual cleanup */  setLoading(false); }
-
+    try { 
+      await verifyOTP(phone, otp); 
+    } catch (error) { 
+      toast.error(error instanceof Error ? error.message : 'Invalid OTP'); 
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(email)) return;
     setLoading(true);
-    ; try {
+    try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth` });
       if (error) throw error;
       toast.success('Reset link sent! Check your email.');
       setMode('login');
-    } catch (error) { toast.error(error instanceof Error ? error.message : 'Failed to send reset link'); }
-       /* manual cleanup */  setLoading(false); }
-
+    } catch (error) { 
+      toast.error(error instanceof Error ? error.message : 'Failed to send reset link'); 
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isFoundationProgram = () => onboardingData.stream === 'foundation';
