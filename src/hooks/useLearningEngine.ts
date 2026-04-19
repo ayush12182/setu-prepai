@@ -27,8 +27,11 @@ const MOCK_NODES: LearningNode[] = [
   { id: 'mock-cuet-bio', name: 'Biology (Domain)', type: 'root', exam_type: 'CUET', parent_id: null, subject_node_id: null, sort_order: 3 },
   // Chapters
   { id: 'mock-cell', name: 'Cell: The Unit of Life', type: 'chapter', exam_type: 'NEET', parent_id: 'mock-bio', subject_node_id: null, sort_order: 1 },
+  { id: 'mock-cell-1', name: 'Cell Membrane and Wall', type: 'topic', exam_type: 'NEET', parent_id: 'mock-cell', subject_node_id: null, sort_order: 1 },
+  { id: 'mock-cell-2', name: 'Cytoplasm and Nucleus', type: 'topic', exam_type: 'NEET', parent_id: 'mock-cell', subject_node_id: null, sort_order: 2 },
   { id: 'mock-gen', name: 'Genetics', type: 'chapter', exam_type: 'NEET', parent_id: 'mock-bio', subject_node_id: null, sort_order: 2 },
   { id: 'mock-kin', name: 'Kinematics', type: 'chapter', exam_type: 'NEET', parent_id: 'mock-phy', subject_node_id: null, sort_order: 1 },
+  { id: 'mock-kin-1', name: 'Motion in 1D', type: 'topic', exam_type: 'NEET', parent_id: 'mock-kin', subject_node_id: null, sort_order: 1 },
   { id: 'mock-cal', name: 'Calculus', type: 'chapter', exam_type: 'JEE', parent_id: 'mock-jee-mat', subject_node_id: null, sort_order: 1 }
 ];
 

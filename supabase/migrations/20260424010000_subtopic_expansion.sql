@@ -1,71 +1,65 @@
--- Sub-Topic Expansion for NEET and JEE
--- This migration adds detailed topics under each major chapter
+-- Syllabus Expansion: Adding Topics to Chapters
+-- This migration ensures that Chapters have child nodes of type 'topic'
 
--- 1. PHYSICS TOPICS
-DO $$
-DECLARE
-    kinematics_id UUID;
-    lom_id UUID;
-    thermo_id UUID;
-BEGIN
-    SELECT id INTO kinematics_id FROM learning_nodes WHERE name = 'Kinematics' AND exam_type = 'NEET' LIMIT 1;
-    IF kinematics_id IS NOT NULL THEN
-        INSERT INTO learning_nodes (name, type, exam_type, parent_id, sort_order) VALUES
-        ('Frame of Reference & Straight Line', 'topic', 'NEET', kinematics_id, 1),
-        ('Velocity and Acceleration', 'topic', 'NEET', kinematics_id, 2),
-        ('Projectile Motion', 'topic', 'NEET', kinematics_id, 3),
-        ('Relative Velocity', 'topic', 'NEET', kinematics_id, 4);
-    END IF;
+-- 1. BIOLOGY TOPICS
+-- Cell Cycle and Cell Division
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Cell Cycle Phases', 'topic', 'NEET', id, 1 FROM learning_nodes WHERE name = 'Cell Cycle and Cell Division' LIMIT 1
+ON CONFLICT DO NOTHING;
 
-    SELECT id INTO lom_id FROM learning_nodes WHERE name = 'Laws of Motion' AND exam_type = 'NEET' LIMIT 1;
-    IF lom_id IS NOT NULL THEN
-        INSERT INTO learning_nodes (name, type, exam_type, parent_id, sort_order) VALUES
-        ('Newton''s Three Laws', 'topic', 'NEET', lom_id, 1),
-        ('Inertia and Momentum', 'topic', 'NEET', lom_id, 2),
-        ('Friction & Lubrication', 'topic', 'NEET', lom_id, 3),
-        ('Circular Motion Dynamics', 'topic', 'NEET', lom_id, 4);
-    END IF;
-END $$;
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'M Phase (Mitosis)', 'topic', 'NEET', id, 2 FROM learning_nodes WHERE name = 'Cell Cycle and Cell Division' LIMIT 1
+ON CONFLICT DO NOTHING;
 
--- 2. BIOLOGY TOPICS
-DO $$
-DECLARE
-    cell_id UUID;
-    genetics_id UUID;
-BEGIN
-    SELECT id INTO cell_id FROM learning_nodes WHERE name = 'Cell: The Unit of Life' AND exam_type = 'NEET' LIMIT 1;
-    IF cell_id IS NOT NULL THEN
-        INSERT INTO learning_nodes (name, type, exam_type, parent_id, sort_order) VALUES
-        ('Cell Overview & Theory', 'topic', 'NEET', cell_id, 1),
-        ('Prokaryotic vs Eukaryotic', 'topic', 'NEET', cell_id, 2),
-        ('Endomembrane System', 'topic', 'NEET', cell_id, 3),
-        ('Mitochondria, Plastids & Ribosomes', 'topic', 'NEET', cell_id, 4);
-    END IF;
+-- Biological Classification
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Kingdom Monera', 'topic', 'NEET', id, 1 FROM learning_nodes WHERE name = 'Biological Classification' LIMIT 1
+ON CONFLICT DO NOTHING;
 
-    SELECT id INTO genetics_id FROM learning_nodes WHERE name = 'Genetics and Evolution' AND exam_type = 'NEET' LIMIT 1;
-    IF genetics_id IS NOT NULL THEN
-        INSERT INTO learning_nodes (name, type, exam_type, parent_id, sort_order) VALUES
-        ('Mendel''s Laws of Inheritance', 'topic', 'NEET', genetics_id, 1),
-        ('Chromosomal Theory', 'topic', 'NEET', genetics_id, 2),
-        ('DNA Replication & Genetic Code', 'topic', 'NEET', genetics_id, 3),
-        ('Adaptive Radiation & Evolution', 'topic', 'NEET', genetics_id, 4);
-    END IF;
-END $$;
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Kingdom Protista', 'topic', 'NEET', id, 2 FROM learning_nodes WHERE name = 'Biological Classification' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Kingdom Fungi', 'topic', 'NEET', id, 3 FROM learning_nodes WHERE name = 'Biological Classification' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+-- 2. PHYSICS TOPICS
+-- Units and Measurements
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'SI Units', 'topic', 'NEET', id, 1 FROM learning_nodes WHERE name = 'Units and Measurements' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Significant Figures', 'topic', 'NEET', id, 2 FROM learning_nodes WHERE name = 'Units and Measurements' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Errors in Measurement', 'topic', 'NEET', id, 3 FROM learning_nodes WHERE name = 'Units and Measurements' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+-- Motion in a Straight Line
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Instantaneous Velocity', 'topic', 'NEET', id, 1 FROM learning_nodes WHERE name = 'Motion in a Straight Line' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Kinematic Equations', 'topic', 'NEET', id, 2 FROM learning_nodes WHERE name = 'Motion in a Straight Line' LIMIT 1
+ON CONFLICT DO NOTHING;
 
 -- 3. CHEMISTRY TOPICS
-DO $$
-DECLARE
-    organic_id UUID;
-BEGIN
-    SELECT id INTO organic_id FROM learning_nodes WHERE name = 'Organic Chemistry: Basic Principles' AND exam_type = 'NEET' LIMIT 1;
-    IF organic_id IS NOT NULL THEN
-        INSERT INTO learning_nodes (name, type, exam_type, parent_id, sort_order) VALUES
-        ('IUPAC Nomenclature', 'topic', 'NEET', organic_id, 1),
-        ('Isomerism', 'topic', 'NEET', organic_id, 2),
-        ('Inductive & Resonance Effects', 'topic', 'NEET', organic_id, 3),
-        ('Reaction Mechanisms', 'topic', 'NEET', organic_id, 4);
-    END IF;
-END $$;
+-- Chemical Bonding
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Ionic Bonding', 'topic', 'NEET', id, 1 FROM learning_nodes WHERE name = 'Chemical Bonding and Molecular Structure' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'VSEPR Theory', 'topic', 'NEET', id, 2 FROM learning_nodes WHERE name = 'Chemical Bonding and Molecular Structure' LIMIT 1
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.learning_nodes (name, type, exam_type, parent_id, sort_order)
+SELECT 'Hybridization', 'topic', 'NEET', id, 3 FROM learning_nodes WHERE name = 'Chemical Bonding and Molecular Structure' LIMIT 1
+ON CONFLICT DO NOTHING;
 
 -- Notify schema change
 NOTIFY pgrst, 'reload schema';
