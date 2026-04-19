@@ -21,16 +21,18 @@ import { generateDiagnosticReport } from '@/lib/diagnosisEngine';
 import { generateDailyMission, generateDailyMissionAsync, DailyMission } from '@/lib/adaptiveEngine';
 import { SnapAndSolveModal } from '@/components/practice/SnapAndSolveModal';
 import { useStudentCycle } from '@/hooks/useStudentCycle';
+import { PracticeTreeExplorer } from '@/components/practice/PracticeTreeExplorer';
+import { LearningNode } from '@/hooks/useLearningEngine';
 
 type PracticeMode = 'practice' | 'test';
 
 type PracticeState =
   | { step: 'select-mode' }
   | { step: 'select-topic'; mode: 'focus' | 'weakness' | 'mixed' }
-  | { step: 'select-difficulty'; subchapter: Subchapter | null; chapter: Chapter | null; subject: string | null; adaptiveMode?: string }
-  | { step: 'quiz'; subchapter: Subchapter | null; chapter: Chapter | null; subject: string | null; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; adaptiveMode?: string }
-  | { step: 'results'; subchapter: Subchapter | null; chapter: Chapter | null; subject: string | null; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; result: QuizResult }
-  | { step: 'test-results'; subchapter: Subchapter | null; chapter: Chapter | null; subject: string | null; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; answers: TestAnswer[]; totalTime: number };
+  | { step: 'select-difficulty'; node: LearningNode; adaptiveMode?: string }
+  | { step: 'quiz'; node: LearningNode; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; adaptiveMode?: string }
+  | { step: 'results'; node: LearningNode; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; result: QuizResult }
+  | { step: 'test-results'; node: LearningNode; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; answers: TestAnswer[]; totalTime: number };
 
 const PracticePage: React.FC = () => {
   const navigate = useNavigate();
@@ -75,11 +77,13 @@ const PracticePage: React.FC = () => {
     const modeParam = searchParams.get('mode');
 
     if (subchapterId) {
+      // Legacy support or fallback
       const subchapter = getSubchapterById(subchapterId);
       if (subchapter) {
         const chapter = getChapterById(subchapter.chapterId);
         if (chapter) {
-          setState({ step: 'select-difficulty', subchapter, chapter, subject: chapter.subject });
+          const mockNode: LearningNode = { id: subchapter.id, name: subchapter.name, type: 'subtopic', parent_id: chapter.id, exam_type: examParam, subject_node_id: null, sort_order: 0 };
+          setState({ step: 'select-difficulty', node: mockNode });
         }
       }
     } else if (modeParam === 'full-syllabus') {
@@ -88,27 +92,20 @@ const PracticePage: React.FC = () => {
     setInitialized(true);
   }, [searchParams, initialized]);
 
-  const handleSubchapterSelect = (subchapter: Subchapter | null, chapter: Chapter | null, subject: string | null) => {
+  const handleNodeSelect = (node: LearningNode) => {
     if (state.step === 'select-topic') {
       const modeName = state.mode === 'weakness' ? 'Weakness Extraction' : state.mode === 'mixed' ? 'Adaptive Mixed Subject' : undefined;
-      setState({ step: 'select-difficulty', subchapter, chapter, subject, adaptiveMode: modeName });
+      setState({ step: 'select-difficulty', node, adaptiveMode: modeName });
     }
   };
 
   const handleDifficultySelect = async (difficulty: 'easy' | 'medium' | 'hard' | 'mixed') => {
     if (state.step !== 'select-difficulty') return;
-    const { subchapter, chapter, subject, adaptiveMode } = state;
-    setState({ step: 'quiz', subchapter, chapter, subject, difficulty, adaptiveMode });
+    const { node, adaptiveMode } = state;
+    setState({ step: 'quiz', node, difficulty, adaptiveMode });
     
-    // For now use B2C practice question fetcher, we will upgrade this to AssessmentEngine
-    if (subchapter && chapter && subject) {
-      await generateQuestions(subchapter.id, adaptiveMode || subchapter.name, chapter.id, chapter.name, subject, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
-    } else {
-      // Overall mode
-      const mockChapter = { id: 'adaptive', name: 'Overall Syllabus', subject: 'Mixed' } as unknown as Chapter;
-      const mockSub = { id: 'adaptive-sub', chapterId: 'adaptive', name: 'Overall Syllabus', jeeAsks: [], pyqFocus: { trends:[], patterns:[], traps:[] }, commonMistakes: [], jeetuLine: "Show me what you got." } as unknown as Subchapter;
-      await generateQuestions(mockSub.id, adaptiveMode || 'Mixed', mockChapter.id, mockChapter.name, mockChapter.subject, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
-    }
+    // Trigger question generation for the selected node
+    generateQuestionsForNode(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
   };
 
   // --- ADAPTIVE LAUNCHERS ---
@@ -117,12 +114,10 @@ const PracticePage: React.FC = () => {
   };
 
   const launchAdaptiveSession = async (title: string, modeName: string, intensity: 'easy' | 'medium' | 'hard' | 'mixed' = 'medium') => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mockChapter = { id: 'adaptive', name: title, subject: 'Mixed' } as unknown as Chapter;
-    const mockSub = { id: 'adaptive-sub', chapterId: 'adaptive', name: title, jeeAsks: [], pyqFocus: { trends:[], patterns:[], traps:[] }, commonMistakes: [], jeetuLine: "Show me what you got." } as unknown as Subchapter;
+    const mockNode: LearningNode = { id: 'adaptive', name: title, type: 'root', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
     
-    setState({ step: 'quiz', subchapter: mockSub, chapter: mockChapter, subject: mockChapter.subject, difficulty: intensity, adaptiveMode: modeName });
-    await generateQuestions(mockSub.id, modeName, mockChapter.id, title, mockChapter.subject, intensity === 'mixed' ? 'medium' : intensity, 10, examParam);
+    setState({ step: 'quiz', node: mockNode, difficulty: intensity, adaptiveMode: modeName });
+    generateQuestionsForNode(mockNode.id, intensity === 'mixed' ? 'medium' : intensity, 10, examParam);
   };
 
   const handleQuizComplete = (result: QuizResult) => {
@@ -130,26 +125,26 @@ const PracticePage: React.FC = () => {
     setState({ ...state, step: 'results', result });
 
     // Submit the practice report via Edge Function
-    if (state.chapter && state.subject) {
+    if (state.node) {
       const answers = questions.map(q => {
         const isWrong = result.wrongQuestions.some(wq => wq.id === q.id);
         return {
-          topic: q.concept_tested || state.chapter!.name,
-          subtopic: q.subchapter_id,
+          topic: q.concept_tested || state.node!.name,
+          subtopic: q.subchapter_id || state.node!.id,
           isCorrect: !isWrong
         };
       });
 
       submitPracticeReport(
         isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
-        state.subject,
-        state.chapter.name,
-        state.subchapter?.name,
+        state.node.name,
+        state.node.name,
+        state.node.name,
         result.totalQuestions,
         result.correct,
         result.timeTakenSeconds,
         answers,
-        state.adaptiveMode === 'task' ? state.subchapter?.name : undefined // passing task identifier if we launched a task
+        state.adaptiveMode === 'task' ? state.node.name : undefined // passing task identifier if we launched a task
       );
 
       // ── 21-Day Cycle Completion ──
@@ -166,18 +161,14 @@ const PracticePage: React.FC = () => {
 
   const handleRetry = async () => {
     if (state.step !== 'results' && state.step !== 'test-results') return;
-    const { subchapter, chapter, subject, difficulty } = state;
-    setState({ step: 'quiz', subchapter, chapter, subject, difficulty });
-    if (subchapter && chapter && subject) {
-      await generateQuestions(subchapter.id, subchapter.name, chapter.id, chapter.name, subject, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
-    } else {
-      await generateQuestions('adaptive-sub', 'Mixed', 'adaptive', 'Overall Syllabus', 'Mixed', difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
-    }
+    const { node, difficulty } = state;
+    setState({ step: 'quiz', node, difficulty });
+    generateQuestionsForNode(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
   };
 
   const handleGetSimilar = async (question: { concept_tested: string; question_text: string }) => {
     if (state.step !== 'quiz') return null;
-    return getSimilarQuestions(question.concept_tested, state.subchapter?.name || 'Mixed', state.subject || 'Mixed', question.question_text);
+    return getSimilarQuestions(question.concept_tested, state.node?.name || 'Mixed', 'Mixed', question.question_text);
   };
 
   if (authLoading || !user) {
@@ -340,38 +331,11 @@ const PracticePage: React.FC = () => {
         )}
 
         {state.step === 'select-topic' && (
-          <div className="animate-fade-in">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-foreground">
-                Target your {state.mode === 'weakness' ? 'Weakness Attack' : state.mode === 'mixed' ? 'Mixed Practice' : 'Focus Session'}
-              </h2>
-              <Button variant="outline" onClick={() => setState({ step: 'select-mode' })}>Back to Modes</Button>
-            </div>
-            
-            {(state.mode === 'weakness' || state.mode === 'mixed') && (
-              <div 
-                onClick={() => handleSubchapterSelect(null, null, null)}
-                className="mb-6 bg-gradient-to-r from-accent/20 to-transparent border border-accent/30 rounded-xl p-5 hover:border-accent hover:shadow-[0_0_20px_rgba(var(--accent),0.15)] cursor-pointer transition-all flex items-center justify-between group"
-              >
-                <div>
-                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-accent" />
-                    Overall Syllabus (Auto-pilot)
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">Let AI dynamically track your weaknesses and mix concepts across all subjects.</p>
-                </div>
-                <Button variant="ghost" className="group-hover:bg-accent group-hover:text-primary-foreground">
-                  Start Overall
-                </Button>
-              </div>
-            )}
-            
-            <SubchapterSelector onSelect={handleSubchapterSelect} />
-          </div>
+            <PracticeTreeExplorer onSelectNode={handleNodeSelect} />
         )}
 
         {state.step === 'select-difficulty' && (
-          <DifficultySelector subchapter={state.subchapter!} chapter={state.chapter!} subject={state.subject!} onSelectDifficulty={handleDifficultySelect} onBack={() => setState({ step: 'select-mode' })} />
+          <DifficultySelector node={state.node!} onSelectDifficulty={handleDifficultySelect} onBack={() => setState({ step: 'select-mode' })} />
         )}
 
         {state.step === 'quiz' && (
@@ -434,13 +398,13 @@ const PracticePage: React.FC = () => {
               <Button onClick={() => handleDifficultySelect(state.difficulty)} variant="outline">Try again</Button>
             </div>
           ) : questions.length > 0 ? (
-            <QuizInterface questions={questions} subchapterName={state.subchapter?.name || 'Mixed Syllabus'} difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} onComplete={handleQuizComplete} onGetSimilar={handleGetSimilar} onRecordAttempt={recordAttempt} />
+            <QuizInterface questions={questions} subchapterName={state.node?.name || 'Mixed Syllabus'} difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} onComplete={handleQuizComplete} onGetSimilar={handleGetSimilar} onRecordAttempt={recordAttempt} />
           ) : null}
           </>
         )}
 
         {state.step === 'results' && (
-          <QuizResults result={state.result} subchapterName={state.subchapter?.name || 'Mixed Syllabus'} difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} onRetry={handleRetry} onChangeDifficulty={() => setState({ step: 'select-difficulty', subchapter: state.subchapter, chapter: state.chapter, subject: state.subject })} onGoHome={() => setState({ step: 'select-mode' })} />
+          <QuizResults result={state.result} subchapterName={state.node?.name || 'Mixed Syllabus'} difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} onRetry={handleRetry} onChangeDifficulty={() => setState({ step: 'select-difficulty', node: state.node })} onGoHome={() => setState({ step: 'select-mode' })} />
         )}
 
       </div>

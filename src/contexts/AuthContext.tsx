@@ -16,6 +16,11 @@ interface Profile {
   user_type: 'student' | 'teacher' | 'b2b_institution' | 'admin' | null;
   organization_id: string | null;
   institution_name: string | null;
+  teacher_id: string | null;
+  teacher_code: string | null;
+  subjects: string[] | null;
+  mentor_name?: string | null;
+  mentor_avatar?: string | null;
 }
 
 interface SubscriptionState {
@@ -114,12 +119,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         full_name: dbData?.full_name || meta.full_name || 'Student',
         user_type: dbData?.user_type || meta.user_type || 'student',
         organization_id: dbData?.organization_id || meta.organization_id || null,
+        teacher_id: dbData?.teacher_id || null,
       };
 
-      setProfile(profileData);
-
-      if (!profileData.organization_id) {
-        console.warn('[AuthContext] organization_id is missing from both DB and metadata. This WILL block batch creation.');
+      // 3. Fetch Mentor Details if linked
+      if (profileData.teacher_id) {
+        const { data: mentor } = await supabase
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('user_id', profileData.teacher_id)
+          .maybeSingle();
+        
+        if (mentor) {
+          profileData.mentor_name = mentor.full_name;
+          profileData.mentor_avatar = mentor.avatar_url;
+        }
       }
 
       setProfile(profileData);

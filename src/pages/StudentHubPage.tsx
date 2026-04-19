@@ -116,11 +116,24 @@ const StudentHubPage: React.FC = () => {
         }
       }
 
-      const { data: tasks } = await supabase.from('assigned_tasks' as any).select('*').eq('student_id', user!.id).limit(10);
-      setAssignedTasks(tasks || []);
+      // 2. Fetch Assigned Teacher Tasks (Assigned to teacher_id or specific student)
+      const { data: tasks, error: taskErr } = await supabase
+        .from('teacher_tasks' as any)
+        .select('*, learning_nodes(name)')
+        .eq('teacher_id', profile?.teacher_id)
+        .order('created_at', { ascending: false });
 
-      const { data: tests } = await supabase.from('student_assessments' as any).select('*, assessment_sessions(*)').eq('student_id', user!.id).eq('status', 'not_started');
-      setAssignedAssessments(tests || []);
+      if (taskErr) throw taskErr;
+
+      const formattedTasks = (tasks || []).map((t: any) => ({
+        id: t.id,
+        topic: t.learning_nodes?.name || t.title,
+        subtopic: t.description,
+        difficulty: 'medium',
+        status: 'pending'
+      }));
+
+      setAssignedTasks(formattedTasks);
 
       const { data: sharedMats } = await supabase.from('batch_materials' as any).select('*').limit(5);
       setSharedMaterials(sharedMats || []);
@@ -133,16 +146,26 @@ const StudentHubPage: React.FC = () => {
   };
 
   const handleJoinByCode = async () => {
-    if (!joinCode) return;
-    setJoiningCode(true);
-    const result = await joinTeacherByCode(joinCode.toUpperCase());
-    if (result.success) {
-      toast.success(result.message);
-      loadAll();
-    } else {
-      toast.error(result.message);
+    if (!joinCode || joinCode.length < 6) {
+      toast.error("Please enter a valid 6-character code");
+      return;
     }
-    setJoiningCode(false);
+    setJoining(true);
+    try {
+      const { linkStudentToMentor } = await import('@/lib/mentorEngine');
+      const result = await linkStudentToMentor(joinCode);
+      if (result.success) {
+        toast.success(result.message);
+        setJoinCode('');
+        if (refreshProfile) await refreshProfile();
+      } else {
+        toast.error(result.message);
+      }
+    } catch (err) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setJoining(false);
+    }
   };
 
   if (loading) return <div className="p-10 text-center">Loading...</div>;
@@ -194,21 +217,58 @@ const StudentHubPage: React.FC = () => {
         {activeTab === 'home' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             
-            {/* Mentor Header (New Moat) */}
+            {/* Mentor Header (Dynamic) */}
             <div className="flex items-center justify-between bg-card/50 backdrop-blur-md border border-border rounded-2xl p-4 sticky top-0 z-10 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center border border-accent/30 overflow-hidden">
-                  <span className="text-accent font-bold">AK</span>
+                  {profile?.mentor_avatar ? (
+                    <img src={profile.mentor_avatar} alt="Mentor" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-accent font-bold">
+                      {(profile?.mentor_name || 'SA').split(' ').map(n => n[0]).join('')}
+                    </span>
+                  )}
                 </div>
                 <div>
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Your Mentor</p>
-                  <h3 className="text-sm font-black text-foreground">{teacherCtx?.teacherName || 'Dr. Anil Kumar'} 👨‍⚕️</h3>
+                  <h3 className="text-sm font-black text-foreground">
+                    {profile?.mentor_name || 'SETU AI Mentor'} {profile?.mentor_name ? '👨‍🏫' : '🧠'}
+                  </h3>
                 </div>
               </div>
               <div className="bg-accent/10 border border-accent/20 px-3 py-1.5 rounded-lg">
-                <p className="text-[11px] font-bold text-accent">"Focus on NCERT diagrams today."</p>
+                <p className="text-[11px] font-bold text-accent">
+                  {profile?.mentor_name 
+                    ? '"Focus on your weak areas today."' 
+                    : "I'll help you master your subjects."}
+                </p>
               </div>
             </div>
+
+            {!profile?.teacher_id && (
+              <div className="bg-secondary/20 border border-dashed border-border rounded-2xl p-6 text-center space-y-4">
+                <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                  <Users className="w-5 h-5" />
+                  <p className="text-sm font-bold">Have a teacher code?</p>
+                </div>
+                <div className="flex gap-2 max-w-xs mx-auto">
+                  <input 
+                    value={joinCode} 
+                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())} 
+                    className="flex-1 bg-background border border-border px-4 py-2 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-accent/50" 
+                    placeholder="ENTER CODE"
+                  />
+                  <Button 
+                    onClick={handleJoinByCode} 
+                    disabled={joiningCode || !joinCode}
+                    size="sm"
+                    className="bg-accent text-primary font-bold rounded-xl"
+                  >
+                    {joiningCode ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Join'}
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* 21-Day Mission Hero (Dopamine Loop) */}
             <div className="relative group overflow-hidden rounded-3xl border-2 border-accent/30 bg-gradient-to-br from-accent/15 via-background to-background p-8 shadow-xl shadow-accent/5">

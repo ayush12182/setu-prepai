@@ -16,10 +16,9 @@ import {
   Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { JeeQuestion, JeeOption, JeeSolution } from '@/lib/jeeMathRenderer';
-
 import { ConfidenceLevel } from '@/hooks/useMCQ';
 import ConfidenceRating from './ConfidenceRating';
+import { QuestionRenderer } from './QuestionRenderer';
 
 interface QuizInterfaceProps {
   questions: Question[];
@@ -27,7 +26,7 @@ interface QuizInterfaceProps {
   difficulty: 'easy' | 'medium' | 'hard';
   onComplete: (results: QuizResult) => void;
   onGetSimilar: (question: Question) => Promise<SimilarQuestion[] | null>;
-  onRecordAttempt: (questionId: string, selected: 'A' | 'B' | 'C' | 'D', isCorrect: boolean, time: number, confidence: ConfidenceLevel) => void;
+  onRecordAttempt: (questionId: string, selected: any, isCorrect: boolean, time: number, confidence: ConfidenceLevel) => void;
 }
 
 export interface QuizResult {
@@ -47,7 +46,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
   onRecordAttempt
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<'A' | 'B' | 'C' | 'D' | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<any>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
   const [similarQuestions, setSimilarQuestions] = useState<SimilarQuestion[] | null>(null);
@@ -69,52 +68,64 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
   const currentQuestion = practiceQuestion ? {
     ...baseQuestion,
     question_text: practiceQuestion.question_text,
-    option_a: practiceQuestion.option_a,
-    option_b: practiceQuestion.option_b,
-    option_c: practiceQuestion.option_c,
-    option_d: practiceQuestion.option_d,
-    correct_option: practiceQuestion.correct_option as 'A' | 'B' | 'C' | 'D',
+    options: {
+        A: practiceQuestion.option_a,
+        B: practiceQuestion.option_b,
+        C: practiceQuestion.option_c,
+        D: practiceQuestion.option_d,
+    },
+    answer: practiceQuestion.correct_option,
     explanation: practiceQuestion.explanation
   } : baseQuestion;
-  const isCorrect = selectedOption === currentQuestion?.correct_option;
+
+  const isAnswerCorrect = useCallback((val: any) => {
+    if (currentQuestion.type === 'NUMERICAL') {
+        const input = parseFloat(val);
+        if (typeof currentQuestion.answer === 'number') {
+            return Math.abs(input - currentQuestion.answer) < 0.01;
+        }
+        if (typeof currentQuestion.answer === 'object' && 'min' in (currentQuestion.answer as any)) {
+            const range = currentQuestion.answer as { min: number; max: number };
+            return input >= range.min && input <= range.max;
+        }
+    }
+    return val === currentQuestion.answer;
+  }, [currentQuestion]);
+
+  const isCurrentCorrect = isAnswerCorrect(selectedAnswer);
 
   useEffect(() => {
     setQuestionStartTime(Date.now());
   }, [currentIndex]);
 
-  const handleOptionSelect = (option: 'A' | 'B' | 'C' | 'D') => {
-    if (hasSubmitted) return;
-    setSelectedOption(option);
-  };
-
   const handleSubmit = useCallback(async () => {
-    if (!selectedOption || !currentQuestion) return;
+    if (selectedAnswer === null || !currentQuestion) return;
 
     const timeTaken = Math.round((Date.now() - questionStartTime) / 1000);
     setTotalTime(prev => prev + timeTaken);
     setHasSubmitted(true);
 
-    const correct = selectedOption === currentQuestion.correct_option;
+    const correct = isAnswerCorrect(selectedAnswer);
     
     // Record the attempt using unified b2b/b2c stats engine
-    onRecordAttempt(currentQuestion.id, selectedOption, correct, timeTaken, confidence!);
+    onRecordAttempt(currentQuestion.id, selectedAnswer, correct, timeTaken, confidence!);
 
     if (correct) {
       setResults(prev => ({ ...prev, correct: prev.correct + 1 }));
     } else {
-      setResults(prev => ({ ...prev, wrong: [...prev.wrong, currentQuestion] }));
+      setResults(prev => ({ ...prev, wrong: [...prev.wrong, currentQuestion as any] }));
       // Auto-fetch similar questions for wrong answers
       setLoadingSimilar(true);
-      const similar = await onGetSimilar(currentQuestion);
+      const similar = await onGetSimilar(currentQuestion as any);
       setSimilarQuestions(similar);
       setLoadingSimilar(false);
     }
-  }, [selectedOption, currentQuestion, questionStartTime, onRecordAttempt, onGetSimilar]);
+  }, [selectedAnswer, currentQuestion, questionStartTime, onRecordAttempt, onGetSimilar, isAnswerCorrect, confidence]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1);
-      setSelectedOption(null);
+      setSelectedAnswer(null);
       setHasSubmitted(false);
       setShowExplanation(false);
       setSimilarQuestions(null);
@@ -125,26 +136,28 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
       // Quiz complete
       onComplete({
         totalQuestions: questions.length,
-        correct: results.correct + (isCorrect ? 1 : 0),
-        incorrect: results.wrong.length + (isCorrect ? 0 : 1),
+        correct: results.correct + (isCurrentCorrect ? 1 : 0),
+        incorrect: results.wrong.length + (isCurrentCorrect ? 0 : 1),
         timeTakenSeconds: totalTime,
-        wrongQuestions: isCorrect ? results.wrong : [...results.wrong, currentQuestion]
+        wrongQuestions: isCurrentCorrect ? results.wrong : [...results.wrong, currentQuestion as any]
       });
     }
-  };
+  }, [currentIndex, questions.length, results.correct, results.wrong, isCurrentCorrect, totalTime, currentQuestion, onComplete]);
 
   // Keyboard Shortcuts hook
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input (if any existed here)
+      // Don't trigger if user is typing
       if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
 
       if (!hasSubmitted) {
-        if (e.key === '1') handleOptionSelect('A');
-        if (e.key === '2') handleOptionSelect('B');
-        if (e.key === '3') handleOptionSelect('C');
-        if (e.key === '4') handleOptionSelect('D');
-        if (e.key === 'Enter' && selectedOption && confidence) {
+        if (currentQuestion.type !== 'NUMERICAL') {
+            if (e.key === '1') setSelectedAnswer('A');
+            if (e.key === '2') setSelectedAnswer('B');
+            if (e.key === '3') setSelectedAnswer('C');
+            if (e.key === '4') setSelectedAnswer('D');
+        }
+        if (e.key === 'Enter' && selectedAnswer !== null && confidence) {
           handleSubmit();
         }
       } else {
@@ -155,25 +168,8 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    // disable exhaustive-deps warning because we don't want to re-bind continuously if functions change unnecessarily
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasSubmitted, selectedOption, confidence]);
-
-  const getOptionClass = (option: 'A' | 'B' | 'C' | 'D') => {
-    if (!hasSubmitted) {
-      return selectedOption === option 
-        ? 'border-primary bg-primary/5' 
-        : 'border-border hover:border-muted-foreground/50';
-    }
-
-    if (option === currentQuestion.correct_option) {
-      return 'border-setu-success bg-setu-success/10';
-    }
-    if (selectedOption === option && option !== currentQuestion.correct_option) {
-      return 'border-destructive bg-destructive/10';
-    }
-    return 'border-border opacity-50';
-  };
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [hasSubmitted, selectedAnswer, confidence, currentQuestion.type, handleSubmit, handleNext]);
 
   const difficultyColors = {
     easy: 'bg-setu-success/10 text-setu-success',
@@ -211,62 +207,19 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
       {/* Progress */}
       <Progress value={((currentIndex + 1) / questions.length) * 100} className="h-2" />
 
-      {/* Question */}
-      <div className="bg-card border border-border rounded-xl p-6 relative">
-        <JeeQuestion 
-          question={currentQuestion.question_text}
-          className="text-lg font-medium text-foreground"
-        />
-        {!hasSubmitted && (
-           <p className="absolute top-4 right-4 text-[10px] uppercase font-bold text-muted-foreground bg-secondary px-2 py-1 rounded">
-             Shortcuts: 1-4 to pick, Enter to submit
-           </p>
-        )}
-      </div>
-
-      {/* Options */}
-      <div className="space-y-3">
-        {(['A', 'B', 'C', 'D'] as const).map((opt) => {
-          const optionText = {
-            A: currentQuestion.option_a,
-            B: currentQuestion.option_b,
-            C: currentQuestion.option_c,
-            D: currentQuestion.option_d
-          }[opt];
-
-          return (
-            <button
-              key={opt}
-              onClick={() => handleOptionSelect(opt)}
-              disabled={hasSubmitted}
-              className={cn(
-                'w-full p-4 rounded-xl border-2 text-left transition-all flex items-start gap-3',
-                getOptionClass(opt),
-                !hasSubmitted && 'cursor-pointer'
-              )}
-            >
-              <span className={cn(
-                'w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm flex-shrink-0',
-                selectedOption === opt ? 'bg-primary text-primary-foreground' : 'bg-secondary'
-              )}>
-                {opt}
-              </span>
-              <JeeOption option={optionText} className="pt-1" />
-              {hasSubmitted && opt === currentQuestion.correct_option && (
-                <CheckCircle className="w-5 h-5 text-setu-success ml-auto flex-shrink-0" />
-              )}
-              {hasSubmitted && selectedOption === opt && opt !== currentQuestion.correct_option && (
-                <XCircle className="w-5 h-5 text-destructive ml-auto flex-shrink-0" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* Questions Renderer */}
+      <QuestionRenderer 
+        question={currentQuestion as any}
+        selectedAnswer={selectedAnswer}
+        onAnswerSelect={setSelectedAnswer}
+        disabled={hasSubmitted}
+        showResult={hasSubmitted}
+      />
 
       {/* Submit / Next Button */}
       {!hasSubmitted ? (
         <div className="space-y-4 animate-fade-in">
-          {selectedOption && (
+          {selectedAnswer !== null && (
             <ConfidenceRating 
               selected={confidence}
               onSelect={setConfidence}
@@ -274,10 +227,10 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
           )}
           <Button 
             onClick={handleSubmit} 
-            disabled={!selectedOption || !confidence}
-            className="w-full h-12 text-base transition-all"
+            disabled={selectedAnswer === null || !confidence}
+            className="w-full h-12 text-base transition-all rounded-xl shadow-lg shadow-accent/20"
           >
-            {(!selectedOption || !confidence) ? 'Select an answer and your confidence first' : 'Submit Answer'}
+            {selectedAnswer === null ? 'Select or enter an answer' : !confidence ? 'Rate your confidence' : 'Submit Answer'}
           </Button>
         </div>
       ) : (
@@ -285,13 +238,13 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
           {/* Result Banner */}
           <div className={cn(
             'p-4 rounded-xl flex items-center gap-3',
-            isCorrect ? 'bg-setu-success/10 border border-setu-success/30' : 'bg-destructive/10 border border-destructive/30'
+            isCurrentCorrect ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-destructive/10 border border-destructive/30'
           )}>
-            {isCorrect ? (
+            {isCurrentCorrect ? (
               <>
-                <CheckCircle className="w-6 h-6 text-setu-success" />
+                <CheckCircle className="w-6 h-6 text-emerald-500" />
                 <div>
-                  <p className="font-semibold text-setu-success">Correct! 🎉</p>
+                  <p className="font-semibold text-emerald-500">Correct! 🎉</p>
                   <p className="text-sm text-muted-foreground">Concept: {currentQuestion.concept_tested}</p>
                 </div>
               </>
@@ -301,7 +254,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
                 <div>
                   <p className="font-semibold text-destructive">Incorrect</p>
                   <p className="text-sm text-muted-foreground">
-                    Correct answer: {currentQuestion.correct_option}
+                    Don't worry, analyzing your mistake helps you learn faster.
                   </p>
                 </div>
               </>
@@ -314,7 +267,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
             className="w-full flex items-center justify-between p-4 bg-secondary rounded-xl"
           >
             <div className="flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-setu-saffron" />
+              <Lightbulb className="w-5 h-5 text-accent" />
               <span className="font-medium">Solution & Explanation</span>
             </div>
             {showExplanation ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -324,7 +277,9 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
             <div className="bg-secondary/50 border border-border rounded-xl p-4 space-y-4">
               <div>
                 <h4 className="font-semibold text-sm text-muted-foreground mb-2">STEP-BY-STEP SOLUTION</h4>
-                <JeeSolution solution={currentQuestion.explanation} className="text-foreground" />
+                <div className="text-foreground leading-relaxed whitespace-pre-wrap">
+                    {currentQuestion.explanation}
+                </div>
               </div>
               
               <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
@@ -356,10 +311,11 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
                   // Pick next similar question from the queue
                   if (similarQuestions && similarQuestions.length > 0) {
                     const nextIndex = similarQueueIndex % similarQuestions.length;
-                    setPracticeQuestion(similarQuestions[nextIndex]);
+                    const sq = similarQuestions[nextIndex];
+                    setPracticeQuestion(sq);
                     setSimilarQueueIndex(prev => prev + 1);
                   }
-                  setSelectedOption(null);
+                  setSelectedAnswer(null);
                   setHasSubmitted(false);
                   setShowExplanation(false);
                   setConfidence(null);

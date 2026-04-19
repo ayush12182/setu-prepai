@@ -1,23 +1,13 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Subchapter } from '@/data/subchapters';
-import { Chapter } from '@/data/syllabus';
-import { ArrowLeft, Zap, Target, Flame } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useExamMode } from '@/contexts/ExamModeContext';
+import { LearningNode } from '@/hooks/useLearningEngine';
 
 interface DifficultySelectorProps {
-  subchapter: Subchapter;
-  chapter: Chapter;
-  subject: string;
-  onSelectDifficulty: (difficulty: 'easy' | 'medium' | 'hard') => void;
+  node: LearningNode;
+  onSelectDifficulty: (difficulty: 'easy' | 'medium' | 'hard' | 'mixed') => void;
   onBack: () => void;
 }
 
 const DifficultySelector: React.FC<DifficultySelectorProps> = ({
-  subchapter,
-  chapter,
-  subject,
+  node,
   onSelectDifficulty,
   onBack
 }) => {
@@ -81,9 +71,11 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
 
       {/* Topic Info */}
       <div className="text-center">
-        <p className="text-sm text-muted-foreground capitalize mb-1">{subject} • {chapter.name}</p>
-        <h2 className="text-2xl font-bold text-foreground">{subchapter.name}</h2>
-        <p className="text-muted-foreground mt-2">Select difficulty level</p>
+        <p className="text-sm text-muted-foreground uppercase mb-1 tracking-widest font-black">
+          {node.type} level • {examLabel}
+        </p>
+        <h2 className="text-3xl font-black text-foreground">{node.name}</h2>
+        <p className="text-muted-foreground mt-2">Select your challenge level</p>
       </div>
 
       {/* Difficulty Cards */}
@@ -116,17 +108,11 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
         ))}
       </div>
 
-      {/* Topic Preview */}
-      <div className="bg-secondary/50 rounded-xl p-4">
-        <h4 className="font-medium text-sm mb-2">What {examLabel} asks in this topic:</h4>
-        <ul className="space-y-1">
-          {subchapter.jeeAsks.slice(0, 3).map((point, idx) => (
-            <li key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-              <span className="text-primary">•</span>
-              {point}
-            </li>
-          ))}
-        </ul>
+      {/* Selection Tip */}
+      <div className="bg-accent/5 border border-accent/20 rounded-2xl p-6 text-center">
+        <p className="text-sm text-accent font-bold">
+          "The engine will adapt to your speed and accuracy in real-time."
+        </p>
       </div>
     </div>
   );

@@ -123,10 +123,12 @@ const AuthPage: React.FC = () => {
     const typeParam = searchParams.get('type');
     const orgName = searchParams.get('org_name');
     const orgId = searchParams.get('org_id');
+    const refParam = searchParams.get('ref') || searchParams.get('teacher_id');
     
     return {
       userType: typeParam === 'coaching' || orgId || orgName ? 'student' : 'student',
       institutionName: orgName || undefined,
+      referenceCode: refParam || undefined,
       stream: '',
       studentClass: '',
       examGoal: '',
@@ -433,10 +435,13 @@ const AuthPage: React.FC = () => {
         student_level: studentLevel,
         user_type: 'student',
         institution_name: onboardingData.institutionName || null,
+        teacher_id: onboardingData.referenceCode || null, // Auto-assign if ref present
       });
 
       // BATCH JOIN (Only if code is provided)
       const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
+      const refCode = onboardingData.referenceCode;
+
       if (joinCode && joinCode.length === 6) {
         console.log("Attempting batch join with code:", joinCode);
         const { joinTeacherByCode } = await import('@/lib/studentActivity');
@@ -445,10 +450,13 @@ const AuthPage: React.FC = () => {
         if (joinResult.success) {
           toast.success(joinResult.message);
         } else {
-          // If explicitly a coaching student who entered a code, we should warn if it fails
           console.error("Batch join failed:", joinResult.message);
           toast.error(`Account ready, but batch link failed: ${joinResult.message}`);
         }
+      } else if (refCode) {
+        // If they joined via ?ref= link, we already set teacher_id in updateProfile
+        // But we might want to trigger any logic associated with joining
+        console.log("Joined via referral link, teacher_id set to:", refCode);
       }
 
       // Final synchronization

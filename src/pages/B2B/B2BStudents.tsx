@@ -29,96 +29,41 @@ export default function B2BStudents() {
   const fetchStudents = async () => {
     setLoading(true);
     try {
-      const teacherId = profile?.user_id;
+      const teacherUserId = profile?.user_id;
+      if (!teacherUserId) return;
 
-      // 1. Get all batches for this teacher (SPEC)
-      const { data: batchData } = await (supabase as any)
-        .from('batches')
-        .select('id, name')
-        .eq('is_active', true)
-        .eq('teacher_id', teacherId);
-
-      if (!batchData || batchData.length === 0) {
-        setStudents([]);
-        setLoading(false);
-        return;
-      }
-
-      // 2. Get all batch members
-      const batchIds = batchData.map((b: any) => b.id);
-      const { data: memberData } = await (supabase as any)
-        .from('batch_students')
-        .select('student_id, batch_id, joined_at')
-        .in('batch_id', batchIds);
-
-      if (!memberData || memberData.length === 0) {
-        setStudents([]);
-        setLoading(false);
-        return;
-      }
-
-      // 3. Get profiles for all students
-      const studentIds = memberData.map((m: any) => m.student_id);
-      const { data: profileData } = await (supabase as any)
+      // Fetch students linked to this teacher via profiles.teacher_id
+      const { data: studentProfiles, error: profileErr } = await supabase
         .from('profiles')
-        .select('user_id, full_name')
-        .in('user_id', studentIds);
+        .select('*')
+        .eq('teacher_id', teacherUserId)
+        .eq('user_type', 'student');
 
-      const profileMap: Record<string, string> = {};
-      (profileData || []).forEach((p: any) => {
-        profileMap[p.user_id] = p.full_name || 'Unknown';
-      });
+      if (profileErr) throw profileErr;
 
-      // 4. Get accuracy from session_participants
-      const { data: allSessions } = await (supabase as any)
-        .from('assessment_sessions')
-        .select('id')
-        .in('batch_id', batchIds);
-
-      const sessionIds = (allSessions || []).map((s: any) => s.id);
-      const accuracyMap: Record<string, { sum: number; count: number }> = {};
-
-      if (sessionIds.length > 0) {
-        const { data: parts } = await (supabase as any)
-          .from('session_participants')
-          .select('student_id, live_accuracy')
-          .in('session_id', sessionIds)
-          .eq('status', 'SUBMITTED');
-
-        (parts || []).forEach((p: any) => {
-          if (!p.student_id) return;
-          if (!accuracyMap[p.student_id]) accuracyMap[p.student_id] = { sum: 0, count: 0 };
-          accuracyMap[p.student_id].sum += p.live_accuracy || 0;
-          accuracyMap[p.student_id].count += 1;
-        });
+      if (!studentProfiles || studentProfiles.length === 0) {
+        setStudents([]);
+        setLoading(false);
+        return;
       }
 
-      const batchMap: Record<string, string> = {};
-      batchData.forEach((b: any) => { batchMap[b.id] = b.name; });
-
-      const rows: StudentRow[] = memberData.map((m: any) => {
-        const accData = accuracyMap[m.student_id];
-        const accuracy = accData ? Math.round(accData.sum / accData.count) : 0;
-        const total = accData?.count || 0;
-        const status: StudentRow['status'] = accuracy >= 70 ? 'top' : accuracy >= 45 ? 'stable' : 'at-risk';
-
-        return {
-          id: `${m.batch_id}-${m.student_id}`,
-          student_id: m.student_id,
-          full_name: profileMap[m.student_id] || 'Unknown Student',
-          batch_name: batchMap[m.batch_id] || 'Unknown Batch',
-          batch_id: m.batch_id,
-          accuracy,
-          total_attempted: total,
-          status,
-          joined_at: m.joined_at,
-        };
-      });
+      // Format rows
+      const rows: StudentRow[] = studentProfiles.map((p: any) => ({
+        id: p.id,
+        student_id: p.user_id,
+        full_name: p.full_name || 'Anonymous Student',
+        batch_name: p.exam_type || 'General',
+        batch_id: 'default',
+        accuracy: 0, // Placeholder for real stats
+        total_attempted: 0,
+        status: 'stable',
+        joined_at: p.created_at,
+      }));
 
       setStudents(rows);
     } catch (e) {
       console.error(e);
-     } finally {
+    } finally {
       setLoading(false);
     }
   };

@@ -5,21 +5,25 @@ import { shuffleQuestionOptions } from '@/utils/questionUtils';
 import { logStudentActivity } from '@/lib/studentActivity';
 
 // The interface expected by QuizInterface components
+export type QuestionType = 'MCQ' | 'AR' | 'NUMERICAL';
+
 export interface Question {
   id: string;
-  subchapter_id: string;
-  chapter_id: string;
-  subject: string;
+  node_id: string;
+  type: QuestionType;
+  exam_type: string;
   difficulty: 'easy' | 'medium' | 'hard';
   question_text: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  correct_option: 'A' | 'B' | 'C' | 'D';
+  options?: {
+    A: string;
+    B: string;
+    C: string;
+    D: string;
+  };
+  answer: string | number | { min: number; max: number };
   explanation: string;
   concept_tested: string;
-  common_mistake: string | null;
+  common_mistake?: string;
   is_verified?: boolean;
   generation_model?: string;
 }
@@ -36,23 +40,26 @@ export interface SimilarQuestion {
 }
 
 const mapQuestionBankToInterface = (qbItem: any): Question => {
+  // Adaptation for the new 'questions' table
   return {
-    id: qbItem.question_id,
-    subchapter_id: qbItem.subtopic || qbItem.ncert_chapter || 'adaptive',
-    chapter_id: qbItem.ncert_chapter || 'adaptive',
-    subject: qbItem.subject,
-    difficulty: qbItem.difficulty.toLowerCase() as 'easy' | 'medium' | 'hard',
-    question_text: qbItem.question_text,
-    option_a: qbItem.options?.A || qbItem.options?.a || '',
-    option_b: qbItem.options?.B || qbItem.options?.b || '',
-    option_c: qbItem.options?.C || qbItem.options?.c || '',
-    option_d: qbItem.options?.D || qbItem.options?.d || '',
-    correct_option: qbItem.correct_option as 'A' | 'B' | 'C' | 'D',
-    explanation: qbItem.explanation?.short || qbItem.explanation || '',
-    concept_tested: qbItem.micro_concept || qbItem.topic || 'General',
-    common_mistake: qbItem.distractor_logic ? JSON.stringify(qbItem.distractor_logic) : null,
+    id: qbItem.id,
+    node_id: qbItem.topic_id || 'adaptive',
+    type: (qbItem.question_type || 'MCQ') as QuestionType,
+    exam_type: qbItem.exam_type || 'JEE',
+    difficulty: (qbItem.difficulty || 'medium').toLowerCase() as 'easy' | 'medium' | 'hard',
+    question_text: qbItem.content?.question || qbItem.question_text,
+    options: qbItem.content?.options || {
+      A: qbItem.option_a || '',
+      B: qbItem.option_b || '',
+      C: qbItem.option_c || '',
+      D: qbItem.option_d || ''
+    },
+    answer: qbItem.answer || qbItem.correct_option,
+    explanation: qbItem.metadata?.explanation || qbItem.explanation || '',
+    concept_tested: qbItem.metadata?.concept || qbItem.concept_tested || 'General',
+    common_mistake: qbItem.metadata?.common_mistake,
     is_verified: qbItem.is_verified,
-    generation_model: qbItem.generation_model,
+    generation_model: qbItem.metadata?.model,
   };
 };
 
@@ -212,6 +219,35 @@ export const usePracticeQuestions = () => {
     }
   };
 
+  const generateQuestionsForNode = async (
+    nodeId: string,
+    difficulty: 'easy' | 'medium' | 'hard' | 'mixed',
+    count: number = 10,
+    exam: string = 'JEE'
+  ) => {
+    setLoading(true);
+    setError(null);
+    setGenerationStatus('fetching');
+    setQuestions([]);
+
+    try {
+      const { generateQuestionsForNode: apiFetch } = await import('@/lib/questionService');
+      const rawQs = await apiFetch(nodeId, difficulty === 'mixed' ? 'medium' : difficulty, count, exam);
+      
+      const qs = rawQs.map(mapQuestionBankToInterface);
+      setQuestions(qs);
+      setGenerationStatus('completed');
+      return qs;
+    } catch (err: any) {
+      setError(err.message);
+      setGenerationStatus('failed');
+      toast.error(err.message);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const submitPracticeReport = async (
     exam: string,
     subject: string,
@@ -318,6 +354,7 @@ export const usePracticeQuestions = () => {
     error,
     generationStatus,
     generateQuestions,
+    generateQuestionsForNode,
     submitPracticeReport,
     getSimilarQuestions,
     recordAttempt
