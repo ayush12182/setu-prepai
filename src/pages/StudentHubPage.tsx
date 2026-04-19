@@ -61,10 +61,21 @@ const StudentHubPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
+      // REFRESH: Fetch latest profile to ensure teacher_id is picked up after join
+      let currentProfile = profile;
+      if (user) {
+        const { data: latest } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (latest) currentProfile = latest;
+      }
+
       const { data: tasks } = await supabase
         .from('teacher_tasks' as any)
         .select('*, learning_nodes(name)')
-        .eq('teacher_id', profile?.teacher_id)
+        .eq('teacher_id', currentProfile?.teacher_id)
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -73,12 +84,12 @@ const StudentHubPage: React.FC = () => {
       }
 
       // Fetch mentor name
-      if (profile?.teacher_id) {
-        console.log("Fetching mentor details for teacher_id:", profile.teacher_id);
+      if (currentProfile?.teacher_id) {
+        console.log("Fetching mentor details for teacher_id:", currentProfile.teacher_id);
         const { data: mentor, error: mentorErr } = await supabase
           .from('profiles')
           .select('full_name')
-          .eq('user_id', profile.teacher_id)
+          .eq('user_id', currentProfile.teacher_id)
           .maybeSingle();
         
         if (mentorErr) console.error("Mentor fetch error:", mentorErr);

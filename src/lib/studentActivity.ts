@@ -12,7 +12,7 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
     if (!user) return { success: false, message: 'Please log in first.' };
 
     // Get current profile role AND internal ID
-    let { data: profile, error: profileErr } = await supabase
+    const { data: profile, error: profileErr } = await supabase
       .from('profiles')
       .select('id, user_type')
       .eq('user_id', user.id)
@@ -25,7 +25,7 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
         .from('profiles')
         .upsert({
           user_id: user.id,
-          full_name: user?.user_metadata?.full_name || 'New Student',
+          full_name: user?.user_metadata?.full_name || user?.user_metadata?.name || 'New Student',
           user_type: user?.user_metadata?.user_type || 'student'
         }, { onConflict: 'user_id' })
         .select('id, user_type')
@@ -33,12 +33,14 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
       
       if (createErr) {
         console.error("Critical: Failed to auto-create profile during join", createErr);
-        return { success: false, message: 'Profile sync failed. Please try again in a moment.' };
+        // Fallback: If upsert failed but it's a conflict, just log it
+        if (createErr.code !== '23505') {
+          return { success: false, message: 'Profile sync failed. Please try again in a moment.' };
+        }
       }
-      profile = newProfile;
     }
 
-    console.log("Onboarding Profile Active:", profile);
+    console.log("Onboarding Profile Active:", profile || "Syncing...");
 
     const normalCode = code.toUpperCase().trim();
 
@@ -53,14 +55,14 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
       return { success: false, message: 'Invalid join code. Ask your Administrator.' };
     }
 
-    console.log("Target Batch found:", batch);
-
     // 2. DUAL LOGIC based on user_type
-    if (profile.user_type === 'student') {
-      const payload = { batch_id: batch.id, student_id: profile.id };
-      console.log("Attempting batch_students insert with payload:", payload);
+    // Use user.id (Auth) for student_id to match RLS policies
+    const userRole = profile?.user_type || user?.user_metadata?.user_type || 'student';
+    
+    if (userRole === 'student') {
+      const payload = { batch_id: batch.id, student_id: user.id };
+      console.log("Attempting batch_students join (Auth ID):", payload);
 
-      // Add to batch_students using profiles.id
       const { error: joinErr } = await (supabase.from as any)('batch_students')
         .insert(payload);
 
@@ -70,8 +72,6 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
         throw joinErr;
       }
 
-      console.log("Successfully joined batch!");
-      
       // SYNC: Update student profile's teacher_id if batch has a teacher
       if (batch.teacher_id) {
         await supabase
