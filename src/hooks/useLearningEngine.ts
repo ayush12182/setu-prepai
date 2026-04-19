@@ -26,6 +26,9 @@ const MOCK_NODES: LearningNode[] = [
   { id: 'mock-cuet-gen', name: 'General Test', type: 'root', exam_type: 'CUET', parent_id: null, subject_node_id: null, sort_order: 2 },
   { id: 'mock-cuet-bio', name: 'Biology (Domain)', type: 'root', exam_type: 'CUET', parent_id: null, subject_node_id: null, sort_order: 3 },
   // Chapters
+  { id: 'mock-bio-1', name: 'The Living World', type: 'chapter', exam_type: 'NEET', parent_id: 'mock-bio', subject_node_id: null, sort_order: 0 },
+  { id: 'mock-bio-1-1', name: 'What is Living?', type: 'topic', exam_type: 'NEET', parent_id: 'mock-bio-1', subject_node_id: null, sort_order: 1 },
+  { id: 'mock-bio-1-2', name: 'Taxonomic Categories', type: 'topic', exam_type: 'NEET', parent_id: 'mock-bio-1', subject_node_id: null, sort_order: 2 },
   { id: 'mock-cell', name: 'Cell: The Unit of Life', type: 'chapter', exam_type: 'NEET', parent_id: 'mock-bio', subject_node_id: null, sort_order: 1 },
   { id: 'mock-cell-1', name: 'Cell Membrane and Wall', type: 'topic', exam_type: 'NEET', parent_id: 'mock-cell', subject_node_id: null, sort_order: 1 },
   { id: 'mock-cell-2', name: 'Cytoplasm and Nucleus', type: 'topic', exam_type: 'NEET', parent_id: 'mock-cell', subject_node_id: null, sort_order: 2 },

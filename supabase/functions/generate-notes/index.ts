@@ -26,35 +26,41 @@ serve(async (req) => {
   try {
     const { chapterName, subject, smartMode = 'default' } = await req.json();
 
-    const prompt = `
-      You are an expert ${subject} teacher at a top Kota coaching institute. 
-      Create detailed, high-yield study notes for the chapter: "${chapterName}".
-      Mode: ${smartMode}. Language: Hinglish.
+    const systemPrompt = `
+      You are an expert ${subject} teacher at a top Kota coaching institute like Allen or Aakash. 
+      Create high-yield, exam-oriented study notes for: "${chapterName}".
+      Language: Hinglish (mix of Hindi + English).
+      Structure:
+      1. Major Concept Definitions
+      2. Priority MCQ Points (NCERT based)
+      3. Common Mistakes/Trap Areas
+      4. Quick Revision Summary
+      Use formatting like **bold** and bullet points for readability.
     `;
 
     const model = "gemini-flash-latest";
     try {
-      console.log(`[GenerateNotes] Attempting model: ${model}`);
+      console.log(`[GenerateNotes] Calling Gemini for: ${chapterName}`);
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: `CONTEXT: ${prompt}` }] }],
+          contents: [{ role: 'user', parts: [{ text: `SYSTEM INSTRUCTION: ${systemPrompt}\n\nTASK: Generate study notes for ${chapterName}` }] }],
           generationConfig: {
             temperature: 0.7,
             topK: 40,
             topP: 0.95,
             maxOutputTokens: 2048,
           },
-          safetySettings: [
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-          ]
         }),
       });
       
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`[GenerateNotes] API Error: ${response.status} - ${errorText}`);
+        throw new Error(`API returned ${response.status}`);
+      }
+
       if (!response.body) throw new Error("No response body");
 
       return new Response(response.body.pipeThrough(new TransformStream({
@@ -81,8 +87,8 @@ serve(async (req) => {
       });
 
     } catch (err) {
-      console.error(`[GenerateNotes] Stream Error:`, err);
-      return new Response(JSON.stringify({ error: "AI temporarily unavailable" }), {
+      console.error(`[GenerateNotes] Processing Error:`, err);
+      return new Response(JSON.stringify({ error: "AI Engine temporarily busy. Please try again." }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
