@@ -1,16 +1,17 @@
-import { useSyncExternalStore } from 'react';
+import { useState, useEffect } from 'react';
 import { LearningNode } from '@/hooks/useLearningEngine';
 
-// --- ROBUST ZERO-DEPENDENCY STORE (Zustand Compatibility) ---
+// --- ULTRA-COMPATIBLE ZERO-DEPENDENCY STORE ---
+// This uses the classic useState + useEffect subscription pattern
+// which is more robust across different production environments.
 
 interface PracticeTreeState {
-  // State
   expandedNodeIds: Set<string>;
   selectedNode: LearningNode | null;
   searchQuery: string;
   nodeIntelligence: Record<string, any>;
   
-  // Actions (Included in the state object to match usePracticeStore() call pattern)
+  // Actions
   toggleNode: (nodeId: string) => void;
   expandPath: (path: string[]) => void;
   setSelectedNode: (node: LearningNode | null) => void;
@@ -18,60 +19,54 @@ interface PracticeTreeState {
   setNodeIntelligence: (nodeId: string, data: any) => void;
 }
 
-const internalStore = {
-  state: {
-    expandedNodeIds: new Set<string>(),
-    selectedNode: null,
-    searchQuery: '',
-    nodeIntelligence: {},
-    
-    // Action Implementations
-    toggleNode: (nodeId: string) => {
-      const { expandedNodeIds } = internalStore.getState();
-      const next = new Set(expandedNodeIds);
-      if (next.has(nodeId)) next.delete(nodeId); else next.add(nodeId);
-      internalStore.setState({ expandedNodeIds: next });
-    },
-    expandPath: (path: string[]) => {
-      const { expandedNodeIds } = internalStore.getState();
-      const next = new Set(expandedNodeIds);
-      path.forEach(id => next.add(id));
-      internalStore.setState({ expandedNodeIds: next });
-    },
-    setSelectedNode: (node: LearningNode | null) => {
-      internalStore.setState({ selectedNode: node });
-    },
-    setSearchQuery: (query: string) => {
-      internalStore.setState({ searchQuery: query });
-    },
-    setNodeIntelligence: (nodeId: string, data: any) => {
-      const { nodeIntelligence } = internalStore.getState();
-      internalStore.setState({ 
-        nodeIntelligence: { ...nodeIntelligence, [nodeId]: data } 
-      });
-    }
-  } as PracticeTreeState,
-
-  listeners: new Set<() => void>(),
-
-  getState() { return this.state; },
-
-  setState(next: Partial<PracticeTreeState> | ((s: PracticeTreeState) => Partial<PracticeTreeState>)) {
-    const nextState = typeof next === 'function' ? next(this.state) : next;
-    this.state = { ...this.state, ...nextState };
-    this.listeners.forEach(l => l());
+// Singleton state object
+let globalState: PracticeTreeState = {
+  expandedNodeIds: new Set<string>(),
+  selectedNode: null,
+  searchQuery: '',
+  nodeIntelligence: {},
+  
+  toggleNode: (nodeId: string) => {
+    const next = new Set(globalState.expandedNodeIds);
+    if (next.has(nodeId)) next.delete(nodeId); else next.add(nodeId);
+    setGlobalState({ expandedNodeIds: next });
   },
-
-  subscribe(l: () => void) {
-    this.listeners.add(l);
-    return () => this.listeners.delete(l);
+  expandPath: (path: string[]) => {
+    const next = new Set(globalState.expandedNodeIds);
+    path.forEach(id => next.add(id));
+    setGlobalState({ expandedNodeIds: next });
+  },
+  setSelectedNode: (node) => {
+    setGlobalState({ selectedNode: node });
+  },
+  setSearchQuery: (query) => {
+    setGlobalState({ searchQuery: query });
+  },
+  setNodeIntelligence: (nodeId, data) => {
+    setGlobalState({ 
+      nodeIntelligence: { ...globalState.nodeIntelligence, [nodeId]: data } 
+    });
   }
 };
 
+const listeners = new Set<(state: PracticeTreeState) => void>();
+
+function setGlobalState(next: Partial<PracticeTreeState>) {
+  globalState = { ...globalState, ...next };
+  listeners.forEach(l => l(globalState));
+}
+
 // Public Hook (exactly mimics Zustand)
 export const usePracticeStore = <T,>(selector: (s: PracticeTreeState) => T): T => {
-  return useSyncExternalStore(
-    internalStore.subscribe.bind(internalStore),
-    () => selector(internalStore.getState())
-  );
+  const [state, setState] = useState(globalState);
+
+  useEffect(() => {
+    const listener = (nextState: PracticeTreeState) => setState(nextState);
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  }, []);
+
+  return selector(state);
 };
