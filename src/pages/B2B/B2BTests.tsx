@@ -230,7 +230,7 @@ export default function B2BTests() {
       setQrDataUrl(qr);
       setStep('share');
       loadSessions(); // refresh even on fallback
-    }   } finally {
+    } finally {
       setGenerating(false);
     }
   };

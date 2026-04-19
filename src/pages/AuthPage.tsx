@@ -228,7 +228,8 @@ const AuthPage: React.FC = () => {
         await signInWithEmail(email, password);
       }
     } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Something went wrong, please try again';
+      console.error('Email Auth Error:', error);
+      const msg = error instanceof Error ? error.message : 'Authentication failed. Please check your credentials and try again.';
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -363,7 +364,8 @@ const AuthPage: React.FC = () => {
 
     } catch (error: any) {
       console.error('CRITICAL Unified Signup Error:', error);
-      const msg = error.message || 'Something went wrong during signup. Please try again.';
+      // Give the user the exact message from Supabase (e.g., "User already registered")
+      const msg = error.message || 'Signup failed. Please try again or contact support.';
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -475,7 +477,7 @@ const AuthPage: React.FC = () => {
 
     } catch (error: any) {
       console.error('CRITICAL Onboarding Failure:', error);
-      const errMsg = error.message || 'Something went wrong during profile setup.';
+      const errMsg = error.message || 'Profile setup failed. Please refresh and try again.';
       toast.error(`Onboarding failed: ${errMsg}`);
     } finally {
       setLoading(false);
