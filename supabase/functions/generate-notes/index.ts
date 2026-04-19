@@ -37,7 +37,7 @@ serve(async (req) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        contents: [{ role: 'user', parts: [{ text: `CONTEXT: ${prompt}` }] }],
         generationConfig: {
           temperature: 0.7,
           topK: 40,

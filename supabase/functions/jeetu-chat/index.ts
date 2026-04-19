@@ -40,18 +40,18 @@ serve(async (req) => {
         parts: [{ text: String(m.content) }]
       }));
 
+    // UPDATED: Prepending system prompt to ensure compatibility
     const contents = [
+      { role: 'user', parts: [{ text: `SYSTEM INSTRUCTION: ${systemPrompt}` }] },
       ...historyTurns,
       { role: 'user', parts: [{ text: String(message) }] }
     ];
 
-    // UPDATED: Standardizing on gemini-1.5-flash v1
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         contents,
-        system_instruction: { parts: [{ text: systemPrompt }] },
         generationConfig: {
           temperature: 0.7,
           topK: 40,
@@ -69,9 +69,10 @@ serve(async (req) => {
 
     const data = await response.json();
     
-    if (data.error || !data.candidates) {
-       console.error("[JeetuChat] Google API Error:", data.error || "No candidates returned");
-       // FALLBACK: Show clean UI message as requested
+    if (data.error || !data.candidates || data.candidates.length === 0) {
+       console.error("[JeetuChat] Google API Error/Block:", JSON.stringify(data));
+       
+       // FALLBACK: Show clean UI message
        return new Response(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: "AI is temporarily unavailable. Bhai thoda wait kar le, system update ho raha hai." } }] })}\n\ndata: [DONE]\n\n`), {
          headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
        });
