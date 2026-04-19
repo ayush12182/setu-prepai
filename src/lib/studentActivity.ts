@@ -100,3 +100,34 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
     return { success: false, message: `Could not process invite: ${error.message}` };
   }
 }
+
+/**
+ * Log student practice activity for analytics
+ */
+export async function logStudentActivity(activity: {
+  question_id: string;
+  subject: string;
+  topic: string;
+  subtopic?: string;
+  difficulty: string;
+  exam_stage: string;
+  is_correct: boolean;
+  time_spent_seconds: number;
+  question_type: string;
+}) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase.from('user_activity' as any).insert({
+      user_id: user.id,
+      activity_type: 'practice',
+      metadata: activity,
+      created_at: new Date().toISOString()
+    });
+
+    if (error) console.error('[ActivityLog] Error logging activity:', error);
+  } catch (err) {
+    console.error('[ActivityLog] Unexpected error:', err);
+  }
+}

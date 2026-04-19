@@ -7,7 +7,7 @@ import { logStudentActivity } from '@/lib/studentActivity';
 // The interface expected by QuizInterface components
 export interface Question {
   id: string;
-  subchapter_id: string; // mapped to subtopic
+  subchapter_id: string;
   chapter_id: string;
   subject: string;
   difficulty: 'easy' | 'medium' | 'hard';
