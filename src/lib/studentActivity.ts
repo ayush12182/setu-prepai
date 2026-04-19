@@ -72,11 +72,15 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
         throw joinErr;
       }
 
-      // SYNC: Update student profile's teacher_id if batch has a teacher
-      if (batch.teacher_id) {
+      // SYNC: Update student profile's teacher_id AND target_exam if batch has them
+      const updates: any = {};
+      if (batch.teacher_id) updates.teacher_id = batch.teacher_id;
+      if (batch.target_exam) updates.target_exam = batch.target_exam;
+
+      if (Object.keys(updates).length > 0) {
         await supabase
           .from('profiles')
-          .update({ teacher_id: batch.teacher_id })
+          .update(updates)
           .eq('user_id', user.id);
       }
 

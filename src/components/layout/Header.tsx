@@ -96,23 +96,25 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
           {/* Exam Mode Switcher — hidden in foundation mode */}
           {!isFoundation ? (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <ArrowRightLeft className="w-4 h-4" />
+              <DropdownMenuTrigger asChild disabled={isLocked}>
+                <Button variant="ghost" size="sm" className={cn("gap-1.5", isLocked && "opacity-80 cursor-default")}>
+                  {isLocked ? <Lock className="w-3.5 h-3.5 text-orange-400" /> : <ArrowRightLeft className="w-4 h-4" />}
                   <span className="text-sm font-medium">{examLabels[examMode].emoji} {examLabels[examMode].label}</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {(Object.keys(examLabels) as ExamMode[]).map((mode) => (
-                  <DropdownMenuItem
-                    key={mode}
-                    onClick={() => handleExamChange(mode)}
-                    className={examMode === mode ? 'bg-secondary font-medium' : ''}
-                  >
-                    {examLabels[mode].emoji} {examLabels[mode].label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
+              {!isLocked && (
+                <DropdownMenuContent align="end">
+                  {(Object.keys(examLabels) as ExamMode[]).map((mode) => (
+                    <DropdownMenuItem
+                      key={mode}
+                      onClick={() => handleExamChange(mode)}
+                      className={examMode === mode ? 'bg-secondary font-medium' : ''}
+                    >
+                      {examLabels[mode].emoji} {examLabels[mode].label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              )}
             </DropdownMenu>
           ) : (
             <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-accent/15 text-accent">

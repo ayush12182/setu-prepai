@@ -109,6 +109,7 @@ interface ExamModeContextType {
   jeeSubMode: JeeSubMode;
   setJeeSubMode: (mode: JeeSubMode) => void;
   jeeSubModeLabel: string;
+  isLocked: boolean;
 }
 
 const ExamModeContext = createContext<ExamModeContextType | undefined>(undefined);
@@ -129,13 +130,18 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   const { profile } = useAuth();
+  const isLocked = !!profile?.teacher_id;
 
   const setExamMode = useCallback((mode: ExamMode) => {
+    if (isLocked) {
+      toast.info("Exam selection is managed by your mentor");
+      return;
+    }
     localStorage.setItem('examMode', mode);
     setExamModeState(mode);
     document.documentElement.classList.toggle('neet-mode', mode === 'neet');
     document.documentElement.classList.toggle('cuet-mode', mode === 'cuet');
-  }, []);
+  }, [isLocked]);
 
   const setJeeSubMode = useCallback((mode: JeeSubMode) => {
     localStorage.setItem('jeeSubMode', mode);
@@ -172,6 +178,7 @@ export const ExamModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       jeeSubMode,
       setJeeSubMode,
       jeeSubModeLabel: JEE_SUB_MODE_LABELS[jeeSubMode],
+      isLocked,
     }}>
       {children}
     </ExamModeContext.Provider>
