@@ -181,7 +181,11 @@ const B2BBatches: React.FC = () => {
               <div>
                 <label className="text-[10px] text-white/40 font-bold uppercase tracking-widest mb-2 block">Target Exam *</label>
                 <select value={form.targetExam} onChange={e => setForm(f => ({ ...f, targetExam: e.target.value }))} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50 appearance-none">
-                  {Object.entries(EXAM_CONFIG).map(([id, cfg]) => <option key={id} value={id}>{cfg.name}</option>)}
+                  {EXAM_CONFIG.map((cfg) => (
+                    <option key={cfg.dbKey} value={cfg.dbKey} className="bg-slate-900 border-none">
+                      {cfg.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
