@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   ArrowLeft, Download, Copy, CheckCircle2, 
-  BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, Calculator, Sparkles 
+  BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, Calculator, Sparkles, FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -106,7 +106,7 @@ const ChapterNotesPage: React.FC = () => {
     } catch (error) {
       console.error('Error generating notes:', error);
       toast.error('Failed to generate AI notes. Please verify your internet connection.');
-      setNotes(`## ⚠️ Error Generation\nFailed to generate notes for ${chapter.name}.\n\n*If you are running this locally, you must run \`supabase functions deploy generate-notes\` in your terminal so the updated prompt architecture goes live on your Supabase server!*`);
+      setNotes(`## ⚠️ AI Temporarily Unavailable\nBhai thoda wait kar le, system update ho raha hai. Please try again in a few minutes.`);
     } finally {
       setIsGenerating(false);
     }

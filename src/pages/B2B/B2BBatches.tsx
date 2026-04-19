@@ -20,11 +20,11 @@ interface Batch {
   name: string;
   subject: string | null;
   target_exam: string | null;
-  join_code: string | null;
+  join_code: string;
   is_active: boolean;
   created_at: string;
   organization_id: string | null;
-  mentor_id: string | null;
+  teacher_id: string | null;
   studentCount: number;
   accuracy: number;
 }
@@ -106,9 +106,9 @@ export default function B2BBatches() {
             is_active: b.is_active,
             created_at: b.created_at,
             organization_id: b.organization_id || null,
-            mentor_id: b.mentor_id || null,
+            teacher_id: b.teacher_id || null,
             studentCount,
-            accuracy: 0, // analytics can be added later
+            accuracy: 0, 
           } as Batch;
         })
       );
@@ -140,7 +140,7 @@ export default function B2BBatches() {
       is_active: true,
       created_at: result.created_at || new Date().toISOString(),
       organization_id: result.organization_id || null,
-      mentor_id: result.mentor_id || user?.id || null,
+      teacher_id: result.teacher_id || user?.id || null,
       studentCount: 0,
       accuracy: 0,
     };

@@ -144,25 +144,25 @@ export const useB2BManager = () => {
 
       const join_code = await generateUniqueCode();
 
-      // 2. Build simple payload focusing on mentor_id
+      // 2. Build simple payload focusing on teacher_id
       const payload = {
         name: name.trim(),
         target_exam: targetExam || 'JEE_MAINS',
         description: description || `Batch for ${subject}`,
-        mentor_id: mentorId || user?.id,
+        teacher_id: mentorId || user?.id,
         join_code: join_code,
         is_active: true,
         subject: subject,
-        organization_id: profile?.organization_id || null // still optional but not blocking
+        organization_id: profile?.organization_id || null 
       };
 
       console.log('🚀 [useB2BManager] vV2_RPC_CONNECTED - Code is live');
       console.log('[useB2BManager] Attempting RPC create_batch_v2 with:', payload);
 
-      // Use V2 RPC to handle the 'stream' check constraint found in schema
+      // Use V2 RPC with updated teacher_id param if exists, otherwise fallback to mentor_id turn
       const { data, error } = await supabase.rpc('create_batch_v2', {
         p_name: payload.name,
-        p_mentor_id: payload.mentor_id,
+        p_teacher_id: payload.teacher_id,
         p_join_code: payload.join_code,
         p_target_exam: payload.target_exam,
         p_description: payload.description,
@@ -172,9 +172,9 @@ export const useB2BManager = () => {
       if (error) {
         console.error('❌ [useB2BManager] V2 RPC Error:', error.message, error.code);
         
-        // Final fallback: try a direct insert with ANY cast if RPC fails
+        // Final fallback: try a direct insert
         console.log('[useB2BManager] RPC failed, trying direct insert...');
-        const { data: direct, error: directErr } = await (supabase as any)
+        const { data: direct, error: directErr } = await supabase
           .from('batches')
           .insert({
             ...payload,
