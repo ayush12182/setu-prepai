@@ -44,7 +44,13 @@ serve(async (req) => {
     });
 
     const data = await response.json();
-    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Bhai, network down hai. Thoda wait kar le.";
+    
+    // Check for actual Google API errors
+    if (data.error) {
+       throw new Error(`Gemini API Error: ${data.error.message} (${data.error.status})`);
+    }
+
+    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Empty response from AI.";
 
     // TRANSFORM: Wrap result in the streaming format the frontend expects
     const encoder = new TextEncoder();

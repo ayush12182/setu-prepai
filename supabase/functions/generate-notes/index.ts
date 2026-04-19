@@ -48,6 +48,11 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    
+    if (data.error) {
+       throw new Error(`Gemini API Error: ${data.error.message} (${data.error.status})`);
+    }
+
     const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Failed to generate notes.";
 
     // TRANSFORM: Wrap result in the streaming format the frontend expects
