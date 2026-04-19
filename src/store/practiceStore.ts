@@ -57,7 +57,7 @@ function setGlobalState(next: Partial<PracticeTreeState>) {
 }
 
 // Public Hook (exactly mimics Zustand)
-export const usePracticeStore = <T,>(selector: (s: PracticeTreeState) => T): T => {
+export const usePracticeStore = <T = PracticeTreeState,>(selector?: (s: PracticeTreeState) => T): T => {
   const [state, setState] = useState(globalState);
 
   useEffect(() => {
@@ -68,5 +68,7 @@ export const usePracticeStore = <T,>(selector: (s: PracticeTreeState) => T): T =
     };
   }, []);
 
+  // Safety: If no selector provided, return full state
+  if (!selector) return state as unknown as T;
   return selector(state);
 };
