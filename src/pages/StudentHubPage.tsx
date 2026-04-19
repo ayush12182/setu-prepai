@@ -52,6 +52,7 @@ const StudentHubPage: React.FC = () => {
   const { days_left: cycleDaysLeft } = useStudentCycle();
   const [loading, setLoading] = useState(true);
   const [mentorName, setMentorName] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'home' | 'leaderboard'>('home');
 
   useEffect(() => {
     if (!user) return;
