@@ -1,61 +1,77 @@
-import { create } from 'zustand';
+import { useSyncExternalStore } from 'react';
 import { LearningNode } from '@/hooks/useLearningEngine';
 
+// --- ROBUST ZERO-DEPENDENCY STORE (Zustand Compatibility) ---
+
 interface PracticeTreeState {
-  // Navigation
+  // State
   expandedNodeIds: Set<string>;
   selectedNode: LearningNode | null;
+  searchQuery: string;
+  nodeIntelligence: Record<string, any>;
+  
+  // Actions (Included in the state object to match usePracticeStore() call pattern)
   toggleNode: (nodeId: string) => void;
   expandPath: (path: string[]) => void;
   setSelectedNode: (node: LearningNode | null) => void;
-  
-  // Search
-  searchQuery: string;
   setSearchQuery: (query: string) => void;
-  
-  // Intelligence Cache
-  nodeIntelligence: Record<string, {
-    weakScore: number | null;
-    totalAttempts: number;
-    lastAttemptedAt: string | null;
-  }>;
   setNodeIntelligence: (nodeId: string, data: any) => void;
 }
 
-// NOTE: Since we are in a sandbox where 'zustand' might not be auto-installed
-// we implement a simple version of the create pattern if needed, but here we assume it's available
-// (In production, you'd run 'npm install zustand')
+const internalStore = {
+  state: {
+    expandedNodeIds: new Set<string>(),
+    selectedNode: null,
+    searchQuery: '',
+    nodeIntelligence: {},
+    
+    // Action Implementations
+    toggleNode: (nodeId: string) => {
+      const { expandedNodeIds } = internalStore.getState();
+      const next = new Set(expandedNodeIds);
+      if (next.has(nodeId)) next.delete(nodeId); else next.add(nodeId);
+      internalStore.setState({ expandedNodeIds: next });
+    },
+    expandPath: (path: string[]) => {
+      const { expandedNodeIds } = internalStore.getState();
+      const next = new Set(expandedNodeIds);
+      path.forEach(id => next.add(id));
+      internalStore.setState({ expandedNodeIds: next });
+    },
+    setSelectedNode: (node: LearningNode | null) => {
+      internalStore.setState({ selectedNode: node });
+    },
+    setSearchQuery: (query: string) => {
+      internalStore.setState({ searchQuery: query });
+    },
+    setNodeIntelligence: (nodeId: string, data: any) => {
+      const { nodeIntelligence } = internalStore.getState();
+      internalStore.setState({ 
+        nodeIntelligence: { ...nodeIntelligence, [nodeId]: data } 
+      });
+    }
+  } as PracticeTreeState,
 
-export const usePracticeStore = create<PracticeTreeState>((set) => ({
-  expandedNodeIds: new Set<string>(),
-  selectedNode: null,
-  
-  toggleNode: (nodeId) => set((state) => {
-    const newSet = new Set(state.expandedNodeIds);
-    if (newSet.has(nodeId)) {
-      newSet.delete(nodeId);
-    } else {
-      newSet.add(nodeId);
-    }
-    return { expandedNodeIds: newSet };
-  }),
-  
-  expandPath: (path) => set((state) => {
-    const newSet = new Set(state.expandedNodeIds);
-    path.forEach(id => newSet.add(id));
-    return { expandedNodeIds: newSet };
-  }),
-  
-  setSelectedNode: (node) => set({ selectedNode: node }),
-  
-  searchQuery: '',
-  setSearchQuery: (searchQuery) => set({ searchQuery }),
-  
-  nodeIntelligence: {},
-  setNodeIntelligence: (nodeId, data) => set((state) => ({
-    nodeIntelligence: {
-      ...state.nodeIntelligence,
-      [nodeId]: data
-    }
-  })),
-}));
+  listeners: new Set<() => void>(),
+
+  getState() { return this.state; },
+
+  setState(next: Partial<PracticeTreeState> | ((s: PracticeTreeState) => Partial<PracticeTreeState>)) {
+    const nextState = typeof next === 'function' ? next(this.state) : next;
+    this.state = { ...this.state, ...nextState };
+    this.listeners.forEach(l => l());
+  },
+
+  subscribe(l: () => void) {
+    this.listeners.add(l);
+    return () => this.listeners.delete(l);
+  }
+};
+
+// Public Hook (exactly mimics Zustand)
+export const usePracticeStore = <T,>(selector: (s: PracticeTreeState) => T): T => {
+  return useSyncExternalStore(
+    internalStore.subscribe.bind(internalStore),
+    () => selector(internalStore.getState())
+  );
+};
