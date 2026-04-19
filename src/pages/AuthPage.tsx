@@ -104,7 +104,7 @@ const SENIOR_CLASS_OPTIONS = [
 
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, profile, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple, signInWithPhone, verifyOTP, updateProfile, loading: authLoading } = useAuth();
+  const { user, profile, refreshProfile, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple, signInWithPhone, verifyOTP, updateProfile, loading: authLoading } = useAuth();
   const { setExamMode } = useExamMode();
 
   const [mode, setMode] = useState<AuthMode>('login');
@@ -168,16 +168,36 @@ const AuthPage: React.FC = () => {
   }, [user, profile, authLoading, navigate, showOnboarding]);
 
   const validateEmail = (value: string) => {
-    ; try { emailSchema.parse(value); setErrors(prev => ({ ...prev, email: '' })); return true; }
-    catch (e) { if (e instanceof z.ZodError) setErrors(prev => ({ ...prev, email: e.errors[0].message })); return false; }
+    try { 
+      emailSchema.parse(value); 
+      setErrors(prev => ({ ...prev, email: '' })); 
+      return true; 
+    } catch (e) { 
+      if (e instanceof z.ZodError) setErrors(prev => ({ ...prev, email: e.errors[0].message })); 
+      return false; 
+    }
   };
+
   const validatePassword = (value: string) => {
-    ; try { passwordSchema.parse(value); setErrors(prev => ({ ...prev, password: '' })); return true; }
-    catch (e) { if (e instanceof z.ZodError) setErrors(prev => ({ ...prev, password: e.errors[0].message })); return false; }
+    try { 
+      passwordSchema.parse(value); 
+      setErrors(prev => ({ ...prev, password: '' })); 
+      return true; 
+    } catch (e) { 
+      if (e instanceof z.ZodError) setErrors(prev => ({ ...prev, password: e.errors[0].message })); 
+      return false; 
+    }
   };
+
   const validatePhone = (value: string) => {
-    ; try { phoneSchema.parse(value); setErrors(prev => ({ ...prev, phone: '' })); return true; }
-    catch (e) { if (e instanceof z.ZodError) setErrors(prev => ({ ...prev, phone: e.errors[0].message })); return false; }
+    try { 
+      phoneSchema.parse(value); 
+      setErrors(prev => ({ ...prev, phone: '' })); 
+      return true; 
+    } catch (e) { 
+      if (e instanceof z.ZodError) setErrors(prev => ({ ...prev, phone: e.errors[0].message })); 
+      return false; 
+    }
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -515,8 +535,6 @@ const AuthPage: React.FC = () => {
     else if (onboardingStep === 2) handleOnboardingComplete();
   };
 
-
-
   const totalSteps = 3;
 
   if (authLoading) {
@@ -834,14 +852,14 @@ const AuthPage: React.FC = () => {
                       onClick={async () => {
                         if (!validateEmail(email) || !validatePassword(password)) { toast.error('Enter email and password'); return; }
                         setLoading(true);
-                        ; try {
+                        try {
                           await signInWithEmail(email, password);
                           await handleOnboardingComplete();
                         } catch (err: any) {
                           toast.error(err?.message || 'Login failed');
+                        } finally {
+                          setLoading(false);
                         }
-       /* manual cleanup */  setLoading(false); }
-
                       }}
                       className="text-accent underline font-medium"
                     >

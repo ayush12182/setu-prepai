@@ -5,32 +5,43 @@
 DROP POLICY IF EXISTS "students_join_flow" ON public.batch_students;
 DROP POLICY IF EXISTS "coaching_students_insert_own" ON public.batch_students;
 
--- 2. Drop existing FK constraint targeting auth.users
-ALTER TABLE public.batch_students DROP CONSTRAINT IF EXISTS batch_students_student_id_fkey;
+-- 2. Drop all potential legacy constraints targeting student_id
+-- Ensures both new and old naming conventions are cleared
+ALTER TABLE IF EXISTS public.batch_students 
+    DROP CONSTRAINT IF EXISTS batch_students_student_id_fkey,
+    DROP CONSTRAINT IF EXISTS batch_members_student_id_fkey;
 
--- 3. Update the column to reference public.profiles(id)
--- Note: If data exists, this will fail if existing IDs are auth.users.id
--- We attempt a graceful migration of existing data if possible
-DO $$ 
+-- 3. Dynamic Cleanup (Catch-all for any other hidden FKs on student_id)
+DO $$
+DECLARE
+    r record;
 BEGIN
-    -- Check if student_id currently contains IDs that don't exist in profiles.id but do exist in profiles.user_id
-    UPDATE public.batch_students bs
-    SET student_id = p.id
-    FROM public.profiles p
-    WHERE bs.student_id = p.user_id
-    AND NOT EXISTS (SELECT 1 FROM public.profiles p2 WHERE p2.id = bs.student_id);
-EXCEPTION WHEN OTHERS THEN
-    RAISE NOTICE 'Skipping data migration: %', SQLERRM;
+    FOR r IN (
+        SELECT constraint_name 
+        FROM information_schema.key_column_usage 
+        WHERE table_name = 'batch_students' AND column_name = 'student_id'
+        AND constraint_name != 'batch_students_pkey'
+    ) LOOP
+        EXECUTE 'ALTER TABLE public.batch_students DROP CONSTRAINT IF EXISTS ' || quote_ident(r.constraint_name);
+    END LOOP;
 END $$;
 
--- 4. Re-add the constraint targeting profiles(id)
+-- 4. Gracefully migrate existing students from 'user_id' mapping to 'profile_id' mapping
+UPDATE public.batch_students bs
+SET student_id = p.id
+FROM public.profiles p
+WHERE bs.student_id = p.user_id;
+
+-- 5. REMOVE ORPHANS: Delete any records that still don't have a profile
+DELETE FROM public.batch_students 
+WHERE student_id NOT IN (SELECT id FROM public.profiles);
+
+-- 6. Apply the definitive constraint targeting profiles(id)
 ALTER TABLE public.batch_students 
     ADD CONSTRAINT batch_students_student_id_fkey 
     FOREIGN KEY (student_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
 
--- 5. Implement the corrected RLS Policy
--- This policy allows a user to insert into batch_students IF the student_id provided
--- belongs to a profile that is owned by their auth.uid().
+-- 7. Implement the corrected RLS Policy
 CREATE POLICY "students_join_flow" ON public.batch_students 
     FOR INSERT WITH CHECK (
         EXISTS (
@@ -40,7 +51,6 @@ CREATE POLICY "students_join_flow" ON public.batch_students
         )
     );
 
--- 6. Grant access to authenticated users
 ALTER TABLE public.batch_students ENABLE ROW LEVEL SECURITY;
 
 NOTIFY pgrst, 'reload schema';
