@@ -1,3 +1,8 @@
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Zap, Target, Flame } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useExamMode } from '@/hooks/useExamMode';
 import { LearningNode } from '@/hooks/useLearningEngine';
 
 interface DifficultySelectorProps {
