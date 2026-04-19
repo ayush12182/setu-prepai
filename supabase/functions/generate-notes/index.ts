@@ -39,27 +39,42 @@ serve(async (req) => {
       - A 1-minute quick revision summary
     `;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-        ]
-      }),
-    });
+    const models = ['gemini-1.5-flash', 'gemini-1.5-flash-8b', 'gemini-pro'];
+    let resultText = "";
+    let lastError = "";
 
-    const data = await response.json();
-    
-    if (data.error) {
-       throw new Error(`Gemini API Error: ${data.error.message} (${data.error.status})`);
+    for (const modelName of models) {
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            safetySettings: [
+              { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+            ]
+          }),
+        });
+
+        const data = await response.json();
+        if (data.error) {
+           lastError = data.error.message;
+           continue;
+        }
+
+        resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        if (resultText) break;
+      } catch (e) {
+        lastError = e.message;
+      }
     }
 
-    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Failed to generate notes.";
+    if (!resultText) {
+       throw new Error(`Gemini Multi-Model Failure. Last Error: ${lastError}`);
+    }
 
     // TRANSFORM: Wrap result in the streaming format the frontend expects
     const encoder = new TextEncoder();
