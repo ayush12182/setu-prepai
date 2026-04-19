@@ -156,11 +156,11 @@ export const useB2BManager = () => {
         organization_id: profile?.organization_id || null // still optional but not blocking
       };
 
-      console.log('🚀 [useB2BManager] vSIMPLE_RPC_CONNECTED - Code is live');
-      console.log('[useB2BManager] Attempting RPC create_batch_v1 with:', payload);
+      console.log('🚀 [useB2BManager] vV2_RPC_CONNECTED - Code is live');
+      console.log('[useB2BManager] Attempting RPC create_batch_v2 with:', payload);
 
-      // Use RPC to bypass PostgREST cache issues
-      const { data, error } = await supabase.rpc('create_batch_v1', {
+      // Use V2 RPC to handle the 'stream' check constraint found in schema
+      const { data, error } = await supabase.rpc('create_batch_v2', {
         p_name: payload.name,
         p_mentor_id: payload.mentor_id,
         p_join_code: payload.join_code,
@@ -170,20 +170,28 @@ export const useB2BManager = () => {
       });
 
       if (error) {
-        console.error('❌ [useB2BManager] RPC Error:', error.message, error.details, error.code);
+        console.error('❌ [useB2BManager] V2 RPC Error:', error.message, error.code);
         
-        // If the error is 'PGRST104' (function not found), it means the user hasn't run the SQL yet
-        if (error.code === 'PGRST104') {
-          toast.error("Database function 'create_batch_v1' not found. Please run the provided SQL in Supabase Editor.");
-          return null;
+        // Final fallback: try a direct insert with ANY cast if RPC fails
+        console.log('[useB2BManager] RPC failed, trying direct insert...');
+        const { data: direct, error: directErr } = await (supabase as any)
+          .from('batches')
+          .insert({
+            ...payload,
+            stream: (payload.target_exam || 'jee').toLowerCase()
+          })
+          .select()
+          .single();
+          
+        if (directErr) {
+          toast.error(`Creation failed: ${directErr.message}`);
+          throw directErr;
         }
-
-        // If it's the schema cache error, we try one last ditch 'any' insert
-        toast.error(`Sync Error: ${error.message}. retrying...`);
-        const { data: fallback, error: fbErr } = await (supabase as any).from('batches').insert(payload).select().single();
-        if (fbErr) throw fbErr;
-        return fallback;
+        return direct;
       }
+
+      toast.success(`Batch "${name}" is live! Code: ${join_code}`);
+      return data;
 
       toast.success(`Batch "${name}" created via secure channel!`);
       return data;
