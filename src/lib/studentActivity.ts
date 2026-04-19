@@ -127,14 +127,25 @@ export async function logStudentActivity(activity: {
   is_correct: boolean;
   time_spent_seconds: number;
   question_type: string;
+  batch_id?: string;
+  organization_id?: string;
 }) {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { error } = await supabase.from('user_activity' as any).insert({
-      user_id: user.id,
+    // Use student_activity (Universal internal table)
+    const { error } = await supabase.from('student_activity' as any).insert({
+      student_id: user.id,
       activity_type: 'practice',
+      subject: activity.subject,
+      topic: activity.topic,
+      subtopic: activity.subtopic || activity.topic,
+      difficulty: activity.difficulty,
+      is_correct: activity.is_correct,
+      time_spent_seconds: activity.time_spent_seconds,
+      batch_id: activity.batch_id,
+      organization_id: activity.organization_id,
       metadata: activity,
       created_at: new Date().toISOString()
     });

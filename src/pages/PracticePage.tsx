@@ -399,7 +399,18 @@ const PracticePage: React.FC = () => {
               <Button onClick={() => handleDifficultySelect(state.difficulty)} variant="outline">Try again</Button>
             </div>
           ) : questions.length > 0 ? (
-            <QuizInterface questions={questions} subchapterName={state.node?.name || 'Mixed Syllabus'} difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} onComplete={handleQuizComplete} onGetSimilar={handleGetSimilar} onRecordAttempt={recordAttempt} />
+            <QuizInterface 
+              questions={questions} 
+              subchapterName={state.node?.name || 'Mixed Syllabus'} 
+              difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} 
+              onComplete={handleQuizComplete} 
+              onGetSimilar={handleGetSimilar} 
+              onRecordAttempt={(qId, sel, corr, time, conf) => recordAttempt(qId, sel, corr, time, conf, {
+                subject: state.node?.id === 'adaptive' ? 'Mixed' : undefined,
+                topic: state.node?.name,
+                batch_id: profile?.batch_id // Inject batch context
+              })} 
+            />
           ) : null}
           </>
         )}

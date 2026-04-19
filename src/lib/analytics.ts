@@ -17,8 +17,8 @@ export async function getStudentBatchStats(studentIds: string[]): Promise<Record
   if (!studentIds.length) return {};
 
   const { data: activity, error } = await supabase
-    .from('user_activity')
-    .select('user_id, metadata')
+    .from('student_activity')
+    .select('user_id, is_correct, time_spent_seconds')
     .in('user_id', studentIds)
     .eq('activity_type', 'practice');
 
@@ -31,7 +31,6 @@ export async function getStudentBatchStats(studentIds: string[]): Promise<Record
 
   activity.forEach((log: any) => {
     const userId = log.user_id;
-    const meta = log.metadata || {};
     
     if (!stats[userId]) {
       stats[userId] = {
@@ -42,10 +41,10 @@ export async function getStudentBatchStats(studentIds: string[]): Promise<Record
     }
 
     stats[userId].total_questions += 1;
-    if (meta.is_correct) {
+    if (log.is_correct) {
       stats[userId].correct_questions += 1;
     }
-    stats[userId].total_time_seconds += (meta.time_spent_seconds || 0);
+    stats[userId].total_time_seconds += (log.time_spent_seconds || 0);
   });
 
   // Calculate derivatives

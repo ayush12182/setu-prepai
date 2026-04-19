@@ -314,6 +314,8 @@ export const usePracticeQuestions = () => {
       subtopic?: string;
       difficulty?: 'easy' | 'medium' | 'hard';
       exam_stage?: 'practice' | 'mock_test' | 'chapter_test' | 'previous_year';
+      batch_id?: string;
+      organization_id?: string;
     }
   ) => {
     try {
@@ -341,6 +343,8 @@ export const usePracticeQuestions = () => {
           is_correct:         isCorrect,
           time_spent_seconds: timeTakenSeconds,
           question_type:      'MCQ',
+          batch_id:           context.batch_id,
+          organization_id:    context.organization_id
         });
       }
     } catch (err) {

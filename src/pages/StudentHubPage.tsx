@@ -21,6 +21,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useStudentStats } from '@/hooks/useStudentStats';
 import { useStudentCycle } from '@/hooks/useStudentCycle';
+import { Leaderboard } from '@/components/student/Leaderboard';
 
 // ─── Types ────────────────────────────────────────────────────
 type Tab = 'home' | 'practice' | 'progress';

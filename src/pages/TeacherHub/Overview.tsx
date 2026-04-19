@@ -14,16 +14,19 @@ import {
   Ticket,
   Plus,
   Loader2,
-  Link
+  Clock,
+  Sparkles,
+  Link as LinkIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { ensureTeacherCode } from '@/lib/mentorEngine';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 export default function B2BMainDashboard() {
   const { profile } = useAuth();
   const [batchCode, setBatchCode] = useState<string>('');
   const [loadingCode, setLoadingCode] = useState(false);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [stats, setStats] = useState({
     activeStudents: 0,
     tasksPushed: 0,
@@ -36,13 +39,44 @@ export default function B2BMainDashboard() {
           // 1. Fetch active batch code
           const { data: batches } = await supabase
             .from('batches')
-            .select('join_code')
+            .select('id, join_code')
             .eq('teacher_id', profile.user_id)
             .order('created_at', { ascending: false })
             .limit(1);
           
           if (batches && batches.length > 0) {
             setBatchCode(batches[0].join_code);
+            
+            // Fetch initial activity
+            const { data: activity } = await supabase
+              .from('student_activity' as any)
+              .select('*, profiles(full_name)')
+              .eq('batch_id', batches[0].id)
+              .order('created_at', { ascending: false })
+              .limit(5);
+            
+            if (activity) setRecentActivity(activity);
+
+            // Subscribe to real-time updates
+            const channel = supabase
+              .channel('teacher_live_feed')
+              .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'student_activity',
+                filter: `batch_id=eq.${batches[0].id}`
+              }, async (payload) => {
+                // Fetch the student's name for the new activity
+                const { data: student } = await supabase.from('profiles').select('full_name').eq('user_id', payload.new.student_id).single();
+                const freshEvent = { ...payload.new, profiles: { full_name: student?.full_name || 'A Student' } };
+                setRecentActivity(prev => [freshEvent, ...prev].slice(0, 5));
+                toast.info(`${freshEvent.profiles.full_name} completed a practice session!`);
+              })
+              .subscribe();
+
+            return () => {
+              supabase.removeChannel(channel);
+            };
           }
 
           // 2. Simple stats fetch
@@ -59,7 +93,7 @@ export default function B2BMainDashboard() {
           setStats({
               activeStudents: studentCount || 0,
               tasksPushed: taskCount || 0,
-              avgAccuracy: 74 // Mock for now
+              avgAccuracy: 74
           });
       }
     };
@@ -69,12 +103,6 @@ export default function B2BMainDashboard() {
   const handleGenerateCode = async () => {
     setLoadingCode(true);
     try {
-      // Create a default batch to generate a code
-      const { createBatch } = await import('@/hooks/useB2BManager');
-      // Note: useB2BManager is a hook, but we need it here. 
-      // Actually, it's better to use the RPC directly or just let them go to the Batches page.
-      // But for "WOW" factor, let's create a "General Batch" if they have none.
-      
       const generateUniqueCode = async (): Promise<string> => {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
         let code = '';
@@ -110,9 +138,7 @@ export default function B2BMainDashboard() {
   const copyRefLink = () => {
     const link = `${window.location.origin}/auth?ref=${profile?.user_id}`;
     navigator.clipboard.writeText(link);
-    setCopied(true);
     toast.success("Invite link copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -175,15 +201,14 @@ export default function B2BMainDashboard() {
                    onClick={copyRefLink}
                    className="bg-white text-accent font-black h-12 rounded-xl border-none hover:bg-neutral-100 flex items-center gap-2"
                  >
-                   Copy Invite Link <Link className="w-4 h-4" />
+                   Copy Invite Link <LinkIcon className="w-4 h-4" />
                  </Button>
               </div>
             </div>
-            {/* Decoration Circles */}
             <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
           </div>
 
-          {/* Quick Stats */}
+          {/* Productivity */}
           <div className="bg-card border border-border rounded-3xl p-8 flex flex-col justify-between hover:border-accent/30 transition-all cursor-default">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500">
@@ -198,43 +223,84 @@ export default function B2BMainDashboard() {
           </div>
         </div>
 
-        {/* Feature Teasers */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="bg-secondary/30 border border-border rounded-3xl p-8 hover:bg-secondary/50 transition-all group">
-              <div className="flex items-start justify-between">
-                <div>
-                   <BookOpen className="w-8 h-8 text-accent mb-4" />
-                   <h3 className="text-xl font-black mb-2">Resource Center</h3>
-                   <p className="text-muted-foreground">Assign specific topics (Learning Nodes) as high-priority tasks.</p>
-                </div>
-                <Button variant="ghost" className="rounded-full w-10 h-10 p-0 hover:bg-accent hover:text-primary">
-                  <ExternalLink className="w-5 h-5" />
-                </Button>
-              </div>
-              <div className="mt-8 pt-8 border-t border-border/50 flex items-center justify-between">
-                 <span className="text-sm font-black text-accent">{stats.tasksPushed} Active Tasks</span>
-                 <div className="flex -space-x-2">
-                    {[1,2,3].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-card bg-secondary" />)}
-                 </div>
-              </div>
-           </div>
-
-           <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-8 hover:bg-emerald-500/10 transition-all">
-              <div className="flex items-start justify-between">
-                <div>
-                   <Users className="w-8 h-8 text-emerald-500 mb-4" />
-                   <h3 className="text-xl font-black mb-2">Student Insights</h3>
-                   <p className="text-muted-foreground">Deep analytics on conceptual gaps across all your linked students.</p>
-                </div>
-                <Button variant="ghost" className="rounded-full w-10 h-10 p-0 hover:bg-emerald-500/20 text-emerald-500">
-                  <ExternalLink className="w-5 h-5" />
-                </Button>
-              </div>
-              <div className="mt-8 bg-emerald-500/10 rounded-2xl p-4 flex items-center gap-3">
+        {/* Live Student Pulse & Features */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Live Pulse Section */}
+          <div className="lg:col-span-1 space-y-4">
+            <div className="flex items-center justify-between">
+               <h3 className="text-xl font-black flex items-center gap-2">
                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">3 Students need attention today</span>
-              </div>
-           </div>
+                 Student Pulse
+               </h3>
+               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-2 py-1 rounded">Real-time</span>
+            </div>
+
+            <div className="space-y-3">
+              {recentActivity.length > 0 ? (
+                recentActivity.map((event, i) => (
+                  <div key={i} className="bg-card border border-border/50 rounded-2xl p-4 hover:border-accent/20 transition-all group animate-in slide-in-from-right duration-300">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-sm font-black text-foreground group-hover:text-accent transition-colors">{event.profiles?.full_name}</span>
+                      <span className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded",
+                        event.is_correct ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
+                      )}>
+                        {event.is_correct ? 'Correct' : 'Incorrect'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground font-medium line-clamp-1">{event.topic}</p>
+                    <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase opacity-60">
+                       <span className="flex items-center gap-1"><Clock size={10} /> {Math.round(event.time_spent_seconds)}s</span>
+                       <span>{new Date(event.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-secondary/20 border-2 border-dashed border-border/50 rounded-3xl p-12 text-center">
+                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                  <p className="text-sm font-bold text-muted-foreground">Waiting for activity...</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="bg-secondary/30 border border-border rounded-3xl p-8 hover:bg-secondary/50 transition-all group">
+                <div className="flex items-start justify-between">
+                  <div>
+                     <BookOpen className="w-8 h-8 text-accent mb-4" />
+                     <h3 className="text-xl font-black mb-2">Resource Center</h3>
+                     <p className="text-muted-foreground">Assign specific topics (Learning Nodes) as high-priority tasks.</p>
+                  </div>
+                  <Button variant="ghost" className="rounded-full w-10 h-10 p-0 hover:bg-accent hover:text-primary">
+                    <ArrowUpRight className="w-5 h-5" />
+                  </Button>
+                </div>
+                <div className="mt-8 pt-8 border-t border-border/50 flex items-center justify-between">
+                   <span className="text-sm font-black text-accent">{stats.tasksPushed} Active Tasks</span>
+                </div>
+             </div>
+
+             <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-8 hover:bg-emerald-500/10 transition-all">
+                <div className="flex items-start justify-between">
+                  <div>
+                     <Sparkles className="w-8 h-8 text-emerald-500 mb-4" />
+                     <h3 className="text-xl font-black mb-2">AI Insights</h3>
+                     <p className="text-muted-foreground">Identify conceptual gaps across your class using collective performance data.</p>
+                  </div>
+                  <Button variant="ghost" className="rounded-full w-10 h-10 p-0 hover:bg-emerald-500/20 text-emerald-500">
+                    <ExternalLink className="w-5 h-5" />
+                  </Button>
+                </div>
+                <div className="mt-8 bg-emerald-500/10 rounded-2xl p-4 flex items-center gap-3">
+                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                   <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Analytics bridge active</span>
+                </div>
+             </div>
+          </div>
         </div>
       </div>
     </B2BSidebarLayout>
