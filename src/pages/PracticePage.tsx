@@ -255,43 +255,86 @@ const PracticePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Practice Modes Grid */}
-            <h3 className="text-xl font-bold text-foreground mb-4">Practice Modes</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              
-              <div 
-                onClick={() => launchTopicSelection('focus')}
-                className="bg-card border border-border rounded-2xl p-6 hover:border-blue-500/50 hover:bg-blue-500/5 cursor-pointer transition-colors group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Crosshair className="w-6 h-6" />
+            {/* Subject-Centric Practice Grid (NEET Focus) */}
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-xl font-black text-foreground mb-4 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-accent" /> Master Your Subjects
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[
+                    { id: 'biology', name: 'Biology', icon: Dna, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+                    { id: 'physics', name: 'Physics', icon: Zap, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+                    { id: 'chemistry', name: 'Chemistry', icon: FlaskConical, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+                  ].map((sub, i) => (
+                    <div 
+                      key={i} 
+                      className={cn("bg-card border-2 rounded-3xl p-6 transition-all", sub.border)}
+                    >
+                      <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-4 shadow-lg", sub.bg, sub.color)}>
+                        <sub.icon className="w-6 h-6" />
+                      </div>
+                      <h4 className="text-xl font-black mb-4">{sub.name}</h4>
+                      
+                      <div className="space-y-2">
+                        <button 
+                          onClick={() => launchTopicSelection('focus')}
+                          className="w-full flex items-center justify-between p-3 rounded-xl bg-secondary/50 hover:bg-secondary transition-all text-xs font-bold group"
+                        >
+                          Chapter-wise Practice
+                          <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-all" />
+                        </button>
+                        <button 
+                          onClick={() => launchAdaptiveSession(`${sub.name} PYQs`, 'PYQ', 'hard')}
+                          className="w-full flex items-center justify-between p-3 rounded-xl bg-orange-500/5 hover:bg-orange-500/10 border border-orange-500/10 transition-all text-xs font-bold text-orange-400 group"
+                        >
+                          Previous Year Questions (PYQs)
+                          <Target className="w-3 h-3" />
+                        </button>
+                        <button 
+                          onClick={() => launchTopicSelection('weakness')}
+                          className="w-full flex items-center justify-between p-3 rounded-xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 transition-all text-xs font-bold text-red-400 group"
+                        >
+                          AI Weakness Attack
+                          <Zap className="w-3 h-3 animate-pulse" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <h4 className="text-lg font-bold text-foreground mb-2">Focus Practice</h4>
-                <p className="text-muted-foreground text-sm">Manually select a weak subject or chapter to drill down specific concepts.</p>
               </div>
 
-              <div 
-                onClick={() => launchTopicSelection('weakness')}
-                className="bg-card border border-border rounded-2xl p-6 hover:border-red-500/50 hover:bg-red-500/5 cursor-pointer transition-colors group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Swords className="w-6 h-6" />
-                </div>
-                <h4 className="text-lg font-bold text-foreground mb-2">Weakness Attack</h4>
-                <p className="text-muted-foreground text-sm">AI generates questions spanning entirely across your historical conceptual mistakes.</p>
-              </div>
+              {/* Advanced Modes Section */}
+              <div className="bg-secondary/20 p-8 rounded-3xl border border-border/50">
+                <h3 className="text-lg font-black text-foreground mb-4">Advanced Training Modes</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div 
+                    onClick={() => launchTopicSelection('mixed')}
+                    className="flex items-center gap-4 p-5 bg-card border border-border rounded-2xl cursor-pointer hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Shuffle className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm">Smart Mixed Practice</h4>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black">All Subjects • Adaptive Mix</p>
+                    </div>
+                  </div>
 
-              <div 
-                onClick={() => launchTopicSelection('mixed')}
-                className="bg-card border border-border rounded-2xl p-6 hover:border-purple-500/50 hover:bg-purple-500/5 cursor-pointer transition-colors group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Shuffle className="w-6 h-6" />
+                  <div 
+                    onClick={() => launchAdaptiveSession('Weakness Extraction', 'Weakness Extraction', 'hard')}
+                    className="flex items-center gap-4 p-5 bg-card border border-border rounded-2xl cursor-pointer hover:border-red-500/50 hover:bg-red-500/5 transition-all group"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Swords className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm">Global Weakness Attack</h4>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black">AI Driven • Error History</p>
+                    </div>
+                  </div>
                 </div>
-                <h4 className="text-lg font-bold text-foreground mb-2">Smart Mixed Practice</h4>
-                <p className="text-muted-foreground text-sm">A balanced, exam-like mix of Easy, Medium, and Hard questions across your chapters.</p>
               </div>
-
             </div>
           </div>
         )}

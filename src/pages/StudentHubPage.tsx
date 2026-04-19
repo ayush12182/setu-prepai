@@ -192,41 +192,178 @@ const StudentHubPage: React.FC = () => {
 
         {/* Home Tab Content */}
         {activeTab === 'home' && (
-          <div className="space-y-6">
-            <div className="rounded-3xl border border-accent/20 bg-gradient-to-br from-accent/10 to-background p-8">
-              <h2 className="text-2xl font-black mb-2">Welcome back, {profile?.full_name || 'Student'}</h2>
-              <p className="text-muted-foreground mb-6">Continue your journey towards {effectiveExam || 'success'}.</p>
-              <Button onClick={() => navigate('/practice')} size="lg" className="bg-accent text-primary font-bold px-8 rounded-xl">Start Learning</Button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { label: 'Today', value: `${realTodayDone}/20`, icon: Target, color: 'text-accent' },
-                { label: 'Streak', value: `${realStreak} Days`, icon: Flame, color: 'text-orange-400' },
-                { label: 'Accuracy', value: `${realAccuracy}%`, icon: Zap, color: 'text-emerald-400' },
-                { label: 'Exam', value: effectiveExam || 'SETU', icon: Lock, color: 'text-amber-400' },
-              ].map((stat, i) => (
-                <div key={i} className="bg-card border border-border rounded-2xl p-4 text-center">
-                  <stat.icon className={cn('w-5 h-5 mx-auto mb-2', stat.color)} />
-                  <p className="text-lg font-black">{stat.value}</p>
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground">{stat.label}</p>
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            
+            {/* Mentor Header (New Moat) */}
+            <div className="flex items-center justify-between bg-card/50 backdrop-blur-md border border-border rounded-2xl p-4 sticky top-0 z-10 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center border border-accent/30 overflow-hidden">
+                  <span className="text-accent font-bold">AK</span>
                 </div>
-              ))}
-            </div>
-
-            {assignedTasks.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-sm font-bold uppercase text-muted-foreground">Missions</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {assignedTasks.map((task: any) => (
-                    <div key={task.id} onClick={() => navigate('/practice')} className="bg-card border border-border rounded-2xl p-4 flex justify-between items-center cursor-pointer">
-                      <p className="font-bold text-sm">{task.topic}</p>
-                      <ArrowRight className="w-4 h-4" />
-                    </div>
-                  ))}
+                <div>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Your Mentor</p>
+                  <h3 className="text-sm font-black text-foreground">{teacherCtx?.teacherName || 'Dr. Anil Kumar'} 👨‍⚕️</h3>
                 </div>
               </div>
-            )}
+              <div className="bg-accent/10 border border-accent/20 px-3 py-1.5 rounded-lg">
+                <p className="text-[11px] font-bold text-accent">"Focus on NCERT diagrams today."</p>
+              </div>
+            </div>
+
+            {/* 21-Day Mission Hero (Dopamine Loop) */}
+            <div className="relative group overflow-hidden rounded-3xl border-2 border-accent/30 bg-gradient-to-br from-accent/15 via-background to-background p-8 shadow-xl shadow-accent/5">
+              <div className="absolute top-0 right-0 p-4">
+                <Flame className="w-12 h-12 text-accent/20 animate-pulse" />
+              </div>
+              
+              <div className="max-w-2xl relative z-10">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="px-3 py-1 bg-accent text-primary text-[11px] font-black rounded-full uppercase tracking-tighter shadow-lg shadow-accent/20">
+                    Day {21 - (cycleDaysLeft || 18)}/21 🔥
+                  </span>
+                  <span className="text-sm font-bold text-accent italic">NEET Recovery Mode</span>
+                </div>
+                
+                <h2 className="text-4xl font-black mb-4 tracking-tight leading-tight">
+                  Today's Mission: <br/>
+                  <span className="text-accent underline decoration-accent/30 underline-offset-8">Cell Cycle & Kinematics</span>
+                </h2>
+                
+                {/* Progress Bar */}
+                <div className="space-y-2 mb-8 max-w-sm">
+                  <div className="flex justify-between text-xs font-bold text-muted-foreground">
+                    <span>MISSION PROGRESS</span>
+                    <span>40%</span>
+                  </div>
+                  <div className="h-3 bg-secondary/50 rounded-full overflow-hidden border border-border">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: '40%' }}
+                      className="h-full bg-gradient-to-r from-accent to-accent/60"
+                    />
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={() => navigate('/practice')} 
+                  size="lg" 
+                  className="bg-accent text-primary font-black px-10 rounded-2xl h-14 text-lg shadow-lg shadow-accent/30 hover:shadow-accent/50 hover:scale-105 transition-all"
+                >
+                  Continue Today's Plan <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Daily Action System (Checklist Style) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              <div className="lg:col-span-2 space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4" /> Today's Primary Tasks
+                  </h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    {assignedTasks.length > 0 ? assignedTasks.map((task: any, i) => (
+                      <div 
+                        key={task.id} 
+                        className={cn(
+                          "group flex items-center justify-between p-5 rounded-2xl border transition-all cursor-pointer",
+                          task.status === 'completed' 
+                            ? "bg-emerald-500/5 border-emerald-500/20 opacity-70" 
+                            : "bg-card border-border hover:border-accent/40"
+                        )}
+                        onClick={() => navigate('/practice')}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center",
+                            task.status === 'completed' ? "bg-emerald-500/20 text-emerald-500" : "bg-secondary text-muted-foreground group-hover:bg-accent/20 group-hover:text-accent"
+                          )}>
+                            {task.status === 'completed' ? <CheckCircle2 className="w-5 h-5" /> : <Target className="w-5 h-5" />}
+                          </div>
+                          <div>
+                            <p className={cn("font-bold text-sm", task.status === 'completed' ? "line-through text-muted-foreground" : "text-foreground")}>
+                              {task.topic} {task.subtopic ? `— ${task.subtopic}` : ''}
+                            </p>
+                            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase">{task.difficulty} Difficulty</p>
+                          </div>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                      </div>
+                    )) : (
+                      <div className="p-10 border border-dashed border-border rounded-2xl text-center">
+                        <Sparkles className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
+                        <p className="text-sm font-bold text-muted-foreground">No tasks assigned today. Check back later!</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* New from Teacher Section */}
+                {sharedMaterials.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-accent flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" /> New from your Teacher
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {sharedMaterials.map((mat, i) => (
+                        <div 
+                          key={i} 
+                          className="bg-card border border-border rounded-2xl p-4 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group"
+                        >
+                          <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-primary transition-all">
+                            {mat.material_type === 'note' ? <BookOpen className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm truncate">{mat.title || 'Shared Material'}</p>
+                            <p className="text-[10px] text-muted-foreground uppercase font-medium">{mat.material_type} • Just shared</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Stats & Streak (Engagement Hooks) */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" /> Performance Status
+                </h3>
+                <div className="space-y-3">
+                  <div className="bg-card border border-border rounded-2xl p-5 relative overflow-hidden group">
+                    <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
+                      <Flame className="w-24 h-24 text-orange-500" />
+                    </div>
+                    <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">Current Streak</p>
+                    <div className="flex items-end gap-2">
+                      <h4 className="text-3xl font-black text-orange-400">{realStreak}</h4>
+                      <p className="text-sm font-bold text-orange-400/60 pb-1">Days</p>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-2 font-medium">🔥 Ahead of 63% students this week</p>
+                  </div>
+
+                  <div className="bg-card border border-border rounded-2xl p-5">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">7-Day Accuracy</p>
+                    <div className="flex items-end gap-2">
+                      <h4 className="text-3xl font-black text-emerald-400">{realAccuracy}%</h4>
+                      <TrendingUp className="w-5 h-5 text-emerald-400/60 pb-1" />
+                    </div>
+                    <div className="h-1.5 bg-secondary/50 rounded-full mt-3 overflow-hidden">
+                      <div className="h-full bg-emerald-400" style={{ width: `${realAccuracy}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="bg-accent/10 border border-accent/20 rounded-2xl p-5">
+                    <p className="text-[10px] font-black text-accent uppercase mb-1">AI Recommendation</p>
+                    <p className="text-xs font-bold leading-relaxed">
+                      Your accuracy in <span className="text-accent underline">Kinematics</span> dropped by 5%. Practice 10 more MCQs before 11 PM.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         )}
 

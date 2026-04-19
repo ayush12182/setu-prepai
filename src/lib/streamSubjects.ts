@@ -166,20 +166,24 @@ export const STREAM_SUBJECTS: Record<string, SubjectConfig[]> = {
  * Get subjects for a given target_exam string.
  * Falls back to CUET if unknown.
  */
-export function getSubjectsForExam(targetExam: string | null | undefined): SubjectConfig[] {
-  if (!targetExam) return STREAM_SUBJECTS['CUET'];
+  // If no target exam, do not default to Commerce (CUET). 
+  // This prevents NEET students from seeing Accounts/Economics during loading states.
+  if (!targetExam) return [];
+  
+  // Clean the input
+  const examKey = targetExam.trim();
   
   // Direct match
-  if (STREAM_SUBJECTS[targetExam]) return STREAM_SUBJECTS[targetExam];
+  if (STREAM_SUBJECTS[examKey]) return STREAM_SUBJECTS[examKey];
   
-  // Fuzzy match — JEE Mains / JEE Advanced → JEE Main
-  if (targetExam.toLowerCase().includes('jee')) return STREAM_SUBJECTS['JEE Main'];
-  if (targetExam.toLowerCase().includes('neet')) return STREAM_SUBJECTS['NEET'];
-  if (targetExam.toLowerCase().includes('cuet')) return STREAM_SUBJECTS['CUET'];
-  if (targetExam.toLowerCase().includes('ca') || targetExam.toLowerCase().includes('commerce')) return STREAM_SUBJECTS['CA Foundation'];
+  // Fuzzy match
+  const lowerExam = examKey.toLowerCase();
+  if (lowerExam.includes('jee')) return STREAM_SUBJECTS['JEE Main'];
+  if (lowerExam.includes('neet')) return STREAM_SUBJECTS['NEET'];
+  if (lowerExam.includes('cuet')) return STREAM_SUBJECTS['CUET'];
+  if (lowerExam.includes('ca') || lowerExam.includes('commerce') || lowerExam.includes('foundation')) return STREAM_SUBJECTS['CA Foundation'];
   
-  return STREAM_SUBJECTS['CUET'];
-}
+  return [];
 
 /**
  * Get flat list of subject labels for use in dropdowns.

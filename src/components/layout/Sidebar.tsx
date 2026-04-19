@@ -29,17 +29,15 @@ interface SidebarProps {
 }
 
 const getNavItems = (isFoundation: boolean, isB2B: boolean) => [
-  { path: '/dashboard', icon: Home, label: 'Home', emoji: '🏠' },
-  { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📖' },
-  ...(!isFoundation && !isB2B ? [{ path: '/ai-teachers', icon: GraduationCap, label: 'AI Teachers', emoji: '👨‍🏫' }] : []),
-  { path: '/practice', icon: PenTool, label: isFoundation ? 'School Practice' : 'Practice', emoji: '✏️' },
-  { path: '/test', icon: ClipboardCheck, label: isFoundation ? 'Chapter Test' : 'Test', emoji: '📝' },
+  { path: '/dashboard', icon: Home, label: 'Today\'s Plan', emoji: '📅' },
+  { path: '/learn', icon: BookOpen, label: 'My Subjects', emoji: '📚' },
+  { path: '/analytics', icon: BarChart3, label: 'Performance', emoji: '📊' },
+  { path: '/ask-jeetu', icon: MessageCircle, label: 'Ask Mentor', emoji: '💬' },
+  { path: '/practice', icon: PenTool, label: 'Daily Practice', emoji: '✏️' },
   { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄' },
-  ...(!isB2B ? [{ path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬' }] : []),
-  { path: '/ask-jeetu', icon: MessageCircle, label: isFoundation ? 'Ask SETU Mentor' : { jee: 'Ask Jeetu Bhaiya', neet: 'Ask NEET Mentor', cuet: 'Ask CUET Mentor' }, emoji: '💬' },
-  ...(!isFoundation && !isB2B ? [{ path: '/circles', icon: Users, label: 'SETU Commune', emoji: '👥', badge: 'New' }] : []),
-  { path: '/analytics', icon: BarChart3, label: isFoundation ? 'Progress' : 'Analytics', emoji: '📊' },
   { path: '/profile', icon: User, label: 'My Profile', emoji: '👤' },
+  ...(!isFoundation && !isB2B ? [{ path: '/ai-teachers', icon: GraduationCap, label: 'AI Teachers', emoji: '👨‍🏫' }] : []),
+  ...(!isB2B ? [{ path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬' }] : []),
 ];
 
 const getB2BNavItems = (isMentor: boolean, isInstitution: boolean) => [
