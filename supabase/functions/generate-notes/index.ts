@@ -30,22 +30,20 @@ serve(async (req) => {
       You are an expert ${subject} teacher at a top Kota coaching institute like Allen or Aakash. 
       Create high-yield, exam-oriented study notes for: "${chapterName}".
       Language: Hinglish (mix of Hindi + English).
-      Structure:
-      1. Major Concept Definitions
-      2. Priority MCQ Points (NCERT based)
-      3. Common Mistakes/Trap Areas
-      4. Quick Revision Summary
-      Use formatting like **bold** and bullet points for readability.
+      Include:
+      1. Key definitions
+      2. Priority MCQ points (NCERT focus)
+      3. Common mistakes to avoid
     `;
 
     const model = "gemini-flash-latest";
     try {
-      console.log(`[GenerateNotes] Calling Gemini for: ${chapterName}`);
+      console.log(`[GenerateNotes] Processing: ${chapterName}`);
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: `SYSTEM INSTRUCTION: ${systemPrompt}\n\nTASK: Generate study notes for ${chapterName}` }] }],
+          contents: [{ role: 'user', parts: [{ text: `SYSTEM INSTRUCTION: ${systemPrompt}\n\nCONTENT REQUEST: Generate study notes for ${chapterName}` }] }],
           generationConfig: {
             temperature: 0.7,
             topK: 40,
@@ -56,9 +54,9 @@ serve(async (req) => {
       });
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`[GenerateNotes] API Error: ${response.status} - ${errorText}`);
-        throw new Error(`API returned ${response.status}`);
+        const errInfo = await response.text();
+        console.error(`[GenerateNotes] API Error: ${response.status}`, errInfo);
+        throw new Error(`API error ${response.status}`);
       }
 
       if (!response.body) throw new Error("No response body");
@@ -75,7 +73,7 @@ serve(async (req) => {
                    const content = data.candidates[0].content.parts[0].text;
                    controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`));
                  }
-               } catch (e) { /* skip */ }
+               } catch (e) { /* partial JSON */ }
             }
           }
         },
@@ -87,8 +85,8 @@ serve(async (req) => {
       });
 
     } catch (err) {
-      console.error(`[GenerateNotes] Processing Error:`, err);
-      return new Response(JSON.stringify({ error: "AI Engine temporarily busy. Please try again." }), {
+      console.error(`[GenerateNotes] Exec Error:`, err);
+      return new Response(JSON.stringify({ error: "AI Engine busy. Please try again." }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
