@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useExamMode } from '@/contexts/ExamModeContext';
 import { StudentProgressView } from '@/components/student/StudentProgressView';
 import { toast } from 'sonner';
 import { getSubjectsForExam } from '@/lib/streamSubjects';
@@ -43,411 +44,303 @@ const DIFF_COLORS: Record<string, string> = {
 // ─── Component ────────────────────────────────────────────────
 const StudentHubPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, profile, refreshProfile } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>('home');
-
-  useEffect(() => {
-    console.log("[SETU] Universal Deployment v2.1 — Active");
-  }, []);
-
-  const [teacherCtx, setTeacherCtx] = useState<TeacherContext | null>(null);
-  const [allTeachers, setAllTeachers] = useState<any[]>([]);
-  const [lockedExam, setLockedExam] = useState<string | null>(null);
-
+  const { user, profile } = useAuth();
+  const { examMode } = useExamMode();
+  
   const [assignedTasks, setAssignedTasks] = useState<any[]>([]);
-  const [assignedAssessments, setAssignedAssessments] = useState<any[]>([]);
-  const [sharedMaterials, setSharedMaterials] = useState<any[]>([]);
-  const [realTests, setRealTests] = useState<any[]>([]);
-
-  const { 
-    accuracy: realAccuracy, 
-    streak: realStreak, 
-    totalSolved: realTotalSolved, 
-    todayDone: realTodayDone,
-    weakTopic,
-    loading: statsLoading 
-  } = useStudentStats();
-
-  const {
-    days_left: cycleDaysLeft,
-    is_test_day: isCycleTestDay
-  } = useStudentCycle();
-
+  const { streak: realStreak, todayDone: realTodayDone, loading: statsLoading } = useStudentStats();
+  const { days_left: cycleDaysLeft } = useStudentCycle();
   const [loading, setLoading] = useState(true);
-  const [joinCode, setJoinCode] = useState('');
-  const [joiningCode, setJoiningCode] = useState(false);
-  const [showJoinInput, setShowJoinInput] = useState(false);
-
-  const effectiveExam = lockedExam || profile?.target_exam || (user as any)?.user_metadata?.target_exam || null;
-  const streamSubjects = getSubjectsForExam(effectiveExam);
-
-  const PRACTICE_TOPICS = useMemo(() => {
-    if (!streamSubjects || !Array.isArray(streamSubjects)) return [];
-    return streamSubjects.flatMap(s =>
-      s.chapters.slice(0, 2).map(ch => ({
-        subject: s.label, topic: ch.title,
-        difficulty: 'medium',
-        qCount: 20,
-        color: s.color, emoji: s.emoji,
-      }))
-    );
-  }, [effectiveExam, streamSubjects]);
+  const [mentorName, setMentorName] = useState<string>('');
 
   useEffect(() => {
     if (!user) return;
-    loadAll();
+    loadData();
   }, [user]);
 
-  const loadAll = async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const { data: links } = await supabase.from('student_teacher_links' as any).select('*').eq('student_id', user!.id);
-      const { data: batchMemberships } = await supabase.from('batch_students' as any).select('batches(*)').eq('student_id', user!.id);
-      const myBatches = (batchMemberships || []).map((bm: any) => bm.batches).filter(Boolean);
-
-      if (links && links.length > 0) {
-        const { data: tProfile } = await supabase.from('profiles').select('*').eq('user_id', links[0].teacher_id).single();
-        if (tProfile) {
-          setTeacherCtx({
-            teacherName: tProfile.full_name,
-            batchName: 'Your Batch',
-            examType: links[0].exam_type || effectiveExam || 'General'
-          });
-        }
-      }
-
-      // 2. Fetch Assigned Teacher Tasks (Assigned to teacher_id or specific student)
-      const { data: tasks, error: taskErr } = await supabase
+      const { data: tasks } = await supabase
         .from('teacher_tasks' as any)
         .select('*, learning_nodes(name)')
         .eq('teacher_id', profile?.teacher_id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(1);
 
-      if (taskErr) throw taskErr;
+      if (tasks && tasks.length > 0) {
+        setAssignedTasks(tasks);
+      }
 
-      const formattedTasks = (tasks || []).map((t: any) => ({
-        id: t.id,
-        topic: t.learning_nodes?.name || t.title,
-        subtopic: t.description,
-        difficulty: 'medium',
-        status: 'pending'
-      }));
-
-      setAssignedTasks(formattedTasks);
-
-      const { data: sharedMats } = await supabase.from('batch_materials' as any).select('*').limit(5);
-      setSharedMaterials(sharedMats || []);
-
+      // Fetch mentor name
+      if (profile?.teacher_id) {
+        console.log("Fetching mentor details for teacher_id:", profile.teacher_id);
+        const { data: mentor, error: mentorErr } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', profile.teacher_id)
+          .maybeSingle();
+        
+        if (mentorErr) console.error("Mentor fetch error:", mentorErr);
+        if (mentor) {
+          console.log("Mentor found:", mentor.full_name);
+          setMentorName(mentor.full_name);
+        }
+      } else {
+        console.warn("No teacher_id found in profile for mentor greeting.");
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Critical Data Load Error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleJoinByCode = async () => {
-    if (!joinCode || joinCode.length < 6) {
-      toast.error("Please enter a valid 6-character code");
-      return;
-    }
-    setJoining(true);
-    try {
-      const { linkStudentToMentor } = await import('@/lib/mentorEngine');
-      const result = await linkStudentToMentor(joinCode);
-      if (result.success) {
-        toast.success(result.message);
-        setJoinCode('');
-        if (refreshProfile) await refreshProfile();
-      } else {
-        toast.error(result.message);
-      }
-    } catch (err) {
-      toast.error("An error occurred. Please try again.");
-    } finally {
-      setJoining(false);
-    }
+  const calculateDaysLeft = (targetDate: string) => {
+    const today = new Date();
+    const target = new Date(targetDate);
+    const diffTime = target.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
   };
 
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  const examData = useMemo(() => {
+    if (examMode === 'neet') {
+      return {
+        name: 'NEET UG 2026',
+        date: '3 May 2026',
+        daysLeft: calculateDaysLeft('2026-05-03'),
+        advice: '"Biology NCERT multiple times read karo. Physics practice ko mat chhodo. You can do it!"'
+      };
+    }
+    if (examMode === 'cuet') {
+      return {
+        name: 'CUET UG 2026',
+        date: '11 May 2026',
+        daysLeft: calculateDaysLeft('2026-05-11'),
+        advice: '"Domain subjects ke liye NCERT focus karo, aur General Test ko ignore mat karna. Reasoning is key!"'
+      };
+    }
+    return {
+      name: 'JEE Advanced 2026',
+      date: '24 May 2026',
+      daysLeft: calculateDaysLeft('2026-05-24'),
+      advice: '"Concepts pe focus karo. Advanced level problems solve karna shuru karo. Time to push limits!"'
+    };
+  }, [examMode]);
 
-  const isB2C = profile?.user_type === 'student';
-
-  if (!isB2C && !teacherCtx) {
+  if (loading || statsLoading) {
     return (
-      <MainLayout title="Student Hub">
-        <div className="max-w-md mx-auto py-20 text-center space-y-6">
-          <GraduationCap className="w-16 h-16 mx-auto text-accent" />
-          <h2 className="text-xl font-bold">Join your Class</h2>
-          <div className="flex gap-2">
-            <input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} className="flex-1 border p-3 rounded-xl" placeholder="Code" />
-            <Button onClick={handleJoinByCode} disabled={joiningCode} className="bg-accent">Join</Button>
-          </div>
-        </div>
-      </MainLayout>
+      <div className="min-h-screen bg-[#0F1117] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
+      </div>
     );
   }
 
-  const TABS = [
-    { id: 'home' as Tab,     label: 'Home',     icon: '🏠' },
-    { id: 'practice' as Tab, label: 'Practice', icon: '✏️' },
-    { id: 'progress' as Tab, label: 'Progress', icon: '📊' },
-  ];
+  const todayFocus = assignedTasks[0] || {
+    learning_nodes: { name: 'Electrical Instruments' },
+    description: 'Focus on Meter bridge working - Potentiometer for EMF comparison',
+    suggested_time: '2h 30m'
+  };
+
 
   return (
-    <MainLayout title="Student Hub">
-      <div className="max-w-5xl mx-auto space-y-6 pb-20">
-        
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 bg-secondary/30 p-1 rounded-xl border border-border w-max">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={cn(
-                'px-4 py-2 rounded-lg text-sm font-semibold transition-all',
-                activeTab === tab.id ? 'bg-card text-foreground shadow-sm border border-border' : 'text-muted-foreground'
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Home Tab Content */}
-        {activeTab === 'home' && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <MainLayout fullHeight>
+      <div className="min-h-full bg-[#0F1117] text-white p-4 lg:p-8 font-sans">
+        <div className="max-w-7xl mx-auto space-y-6">
+          
+          {/* Top Greeting Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative bg-[#1A1F2C] rounded-[2rem] p-8 lg:p-10 border border-white/[0.05] overflow-hidden shadow-2xl"
+          >
+            <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
             
-            {/* Mentor Header (Dynamic) */}
-            <div className="flex items-center justify-between bg-card/50 backdrop-blur-md border border-border rounded-2xl p-4 sticky top-0 z-10 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center border border-accent/30 overflow-hidden">
-                  {profile?.mentor_avatar ? (
-                    <img src={profile.mentor_avatar} alt="Mentor" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-accent font-bold">
-                      {(profile?.mentor_name || 'SA').split(' ').map(n => n[0]).join('')}
-                    </span>
-                  )}
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">Dashboard</span>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Your Mentor</p>
-                  <h3 className="text-sm font-black text-foreground">
-                    {profile?.mentor_name || 'SETU AI Mentor'} {profile?.mentor_name ? '👨‍🏫' : '🧠'}
+                  <h3 className="text-white/60 text-base font-medium mb-1">
+                    {mentorName 
+                      ? `Welcome back to ${mentorName}'s Classroom! 👋` 
+                      : profile?.teacher_id 
+                      ? "Welcome back to your Teacher's Classroom! 👋"
+                      : `Welcome back, ${profile?.full_name?.split(' ')[0] || 'Student'}! 👋`}
                   </h3>
+                  <h1 className="text-2xl lg:text-4xl font-bold tracking-tight leading-tight">
+                    Your personalized learning <br className="hidden lg:block" /> path is ready for today
+                  </h1>
                 </div>
               </div>
-              <div className="bg-accent/10 border border-accent/20 px-3 py-1.5 rounded-lg">
-                <p className="text-[11px] font-bold text-accent">
-                  {profile?.mentor_name 
-                    ? '"Focus on your weak areas today."' 
-                    : "I'll help you master your subjects."}
-                </p>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="px-5 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-500">
+                    <Flame className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Streak</p>
+                    <p className="text-lg font-black">{realStreak} Days</p>
+                  </div>
+                </div>
+                <div className="px-5 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-500">
+                    <Target className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Solved</p>
+                    <p className="text-lg font-black">{realTodayDone} Qs Today</p>
+                  </div>
+                </div>
               </div>
             </div>
+          </motion.div>
 
-            {!profile?.teacher_id && (
-              <div className="bg-secondary/20 border border-dashed border-border rounded-2xl p-6 text-center space-y-4">
-                <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                  <Users className="w-5 h-5" />
-                  <p className="text-sm font-bold">Have a teacher code?</p>
-                </div>
-                <div className="flex gap-2 max-w-xs mx-auto">
-                  <input 
-                    value={joinCode} 
-                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())} 
-                    className="flex-1 bg-background border border-border px-4 py-2 rounded-xl text-sm font-bold focus:outline-none focus:ring-2 focus:ring-accent/50" 
-                    placeholder="ENTER CODE"
-                  />
-                  <Button 
-                    onClick={handleJoinByCode} 
-                    disabled={joiningCode || !joinCode}
-                    size="sm"
-                    className="bg-accent text-primary font-bold rounded-xl"
-                  >
-                    {joiningCode ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Join'}
-                  </Button>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* Today's Focus Card */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="lg:col-span-8 bg-[#1A1F2C] rounded-[2rem] p-8 lg:p-10 border border-white/[0.05] relative overflow-hidden group hover:border-accent/30 transition-all duration-500"
+            >
+              <div className="absolute top-6 left-6">
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.05]">
+                  <Zap className="w-3.5 h-3.5 text-accent" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Today's Focus</span>
                 </div>
               </div>
-            )}
 
-            {/* 21-Day Mission Hero (Dopamine Loop) */}
-            <div className="relative group overflow-hidden rounded-3xl border-2 border-accent/30 bg-gradient-to-br from-accent/15 via-background to-background p-8 shadow-xl shadow-accent/5">
-              <div className="absolute top-0 right-0 p-4">
-                <Flame className="w-12 h-12 text-accent/20 animate-pulse" />
-              </div>
-              
-              <div className="max-w-2xl relative z-10">
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="px-3 py-1 bg-accent text-primary text-[11px] font-black rounded-full uppercase tracking-tighter shadow-lg shadow-accent/20">
-                    Day {21 - (cycleDaysLeft || 18)}/21 🔥
-                  </span>
-                  <span className="text-sm font-bold text-accent italic">NEET Recovery Mode</span>
-                </div>
-                
-                <h2 className="text-4xl font-black mb-4 tracking-tight leading-tight">
-                  Today's Mission: <br/>
-                  <span className="text-accent underline decoration-accent/30 underline-offset-8">Cell Cycle & Kinematics</span>
-                </h2>
-                
-                {/* Progress Bar */}
-                <div className="space-y-2 mb-8 max-w-sm">
-                  <div className="flex justify-between text-xs font-bold text-muted-foreground">
-                    <span>MISSION PROGRESS</span>
-                    <span>40%</span>
-                  </div>
-                  <div className="h-3 bg-secondary/50 rounded-full overflow-hidden border border-border">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: '40%' }}
-                      className="h-full bg-gradient-to-r from-accent to-accent/60"
-                    />
-                  </div>
+              <div className="mt-12 space-y-8">
+                <div>
+                  <h2 className="text-3xl lg:text-5xl font-bold tracking-tighter mb-4 group-hover:text-accent transition-colors duration-500 italic">
+                    {todayFocus.learning_nodes?.name || todayFocus.title}
+                  </h2>
+                  <p className="text-white/40 text-lg font-medium flex items-center gap-2">
+                    Physics • <span className="text-white/80">Current Electricity</span>
+                  </p>
                 </div>
 
-                <Button 
-                  onClick={() => navigate('/practice')} 
-                  size="lg" 
-                  className="bg-accent text-primary font-black px-10 rounded-2xl h-14 text-lg shadow-lg shadow-accent/30 hover:shadow-accent/50 hover:scale-105 transition-all"
-                >
-                  Continue Today's Plan <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Daily Action System (Checklist Style) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              <div className="lg:col-span-2 space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                    <ClipboardList className="w-4 h-4" /> Today's Primary Tasks
-                  </h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    {assignedTasks.length > 0 ? assignedTasks.map((task: any, i) => (
-                      <div 
-                        key={task.id} 
-                        className={cn(
-                          "group flex items-center justify-between p-5 rounded-2xl border transition-all cursor-pointer",
-                          task.status === 'completed' 
-                            ? "bg-emerald-500/5 border-emerald-500/20 opacity-70" 
-                            : "bg-card border-border hover:border-accent/40"
-                        )}
-                        onClick={() => navigate('/practice')}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center",
-                            task.status === 'completed' ? "bg-emerald-500/20 text-emerald-500" : "bg-secondary text-muted-foreground group-hover:bg-accent/20 group-hover:text-accent"
-                          )}>
-                            {task.status === 'completed' ? <CheckCircle2 className="w-5 h-5" /> : <Target className="w-5 h-5" />}
-                          </div>
-                          <div>
-                            <p className={cn("font-bold text-sm", task.status === 'completed' ? "line-through text-muted-foreground" : "text-foreground")}>
-                              {task.topic} {task.subtopic ? `— ${task.subtopic}` : ''}
-                            </p>
-                            <p className="text-[10px] font-bold text-muted-foreground/60 uppercase">{task.difficulty} Difficulty</p>
-                          </div>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-accent group-hover:translate-x-1 transition-all" />
-                      </div>
-                    )) : (
-                      <div className="p-10 border border-dashed border-border rounded-2xl text-center">
-                        <Sparkles className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
-                        <p className="text-sm font-bold text-muted-foreground">No tasks assigned today. Check back later!</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* New from Teacher Section */}
-                {sharedMaterials.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="text-sm font-black uppercase tracking-widest text-accent flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" /> New from your Teacher
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {sharedMaterials.map((mat, i) => (
-                        <div 
-                          key={i} 
-                          className="bg-card border border-border rounded-2xl p-4 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer group"
-                        >
-                          <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-primary transition-all">
-                            {mat.material_type === 'note' ? <BookOpen className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm truncate">{mat.title || 'Shared Material'}</p>
-                            <p className="text-[10px] text-muted-foreground uppercase font-medium">{mat.material_type} • Just shared</p>
-                          </div>
-                        </div>
-                      ))}
+                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Sparkles className="w-3.5 h-3.5 text-accent" />
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Stats & Streak (Engagement Hooks) */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" /> Performance Status
-                </h3>
-                <div className="space-y-3">
-                  <div className="bg-card border border-border rounded-2xl p-5 relative overflow-hidden group">
-                    <div className="absolute -right-4 -bottom-4 opacity-5 group-hover:scale-110 transition-transform">
-                      <Flame className="w-24 h-24 text-orange-500" />
-                    </div>
-                    <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">Current Streak</p>
-                    <div className="flex items-end gap-2">
-                      <h4 className="text-3xl font-black text-orange-400">{realStreak}</h4>
-                      <p className="text-sm font-bold text-orange-400/60 pb-1">Days</p>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-2 font-medium">🔥 Ahead of 63% students this week</p>
-                  </div>
-
-                  <div className="bg-card border border-border rounded-2xl p-5">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase mb-1">7-Day Accuracy</p>
-                    <div className="flex items-end gap-2">
-                      <h4 className="text-3xl font-black text-emerald-400">{realAccuracy}%</h4>
-                      <TrendingUp className="w-5 h-5 text-emerald-400/60 pb-1" />
-                    </div>
-                    <div className="h-1.5 bg-secondary/50 rounded-full mt-3 overflow-hidden">
-                      <div className="h-full bg-emerald-400" style={{ width: `${realAccuracy}%` }} />
-                    </div>
-                  </div>
-
-                  <div className="bg-accent/10 border border-accent/20 rounded-2xl p-5">
-                    <p className="text-[10px] font-black text-accent uppercase mb-1">AI Recommendation</p>
-                    <p className="text-xs font-bold leading-relaxed">
-                      Your accuracy in <span className="text-accent underline">Kinematics</span> dropped by 5%. Practice 10 more MCQs before 11 PM.
+                    <p className="text-white/70 leading-relaxed font-medium">
+                      {todayFocus.description || 'Focus on depth understanding today.'}
                     </p>
                   </div>
                 </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 text-white/40">
+                      <Clock className="w-4 h-4" />
+                      <span className="text-xs font-bold uppercase tracking-widest">Suggested: {todayFocus.suggested_time || '2h 30m'}</span>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => navigate('/practice')}
+                    className="w-full sm:w-auto px-10 h-14 rounded-2xl bg-accent hover:bg-accent/90 text-primary font-black text-lg shadow-xl shadow-accent/20 group-hover:scale-105 transition-all duration-300"
+                  >
+                    Start Now <ArrowRight className="ml-3 w-5 h-5" />
+                  </Button>
+                </div>
               </div>
+            </motion.div>
+
+            {/* Right Column Countdowns */}
+            <div className="lg:col-span-4 space-y-6 flex flex-col">
+              
+              {/* Upcoming Exam Card */}
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+                className="flex-1 bg-white/[0.03] rounded-[2rem] p-8 border border-white/[0.05] relative overflow-hidden group hover:bg-white/[0.05] transition-all duration-300"
+              >
+                <div className="flex items-start justify-between mb-8">
+                  <div className="p-3 rounded-2xl bg-orange-500/10 text-orange-500">
+                    <Trophy className="w-6 h-6" />
+                  </div>
+                  <div className="flex items-center gap-2 text-orange-500/60 font-black italic">
+                    <Flame className="w-4 h-4" />
+                    <span className="text-4xl">{examData.daysLeft}</span>
+                    <span className="text-sm self-end pb-1">Days Left</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] font-black text-white/25 uppercase tracking-widest mb-1">Upcoming Exam</p>
+                    <h4 className="text-xl font-black">{examData.name}</h4>
+                    <p className="text-xs text-white/40 mt-1">{examData.date}</p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10">
+                    <p className="text-[11px] leading-relaxed text-orange-200/60 italic font-medium">
+                      {examData.advice}
+                    </p>
+                  </div>
+
+                  <Button 
+                    variant="ghost" 
+                    className="w-full h-12 rounded-xl border border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest"
+                  >
+                    Start Preparing <ChevronRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </div>
+              </motion.div>
+
+              {/* 21-Day Cycle Card */}
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex-1 bg-white/[0.03] rounded-[2rem] p-8 border border-white/[0.05] relative overflow-hidden group hover:bg-white/[0.05] transition-all duration-300"
+              >
+                <div className="flex items-start justify-between mb-8">
+                  <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-500">
+                    <CalendarDays className="w-6 h-6" />
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-500/60 font-black italic">
+                    <Clock className="w-4 h-4" />
+                    <span className="text-4xl">8</span>
+                    <span className="text-sm self-end pb-1">Days Left</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] font-black text-white/25 uppercase tracking-widest mb-1 font-sans">21 Day Cycle</p>
+                    <h4 className="text-xl font-black">Major Test</h4>
+                    <p className="text-xs text-white/40 mt-1">Test Date: 25 Feb 2026 • <span className="text-blue-400">Cycle 1</span></p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                    <p className="text-[11px] leading-relaxed text-blue-200/60 italic font-medium">
+                      "Major Test ke liye prepare ho raha hai? Daily practice karte raho, bhai!"
+                    </p>
+                  </div>
+
+                  <Button 
+                    variant="ghost" 
+                    className="w-full h-12 rounded-xl border border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest"
+                  >
+                    View Details <ChevronRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </div>
+              </motion.div>
 
             </div>
           </div>
-        )}
-
-        {/* Practice Tab Content */}
-        {activeTab === 'practice' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {PRACTICE_TOPICS.map((topic, i) => (
-              <div key={i} onClick={() => navigate('/practice')} className="bg-card border border-border rounded-2xl p-4 flex items-center justify-between cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{topic.emoji}</span>
-                  <p className="font-bold text-sm">{topic.topic}</p>
-                </div>
-                <Play className="w-4 h-4 text-accent" />
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Progress Tab Content */}
-        {activeTab === 'progress' && (
-          <div>
-            <StudentProgressView />
-          </div>
-        )}
+        </div>
       </div>
     </MainLayout>
   );

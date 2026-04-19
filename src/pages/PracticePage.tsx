@@ -10,8 +10,9 @@ import QuizInterface, { QuizResult } from '@/components/practice/QuizInterface';
 import QuizResults from '@/components/practice/QuizResults';
 import TestModeQuiz, { TestAnswer } from '@/components/practice/TestModeQuiz';
 import TestResults from '@/components/practice/TestResults';
-import { ArrowRight, Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter } from 'lucide-react';
+import { ArrowRight, Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter, Dna, FlaskConical } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
@@ -105,7 +106,7 @@ const PracticePage: React.FC = () => {
     setState({ step: 'quiz', node, difficulty, adaptiveMode });
     
     // Trigger question generation for the selected node
-    generateQuestionsForNode(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
+    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
   };
 
   // --- ADAPTIVE LAUNCHERS ---
@@ -117,7 +118,7 @@ const PracticePage: React.FC = () => {
     const mockNode: LearningNode = { id: 'adaptive', name: title, type: 'root', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
     
     setState({ step: 'quiz', node: mockNode, difficulty: intensity, adaptiveMode: modeName });
-    generateQuestionsForNode(mockNode.id, intensity === 'mixed' ? 'medium' : intensity, 10, examParam);
+    generateQuestions(mockNode.id, intensity === 'mixed' ? 'medium' : intensity, 10, examParam);
   };
 
   const handleQuizComplete = (result: QuizResult) => {
@@ -163,7 +164,7 @@ const PracticePage: React.FC = () => {
     if (state.step !== 'results' && state.step !== 'test-results') return;
     const { node, difficulty } = state;
     setState({ step: 'quiz', node, difficulty });
-    generateQuestionsForNode(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
+    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
   };
 
   const handleGetSimilar = async (question: { concept_tested: string; question_text: string }) => {

@@ -12,13 +12,14 @@ import { Mail, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Loader2, Check, BookOp
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { EXAM_CONFIG, STREAM_TO_EXAM } from '@/config/examConfig';
+import { cn } from '@/lib/utils';
 
 const emailSchema = z.string().email('Please enter a valid email');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
 const phoneSchema = z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid phone number');
 
 type AuthMode = 'login' | 'signup' | 'phone' | 'otp' | 'forgot-password';
-type OnboardingStep = 0 | 1 | 2 | 3;
+type OnboardingStep = 0 | 1 | 2 | 3 | 4;
 type StreamType = 'foundation' | 'jee' | 'neet' | 'cuet' | 'commerce' | '';
 
 interface OnboardingData {
@@ -493,59 +494,40 @@ const AuthPage: React.FC = () => {
   };
 
   const handleOnboardingNext = async () => {
-    // ── Coaching Student: validate code format at Step 0, then show inline auth ──
-    if (onboardingStep === 0 && onboardingData.userType === 'student') {
-      const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
-      if (!joinCode || joinCode.length < 6) {
-        toast.error('Please enter the 6-character batch code from your teacher');
+    if (onboardingStep === 0) {
+      if (!onboardingData.userType) {
+        toast.error('Please select your role');
         return;
       }
-      // Step 3 = inline signup form inside onboarding (showOnboarding stays true)
-      setOnboardingStep(3);
-      return;
-    }
-
-    // ── Teacher: go to exam selection ──
-    if (onboardingStep === 0 && onboardingData.userType === 'teacher') {
       setOnboardingStep(1);
-      return;
-    }
-
-    // ── Teacher at exam step: no class step needed, complete immediately ──
-    if (onboardingStep === 1 && onboardingData.userType === 'teacher') {
+    } else if (onboardingStep === 1) {
       if (!onboardingData.stream) {
-        toast.error('Please select the exam you teach');
+        toast.error('Please select your stream');
         return;
       }
-      handleOnboardingComplete();
-      return;
-    }
-
-    if (onboardingStep === 0 && !onboardingData.userType) {
-      toast.error('Please select your role');
-      return;
-    }
-    if (onboardingStep === 1 && !onboardingData.stream) {
-      toast.error('Please select your stream');
-      return;
-    }
-    if (onboardingStep === 2 && !onboardingData.studentClass) {
-      toast.error('Please select your class');
-      return;
-    }
-
-    if (onboardingStep === 0) setOnboardingStep(1);
-    else if (onboardingStep === 1) {
       if (onboardingData.userType === 'teacher') {
         handleOnboardingComplete();
       } else {
         setOnboardingStep(2);
       }
+    } else if (onboardingStep === 2) {
+      if (!onboardingData.studentClass) {
+        toast.error('Please select your class');
+        return;
+      }
+      setOnboardingStep(3);
+    } else if (onboardingStep === 3) {
+      // Mentor selection step logic is handled within the component buttons for this step
+      // or by clicking 'Next' if they already entered a code
+      if (!onboardingData.referenceCode && onboardingData.userType === 'student') {
+          // If no code and they click next, we assume AI Mentor or they must choose
+          // But usually they click the specific buttons in the UI
+      }
+      handleOnboardingComplete();
     }
-    else if (onboardingStep === 2) handleOnboardingComplete();
   };
 
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   if (authLoading) {
     return (
@@ -604,7 +586,7 @@ const AuthPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-3">
-                    {/* Individual Student */}
+                    {/* Student Card */}
                     <button
                       onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'student', institutionName: undefined }))}
                       className={`w-full p-5 rounded-2xl border text-left transition-all duration-200 flex items-center gap-4
@@ -619,8 +601,8 @@ const AuthPage: React.FC = () => {
                         <Users className="w-6 h-6 text-accent" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-bold text-white text-base">Individual Student</p>
-                        <p className="text-xs text-white/40 mt-0.5">Studying on my own, self-paced</p>
+                        <p className="font-bold text-white text-base">I am a Student</p>
+                        <p className="text-xs text-white/40 mt-0.5">I want to excel in my competitive exams</p>
                       </div>
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
                         onboardingData.userType === 'student' ? 'bg-accent border-accent' : 'border-white/20'
@@ -629,49 +611,7 @@ const AuthPage: React.FC = () => {
                       </div>
                     </button>
 
-                    {/* Coaching Student */}
-                    <button
-                      onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'student' }))}
-                      className={`w-full p-5 rounded-2xl border text-left transition-all duration-200 flex items-center gap-4
-                        ${onboardingData.userType === 'student'
-                          ? 'border-accent bg-accent/5 ring-1 ring-accent/30'
-                          : 'border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02]'
-                        }`}
-                    >
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                        onboardingData.userType === 'student' ? 'bg-accent/20' : 'bg-white/[0.06]'
-                      }`}>
-                        <Building2 className="w-6 h-6 text-accent" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-white text-base">Coaching Student</p>
-                        <p className="text-xs text-white/40 mt-0.5">Enrolled in a coaching centre / institute</p>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
-                        onboardingData.userType === 'student' ? 'bg-accent border-accent' : 'border-white/20'
-                      }`}>
-                        {onboardingData.userType === 'student' && <Check className="w-3 h-3 text-white stroke-[3]" />}
-                      </div>
-                    </button>
-
-                    {/* Coaching name field */}
-                    {onboardingData.userType === 'student' && (
-                      <div className="mt-2 pt-2">
-                        <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Batch Join Code (6 characters — from your teacher)</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. K8ZX2W"
-                          value={onboardingData.institutionName || ''}
-                          maxLength={6}
-                          onChange={e => setOnboardingData(prev => ({ ...prev, institutionName: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') }))}
-                          className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all font-mono tracking-widest"
-                        />
-                        <p className="text-[11px] text-white/30 mt-1.5">Ask your teacher for the 6-digit code from their dashboard</p>
-                      </div>
-                    )}
-
-
-                    {/* Teacher / Mentor Card */}
+                    {/* Teacher Card */}
                     <button
                       onClick={() => setOnboardingData(prev => ({ ...prev, userType: 'teacher', institutionName: undefined }))}
                       className={`w-full p-5 rounded-2xl border text-left transition-all duration-200 flex items-center gap-4
@@ -686,8 +626,8 @@ const AuthPage: React.FC = () => {
                         <GraduationCap className="w-6 h-6 text-violet-400" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-bold text-white text-base">Teacher / Mentor</p>
-                        <p className="text-xs text-white/40 mt-0.5">I teach students and manage a batch</p>
+                        <p className="font-bold text-white text-base">I am a Teacher / Mentor</p>
+                        <p className="text-xs text-white/40 mt-0.5">I manage a batch and teach students</p>
                       </div>
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${
                         onboardingData.userType === 'teacher' ? 'bg-violet-500 border-violet-500' : 'border-white/20'
@@ -695,15 +635,6 @@ const AuthPage: React.FC = () => {
                         {onboardingData.userType === 'teacher' && <Check className="w-3 h-3 text-white stroke-[3]" />}
                       </div>
                     </button>
-
-                    {/* Teacher name/school field */}
-                    {onboardingData.userType === 'teacher' && (
-                      <div className="mt-2 pt-2 p-4 rounded-2xl bg-violet-500/5 border border-violet-500/20">
-                        <p className="text-xs text-violet-300/80 leading-relaxed">
-                          👨‍🏫 You'll get access to the <span className="font-bold text-violet-300">Teacher Portal</span> where you can manage students, create tests, and distribute chapter-wise notes.
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
@@ -804,79 +735,107 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 3: Inline Auth (B2B Student — post code validation) */}
+              {/* Step 3: Mentor Selection */}
               {onboardingStep === 3 && onboardingData.userType === 'student' && (
-                <div className="space-y-5">
-                  <div className="text-center space-y-1 mt-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-2">
-                      <Check className="h-3.5 w-3.5 text-accent" />
-                      <span className="text-xs font-medium text-accent">Code accepted: {onboardingData.institutionName}</span>
-                    </div>
+                <div className="space-y-6">
+                  <div className="text-center space-y-2 mt-2">
                     <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                      Create your account
+                      Are you joining through a teacher?
                     </h2>
-                    <p className="text-white/40 text-sm">You'll be added to your teacher's batch automatically</p>
+                    <p className="text-white/40 text-sm">
+                      Establish your guidance loop to get personalized tasks.
+                    </p>
                   </div>
 
                   <div className="space-y-3">
-                    <div>
-                      <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Full Name</label>
-                      <input
-                        type="text" placeholder="Your name"
-                        value={fullName}
-                        onChange={e => setFullName(e.target.value)}
-                        className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 transition-all"
-                      />
+                    {/* Auto-detected Referral */}
+                    {onboardingData.referenceCode && (
+                       <div className="p-5 rounded-2xl border border-accent bg-accent/10 flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                          <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+                            <Sparkles className="w-6 h-6 text-accent" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs font-black text-accent uppercase tracking-widest">Teacher Detected</p>
+                            <p className="font-bold text-white text-base">Referral Link Active</p>
+                          </div>
+                          <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center">
+                            <Check className="w-4 h-4 text-white" />
+                          </div>
+                       </div>
+                    )}
+
+                    {/* Option: Enter Code */}
+                    <div className={cn(
+                        "p-5 rounded-2xl border transition-all duration-200 space-y-4",
+                        onboardingData.institutionName?.length === 6 ? "border-accent bg-accent/5 ring-1 ring-accent/30" : "border-white/[0.08]"
+                    )}>
+                        <div className="flex items-center gap-4">
+                            <div className={cn(
+                                "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                                onboardingData.institutionName?.length === 6 ? "bg-accent/20" : "bg-white/[0.06]"
+                            )}>
+                                <Users className={cn(
+                                    "w-6 h-6",
+                                    onboardingData.institutionName?.length === 6 ? "text-accent" : "text-white/40"
+                                )} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-bold text-white text-base">Yes, I have a code</p>
+                                <p className="text-xs text-white/40 mt-0.5">Enter the 6-character code from your teacher</p>
+                            </div>
+                        </div>
+                        <div className="space-y-3">
+                            <input
+                              type="text"
+                              placeholder="e.g. K8ZX2W"
+                              value={onboardingData.institutionName || ''}
+                              maxLength={6}
+                              onChange={e => setOnboardingData(prev => ({ ...prev, institutionName: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') }))}
+                              className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all font-mono tracking-widest text-center"
+                            />
+                            
+                            {onboardingData.institutionName?.length === 6 && (
+                                <Button 
+                                    onClick={handleOnboardingComplete}
+                                    disabled={loading}
+                                    className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-primary font-bold shadow-lg shadow-accent/20 animate-in zoom-in-95 duration-200"
+                                >
+                                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                                    Join Class & Finish
+                                </Button>
+                            )}
+                        </div>
                     </div>
-                    <div>
-                      <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Email</label>
-                      <input
-                        type="email" placeholder="you@email.com"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-white/50 uppercase tracking-widest mb-1.5 block">Password</label>
-                      <input
-                        type="password" placeholder="Min 6 characters"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 transition-all"
-                      />
-                    </div>
+
+                    {/* Option: AI Mentor */}
+                    {!onboardingData.referenceCode && (
+                        <button
+                          onClick={() => {
+                              setOnboardingData(prev => ({ ...prev, institutionName: undefined, referenceCode: undefined }));
+                              handleOnboardingComplete();
+                          }}
+                          className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02] text-left transition-all duration-200 flex items-center gap-4"
+                        >
+                          <div className="w-12 h-12 rounded-xl bg-white/[0.06] flex items-center justify-center shrink-0">
+                            <Brain className="w-6 h-6 text-blue-400" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-white text-base">No, continue with AI mentor</p>
+                            <p className="text-xs text-white/40 mt-0.5">I am studying independently with SETU AI</p>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-white/20" />
+                        </button>
+                    )}
                   </div>
-
-                  <Button
-                    onClick={handleUnifiedSignup}
-                    disabled={loading}
-                    className="w-full h-14 rounded-xl bg-accent hover:bg-accent/90 text-[hsl(213,28%,20%)] font-bold text-base shadow-[0_0_20px_rgba(232,154,60,0.2)] transition-all"
-                  >
-                    {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <>Join Batch & Start Learning <ArrowRight className="h-5 w-5 ml-2" /></>}
-                  </Button>
-
-                  <p className="text-center text-xs text-white/30">
-                    Already have an account?{' '}
-                    <button
-                      onClick={async () => {
-                        if (!validateEmail(email) || !validatePassword(password)) { toast.error('Enter email and password'); return; }
-                        setLoading(true);
-                        try {
-                          await signInWithEmail(email, password);
-                          await handleOnboardingComplete();
-                        } catch (err: any) {
-                          toast.error(err?.message || 'Login failed');
-                        } finally {
-                          setLoading(false);
-                        }
-                      }}
-                      className="text-accent underline font-medium"
-                    >
-                      Sign in instead
-                    </button>
-                  </p>
                 </div>
+              )}
+
+              {/* Step 4: Final Confirmation / Redirect (Optional) */}
+              {onboardingStep === 4 && (
+                  <div className="text-center space-y-4 py-10">
+                      <Loader2 className="h-10 w-10 animate-spin text-accent mx-auto" />
+                      <p className="text-white/60 font-bold">Finalizing your learning space...</p>
+                  </div>
               )}
 
               {onboardingStep !== 3 && (

@@ -10,7 +10,11 @@ import {
   TrendingUp, 
   BookOpen,
   ArrowUpRight,
-  ExternalLink
+  ExternalLink,
+  Ticket,
+  Plus,
+  Loader2,
+  Link
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ensureTeacherCode } from '@/lib/mentorEngine';
@@ -18,8 +22,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 export default function B2BMainDashboard() {
   const { profile } = useAuth();
-  const [teacherCode, setTeacherCode] = useState<string>('');
-  const [copied, setCopied] = useState(false);
+  const [batchCode, setBatchCode] = useState<string>('');
+  const [loadingCode, setLoadingCode] = useState(false);
   const [stats, setStats] = useState({
     activeStudents: 0,
     tasksPushed: 0,
@@ -28,11 +32,20 @@ export default function B2BMainDashboard() {
 
   useEffect(() => {
     const init = async () => {
-      const code = await ensureTeacherCode();
-      if (code) setTeacherCode(code);
-
-      // Simple stats fetch
       if (profile?.user_id) {
+          // 1. Fetch active batch code
+          const { data: batches } = await supabase
+            .from('batches')
+            .select('join_code')
+            .eq('teacher_id', profile.user_id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+          
+          if (batches && batches.length > 0) {
+            setBatchCode(batches[0].join_code);
+          }
+
+          // 2. Simple stats fetch
           const { count: studentCount } = await supabase
             .from('profiles')
             .select('*', { count: 'exact', head: true })
@@ -52,6 +65,47 @@ export default function B2BMainDashboard() {
     };
     init();
   }, [profile]);
+
+  const handleGenerateCode = async () => {
+    setLoadingCode(true);
+    try {
+      // Create a default batch to generate a code
+      const { createBatch } = await import('@/hooks/useB2BManager');
+      // Note: useB2BManager is a hook, but we need it here. 
+      // Actually, it's better to use the RPC directly or just let them go to the Batches page.
+      // But for "WOW" factor, let's create a "General Batch" if they have none.
+      
+      const generateUniqueCode = async (): Promise<string> => {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
+        let code = '';
+        let isUnique = false;
+        let attempts = 0;
+        while (!isUnique && attempts < 10) {
+          code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+          const { data } = await supabase.from('batches').select('id').eq('join_code', code).maybeSingle();
+          if (!data) isUnique = true;
+          attempts++;
+        }
+        return code;
+      };
+
+      const newJoinCode = await generateUniqueCode();
+      const { error } = await supabase.from('batches').insert({
+        name: 'General Batch',
+        teacher_id: profile?.user_id,
+        join_code: newJoinCode,
+        target_exam: profile?.target_exam || 'JEE_MAINS'
+      });
+
+      if (error) throw error;
+      setBatchCode(newJoinCode);
+      toast.success("Class Code generated successfully!");
+    } catch (err: any) {
+      toast.error("Failed to generate code: " + err.message);
+    } finally {
+      setLoadingCode(false);
+    }
+  };
 
   const copyRefLink = () => {
     const link = `${window.location.origin}/auth?ref=${profile?.user_id}`;
@@ -76,32 +130,52 @@ export default function B2BMainDashboard() {
           <div className="col-span-1 md:col-span-2 bg-gradient-to-br from-accent to-accent/80 rounded-3xl p-8 text-primary relative overflow-hidden shadow-2xl shadow-accent/20">
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h2 className="text-2xl font-black mb-2 flex items-center gap-2">
-                  <Users className="w-6 h-6" /> Referral Command Center
+                <h2 className="text-2xl font-black mb-2 flex items-center gap-2 text-primary">
+                  <Ticket className="w-6 h-6" /> Class Invite Code
                 </h2>
-                <p className="text-primary/80 max-w-md font-medium">
-                  Share your link with students to automatically link them to your mentor profile.
+                <p className="text-primary/70 max-w-md font-medium">
+                  Students can join your batch by entering this 6-character code during onboarding.
                 </p>
                 <div className="mt-6 flex items-center gap-4 bg-white/10 p-2 rounded-2xl border border-white/20 backdrop-blur-sm">
-                  <span className="px-4 py-2 font-mono font-bold text-xl">{teacherCode || '......'}</span>
+                  <span className="px-4 py-2 font-mono font-bold text-2xl tracking-widest text-primary">
+                    {batchCode || '------'}
+                  </span>
                   <div className="h-8 w-px bg-white/20" />
-                  <Button 
-                    onClick={copyRefLink}
-                    variant="ghost"
-                    className="hover:bg-white/20 text-primary font-bold transition-all"
-                  >
-                    {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5 mr-2" />}
-                    {copied ? 'Copied' : 'Copy Invite Link'}
-                  </Button>
+                  {batchCode ? (
+                    <Button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(batchCode);
+                        toast.success("Code copied!");
+                      }}
+                      variant="ghost"
+                      className="hover:bg-white/20 text-primary font-bold transition-all"
+                    >
+                      <Copy className="w-5 h-5 mr-2" />
+                      Copy Code
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={handleGenerateCode}
+                      disabled={loadingCode}
+                      variant="ghost"
+                      className="hover:bg-white/20 text-primary font-bold transition-all"
+                    >
+                      {loadingCode ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
+                      Generate Code
+                    </Button>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col gap-3">
-                 <div className="bg-white/20 p-4 rounded-2xl flex items-center gap-4 border border-white/30">
+                 <div className="bg-white/20 p-4 rounded-2xl flex items-center gap-4 border border-white/30 text-primary">
                     <div className="text-3xl font-black">{stats.activeStudents}</div>
-                    <div className="text-xs uppercase font-black opacity-80 leading-tight">Total<br/>Students</div>
+                    <div className="text-xs uppercase font-black opacity-80 leading-tight">Linked<br/>Students</div>
                  </div>
-                 <Button className="bg-white text-accent font-black h-12 rounded-xl border-none hover:bg-neutral-100">
-                   Generate QR Code <ArrowUpRight className="w-4 h-4 ml-2" />
+                 <Button 
+                   onClick={copyRefLink}
+                   className="bg-white text-accent font-black h-12 rounded-xl border-none hover:bg-neutral-100 flex items-center gap-2"
+                 >
+                   Copy Invite Link <Link className="w-4 h-4" />
                  </Button>
               </div>
             </div>

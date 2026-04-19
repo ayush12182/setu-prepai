@@ -71,6 +71,15 @@ export async function joinTeacherByCode(code: string): Promise<{ success: boolea
       }
 
       console.log("Successfully joined batch!");
+      
+      // SYNC: Update student profile's teacher_id if batch has a teacher
+      if (batch.teacher_id) {
+        await supabase
+          .from('profiles')
+          .update({ teacher_id: batch.teacher_id })
+          .eq('user_id', user.id);
+      }
+
       return { success: true, message: `Successfully joined ${batch.name}!` };
     } 
     
