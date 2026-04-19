@@ -24,6 +24,10 @@ import { SnapAndSolveModal } from '@/components/practice/SnapAndSolveModal';
 import { useStudentCycle } from '@/hooks/useStudentCycle';
 import { PracticeTreeExplorer } from '@/components/practice/PracticeTreeExplorer';
 import { LearningNode } from '@/hooks/useLearningEngine';
+import { usePracticeStore } from '@/store/practiceStore';
+import { DecisionTreeSearch } from '@/components/practice/DecisionTreeSearch';
+import { ActiveLearningPanel } from '@/components/practice/ActiveLearningPanel';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type PracticeMode = 'practice' | 'test';
 
@@ -41,6 +45,7 @@ const PracticePage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const { isNeet, isCuet } = useExamMode();
   const { isFoundation } = useClassContext();
+  const { selectedNode, setSelectedNode } = usePracticeStore();
   const [state, setState] = useState<PracticeState>({ step: 'select-mode' });
   const [initialized, setInitialized] = useState(false);
   const [mode, setMode] = useState<PracticeMode>('practice');
@@ -332,7 +337,69 @@ const PracticePage: React.FC = () => {
         )}
 
         {state.step === 'select-topic' && (
-            <PracticeTreeExplorer onSelectNode={handleNodeSelect} />
+          <div className="animate-in fade-in slide-in-from-bottom-5 duration-500">
+            {/* 1. SEAMLESS NAVIGATION HEADER */}
+            <div className="mb-12">
+               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                 <div>
+                   <h1 className="text-4xl font-black text-foreground tracking-tight">Intelligence Dashboard</h1>
+                   <p className="text-muted-foreground text-lg mt-2 font-medium">Diagnose weak areas and master topics with AI-driven paths.</p>
+                 </div>
+                 <div className="flex items-center gap-3 bg-secondary/30 p-1.5 rounded-2xl border border-border/50">
+                    <div className="px-4 py-2 bg-accent text-primary rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-accent/20">
+                      Standard Mode
+                    </div>
+                    <div className="px-4 py-2 text-muted-foreground hover:text-foreground cursor-pointer text-xs font-black uppercase tracking-widest transition-colors">
+                      Survival Mode
+                    </div>
+                 </div>
+               </div>
+
+               {/* 2. SEMANTIC SEARCH & SMART QUICK-LINKS */}
+               <DecisionTreeSearch />
+               
+               <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
+                 <button className="flex items-center gap-2 px-4 py-2.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold hover:bg-red-500/20 transition-all group">
+                   <Zap className="w-4 h-4 group-hover:scale-125 transition-transform" /> Revise Weak Areas
+                 </button>
+                 <button className="flex items-center gap-2 px-4 py-2.5 bg-accent/10 text-accent border border-accent/20 rounded-xl text-xs font-bold hover:bg-accent/20 transition-all group">
+                   <Target className="w-4 h-4 group-hover:rotate-45 transition-transform" /> Continue Mission
+                 </button>
+                 <button className="flex items-center gap-2 px-4 py-2.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl text-xs font-bold hover:bg-purple-500/20 transition-all group">
+                   <Shuffle className="w-4 h-4" /> Randomized Drill
+                 </button>
+               </div>
+            </div>
+
+            {/* 3. DUAL-PANE INTELLIGENCE EXPLORER */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className={cn(
+                "lg:col-span-7 transition-all duration-500",
+                selectedNode ? "opacity-100" : "lg:col-span-12"
+              )}>
+                <PracticeTreeExplorer onSelect={(node) => setSelectedNode(node)} />
+              </div>
+
+              <AnimatePresence>
+                {selectedNode && (
+                  <motion.div 
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    className="lg:col-span-5 sticky top-24"
+                  >
+                    <ActiveLearningPanel 
+                      node={selectedNode} 
+                      onStartPractice={(node, diff) => {
+                        handleDifficultySelect(diff as any);
+                        handleNodeSelect(node);
+                      }} 
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
         )}
 
         {state.step === 'select-difficulty' && (

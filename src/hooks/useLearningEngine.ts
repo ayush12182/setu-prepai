@@ -46,9 +46,10 @@ export const useLearningEngine = (examType: string) => {
   const fetchNodes = async (parentId: string | null = null) => {
     setLoading(true);
     try {
+      // 1. Fetch the nodes
       let query = supabase
         .from('learning_nodes')
-        .select('*')
+        .select('*') // Includes 'keywords' from migration
         .eq('exam_type', examType)
         .order('sort_order', { ascending: true });
       
@@ -60,21 +61,57 @@ export const useLearningEngine = (examType: string) => {
 
       const { data, error: fetchErr } = await query;
       
-      if (fetchErr) {
-        // FALLBACK: If table doesn't exist (42P01), use mock data
-        if (fetchErr.code === '42P01') {
-          console.warn("[LearningEngine] Table missing, using local fallback nodes.");
-          return MOCK_NODES.filter(n => n.exam_type === examType && n.parent_id === parentId) as LearningNode[];
-        }
-        throw fetchErr;
+      if (fetchErr) throw fetchErr;
+
+      // 2. Fetch Intelligence Scores for these nodes
+      const { data: { user } } = await supabase.auth.getUser();
+      const nodeIds = (data || []).map(n => n.id);
+      
+      let scores: any[] = [];
+      if (user && nodeIds.length > 0) {
+        const { data: intelData } = await supabase
+          .from('v_user_node_intelligence' as any)
+          .select('*')
+          .eq('user_id', user.id)
+          .in('node_id', nodeIds);
+        scores = intelData || [];
       }
-      return data as LearningNode[];
+
+      // Merge scores into nodes
+      const nodesWithIntel = (data || []).map(node => {
+        const intel = scores.find(s => s.node_id === node.id);
+        return {
+          ...node,
+          weak_score: intel?.weak_score ?? null,
+          total_attempts: intel?.total_attempts ?? 0,
+          last_attempted_at: intel?.last_attempted_at ?? null,
+        };
+      });
+
+      return nodesWithIntel as LearningNode[];
     } catch (err: any) {
       console.error("[LearningEngine] Error:", err);
-      // Last-ditch local fallback
-      return MOCK_NODES.filter(n => n.exam_type === examType && n.parent_id === parentId) as LearningNode[];
+      return MOCK_NODES.filter(n => n.exam_type === examType && n.parent_id === parentId);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Semantic Search Helper: Returns nodes matching title OR keywords
+  const searchSemantic = async (queryTerm: string) => {
+    if (!queryTerm) return [];
+    try {
+      const { data, error } = await supabase
+        .from('learning_nodes')
+        .select('*')
+        .eq('exam_type', examType)
+        .or(`name.ilike.%${queryTerm}%,keywords.cs.{${queryTerm.toLowerCase()}}`)
+        .limit(20);
+      
+      if (error) throw error;
+      return data as LearningNode[];
+    } catch (e) {
+      return [];
     }
   };
 
