@@ -116,8 +116,9 @@ export default function B2BTests() {
       console.error(err);
       setSessions([]); 
       setMaterials([]);
+    } finally { 
+      setLoadingSessions(false); 
     }
-      } finally { setLoadingSessions(false); }
   };
 
 
