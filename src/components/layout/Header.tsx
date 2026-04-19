@@ -16,6 +16,7 @@ import { useExamMode, ExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { toast } from 'sonner';
 import { ModeToggle } from '@/components/mode-toggle';
+import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   onMenuClick?: () => void;
