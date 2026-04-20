@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles DROP CONSTRAINT profiles_target_exam_check;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_target_exam_check CHECK (target_exam = ANY (ARRAY['JEE Main'::text, 'JEE Advanced'::text, 'Both'::text, 'NEET'::text]));

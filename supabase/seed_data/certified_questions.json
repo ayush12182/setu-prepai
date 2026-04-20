@@ -1,0 +1,62 @@
+[
+  {
+    "topic": "Kinematics",
+    "subtopic": "Motion in 1D",
+    "concept": "Relative Velocity",
+    "difficulty": "medium",
+    "question_text": "Two cars A and B are moving in the same direction with velocities 30 m/s and 20 m/s respectively. When car A is 100m behind B, it applies brakes providing a deceleration of 2 m/s². What is the minimum time to avoid collision?",
+    "options": ["5 s", "10 s", "15 s", "20 s"],
+    "correct_index": 0,
+    "explanation": "Relative velocity v_rel = 30 - 20 = 10 m/s. Relative deceleration a_rel = 2 m/s². To avoid collision, relative distance s = 100m. Using v² = u² + 2as is for stop, but here we need v_rel = 0. Time t = u_rel / a_rel = 10 / 2 = 5 s.",
+    "is_verified": true,
+    "tags": ["Relative Motion", "Mechanics"]
+  },
+  {
+    "topic": "Kinematics",
+    "subtopic": "Projectile Motion",
+    "concept": "Range and Height",
+    "difficulty": "hard",
+    "question_text": "A projectile is fired at an angle of 45° with the horizontal. Elevation angle of the projectile at its highest point as seen from the point of projection is:",
+    "options": ["tan⁻¹(1/2)", "45°", "60°", "tan⁻¹(1/4)"],
+    "correct_index": 0,
+    "explanation": "At highest point, H = u²sin²θ/2g and Range R = u²sin2θ/g. From projection point, the horizontal distance is R/2. Elevation angle α = tan⁻¹(H / (R/2)) = tan⁻¹(2H/R). Since θ=45°, H = u²(1/2)/2g = u²/4g and R = u²/g. So 2H/R = 2(1/4) = 1/2. α = tan⁻¹(1/2).",
+    "is_verified": true,
+    "tags": ["Projectile", "JEE Mains"]
+  },
+  {
+    "topic": "Laws of Motion",
+    "subtopic": "Friction",
+    "concept": "Static and Kinetic Friction",
+    "difficulty": "medium",
+    "question_text": "A block of 10kg is kept on a rough horizontal surface (μs=0.5, μk=0.4). A horizontal force of 45N is applied. What is the friction force acting on the block?",
+    "options": ["45 N", "50 N", "40 N", "0 N"],
+    "correct_index": 0,
+    "explanation": "Max static friction fs_max = μs * m * g = 0.5 * 10 * 10 = 50N. Since applied force (45N) < fs_max (50N), the block remains at rest. Friction force = Applied force = 45N.",
+    "is_verified": true,
+    "tags": ["Friction", "Mechanics"]
+  },
+  {
+    "topic": "Electrostatics",
+    "subtopic": "Coulomb's Law",
+    "concept": "Superposition Principle",
+    "difficulty": "hard",
+    "question_text": "Four charges +q, +q, -q, -q are placed at the corners of a square of side 'a'. What is the electric potential at the center of the square?",
+    "options": ["Zero", "4kq/a", "√2kq/a", "kq/a²"],
+    "correct_index": 0,
+    "explanation": "Potential is a scalar quantity. Distance from corners to center is r = a/√2. Net V = V1 + V2 + V3 + V4 = k(q/r + q/r - q/r - q/r) = 0.",
+    "is_verified": true,
+    "tags": ["Potential", "Superposition"]
+  },
+  {
+    "topic": "Mole Concept & Stoichiometry",
+    "subtopic": "Mole Concept",
+    "concept": "Number of Particles",
+    "difficulty": "easy",
+    "question_text": "How many atoms are present in 1 mole of Ozone (O₃)?",
+    "options": ["6.022 × 10²³", "1.806 × 10²⁴", "3", "12.044 × 10²³"],
+    "correct_index": 1,
+    "explanation": "1 mole of O₃ = 6.022 × 10²³ molecules. Each molecule has 3 atoms. Total atoms = 3 * 6.022 × 10²³ = 18.066 × 10²³ = 1.806 × 10²⁴.",
+    "is_verified": true,
+    "tags": ["Mole Concept", "Chemistry"]
+  }
+]
