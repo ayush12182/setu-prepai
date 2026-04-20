@@ -111,7 +111,7 @@ const PracticePage: React.FC = () => {
     setState({ step: 'quiz', node, difficulty, adaptiveMode });
     
     // Trigger question generation for the selected node
-    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
+    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam, node.name);
   };
 
   // --- ADAPTIVE LAUNCHERS ---
@@ -123,7 +123,7 @@ const PracticePage: React.FC = () => {
     const mockNode: LearningNode = { id: 'adaptive', name: title, type: 'root', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
     
     setState({ step: 'quiz', node: mockNode, difficulty: intensity, adaptiveMode: modeName });
-    generateQuestions(mockNode.id, intensity === 'mixed' ? 'medium' : intensity, 10, examParam);
+    generateQuestions(mockNode.id, intensity === 'mixed' ? 'medium' : intensity, 10, examParam, title);
   };
 
   const handleQuizComplete = (result: QuizResult) => {
@@ -169,7 +169,7 @@ const PracticePage: React.FC = () => {
     if (state.step !== 'results' && state.step !== 'test-results') return;
     const { node, difficulty } = state;
     setState({ step: 'quiz', node, difficulty });
-    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam);
+    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam, node.name);
   };
 
   const handleGetSimilar = async (question: { concept_tested: string; question_text: string }) => {
