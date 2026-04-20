@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { callGeminiJSON } from "../_shared/gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,11 +31,11 @@ Output format:
 }
 
 Rules:
-- 6-14 subtopics, ordered basic → advanced
+- 6-14 subtopics, ordered basic to advanced
 - 3-6 microtopics per subtopic
-- No generic headings (no "Introduction", "Overview", "Basics")
+- No generic headings (no Introduction, Overview, Basics)
 - Weightage = frequency in past exam papers
-- Biology: NCERT lines, diagrams, factual traps, memory clusters
+- Biology: NCERT lines, diagrams, factual traps
 - Physics: numericals, derivations, graph-based thinking
 - Chemistry: reaction mechanisms, exceptions, memory rules
 - Math: problem types, standard forms, formula-driven`;
@@ -51,13 +52,10 @@ serve(async (req) => {
       });
     }
 
-    const OPENAI_KEY = Deno.env.get("OPENAI_API_KEY");
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
-    if (!OPENAI_KEY) throw new Error("OPENAI_API_KEY not configured");
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
     // CACHE HIT: return existing AI-generated tree
     if (chapter_node_id) {
@@ -86,33 +84,13 @@ serve(async (req) => {
       }
     }
 
-    // GENERATE: Call OpenAI with retry
-    let parsed: any = null;
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${OPENAI_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-              { role: "system", content: CURRICULUM_PROMPT },
-              { role: "user", content: JSON.stringify({ subject, chapter, exam }) },
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.3,
-          }),
-        });
-
-        if (!res.ok) throw new Error(`OpenAI ${res.status}: ${await res.text()}`);
-        const json = await res.json();
-        parsed = JSON.parse(json.choices[0].message.content);
-        if (parsed?.subtopics?.length) break;
-      } catch (e) {
-        if (attempt === 3) throw e;
-        await new Promise((r) => setTimeout(r, 1000 * attempt));
-      }
-    }
+    // GENERATE via Gemini
+    const parsed = await callGeminiJSON<{ chapter: string; subtopics: any[] }>(
+      GEMINI_API_KEY,
+      CURRICULUM_PROMPT,
+      JSON.stringify({ subject, chapter, exam }),
+      0.3
+    );
 
     if (!parsed?.subtopics?.length) throw new Error("Invalid curriculum response from AI");
 

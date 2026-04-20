@@ -1,10 +1,5 @@
-/**
- * generate-learning-profile — Supabase Edge Function
- * 
- * UNIVERSAL ENGINE: Migrated to OpenAI GPT-4o
- */
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { callGeminiJSON } from "../_shared/gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,43 +11,21 @@ serve(async (req) => {
 
   try {
     const { userId, quizAttempts } = await req.json();
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
+    const systemPrompt = `You are an AI learning analyst for JEE/NEET students. Analyze quiz attempts and identify weak topics, strong topics, and conceptual gaps. Return a JSON object with a "profile" object.`;
+    const userPrompt = `Student Quiz Attempts: ${JSON.stringify(quizAttempts)}. Identify: weak_topics (array), strong_topics (array), concept_score (0-100), speed_score (0-100), recommended_focus (array of topic strings).`;
 
-    console.log(`[UniversalEngine] Generating learning profile for user: ${userId}`);
+    const data = await callGeminiJSON<{ profile: any }>(GEMINI_API_KEY, systemPrompt, userPrompt, 0.3);
 
-    const systemPrompt = `You are an AI learning analyst. Analyze student quiz attempts and identify weak topics, strong topics, and conceptual gaps. Return a JSON object with a "profile" object.`;
-    const userPrompt = `Student Quiz Attempts: ${JSON.stringify(quizAttempts)}. Identify: weak_topics (array), strong_topics (array), concept_score (0-100), and speed_score (0-100).`;
-
-    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        response_format: { type: "json_object" },
-      }),
+    return new Response(JSON.stringify({ profile: data.profile || data }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
-    if (!aiRes.ok) throw new Error(`OpenAI error: ${aiRes.status}`);
-    const data = await aiRes.json();
-    const profile = JSON.parse(data.choices[0].message.content).profile;
-
-    return new Response(JSON.stringify({ profile }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
-
   } catch (error) {
-    console.error("[UniversalEngine] Profile Error:", error);
+    console.error("[generate-learning-profile]", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Internal Error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

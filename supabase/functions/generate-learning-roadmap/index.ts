@@ -1,10 +1,5 @@
-/**
- * generate-learning-roadmap — Supabase Edge Function
- * 
- * UNIVERSAL ENGINE: Migrated to OpenAI GPT-4o
- */
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { callGeminiJSON } from "../_shared/gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,43 +11,21 @@ serve(async (req) => {
 
   try {
     const { userId, profileData } = await req.json();
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
-    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
+    const systemPrompt = `You are a career counselor and academic planner for JEE/NEET aspirants. Generate a personalized 4-week learning roadmap. Return a JSON object with a "roadmap" array.`;
+    const userPrompt = `Student Data: ${JSON.stringify(profileData)}. Create a 4-week plan. Each week must have: week (number), title, focus_area, topics (array of strings), daily_target (string), tip (string).`;
 
-    console.log(`[UniversalEngine] Generating roadmap for user: ${userId}`);
+    const data = await callGeminiJSON<{ roadmap: any[] }>(GEMINI_API_KEY, systemPrompt, userPrompt, 0.5);
 
-    const systemPrompt = `You are a career counselor and academic planner. Generate a 4-week personalized learning roadmap. Return a JSON object with a "roadmap" array.`;
-    const userPrompt = `Student Data: ${JSON.stringify(profileData)}. Create a 4-week plan. Each week must have a title and list of topics.`;
-
-    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        response_format: { type: "json_object" },
-      }),
+    return new Response(JSON.stringify({ roadmap: data.roadmap || [] }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
-    if (!aiRes.ok) throw new Error(`OpenAI error: ${aiRes.status}`);
-    const data = await aiRes.json();
-    const roadmap = JSON.parse(data.choices[0].message.content).roadmap;
-
-    return new Response(JSON.stringify({ roadmap }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
-
   } catch (error) {
-    console.error("[UniversalEngine] Roadmap Error:", error);
+    console.error("[generate-learning-roadmap]", error);
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Internal Error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" }
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
