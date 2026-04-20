@@ -83,3 +83,6 @@ verify_jwt = false
 
 [functions.ai-proxy]
 verify_jwt = false
+
+[functions.generate-subtopics]
+verify_jwt = false
