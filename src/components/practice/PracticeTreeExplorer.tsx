@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useLearningEngine, LearningNode } from '@/hooks/useLearningEngine';
 import { usePracticeStore } from '@/store/practiceStore';
-import { ChevronRight, ChevronDown, BookOpen, Target, Loader2, ArrowRight, Sparkles } from 'lucide-react';
+import { useExamMode } from '@/contexts/ExamModeContext';
+import { ChevronRight, ChevronDown, Loader2, ArrowRight, Sparkles } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { NodeStabilityIndicator } from './IntelligenceIndicators';
+import { STATIC_CHAPTER_TOPICS } from '@/data/staticTopics';
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   easy: 'text-emerald-400',
@@ -17,6 +20,23 @@ const WEIGHTAGE_DOT: Record<string, string> = {
   medium: 'bg-yellow-400',
   low: 'bg-muted-foreground',
 };
+
+function makeStaticNodes(chapterNode: LearningNode): LearningNode[] {
+  const topics = STATIC_CHAPTER_TOPICS[chapterNode.name];
+  if (!topics?.length) return [];
+  return topics.map((t, i) => ({
+    id: `static-${chapterNode.id}-${i}`,
+    parent_id: chapterNode.id,
+    name: t.name,
+    type: 'topic' as const,
+    exam_type: chapterNode.exam_type,
+    subject_node_id: null,
+    sort_order: i + 1,
+    difficulty_level: t.difficulty,
+    weightage_estimate: t.weightage,
+    ai_generated: false,
+  }));
+}
 
 const NodeItem: React.FC<{
   node: LearningNode;
@@ -31,7 +51,7 @@ const NodeItem: React.FC<{
 
   const isExpanded = expandedNodeIds.has(node.id);
   const isSelected = selectedNode?.id === node.id;
-  const isLeaf = node.type === 'subtopic';
+  const isLeaf = node.type === 'subtopic' || node.id.startsWith('static-');
 
   useEffect(() => {
     if (isExpanded && loadState === 'idle') {
@@ -41,22 +61,41 @@ const NodeItem: React.FC<{
 
   const loadChildren = async () => {
     setLoadState('loading');
+
+    // Static nodes have no real DB children — skip fetch
+    if (node.id.startsWith('static-')) {
+      setLoadState('done');
+      return;
+    }
+
     const data = await fetchNodes(node.id);
 
     if (data.length === 0 && node.type === 'chapter') {
-      // No children — trigger AI generation
-      setLoadState('generating');
-      const generated = await generateSubtopicsForChapter(node, subjectName);
-      setChildren(generated);
+      // Try static fallback first (instant)
+      const staticNodes = makeStaticNodes(node);
+      if (staticNodes.length > 0) {
+        setChildren(staticNodes);
+        setLoadState('done');
+        // Fire AI generation in background to enrich with DB data
+        setLoadState('generating');
+        const generated = await generateSubtopicsForChapter(node, subjectName);
+        if (generated.length > 0) setChildren(generated);
+        setLoadState('done');
+      } else {
+        // No static fallback — try AI generation directly
+        setLoadState('generating');
+        const generated = await generateSubtopicsForChapter(node, subjectName);
+        setChildren(generated);
+        setLoadState('done');
+      }
     } else {
       setChildren(data);
+      setLoadState('done');
     }
-    setLoadState('done');
   };
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (loadState === 'idle') setLoadState('idle'); // reset to allow re-fetch on next expand
     toggleNode(node.id);
   };
 
@@ -84,7 +123,7 @@ const NodeItem: React.FC<{
                 onClick={handleToggle}
                 className="w-5 h-5 rounded flex items-center justify-center hover:bg-accent/20 text-muted-foreground group-hover:text-foreground transition-all"
               >
-                {loadState === 'loading' || loadState === 'generating' ? (
+                {loadState === 'loading' ? (
                   <Loader2 className="w-3 h-3 animate-spin" />
                 ) : isExpanded ? (
                   <ChevronDown size={14} />
@@ -132,6 +171,9 @@ const NodeItem: React.FC<{
               {Math.round(((node as any).weak_score || 0) * 100)}%
             </span>
           )}
+          {loadState === 'generating' && isExpanded && (
+            <Sparkles className="w-3 h-3 text-violet-400 animate-pulse" />
+          )}
           <ArrowRight
             className={cn(
               'w-4 h-4 text-accent transition-all',
@@ -150,12 +192,10 @@ const NodeItem: React.FC<{
             transition={{ duration: 0.25, ease: 'easeOut' }}
             className="overflow-hidden ml-6 mt-1 border-l border-border/20"
           >
-            {loadState === 'generating' ? (
+            {loadState === 'loading' ? (
               <div className="flex items-center gap-2 py-3 pl-4">
-                <Sparkles className="w-3 h-3 text-violet-400 animate-pulse" />
-                <p className="text-[10px] text-violet-400 font-medium animate-pulse">
-                  Generating AI curriculum tree...
-                </p>
+                <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                <p className="text-[10px] text-muted-foreground">Loading topics...</p>
               </div>
             ) : children.length > 0 ? (
               <div className="py-1">
@@ -182,12 +222,15 @@ const NodeItem: React.FC<{
 export const PracticeTreeExplorer: React.FC<{ onSelect: (node: LearningNode) => void }> = ({
   onSelect,
 }) => {
-  const { fetchNodes, loading } = useLearningEngine('NEET');
+  const { isNeet, isCuet } = useExamMode();
+  const examType = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE';
+  const { fetchNodes, loading } = useLearningEngine(examType);
   const [subjects, setSubjects] = useState<LearningNode[]>([]);
 
   useEffect(() => {
+    setSubjects([]);
     fetchNodes(null).then(setSubjects);
-  }, []);
+  }, [examType]);
 
   if (loading && subjects.length === 0) {
     return (
