@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { generateSubtopics } from '@/lib/curriculumService';
 
 export interface LearningNode {
   id: string;
@@ -9,6 +10,18 @@ export interface LearningNode {
   exam_type: string;
   subject_node_id: string | null;
   sort_order: number;
+  // AI curriculum metadata
+  difficulty_level?: 'easy' | 'medium' | 'hard';
+  weightage_estimate?: 'low' | 'medium' | 'high';
+  concept_type?: 'theoretical' | 'numerical' | 'mixed' | 'memory-based';
+  ai_generated?: boolean;
+  common_mistakes?: string[];
+  expected_question_types?: string[];
+  microtopic_tags?: string[];
+  // Intelligence scores (from v_user_node_intelligence)
+  weak_score?: number | null;
+  total_attempts?: number;
+  last_attempted_at?: string | null;
 }
 
 
@@ -132,9 +145,32 @@ export const useLearningEngine = (examType: string) => {
     }
   };
 
+  // Trigger AI generation for a chapter node if it has no children yet
+  const generateSubtopicsForChapter = async (
+    chapterNode: LearningNode,
+    subjectName: string
+  ): Promise<LearningNode[]> => {
+    setLoading(true);
+    try {
+      const tree = await generateSubtopics(
+        subjectName,
+        chapterNode.name,
+        chapterNode.exam_type,
+        chapterNode.id
+      );
+      return tree.topics as LearningNode[];
+    } catch (err: any) {
+      console.error('[LearningEngine] generateSubtopics error:', err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     fetchNodes,
     fetchAllChildren,
+    generateSubtopicsForChapter,
     loading,
     error
   };
