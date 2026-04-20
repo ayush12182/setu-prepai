@@ -1,0 +1,10 @@
+Environment Variables
+
+Local development: create a file named .env.local with the following key
+VITE_OPENAI_API_KEY=your-openai-api-key
+
+Vercel: set Environment Variables in Project Settings → Environment Variables
+Name: VITE_OPENAI_API_KEY
+Value: your-openai-api-key
+Environments: Production, Preview, Development
+
