@@ -193,7 +193,24 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     setBatchInfo(null);
 
     try {
-      // 1. PRIMARY: RPC with SECURITY DEFINER (bypasses RLS)
+      // 1. PRIMARY: Vercel API route (service-role key, bypasses RLS completely)
+      try {
+        const res = await fetch('/api/validate-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+        const data = await res.json();
+        if (res.ok && data.valid) {
+          setCodeState('valid');
+          setBatchInfo(data);
+          return;
+        }
+        if (res.status === 404) { setCodeState('invalid'); return; }
+        if (res.status === 403) { setCodeState('invalid'); return; }
+      } catch { /* API route unavailable (dev mode) — fall through */ }
+
+      // 2. FALLBACK: SECURITY DEFINER RPC (bypasses RLS if migration applied)
       const { data: rows, error: rpcErr } = await supabase
         .rpc('validate_batch_code' as any, { p_code: code });
 
@@ -209,14 +226,9 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
         });
         return;
       }
+      if (!rpcErr && rows && (rows as any[]).length === 0) { setCodeState('invalid'); return; }
 
-      // RPC returned empty rows = code not found
-      if (!rpcErr && rows && (rows as any[]).length === 0) {
-        setCodeState('invalid');
-        return;
-      }
-
-      // 2. FALLBACK: edge function (if RPC migration hasn't run yet)
+      // 3. LAST FALLBACK: edge function
       const { data, error } = await supabase.functions.invoke('validate-join-code', {
         body: { join_code: code },
       });
@@ -268,28 +280,34 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
         user_type: 'student',
       });
 
-      // Join batch: PRIMARY = student_join_batch RPC (SECURITY DEFINER, bypasses RLS)
+      // Join batch: PRIMARY = Vercel API route (service-role key, no RLS)
       if (batchInfo) {
-        const { data: joinRows, error: joinRpcErr } = await supabase
-          .rpc('student_join_batch' as any, {
-            p_code:       joinCode.toUpperCase(),
-            p_student_id: user.id,
-          });
+        let joined = false;
 
-        if (joinRpcErr || !joinRows || (joinRows as any[]).length === 0) {
-          // Fallback: edge function
-          const { data: joinData, error: joinEdgeErr } = await supabase.functions.invoke('validate-join-code', {
+        try {
+          const res = await fetch('/api/validate-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: joinCode.toUpperCase(), student_id: user.id }),
+          });
+          joined = res.ok;
+        } catch { /* fall through */ }
+
+        if (!joined) {
+          // Fallback: SECURITY DEFINER RPC
+          const { data: joinRows, error: joinRpcErr } = await supabase
+            .rpc('student_join_batch' as any, {
+              p_code:       joinCode.toUpperCase(),
+              p_student_id: user.id,
+            });
+          joined = !joinRpcErr && joinRows && (joinRows as any[]).length > 0;
+        }
+
+        if (!joined) {
+          // Last fallback: edge function
+          await supabase.functions.invoke('validate-join-code', {
             body: { join_code: joinCode.toUpperCase(), student_id: user.id },
           });
-          if (joinEdgeErr || joinData?.error) {
-            // Last resort: direct upsert (might fail if RLS blocks, non-fatal)
-            await supabase
-              .from('student_batch_map' as any)
-              .upsert(
-                { student_id: user.id, batch_id: batchInfo.batch_id },
-                { onConflict: 'student_id,batch_id', ignoreDuplicates: true } as any
-              );
-          }
         }
       }
 
