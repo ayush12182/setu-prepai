@@ -25,19 +25,27 @@ serve(async (req) => {
 
     const code = join_code.trim().toUpperCase();
 
-    // ── 1. Find the batch ─────────────────────────────────────────────────
+    // ── 1. Find the batch (only safe columns) ─────────────────────────────
     const { data: batch, error: batchErr } = await supabase
       .from("batches")
-      .select("id, name, teacher_id, exam_type, total_students, is_active")
+      .select("id, name, teacher_id, target_exam, is_active")
       .eq("join_code", code)
-      .single();
+      .maybeSingle();
 
-    if (batchErr || !batch) {
+    if (batchErr) {
+      console.error("[validate-join-code] batch query error:", batchErr.message);
       return new Response(JSON.stringify({ error: "Invalid code. Please check with your teacher." }), {
         status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    if (!batch) {
+      return new Response(JSON.stringify({ error: "Invalid code. Please check with your teacher." }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Only block if explicitly set to false (null/undefined = active)
     if (batch.is_active === false) {
       return new Response(JSON.stringify({ error: "This batch is no longer active." }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -47,15 +55,23 @@ serve(async (req) => {
     // ── 2. Resolve teacher name ───────────────────────────────────────────
     const { data: teacherProfile } = await supabase
       .from("profiles")
-      .select("full_name")
+      .select("full_name, institution_name")
       .eq("user_id", batch.teacher_id)
-      .single();
+      .maybeSingle();
 
-    const teacher_name = teacherProfile?.full_name || "Your Teacher";
+    const teacher_name =
+      teacherProfile?.institution_name ||
+      teacherProfile?.full_name ||
+      "Your Teacher";
 
-    // ── 3. If student_id provided → join them ─────────────────────────────
+    // ── 3. Current student count ──────────────────────────────────────────
+    const { count: current_count } = await supabase
+      .from("student_batch_map")
+      .select("*", { count: "exact", head: true })
+      .eq("batch_id", batch.id);
+
+    // ── 4. If student_id provided → join them ─────────────────────────────
     if (student_id) {
-      // Idempotent: ignore duplicate joins
       const { error: mapErr } = await supabase
         .from("student_batch_map")
         .upsert(
@@ -70,24 +86,13 @@ serve(async (req) => {
         });
       }
 
-      // Increment total_students (only if this is a new join)
-      const { count } = await supabase
-        .from("student_batch_map")
-        .select("*", { count: "exact", head: true })
-        .eq("batch_id", batch.id);
-
-      await supabase
-        .from("batches")
-        .update({ total_students: count ?? batch.total_students + 1 })
-        .eq("id", batch.id);
-
-      // Update student profile with teacher + org linkage
+      // Update student profile with teacher linkage
       await supabase
         .from("profiles")
-        .update({ teacher_id: batch.teacher_id, organization_id: null })
+        .update({ teacher_id: batch.teacher_id })
         .eq("user_id", student_id);
 
-      // Seed leaderboard row (score = 0, will update as they practice)
+      // Seed leaderboard row
       await supabase
         .from("batch_leaderboard")
         .upsert(
@@ -95,27 +100,43 @@ serve(async (req) => {
           { onConflict: "student_id,batch_id", ignoreDuplicates: true }
         );
 
-      // Refresh ranks for this batch
-      await supabase.rpc("refresh_batch_ranks", { p_batch_id: batch.id });
+      // Refresh ranks (non-fatal)
+      try {
+        await supabase.rpc("refresh_batch_ranks", { p_batch_id: batch.id });
+      } catch { /* non-fatal */ }
+
+      // Fresh count after join
+      const { count: fresh_count } = await supabase
+        .from("student_batch_map")
+        .select("*", { count: "exact", head: true })
+        .eq("batch_id", batch.id);
+
+      return new Response(
+        JSON.stringify({
+          valid: true,
+          batch_id: batch.id,
+          batch_name: batch.name,
+          teacher_name,
+          exam_type: batch.target_exam ?? "JEE",
+          total_students: fresh_count ?? 0,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    // ── 4. Get fresh count ────────────────────────────────────────────────
-    const { count: fresh_count } = await supabase
-      .from("student_batch_map")
-      .select("*", { count: "exact", head: true })
-      .eq("batch_id", batch.id);
-
+    // ── 5. Validation-only response (no student_id) ───────────────────────
     return new Response(
       JSON.stringify({
         valid: true,
         batch_id: batch.id,
         batch_name: batch.name,
         teacher_name,
-        exam_type: batch.exam_type,
-        total_students: fresh_count ?? 0,
+        exam_type: batch.target_exam ?? "JEE",
+        total_students: current_count ?? 0,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
+
   } catch (err) {
     console.error("[validate-join-code]", err);
     return new Response(JSON.stringify({ error: "Internal error. Please try again." }), {

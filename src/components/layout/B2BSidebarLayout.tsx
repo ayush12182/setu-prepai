@@ -99,11 +99,15 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
         <div className="p-4 border-t border-border mt-auto">
           <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-secondary/50 border border-border">
              <div className="w-8 h-8 rounded-full bg-accent/20 text-accent font-bold flex items-center justify-center text-xs">
-               {(profile?.full_name || 'Admin')[0].toUpperCase()}
+               {(profile?.institution_name || profile?.full_name || 'T')[0].toUpperCase()}
              </div>
              <div className="flex-1 min-w-0">
-               <p className="text-sm font-bold text-foreground truncate">{profile?.full_name || 'Admin User'}</p>
-               <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground truncate">{profile?.user_type?.replace('b2b_', '') || 'Mentor'}</p>
+               <p className="text-sm font-bold text-foreground truncate">
+                 {profile?.institution_name || profile?.full_name || 'Teacher'}
+               </p>
+               <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground truncate">
+                 {profile?.user_type?.replace('b2b_', '') || 'Teacher'}
+               </p>
              </div>
           </div>
           

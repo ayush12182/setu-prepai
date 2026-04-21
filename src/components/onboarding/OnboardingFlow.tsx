@@ -321,10 +321,12 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     setSaving(true);
     try {
       const examGoal = EXAM_MAP[teacherExam] ?? 'JEE Main';
+      const displayName = institutionName.trim() || null;
       await updateProfile({
         user_type: 'teacher',
         target_exam: examGoal,
-        institution_name: institutionName.trim() || null,
+        institution_name: displayName,
+        full_name: displayName || undefined,
       } as any);
       await refreshProfile();
       onComplete?.();

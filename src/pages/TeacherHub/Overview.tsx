@@ -2,307 +2,383 @@ import React, { useEffect, useState } from 'react';
 import { B2BSidebarLayout } from '@/components/layout/B2BSidebarLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { 
-  Users, 
-  Target, 
-  Copy, 
-  Check, 
-  TrendingUp, 
-  BookOpen,
-  ArrowUpRight,
-  ExternalLink,
-  Ticket,
-  Plus,
-  Loader2,
-  Clock,
-  Sparkles,
-  Link as LinkIcon
+import {
+  Users, Target, Copy, TrendingUp, BookOpen,
+  ArrowUpRight, ExternalLink, Ticket, Plus,
+  Loader2, Clock, Sparkles, Link as LinkIcon,
+  GraduationCap, BarChart3, CheckCircle2, ChevronRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
+
+interface Batch {
+  id: string;
+  name: string;
+  join_code: string;
+  total_students?: number;
+  target_exam?: string;
+  created_at: string;
+}
 
 export default function B2BMainDashboard() {
   const { profile } = useAuth();
-  const [batchCode, setBatchCode] = useState<string>('');
-  const [loadingCode, setLoadingCode] = useState(false);
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [activeBatch, setActiveBatch] = useState<Batch | null>(null);
+  const [loadingBatches, setLoadingBatches] = useState(true);
+  const [generatingCode, setGeneratingCode] = useState(false);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [stats, setStats] = useState({
-    activeStudents: 0,
-    tasksPushed: 0,
-    avgAccuracy: 0
-  });
+  const [stats, setStats] = useState({ totalStudents: 0, tasksPushed: 0, avgAccuracy: 0 });
+  const [codeCopied, setCodeCopied] = useState(false);
 
   useEffect(() => {
+    if (!profile?.user_id) return;
     const init = async () => {
-      if (profile?.user_id) {
-          // 1. Fetch active batch code
-          const { data: batches } = await supabase
-            .from('batches')
-            .select('id, join_code')
-            .eq('teacher_id', profile.user_id)
-            .order('created_at', { ascending: false })
-            .limit(1);
-          
-          if (batches && batches.length > 0) {
-            setBatchCode(batches[0].join_code);
-            
-            // Fetch initial activity
-            const { data: activity } = await supabase
-              .from('student_activity' as any)
-              .select('*, profiles(full_name)')
-              .eq('batch_id', batches[0].id)
-              .order('created_at', { ascending: false })
-              .limit(5);
-            
-            if (activity) setRecentActivity(activity);
+      setLoadingBatches(true);
+      try {
+        // Fetch all batches for this teacher
+        const { data: batchData } = await supabase
+          .from('batches')
+          .select('id, name, join_code, total_students, target_exam, created_at')
+          .eq('teacher_id', profile.user_id)
+          .order('created_at', { ascending: false });
 
-            // Subscribe to real-time updates
-            const channel = supabase
-              .channel('teacher_live_feed')
-              .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'student_activity',
-                filter: `batch_id=eq.${batches[0].id}`
-              }, async (payload) => {
-                // Fetch the student's name for the new activity
-                const { data: student } = await supabase.from('profiles').select('full_name').eq('user_id', payload.new.student_id).single();
-                const freshEvent = { ...payload.new, profiles: { full_name: student?.full_name || 'A Student' } };
-                setRecentActivity(prev => [freshEvent, ...prev].slice(0, 5));
-                toast.info(`${freshEvent.profiles.full_name} completed a practice session!`);
-              })
-              .subscribe();
+        if (batchData && batchData.length > 0) {
+          setBatches(batchData as Batch[]);
+          const primary = batchData[0] as Batch;
+          setActiveBatch(primary);
 
-            return () => {
-              supabase.removeChannel(channel);
-            };
-          }
-
-          // 2. Simple stats fetch
+          // Student count across all batches
           const { count: studentCount } = await supabase
-            .from('profiles')
+            .from('student_batch_map' as any)
             .select('*', { count: 'exact', head: true })
-            .eq('teacher_id', profile.user_id);
-          
-          const { count: taskCount } = await supabase
-            .from('teacher_tasks' as any)
-            .select('*', { count: 'exact', head: true })
-            .eq('teacher_id', profile.user_id);
+            .in('batch_id', batchData.map((b: any) => b.id));
 
-          setStats({
-              activeStudents: studentCount || 0,
-              tasksPushed: taskCount || 0,
-              avgAccuracy: 74
-          });
+          setStats(prev => ({ ...prev, totalStudents: studentCount ?? 0 }));
+
+          // Recent activity for primary batch
+          const { data: activity } = await supabase
+            .from('student_activity' as any)
+            .select('*, profiles(full_name)')
+            .eq('batch_id', primary.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+          if (activity) setRecentActivity(activity);
+
+          // Subscribe to real-time
+          const channel = supabase
+            .channel('teacher_live_feed')
+            .on('postgres_changes', {
+              event: 'INSERT', schema: 'public',
+              table: 'student_activity',
+              filter: `batch_id=eq.${primary.id}`,
+            }, async (payload) => {
+              const { data: student } = await supabase.from('profiles').select('full_name').eq('user_id', payload.new.student_id).single();
+              const event = { ...payload.new, profiles: { full_name: student?.full_name || 'A Student' } };
+              setRecentActivity(prev => [event, ...prev].slice(0, 5));
+              toast.info(`${event.profiles.full_name} completed a practice session!`);
+            })
+            .subscribe();
+
+          return () => supabase.removeChannel(channel);
+        }
+      } finally {
+        setLoadingBatches(false);
       }
     };
     init();
-  }, [profile]);
+  }, [profile?.user_id]);
 
   const handleGenerateCode = async () => {
-    setLoadingCode(true);
+    setGeneratingCode(true);
     try {
-      const generateUniqueCode = async (): Promise<string> => {
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
-        let code = '';
-        let isUnique = false;
-        let attempts = 0;
-        while (!isUnique && attempts < 10) {
-          code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-          const { data } = await supabase.from('batches').select('id').eq('join_code', code).maybeSingle();
-          if (!data) isUnique = true;
-          attempts++;
-        }
-        return code;
-      };
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      let isUnique = false;
+      let attempts = 0;
+      while (!isUnique && attempts < 10) {
+        code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const { data } = await supabase.from('batches').select('id').eq('join_code', code).maybeSingle();
+        if (!data) isUnique = true;
+        attempts++;
+      }
 
-      const newJoinCode = await generateUniqueCode();
-      const { error } = await supabase.from('batches').insert({
-        name: 'General Batch',
-        teacher_id: profile?.user_id,
-        join_code: newJoinCode,
-        target_exam: profile?.target_exam || 'JEE_MAINS'
-      });
+      const batchName = profile?.institution_name
+        ? `${profile.institution_name} Batch`
+        : 'General Batch';
+
+      const { data: newBatch, error } = await supabase
+        .from('batches')
+        .insert({
+          name: batchName,
+          teacher_id: profile?.user_id,
+          join_code: code,
+          target_exam: profile?.target_exam || 'JEE_MAINS',
+        })
+        .select()
+        .single();
 
       if (error) throw error;
-      setBatchCode(newJoinCode);
-      toast.success("Class Code generated successfully!");
+      setActiveBatch(newBatch as Batch);
+      setBatches(prev => [newBatch as Batch, ...prev]);
+      toast.success('New batch created with code ' + code);
     } catch (err: any) {
-      toast.error("Failed to generate code: " + err.message);
+      toast.error('Failed to generate code: ' + err.message);
     } finally {
-      setLoadingCode(false);
+      setGeneratingCode(false);
     }
   };
 
-  const copyRefLink = () => {
+  const copyCode = async () => {
+    if (!activeBatch?.join_code) return;
+    await navigator.clipboard.writeText(activeBatch.join_code);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+    toast.success('Code copied!');
+  };
+
+  const copyInviteLink = () => {
     const link = `${window.location.origin}/auth?ref=${profile?.user_id}`;
     navigator.clipboard.writeText(link);
-    toast.success("Invite link copied to clipboard!");
+    toast.success('Invite link copied!');
   };
+
+  const institutionName = profile?.institution_name || profile?.full_name || 'Your Institute';
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  })();
 
   return (
     <B2BSidebarLayout title="Overview">
       <div className="space-y-8 animate-in fade-in duration-500">
-        {/* Header Section */}
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-foreground">Teacher Hub</h1>
-          <p className="text-muted-foreground mt-1 text-lg">Manage your students and guide their practice.</p>
+
+        {/* ── Header ─────────────────────────────────────────────────────── */}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-muted-foreground text-sm font-medium mb-1">{greeting} 👋</p>
+            <h1 className="text-3xl font-black tracking-tight text-foreground">{institutionName}</h1>
+            <p className="text-muted-foreground mt-1">
+              {batches.length > 0
+                ? `${batches.length} batch${batches.length > 1 ? 'es' : ''} · ${stats.totalStudents} student${stats.totalStudents !== 1 ? 's' : ''} enrolled`
+                : 'Set up your first batch to get started'}
+            </p>
+          </div>
+          <Link to="/b2b/batches">
+            <Button variant="outline" className="hidden md:flex items-center gap-2 rounded-xl border-border text-muted-foreground hover:text-foreground">
+              <GraduationCap className="w-4 h-4" /> Manage Batches
+            </Button>
+          </Link>
         </div>
 
-        {/* Action Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Invite Card */}
-          <div className="col-span-1 md:col-span-2 bg-gradient-to-br from-accent to-accent/80 rounded-3xl p-8 text-primary relative overflow-hidden shadow-2xl shadow-accent/20">
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        {/* ── Stats row ──────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {[
+            { label: 'Total Students', value: stats.totalStudents, icon: Users, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+            { label: 'Active Batches', value: batches.length, icon: Layers2, color: 'text-violet-400', bg: 'bg-violet-400/10' },
+            { label: 'Class Accuracy', value: `${stats.avgAccuracy}%`, icon: Target, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+          ].map(stat => (
+            <div key={stat.label} className="bg-card border border-border rounded-2xl p-5 flex items-center gap-4">
+              <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center shrink-0', stat.bg)}>
+                <stat.icon className={cn('w-5 h-5', stat.color)} />
+              </div>
               <div>
-                <h2 className="text-2xl font-black mb-2 flex items-center gap-2 text-primary">
-                  <Ticket className="w-6 h-6" /> Class Invite Code
-                </h2>
-                <p className="text-primary/70 max-w-md font-medium">
-                  Students can join your batch by entering this 6-character code during onboarding.
-                </p>
-                <div className="mt-6 flex items-center gap-4 bg-white/10 p-2 rounded-2xl border border-white/20 backdrop-blur-sm">
-                  <span className="px-4 py-2 font-mono font-bold text-2xl tracking-widest text-primary">
-                    {batchCode || '------'}
-                  </span>
-                  <div className="h-8 w-px bg-white/20" />
-                  {batchCode ? (
-                    <Button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(batchCode);
-                        toast.success("Code copied!");
-                      }}
-                      variant="ghost"
-                      className="hover:bg-white/20 text-primary font-bold transition-all"
-                    >
-                      <Copy className="w-5 h-5 mr-2" />
-                      Copy Code
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={handleGenerateCode}
-                      disabled={loadingCode}
-                      variant="ghost"
-                      className="hover:bg-white/20 text-primary font-bold transition-all"
-                    >
-                      {loadingCode ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Plus className="w-5 h-5 mr-2" />}
-                      Generate Code
-                    </Button>
+                <p className="text-2xl font-black text-foreground">{stat.value}</p>
+                <p className="text-xs text-muted-foreground font-semibold mt-0.5">{stat.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Batch card + Activity ──────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Active Batch / Invite Card */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-accent to-amber-600 rounded-3xl p-7 text-primary shadow-2xl shadow-accent/20 relative overflow-hidden">
+            <div className="absolute -right-12 -bottom-12 w-56 h-56 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute right-8 top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="relative z-10 space-y-5">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Ticket className="w-5 h-5 text-primary/70" />
+                    <p className="text-primary/70 text-sm font-bold uppercase tracking-wider">Active Batch</p>
+                  </div>
+                  <h2 className="text-2xl font-black text-primary">
+                    {activeBatch?.name || (loadingBatches ? '...' : 'No batch yet')}
+                  </h2>
+                  {activeBatch?.target_exam && (
+                    <p className="text-primary/60 text-sm mt-0.5">{activeBatch.target_exam.replace('_', ' ')}</p>
                   )}
                 </div>
-              </div>
-              <div className="flex flex-col gap-3">
-                 <div className="bg-white/20 p-4 rounded-2xl flex items-center gap-4 border border-white/30 text-primary">
-                    <div className="text-3xl font-black">{stats.activeStudents}</div>
-                    <div className="text-xs uppercase font-black opacity-80 leading-tight">Linked<br/>Students</div>
-                 </div>
-                 <Button 
-                   onClick={copyRefLink}
-                   className="bg-white text-accent font-black h-12 rounded-xl border-none hover:bg-neutral-100 flex items-center gap-2"
-                 >
-                   Copy Invite Link <LinkIcon className="w-4 h-4" />
-                 </Button>
-              </div>
-            </div>
-            <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-          </div>
 
-          {/* Productivity */}
-          <div className="bg-card border border-border rounded-3xl p-8 flex flex-col justify-between hover:border-accent/30 transition-all cursor-default">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500">
-                <Target className="w-6 h-6" />
+                {/* Student count badge */}
+                <div className="bg-white/20 border border-white/30 rounded-2xl px-5 py-3 text-center shrink-0">
+                  <p className="text-2xl font-black text-primary">{stats.totalStudents}</p>
+                  <p className="text-[10px] uppercase font-black text-primary/70 tracking-widest mt-0.5">Students</p>
+                </div>
               </div>
-              <TrendingUp className="text-emerald-500 w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-4xl font-black text-foreground mb-1">{stats.avgAccuracy}%</p>
-              <p className="text-muted-foreground font-bold text-sm">Class Productivity</p>
-            </div>
-          </div>
-        </div>
 
-        {/* Live Student Pulse & Features */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Live Pulse Section */}
-          <div className="lg:col-span-1 space-y-4">
-            <div className="flex items-center justify-between">
-               <h3 className="text-xl font-black flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                 Student Pulse
-               </h3>
-               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-2 py-1 rounded">Real-time</span>
-            </div>
-
-            <div className="space-y-3">
-              {recentActivity.length > 0 ? (
-                recentActivity.map((event, i) => (
-                  <div key={i} className="bg-card border border-border/50 rounded-2xl p-4 hover:border-accent/20 transition-all group animate-in slide-in-from-right duration-300">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-sm font-black text-foreground group-hover:text-accent transition-colors">{event.profiles?.full_name}</span>
-                      <span className={cn(
-                        "text-[10px] font-bold px-2 py-0.5 rounded",
-                        event.is_correct ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
-                      )}>
-                        {event.is_correct ? 'Correct' : 'Incorrect'}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground font-medium line-clamp-1">{event.topic}</p>
-                    <div className="mt-3 flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase opacity-60">
-                       <span className="flex items-center gap-1"><Clock size={10} /> {Math.round(event.time_spent_seconds)}s</span>
-                       <span>{new Date(event.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
+              {/* Code display */}
+              {activeBatch ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-5 py-3 flex items-center justify-between gap-4 backdrop-blur-sm">
+                    <span className="font-mono font-black text-2xl tracking-[0.35em] text-primary">
+                      {activeBatch.join_code}
+                    </span>
+                    <button
+                      onClick={copyCode}
+                      className="flex items-center gap-2 text-primary/80 hover:text-primary transition-colors text-sm font-bold"
+                    >
+                      {codeCopied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {codeCopied ? 'Copied!' : 'Copy'}
+                    </button>
                   </div>
-                ))
+                  <button
+                    onClick={copyInviteLink}
+                    className="bg-white/20 hover:bg-white/30 border border-white/30 rounded-2xl px-4 py-3 text-primary text-sm font-bold flex items-center gap-2 transition-colors shrink-0"
+                  >
+                    <LinkIcon className="w-4 h-4" /> Invite Link
+                  </button>
+                </div>
               ) : (
-                <div className="bg-secondary/20 border-2 border-dashed border-border/50 rounded-3xl p-12 text-center">
-                  <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 opacity-50">
-                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-bold text-muted-foreground">Waiting for activity...</p>
+                <button
+                  onClick={handleGenerateCode}
+                  disabled={generatingCode}
+                  className="bg-white/20 hover:bg-white/30 border border-white/30 rounded-2xl px-5 py-3 text-primary font-bold flex items-center gap-2 transition-colors"
+                >
+                  {generatingCode ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  Create First Batch
+                </button>
+              )}
+
+              {/* Batch switcher if multiple */}
+              {batches.length > 1 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {batches.slice(0, 4).map(b => (
+                    <button
+                      key={b.id}
+                      onClick={() => setActiveBatch(b)}
+                      className={cn(
+                        'px-3 py-1.5 rounded-xl text-xs font-bold border transition-all',
+                        activeBatch?.id === b.id
+                          ? 'bg-white/25 border-white/40 text-primary'
+                          : 'bg-white/10 border-white/20 text-primary/60 hover:bg-white/20'
+                      )}
+                    >
+                      {b.name}
+                    </button>
+                  ))}
+                  {batches.length > 4 && (
+                    <Link to="/b2b/batches" className="text-primary/60 text-xs font-bold hover:text-primary transition-colors">
+                      +{batches.length - 4} more
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Features Grid */}
-          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-             <div className="bg-secondary/30 border border-border rounded-3xl p-8 hover:bg-secondary/50 transition-all group">
-                <div className="flex items-start justify-between">
-                  <div>
-                     <BookOpen className="w-8 h-8 text-accent mb-4" />
-                     <h3 className="text-xl font-black mb-2">Resource Center</h3>
-                     <p className="text-muted-foreground">Assign specific topics (Learning Nodes) as high-priority tasks.</p>
-                  </div>
-                  <Button variant="ghost" className="rounded-full w-10 h-10 p-0 hover:bg-accent hover:text-primary">
-                    <ArrowUpRight className="w-5 h-5" />
-                  </Button>
-                </div>
-                <div className="mt-8 pt-8 border-t border-border/50 flex items-center justify-between">
-                   <span className="text-sm font-black text-accent">{stats.tasksPushed} Active Tasks</span>
-                </div>
-             </div>
+          {/* Student Pulse */}
+          <div className="bg-card border border-border rounded-3xl p-6 flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-base flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Student Pulse
+              </h3>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-secondary px-2 py-1 rounded">Live</span>
+            </div>
 
-             <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-8 hover:bg-emerald-500/10 transition-all">
-                <div className="flex items-start justify-between">
-                  <div>
-                     <Sparkles className="w-8 h-8 text-emerald-500 mb-4" />
-                     <h3 className="text-xl font-black mb-2">AI Insights</h3>
-                     <p className="text-muted-foreground">Identify conceptual gaps across your class using collective performance data.</p>
+            <div className="flex-1 space-y-2">
+              {recentActivity.length > 0 ? (
+                recentActivity.map((event, i) => (
+                  <div key={i} className="bg-secondary/40 rounded-xl p-3 hover:bg-secondary/70 transition-all">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-bold text-foreground truncate">{event.profiles?.full_name || 'Student'}</span>
+                      <span className={cn(
+                        'text-[10px] font-bold px-2 py-0.5 rounded-full',
+                        event.is_correct ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
+                      )}>
+                        {event.is_correct ? '✓' : '✗'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{event.topic}</p>
+                    <p className="text-[10px] text-muted-foreground/50 mt-1 flex items-center gap-1">
+                      <Clock size={9} /> {new Date(event.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                   </div>
-                  <Button variant="ghost" className="rounded-full w-10 h-10 p-0 hover:bg-emerald-500/20 text-emerald-500">
-                    <ExternalLink className="w-5 h-5" />
-                  </Button>
+                ))
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center py-10 text-center">
+                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mb-3">
+                    <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                  </div>
+                  <p className="text-sm font-bold text-muted-foreground">Waiting for activity...</p>
+                  <p className="text-xs text-muted-foreground/50 mt-1">Students' activity appears here live</p>
                 </div>
-                <div className="mt-8 bg-emerald-500/10 rounded-2xl p-4 flex items-center gap-3">
-                   <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                   <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Analytics bridge active</span>
-                </div>
-             </div>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* ── Feature cards ──────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Resource Center */}
+          <Link to="/b2b/materials" className="group bg-secondary/30 border border-border rounded-2xl p-6 hover:border-accent/30 hover:bg-secondary/60 transition-all flex flex-col justify-between">
+            <div>
+              <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
+                <BookOpen className="w-5 h-5 text-accent" />
+              </div>
+              <h3 className="font-black text-base mb-1">Study Materials</h3>
+              <p className="text-sm text-muted-foreground">Upload and share notes, PDFs and videos with your batch.</p>
+            </div>
+            <div className="mt-4 flex items-center text-accent text-xs font-bold gap-1 group-hover:gap-2 transition-all">
+              Manage Materials <ChevronRight className="w-3.5 h-3.5" />
+            </div>
+          </Link>
+
+          {/* Tests */}
+          <Link to="/b2b/tests" className="group bg-secondary/30 border border-border rounded-2xl p-6 hover:border-violet-500/30 hover:bg-secondary/60 transition-all flex flex-col justify-between">
+            <div>
+              <div className="w-11 h-11 rounded-xl bg-violet-500/10 flex items-center justify-center mb-4">
+                <BarChart3 className="w-5 h-5 text-violet-400" />
+              </div>
+              <h3 className="font-black text-base mb-1">Assign Tests</h3>
+              <p className="text-sm text-muted-foreground">Create and push AI-generated tests to your entire batch.</p>
+            </div>
+            <div className="mt-4 flex items-center text-violet-400 text-xs font-bold gap-1 group-hover:gap-2 transition-all">
+              Go to Tests <ChevronRight className="w-3.5 h-3.5" />
+            </div>
+          </Link>
+
+          {/* AI Insights */}
+          <Link to="/b2b/analytics" className="group bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-6 hover:border-emerald-500/30 hover:bg-emerald-500/[0.08] transition-all flex flex-col justify-between">
+            <div>
+              <div className="w-11 h-11 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+                <Sparkles className="w-5 h-5 text-emerald-500" />
+              </div>
+              <h3 className="font-black text-base mb-1">AI Insights</h3>
+              <p className="text-sm text-muted-foreground">Identify conceptual gaps across your class with collective analytics.</p>
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Analytics Bridge Active</span>
+            </div>
+          </Link>
         </div>
       </div>
     </B2BSidebarLayout>
   );
 }
+
+// tiny local icon (Layers2 not in older lucide builds)
+const Layers2 = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m2 17 10 5 10-5" /><path d="m2 12 10 5 10-5" /><path d="M12 2 2 7l10 5 10-5-10-5z" />
+  </svg>
+);
