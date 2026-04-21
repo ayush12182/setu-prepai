@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
@@ -8,11 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { Mail, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Loader2, Check, BookOpen, GraduationCap, Sparkles, Rocket, Zap, Brain, Users, Building2 } from 'lucide-react';
+import { Mail, Phone, Eye, EyeOff, ArrowLeft, ArrowRight, Loader2, Check, BookOpen, GraduationCap, Sparkles, Rocket, Zap, Brain, Users, Building2, ShieldCheck, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { EXAM_CONFIG, STREAM_TO_EXAM } from '@/config/examConfig';
 import { cn } from '@/lib/utils';
+import { BatchWelcomeScreen } from '@/components/batch/BatchWelcomeScreen';
 
 const emailSchema = z.string().email('Please enter a valid email');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -120,6 +121,19 @@ const AuthPage: React.FC = () => {
 
   const [searchParams] = useSearchParams();
   const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Join-code validation state
+  const [joinCodeInput, setJoinCodeInput] = useState('');
+  const [joinCodeState, setJoinCodeState] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle');
+  const [joinCodeResult, setJoinCodeResult] = useState<{
+    batch_id: string;
+    batch_name: string;
+    teacher_name: string;
+    exam_type: string;
+    total_students: number;
+  } | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+
   const [onboardingData, setOnboardingData] = useState<OnboardingData>(() => {
     const typeParam = searchParams.get('type');
     const orgName = searchParams.get('org_name');
@@ -149,7 +163,15 @@ const AuthPage: React.FC = () => {
 
   useEffect(() => {
     if (user && !authLoading) {
-      if (showOnboarding) return;
+      if (showOnboarding || showWelcome) return;
+
+      // Redirected here because student has no batch yet — go straight to join-code step
+      if (searchParams.get('require_batch') === '1' && profile?.user_type === 'student') {
+        setShowOnboarding(true);
+        setOnboardingStep(3);
+        return;
+      }
+
       if (profile) {
         if (profile.user_type === 'teacher' || profile.user_type === 'b2b_institution' || profile.user_type === 'admin') {
           navigate('/teacher-dashboard');
@@ -174,7 +196,7 @@ const AuthPage: React.FC = () => {
         }
       }
     }
-  }, [user, profile, authLoading, navigate, showOnboarding]);
+  }, [user, profile, authLoading, navigate, showOnboarding, showWelcome]);
 
   const validateEmail = (value: string) => {
     try { 
@@ -445,25 +467,27 @@ const AuthPage: React.FC = () => {
         teacher_id: onboardingData.referenceCode || null, // Auto-assign if ref present
       });
 
-      // BATCH JOIN (Only if code is provided)
+      // BATCH JOIN — validated code is REQUIRED; persist via edge function
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
       const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
-      const refCode = onboardingData.referenceCode;
 
-      if (joinCode && joinCode.length === 6) {
-        console.log("Attempting batch join with code:", joinCode);
-        const { joinTeacherByCode } = await import('@/lib/studentActivity');
-        const joinResult = await joinTeacherByCode(joinCode);
-        
-        if (joinResult.success) {
-          toast.success(joinResult.message);
-        } else {
-          console.error("Batch join failed:", joinResult.message);
-          toast.error(`Account ready, but batch link failed: ${joinResult.message}`);
+      if (joinCode && currentUser) {
+        console.log("Joining batch with code:", joinCode);
+        const { data: joinData, error: joinErr } = await supabase.functions.invoke('validate-join-code', {
+          body: { join_code: joinCode, student_id: currentUser.id },
+        });
+
+        if (joinErr || joinData?.error) {
+          toast.error('Could not join batch. Please check your code and try again.');
+          setLoading(false);
+          return;
         }
-      } else if (refCode) {
-        // If they joined via ?ref= link, we already set teacher_id in updateProfile
-        // But we might want to trigger any logic associated with joining
-        console.log("Joined via referral link, teacher_id set to:", refCode);
+
+        // Show welcome screen before navigating to student hub
+        setJoinCodeResult(joinData);
+        setShowWelcome(true);
+        setLoading(false);
+        return; // welcome screen handles final navigation
       }
 
       // Final synchronization
@@ -499,6 +523,32 @@ const AuthPage: React.FC = () => {
     }
   };
 
+  const validateJoinCode = useCallback(async (code: string) => {
+    const trimmed = code.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (trimmed.length < 6) return;
+
+    setJoinCodeState('checking');
+    setJoinCodeResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('validate-join-code', {
+        body: { join_code: trimmed },
+      });
+
+      if (error || data?.error) {
+        setJoinCodeState('invalid');
+        setJoinCodeResult(null);
+      } else {
+        setJoinCodeState('valid');
+        setJoinCodeResult(data);
+        // Mirror to onboardingData so handleOnboardingComplete can use it
+        setOnboardingData(prev => ({ ...prev, institutionName: trimmed }));
+      }
+    } catch {
+      setJoinCodeState('invalid');
+    }
+  }, []);
+
   const handleOnboardingNext = async () => {
     if (onboardingStep === 0) {
       if (!onboardingData.userType) {
@@ -523,11 +573,10 @@ const AuthPage: React.FC = () => {
       }
       setOnboardingStep(3);
     } else if (onboardingStep === 3) {
-      // Mentor selection step logic is handled within the component buttons for this step
-      // or by clicking 'Next' if they already entered a code
-      if (!onboardingData.referenceCode && onboardingData.userType === 'student') {
-          // If no code and they click next, we assume AI Mentor or they must choose
-          // But usually they click the specific buttons in the UI
+      // STRICT: student MUST have a validated join code
+      if (onboardingData.userType === 'student' && joinCodeState !== 'valid') {
+        toast.error('Please enter a valid teacher code to continue.');
+        return;
       }
       handleOnboardingComplete();
     }
@@ -546,8 +595,25 @@ const AuthPage: React.FC = () => {
     );
   }
 
+  // ─── WELCOME SCREEN (post batch-join) ────────────────────────────────────
+  if (showWelcome && joinCodeResult) {
+    const handleWelcomeContinue = async () => {
+      await refreshProfile();
+      navigate('/student-hub');
+    };
+    return (
+      <BatchWelcomeScreen
+        teacherName={joinCodeResult.teacher_name}
+        batchName={joinCodeResult.batch_name}
+        batchId={joinCodeResult.batch_id}
+        totalStudents={joinCodeResult.total_students}
+        onContinue={handleWelcomeContinue}
+      />
+    );
+  }
+
   // ─── ONBOARDING ───
-  // Note: We render onboarding even if user hasn't fully synced to context yet 
+  // Note: We render onboarding even if user hasn't fully synced to context yet
   // because Supabase session sync can have a slight delay after signup.
   if (showOnboarding) {
     return (
@@ -741,98 +807,93 @@ const AuthPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Step 3: Mentor Selection */}
+              {/* Step 3: Join Code — REQUIRED, no bypass */}
               {onboardingStep === 3 && onboardingData.userType === 'student' && (
                 <div className="space-y-6">
                   <div className="text-center space-y-2 mt-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-2">
+                      <ShieldCheck className="h-3.5 w-3.5 text-accent" />
+                      <span className="text-xs font-bold text-accent uppercase tracking-widest">Required</span>
+                    </div>
                     <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                      Are you joining through a teacher?
+                      Enter your class code
                     </h2>
                     <p className="text-white/40 text-sm">
-                      Establish your guidance loop to get personalized tasks.
+                      Get this code from your teacher. You cannot access SETU without it.
                     </p>
                   </div>
 
-                  <div className="space-y-3">
-                    {/* Auto-detected Referral */}
-                    {onboardingData.referenceCode && (
-                       <div className="p-5 rounded-2xl border border-accent bg-accent/10 flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-500">
-                          <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
-                            <Sparkles className="w-6 h-6 text-accent" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-xs font-black text-accent uppercase tracking-widest">Teacher Detected</p>
-                            <p className="font-bold text-white text-base">Referral Link Active</p>
-                          </div>
-                          <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center">
-                            <Check className="w-4 h-4 text-white" />
-                          </div>
-                       </div>
-                    )}
-
-                    {/* Option: Enter Code */}
-                    <div className={cn(
-                        "p-5 rounded-2xl border transition-all duration-200 space-y-4",
-                        onboardingData.institutionName?.length === 6 ? "border-accent bg-accent/5 ring-1 ring-accent/30" : "border-white/[0.08]"
-                    )}>
-                        <div className="flex items-center gap-4">
-                            <div className={cn(
-                                "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                                onboardingData.institutionName?.length === 6 ? "bg-accent/20" : "bg-white/[0.06]"
-                            )}>
-                                <Users className={cn(
-                                    "w-6 h-6",
-                                    onboardingData.institutionName?.length === 6 ? "text-accent" : "text-white/40"
-                                )} />
-                            </div>
-                            <div className="flex-1">
-                                <p className="font-bold text-white text-base">Yes, I have a code</p>
-                                <p className="text-xs text-white/40 mt-0.5">Enter the 6-character code from your teacher</p>
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <input
-                              type="text"
-                              placeholder="e.g. K8ZX2W"
-                              value={onboardingData.institutionName || ''}
-                              maxLength={6}
-                              onChange={e => setOnboardingData(prev => ({ ...prev, institutionName: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') }))}
-                              className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all font-mono tracking-widest text-center"
-                            />
-                            
-                            {onboardingData.institutionName?.length === 6 && (
-                                <Button 
-                                    onClick={handleOnboardingComplete}
-                                    disabled={loading}
-                                    className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-primary font-bold shadow-lg shadow-accent/20 animate-in zoom-in-95 duration-200"
-                                >
-                                    {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
-                                    Join Class & Finish
-                                </Button>
-                            )}
-                        </div>
+                  {/* Code input */}
+                  <div className={cn(
+                    'rounded-2xl border p-5 space-y-4 transition-all duration-300',
+                    joinCodeState === 'valid'   ? 'border-emerald-500/40 bg-emerald-500/5'  :
+                    joinCodeState === 'invalid' ? 'border-red-500/40 bg-red-500/5'          :
+                    joinCodeState === 'checking'? 'border-accent/30 bg-accent/5'            :
+                    'border-white/[0.08]'
+                  )}>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="e.g. K8ZX2W"
+                        value={joinCodeInput}
+                        maxLength={8}
+                        onChange={e => {
+                          const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                          setJoinCodeInput(val);
+                          setJoinCodeState('idle');
+                          setJoinCodeResult(null);
+                          if (val.length >= 6) validateJoinCode(val);
+                        }}
+                        className="w-full bg-white/[0.05] border border-white/[0.1] rounded-xl px-4 py-4 text-lg text-white placeholder:text-white/20 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 transition-all font-mono tracking-[0.4em] text-center pr-12"
+                      />
+                      {/* Status icon */}
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        {joinCodeState === 'checking' && <Loader2 className="w-5 h-5 animate-spin text-accent" />}
+                        {joinCodeState === 'valid'    && <Check className="w-5 h-5 text-emerald-400" />}
+                        {joinCodeState === 'invalid'  && <XCircle className="w-5 h-5 text-red-400" />}
+                      </div>
                     </div>
 
-                    {/* Option: AI Mentor */}
-                    {!onboardingData.referenceCode && (
-                        <button
-                          onClick={() => {
-                              setOnboardingData(prev => ({ ...prev, institutionName: undefined, referenceCode: undefined }));
-                              handleOnboardingComplete();
-                          }}
-                          className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-white/20 hover:bg-white/[0.02] text-left transition-all duration-200 flex items-center gap-4"
+                    {/* Validation feedback */}
+                    {joinCodeState === 'invalid' && (
+                      <p className="text-red-400 text-sm font-medium flex items-center gap-2">
+                        <XCircle className="w-4 h-4 shrink-0" />
+                        Invalid code. Please check with your teacher.
+                      </p>
+                    )}
+
+                    {/* Success preview */}
+                    {joinCodeState === 'valid' && joinCodeResult && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="flex items-center gap-3 bg-emerald-500/10 rounded-xl px-4 py-3 border border-emerald-500/20">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                            <Users className="w-5 h-5 text-emerald-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Code Verified</p>
+                            <p className="font-bold text-white truncate">{joinCodeResult.batch_name}</p>
+                            <p className="text-xs text-white/40">by {joinCodeResult.teacher_name} · {joinCodeResult.total_students} students</p>
+                          </div>
+                          <Check className="w-5 h-5 text-emerald-400 shrink-0" />
+                        </div>
+
+                        <Button
+                          onClick={handleOnboardingComplete}
+                          disabled={loading}
+                          className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-primary font-bold shadow-lg shadow-accent/20"
                         >
-                          <div className="w-12 h-12 rounded-xl bg-white/[0.06] flex items-center justify-center shrink-0">
-                            <Brain className="w-6 h-6 text-blue-400" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-bold text-white text-base">No, continue with AI mentor</p>
-                            <p className="text-xs text-white/40 mt-0.5">I am studying independently with SETU AI</p>
-                          </div>
-                          <ArrowRight className="w-4 h-4 text-white/20" />
-                        </button>
+                          {loading
+                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            : <><Sparkles className="w-4 h-4 mr-2" /> Join Class & Start Learning</>
+                          }
+                        </Button>
+                      </div>
                     )}
                   </div>
+
+                  <p className="text-center text-xs text-white/25">
+                    Don't have a code? Ask your teacher to generate one from their dashboard.
+                  </p>
                 </div>
               )}
 

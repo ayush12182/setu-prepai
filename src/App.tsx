@@ -81,9 +81,23 @@ const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-/** Students go to /student-hub */
+/** Students go to /student-hub — but MUST have joined a batch first */
 const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading } = useAuth();
+  const [hasBatch, setHasBatch] = React.useState<boolean | null>(null);
+
+  React.useEffect(() => {
+    if (!profile || profile.user_type !== 'student') return;
+    // Check if this student has an entry in student_batch_map
+    import('@/integrations/supabase/client').then(({ supabase }) => {
+      supabase
+        .from('student_batch_map' as any)
+        .select('id', { count: 'exact', head: true })
+        .eq('student_id', profile.id ?? (profile as any).user_id)
+        .then(({ count }) => setHasBatch((count ?? 0) > 0));
+    });
+  }, [profile]);
+
   if (loading) return null;
   const type = profile?.user_type;
   if (!type) return <Navigate to="/auth" replace />;
@@ -92,6 +106,14 @@ const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
   if (type === 'teacher' || type === 'admin') {
     return <Navigate to="/b2b" replace />;
   }
+
+  // Student must be in a batch — redirect to auth (join-code step) if not
+  if (type === 'student' && hasBatch === false) {
+    return <Navigate to="/auth?require_batch=1" replace />;
+  }
+
+  // Still loading batch check
+  if (type === 'student' && hasBatch === null) return null;
 
   return <>{children}</>;
 };

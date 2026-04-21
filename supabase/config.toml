@@ -86,3 +86,9 @@ verify_jwt = false
 
 [functions.generate-subtopics]
 verify_jwt = false
+
+[functions.validate-join-code]
+verify_jwt = false
+
+[functions.get-batch-leaderboard]
+verify_jwt = false
