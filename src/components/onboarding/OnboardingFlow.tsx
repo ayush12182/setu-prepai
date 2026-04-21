@@ -182,7 +182,9 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
   const totalStudentSteps = skipToJoinCode ? 2 : 4; // role → code → goal → done
   const totalTeacherSteps = 4; // role → identity → batch → code
 
-  // ─── Join code validation (with direct-DB fallback) ──────────────────────────
+  // ─── Join code validation ─────────────────────────────────────────────────
+  // Primary: SECURITY DEFINER RPC (bypasses RLS, always works)
+  // Fallback: edge function (if RPC not deployed yet)
 
   const validateCode = useCallback(async (raw: string) => {
     const code = raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -191,49 +193,39 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     setBatchInfo(null);
 
     try {
-      // 1. Try edge function
-      const { data, error } = await supabase.functions.invoke('validate-join-code', {
-        body: { join_code: code },
-      });
+      // 1. PRIMARY: RPC with SECURITY DEFINER (bypasses RLS)
+      const { data: rows, error: rpcErr } = await supabase
+        .rpc('validate_batch_code' as any, { p_code: code });
 
-      if (!error && data && !data.error) {
+      if (!rpcErr && rows && (rows as any[]).length > 0) {
+        const row = (rows as any[])[0];
         setCodeState('valid');
-        setBatchInfo(data);
+        setBatchInfo({
+          batch_id:       row.batch_id,
+          batch_name:     row.batch_name,
+          teacher_name:   row.teacher_name,
+          exam_type:      row.exam_type,
+          total_students: Number(row.total_students ?? 0),
+        });
         return;
       }
 
-      // 2. Edge function failed (bad deploy, column error, etc.) — query DB directly
-      const { data: batch, error: batchErr } = await supabase
-        .from('batches' as any)
-        .select('id, name, teacher_id, target_exam')
-        .eq('join_code', code)
-        .maybeSingle();
+      // RPC returned empty rows = code not found
+      if (!rpcErr && rows && (rows as any[]).length === 0) {
+        setCodeState('invalid');
+        return;
+      }
 
-      if (batchErr || !batch) { setCodeState('invalid'); return; }
-
-      const b = batch as any;
-
-      // Resolve teacher display name
-      const { data: tp } = await supabase
-        .from('profiles')
-        .select('full_name, institution_name')
-        .eq('user_id', b.teacher_id)
-        .maybeSingle();
-
-      // Student count
-      const { count } = await supabase
-        .from('student_batch_map' as any)
-        .select('*', { count: 'exact', head: true })
-        .eq('batch_id', b.id);
-
-      setCodeState('valid');
-      setBatchInfo({
-        batch_id: b.id,
-        batch_name: b.name,
-        teacher_name: (tp as any)?.institution_name || (tp as any)?.full_name || 'Your Teacher',
-        exam_type: b.target_exam || 'JEE',
-        total_students: count ?? 0,
+      // 2. FALLBACK: edge function (if RPC migration hasn't run yet)
+      const { data, error } = await supabase.functions.invoke('validate-join-code', {
+        body: { join_code: code },
       });
+      if (!error && data && !data.error) {
+        setCodeState('valid');
+        setBatchInfo(data);
+      } else {
+        setCodeState('invalid');
+      }
     } catch {
       setCodeState('invalid');
     }
@@ -276,29 +268,28 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
         user_type: 'student',
       });
 
-      // Join batch (try edge function, fall back to direct insert)
+      // Join batch: PRIMARY = student_join_batch RPC (SECURITY DEFINER, bypasses RLS)
       if (batchInfo) {
-        const { data: joinData, error: joinErr } = await supabase.functions.invoke('validate-join-code', {
-          body: { join_code: joinCode.toUpperCase(), student_id: user.id },
-        });
+        const { data: joinRows, error: joinRpcErr } = await supabase
+          .rpc('student_join_batch' as any, {
+            p_code:       joinCode.toUpperCase(),
+            p_student_id: user.id,
+          });
 
-        if (joinErr || joinData?.error) {
-          // Fallback: insert directly into student_batch_map
-          const { error: mapErr } = await supabase
-            .from('student_batch_map' as any)
-            .upsert(
-              { student_id: user.id, batch_id: batchInfo.batch_id },
-              { onConflict: 'student_id,batch_id', ignoreDuplicates: true } as any
-            );
-          if (mapErr) {
-            // Non-fatal — the batch was already validated, proceed anyway
-            console.warn('[OnboardingFlow] student_batch_map insert fallback failed:', mapErr.message);
+        if (joinRpcErr || !joinRows || (joinRows as any[]).length === 0) {
+          // Fallback: edge function
+          const { data: joinData, error: joinEdgeErr } = await supabase.functions.invoke('validate-join-code', {
+            body: { join_code: joinCode.toUpperCase(), student_id: user.id },
+          });
+          if (joinEdgeErr || joinData?.error) {
+            // Last resort: direct upsert (might fail if RLS blocks, non-fatal)
+            await supabase
+              .from('student_batch_map' as any)
+              .upsert(
+                { student_id: user.id, batch_id: batchInfo.batch_id },
+                { onConflict: 'student_id,batch_id', ignoreDuplicates: true } as any
+              );
           }
-          // Update profile teacher linkage
-          await supabase
-            .from('profiles')
-            .update({ teacher_id: (batchInfo as any).teacher_id ?? null } as any)
-            .eq('user_id', user.id);
         }
       }
 
