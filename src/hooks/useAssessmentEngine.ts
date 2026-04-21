@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
+import { generateQuestionsGemini } from '@/lib/gemini';
 
 export interface AssessmentQuestion {
   id: string;
@@ -86,8 +87,26 @@ export const useAssessmentEngine = () => {
       },
     });
 
-    if (error) throw new Error(error.message || 'Failed to generate questions');
-    if (data?.error) throw new Error(data.error);
+    if (error || data?.error || !data?.questions?.length) {
+      // Frontend Gemini fallback
+      const topic = `${cfg.chapterName} — ${cfg.subchapterName}`;
+      const geminiQs = await generateQuestionsGemini(topic, cfg.examMode, difficulty, cfg.batchSize || BATCH_SIZE);
+      const mapped = geminiQs.map(q => ({
+        id: q.id,
+        question_text: q.question_text,
+        option_a: q.option_a,
+        option_b: q.option_b,
+        option_c: q.option_c,
+        option_d: q.option_d,
+        correct_option: q.correct_option as 'A' | 'B' | 'C' | 'D',
+        explanation: q.explanation,
+        concept_tested: q.concept_tested,
+        common_mistake: null,
+        difficulty: q.difficulty,
+      })) as AssessmentQuestion[];
+      mapped.forEach(q => seenIds.current.add(q.id));
+      return mapped;
+    }
 
     const qs = (data.questions as AssessmentQuestion[])
       .filter(q => !seenIds.current.has(q.id))

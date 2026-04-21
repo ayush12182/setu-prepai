@@ -23,16 +23,24 @@ export const useJeetuChat = () => {
     setError(null);
 
     try {
+      // Edge function expects {message, history} — split from messages array
+      const lastMsg = messages[messages.length - 1];
+      const history = messages.slice(0, -1);
+      const messageText = typeof lastMsg?.content === 'string'
+        ? lastMsg.content
+        : JSON.stringify(lastMsg?.content ?? '');
+
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ 
-          messages, 
-          examMode: aiContext.learning_mode === 'foundation' ? 'foundation' : examMode, 
-          language, 
+        body: JSON.stringify({
+          message: messageText,
+          history,
+          examMode: aiContext.learning_mode === 'foundation' ? 'foundation' : examMode,
+          language,
           classContext: {
             ...aiContext,
             strict_class_only: true,

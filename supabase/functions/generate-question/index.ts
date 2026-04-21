@@ -100,8 +100,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
     const body: GenerateRequest = await req.json();
     const {
@@ -137,39 +137,31 @@ serve(async (req) => {
     // ── Build prompt ──────────────────────────────────────────
     const { system, user } = buildPrompt(body, originalQuestion);
 
-    // ── Call Claude via Lovable Gateway ──────────────────────
-    const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "anthropic/claude-sonnet-4-5",
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-        temperature: variant_of_question_id ? 0.8 : 0.65,
-        max_tokens: 1200,
-      }),
-    });
+    // ── Call Gemini ───────────────────────────────────────────
+    const aiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: `${system}\n\n${user}` }] }],
+          generationConfig: {
+            temperature: variant_of_question_id ? 0.8 : 0.65,
+            response_mime_type: "application/json",
+          },
+        }),
+      }
+    );
 
-    if (!aiRes.ok) throw new Error(`AI gateway error: ${aiRes.status}`);
+    if (!aiRes.ok) throw new Error(`Gemini API error: ${aiRes.status}`);
 
     const aiJson = await aiRes.json();
-    const raw = aiJson.choices?.[0]?.message?.content ?? "";
+    const raw = aiJson.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
     // ── Parse ─────────────────────────────────────────────────
     let parsed: any;
     try {
-      let clean = raw.trim();
-      const codeBlock = clean.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (codeBlock) clean = codeBlock[1].trim();
-      const objStart = clean.indexOf("{");
-      const objEnd = clean.lastIndexOf("}");
-      if (objStart !== -1 && objEnd !== -1) clean = clean.slice(objStart, objEnd + 1);
-      parsed = JSON.parse(clean);
+      parsed = JSON.parse(raw.trim());
     } catch {
       throw new Error("Failed to parse AI response as JSON");
     }

@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Question } from './usePracticeQuestions';
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { generateQuestionsGemini } from '@/lib/gemini';
 
 export interface ChapterSelection {
   chapterId: string;
@@ -74,6 +75,14 @@ export const useTestQuestions = () => {
           if (!fnError && data?.questions) {
             const mappedQuestions = data.questions.map(shuffleQuestionOptions);
             allQuestions.push(...mappedQuestions);
+          } else {
+            // Frontend Gemini fallback
+            try {
+              const geminiQs = await generateQuestionsGemini(
+                chapter.chapterName, examModeUpper, 'medium', questionsPerChapter
+              );
+              allQuestions.push(...(geminiQs as any[]));
+            } catch { /* silent */ }
           }
         }
       }
@@ -155,12 +164,20 @@ export const useTestQuestions = () => {
         }
       });
 
-      if (fnError) throw fnError;
-
-      if (data?.error) {
-        setError(data.error);
-        toast.error(data.error);
-        return null;
+      if (fnError || data?.error) {
+        // Frontend Gemini fallback for PYQ-style questions
+        try {
+          const geminiQs = await generateQuestionsGemini(
+            subject || examModeUpper, examModeUpper, 'medium', count
+          );
+          setQuestions(geminiQs as any[]);
+          return geminiQs as any[];
+        } catch (geminiErr) {
+          const msg = geminiErr instanceof Error ? geminiErr.message : 'Failed to load questions';
+          setError(msg);
+          toast.error(msg);
+          return null;
+        }
       }
 
       if (data?.questions) {
@@ -169,7 +186,6 @@ export const useTestQuestions = () => {
         return mappedQuestions;
       }
 
-      // Fallback: inform user no PYQs available
       toast.info(`No PYQs found. Generating ${examMode}-style questions...`);
       return [];
     } catch (err) {
@@ -193,28 +209,25 @@ export const useTestQuestions = () => {
         body: { count }
       });
 
-      if (fnError) throw fnError;
-
-      if (data?.error) {
-        if (data.error.includes('Rate limit')) {
-          toast.error('Too many requests. Please wait a moment.');
-        } else if (data.error.includes('credits')) {
-          toast.error('AI credits exhausted. Please try again later.');
-        } else {
-          toast.error(data.error);
+      if (fnError || data?.error || !data?.questions?.length) {
+        // Frontend Gemini fallback for adaptive test
+        try {
+          const geminiQs = await generateQuestionsGemini(
+            examModeUpper, examModeUpper, 'mixed', count
+          );
+          setQuestions(geminiQs as any[]);
+          return geminiQs as any[];
+        } catch (geminiErr) {
+          const msg = geminiErr instanceof Error ? geminiErr.message : 'Failed to generate adaptive test';
+          setError(msg);
+          toast.error(msg);
+          return null;
         }
-        setError(data.error);
-        return null;
       }
 
-      if (data?.questions && data.questions.length > 0) {
-        const mappedQuestions = (data.questions as Question[]).map(shuffleQuestionOptions);
-        setQuestions(mappedQuestions);
-        return mappedQuestions;
-      }
-
-      toast.error('No questions generated');
-      return null;
+      const mappedQuestions = (data.questions as Question[]).map(shuffleQuestionOptions);
+      setQuestions(mappedQuestions);
+      return mappedQuestions;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to generate adaptive test';
       setError(message);

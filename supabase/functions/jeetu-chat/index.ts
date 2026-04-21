@@ -24,14 +24,17 @@ serve(async (req) => {
   }
 
   try {
-    const { message, history = [] } = await req.json();
+    const body = await req.json();
+    const message: string = String(body.message || '');
+    const history: any[] = body.history || [];
+    const examMode: string = body.examMode || 'JEE';
+    const language: string = body.language || 'english';
 
-    const systemPrompt = `
-      You are Jeetu Bhaiya, a legendary mentor for JEE/NEET/CUET aspirants. 
-      Your style is firm but supportive, like a big brother. 
-      Use Hinglish (Hindi + English). 
-      Don't just solve problems—give 'Toka' (reality checks) and actionable study plans.
-    `;
+    const systemPrompt = `You are Jeetu Bhaiya, a legendary mentor for ${examMode} aspirants.
+Your style is firm but supportive, like a big brother.
+${language === 'hindi' ? 'Reply in Hindi.' : 'Use Hinglish (mix of Hindi + English).'}
+Don't just solve problems — give 'Toka' (reality checks) and actionable study plans.
+Keep answers concise and exam-focused.`;
 
     const historyTurns = history
       .filter((m: any) => m.content && String(m.content).trim() !== "")
