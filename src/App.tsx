@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -84,9 +85,9 @@ const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
 /** Students go to /student-hub — but MUST have joined a batch first */
 const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading } = useAuth();
-  const [hasBatch, setHasBatch] = React.useState<boolean | null>(null);
+  const [hasBatch, setHasBatch] = useState<boolean | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!profile || profile.user_type !== 'student') return;
     // Check if this student has an entry in student_batch_map
     import('@/integrations/supabase/client').then(({ supabase }) => {
