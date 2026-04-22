@@ -280,21 +280,26 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
         user_type: 'student',
       });
 
-      // Join batch: PRIMARY = Vercel API route (service-role key, no RLS)
+      // Join batch
       if (batchInfo) {
         let joined = false;
 
+        // Primary: Vercel API route with 8s timeout
         try {
+          const ctrl = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), 8000);
           const res = await fetch('/api/validate-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code: joinCode.toUpperCase(), student_id: user.id }),
+            signal: ctrl.signal,
           });
+          clearTimeout(timer);
           joined = res.ok;
         } catch { /* fall through */ }
 
+        // Fallback: SECURITY DEFINER RPC
         if (!joined) {
-          // Fallback: SECURITY DEFINER RPC
           const { data: joinRows, error: joinRpcErr } = await supabase
             .rpc('student_join_batch' as any, {
               p_code:       joinCode.toUpperCase(),
@@ -303,11 +308,23 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
           joined = !joinRpcErr && joinRows && (joinRows as any[]).length > 0;
         }
 
+        // Last fallback: edge function
         if (!joined) {
-          // Last fallback: edge function
           await supabase.functions.invoke('validate-join-code', {
             body: { join_code: joinCode.toUpperCase(), student_id: user.id },
           });
+        }
+
+        // Confirm join landed in DB before navigating (prevents StudentHubRoute bounce)
+        const { count } = await supabase
+          .from('student_batch_map' as any)
+          .select('id', { count: 'exact', head: true })
+          .eq('student_id', user.id);
+
+        if ((count ?? 0) === 0) {
+          toast.error('Could not join the batch. Please check your code and try again.');
+          setSaving(false);
+          return;
         }
       }
 
