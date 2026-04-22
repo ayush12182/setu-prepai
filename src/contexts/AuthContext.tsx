@@ -280,19 +280,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (metaError) console.error('[AuthContext] Error updating auth metadata:', metaError);
     }
 
-    // 2. Attempt to update profiles table using an atomic upsert
-    // Strip out any keys that are explicitly null/undefined to avoid overwriting existing data
-    const rawUpdates: any = { user_id: user.id, ...updates, updated_at: new Date().toISOString() };
+    // 2. Update profiles table — use .update() to avoid INSERT path issues
+    const rawUpdates: any = { ...updates, updated_at: new Date().toISOString() };
     const dbUpdates: any = Object.fromEntries(
       Object.entries(rawUpdates).filter(([, v]) => v !== undefined && v !== null)
     );
-    // Always keep user_id
-    dbUpdates.user_id = user.id;
-    
+
     try {
       const { error } = await supabase
         .from('profiles')
-        .upsert(dbUpdates, { onConflict: 'user_id' });
+        .update(dbUpdates)
+        .eq('user_id', user.id);
 
       if (error) {
         if (error.code === 'PGRST204' || error.message?.includes('column')) {
@@ -302,7 +300,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     } catch (error) {
-      // Catch PGRST204 (Missing Column) and other generic DB errors
       const err = error as any;
       if (err.code === 'PGRST204' || err.message?.includes('column')) {
         console.warn('Database column not found, but metadata updated successfully.');
