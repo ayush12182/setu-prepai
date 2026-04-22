@@ -330,7 +330,8 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
 
       await refreshProfile();
       onComplete?.();
-      navigate('/student-hub');
+      // Full reload so StudentHubRoute reads the freshly committed profile
+      window.location.href = '/student-hub';
     } catch (e: any) {
       toast.error(e.message || 'Something went wrong. Please try again.');
     } finally {
