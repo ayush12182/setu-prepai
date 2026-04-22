@@ -46,11 +46,19 @@ serve(async (req) => {
       concept_tested: q.concept_tested || subchapterName,
     }));
 
-    const { data: inserted, error: insertErr } = await supabase
-      .from("questions")
-      .insert(toInsert)
-      .select();
-    if (insertErr) throw insertErr;
+    // Try to persist to DB — but don't fail the request if insert errors
+    // (e.g. subject constraint violation when called from practice page with exam name)
+    let inserted: any[] | null = null;
+    try {
+      const { data, error: insertErr } = await supabase
+        .from("questions")
+        .insert(toInsert)
+        .select();
+      if (!insertErr) inserted = data;
+      else console.warn("[generate-questions] Insert skipped:", insertErr.message);
+    } catch (e) {
+      console.warn("[generate-questions] Insert failed silently:", e);
+    }
 
     if (jobId) {
       await supabase.from("bulk_generation_jobs").update({

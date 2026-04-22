@@ -128,50 +128,57 @@ export const usePracticeQuestions = () => {
     const topicName = nodeName || nodeId;
     const effectiveDifficulty = difficulty || 'medium';
 
+    // PRIMARY: edge function (server-side Gemini, no client key needed)
     try {
-      // PRIMARY: call Gemini directly (no edge function, no polling, instant)
-      const qs = await geminiGenerateQuestions(topicName, exam, effectiveDifficulty, count);
-      setQuestions(qs);
+      setGenerationStatus('fetching');
+      const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
+        body: {
+          examMode: exam,
+          subject: exam,
+          chapterName: topicName,
+          subchapterName: topicName,
+          difficulty: effectiveDifficulty,
+          count,
+        }
+      });
+
+      if (fnError) throw fnError;
+
+      const rawQs: Question[] = (data?.questions || []).map((q: any, i: number) => ({
+        id: q.id || `fn-${Date.now()}-${i}`,
+        node_id: nodeId,
+        type: 'MCQ' as QuestionType,
+        exam_type: exam,
+        difficulty: (q.difficulty || effectiveDifficulty).toLowerCase() as 'easy' | 'medium' | 'hard',
+        question_text: q.question_text,
+        options: { A: q.option_a || '', B: q.option_b || '', C: q.option_c || '', D: q.option_d || '' },
+        answer: q.correct_option,
+        explanation: q.explanation || '',
+        concept_tested: q.concept_tested || topicName,
+        option_a: q.option_a || '',
+        option_b: q.option_b || '',
+        option_c: q.option_c || '',
+        option_d: q.option_d || '',
+        correct_option: q.correct_option,
+      }));
+
+      if (rawQs.length === 0) throw new Error('No questions returned');
+
+      setQuestions(rawQs);
       setGenerationStatus('completed');
-      return qs;
+      return rawQs;
     } catch (err) {
-      // FALLBACK: try edge function (requires GEMINI_API_KEY in Supabase secrets)
+      // FALLBACK: direct Gemini from frontend (requires VITE_GEMINI_API_KEY)
       try {
-        setGenerationStatus('fetching');
-        const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
-          body: {
-            examMode: exam,
-            subject: exam,
-            chapterName: topicName,
-            subchapterName: topicName,
-            difficulty: effectiveDifficulty,
-            count,
-          }
-        });
-
-        if (fnError) throw fnError;
-
-        const rawQs: Question[] = (data?.questions || []).map((q: any, i: number) => ({
-          id: `fn-${Date.now()}-${i}`,
-          node_id: nodeId,
-          type: 'MCQ' as QuestionType,
-          exam_type: exam,
-          difficulty: (q.difficulty || effectiveDifficulty).toLowerCase() as 'easy' | 'medium' | 'hard',
-          question_text: q.question_text,
-          options: { A: q.option_a || '', B: q.option_b || '', C: q.option_c || '', D: q.option_d || '' },
-          answer: q.correct_option,
-          explanation: q.explanation || '',
-          concept_tested: q.concept_tested || topicName,
-        }));
-
-        setQuestions(rawQs);
+        const qs = await geminiGenerateQuestions(topicName, exam, effectiveDifficulty, count);
+        setQuestions(qs);
         setGenerationStatus('completed');
-        return rawQs;
+        return qs;
       } catch (fallbackErr) {
         const message = fallbackErr instanceof Error ? fallbackErr.message : 'Failed to load questions';
         setGenerationStatus('failed');
         setError(message);
-        toast.error('Failed to load questions. Please add VITE_GEMINI_API_KEY to your environment.');
+        toast.error('Failed to load questions. Try again in a moment.');
         return null;
       }
     } finally {
