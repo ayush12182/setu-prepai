@@ -94,7 +94,7 @@ const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
       supabase
         .from('student_batch_map' as any)
         .select('id', { count: 'exact', head: true })
-        .eq('student_id', profile.id ?? (profile as any).user_id)
+        .eq('student_id', (profile as any).user_id ?? profile.id)
         .then(({ count }) => setHasBatch((count ?? 0) > 0));
     });
   }, [profile]);
