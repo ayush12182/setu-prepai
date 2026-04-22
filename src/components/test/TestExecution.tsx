@@ -27,6 +27,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
   const [step, setStep] = useState<'loading' | 'quiz' | 'results'>('loading');
   const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([]);
   const [totalTime, setTotalTime] = useState(0);
+  const [fetchDone, setFetchDone] = useState(false);
 
   const {
     questions,
@@ -39,6 +40,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
   } = useTestQuestions();
 
   const loadQuestions = async () => {
+    setFetchDone(false);
     let result;
 
     switch (config.type) {
@@ -55,7 +57,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
       case 'pyq':
         result = await fetchPYQQuestions(
           config.subject,
-          config.chapters?.[0]?.chapterId,   // filter by chapter topic
+          config.chapters?.[0]?.chapterId,
           config.yearRange,
           config.questionCount || 25
         );
@@ -68,6 +70,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
     if (result && result.length > 0) {
       setStep('quiz');
     }
+    setFetchDone(true);
   };
 
   useEffect(() => {
@@ -84,6 +87,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
     setStep('loading');
     setTestAnswers([]);
     setTotalTime(0);
+    setFetchDone(false);
     await loadQuestions();
   };
 
@@ -101,7 +105,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
   };
 
   // Loading state
-  if (step === 'loading' || loading) {
+  if (loading || !fetchDone) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />

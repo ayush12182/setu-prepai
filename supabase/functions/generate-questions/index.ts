@@ -21,11 +21,11 @@ serve(async (req) => {
 
   let jobId: string | undefined;
   try {
-    const { job_id, examMode, subject, chapterName, subchapterName, difficulty, count = 5 } = await req.json();
+    const { job_id, examMode, subject, chapterId, chapterName, subchapterId, subchapterName, difficulty, count = 5 } = await req.json();
     jobId = job_id;
 
     const systemPrompt = `You are a world-class ${examMode} exam designer. Generate high-quality MCQs for ${subject}. Return a JSON object with a "questions" array. No markdown, no backticks.`;
-    const userPrompt = `Generate ${count} questions for ${chapterName} - ${subchapterName}. Difficulty: ${difficulty}. Each question must have: question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), explanation.`;
+    const userPrompt = `Generate ${count} questions for ${chapterName} - ${subchapterName}. Difficulty: ${difficulty}. Each question must have: question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), explanation, concept_tested.`;
 
     const data = await callGeminiJSON<{ questions: any[] }>(GEMINI_API_KEY, systemPrompt, userPrompt, 0.3);
     const questions = data.questions || [];
@@ -33,8 +33,8 @@ serve(async (req) => {
     const toInsert = questions.map((q: any) => ({
       exam: examMode,
       subject,
-      chapter_id: chapterName,
-      subchapter_id: subchapterName,
+      chapter_id: chapterId || chapterName,
+      subchapter_id: subchapterId || subchapterName,
       difficulty: q.difficulty || difficulty || "medium",
       question_text: q.question_text,
       option_a: q.option_a,
@@ -46,7 +46,10 @@ serve(async (req) => {
       concept_tested: q.concept_tested || subchapterName,
     }));
 
-    const { error: insertErr } = await supabase.from("questions").insert(toInsert);
+    const { data: inserted, error: insertErr } = await supabase
+      .from("questions")
+      .insert(toInsert)
+      .select();
     if (insertErr) throw insertErr;
 
     if (jobId) {
@@ -57,7 +60,7 @@ serve(async (req) => {
       }).eq("id", jobId);
     }
 
-    return new Response(JSON.stringify({ success: true, questions: toInsert }), {
+    return new Response(JSON.stringify({ success: true, questions: inserted || toInsert }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
