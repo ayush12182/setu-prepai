@@ -1,15 +1,7 @@
 /**
- * ai-proxy — Public Lovable AI proxy endpoint
- *
- * Lets external tools (e.g. Antigravity) call Lovable AI through this app.
+ * ai-proxy — Generic AI proxy backed by Gemini 1.5 Flash
+ * Accepts OpenAI-style messages, returns OpenAI-style response.
  * Auth: pass header `x-api-key: <PROXY_API_KEY>` (set as a Supabase secret).
- *
- * POST body (OpenAI-compatible):
- * {
- *   "model": "google/gemini-3-flash-preview",
- *   "messages": [{ "role": "user", "content": "Hello" }],
- *   "stream": false
- * }
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -27,42 +19,31 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     const PROXY_API_KEY = Deno.env.get("PROXY_API_KEY");
 
-    if (!LOVABLE_API_KEY) {
+    if (!GEMINI_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
-    if (!PROXY_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "PROXY_API_KEY not configured. Set it in Cloud → Secrets." }),
+        JSON.stringify({ error: "GEMINI_API_KEY not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    // Auth: accept either x-api-key or Authorization: Bearer <key>
-    const provided =
-      req.headers.get("x-api-key") ||
-      req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ||
-      "";
-
-    if (provided !== PROXY_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized. Provide x-api-key header." }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+    // Auth check (optional — skip if no PROXY_API_KEY is set)
+    if (PROXY_API_KEY) {
+      const provided =
+        req.headers.get("x-api-key") ||
+        req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") || "";
+      if (provided !== PROXY_API_KEY) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized. Provide x-api-key header." }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
     const body = await req.json().catch(() => ({}));
-    const {
-      model = "google/gemini-3-flash-preview",
-      messages,
-      stream = false,
-      ...rest
-    } = body;
+    const { messages, temperature = 0.7, ...rest } = body;
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return new Response(
@@ -71,43 +52,42 @@ serve(async (req) => {
       );
     }
 
-    const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ model, messages, stream, ...rest }),
-    });
+    // Convert OpenAI messages to Gemini format
+    const systemMsg = messages.find((m: any) => m.role === "system");
+    const userMsgs = messages.filter((m: any) => m.role !== "system");
+    const contents = userMsgs.map((m: any) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+    if (systemMsg && contents.length > 0) {
+      contents[0].parts[0].text = `${systemMsg.content}\n\n${contents[0].parts[0].text}`;
+    }
+
+    const upstream = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents, generationConfig: { temperature } }),
+      }
+    );
 
     if (!upstream.ok) {
-      if (upstream.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Try again later." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-      if (upstream.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Payment required. Add credits to your Lovable workspace." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
       const errText = await upstream.text();
       return new Response(
-        JSON.stringify({ error: "Upstream error", status: upstream.status, detail: errText }),
+        JSON.stringify({ error: "Gemini error", status: upstream.status, detail: errText }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
 
-    if (stream) {
-      return new Response(upstream.body, {
-        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-      });
-    }
-
     const data = await upstream.json();
-    return new Response(JSON.stringify(data), {
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    // Return OpenAI-compatible response
+    return new Response(JSON.stringify({
+      choices: [{ message: { role: "assistant", content: text }, finish_reason: "stop" }],
+      model: "gemini-1.5-flash",
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

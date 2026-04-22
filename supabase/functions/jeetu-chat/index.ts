@@ -50,7 +50,7 @@ Keep answers concise and exam-focused.`;
       { role: 'user', parts: [{ text: String(message) }] }
     ];
 
-    const model = "gemini-flash-latest";
+    const model = "gemini-1.5-flash";
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`, {
         method: 'POST',

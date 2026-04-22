@@ -16,7 +16,7 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+  const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
   const supabaseUrl  = Deno.env.get("SUPABASE_URL")!;
   const supabaseKey  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -36,25 +36,24 @@ serve(async (req) => {
     const systemPrompt = `You are an expert ${exam} question designer. Generate authentic PYQ-style MCQs. Return a JSON object with a "questions" array.`;
     const userPrompt = `Generate ${count} questions for ${subject} - ${chapter}. Difficulty: ${difficulty}. Include options, correct_option, and explanation.`;
 
-    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-      }),
-    });
+    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
-    if (!aiRes.ok) throw new Error(`OpenAI error: ${aiRes.status}`);
+    const aiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+          generationConfig: { temperature: 0.4, response_mime_type: "application/json" },
+        }),
+      }
+    );
+
+    if (!aiRes.ok) throw new Error(`Gemini error: ${aiRes.status}`);
     const aiData = await aiRes.json();
-    const questions = JSON.parse(aiData.choices[0].message.content).questions;
+    const rawText = aiData.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const questions = JSON.parse(rawText).questions;
 
     const toInsert = questions.map((q: any) => ({
       exam,
@@ -67,7 +66,7 @@ serve(async (req) => {
       correct_option: q.correct_option,
       explanation: q.explanation,
       pyq_similar: true,
-      generation_model: "gpt-4o",
+      generation_model: "gemini-1.5-flash",
     }));
 
     const { error: insertErr } = await supabase.from("questions_bank").insert(toInsert);
