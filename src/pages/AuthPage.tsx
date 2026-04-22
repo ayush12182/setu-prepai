@@ -619,7 +619,7 @@ const AuthPage: React.FC = () => {
     return (
       <OnboardingFlow
         initialUserType={initialType}
-        skipToJoinCode={searchParams.get('require_batch') === '1'}
+        skipToJoinCode={false}
       />
     );
   }

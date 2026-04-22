@@ -75,10 +75,10 @@ const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
   if (loading) return null;
   const type = profile?.user_type;
   if (!type) return <Navigate to="/auth" replace />;
-  
+
   // Students are directed to their hub
   if (type === 'student') return <Navigate to="/student-hub" replace />;
-  
+
   return <>{children}</>;
 };
 
