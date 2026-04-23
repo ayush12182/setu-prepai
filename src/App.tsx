@@ -37,8 +37,7 @@ import FoundationAssessmentPage from "./pages/FoundationAssessmentPage";
 import LearningProfilePage from "./pages/LearningProfilePage";
 import ConceptGraphPage from "./pages/ConceptGraphPage";
 import LearningRoadmapPage from "./pages/LearningRoadmapPage";
-import TeacherDashboardPage from "./pages/TeacherDashboardPage";
-import StudentHubPage from "./pages/StudentHubPage";
+
 import AITeachingRoomPage from "./pages/AITeachingRoomPage";
 import AITeachersDirectoryPage from "./pages/AITeachersDirectoryPage";
 import PricingPage from "./pages/PricingPage";
@@ -60,6 +59,7 @@ import QuestionGeneratorPage from "./pages/Admin/QuestionGeneratorPage";
 import BulkPYQGenerator from "./pages/Admin/BulkPYQGenerator";
 import AdaptivePracticePage from "./pages/AdaptivePracticePage";
 import StudentAnalyticsPage from "./pages/B2B/StudentAnalyticsPage";
+import MyBatchPage from "./pages/MyBatchPage";
 
 // Assess
 import B2BAssessmentTakerPage from "./pages/Assess/B2BAssessmentTakerPage";
@@ -122,7 +122,7 @@ const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <BrowserRouter>
         <AuthProvider>
           <ExamModeProvider>
@@ -149,6 +149,7 @@ const App = () => (
                     <Route path="/revision/:subject/:topic" element={<RevisionTopicPage />} />
                     <Route path="/lecture-setu" element={<LectureSetu />} />
                     <Route path="/ask-jeetu" element={<AskJeetuPage />} />
+                    <Route path="/my-batch" element={<MyBatchPage />} />
                     <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/settings" element={<SettingsPage />} />
@@ -193,7 +194,7 @@ const App = () => (
                     <Route path="/teacher/student-analytics" element={<StudentAnalyticsPage />} />
                     
                     {/* Student Hub — B2B students only */}
-                    <Route path="/student-hub" element={<StudentHubRoute><StudentHubPage /></StudentHubRoute>} />
+                    <Route path="/student-hub" element={<StudentHubRoute><MyBatchPage /></StudentHubRoute>} />
                     <Route path="/ai-teachers" element={<AITeachersDirectoryPage />} />
                     <Route path="/teaching-room/:teacherId" element={<AITeachingRoomPage />} />
                     <Route path="/pricing" element={<PricingPage />} />

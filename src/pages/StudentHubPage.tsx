@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   BookOpen, BarChart3, ChevronRight, Brain,
   Target, Zap, ShieldCheck, ClipboardList, ArrowRight,
@@ -21,7 +21,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useStudentStats } from '@/hooks/useStudentStats';
 import { useStudentCycle } from '@/hooks/useStudentCycle';
-import { Leaderboard } from '@/components/student/Leaderboard';
+// ── Dummy perf data (replace with real hook later) ────────────
+const PERF = {
+  accuracy: 68,
+  rank: 12,
+  batchSize: 60,
+  improvementPct: 6,
+  percentileAhead: 40,
+  weakSubject: 'Integration',
+  weakAccuracy: 42,
+  rankGainIfImprove: 5,
+  dailyGoals: [
+    { subject: 'Physics',   count: 15, type: 'Questions' },
+    { subject: 'Maths',     count: 10, type: 'Questions' },
+    { subject: 'Chemistry', count: 1,  type: 'Revision'  },
+  ],
+};
+
+// Rotates daily so it feels fresh without being random on every render
+const smartSubtext = [
+  `You improved +${PERF.improvementPct}% accuracy this week`,
+  `You're ahead of ${PERF.percentileAhead}% of students in your batch`,
+  'Your mentor will review your progress today',
+][new Date().getDay() % 3];
 
 // ─── Types ────────────────────────────────────────────────────
 type Tab = 'home' | 'practice' | 'progress';
@@ -53,7 +75,6 @@ const StudentHubPage: React.FC = () => {
   const { days_left: cycleDaysLeft } = useStudentCycle();
   const [loading, setLoading] = useState(true);
   const [mentorName, setMentorName] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'home' | 'leaderboard'>('home');
 
   useEffect(() => {
     if (!user) return;
@@ -175,114 +196,125 @@ const StudentHubPage: React.FC = () => {
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Active Guidance</span>
                 </div>
                 <h1 className="text-4xl lg:text-7xl font-bold tracking-tighter leading-[0.9]">
-                  {mentorName 
-                    ? `Welcome back to ${mentorName}'s Classroom! 👋` 
-                    : profile?.teacher_id 
+                  {mentorName
+                    ? `Welcome back to ${mentorName}'s Classroom! 👋`
+                    : profile?.teacher_id
                     ? "Welcome back to your Teacher's Classroom! 👋"
                     : `Welcome back, ${profile?.full_name?.split(' ')[0] || 'Student'}! 👋`}
                 </h1>
-              </div>
-
-              {/* Tab Switcher */}
-              <div className="flex bg-white/[0.03] p-1.5 rounded-2xl border border-white/[0.05] h-fit self-start lg:self-end">
-                <button
-                  onClick={() => setActiveTab('home')}
-                  className={cn(
-                    "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
-                    activeTab === 'home' 
-                      ? "bg-accent text-primary shadow-lg shadow-accent/20" 
-                      : "text-white/40 hover:text-white/70"
-                  )}
-                >
-                  <Rocket className="w-3.5 h-3.5" /> Dashboard
-                </button>
-                <button
-                  onClick={() => setActiveTab('leaderboard')}
-                  className={cn(
-                    "px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2",
-                    activeTab === 'leaderboard' 
-                      ? "bg-accent text-primary shadow-lg shadow-accent/20" 
-                      : "text-white/40 hover:text-white/70"
-                  )}
-                >
-                  <Trophy className="w-3.5 h-3.5" /> Leaderboard
-                </button>
+                {/* Smart dynamic subtext */}
+                <p className="text-white/40 text-base font-medium pt-1 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-accent shrink-0" />
+                  {smartSubtext}
+                </p>
               </div>
             </div>
 
-            <AnimatePresence mode="wait">
-              {activeTab === 'home' ? (
-                <motion.div
-                  key="home"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 10 }}
-                  className="p-8 lg:p-12 bg-gradient-to-br from-white/[0.05] to-transparent rounded-[3rem] border border-white/[0.08] relative overflow-hidden group"
-                >
-                  <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
-                  
-                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-                    <div className="flex-1 space-y-6">
-                      <div className="space-y-4">
-                        <h2 className="text-4xl lg:text-5xl font-bold tracking-tighter text-white">
-                          Your personalized learning path is ready for today
-                        </h2>
-                        <p className="text-white/40 text-lg lg:text-xl font-medium max-w-2xl leading-relaxed italic">
-                          "{examMode.toUpperCase()} preparation is a marathon. Stay consistent with your daily targets."
-                        </p>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-4 pt-4">
-                        <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
-                          <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500">
-                             <Flame className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Daily Streak</p>
-                            <p className="text-xl font-black">{realStreak} Days</p>
-                          </div>
-                        </div>
-                        <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
-                          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
-                             <Target className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Questions Solved</p>
-                            <p className="text-xl font-black">{realTodayDone} <span className="text-xs text-white/20">Today</span></p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="p-8 lg:p-12 bg-gradient-to-br from-white/[0.05] to-transparent rounded-[3rem] border border-white/[0.08] relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
 
-                    <div className="flex flex-col gap-4 min-w-[280px]">
-                      <Button 
-                        onClick={() => navigate('/practice')}
-                        size="lg" 
-                        className="h-16 rounded-2xl bg-white text-primary hover:bg-white/90 font-black text-lg gap-3 shadow-xl transition-all duration-300 hover:scale-[1.02]"
-                      >
-                        <Play className="fill-current w-4 h-4" /> Start Daily Target
-                      </Button>
-                      <Button 
-                        variant="outline"
-                        onClick={() => navigate('/learn')}
-                        className="h-16 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold"
-                      >
-                        View Full Syllabus
-                      </Button>
+              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+                <div className="flex-1 space-y-6">
+                  <div className="space-y-3">
+                    <h2 className="text-4xl lg:text-5xl font-bold tracking-tighter text-white">
+                      Your performance plan for today is ready
+                    </h2>
+                    {/* Mentor presence line */}
+                    <p className="text-white/30 text-sm font-medium flex items-center gap-2">
+                      <Eye className="w-3.5 h-3.5 text-white/20 shrink-0" />
+                      Your mentor is tracking your progress
+                    </p>
+                  </div>
+
+                  {/* Today's Goals */}
+                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.05] space-y-3">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Today's Goal</p>
+                    <div className="space-y-2">
+                      {PERF.dailyGoals.map((g) => (
+                        <div key={g.subject} className="flex items-center gap-3">
+                          <div className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                          <span className="text-white/70 text-sm font-medium">
+                            {g.type === 'Revision'
+                              ? `1 Revision – ${g.subject}`
+                              : `${g.count} Questions – ${g.subject}`}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="leaderboard"
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                >
-                  <Leaderboard />
-                </motion.div>
-              )}
-            </AnimatePresence>
+
+                  {/* Current Status row */}
+                  <div className="flex flex-wrap gap-4">
+                    <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
+                      <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500">
+                        <Flame className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Daily Streak</p>
+                        <p className="text-xl font-black">{realStreak} Days</p>
+                      </div>
+                    </div>
+                    <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
+                      <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
+                        <Target className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Questions Solved</p>
+                        <p className="text-xl font-black">{realTodayDone} <span className="text-xs text-white/20">Today</span></p>
+                      </div>
+                    </div>
+                    <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
+                      <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
+                        <BarChart3 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Accuracy</p>
+                        <p className="text-xl font-black">{PERF.accuracy}<span className="text-xs text-white/20">%</span></p>
+                      </div>
+                    </div>
+                    <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
+                      <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Batch Rank</p>
+                        <p className="text-xl font-black">{PERF.rank}<span className="text-xs text-white/20">/{PERF.batchSize}</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Impact line */}
+                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-accent/5 border border-accent/15">
+                    <Zap className="w-4 h-4 text-accent shrink-0" />
+                    <p className="text-white/60 text-sm font-medium">
+                      Improving <span className="text-white font-bold">{PERF.dailyGoals[1].subject}</span> today can increase your rank by{' '}
+                      <span className="text-accent font-black">~{PERF.rankGainIfImprove} positions</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4 min-w-[280px]">
+                  <Button
+                    onClick={() => navigate('/practice')}
+                    size="lg"
+                    className="h-16 rounded-2xl bg-accent text-primary hover:bg-accent/90 font-black text-lg gap-3 shadow-xl shadow-accent/25 transition-all duration-300 hover:scale-[1.02]"
+                  >
+                    <Play className="fill-current w-4 h-4" /> Start Daily Target
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/learn')}
+                    className="h-16 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold"
+                  >
+                    View Full Syllabus
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
 
           {/* Main Content Grid */}
@@ -304,11 +336,17 @@ const StudentHubPage: React.FC = () => {
 
               <div className="mt-12 space-y-8">
                 <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                      Weak Area · {PERF.weakAccuracy}% accuracy
+                    </span>
+                  </div>
                   <h2 className="text-3xl lg:text-5xl font-bold tracking-tighter mb-4 group-hover:text-accent transition-colors duration-500 italic">
-                    {todayFocus.learning_nodes?.name || todayFocus.title}
+                    {todayFocus.learning_nodes?.name || PERF.weakSubject}
                   </h2>
                   <p className="text-white/40 text-lg font-medium flex items-center gap-2">
-                    Physics • <span className="text-white/80">Current Electricity</span>
+                    Focus Topic (based on your performance) •{' '}
+                    <span className="text-red-400 font-semibold">This is one of your weakest areas</span>
                   </p>
                 </div>
 
@@ -320,6 +358,15 @@ const StudentHubPage: React.FC = () => {
                     <p className="text-white/70 leading-relaxed font-medium">
                       {todayFocus.description || 'Focus on depth understanding today.'}
                     </p>
+                  </div>
+                  {/* Micro progress feedback pills */}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
+                      <TrendingUp className="w-3 h-3" /> +{PERF.improvementPct}% accuracy this week
+                    </span>
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/15">
+                      <Users className="w-3 h-3" /> Ahead of {PERF.percentileAhead}% students
+                    </span>
                   </div>
                 </div>
 

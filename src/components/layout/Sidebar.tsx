@@ -13,31 +13,34 @@ import {
   X,
   Sparkles,
   Users,
-  GraduationCap,
   Building2,
   Settings,
+  TrendingUp,
+  AlertTriangle,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBatchInfo } from '@/hooks/useBatchInfo';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const getNavItems = (isFoundation: boolean, isB2B: boolean) => [
-  { path: '/student-hub', icon: Home, label: 'Dashboard', emoji: '🏠' },
-  { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📚' },
-  { path: '/practice', icon: PenTool, label: 'Practice', emoji: '✏️' },
-  { path: '/test', icon: ClipboardCheck, label: 'Test', emoji: '📝' },
-  { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄' },
-  { path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬' },
-  { path: '/analytics', icon: BarChart3, label: 'Analytics', emoji: '📊' },
-  { path: '/profile', icon: User, label: 'My Profile', emoji: '👤' },
-  { path: '/ask-jeetu', icon: MessageCircle, label: 'Your Mentor', emoji: '💬' },
+const getNavItems = () => [
+  { path: '/student-hub', icon: Home, label: 'Dashboard', emoji: '🏠', badge: undefined },
+  { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📚', badge: undefined },
+  { path: '/practice', icon: PenTool, label: 'Practice', emoji: '✏️', badge: undefined },
+  { path: '/test', icon: ClipboardCheck, label: 'Test', emoji: '📝', badge: undefined },
+  { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄', badge: undefined },
+  { path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬', badge: undefined },
+  { path: '/analytics', icon: BarChart3, label: 'Analytics', emoji: '📊', badge: undefined },
+  { path: '/profile', icon: User, label: 'My Profile', emoji: '👤', badge: undefined },
+  { path: '/ask-jeetu', icon: MessageCircle, label: 'Your Mentor', emoji: '💬', badge: undefined },
 ];
 
 const getB2BNavItems = (isMentor: boolean, isInstitution: boolean) => [
@@ -46,10 +49,11 @@ const getB2BNavItems = (isMentor: boolean, isInstitution: boolean) => [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { config, isNeet, isCuet, examMode } = useExamMode();
+  const { config, isNeet, isCuet } = useExamMode();
   const { isFoundation, classLabel } = useClassContext();
-  const { isMentor, isInstitution, isB2BStudent } = useAuth();
-  const navItems = getNavItems(isFoundation, isB2BStudent);
+  const { isMentor, isInstitution } = useAuth();
+  const { info: batchInfo, loading: batchLoading } = useBatchInfo();
+  const navItems = getNavItems();
   const b2bItems = getB2BNavItems(isMentor, isInstitution);
 
   return (
@@ -124,12 +128,96 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
           <div className="mx-5 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
+          {/* My Batch Card - above nav, visible for students */}
+          {!isMentor && !isInstitution && (
+            <div className="p-3 pt-3">
+              <NavLink
+                to="/my-batch"
+                onClick={onClose}
+                className="block bg-gradient-to-br from-white/[0.07] to-white/[0.02] rounded-2xl p-4 border border-white/[0.08] hover:border-accent/30 transition-all"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <Sparkles className="w-3 h-3 text-accent animate-pulse" />
+                  <p className="text-white/50 text-[10px] font-black tracking-[0.15em] uppercase">My Batch</p>
+                </div>
+
+                {batchLoading ? (
+                  <div className="space-y-2">
+                    {[1,2,3].map(i => (
+                      <div key={i} className="h-3 bg-white/[0.05] rounded animate-pulse" />
+                    ))}
+                  </div>
+                ) : batchInfo ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent/30 to-accent/10 border border-accent/20 flex items-center justify-center shrink-0 overflow-hidden">
+                        <img
+                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(batchInfo.mentorName)}&backgroundColor=b6e3f4`}
+                          alt="Mentor"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-white text-[11px] font-bold truncate">{batchInfo.mentorName}</p>
+                        <p className="text-accent/70 text-[10px] truncate">{batchInfo.batchName}</p>
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-white/[0.05]" />
+
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <div className="bg-white/[0.04] rounded-xl p-2 text-center">
+                        <p className="text-white font-black text-sm">{batchInfo.totalStudents}</p>
+                        <p className="text-white/30 text-[9px] uppercase tracking-wider">Students</p>
+                      </div>
+                      <div className="bg-emerald-500/10 rounded-xl p-2 text-center">
+                        <p className="text-emerald-400 font-black text-sm flex items-center justify-center gap-1">
+                          <Activity className="w-2.5 h-2.5" />{batchInfo.practicingToday}
+                        </p>
+                        <p className="text-white/30 text-[9px] uppercase tracking-wider">Active Today</p>
+                      </div>
+                    </div>
+
+                    {batchInfo.mostStudiedTopic !== '—' && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-1.5 bg-blue-500/10 rounded-lg px-2 py-1.5">
+                          <TrendingUp className="w-2.5 h-2.5 text-blue-400 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[8px] text-white/30 uppercase tracking-wider">Top Topic</p>
+                            <p className="text-[10px] text-blue-300 font-semibold truncate">{batchInfo.mostStudiedTopic}</p>
+                          </div>
+                        </div>
+                        {batchInfo.mostMistakenTopic !== '—' && (
+                          <div className="flex items-center gap-1.5 bg-red-500/10 rounded-lg px-2 py-1.5">
+                            <AlertTriangle className="w-2.5 h-2.5 text-red-400 shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-[8px] text-white/30 uppercase tracking-wider">Needs Work</p>
+                              <p className="text-[10px] text-red-300 font-semibold truncate">{batchInfo.mostMistakenTopic}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center overflow-hidden">
+                      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mentor&backgroundColor=b6e3f4" alt="Mentor" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold text-sm">Class Mentor</p>
+                      <p className="text-white/40 text-[10px]">Active guidance</p>
+                    </div>
+                  </div>
+                )}
+              </NavLink>
+            </div>
+          )}
+
           {/* Navigation */}
           <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto mt-2">
             {navItems.map((item) => {
-              const label = typeof item.label === 'object'
-                ? (item.label as Record<string, string>)[examMode] || item.label.jee
-                : item.label;
+              const label = item.label;
 
               return (
                 <NavLink
@@ -211,30 +299,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </>
           )}
 
-          {/* Mentor Card - Always visible for Students */}
-          {!isMentor && !isInstitution && (
-            <div className="p-4">
-              <div className="bg-gradient-to-br from-white/[0.08] to-white/[0.03] rounded-2xl p-4 border border-white/[0.08] group/mentor hover:border-accent/30 transition-all cursor-pointer">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-3.5 h-3.5 text-accent animate-pulse" />
-                  <p className="text-white/50 text-[11px] font-semibold tracking-wider uppercase">Your Mentor</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src="https://api.dicebear.com/7.x/avataaars/svg?seed=Mentor&backgroundColor=b6e3f4" 
-                      alt="Mentor"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-white font-semibold text-sm">Class Mentor</p>
-                    <p className="text-white/40 text-[10px]">Active guidance</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </aside>
     </>
