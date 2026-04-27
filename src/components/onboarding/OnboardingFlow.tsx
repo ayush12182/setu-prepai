@@ -59,6 +59,24 @@ const EXAM_MAP: Record<string, string> = {
   jee: 'JEE Main', neet: 'NEET', foundation: 'Foundation', cuet: 'CUET', commerce: 'CA Foundation',
 };
 
+const TEACHER_SUBJECTS = [
+  { value: 'physics',   label: 'Physics',        emoji: '⚡' },
+  { value: 'chemistry', label: 'Chemistry',      emoji: '🧪' },
+  { value: 'maths',     label: 'Mathematics',    emoji: '📐' },
+  { value: 'biology',   label: 'Biology',        emoji: '🔬' },
+  { value: 'english',   label: 'English',        emoji: '📝' },
+  { value: 'social',    label: 'Social Science', emoji: '🌍' },
+  { value: 'commerce',  label: 'Commerce',       emoji: '📊' },
+];
+
+const TEACHER_GOALS = [
+  { value: 'test_analysis',  label: 'Assign & analyse tests',      emoji: '📋' },
+  { value: 'performance',    label: 'Track student performance',   emoji: '📈' },
+  { value: 'materials',      label: 'Share study materials',       emoji: '📚' },
+  { value: 'batches',        label: 'Manage multiple batches',     emoji: '👥' },
+  { value: 'all',            label: 'All of the above',            emoji: '🚀' },
+];
+
 // ─── Slide animation variants ─────────────────────────────────────────────────
 
 const slide = {
@@ -166,6 +184,8 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
   // Teacher state
   const [institutionName, setInstitutionName] = useState('');
   const [teacherExam, setTeacherExam] = useState('');
+  const [teacherSubjects, setTeacherSubjects] = useState<string[]>([]);
+  const [teacherGoals, setTeacherGoals] = useState<string[]>([]);
   const [batchName, setBatchName] = useState('');
   const [generatedCode, setGeneratedCode] = useState('');
   const [copied, setCopied] = useState(false);
@@ -180,7 +200,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
   };
 
   const totalStudentSteps = skipToJoinCode ? 2 : 4; // role → code → goal → done
-  const totalTeacherSteps = 4; // role → identity → batch → code
+  const totalTeacherSteps = 5; // role → identity → goals → batch → code
 
   // ─── Join code validation ─────────────────────────────────────────────────
   // Primary: SECURITY DEFINER RPC (bypasses RLS, always works)
@@ -381,7 +401,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
         setGeneratedCode(row?.join_code || code);
       }
 
-      go(3);
+      go(4);
     } catch (e: any) {
       toast.error(e.message || 'Batch creation failed.');
     } finally {
@@ -400,6 +420,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
         target_exam: examGoal,
         institution_name: displayName,
         full_name: displayName || undefined,
+        subjects: teacherSubjects.length > 0 ? teacherSubjects : null,
       } as any);
       await refreshProfile();
       onComplete?.();
@@ -707,6 +728,33 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
                 })}
               </div>
             </div>
+
+            <div className="space-y-2">
+              <label className="text-white/50 text-xs font-bold uppercase tracking-wider">Subjects you teach</label>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {TEACHER_SUBJECTS.map(s => {
+                  const sel = teacherSubjects.includes(s.value);
+                  return (
+                    <button
+                      key={s.value}
+                      type="button"
+                      onClick={() => setTeacherSubjects(prev =>
+                        sel ? prev.filter(v => v !== s.value) : [...prev, s.value]
+                      )}
+                      className={cn(
+                        'py-2.5 px-2 rounded-xl border text-center transition-all duration-200',
+                        sel
+                          ? 'border-violet-400/50 bg-violet-400/[0.08] ring-1 ring-violet-400/20'
+                          : 'border-white/[0.07] hover:border-white/[0.14]'
+                      )}
+                    >
+                      <span className="text-base block mb-0.5">{s.emoji}</span>
+                      <p className={cn('text-[11px] font-semibold leading-tight', sel ? 'text-violet-300' : 'text-white/60')}>{s.label}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           <PrimaryBtn
@@ -723,8 +771,71 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
       );
     }
 
-    // ── TEACHER STEP 2: Create batch ──────────────────────────────────────────
+    // ── TEACHER STEP 2: Goals ─────────────────────────────────────────────────
     if (step === 2 && track === 'teacher') {
+      return (
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
+              What do you want from SETU?
+            </h1>
+            <p className="text-white/40 text-sm">Select all that apply — we'll personalise your dashboard</p>
+          </div>
+
+          <div className="space-y-2">
+            {TEACHER_GOALS.map(g => {
+              const sel = teacherGoals.includes(g.value);
+              return (
+                <motion.button
+                  key={g.value}
+                  whileTap={{ scale: 0.99 }}
+                  type="button"
+                  onClick={() => {
+                    if (g.value === 'all') {
+                      setTeacherGoals(sel ? [] : TEACHER_GOALS.map(x => x.value));
+                    } else {
+                      setTeacherGoals(prev =>
+                        sel ? prev.filter(v => v !== 'all' && v !== g.value) : [...prev.filter(v => v !== 'all'), g.value]
+                      );
+                    }
+                  }}
+                  className={cn(
+                    'w-full px-4 py-3.5 rounded-xl border text-left flex items-center gap-3 transition-all duration-200',
+                    sel
+                      ? 'border-violet-400/40 bg-violet-400/[0.06] ring-1 ring-violet-400/20'
+                      : 'border-white/[0.07] hover:border-white/[0.14] hover:bg-white/[0.02]'
+                  )}
+                >
+                  <span className="text-xl w-7 shrink-0">{g.emoji}</span>
+                  <p className={cn('text-sm font-semibold flex-1', sel ? 'text-violet-300' : 'text-white/70')}>{g.label}</p>
+                  <div className={cn(
+                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+                    sel ? 'bg-violet-400 border-violet-400' : 'border-white/20'
+                  )}>
+                    {sel && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <PrimaryBtn
+            disabled={teacherGoals.length === 0}
+            onClick={() => go(3)}
+            className="from-violet-400 to-violet-500 shadow-violet-500/25"
+          >
+            Continue <ArrowRight className="w-5 h-5" />
+          </PrimaryBtn>
+
+          <GhostBtn onClick={() => go(1, -1)}>
+            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
+          </GhostBtn>
+        </div>
+      );
+    }
+
+    // ── TEACHER STEP 3: Create batch ──────────────────────────────────────────
+    if (step === 3 && track === 'teacher') {
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
@@ -764,15 +875,15 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
             Generate Join Code <Rocket className="w-5 h-5" />
           </PrimaryBtn>
 
-          <GhostBtn onClick={() => go(1, -1)}>
+          <GhostBtn onClick={() => go(2, -1)}>
             <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
           </GhostBtn>
         </div>
       );
     }
 
-    // ── TEACHER STEP 3: Show join code ─────────────────────────────────────────
-    if (step === 3 && track === 'teacher') {
+    // ── TEACHER STEP 4: Show join code ─────────────────────────────────────────
+    if (step === 4 && track === 'teacher') {
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
@@ -796,6 +907,9 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
             <div className="font-mono text-4xl font-black tracking-[0.4em] text-amber-400 select-all">
               {generatedCode}
             </div>
+            <p className="text-white/30 text-xs break-all select-all">
+              {`${window.location.origin}/join/${generatedCode}`}
+            </p>
             <div className="flex gap-3">
               <motion.button
                 whileTap={{ scale: 0.97 }}
