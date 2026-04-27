@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   ArrowLeft, Download, Copy, CheckCircle2, 
-  BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, Calculator, Sparkles, FileText
+  BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, Calculator, Sparkles, GraduationCap, RotateCcw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -15,8 +15,20 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { cn } from '@/lib/utils';
+import Latex from 'react-latex-next';
+import 'katex/dist/katex.min.css';
+import { CardHeader, CardTitle } from '@/components/ui/card';
 
 type SmartMode = 'default' | 'beginner' | 'advanced' | 'formulas_only' | 'mistakes_only' | 'revision';
+
+const SMART_MODE_META: Record<SmartMode, { label: string; loaderText: string }> = {
+  default:       { label: 'Hybrid Mode',      loaderText: 'Building full structured notes (Concept → Formulas → Practice)...' },
+  beginner:      { label: 'Tuition Mode',     loaderText: 'Preparing step-by-step beginner-friendly explanation...' },
+  advanced:      { label: 'Coaching Mode',    loaderText: 'Generating Kota-style fast notes with shortcuts & tricks...' },
+  formulas_only: { label: 'Formula Bank',     loaderText: 'Compiling all formulas with conditions and tricks...' },
+  mistakes_only: { label: 'Common Mistakes',  loaderText: 'Identifying traps and common errors for your exam...' },
+  revision:      { label: '1-Min Revision',   loaderText: 'Building a rapid revision flash sheet...' },
+};
 
 const ChapterNotesPage: React.FC = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
@@ -25,7 +37,7 @@ const ChapterNotesPage: React.FC = () => {
 
   // AI States
   const [notes, setNotes] = useState<string>('');
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(true);  // Start as true to show loader immediately
   const [hasAttemptedGen, setHasAttemptedGen] = useState(false);
   const [activeSmartMode, setActiveSmartMode] = useState<SmartMode>('default');
 
@@ -38,9 +50,11 @@ const ChapterNotesPage: React.FC = () => {
   useEffect(() => {
     if (chapter && !hasAttemptedGen) {
       generateNotes('default');
+    } else if (!chapter) {
+      setIsGenerating(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chapter, hasAttemptedGen]);
+  }, [chapter]);
 
   const generateNotes = async (mode: SmartMode) => {
     if (!chapter) return;
@@ -50,16 +64,17 @@ const ChapterNotesPage: React.FC = () => {
     setNotes('');
 
     try {
-      // Get user session token for Edge Function auth
+      // Get user session token for Edge Function auth — falls back to anon key for dev
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const token = session?.access_token || anonKey;
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-notes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'apikey': anonKey,
         },
         body: JSON.stringify({
           chapterName: chapter.name,
@@ -72,12 +87,18 @@ const ChapterNotesPage: React.FC = () => {
       });
 
       if (!response.ok) {
-        if (response.status === 500) {
-          toast.error("You need to deploy the new generate-notes Edge Function to enable Kota Mode!");
-          setIsGenerating(false);
-          return;
+        const errText = await response.text();
+        console.error('[ChapterNotesPage] Edge function error:', response.status, errText);
+        
+        if (response.status === 429 || errText.includes('429')) {
+          toast.error('AI Quota Exceeded. Showing offline notes. Please try again in 30 seconds.');
+        } else {
+          toast.error('Notes engine temporarily unavailable. Showing offline version.');
         }
-        throw new Error('Failed to generate notes');
+        
+        setNotes(buildFallbackNotes(chapter));
+        setIsGenerating(false);
+        return;
       }
 
       const reader = response.body?.getReader();
@@ -103,13 +124,41 @@ const ChapterNotesPage: React.FC = () => {
           }
         }
       }
+
+      // If we got no content at all after streaming, show fallback
+      if (!fullNotes) {
+        console.warn('[ChapterNotesPage] Stream completed with no content, using fallback');
+        setNotes(buildFallbackNotes(chapter));
+      }
+
     } catch (error) {
       console.error('Error generating notes:', error);
-      toast.error('Failed to generate AI notes. Please verify your internet connection.');
-      setNotes(`## ⚠️ AI Temporarily Unavailable\nBhai thoda wait kar le, system update ho raha hai. Please try again in a few minutes.`);
+      toast.error('Failed to generate AI notes. Showing offline version.');
+      setNotes(buildFallbackNotes(chapter));
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const buildFallbackNotes = (ch: ReturnType<typeof getChapterById>) => {
+    if (!ch) return '';
+    const examName = isFoundation ? `Class ${classLabel}` : isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE';
+    return `# ${ch.name}
+
+## Key Topics
+${ch.topics.map(t => `- ${t}`).join('\n')}
+
+## Key Formulas
+${ch.keyFormulas.length > 0 ? ch.keyFormulas.map(f => `- ${f}`).join('\n') : 'Focus on conceptual understanding for this chapter.'}
+
+## Exam Tips (${examName})
+${ch.examTips.map(t => `- ${t}`).join('\n')}
+
+## PYQ Focus
+- Post-2020: ${ch.pyqData.postCovid} questions from this chapter
+- Trending: ${ch.pyqData.trendingConcepts.join(', ')}
+
+⚡ **AI Notes unavailable offline.** Sign in and try again for full Kota-coach notes.`;
   };
 
   if (!chapter) {
@@ -141,35 +190,81 @@ const ChapterNotesPage: React.FC = () => {
   };
 
   const smartModes = [
-    { id: 'default', label: 'Default Notes', icon: BookOpen, color: 'text-sky-500', bg: 'bg-sky-500/10' },
-    { id: 'beginner', label: 'Explain like Beginner', icon: Sparkles, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { id: 'advanced', label: 'Advanced Depth', icon: BrainCircuit, color: 'text-violet-500', bg: 'bg-violet-500/10' },
-    { id: 'formulas_only', label: 'Only Formulas', icon: Calculator, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    { id: 'mistakes_only', label: 'Only Mistakes', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' },
-    { id: 'revision', label: '1 Min Revision', icon: Zap, color: 'text-accent', bg: 'bg-accent/10' },
+    { id: 'default',       label: '🔀 Hybrid Mode',      icon: BookOpen,      color: 'text-sky-500',     bg: 'bg-sky-500/10' },
+    { id: 'beginner',      label: '📖 Tuition Mode',     icon: GraduationCap, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { id: 'advanced',      label: '⚡ Coaching Mode',    icon: Zap,           color: 'text-amber-500',   bg: 'bg-amber-500/10' },
+    { id: 'formulas_only', label: '🧮 Formula Bank',     icon: Calculator,    color: 'text-violet-500',  bg: 'bg-violet-500/10' },
+    { id: 'mistakes_only', label: '⚠️ Common Mistakes',  icon: AlertTriangle, color: 'text-red-500',     bg: 'bg-red-500/10' },
+    { id: 'revision',      label: '⚡ 1-Min Revision',   icon: RotateCcw,     color: 'text-accent',      bg: 'bg-accent/10' },
   ] as const;
 
   const renderNotes = (content: string) => {
+    // First, combine multi-line block math ($$ ... $$) so it doesn't get broken by split('\n')
+    // A simple approach: we'll just parse line by line, but if a line is just '$$', we might have issues.
+    // Assuming the AI generates single-line block math like `$$ \boxed{v} $$`.
+    
     return content.split('\n').map((line, i) => {
-      if (line.startsWith('# ')) return <h1 key={i} className="text-3xl font-display font-bold mt-2 mb-6 text-foreground border-b border-border pb-2">{line.slice(2)}</h1>;
-      if (line.startsWith('## ')) return <h2 key={i} className={`text-xl font-bold mt-10 mb-4 flex items-center gap-3 text-foreground bg-secondary/50 p-3 rounded-xl border border-border`}>
-        <Layers className="w-5 h-5 text-accent shrink-0" />
-        {line.slice(3)}
-      </h2>;
-      if (line.startsWith('### ')) return <h3 key={i} className="text-lg font-bold mt-6 mb-2 text-foreground/90 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" />{line.slice(4)}</h3>;
-      if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) return <li key={i} className="ml-6 my-2 text-muted-foreground list-disc marker:text-accent font-medium leading-relaxed">{line.slice(2).replace(/\*\*/g, '')}</li>;
-      if (line.startsWith('⚡') || line.startsWith('💡')) return <p key={i} className="ml-0 my-5 text-accent font-semibold bg-accent/5 p-4 rounded-xl border border-accent/20 leading-relaxed shadow-sm flex items-start gap-3"><span className="text-xl shrink-0 mt-0.5">{line.substring(0,2)}</span><span>{line.substring(2).replace(/\*\*/g, '')}</span></p>;
-      if (line.startsWith('---')) return <hr key={i} className="my-8 border-border/60" />;
-      if (line.match(/^\d+\./)) return <p key={i} className="ml-2 my-3 font-bold text-foreground/90">{line.replace(/\*\*/g, '')}</p>;
-      if (line.trim()) {
-        const parts = line.split(/(\*\*.*?\*\*)/g);
-        return <p key={i} className="my-4 text-muted-foreground leading-relaxed text-base">
-          {parts.map((p, x) => p.startsWith('**') && p.endsWith('**') ? <strong key={x} className="font-bold text-foreground/90 bg-primary/5 px-1 rounded">{p.slice(2, -2)}</strong> : p)}
-        </p>;
+      const trimmed = line.trim();
+      if (!trimmed) return <br key={i} />;
+
+      // Level Badges
+      if (trimmed.startsWith('### Level 1')) return <h3 key={i} className="text-lg font-bold mt-8 mb-4 inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-600 px-4 py-2 rounded-xl"><div className="w-2 h-2 rounded-full bg-emerald-500" /><Latex>{trimmed.slice(4)}</Latex></h3>;
+      if (trimmed.startsWith('### Level 2')) return <h3 key={i} className="text-lg font-bold mt-8 mb-4 inline-flex items-center gap-2 bg-amber-500/10 text-amber-600 px-4 py-2 rounded-xl"><div className="w-2 h-2 rounded-full bg-amber-500" /><Latex>{trimmed.slice(4)}</Latex></h3>;
+      if (trimmed.startsWith('### Level 3')) return <h3 key={i} className="text-lg font-bold mt-8 mb-4 inline-flex items-center gap-2 bg-red-500/10 text-red-600 px-4 py-2 rounded-xl"><div className="w-2 h-2 rounded-full bg-red-500" /><Latex>{trimmed.slice(4)}</Latex></h3>;
+
+      // Structured Solution Steps
+      if (trimmed.startsWith('**Given:**')) return <p key={i} className="my-2"><strong className="text-foreground">Given:</strong> <Latex>{trimmed.replace('**Given:**', '')}</Latex></p>;
+      if (trimmed.startsWith('**To find:**')) return <p key={i} className="my-2"><strong className="text-foreground">To find:</strong> <Latex>{trimmed.replace('**To find:**', '')}</Latex></p>;
+      if (trimmed.startsWith('**Concept:**')) return <p key={i} className="my-3 inline-flex items-center px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm font-semibold"><Layers className="w-4 h-4 mr-2"/> Concept: <Latex>{trimmed.replace('**Concept:**', '')}</Latex></p>;
+      if (trimmed.startsWith('**Solution:**')) return <p key={i} className="mt-4 mb-2 font-bold text-foreground">Solution:</p>;
+      if (trimmed.startsWith('**Answer:**')) return <div key={i} className="my-4 p-4 bg-secondary/30 rounded-xl border border-border flex flex-wrap items-center gap-4"><strong className="text-foreground">Answer:</strong> <div className="text-lg overflow-x-auto"><Latex>{trimmed.replace('**Answer:**', '')}</Latex></div></div>;
+      
+      // JEE Tip Callout
+      if (trimmed.startsWith('**JEE Tip:**')) return (
+        <div key={i} className="my-6 p-4 bg-amber-500/10 border-l-4 border-amber-500 rounded-r-xl">
+          <p className="text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-2 mb-1">
+            <AlertTriangle className="w-4 h-4" /> JEE Tip
+          </p>
+          <p className="text-amber-900 dark:text-amber-200 text-sm">
+            <Latex>{trimmed.replace('**JEE Tip:**', '')}</Latex>
+          </p>
+        </div>
+      );
+
+      // Steps in solution
+      if (trimmed.match(/^Step \d+:/)) {
+        return <p key={i} className="my-2 ml-4 text-muted-foreground"><Latex>{trimmed}</Latex></p>;
       }
-      return <br key={i} />;
+
+      if (trimmed.startsWith('# ')) return <h1 key={i} className="text-3xl font-display font-bold mt-2 mb-6 text-foreground border-b border-border pb-2"><Latex>{trimmed.slice(2)}</Latex></h1>;
+      if (trimmed.startsWith('## ')) return <h2 key={i} className={`text-xl font-bold mt-10 mb-4 flex items-center gap-3 text-foreground bg-secondary/50 p-3 rounded-xl border border-border`}>
+        <Layers className="w-5 h-5 text-accent shrink-0" />
+        <Latex>{trimmed.slice(3)}</Latex>
+      </h2>;
+      if (trimmed.startsWith('### ')) return <h3 key={i} className="text-lg font-bold mt-6 mb-2 text-foreground/90 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /><Latex>{trimmed.slice(4)}</Latex></h3>;
+      if (trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) return <li key={i} className="ml-6 my-2 text-muted-foreground list-disc marker:text-accent font-medium leading-relaxed"><Latex>{trimmed.slice(2).replace(/\*\*/g, '')}</Latex></li>;
+      if (trimmed.startsWith('⚡') || trimmed.startsWith('💡')) return <p key={i} className="ml-0 my-5 text-accent font-semibold bg-accent/5 p-4 rounded-xl border border-accent/20 leading-relaxed shadow-sm flex items-start gap-3"><span className="text-xl shrink-0 mt-0.5">{trimmed.substring(0,2)}</span><span><Latex>{trimmed.substring(2).replace(/\*\*/g, '')}</Latex></span></p>;
+      if (trimmed.startsWith('---')) return <hr key={i} className="my-8 border-border/60" />;
+      if (trimmed.match(/^\d+\./)) return <p key={i} className="ml-2 my-3 font-bold text-foreground/90"><Latex>{trimmed.replace(/\*\*/g, '')}</Latex></p>;
+      
+      // Default paragraphs
+      const parts = trimmed.split(/(\*\*.*?\*\*)/g);
+      return <p key={i} className="my-4 text-muted-foreground leading-relaxed text-base overflow-x-auto">
+        {parts.map((p, x) => 
+          p.startsWith('**') && p.endsWith('**') 
+            ? <strong key={x} className="font-bold text-foreground/90 bg-primary/5 px-1 rounded"><Latex>{p.slice(2, -2)}</Latex></strong> 
+            : <Latex key={x}>{p}</Latex>
+        )}
+      </p>;
     });
   };
+
+  const formulas = React.useMemo(() => {
+    // Extract all content inside \boxed{...} 
+    const matches = [...notes.matchAll(/\\boxed\{([^}]+)\}/g)];
+    // Filter duplicates
+    return Array.from(new Set(matches.map(m => m[1])));
+  }, [notes]);
 
   return (
     <MainLayout title={`Notes: ${chapter.name}`}>
@@ -211,6 +306,24 @@ const ChapterNotesPage: React.FC = () => {
 
         {/* Smart Toolbar */}
         <div className="sticky top-20 z-40 bg-background/80 backdrop-blur-xl border-y border-border py-4 mb-8 -mx-4 px-4 sm:mx-0 sm:rounded-2xl sm:border-x shadow-sm">
+          
+          {/* Formula Quick Reference Card */}
+          {formulas.length > 0 && (
+            <div className="mb-4 pt-2">
+              <div className="flex items-center gap-2 mb-3">
+                <Calculator className="w-5 h-5 text-accent" /> 
+                <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Formula Quick Reference</h3>
+              </div>
+              <div className="flex flex-wrap gap-3 max-h-[200px] overflow-y-auto hide-scrollbar p-1">
+                {formulas.map((f, i) => (
+                  <div key={i} className="px-4 py-2 bg-background rounded-lg border border-border shadow-sm flex items-center justify-center">
+                    <Latex>{`$${f}$`}</Latex>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
             {smartModes.map(mode => {
               const Icon = mode.icon;
@@ -254,7 +367,7 @@ const ChapterNotesPage: React.FC = () => {
               </div>
               <h3 className="text-2xl font-display font-bold text-foreground mb-3">Distilling Output...</h3>
               <p className="text-muted-foreground text-center max-w-sm text-lg">
-                Your AI Coach is currently compiling {activeSmartMode === 'default' ? 'the ultimate chapter blueprint' : `the specific '${smartModes.find(m => m.id === activeSmartMode)?.label}' view`}...
+                {SMART_MODE_META[activeSmartMode].loaderText}
               </p>
             </motion.div>
           ) : (
