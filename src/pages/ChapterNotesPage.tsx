@@ -5,9 +5,10 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { getChapterById } from '@/data/syllabus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  ArrowLeft, Download, Copy, CheckCircle2, 
-  BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, Calculator, Sparkles, GraduationCap, RotateCcw
+import {
+  ArrowLeft, Download, Copy, CheckCircle2,
+  BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, Calculator, Sparkles,
+  GraduationCap, RotateCcw, Lightbulb,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -17,27 +18,43 @@ import { useClassContext } from '@/contexts/ClassContext';
 import { cn } from '@/lib/utils';
 import Latex from 'react-latex-next';
 import 'katex/dist/katex.min.css';
-import { CardHeader, CardTitle } from '@/components/ui/card';
 
 type SmartMode = 'default' | 'beginner' | 'advanced' | 'formulas_only' | 'mistakes_only' | 'revision';
 
 const SMART_MODE_META: Record<SmartMode, { label: string; loaderText: string }> = {
-  default:       { label: 'Hybrid Mode',      loaderText: 'Building full structured notes (Concept → Formulas → Practice)...' },
-  beginner:      { label: 'Tuition Mode',     loaderText: 'Preparing step-by-step beginner-friendly explanation...' },
-  advanced:      { label: 'Coaching Mode',    loaderText: 'Generating Kota-style fast notes with shortcuts & tricks...' },
-  formulas_only: { label: 'Formula Bank',     loaderText: 'Compiling all formulas with conditions and tricks...' },
-  mistakes_only: { label: 'Common Mistakes',  loaderText: 'Identifying traps and common errors for your exam...' },
-  revision:      { label: '1-Min Revision',   loaderText: 'Building a rapid revision flash sheet...' },
+  default:       { label: 'Hybrid Mode',     loaderText: 'Building full structured notes (Concept → Formulas → Practice)...' },
+  beginner:      { label: 'Tuition Mode',    loaderText: 'Preparing step-by-step beginner-friendly explanation...' },
+  advanced:      { label: 'Coaching Mode',   loaderText: 'Generating Kota-style fast notes with shortcuts & tricks...' },
+  formulas_only: { label: 'Formula Bank',    loaderText: 'Compiling all formulas with conditions and tricks...' },
+  mistakes_only: { label: 'Common Mistakes', loaderText: 'Identifying traps and common errors for your exam...' },
+  revision:      { label: '1-Min Revision',  loaderText: 'Building a rapid revision flash sheet...' },
 };
+
+// Extracts \boxed{...} contents, handles one level of nested braces
+function extractFormulas(content: string): string[] {
+  const results: string[] = [];
+  const re = /\\boxed\{((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\}/g;
+  let m;
+  while ((m = re.exec(content)) !== null) {
+    const f = m[1].trim();
+    if (f) results.push(f);
+  }
+  return [...new Set(results)];
+}
+
+const LEVEL_STYLES = {
+  1: { wrapper: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400', dot: 'bg-emerald-500' },
+  2: { wrapper: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',   dot: 'bg-amber-500' },
+  3: { wrapper: 'bg-red-500/10 text-red-600 dark:text-red-400',         dot: 'bg-red-500' },
+} as const;
 
 const ChapterNotesPage: React.FC = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
-  // AI States
   const [notes, setNotes] = useState<string>('');
-  const [isGenerating, setIsGenerating] = useState(true);  // Start as true to show loader immediately
+  const [isGenerating, setIsGenerating] = useState(true);
   const [hasAttemptedGen, setHasAttemptedGen] = useState(false);
   const [activeSmartMode, setActiveSmartMode] = useState<SmartMode>('default');
 
@@ -64,7 +81,6 @@ const ChapterNotesPage: React.FC = () => {
     setNotes('');
 
     try {
-      // Get user session token for Edge Function auth — falls back to anon key for dev
       const { data: { session } } = await supabase.auth.getSession();
       const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const token = session?.access_token || anonKey;
@@ -82,20 +98,18 @@ const ChapterNotesPage: React.FC = () => {
           topics: chapter.topics || [],
           smartMode: mode,
           language,
-          examMode: isFoundation ? `Class ${classLabel} (Foundation)` : isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE'
+          examMode: isFoundation ? `Class ${classLabel} (Foundation)` : isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
         }),
       });
 
       if (!response.ok) {
         const errText = await response.text();
         console.error('[ChapterNotesPage] Edge function error:', response.status, errText);
-        
         if (response.status === 429 || errText.includes('429')) {
           toast.error('AI Quota Exceeded. Showing offline notes. Please try again in 30 seconds.');
         } else {
           toast.error('Notes engine temporarily unavailable. Showing offline version.');
         }
-        
         setNotes(buildFallbackNotes(chapter));
         setIsGenerating(false);
         return;
@@ -110,22 +124,20 @@ const ChapterNotesPage: React.FC = () => {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-        for (const line of lines) {
+        for (const line of chunk.split('\n')) {
           if (line.startsWith('data: ') && line !== 'data: [DONE]') {
             try {
               const json = JSON.parse(line.slice(6));
               const content = json.choices?.[0]?.delta?.content;
-              if (content) { 
-                fullNotes += content; 
-                setNotes(fullNotes); 
+              if (content) {
+                fullNotes += content;
+                setNotes(fullNotes);
               }
-            } catch { /* Skip invalid JSON */ }
+            } catch { /* skip invalid JSON */ }
           }
         }
       }
 
-      // If we got no content at all after streaming, show fallback
       if (!fullNotes) {
         console.warn('[ChapterNotesPage] Stream completed with no content, using fallback');
         setNotes(buildFallbackNotes(chapter));
@@ -190,95 +202,153 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
   };
 
   const smartModes = [
-    { id: 'default',       label: '🔀 Hybrid Mode',      icon: BookOpen,      color: 'text-sky-500',     bg: 'bg-sky-500/10' },
-    { id: 'beginner',      label: '📖 Tuition Mode',     icon: GraduationCap, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { id: 'advanced',      label: '⚡ Coaching Mode',    icon: Zap,           color: 'text-amber-500',   bg: 'bg-amber-500/10' },
-    { id: 'formulas_only', label: '🧮 Formula Bank',     icon: Calculator,    color: 'text-violet-500',  bg: 'bg-violet-500/10' },
-    { id: 'mistakes_only', label: '⚠️ Common Mistakes',  icon: AlertTriangle, color: 'text-red-500',     bg: 'bg-red-500/10' },
-    { id: 'revision',      label: '⚡ 1-Min Revision',   icon: RotateCcw,     color: 'text-accent',      bg: 'bg-accent/10' },
+    { id: 'default',       label: '🔀 Hybrid Mode',     icon: BookOpen,      color: 'text-sky-500' },
+    { id: 'beginner',      label: '📖 Tuition Mode',    icon: GraduationCap, color: 'text-emerald-500' },
+    { id: 'advanced',      label: '⚡ Coaching Mode',   icon: Zap,           color: 'text-amber-500' },
+    { id: 'formulas_only', label: '🧮 Formula Bank',    icon: Calculator,    color: 'text-violet-500' },
+    { id: 'mistakes_only', label: '⚠️ Common Mistakes', icon: AlertTriangle, color: 'text-red-500' },
+    { id: 'revision',      label: '⚡ 1-Min Revision',  icon: RotateCcw,     color: 'text-accent' },
   ] as const;
 
+  const renderInline = (text: string, key?: number) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return (
+      <span key={key}>
+        {parts.map((p, x) =>
+          p.startsWith('**') && p.endsWith('**')
+            ? <strong key={x} className="font-bold text-foreground/90 bg-primary/5 px-1 rounded">
+                <Latex>{p.slice(2, -2)}</Latex>
+              </strong>
+            : <Latex key={x}>{p}</Latex>
+        )}
+      </span>
+    );
+  };
+
   const renderNotes = (content: string) => {
-    // First, combine multi-line block math ($$ ... $$) so it doesn't get broken by split('\n')
-    // A simple approach: we'll just parse line by line, but if a line is just '$$', we might have issues.
-    // Assuming the AI generates single-line block math like `$$ \boxed{v} $$`.
-    
     return content.split('\n').map((line, i) => {
       const trimmed = line.trim();
       if (!trimmed) return <br key={i} />;
 
-      // Level Badges
-      if (trimmed.startsWith('### Level 1')) return <h3 key={i} className="text-lg font-bold mt-8 mb-4 inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-600 px-4 py-2 rounded-xl"><div className="w-2 h-2 rounded-full bg-emerald-500" /><Latex>{trimmed.slice(4)}</Latex></h3>;
-      if (trimmed.startsWith('### Level 2')) return <h3 key={i} className="text-lg font-bold mt-8 mb-4 inline-flex items-center gap-2 bg-amber-500/10 text-amber-600 px-4 py-2 rounded-xl"><div className="w-2 h-2 rounded-full bg-amber-500" /><Latex>{trimmed.slice(4)}</Latex></h3>;
-      if (trimmed.startsWith('### Level 3')) return <h3 key={i} className="text-lg font-bold mt-8 mb-4 inline-flex items-center gap-2 bg-red-500/10 text-red-600 px-4 py-2 rounded-xl"><div className="w-2 h-2 rounded-full bg-red-500" /><Latex>{trimmed.slice(4)}</Latex></h3>;
+      // Level badges (### Level 1/2/3)
+      const levelMatch = trimmed.match(/^#{1,3}\s*Level\s*([123])\s*[—–-]?\s*(.*)/i);
+      if (levelMatch) {
+        const lvl = parseInt(levelMatch[1]) as 1 | 2 | 3;
+        const style = LEVEL_STYLES[lvl];
+        const title = levelMatch[2].trim();
+        return (
+          <h3 key={i} className={cn('text-lg font-bold mt-8 mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl', style.wrapper)}>
+            <div className={cn('w-2 h-2 rounded-full', style.dot)} />
+            {title ? <Latex>{title}</Latex> : `Level ${lvl}`}
+          </h3>
+        );
+      }
 
-      // Structured Solution Steps
-      if (trimmed.startsWith('**Given:**')) return <p key={i} className="my-2"><strong className="text-foreground">Given:</strong> <Latex>{trimmed.replace('**Given:**', '')}</Latex></p>;
-      if (trimmed.startsWith('**To find:**')) return <p key={i} className="my-2"><strong className="text-foreground">To find:</strong> <Latex>{trimmed.replace('**To find:**', '')}</Latex></p>;
-      if (trimmed.startsWith('**Concept:**')) return <p key={i} className="my-3 inline-flex items-center px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm font-semibold"><Layers className="w-4 h-4 mr-2"/> Concept: <Latex>{trimmed.replace('**Concept:**', '')}</Latex></p>;
+      // JEE Tip callout
+      if (/^(?:\*\*)?JEE Tip:?(?:\*\*)?/i.test(trimmed)) {
+        const tipText = trimmed.replace(/^\*?\*?JEE Tip:?\*?\*?\s*/i, '');
+        return (
+          <div key={i} className="my-6 p-4 bg-amber-500/10 border-l-4 border-amber-500 rounded-r-xl">
+            <p className="text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-2 mb-1">
+              <Lightbulb className="w-4 h-4" /> JEE Tip
+            </p>
+            <p className="text-amber-800 dark:text-amber-200 text-sm leading-relaxed">
+              <Latex>{tipText}</Latex>
+            </p>
+          </div>
+        );
+      }
+
+      // Structured solution fields
+      if (trimmed.startsWith('**Given:**')) return <p key={i} className="my-2"><strong className="text-foreground">Given:</strong> <Latex>{trimmed.replace('**Given:**', '').trim()}</Latex></p>;
+      if (trimmed.startsWith('**To find:**')) return <p key={i} className="my-2"><strong className="text-foreground">To find:</strong> <Latex>{trimmed.replace('**To find:**', '').trim()}</Latex></p>;
+      if (trimmed.startsWith('**Concept:**')) return (
+        <p key={i} className="my-3 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm font-semibold">
+          <Layers className="w-4 h-4" /> Concept: <Latex>{trimmed.replace('**Concept:**', '').trim()}</Latex>
+        </p>
+      );
       if (trimmed.startsWith('**Solution:**')) return <p key={i} className="mt-4 mb-2 font-bold text-foreground">Solution:</p>;
-      if (trimmed.startsWith('**Answer:**')) return <div key={i} className="my-4 p-4 bg-secondary/30 rounded-xl border border-border flex flex-wrap items-center gap-4"><strong className="text-foreground">Answer:</strong> <div className="text-lg overflow-x-auto"><Latex>{trimmed.replace('**Answer:**', '')}</Latex></div></div>;
-      
-      // JEE Tip Callout
-      if (trimmed.startsWith('**JEE Tip:**')) return (
-        <div key={i} className="my-6 p-4 bg-amber-500/10 border-l-4 border-amber-500 rounded-r-xl">
-          <p className="text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-2 mb-1">
-            <AlertTriangle className="w-4 h-4" /> JEE Tip
-          </p>
-          <p className="text-amber-900 dark:text-amber-200 text-sm">
-            <Latex>{trimmed.replace('**JEE Tip:**', '')}</Latex>
-          </p>
+      if (trimmed.startsWith('**Answer:**')) return (
+        <div key={i} className="my-4 p-4 bg-secondary/30 rounded-xl border border-border flex flex-wrap items-center gap-4">
+          <strong className="text-foreground">Answer:</strong>
+          <div className="text-lg overflow-x-auto"><Latex>{trimmed.replace('**Answer:**', '').trim()}</Latex></div>
         </div>
       );
 
-      // Steps in solution
-      if (trimmed.match(/^Step \d+:/)) {
-        return <p key={i} className="my-2 ml-4 text-muted-foreground"><Latex>{trimmed}</Latex></p>;
-      }
+      // Step lines inside solution
+      if (/^Step \d+:/i.test(trimmed)) return (
+        <p key={i} className="my-2 ml-4 text-muted-foreground"><Latex>{trimmed}</Latex></p>
+      );
 
-      if (trimmed.startsWith('# ')) return <h1 key={i} className="text-3xl font-display font-bold mt-2 mb-6 text-foreground border-b border-border pb-2"><Latex>{trimmed.slice(2)}</Latex></h1>;
-      if (trimmed.startsWith('## ')) return <h2 key={i} className={`text-xl font-bold mt-10 mb-4 flex items-center gap-3 text-foreground bg-secondary/50 p-3 rounded-xl border border-border`}>
-        <Layers className="w-5 h-5 text-accent shrink-0" />
-        <Latex>{trimmed.slice(3)}</Latex>
-      </h2>;
-      if (trimmed.startsWith('### ')) return <h3 key={i} className="text-lg font-bold mt-6 mb-2 text-foreground/90 flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-accent" /><Latex>{trimmed.slice(4)}</Latex></h3>;
-      if (trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) return <li key={i} className="ml-6 my-2 text-muted-foreground list-disc marker:text-accent font-medium leading-relaxed"><Latex>{trimmed.slice(2).replace(/\*\*/g, '')}</Latex></li>;
-      if (trimmed.startsWith('⚡') || trimmed.startsWith('💡')) return <p key={i} className="ml-0 my-5 text-accent font-semibold bg-accent/5 p-4 rounded-xl border border-accent/20 leading-relaxed shadow-sm flex items-start gap-3"><span className="text-xl shrink-0 mt-0.5">{trimmed.substring(0,2)}</span><span><Latex>{trimmed.substring(2).replace(/\*\*/g, '')}</Latex></span></p>;
+      // Standard headings
+      if (trimmed.startsWith('# ')) return (
+        <h1 key={i} className="text-3xl font-display font-bold mt-2 mb-6 text-foreground border-b border-border pb-2">
+          <Latex>{trimmed.slice(2)}</Latex>
+        </h1>
+      );
+      if (trimmed.startsWith('## ')) return (
+        <h2 key={i} className="text-xl font-bold mt-10 mb-4 flex items-center gap-3 text-foreground bg-secondary/50 p-3 rounded-xl border border-border">
+          <Layers className="w-5 h-5 text-accent shrink-0" />
+          <Latex>{trimmed.slice(3)}</Latex>
+        </h2>
+      );
+      if (trimmed.startsWith('### ')) return (
+        <h3 key={i} className="text-lg font-bold mt-6 mb-2 text-foreground/90 flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+          <Latex>{trimmed.slice(4)}</Latex>
+        </h3>
+      );
+
+      // Bullets
+      if (trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) return (
+        <li key={i} className="ml-6 my-2 text-muted-foreground list-disc marker:text-accent font-medium leading-relaxed">
+          <Latex>{trimmed.slice(2).replace(/\*\*/g, '')}</Latex>
+        </li>
+      );
+
+      // Accent callouts
+      if (trimmed.startsWith('⚡') || trimmed.startsWith('💡')) return (
+        <p key={i} className="ml-0 my-5 text-accent font-semibold bg-accent/5 p-4 rounded-xl border border-accent/20 leading-relaxed shadow-sm flex items-start gap-3">
+          <span className="text-xl shrink-0 mt-0.5">{trimmed.substring(0, 2)}</span>
+          <span><Latex>{trimmed.substring(2).replace(/\*\*/g, '')}</Latex></span>
+        </p>
+      );
+
       if (trimmed.startsWith('---')) return <hr key={i} className="my-8 border-border/60" />;
-      if (trimmed.match(/^\d+\./)) return <p key={i} className="ml-2 my-3 font-bold text-foreground/90"><Latex>{trimmed.replace(/\*\*/g, '')}</Latex></p>;
-      
-      // Default paragraphs
+
+      if (trimmed.match(/^\d+\./)) return (
+        <p key={i} className="ml-2 my-3 font-bold text-foreground/90 overflow-x-auto">
+          <Latex>{trimmed.replace(/\*\*/g, '')}</Latex>
+        </p>
+      );
+
+      // Default paragraph with bold + LaTeX
       const parts = trimmed.split(/(\*\*.*?\*\*)/g);
-      return <p key={i} className="my-4 text-muted-foreground leading-relaxed text-base overflow-x-auto">
-        {parts.map((p, x) => 
-          p.startsWith('**') && p.endsWith('**') 
-            ? <strong key={x} className="font-bold text-foreground/90 bg-primary/5 px-1 rounded"><Latex>{p.slice(2, -2)}</Latex></strong> 
-            : <Latex key={x}>{p}</Latex>
-        )}
-      </p>;
+      return (
+        <p key={i} className="my-4 text-muted-foreground leading-relaxed text-base overflow-x-auto">
+          {parts.map((p, x) =>
+            p.startsWith('**') && p.endsWith('**')
+              ? <strong key={x} className="font-bold text-foreground/90 bg-primary/5 px-1 rounded"><Latex>{p.slice(2, -2)}</Latex></strong>
+              : <Latex key={x}>{p}</Latex>
+          )}
+        </p>
+      );
     });
   };
 
-  const formulas = React.useMemo(() => {
-    // Extract all content inside \boxed{...} 
-    const matches = [...notes.matchAll(/\\boxed\{([^}]+)\}/g)];
-    // Filter duplicates
-    return Array.from(new Set(matches.map(m => m[1])));
-  }, [notes]);
+  const formulas = extractFormulas(notes);
 
   return (
     <MainLayout title={`Notes: ${chapter.name}`}>
       <div className="max-w-5xl mx-auto space-y-6 pb-20 px-4 sm:px-0">
 
-        {/* Header Section */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 mt-4">
           <div>
             <Button variant="ghost" size="sm" onClick={() => navigate(`/chapter/${chapter.id}`)} className="mb-4 text-muted-foreground hover:text-foreground">
               <ArrowLeft className="w-4 h-4 mr-2" /> Back to Chapter
             </Button>
-            <h1 className="text-4xl font-display font-bold text-foreground mb-3">
-              {chapter.name}
-            </h1>
+            <h1 className="text-4xl font-display font-bold text-foreground mb-3">{chapter.name}</h1>
             <div className="flex flex-wrap items-center gap-3">
               <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border ${subjectAccent}`}>
                 {chapter.subject.replace('_', ' ')}
@@ -291,7 +361,7 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <Button variant="outline" className="flex-1 sm:flex-none h-11" onClick={handleCopy}>
               {copied ? <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-500" /> : <Copy className="w-4 h-4 mr-2" />}
@@ -304,19 +374,17 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
           </div>
         </div>
 
-        {/* Smart Toolbar */}
+        {/* Sticky Toolbar + Formula Quick Reference */}
         <div className="sticky top-20 z-40 bg-background/80 backdrop-blur-xl border-y border-border py-4 mb-8 -mx-4 px-4 sm:mx-0 sm:rounded-2xl sm:border-x shadow-sm">
-          
-          {/* Formula Quick Reference Card */}
           {formulas.length > 0 && (
             <div className="mb-4 pt-2">
               <div className="flex items-center gap-2 mb-3">
-                <Calculator className="w-5 h-5 text-accent" /> 
+                <Calculator className="w-5 h-5 text-accent" />
                 <h3 className="font-bold text-sm uppercase tracking-wider text-foreground">Formula Quick Reference</h3>
               </div>
-              <div className="flex flex-wrap gap-3 max-h-[200px] overflow-y-auto hide-scrollbar p-1">
-                {formulas.map((f, i) => (
-                  <div key={i} className="px-4 py-2 bg-background rounded-lg border border-border shadow-sm flex items-center justify-center">
+              <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
+                {formulas.map((f, idx) => (
+                  <div key={idx} className="shrink-0 px-4 py-2 bg-background rounded-lg border border-border shadow-sm flex items-center justify-center">
                     <Latex>{`$${f}$`}</Latex>
                   </div>
                 ))}
@@ -334,9 +402,9 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
                   disabled={isGenerating}
                   className={cn(
                     "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 disabled:opacity-50",
-                    activeSmartMode === mode.id 
-                      ? `bg-foreground text-background shadow-md` 
-                      : `bg-secondary hover:bg-secondary/80 text-foreground border border-border`
+                    activeSmartMode === mode.id
+                      ? "bg-foreground text-background shadow-md"
+                      : "bg-secondary hover:bg-secondary/80 text-foreground border border-border"
                   )}
                 >
                   <Icon className={cn("w-4 h-4", activeSmartMode === mode.id ? "opacity-100" : mode.color)} />
@@ -350,10 +418,10 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
         {/* Main Notes Area */}
         <AnimatePresence mode="wait">
           {isGenerating && notes === '' ? (
-            <motion.div 
+            <motion.div
               key="loading"
-              initial={{ opacity: 0, scale: 0.95 }} 
-              animate={{ opacity: 1, scale: 1 }} 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               className="flex flex-col items-center justify-center py-32 bg-card border border-border rounded-3xl shadow-sm"
             >
@@ -371,10 +439,10 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
               </p>
             </motion.div>
           ) : (
-            <motion.div 
+            <motion.div
               key="content"
-              initial={{ opacity: 0, y: 20 }} 
-              animate={{ opacity: 1, y: 0 }} 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
               <Card className="border border-border/80 shadow-xl min-h-[500px] overflow-hidden rounded-3xl">
@@ -391,17 +459,17 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
 
         {/* Bottom CTA */}
         {!isGenerating && notes !== '' && (
-           <motion.div
-             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-             className="flex flex-col sm:flex-row justify-center pt-10 gap-4"
-           >
-             <Button variant="outline" size="lg" className="h-14 font-bold rounded-2xl border-border bg-card shadow-sm" onClick={() => navigate(`/practice?chapter=${chapter.id}`)}>
-               Test Concepts in Practice
-             </Button>
-             <Button variant="default" size="lg" className="h-14 font-bold rounded-2xl shadow-lg shadow-primary/20" onClick={() => navigate(`/test?chapter=${chapter.id}`)}>
-               Take Formal Chapter Test
-             </Button>
-           </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+            className="flex flex-col sm:flex-row justify-center pt-10 gap-4"
+          >
+            <Button variant="outline" size="lg" className="h-14 font-bold rounded-2xl border-border bg-card shadow-sm" onClick={() => navigate(`/practice?chapter=${chapter.id}`)}>
+              Test Concepts in Practice
+            </Button>
+            <Button variant="default" size="lg" className="h-14 font-bold rounded-2xl shadow-lg shadow-primary/20" onClick={() => navigate(`/test?chapter=${chapter.id}`)}>
+              Take Formal Chapter Test
+            </Button>
+          </motion.div>
         )}
 
       </div>
