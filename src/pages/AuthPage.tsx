@@ -174,7 +174,7 @@ const AuthPage: React.FC = () => {
       }
 
       if (profile) {
-        if (profile.user_type === 'teacher' || profile.user_type === 'b2b_institution' || profile.user_type === 'admin') {
+        if (profile.user_type === 'teacher' || profile.user_type === 'admin') {
           navigate('/teacher-dashboard');
           return;
         }

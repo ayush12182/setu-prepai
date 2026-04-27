@@ -60,6 +60,7 @@ import BulkPYQGenerator from "./pages/Admin/BulkPYQGenerator";
 import AdaptivePracticePage from "./pages/AdaptivePracticePage";
 import StudentAnalyticsPage from "./pages/B2B/StudentAnalyticsPage";
 import MyBatchPage from "./pages/MyBatchPage";
+import PlatformUpdatedPage from "./pages/PlatformUpdatedPage";
 
 // Assess
 import B2BAssessmentTakerPage from "./pages/Assess/B2BAssessmentTakerPage";
@@ -120,6 +121,19 @@ const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 
+/**
+ * Redirects users who hit legacy B2C dashboard routes.
+ * Teachers → /b2b  |  Students → /platform-updated  |  No auth → /auth
+ */
+const B2CGateRoute = ({ children }: { children: React.ReactNode }) => {
+  const { profile, loading } = useAuth();
+  if (loading) return null;
+  if (!profile?.user_type) return <Navigate to="/auth" replace />;
+  if (profile.user_type === 'teacher' || profile.user_type === 'admin') return <Navigate to="/b2b" replace />;
+  if (profile.user_type === 'student') return <Navigate to="/platform-updated" replace />;
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -135,7 +149,8 @@ const App = () => (
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/select-exam" element={<ExamSelectionPage />} />
-                    <Route path="/dashboard" element={<Index />} />
+                    <Route path="/dashboard" element={<B2CGateRoute><Index /></B2CGateRoute>} />
+                    <Route path="/platform-updated" element={<PlatformUpdatedPage />} />
                     <Route path="/learn" element={<PreparationPage />} />
                     <Route path="/preparation" element={<PreparationPage />} />
                     <Route path="/tutorial-sessions" element={<TutorialSessionsPage />} />

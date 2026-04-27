@@ -13,7 +13,7 @@ interface Profile {
   class: string | null;
   target_exam: string | null;
   student_level: string | null;
-  user_type: 'student' | 'teacher' | 'b2b_institution' | 'admin' | null;
+  user_type: 'student' | 'teacher' | 'admin' | null;
   organization_id: string | null;
   institution_name: string | null;
   teacher_id: string | null;
@@ -314,7 +314,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const userType = profile?.user_type ?? 'student';
   const isMentor = userType === 'teacher' || userType === 'admin';
-  const isInstitution = userType === 'b2b_institution' || userType === 'admin';
+  const isInstitution = userType === 'teacher' || userType === 'admin';
   const isB2C = userType === 'student';
   const isB2BStudent = userType === 'student';
 
