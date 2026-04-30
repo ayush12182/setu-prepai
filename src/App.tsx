@@ -61,6 +61,8 @@ import AdaptivePracticePage from "./pages/AdaptivePracticePage";
 import StudentAnalyticsPage from "./pages/B2B/StudentAnalyticsPage";
 import MyBatchPage from "./pages/MyBatchPage";
 import PlatformUpdatedPage from "./pages/PlatformUpdatedPage";
+import StudentHubPage from "./pages/StudentHubPage";
+import MaterialViewerPage from "./pages/MaterialViewerPage";
 
 // Assess
 import B2BAssessmentTakerPage from "./pages/Assess/B2BAssessmentTakerPage";
@@ -209,7 +211,9 @@ const App = () => (
                     <Route path="/teacher/student-analytics" element={<StudentAnalyticsPage />} />
                     
                     {/* Student Hub — B2B students only */}
-                    <Route path="/student-hub" element={<StudentHubRoute><MyBatchPage /></StudentHubRoute>} />
+                    <Route path="/student-hub" element={<StudentHubRoute><StudentHubPage /></StudentHubRoute>} />
+                    {/* Material Viewer */}
+                    <Route path="/materials/:id" element={<MaterialViewerPage />} />
                     <Route path="/ai-teachers" element={<AITeachersDirectoryPage />} />
                     <Route path="/teaching-room/:teacherId" element={<AITeachingRoomPage />} />
                     <Route path="/pricing" element={<PricingPage />} />

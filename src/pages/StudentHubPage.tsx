@@ -3,470 +3,475 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import {
-  BookOpen, BarChart3, ChevronRight, Brain,
-  Target, Zap, ShieldCheck, ClipboardList, ArrowRight,
-  Play, Link, Eye, GraduationCap, Users, FileText,
-  Sparkles, Plus, CheckCircle2, Clock, Circle, LogOut,
-  Trophy, AlertCircle, BookMarked, FlameKindling, Flame,
-  TrendingUp, Lock, Loader2, Rocket, CalendarDays
+  Flame, Target, BarChart3, Trophy, Play, ArrowRight,
+  CalendarDays, ChevronRight, Zap, Eye, TrendingUp, Users,
+  Clock, Sparkles, BookOpen, Loader2, GraduationCap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { useExamMode } from '@/contexts/ExamModeContext';
-import { StudentProgressView } from '@/components/student/StudentProgressView';
-import { toast } from 'sonner';
-import { getSubjectsForExam } from '@/lib/streamSubjects';
-import { joinTeacherByCode } from '@/lib/studentActivity';
+import { useStudentStats } from '@/hooks/useStudentStats';
+import { useBatchInfo } from '@/hooks/useBatchInfo';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { useStudentStats } from '@/hooks/useStudentStats';
-import { useStudentCycle } from '@/hooks/useStudentCycle';
-// ── Dummy perf data (replace with real hook later) ────────────
-const PERF = {
-  accuracy: 68,
-  rank: 12,
-  batchSize: 60,
-  improvementPct: 6,
-  percentileAhead: 40,
-  weakSubject: 'Integration',
-  weakAccuracy: 42,
-  rankGainIfImprove: 5,
-  dailyGoals: [
-    { subject: 'Physics',   count: 15, type: 'Questions' },
-    { subject: 'Maths',     count: 10, type: 'Questions' },
-    { subject: 'Chemistry', count: 1,  type: 'Revision'  },
-  ],
-};
+import { AssignedContent } from '@/components/student/AssignedContent';
 
-// Rotates daily so it feels fresh without being random on every render
-const smartSubtext = [
-  `You improved +${PERF.improvementPct}% accuracy this week`,
-  `You're ahead of ${PERF.percentileAhead}% of students in your batch`,
-  'Your mentor will review your progress today',
-][new Date().getDay() % 3];
-
-// ─── Types ────────────────────────────────────────────────────
-type Tab = 'home' | 'practice' | 'progress';
-
-interface TeacherContext {
-  teacherName: string;
-  batchName: string;
-  examType: string;
-  institutionName?: string;
-  coachingName?: string;
-  joinedAt?: string;
-  teacherMessage?: string;
+// ── Helpers ───────────────────────────────────────────────────────
+function daysUntil(dateStr: string) {
+  const diff = new Date(dateStr).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / 86400000));
 }
 
-const DIFF_COLORS: Record<string, string> = {
-  easy:   'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  hard:   'bg-red-500/10 text-red-400 border-red-500/20',
-};
+function StatPill({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+  color: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3">
+      <div className={`p-2 rounded-xl ${color}`}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <div>
+        <p className="text-[9px] font-black uppercase tracking-widest text-white/25">{label}</p>
+        <p className="text-lg font-black text-white leading-none mt-0.5">{value}</p>
+      </div>
+    </div>
+  );
+}
 
-// ─── Component ────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────
 const StudentHubPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { examMode } = useExamMode();
-  
-  const [assignedTasks, setAssignedTasks] = useState<any[]>([]);
-  const { streak: realStreak, todayDone: realTodayDone, loading: statsLoading } = useStudentStats();
-  const { days_left: cycleDaysLeft } = useStudentCycle();
-  const [loading, setLoading] = useState(true);
-  const [mentorName, setMentorName] = useState<string>('');
 
+  const { streak, todayDone, accuracy, loading: statsLoading } = useStudentStats();
+  const { info: batch, loading: batchLoading } = useBatchInfo();
+
+  const [mentorName, setMentorName] = useState('');
+  const [todayFocus, setTodayFocus] = useState<{ topic: string; description: string; time: string } | null>(null);
+  const [pageLoading, setPageLoading] = useState(true);
+
+  // ── Data Fetch ────────────────────────────────────────────────
   useEffect(() => {
     if (!user) return;
     loadData();
   }, [user]);
 
   const loadData = async () => {
-    setLoading(true);
+    setPageLoading(true);
     try {
-      // REFRESH: Fetch latest profile to ensure teacher_id is picked up after join
-      let currentProfile = profile;
-      if (user) {
-        const { data: latest } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if (latest) currentProfile = latest;
-      }
+      // Refresh profile to pick up teacher_id after batch join
+      const { data: latest } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user!.id)
+        .maybeSingle();
 
-      const { data: tasks } = await supabase
-        .from('teacher_tasks' as any)
-        .select('*, learning_nodes(name)')
-        .eq('teacher_id', currentProfile?.teacher_id)
-        .order('created_at', { ascending: false })
-        .limit(1);
+      const currentProfile = latest ?? profile;
 
-      if (tasks && tasks.length > 0) {
-        setAssignedTasks(tasks);
-      }
-
-      // Fetch mentor name
+      // Mentor name
       if (currentProfile?.teacher_id) {
-        console.log("Fetching mentor details for teacher_id:", currentProfile.teacher_id);
-        const { data: mentor, error: mentorErr } = await supabase
+        const { data: mentor } = await supabase
           .from('profiles')
           .select('full_name')
           .eq('user_id', currentProfile.teacher_id)
           .maybeSingle();
-        
-        if (mentorErr) console.error("Mentor fetch error:", mentorErr);
-        if (mentor) {
-          console.log("Mentor found:", mentor.full_name);
-          setMentorName(mentor.full_name);
+        if (mentor?.full_name) setMentorName(mentor.full_name);
+      }
+
+      // Today's teacher-assigned task
+      if (currentProfile?.teacher_id) {
+        const { data: tasks } = await supabase
+          .from('teacher_tasks' as any)
+          .select('*, learning_nodes(name)')
+          .eq('teacher_id', currentProfile.teacher_id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (tasks && tasks.length > 0) {
+          const t = tasks[0];
+          setTodayFocus({
+            topic: t.learning_nodes?.name ?? 'Today\'s Focus',
+            description: t.description ?? 'Practice the topic your mentor assigned.',
+            time: t.suggested_time ?? '2h',
+          });
         }
-      } else {
-        console.warn("No teacher_id found in profile for mentor greeting.");
       }
     } catch (err) {
-      console.error("Critical Data Load Error:", err);
+      console.error('[StudentHubPage] loadData error:', err);
     } finally {
-      setLoading(false);
+      setPageLoading(false);
     }
   };
 
-  const calculateDaysLeft = (targetDate: string) => {
-    const today = new Date();
-    const target = new Date(targetDate);
-    const diffTime = target.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
-  };
-
+  // ── Exam Data ─────────────────────────────────────────────────
   const examData = useMemo(() => {
-    if (examMode === 'neet') {
-      return {
-        name: 'NEET UG 2026',
-        date: '3 May 2026',
-        daysLeft: calculateDaysLeft('2026-05-03'),
-        advice: '"Biology NCERT multiple times read karo. Physics practice ko mat chhodo. You can do it!"'
-      };
-    }
-    if (examMode === 'cuet') {
-      return {
-        name: 'CUET UG 2026',
-        date: '11 May 2026',
-        daysLeft: calculateDaysLeft('2026-05-11'),
-        advice: '"Domain subjects ke liye NCERT focus karo, aur General Test ko ignore mat karna. Reasoning is key!"'
-      };
-    }
-    return {
-      name: 'JEE Advanced 2026',
-      date: '24 May 2026',
-      daysLeft: calculateDaysLeft('2026-05-24'),
-      advice: '"Concepts pe focus karo. Advanced level problems solve karna shuru karo. Time to push limits!"'
-    };
+    if (examMode === 'neet') return { name: 'NEET UG 2026', date: '3 May 2026', target: '2026-05-03', advice: 'NCERT Biology is king. Daily Physics practice is non-negotiable.' };
+    if (examMode === 'cuet') return { name: 'CUET UG 2026', date: '11 May 2026', target: '2026-05-11', advice: 'Domain subjects + NCERT. Don\'t skip General Test reasoning.' };
+    return { name: 'JEE Advanced 2026', date: '24 May 2026', target: '2026-05-24', advice: 'Concepts over shortcuts. Advanced problems every day, no exceptions.' };
   }, [examMode]);
 
-  if (loading || statsLoading) {
+  const daysLeft = daysUntil(examData.target);
+
+  // ── Loading State ─────────────────────────────────────────────
+  if (pageLoading || statsLoading) {
     return (
-      <div className="min-h-screen bg-[#0F1117] flex items-center justify-center">
+      <div className="min-h-screen bg-[#06080D] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-accent" />
       </div>
     );
   }
 
-  const todayFocus = assignedTasks[0] || {
-    learning_nodes: { name: 'Electrical Instruments' },
-    description: 'Focus on Meter bridge working - Potentiometer for EMF comparison',
-    suggested_time: '2h 30m'
-  };
-
+  const firstName = profile?.full_name?.split(' ')[0] ?? 'Student';
+  const greeting = mentorName
+    ? `${mentorName}'s Classroom`
+    : profile?.teacher_id
+    ? 'Your Classroom'
+    : 'Your Dashboard';
 
   return (
     <MainLayout>
-      <div className="min-h-screen pb-20 pt-24 lg:pt-28">
-        <div className="max-container px-4">
-          
-          {/* Hero Greeting & Tabs */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+      <div className="min-h-screen pb-28 pt-20 lg:pt-24" style={{ background: '#06080D' }}>
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-8">
+
+          {/* ── ZONE 1: HERO ─────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-12"
+            transition={{ duration: 0.5 }}
+            className="mb-8"
           >
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 w-fit">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Active Guidance</span>
-                </div>
-                <h1 className="text-4xl lg:text-7xl font-bold tracking-tighter leading-[0.9]">
-                  {mentorName
-                    ? `Welcome back to ${mentorName}'s Classroom! 👋`
-                    : profile?.teacher_id
-                    ? "Welcome back to your Teacher's Classroom! 👋"
-                    : `Welcome back, ${profile?.full_name?.split(' ')[0] || 'Student'}! 👋`}
-                </h1>
-                {/* Smart dynamic subtext */}
-                <p className="text-white/40 text-base font-medium pt-1 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-accent shrink-0" />
-                  {smartSubtext}
-                </p>
-              </div>
+            {/* Pill badge */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 w-fit mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Active Learning</span>
             </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="p-8 lg:p-12 bg-gradient-to-br from-white/[0.05] to-transparent rounded-[3rem] border border-white/[0.08] relative overflow-hidden group"
-            >
-              <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
-
-              <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-                <div className="flex-1 space-y-6">
-                  <div className="space-y-3">
-                    <h2 className="text-4xl lg:text-5xl font-bold tracking-tighter text-white">
-                      Your performance plan for today is ready
-                    </h2>
-                    {/* Mentor presence line */}
-                    <p className="text-white/30 text-sm font-medium flex items-center gap-2">
-                      <Eye className="w-3.5 h-3.5 text-white/20 shrink-0" />
-                      Your mentor is tracking your progress
-                    </p>
-                  </div>
-
-                  {/* Today's Goals */}
-                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.05] space-y-3">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-white/30">Today's Goal</p>
-                    <div className="space-y-2">
-                      {PERF.dailyGoals.map((g) => (
-                        <div key={g.subject} className="flex items-center gap-3">
-                          <div className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
-                          <span className="text-white/70 text-sm font-medium">
-                            {g.type === 'Revision'
-                              ? `1 Revision – ${g.subject}`
-                              : `${g.count} Questions – ${g.subject}`}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Current Status row */}
-                  <div className="flex flex-wrap gap-4">
-                    <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
-                      <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500">
-                        <Flame className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Daily Streak</p>
-                        <p className="text-xl font-black">{realStreak} Days</p>
-                      </div>
-                    </div>
-                    <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
-                      <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
-                        <Target className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Questions Solved</p>
-                        <p className="text-xl font-black">{realTodayDone} <span className="text-xs text-white/20">Today</span></p>
-                      </div>
-                    </div>
-                    <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
-                      <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
-                        <BarChart3 className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Accuracy</p>
-                        <p className="text-xl font-black">{PERF.accuracy}<span className="text-xs text-white/20">%</span></p>
-                      </div>
-                    </div>
-                    <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 flex items-center gap-4 group-hover:border-accent/30 transition-colors">
-                      <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
-                        <Users className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-white/25">Batch Rank</p>
-                        <p className="text-xl font-black">{PERF.rank}<span className="text-xs text-white/20">/{PERF.batchSize}</span></p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Impact line */}
-                  <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-accent/5 border border-accent/15">
-                    <Zap className="w-4 h-4 text-accent shrink-0" />
-                    <p className="text-white/60 text-sm font-medium">
-                      Improving <span className="text-white font-bold">{PERF.dailyGoals[1].subject}</span> today can increase your rank by{' '}
-                      <span className="text-accent font-black">~{PERF.rankGainIfImprove} positions</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-4 min-w-[280px]">
-                  <Button
-                    onClick={() => navigate('/practice')}
-                    size="lg"
-                    className="h-16 rounded-2xl bg-accent text-primary hover:bg-accent/90 font-black text-lg gap-3 shadow-xl shadow-accent/25 transition-all duration-300 hover:scale-[1.02]"
-                  >
-                    <Play className="fill-current w-4 h-4" /> Start Daily Target
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/learn')}
-                    className="h-16 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold"
-                  >
-                    View Full Syllabus
-                  </Button>
-                </div>
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-6">
+              <div>
+                <h1 className="text-3xl lg:text-5xl font-black tracking-tight text-white leading-tight">
+                  Welcome back, <span className="text-accent">{firstName}</span> 👋
+                </h1>
+                <p className="text-white/40 text-sm font-medium mt-2 flex items-center gap-1.5">
+                  <GraduationCap className="w-3.5 h-3.5 shrink-0 text-white/30" />
+                  {greeting}
+                </p>
               </div>
-            </motion.div>
+
+              {/* Stats Bar */}
+              <div className="flex flex-wrap gap-3">
+                <StatPill icon={Flame} label="Streak" value={`${streak}d`} color="bg-orange-500/10 text-orange-400" />
+                <StatPill icon={Target} label="Today" value={`${todayDone} Qs`} color="bg-blue-500/10 text-blue-400" />
+                <StatPill icon={BarChart3} label="Accuracy" value={`${accuracy}%`} color="bg-emerald-500/10 text-emerald-400" />
+                {batch && (
+                  <StatPill icon={Users} label="Batch" value={`${batch.totalStudents} students`} color="bg-purple-500/10 text-purple-400" />
+                )}
+              </div>
+            </div>
           </motion.div>
 
-          {/* Main Content Grid */}
+          {/* ── ZONE 2+3: MAIN GRID ──────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* Today's Focus Card */}
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="lg:col-span-8 bg-[#1A1F2C] rounded-[2rem] p-8 lg:p-10 border border-white/[0.05] relative overflow-hidden group hover:border-accent/30 transition-all duration-500"
-            >
-              <div className="absolute top-6 left-6">
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.05] border border-white/[0.05]">
-                  <Zap className="w-3.5 h-3.5 text-accent" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Today's Focus</span>
-                </div>
-              </div>
 
-              <div className="mt-12 space-y-8">
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                      Weak Area · {PERF.weakAccuracy}% accuracy
-                    </span>
-                  </div>
-                  <h2 className="text-3xl lg:text-5xl font-bold tracking-tighter mb-4 group-hover:text-accent transition-colors duration-500 italic">
-                    {todayFocus.learning_nodes?.name || PERF.weakSubject}
-                  </h2>
-                  <p className="text-white/40 text-lg font-medium flex items-center gap-2">
-                    Focus Topic (based on your performance) •{' '}
-                    <span className="text-red-400 font-semibold">This is one of your weakest areas</span>
-                  </p>
-                </div>
+            {/* ── LEFT COLUMN ─────────────────────────────────────── */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
 
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <Sparkles className="w-3.5 h-3.5 text-accent" />
+              {/* Today's Mission Card */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+                className="relative rounded-[2rem] overflow-hidden border border-white/[0.07] group hover:border-accent/30 transition-all duration-500"
+                style={{
+                  background: 'linear-gradient(135deg, #0D1422 0%, #0A1018 50%, #080D14 100%)',
+                }}
+              >
+                {/* Glow orb */}
+                <div className="absolute top-0 right-0 w-80 h-80 bg-accent/5 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+
+                <div className="relative z-10 p-8 lg:p-10">
+                  {/* Section label */}
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-7 h-7 rounded-lg bg-accent/10 flex items-center justify-center">
+                      <Zap className="w-3.5 h-3.5 text-accent" />
                     </div>
-                    <p className="text-white/70 leading-relaxed font-medium">
-                      {todayFocus.description || 'Focus on depth understanding today.'}
-                    </p>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Today's Mission</span>
                   </div>
-                  {/* Micro progress feedback pills */}
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">
-                      <TrendingUp className="w-3 h-3" /> +{PERF.improvementPct}% accuracy this week
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/15">
-                      <Users className="w-3 h-3" /> Ahead of {PERF.percentileAhead}% students
-                    </span>
-                  </div>
-                </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-white/40">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-xs font-bold uppercase tracking-widest">Suggested: {todayFocus.suggested_time || '2h 30m'}</span>
+                  <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
+                    <div className="flex-1 space-y-4">
+                      {todayFocus ? (
+                        <>
+                          <div>
+                            <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                              Assigned by your mentor
+                            </span>
+                            <h2 className="text-3xl lg:text-4xl font-black tracking-tight text-white mt-3 group-hover:text-accent transition-colors duration-500">
+                              {todayFocus.topic}
+                            </h2>
+                          </div>
+                          <p className="text-white/50 text-sm leading-relaxed font-medium max-w-xl">
+                            {todayFocus.description}
+                          </p>
+                          <div className="flex items-center gap-4 pt-1">
+                            <div className="flex items-center gap-1.5 text-white/30">
+                              <Clock className="w-3.5 h-3.5" />
+                              <span className="text-xs font-bold uppercase tracking-widest">Suggested: {todayFocus.time}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-white/30">
+                              <Eye className="w-3.5 h-3.5" />
+                              <span className="text-xs font-bold uppercase tracking-widest">Mentor tracking</span>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <h2 className="text-3xl lg:text-4xl font-black tracking-tight text-white group-hover:text-accent transition-colors duration-500">
+                            Start Your Daily Practice
+                          </h2>
+                          <p className="text-white/40 text-sm leading-relaxed max-w-xl">
+                            No specific topic assigned today. Practice any subject to keep your streak alive and improve your accuracy.
+                          </p>
+                        </>
+                      )}
+
+                      {/* Impact line */}
+                      <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-accent/5 border border-accent/15 w-fit mt-2">
+                        <TrendingUp className="w-3.5 h-3.5 text-accent shrink-0" />
+                        <p className="text-white/60 text-xs font-medium">
+                          {streak > 0
+                            ? `${streak}-day streak! Keep the momentum going 🔥`
+                            : 'Start today to build your streak!'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* CTA Buttons */}
+                    <div className="flex flex-col gap-3 min-w-[220px] w-full lg:w-auto">
+                      <Button
+                        onClick={() => navigate('/practice')}
+                        className="h-14 rounded-2xl bg-accent text-primary hover:bg-accent/90 font-black text-base gap-2.5 shadow-xl shadow-accent/25 transition-all duration-300 hover:scale-[1.02] w-full"
+                      >
+                        <Play className="fill-current w-4 h-4" />
+                        Start Practice
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate('/learn')}
+                        className="h-12 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold text-sm w-full"
+                      >
+                        Browse Syllabus
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
                     </div>
                   </div>
-                  <Button 
-                    onClick={() => navigate('/practice')}
-                    className="w-full sm:w-auto px-10 h-14 rounded-2xl bg-accent hover:bg-accent/90 text-primary font-black text-lg shadow-xl shadow-accent/20 group-hover:scale-105 transition-all duration-300"
-                  >
-                    Start Now <ArrowRight className="ml-3 w-5 h-5" />
-                  </Button>
                 </div>
-              </div>
-            </motion.div>
+              </motion.div>
 
-            {/* Right Column Countdowns */}
-            <div className="lg:col-span-4 space-y-6 flex flex-col">
-              
-              {/* Upcoming Exam Card */}
-              <motion.div 
+              {/* Assigned Content — Tests + Materials */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <AssignedContent />
+              </motion.div>
+            </div>
+
+            {/* ── RIGHT COLUMN ────────────────────────────────────── */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+
+              {/* Exam Countdown */}
+              <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex-1 bg-white/[0.03] rounded-[2rem] p-8 border border-white/[0.05] relative overflow-hidden group hover:bg-white/[0.05] transition-all duration-300"
+                transition={{ delay: 0.15 }}
+                className="rounded-[2rem] border border-white/[0.07] p-7 relative overflow-hidden group hover:border-orange-500/30 transition-all duration-300"
+                style={{ background: 'linear-gradient(160deg, #0E1520 0%, #090F1A 100%)' }}
               >
-                <div className="flex items-start justify-between mb-8">
-                  <div className="p-3 rounded-2xl bg-orange-500/10 text-orange-500">
-                    <Trophy className="w-6 h-6" />
+                <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-orange-500/5 rounded-full blur-2xl pointer-events-none" />
+
+                <div className="flex items-start justify-between mb-6">
+                  <div className="p-3 rounded-2xl bg-orange-500/10 text-orange-400">
+                    <Trophy className="w-5 h-5" />
                   </div>
-                  <div className="flex items-center gap-2 text-orange-500/60 font-black italic">
-                    <Flame className="w-4 h-4" />
-                    <span className="text-4xl">{examData.daysLeft}</span>
-                    <span className="text-sm self-end pb-1">Days Left</span>
+                  <div className="text-right">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-white/25 mb-1">Days Left</p>
+                    <p className="text-5xl font-black text-orange-400/80 leading-none">{daysLeft}</p>
                   </div>
                 </div>
-                
-                <div className="space-y-4">
+
+                <div className="space-y-3">
                   <div>
-                    <p className="text-[10px] font-black text-white/25 uppercase tracking-widest mb-1">Upcoming Exam</p>
-                    <h4 className="text-xl font-black">{examData.name}</h4>
-                    <p className="text-xs text-white/40 mt-1">{examData.date}</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-white/25 mb-1">Upcoming Exam</p>
+                    <h3 className="text-xl font-black text-white">{examData.name}</h3>
+                    <p className="text-xs text-white/35 mt-0.5">{examData.date}</p>
                   </div>
 
-                  <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10">
-                    <p className="text-[11px] leading-relaxed text-orange-200/60 italic font-medium">
-                      {examData.advice}
+                  <div className="p-3.5 rounded-xl bg-orange-500/5 border border-orange-500/10">
+                    <p className="text-[11px] leading-relaxed text-orange-200/50 italic font-medium">
+                      "{examData.advice}"
                     </p>
                   </div>
 
-                  <Button 
-                    variant="ghost" 
-                    className="w-full h-12 rounded-xl border border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest"
+                  {/* Urgency bar */}
+                  <div>
+                    <div className="flex justify-between mb-1.5">
+                      <span className="text-[9px] text-white/25 font-bold uppercase tracking-wider">Time remaining</span>
+                      <span className="text-[9px] text-white/25 font-bold uppercase tracking-wider">{daysLeft} / 365 days</span>
+                    </div>
+                    <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${Math.min(100, (daysLeft / 365) * 100)}%`,
+                          background: daysLeft < 15
+                            ? 'linear-gradient(90deg, #EF4444, #F87171)'
+                            : daysLeft < 60
+                            ? 'linear-gradient(90deg, #F59E0B, #FCD34D)'
+                            : 'linear-gradient(90deg, #10B981, #34D399)',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigate('/practice')}
+                    className="w-full h-11 rounded-xl border border-white/10 hover:bg-white/5 text-white font-bold text-xs uppercase tracking-widest mt-1"
                   >
-                    Start Preparing <ChevronRight className="ml-2 w-4 h-4" />
+                    Prepare Now <ArrowRight className="ml-2 w-3.5 h-3.5" />
                   </Button>
                 </div>
               </motion.div>
 
-              {/* 21-Day Cycle Card */}
-              <motion.div 
+              {/* My Batch Panel */}
+              <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="flex-1 bg-white/[0.03] rounded-[2rem] p-8 border border-white/[0.05] relative overflow-hidden group hover:bg-white/[0.05] transition-all duration-300"
+                transition={{ delay: 0.25 }}
+                className="rounded-[2rem] border border-white/[0.07] overflow-hidden"
+                style={{ background: 'linear-gradient(160deg, #0D1422 0%, #080E18 100%)' }}
               >
-                <div className="flex items-start justify-between mb-8">
-                  <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-500">
-                    <CalendarDays className="w-6 h-6" />
+                {/* Header */}
+                <div className="px-6 pt-6 pb-4 border-b border-white/[0.05] flex items-center justify-between">
+                  <div>
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/25">My Batch</p>
+                    {batchLoading ? (
+                      <div className="h-4 w-28 bg-white/[0.05] rounded animate-pulse mt-1" />
+                    ) : (
+                      <h3 className="text-base font-black text-white mt-0.5">{batch?.batchName ?? 'Your Batch'}</h3>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 text-blue-500/60 font-black italic">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-4xl">8</span>
-                    <span className="text-sm self-end pb-1">Days Left</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[10px] font-bold text-emerald-400">Live</span>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-[10px] font-black text-white/25 uppercase tracking-widest mb-1 font-sans">21 Day Cycle</p>
-                    <h4 className="text-xl font-black">Major Test</h4>
-                    <p className="text-xs text-white/40 mt-1">Test Date: 25 Feb 2026 • <span className="text-blue-400">Cycle 1</span></p>
+                {/* Mentor row */}
+                <div className="px-6 py-4 flex items-center gap-3 border-b border-white/[0.05]">
+                  <div className="w-9 h-9 rounded-lg overflow-hidden border border-white/10 shrink-0">
+                    <img
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(batch?.mentorName ?? 'Mentor')}&backgroundColor=1e293b`}
+                      alt="Mentor"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-
-                  <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
-                    <p className="text-[11px] leading-relaxed text-blue-200/60 italic font-medium">
-                      "Major Test ke liye prepare ho raha hai? Daily practice karte raho, bhai!"
-                    </p>
+                  <div className="flex-1 min-w-0">
+                    {batchLoading ? (
+                      <>
+                        <div className="h-3 w-24 bg-white/[0.05] rounded animate-pulse mb-1.5" />
+                        <div className="h-2.5 w-16 bg-white/[0.04] rounded animate-pulse" />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-white font-semibold text-sm truncate">{batch?.mentorName ?? 'Your Mentor'}</p>
+                        <p className="text-white/35 text-[11px] truncate">Batch Mentor</p>
+                      </>
+                    )}
                   </div>
+                  <div className="flex items-center gap-1.5 text-[10px] font-black text-blue-400 bg-blue-500/10 border border-blue-500/15 px-2.5 py-1 rounded-lg shrink-0">
+                    <Eye className="w-3 h-3" />
+                    Watching
+                  </div>
+                </div>
 
-                  <Button 
-                    variant="ghost" 
-                    className="w-full h-12 rounded-xl border border-white/10 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest"
+                {/* Batch Stats */}
+                <div className="grid grid-cols-3 divide-x divide-white/[0.05]">
+                  {[
+                    { label: 'Students', value: batchLoading ? null : batch?.totalStudents ?? 0, color: '#60A5FA' },
+                    { label: 'Active Today', value: batchLoading ? null : batch?.practicingToday ?? 0, color: '#10B981' },
+                    {
+                      label: 'Total Qs',
+                      value: batchLoading ? null : batch?.totalQuestionsAttempted ?? 0,
+                      fmt: (v: number) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v),
+                      color: '#A78BFA',
+                    },
+                  ].map(({ label, value, color, fmt }: any) => (
+                    <div key={label} className="px-4 py-4 text-center">
+                      <p className="text-[9px] font-black uppercase tracking-wider text-white/25 mb-2">{label}</p>
+                      {value === null ? (
+                        <div className="h-7 w-10 mx-auto bg-white/[0.05] rounded animate-pulse" />
+                      ) : (
+                        <p className="font-black text-2xl leading-none" style={{ color }}>
+                          {fmt ? fmt(value) : value}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer CTA */}
+                <div className="px-6 pb-6 pt-3">
+                  <button
+                    onClick={() => navigate('/my-batch')}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors border border-white/[0.07] hover:border-white/20 hover:bg-white/[0.03]"
                   >
-                    View Details <ChevronRight className="ml-2 w-4 h-4" />
-                  </Button>
+                    <BarChart3 className="w-3.5 h-3.5" />
+                    Full Analytics Report
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </motion.div>
+
+              {/* Quick Actions */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="rounded-[2rem] border border-white/[0.07] p-6"
+                style={{ background: 'linear-gradient(160deg, #0D1422 0%, #080E18 100%)' }}
+              >
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/25 mb-4">Quick Actions</p>
+                <div className="space-y-2.5">
+                  {[
+                    { icon: BookOpen, label: 'Study Notes', sub: 'Chapter summaries', path: '/learn', color: 'text-blue-400 bg-blue-500/10' },
+                    { icon: CalendarDays, label: 'Full Analytics', sub: 'My batch report', path: '/my-batch', color: 'text-purple-400 bg-purple-500/10' },
+                    { icon: Sparkles, label: 'AI Teachers', sub: 'Live AI sessions', path: '/ai-teachers', color: 'text-accent bg-accent/10' },
+                  ].map(({ icon: Icon, label, sub, path, color }) => (
+                    <button
+                      key={label}
+                      onClick={() => navigate(path)}
+                      className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl border border-white/[0.05] hover:border-white/20 hover:bg-white/[0.03] transition-all duration-200 text-left group"
+                    >
+                      <div className={`p-2 rounded-xl shrink-0 ${color}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-bold text-sm">{label}</p>
+                        <p className="text-white/30 text-xs">{sub}</p>
+                      </div>
+                      <ChevronRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/50 transition-colors shrink-0" />
+                    </button>
+                  ))}
                 </div>
               </motion.div>
 
