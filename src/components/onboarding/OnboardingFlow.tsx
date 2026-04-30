@@ -77,6 +77,9 @@ const TEACHER_GOALS = [
   { value: 'all',            label: 'All of the above',            emoji: '🚀' },
 ];
 
+const ALLOWED_GOAL_VALUES = new Set(TEACHER_GOALS.filter(g => g.value !== 'all').map(g => g.value));
+const GOAL_SORT_ORDER = TEACHER_GOALS.filter(g => g.value !== 'all').map(g => g.value);
+
 // ─── Slide animation variants ─────────────────────────────────────────────────
 
 const slide = {
@@ -189,6 +192,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
   const [batchName, setBatchName] = useState('');
   const [generatedCode, setGeneratedCode] = useState('');
   const [copied, setCopied] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
 
   const codeDebounce = useRef<NodeJS.Timeout>();
 
@@ -200,7 +204,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
   };
 
   const totalStudentSteps = skipToJoinCode ? 2 : 4; // role → code → goal → done
-  const totalTeacherSteps = 5; // role → identity → goals → batch → code
+  const totalTeacherSteps = 5; // identity → goals → batch → code → done
 
   // ─── Join code validation ─────────────────────────────────────────────────
   // Primary: SECURITY DEFINER RPC (bypasses RLS, always works)
@@ -415,16 +419,23 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     try {
       const examGoal = EXAM_MAP[teacherExam] ?? 'JEE Main';
       const displayName = institutionName.trim() || null;
+      const goalsToSave = [...new Set(
+        teacherGoals.filter(v => v !== 'all' && ALLOWED_GOAL_VALUES.has(v))
+      )]
+        .sort((a, b) => GOAL_SORT_ORDER.indexOf(a) - GOAL_SORT_ORDER.indexOf(b))
+        .slice(0, 4);
       await updateProfile({
         user_type: 'teacher',
         target_exam: examGoal,
         institution_name: displayName,
         full_name: displayName || undefined,
         subjects: teacherSubjects.length > 0 ? teacherSubjects : null,
+        coach_goals: goalsToSave.length > 0 ? goalsToSave : null,
       } as any);
       await refreshProfile();
       onComplete?.();
-      navigate('/b2b');
+      setProfileSaved(true);
+      go(5);
     } catch (e: any) {
       toast.error(e.message || 'Something went wrong.');
     } finally {
@@ -773,6 +784,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
 
     // ── TEACHER STEP 2: Goals ─────────────────────────────────────────────────
     if (step === 2 && track === 'teacher') {
+      if (!teacherExam) { toast.info("Let's complete the previous step first"); go(1, -1); return null; }
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
@@ -794,9 +806,13 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
                     if (g.value === 'all') {
                       setTeacherGoals(sel ? [] : TEACHER_GOALS.map(x => x.value));
                     } else {
-                      setTeacherGoals(prev =>
-                        sel ? prev.filter(v => v !== 'all' && v !== g.value) : [...prev.filter(v => v !== 'all'), g.value]
-                      );
+                      setTeacherGoals(prev => {
+                        const next = sel
+                          ? prev.filter(v => v !== 'all' && v !== g.value)
+                          : [...prev.filter(v => v !== 'all'), g.value];
+                        const individuals = TEACHER_GOALS.filter(x => x.value !== 'all').map(x => x.value);
+                        return individuals.every(v => next.includes(v)) ? [...next, 'all'] : next;
+                      });
                     }
                   }}
                   className={cn(
@@ -836,6 +852,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
 
     // ── TEACHER STEP 3: Create batch ──────────────────────────────────────────
     if (step === 3 && track === 'teacher') {
+      if (teacherGoals.length === 0) { toast.info("Let's complete the previous step first"); go(2, -1); return null; }
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
@@ -884,6 +901,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
 
     // ── TEACHER STEP 4: Show join code ─────────────────────────────────────────
     if (step === 4 && track === 'teacher') {
+      if (!generatedCode) { toast.info("Let's complete the previous step first"); go(3, -1); return null; }
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
@@ -908,7 +926,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
               {generatedCode}
             </div>
             <p className="text-white/30 text-xs break-all select-all">
-              {`${window.location.origin}/join/${generatedCode}`}
+              {`${window.location.origin || 'https://app.setulearn.com'}/join/${generatedCode}`}
             </p>
             <div className="flex gap-3">
               <motion.button
@@ -921,16 +939,14 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.97 }}
-                onClick={async () => {
-                  try {
-                    await navigator.share({ title: 'Join my SETU batch', text: `Use code ${generatedCode} to join my batch on SETU.` });
-                  } catch {
-                    copyCode();
-                  }
+                onClick={() => {
+                  const origin = window.location.origin || 'https://app.setulearn.com';
+                  const text = encodeURIComponent(`Join my batch on SETU! Use code ${generatedCode} or click: ${origin}/join/${generatedCode}`);
+                  window.open(`https://wa.me/?text=${text}`, '_blank');
                 }}
-                className="flex-1 h-11 rounded-xl border border-white/[0.1] bg-white/[0.03] hover:bg-white/[0.07] text-white/70 hover:text-white transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                className="flex-1 h-11 rounded-xl border border-green-500/20 bg-green-500/[0.06] hover:bg-green-500/[0.1] text-green-400 hover:text-green-300 transition-all flex items-center justify-center gap-2 text-sm font-medium"
               >
-                <Share2 className="w-4 h-4" /> Share
+                <Share2 className="w-4 h-4" /> WhatsApp
               </motion.button>
             </div>
           </div>
@@ -953,8 +969,71 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
             onClick={completeTeacher}
             className="from-violet-400 to-violet-500 shadow-violet-500/25"
           >
-            Go to Dashboard <ArrowRight className="w-5 h-5" />
+            Save & Continue <ArrowRight className="w-5 h-5" />
           </PrimaryBtn>
+        </div>
+      );
+    }
+
+    // ── TEACHER STEP 5: Completion ─────────────────────────────────────────────
+    if (step === 5 && track === 'teacher') {
+      if (!profileSaved) { toast.info("Let's complete the previous step first"); go(4, -1); return null; }
+      return (
+        <div className="space-y-6 text-center">
+          <motion.div
+            initial={{ scale: 0, rotate: -10 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+            className="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-400/20 to-amber-600/20 border border-amber-400/30 flex items-center justify-center mx-auto"
+          >
+            <Rocket className="w-10 h-10 text-amber-400" />
+          </motion.div>
+
+          <div className="space-y-2">
+            <p className="text-amber-400 text-xs font-black uppercase tracking-[0.2em]">You're all set!</p>
+            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
+              Your portal is ready
+            </h1>
+            <p className="text-white/40 text-sm leading-relaxed">
+              Your batch is live and students can join right now. Head to the dashboard to get started.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-left">
+            {[
+              { icon: Users,  label: 'Batch',    value: batchName || `${EXAM_MAP[teacherExam] ?? 'My'} Batch` },
+              { icon: Brain,  label: 'Exam',     value: EXAM_MAP[teacherExam] ?? '—' },
+            ].map(({ icon: Icon, label, value }) => (
+              <div key={label} className="bg-white/[0.03] rounded-2xl border border-white/[0.06] p-4 text-center">
+                <Icon className="w-5 h-5 text-violet-400 mx-auto mb-1.5" />
+                <p className="text-white/30 text-[10px] font-bold uppercase tracking-wider">{label}</p>
+                <p className="text-white font-semibold text-sm mt-0.5 truncate">{value}</p>
+              </div>
+            ))}
+          </div>
+
+          <PrimaryBtn
+            onClick={() => navigate('/b2b/invite')}
+            className="from-violet-400 to-violet-500 shadow-violet-500/25"
+          >
+            <Users className="w-5 h-5" /> Add your first student
+          </PrimaryBtn>
+
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => {
+              const origin = window.location.origin || 'https://app.setulearn.com';
+              const text = encodeURIComponent(`Join my batch on SETU! Use code ${generatedCode} or click: ${origin}/join/${generatedCode}`);
+              window.open(`https://wa.me/?text=${text}`, '_blank');
+            }}
+            className="w-full h-11 rounded-xl border border-green-500/20 bg-green-500/[0.06] hover:bg-green-500/[0.1] text-green-400 hover:text-green-300 transition-all flex items-center justify-center gap-2 text-sm font-medium"
+          >
+            <Share2 className="w-4 h-4" /> Share invite via WhatsApp
+          </motion.button>
+
+          <GhostBtn onClick={() => navigate('/b2b')}>
+            Skip — go to dashboard
+          </GhostBtn>
         </div>
       );
     }
