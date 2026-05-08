@@ -7,8 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Card } from '@/components/ui/card';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Brain, Clock, CheckCircle2, XCircle, ArrowRight, Sparkles, Lightbulb, Target, ShieldCheck, Timer } from 'lucide-react';
+import { 
+  Loader2, Brain, Clock, CheckCircle2, XCircle, ArrowRight, 
+  Sparkles, Lightbulb, Target, ShieldCheck, Timer, PlayCircle, RefreshCw,
+  ChevronRight, Layout, BookOpen, AlertCircle
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { VisualExplanation } from '@/components/learning/VisualExplanation';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
 import { ProctoringOverlay, ProctoringState } from '@/components/diagnostic/ProctoringOverlay';
 import { getASATDiagnosticQuestions } from '@/data/diagnosticQuestions';
@@ -55,6 +61,13 @@ const FoundationAssessmentPage: React.FC = () => {
   const [testComplete, setTestComplete] = useState(false);
   const [generatingProfile, setGeneratingProfile] = useState(false);
   const [testStartTimestamp, setTestStartTimestamp] = useState(Date.now());
+  const [currentPhase, setCurrentPhase] = useState<'baseline' | 'probing'>('baseline');
+  const [probingTopic, setProbingTopic] = useState<string | null>(null);
+  const [confidence, setConfidence] = useState<'low' | 'medium' | 'high' | null>(null);
+  const [baselineReport, setBaselineReport] = useState<any>(null);
+  const [visualData, setVisualData] = useState<any>(null);
+  const [loadingVisual, setLoadingVisual] = useState(false);
+  const [showVisualModal, setShowVisualModal] = useState(false);
 
   const studentClass = profile?.class || '11';
   const studentLevel = profile?.student_level || '11-12';
@@ -74,8 +87,28 @@ const FoundationAssessmentPage: React.FC = () => {
     if (!user) return;
     setLoading(true);
 
-    // STEP 1: Load questions instantly from local bank — zero network wait
-    let pool = getASATDiagnosticQuestions(stream) as FoundationQuestion[];
+    let pool: FoundationQuestion[] = [];
+    
+    // STEP 1: Try AI generation first (Premium B2B path)
+    try {
+      const { data, error: aiErr } = await supabase.functions.invoke('generate-diagnostic-test', {
+        body: { 
+          targetExam: stream.toUpperCase(), 
+          currentClass: profile?.class || '11',
+          totalQuestions: 30
+        }
+      });
+      
+      if (!aiErr && data?.questions && data.questions.length > 0) {
+        pool = data.questions;
+      } else {
+        throw new Error('AI Generation failed or returned empty');
+      }
+    } catch (aiErr) {
+      console.warn('AI Diagnostic generation failed, falling back to local bank:', aiErr);
+      pool = getASATDiagnosticQuestions(stream) as FoundationQuestion[];
+    }
+
     pool = pool.map(q => shuffleQuestionOptions(q as any) as unknown as FoundationQuestion);
     setQuestions(pool);
 
@@ -111,46 +144,138 @@ const FoundationAssessmentPage: React.FC = () => {
     if (showResult || !attemptId) return;
     setSelectedOption(option);
     setShowResult(true);
+  };
 
+  const handleConfidence = async (level: 'low' | 'medium' | 'high') => {
+    setConfidence(level);
+    
     const timeTaken = Math.round((Date.now() - questionStartTime) / 1000);
     const currentQ = questions[currentIndex];
-    const isCorrect = option === currentQ.correct_option;
+    const isCorrect = selectedOption === currentQ.correct_option;
+
+    if (!isCorrect) {
+      // Pre-trigger visual data generation for wrong answers to reduce latency if they click
+      generateVisualData(currentQ);
+    }
 
     const answer = { 
       questionId: currentQ.id, 
-      selected: option, 
+      selected: selectedOption!, 
       correct: currentQ.correct_option, 
       isCorrect, 
       time: timeTaken,
       subject: currentQ.subject,
       topic: currentQ.topic,
       difficulty: currentQ.difficulty,
-      skill_tested: currentQ.skill_tested
+      skill_tested: currentQ.skill_tested,
+      confidence: level
     };
     setAnswers(prev => [...prev, answer]);
 
     try {
       await supabase.from('diagnostic_answers').insert({
         attempt_id: attemptId,
-        question_id: currentQ.id || crypto.randomUUID(), // fallback for unsaved edge fn questions
-        selected_option: option,
+        question_id: currentQ.id || crypto.randomUUID(),
+        selected_option: selectedOption,
         is_correct: isCorrect,
         time_taken_seconds: timeTaken,
         difficulty_at_time: currentQ.difficulty,
+        confidence_level: level,
+        phase: currentPhase
       });
     } catch (err) {
       console.error('Failed to save answer:', err);
     }
   };
 
+  const generateVisualData = async (question: any) => {
+    setLoadingVisual(true);
+    try {
+      // Basic heuristic for error type - can be refined
+      const errorType = question.skill_tested === 'Calculation' ? 'Calculation Mistake' : 
+                        question.skill_tested === 'Application' ? 'Concept Confusion' : 'Interpretation Error';
+
+      const { data, error } = await supabase.functions.invoke('generate-visual-explanation', {
+        body: { 
+          topic: question.topic, 
+          subconcept: question.subtopic || question.concept || question.topic,
+          weaknessType: 'Misconception', 
+          studentErrorType: errorType,
+          classLevel: `Class ${profile?.class || '11'}`
+        }
+      });
+      if (error) throw error;
+      setVisualData(data);
+    } catch (err) {
+      console.error('Failed to generate visual explanation:', err);
+    } finally {
+      setLoadingVisual(false);
+    }
+  };
+
   const handleNext = () => {
     if (answers.length >= TOTAL_QUESTIONS || currentIndex + 1 >= questions.length) {
-      handleTestComplete();
+      if (currentPhase === 'baseline') {
+        startAdaptiveProbing();
+      } else {
+        handleTestComplete();
+      }
     } else {
       setCurrentIndex(prev => prev + 1);
       setSelectedOption(null);
       setShowResult(false);
+      setConfidence(null);
       setQuestionStartTime(Date.now());
+    }
+  };
+
+  const startAdaptiveProbing = async () => {
+    setGeneratingProfile(true);
+    // 1. Get baseline report
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-learning-profile', {
+        body: { attemptId, answers, questions, stream, phase: 'baseline' }
+      });
+      
+      if (error) throw error;
+      setBaselineReport(data.profile);
+      
+      // 2. Identify weakest topic for probing
+      const weakest = data.profile.weak_topics?.[0];
+      if (weakest) {
+        setProbingTopic(weakest);
+        setCurrentPhase('probing');
+        
+        // 3. Fetch 5 probe questions
+        const { data: probeData } = await supabase.functions.invoke('generate-diagnostic-test', {
+          body: { 
+            targetExam: stream.toUpperCase(), 
+            currentClass: profile?.class || '11',
+            totalQuestions: 5,
+            topic: weakest,
+            difficulty: 'Adaptive'
+          }
+        });
+        
+        if (probeData?.questions) {
+          setQuestions(probeData.questions);
+          setCurrentIndex(0);
+          setSelectedOption(null);
+          setShowResult(false);
+          setConfidence(null);
+          setAnswers([]); // Reset answers for probing phase tracking
+          setTestComplete(false);
+          setGeneratingProfile(false);
+          toast.success(`Phase 2: Diving deep into ${weakest}...`);
+        } else {
+          handleTestComplete();
+        }
+      } else {
+        handleTestComplete();
+      }
+    } catch (err) {
+      console.error('Probing trigger failed:', err);
+      handleTestComplete();
     }
   };
 
@@ -256,6 +381,17 @@ const FoundationAssessmentPage: React.FC = () => {
       }
 
       if (profileToSave) {
+        // Auto-Placement Logic (Decision Matrix)
+        const score = profileToSave.accuracy_score;
+        const misconceptions = profileToSave.metadata?.mistake_analysis?.conceptual_errors || 0;
+        const confidenceIdx = profileToSave.confidence_score / 100;
+
+        let suggestion = 'Batch B (Intermediate)';
+        if (score > 75 && misconceptions < 10) suggestion = 'Batch A (Top)';
+        else if (score < 50) suggestion = 'Batch C (Foundation)';
+
+        const riskFlag = misconceptions > 25 || (confidenceIdx > 0.7 && score < 40);
+
         await supabase.from('learning_profiles').upsert({
           user_id: user!.id,
           diagnostic_attempt_id: attemptId!,
@@ -268,15 +404,17 @@ const FoundationAssessmentPage: React.FC = () => {
           strong_topics: profileToSave.strong_topics,
           prerequisite_gaps: profileToSave.prerequisite_gaps,
           overall_level: profileToSave.overall_level,
+          batch_suggestion: suggestion,
+          risk_flag: riskFlag,
+          misconception_density: misconceptions,
           metadata: {
-            action_plan: (profileToSave.metadata as any)?.action_plan,
-            mistake_patterns: (profileToSave.metadata as any)?.mistake_patterns,
-            time_analysis: (profileToSave.metadata as any)?.time_analysis || '',
-            subject_performance: (profileToSave.metadata as any)?.subject_performance || {},
+            ...(profileToSave.metadata || {}),
+            baseline: baselineReport,
+            adaptive_phase: currentPhase === 'probing' ? 'completed' : 'skipped',
+            probing_topic: probingTopic
           }
         });
 
-        // @ts-ignore
         await supabase.from('profiles').update({ diagnostic_completed: true }).eq('user_id', user!.id);
       }
 
@@ -463,13 +601,15 @@ const FoundationAssessmentPage: React.FC = () => {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <Brain className="w-4 h-4 text-accent" />
-              <span className="font-semibold text-white text-sm">Foundation Assessment</span>
+              <span className="font-semibold text-white text-sm">
+                {currentPhase === 'baseline' ? 'Baseline Assessment' : `Phase 2: ${probingTopic}`}
+              </span>
             </div>
             <div className="flex items-center gap-3 text-xs text-white/40">
-              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Q{answers.length + 1} of {TOTAL_QUESTIONS}</span>
+              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Q{answers.length + 1} of {questions.length}</span>
             </div>
           </div>
-          <Progress value={progress} className="h-1.5" />
+          <Progress value={((currentIndex + 1) / questions.length) * 100} className="h-1.5" />
         </div>
       </div>
 
@@ -541,30 +681,102 @@ const FoundationAssessmentPage: React.FC = () => {
                 })}
               </div>
 
-              {/* Explanation & Next */}
+              {/* Explanation & Confidence Layer */}
               {showResult && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-6 space-y-4"
+                  className="mt-6 space-y-6"
                 >
                   <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                    <p className="text-sm text-white/50 leading-relaxed"><span className="text-emerald-400 font-bold block mb-1">Explanation</span> {currentQ.explanation}</p>
+                    <p className="text-sm text-white/50 leading-relaxed">
+                      <span className="text-emerald-400 font-bold block mb-1">Explanation</span> 
+                      {currentQ.explanation}
+                    </p>
                   </div>
-                  <Button
-                    onClick={handleNext}
-                    className="w-full gap-2 bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white"
-                    size="lg"
-                  >
-                    {currentIndex + 1 >= TOTAL_QUESTIONS ? 'Finish Assessment' : 'Next Question'}
-                    <ArrowRight className="w-5 h-5" />
-                  </Button>
+
+                  {selectedOption !== currentQ.correct_option && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowVisualModal(true)}
+                      className="w-full border-accent/20 bg-accent/5 hover:bg-accent/10 text-accent font-black gap-2 h-14 rounded-2xl"
+                    >
+                      {loadingVisual ? (
+                        <div className="flex items-center gap-2">
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          Generating Visual Guide...
+                        </div>
+                      ) : (
+                        <>
+                          <PlayCircle className="w-5 h-5" />
+                          Watch Visual Explanation (Jeetu Bhaiya Style)
+                        </>
+                      )}
+                    </Button>
+                  )}
+
+                  {!confidence ? (
+                    <div className="space-y-4">
+                      <p className="text-xs font-bold text-white/30 uppercase tracking-widest text-center">How confident were you in this answer?</p>
+                      <div className="grid grid-cols-3 gap-3">
+                        {[
+                          { label: 'Low', val: 'low', color: 'hover:border-rose-500/50 hover:bg-rose-500/5' },
+                          { label: 'Medium', val: 'medium', color: 'hover:border-amber-500/50 hover:bg-amber-500/5' },
+                          { label: 'High', val: 'high', color: 'hover:border-emerald-500/50 hover:bg-emerald-500/5' }
+                        ].map((c) => (
+                          <Button
+                            key={c.val}
+                            variant="outline"
+                            onClick={() => handleConfidence(c.val as any)}
+                            className={`h-12 rounded-xl border-white/10 text-white/60 font-bold text-xs uppercase tracking-widest transition-all ${c.color}`}
+                          >
+                            {c.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={handleNext}
+                      className="w-full gap-2 bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white"
+                      size="lg"
+                    >
+                      {currentIndex + 1 >= questions.length ? (currentPhase === 'baseline' ? 'Trigger Intelligence Phase' : 'Finish Assessment') : 'Next Question'}
+                      <ArrowRight className="w-5 h-5" />
+                    </Button>
+                  )}
                 </motion.div>
               )}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      <Dialog open={showVisualModal} onOpenChange={setShowVisualModal}>
+        <DialogContent className="max-w-5xl bg-slate-950 border-white/10 p-0 overflow-hidden">
+          <DialogHeader className="p-6 border-b border-white/5 flex flex-row items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                <Brain className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <DialogTitle className="text-white font-black tracking-tight">Visual Concept Breakdown</DialogTitle>
+                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Powered by SETU Visual Engine</p>
+              </div>
+            </div>
+          </DialogHeader>
+          <div className="max-h-[80vh] overflow-y-auto">
+            {visualData ? (
+              <VisualExplanation data={visualData} />
+            ) : (
+              <div className="p-20 text-center">
+                <PlayCircle className="w-10 h-10 text-accent animate-pulse mx-auto mb-4" />
+                <p className="text-white/40">Generating your visual learning experience...</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

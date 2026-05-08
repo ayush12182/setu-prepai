@@ -218,7 +218,7 @@ CRITICAL: Generate notes STRICTLY based on the video title${transcript ? ' and t
 - Connect to real PYQ years where this topic appeared in JEE Main/Advanced.`;
 
     const aiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

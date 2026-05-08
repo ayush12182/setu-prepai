@@ -39,7 +39,7 @@ serve(async (req) => {
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
     const aiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,7 +66,7 @@ serve(async (req) => {
       correct_option: q.correct_option,
       explanation: q.explanation,
       pyq_similar: true,
-      generation_model: "gemini-1.5-flash",
+      generation_model: "gemini-2.5-flash",
     }));
 
     const { error: insertErr } = await supabase.from("questions_bank").insert(toInsert);

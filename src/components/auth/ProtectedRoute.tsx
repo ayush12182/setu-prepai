@@ -4,6 +4,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { Loader2 } from 'lucide-react';
 
+// ─── DEV BYPASS ──────────────────────────────────────────────────────────────
+// Set VITE_DEV_BYPASS=true in .env.local to skip all auth guards locally.
+const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS === 'true';
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
@@ -21,6 +25,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading } = useAuth();
   const { diagnosticCompleted, isFoundation } = useClassContext();
   const location = useLocation();
+
+  // ── DEV BYPASS: skip all guards ──
+  if (DEV_BYPASS) return <>{children}</>;
 
   if (loading) {
     return (

@@ -1,0 +1,40 @@
+{
+  "common": {
+    "welcome": "Welcome back",
+    "language": "Language",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "practice": "Practice Arena",
+    "tests": "Mock Tests",
+    "knowledge": "Knowledge Tree",
+    "teachers": "AI Teachers",
+    "settings": "Settings"
+  },
+  "hub": {
+    "myBatch": "My Batch",
+    "assignedByTeacher": "Assigned By Your Teacher",
+    "mission": "Today's Mission",
+    "resume": "Resume Learning",
+    "noAssignments": "No active assignments! Have fun! 🎉"
+  },
+  "teacherSidebar": {
+    "portal": "Teacher Portal",
+    "overview": "Overview",
+    "students": "Students",
+    "batches": "Batches",
+    "commune": "Batch Commune",
+    "studyMaterials": "Study Materials",
+    "tests": "Tests",
+    "analytics": "Analytics",
+    "studentAnalytics": "Student Analytics",
+    "inviteStudents": "Invite Students",
+    "settings": "Settings",
+    "signOut": "Sign Out",
+    "viewStudentApp": "View Student App"
+  }
+}

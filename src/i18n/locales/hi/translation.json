@@ -1,0 +1,39 @@
+{
+  "common": {
+    "welcome": "वापसी पर स्वागत है",
+    "language": "भाषा",
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "loading": "लोड हो रहा है...",
+    "error": "एक त्रुटि हुई"
+  },
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "practice": "अभ्यास क्षेत्र",
+    "tests": "मॉक टेस्ट",
+    "knowledge": "ज्ञान वृक्ष",
+    "teachers": "एआई शिक्षक",
+    "settings": "सेटिंग्स"
+  },
+  "hub": {
+    "myBatch": "मेरा बैच",
+    "assignedByTeacher": "आपके शिक्षक द्वारा निर्धारित",
+    "mission": "आज का मिशन",
+    "resume": "सीखना फिर से शुरू करें",
+    "noAssignments": "कोई सक्रिय कार्य नहीं! मज़े करो! 🎉"
+  },
+  "teacherSidebar": {
+    "portal": "शिक्षक पोर्टल",
+    "overview": "अवलोकन",
+    "students": "छात्र",
+    "batches": "बैच",
+    "studyMaterials": "अध्ययन सामग्री",
+    "tests": "परीक्षण",
+    "analytics": "विश्लेषण",
+    "studentAnalytics": "छात्र विश्लेषण",
+    "inviteStudents": "छात्रों को आमंत्रित करें",
+    "settings": "सेटिंग्स",
+    "signOut": "साइन आउट",
+    "viewStudentApp": "छात्र ऐप देखें"
+  }
+}

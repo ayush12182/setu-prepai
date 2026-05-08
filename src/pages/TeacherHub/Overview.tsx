@@ -31,6 +31,8 @@ export default function B2BMainDashboard() {
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [stats, setStats] = useState({ totalStudents: 0, tasksPushed: 0, avgAccuracy: 0 });
   const [codeCopied, setCodeCopied] = useState(false);
+  const [broadcastText, setBroadcastText] = useState('');
+  const [sendingBroadcast, setSendingBroadcast] = useState(false);
 
   useEffect(() => {
     if (!profile?.user_id) return;
@@ -41,7 +43,7 @@ export default function B2BMainDashboard() {
         const { data: batchData } = await supabase
           .from('batches')
           .select('id, name, join_code, total_students, target_exam, created_at')
-          .eq('teacher_id', profile.user_id)
+          .eq('mentor_id', profile.user_id)
           .order('created_at', { ascending: false });
 
         if (batchData && batchData.length > 0) {
@@ -145,6 +147,38 @@ export default function B2BMainDashboard() {
     toast.success('Invite link copied!');
   };
 
+  const handleBroadcast = async () => {
+    if (!broadcastText.trim() || !activeBatch) return;
+    setSendingBroadcast(true);
+    try {
+      const { data: room } = await supabase.from('commune_rooms').select('id').eq('title', `BATCH_${activeBatch.id}`).maybeSingle();
+      let roomId = room?.id;
+      if (!roomId) {
+        const { data: newRoom, error } = await supabase.from('commune_rooms').insert({
+          title: `BATCH_${activeBatch.id}`, subject: 'Batch General', study_mode: 'doubts', exam_type: activeBatch.target_exam || 'jee', created_by: profile!.user_id, expires_at: new Date('2036-01-01').toISOString()
+        }).select('id').single();
+        if (error) throw error;
+        roomId = newRoom?.id;
+      }
+
+      if (roomId) {
+        await supabase.from('commune_messages').insert({
+          room_id: roomId,
+          user_id: profile!.user_id,
+          user_name: profile!.full_name || 'Teacher',
+          category: 'Broadcast',
+          content: broadcastText.trim()
+        });
+        toast.success("Broadcast sent and pinned in Batch Commune!");
+        setBroadcastText('');
+      }
+    } catch (err: any) {
+      toast.error('Failed to broadcast: ' + err.message);
+    } finally {
+      setSendingBroadcast(false);
+    }
+  };
+
   const institutionName = profile?.institution_name || profile?.full_name || 'Your Institute';
   const greeting = (() => {
     const h = new Date().getHours();
@@ -197,90 +231,124 @@ export default function B2BMainDashboard() {
         {/* ── Batch card + Activity ──────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          {/* Active Batch / Invite Card */}
-          <div className="lg:col-span-2 bg-gradient-to-br from-accent to-amber-600 rounded-3xl p-7 text-primary shadow-2xl shadow-accent/20 relative overflow-hidden">
-            <div className="absolute -right-12 -bottom-12 w-56 h-56 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute right-8 top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            {/* Active Batch / Invite Card */}
+            <div className="bg-gradient-to-br from-accent to-amber-600 rounded-3xl p-7 text-primary shadow-2xl shadow-accent/20 relative overflow-hidden">
+              <div className="absolute -right-12 -bottom-12 w-56 h-56 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute right-8 top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
-            <div className="relative z-10 space-y-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Ticket className="w-5 h-5 text-primary/70" />
-                    <p className="text-primary/70 text-sm font-bold uppercase tracking-wider">Active Batch</p>
+              <div className="relative z-10 space-y-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Ticket className="w-5 h-5 text-primary/70" />
+                      <p className="text-primary/70 text-sm font-bold uppercase tracking-wider">Active Batch</p>
+                    </div>
+                    <h2 className="text-2xl font-black text-primary">
+                      {activeBatch?.name || (loadingBatches ? '...' : 'No batch yet')}
+                    </h2>
+                    {activeBatch?.target_exam && (
+                      <p className="text-primary/60 text-sm mt-0.5">{activeBatch.target_exam.replace('_', ' ')}</p>
+                    )}
                   </div>
-                  <h2 className="text-2xl font-black text-primary">
-                    {activeBatch?.name || (loadingBatches ? '...' : 'No batch yet')}
-                  </h2>
-                  {activeBatch?.target_exam && (
-                    <p className="text-primary/60 text-sm mt-0.5">{activeBatch.target_exam.replace('_', ' ')}</p>
-                  )}
+
+                  {/* Student count badge */}
+                  <div className="bg-white/20 border border-white/30 rounded-2xl px-5 py-3 text-center shrink-0">
+                    <p className="text-2xl font-black text-primary">{stats.totalStudents}</p>
+                    <p className="text-[10px] uppercase font-black text-primary/70 tracking-widest mt-0.5">Students</p>
+                  </div>
                 </div>
 
-                {/* Student count badge */}
-                <div className="bg-white/20 border border-white/30 rounded-2xl px-5 py-3 text-center shrink-0">
-                  <p className="text-2xl font-black text-primary">{stats.totalStudents}</p>
-                  <p className="text-[10px] uppercase font-black text-primary/70 tracking-widest mt-0.5">Students</p>
-                </div>
-              </div>
-
-              {/* Code display */}
-              {activeBatch ? (
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-5 py-3 flex items-center justify-between gap-4 backdrop-blur-sm">
-                    <span className="font-mono font-black text-2xl tracking-[0.35em] text-primary">
-                      {activeBatch.join_code}
-                    </span>
+                {/* Code display */}
+                {activeBatch ? (
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 bg-white/10 border border-white/20 rounded-2xl px-5 py-3 flex items-center justify-between gap-4 backdrop-blur-sm">
+                      <span className="font-mono font-black text-2xl tracking-[0.35em] text-primary">
+                        {activeBatch.join_code}
+                      </span>
+                      <button
+                        onClick={copyCode}
+                        className="flex items-center gap-2 text-primary/80 hover:text-primary transition-colors text-sm font-bold"
+                      >
+                        {codeCopied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                        {codeCopied ? 'Copied!' : 'Copy'}
+                      </button>
+                    </div>
                     <button
-                      onClick={copyCode}
-                      className="flex items-center gap-2 text-primary/80 hover:text-primary transition-colors text-sm font-bold"
+                      onClick={copyInviteLink}
+                      className="bg-white/20 hover:bg-white/30 border border-white/30 rounded-2xl px-4 py-3 text-primary text-sm font-bold flex items-center gap-2 transition-colors shrink-0"
                     >
-                      {codeCopied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      {codeCopied ? 'Copied!' : 'Copy'}
+                      <LinkIcon className="w-4 h-4" /> Invite Link
                     </button>
                   </div>
+                ) : (
                   <button
-                    onClick={copyInviteLink}
-                    className="bg-white/20 hover:bg-white/30 border border-white/30 rounded-2xl px-4 py-3 text-primary text-sm font-bold flex items-center gap-2 transition-colors shrink-0"
+                    onClick={handleGenerateCode}
+                    disabled={generatingCode}
+                    className="bg-white/20 hover:bg-white/30 border border-white/30 rounded-2xl px-5 py-3 text-primary font-bold flex items-center gap-2 transition-colors"
                   >
-                    <LinkIcon className="w-4 h-4" /> Invite Link
+                    {generatingCode ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                    Create First Batch
                   </button>
-                </div>
-              ) : (
-                <button
-                  onClick={handleGenerateCode}
-                  disabled={generatingCode}
-                  className="bg-white/20 hover:bg-white/30 border border-white/30 rounded-2xl px-5 py-3 text-primary font-bold flex items-center gap-2 transition-colors"
-                >
-                  {generatingCode ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                  Create First Batch
-                </button>
-              )}
+                )}
 
-              {/* Batch switcher if multiple */}
-              {batches.length > 1 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  {batches.slice(0, 4).map(b => (
-                    <button
-                      key={b.id}
-                      onClick={() => setActiveBatch(b)}
-                      className={cn(
-                        'px-3 py-1.5 rounded-xl text-xs font-bold border transition-all',
-                        activeBatch?.id === b.id
-                          ? 'bg-white/25 border-white/40 text-primary'
-                          : 'bg-white/10 border-white/20 text-primary/60 hover:bg-white/20'
-                      )}
-                    >
-                      {b.name}
-                    </button>
-                  ))}
-                  {batches.length > 4 && (
-                    <Link to="/b2b/batches" className="text-primary/60 text-xs font-bold hover:text-primary transition-colors">
-                      +{batches.length - 4} more
-                    </Link>
-                  )}
-                </div>
-              )}
+                {/* Batch switcher if multiple */}
+                {batches.length > 1 && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {batches.slice(0, 4).map(b => (
+                      <button
+                        key={b.id}
+                        onClick={() => setActiveBatch(b)}
+                        className={cn(
+                          'px-3 py-1.5 rounded-xl text-xs font-bold border transition-all',
+                          activeBatch?.id === b.id
+                            ? 'bg-white/25 border-white/40 text-primary'
+                            : 'bg-white/10 border-white/20 text-primary/60 hover:bg-white/20'
+                        )}
+                      >
+                        {b.name}
+                      </button>
+                    ))}
+                    {batches.length > 4 && (
+                      <Link to="/b2b/batches" className="text-primary/60 text-xs font-bold hover:text-primary transition-colors">
+                        +{batches.length - 4} more
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Broadcast Megaphone Card */}
+            <div className="bg-card border border-border rounded-3xl p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <h3 className="font-black text-base flex items-center gap-2">
+                  <div className="p-1.5 bg-amber-500/10 text-amber-500 rounded-lg">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  Batch Megaphone
+                </h3>
+                <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded">Pinned in Commune</span>
+              </div>
+              
+              <div className="flex gap-3 relative z-10">
+                <input
+                  type="text"
+                  value={broadcastText}
+                  onChange={(e) => setBroadcastText(e.target.value)}
+                  placeholder="E.g., Complete 50 Kinematics MCQs by tonight!"
+                  className="flex-1 bg-secondary border border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  onKeyDown={(e) => e.key === 'Enter' && handleBroadcast()}
+                />
+                <Button 
+                  onClick={handleBroadcast} 
+                  disabled={sendingBroadcast || !broadcastText.trim()}
+                  className="bg-amber-500 hover:bg-amber-600 text-white rounded-xl px-6"
+                >
+                  {sendingBroadcast ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Broadcast 📢'}
+                </Button>
+              </div>
             </div>
           </div>
 

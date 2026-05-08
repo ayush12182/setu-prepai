@@ -28,7 +28,7 @@ serve(async (req) => {
     // ── 1. Find the batch (only safe columns) ─────────────────────────────
     const { data: batch, error: batchErr } = await supabase
       .from("batches")
-      .select("id, name, teacher_id, target_exam, is_active")
+      .select("id, name, mentor_id, target_exam, stream, subject, is_active")
       .eq("join_code", code)
       .maybeSingle();
 
@@ -56,7 +56,7 @@ serve(async (req) => {
     const { data: teacherProfile } = await supabase
       .from("profiles")
       .select("full_name, institution_name")
-      .eq("user_id", batch.teacher_id)
+      .eq("user_id", batch.mentor_id)
       .maybeSingle();
 
     const teacher_name =
@@ -89,7 +89,7 @@ serve(async (req) => {
       // Update student profile with teacher linkage
       await supabase
         .from("profiles")
-        .update({ teacher_id: batch.teacher_id })
+        .update({ teacher_id: batch.mentor_id })
         .eq("user_id", student_id);
 
       // Seed leaderboard row
@@ -118,6 +118,8 @@ serve(async (req) => {
           batch_name: batch.name,
           teacher_name,
           exam_type: batch.target_exam ?? "JEE",
+          stream: batch.stream ?? "jee",
+          subject: batch.subject ?? "All Subjects",
           total_students: fresh_count ?? 0,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -132,6 +134,8 @@ serve(async (req) => {
         batch_name: batch.name,
         teacher_name,
         exam_type: batch.target_exam ?? "JEE",
+        stream: batch.stream ?? "jee",
+        subject: batch.subject ?? "All Subjects",
         total_students: current_count ?? 0,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

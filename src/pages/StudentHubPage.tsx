@@ -14,6 +14,7 @@ import { useBatchInfo } from '@/hooks/useBatchInfo';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { AssignedContent } from '@/components/student/AssignedContent';
+import { toast } from 'sonner';
 
 // ── Helpers ───────────────────────────────────────────────────────
 function daysUntil(dateStr: string) {
@@ -285,8 +286,46 @@ const StudentHubPage: React.FC = () => {
               </motion.div>
             </div>
 
-            {/* ── RIGHT COLUMN ────────────────────────────────────── */}
+            {/* ── RIGHT COLUMN: QUICK ACTIONS & LEADERBOARD ────────────────────────── */}
             <div className="lg:col-span-4 flex flex-col gap-6">
+
+              {/* Leaderboard Widget */}
+              {batch && batch.dailyLeaderboard && batch.dailyLeaderboard.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-card/40 backdrop-blur-sm border border-white/10 rounded-[2rem] p-6 lg:p-8 relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/10 blur-[50px] rounded-full -translate-y-1/2 translate-x-1/2" />
+                  <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-yellow-400" />
+                    Today's Leaders
+                  </h3>
+                  <div className="space-y-3">
+                    {batch.dailyLeaderboard.map((student, idx) => (
+                      <div key={student.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
+                          idx === 0 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                          idx === 1 ? 'bg-slate-300/20 text-slate-300 border border-slate-300/30' :
+                          idx === 2 ? 'bg-amber-600/20 text-amber-500 border border-amber-600/30' :
+                          'bg-white/5 text-white/50 border border-white/10'
+                        }`}>
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-bold truncate ${student.id === user?.id ? 'text-accent' : 'text-white'}`}>
+                            {student.id === user?.id ? 'You' : student.name}
+                          </p>
+                        </div>
+                        <div className="text-xs font-bold text-white/70 bg-white/10 px-2 py-1 rounded-md">
+                          {student.questions} Qs
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
 
               {/* Exam Countdown */}
               <motion.div
@@ -455,11 +494,35 @@ const StudentHubPage: React.FC = () => {
                   {[
                     { icon: BookOpen, label: 'Study Notes', sub: 'Chapter summaries', path: '/learn', color: 'text-blue-400 bg-blue-500/10' },
                     { icon: CalendarDays, label: 'Full Analytics', sub: 'My batch report', path: '/my-batch', color: 'text-purple-400 bg-purple-500/10' },
+                    { icon: Users, label: 'Batch Commune', sub: 'Live group study', path: '/batch-commune', color: 'text-emerald-400 bg-emerald-500/10' },
+                    { icon: Flame, label: 'SOS Help', sub: 'Ping batch for help', onClick: async () => {
+                      if (!batch) return toast.error("You need a batch to send an SOS!");
+                      toast.promise(
+                        (async () => {
+                          const { data: room } = await supabase.from('commune_rooms').select('id').eq('title', `BATCH_${batch.batchId}`).maybeSingle();
+                          if (!room?.id) throw new Error("Batch room not initialized yet. Open Batch Commune first.");
+                          
+                          const { error } = await supabase.from('commune_messages').insert({
+                            room_id: room.id,
+                            user_id: user?.id,
+                            user_name: profile?.full_name || 'Student',
+                            category: 'SOS',
+                            content: 'I need help with my practice questions!'
+                          });
+                          if (error) throw error;
+                        })(),
+                        {
+                          loading: 'Sending SOS...',
+                          success: 'SOS sent to Batch Commune! 🚨',
+                          error: (err) => err.message || 'Failed to send SOS'
+                        }
+                      );
+                    }, color: 'text-rose-400 bg-rose-500/10' },
                     { icon: Sparkles, label: 'AI Teachers', sub: 'Live AI sessions', path: '/ai-teachers', color: 'text-accent bg-accent/10' },
-                  ].map(({ icon: Icon, label, sub, path, color }) => (
+                  ].map(({ icon: Icon, label, sub, path, color, onClick }) => (
                     <button
                       key={label}
-                      onClick={() => navigate(path)}
+                      onClick={onClick ? onClick : () => navigate(path!)}
                       className="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl border border-white/[0.05] hover:border-white/20 hover:bg-white/[0.03] transition-all duration-200 text-left group"
                     >
                       <div className={`p-2 rounded-xl shrink-0 ${color}`}>

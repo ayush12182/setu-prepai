@@ -76,7 +76,7 @@ serve(async (req) => {
     Include question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), explanation, concept_tested, common_mistake, pyq_year, and source.
     Wait, return ONLY JSON.`;
 
-    const model = "gemini-1.5-flash";
+    const model = "gemini-2.5-flash";
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

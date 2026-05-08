@@ -9,7 +9,7 @@ export interface Batch {
   subject: string;
   target_exam: string;
   description: string;
-  teacher_id: string;
+  mentor_id: string;
   join_code: string;
   is_active: boolean;
   created_at: string;
@@ -22,7 +22,7 @@ export const useB2BManager = () => {
 
   const orgId = profile?.organization_id;
 
-  const createBatch = async (name: string, subject: string, teacherId?: string, targetExam?: string, description?: string) => {
+  const createBatch = async (name: string, subject: string, mentorId?: string, targetExam?: string, description?: string) => {
     setLoading(true);
     try {
       // 1. Generate unique 6-character alphanumeric uppercase join code
@@ -48,14 +48,14 @@ export const useB2BManager = () => {
         name: name.trim(),
         target_exam: targetExam || 'JEE_MAINS',
         description: description || `Batch for ${subject}`,
-        teacher_id: teacherId || user?.id,
+        mentor_id: mentorId || user?.id,
         join_code: join_code,
       };
 
       // 3. RPC call
       const { data, error } = await supabase.rpc('create_batch_v2', {
         p_name: payload.name,
-        p_teacher_id: payload.teacher_id,
+        p_mentor_id: payload.mentor_id,
         p_join_code: payload.join_code,
         p_target_exam: payload.target_exam,
         p_description: payload.description,

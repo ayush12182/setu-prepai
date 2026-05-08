@@ -1,29 +1,33 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
-  LayoutDashboard, Users, Layers, ClipboardList,
+  LayoutDashboard, Users, Layers, ClipboardList, MessageSquare,
   LineChart, UserPlus, Settings, Menu, X, LogOut, ChevronLeft, BookOpen, Brain
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
 export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: string }> = ({ children, title }) => {
   const { profile, signOut } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { t } = useTranslation();
 
   const NAV_ITEMS = [
-    { icon: LayoutDashboard, label: 'Overview', path: '/b2b' },
-    { icon: Users, label: 'Students', path: '/b2b/students' },
-    { icon: Layers, label: 'Batches', path: '/b2b/batches' },
-    { icon: BookOpen, label: 'Study Materials', path: '/b2b/materials' },
-    { icon: ClipboardList, label: 'Tests', path: '/b2b/tests' },
-    { icon: LineChart, label: 'Analytics', path: '/b2b/analytics' },
-    { icon: Brain, label: 'Student Analytics', path: '/teacher/student-analytics' },
-    { icon: UserPlus, label: 'Invite Students', path: '/b2b/invite' },
-    { icon: Settings, label: 'Settings', path: '/b2b/settings' },
+    { icon: LayoutDashboard, label: t('teacherSidebar.overview'), path: '/b2b' },
+    { icon: Users, label: t('teacherSidebar.students'), path: '/b2b/students' },
+    { icon: Layers, label: t('teacherSidebar.batches'), path: '/b2b/batches' },
+    { icon: MessageSquare, label: t('teacherSidebar.commune'), path: '/batch-commune' },
+    { icon: BookOpen, label: t('teacherSidebar.studyMaterials'), path: '/b2b/materials' },
+    { icon: ClipboardList, label: t('teacherSidebar.tests'), path: '/b2b/tests' },
+    { icon: LineChart, label: t('teacherSidebar.analytics'), path: '/b2b/analytics' },
+    { icon: Brain, label: t('teacherSidebar.studentAnalytics'), path: '/teacher/student-analytics' },
+    { icon: UserPlus, label: t('teacherSidebar.inviteStudents'), path: '/b2b/invite' },
+    { icon: Settings, label: t('teacherSidebar.settings'), path: '/b2b/settings' },
   ];
 
   return (
@@ -62,7 +66,7 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-display font-black tracking-tighter text-2xl scale-y-110">SETU.</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full mt-1">Teacher Portal</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full mt-1">{t('teacherSidebar.portal')}</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="md:hidden p-2 text-muted-foreground hover:text-foreground">
             <X size={20} />
@@ -97,6 +101,9 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
         </nav>
 
         <div className="p-4 border-t border-border mt-auto">
+          <div className="mb-4">
+            <LanguageSwitcher />
+          </div>
           <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-secondary/50 border border-border">
              <div className="w-8 h-8 rounded-full bg-accent/20 text-accent font-bold flex items-center justify-center text-xs">
                {(profile?.institution_name || profile?.full_name || 'T')[0].toUpperCase()}
@@ -112,12 +119,12 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
           </div>
           
           <Button variant="ghost" onClick={signOut} className="w-full justify-start text-muted-foreground hover:text-red-400 hover:bg-red-500/10">
-            <LogOut size={16} className="mr-2" /> Sign Out
+            <LogOut size={16} className="mr-2" /> {t('teacherSidebar.signOut')}
           </Button>
           
           <Button variant="ghost" asChild className="w-full justify-start text-muted-foreground mt-1">
             <Link to="/student-hub">
-              <ChevronLeft size={16} className="mr-2" /> View Student App
+              <ChevronLeft size={16} className="mr-2" /> {t('teacherSidebar.viewStudentApp')}
             </Link>
           </Button>
         </div>

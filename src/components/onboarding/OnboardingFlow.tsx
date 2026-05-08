@@ -23,6 +23,8 @@ interface BatchInfo {
   batch_name: string;
   teacher_name: string;
   exam_type: string;
+  stream: string;
+  subject: string;
   total_students: number;
 }
 
@@ -98,12 +100,19 @@ const GlowBg: React.FC = () => (
   </div>
 );
 
-const Logo: React.FC = () => (
-  <div className="flex items-center gap-2.5">
-    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
-      <BookOpen className="w-4.5 h-4.5 text-white" />
-    </div>
-    <span className="text-white font-bold text-lg tracking-wide" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>SETU</span>
+const Logo: React.FC<{ size?: 'sm' | 'lg' }> = ({ size = 'sm' }) => (
+  <div className={`flex flex-col items-center gap-2 ${size === 'lg' ? '' : 'flex-row gap-2.5'}`}>
+    <img
+      src="/setu-logo.png"
+      alt="SETU"
+      className={size === 'lg' ? 'w-16 h-16 object-contain' : 'w-8 h-8 object-contain'}
+    />
+    <span
+      className={`text-white font-bold tracking-widest uppercase ${size === 'lg' ? 'text-2xl' : 'text-base'}`}
+      style={{ fontFamily: 'Sora, Inter, sans-serif', letterSpacing: '0.2em' }}
+    >
+      SETU
+    </span>
   </div>
 );
 
@@ -207,34 +216,42 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
   const totalTeacherSteps = 5; // identity → goals → batch → code → done
 
   // ─── Join code validation ─────────────────────────────────────────────────
-  // Primary: SECURITY DEFINER RPC (bypasses RLS, always works)
-  // Fallback: edge function (if RPC not deployed yet)
 
   const validateCode = useCallback(async (raw: string) => {
     const code = raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (code.length < 6) { setCodeState('idle'); return; }
-    setCodeState('checking');
-    setBatchInfo(null);
+    if (code.length < 6) return;
 
     try {
-      // 1. PRIMARY: Vercel API route (service-role key, bypasses RLS completely)
-      try {
-        const res = await fetch('/api/validate-code', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code }),
-        });
-        const data = await res.json();
-        if (res.ok && data.valid) {
-          setCodeState('valid');
-          setBatchInfo(data);
-          return;
-        }
-        if (res.status === 404) { setCodeState('invalid'); return; }
-        if (res.status === 403) { setCodeState('invalid'); return; }
-      } catch { /* API route unavailable (dev mode) — fall through */ }
+      setCodeState('checking');
+      
+      // 1. PRIMARY: Edge Function (Standardized for B2B)
+      const { data, error } = await supabase.functions.invoke('validate-join-code', {
+        body: { join_code: code },
+      });
 
-      // 2. FALLBACK: SECURITY DEFINER RPC (bypasses RLS if migration applied)
+      if (!error && data && data.valid) {
+        setCodeState('valid');
+        setBatchInfo(data);
+        // ── AUTO-APPLY teacher's exam/stream to student ──────────────────
+        const detectedStream = data.stream || (() => {
+          const m: Record<string, string> = {
+            'JEE': 'jee', 'JEE Main': 'jee', 'JEE Advanced': 'jee',
+            'NEET': 'neet', 'CUET': 'cuet',
+            'Commerce': 'commerce', 'CA Foundation': 'commerce',
+            'Foundation': 'foundation',
+          };
+          return m[data.exam_type] ?? 'jee';
+        })();
+        setStream(detectedStream);
+        return;
+      }
+      
+      if (data?.error?.includes('Invalid code')) {
+        setCodeState('invalid');
+        return;
+      }
+
+      // 2. FALLBACK: SECURITY DEFINER RPC (legacy compatibility)
       const { data: rows, error: rpcErr } = await supabase
         .rpc('validate_batch_code' as any, { p_code: code });
 
@@ -246,23 +263,17 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
           batch_name:     row.batch_name,
           teacher_name:   row.teacher_name,
           exam_type:      row.exam_type,
+          stream:         row.stream ?? 'jee',
+          subject:        row.subject ?? 'All Subjects',
           total_students: Number(row.total_students ?? 0),
         });
-        return;
-      }
-      if (!rpcErr && rows && (rows as any[]).length === 0) { setCodeState('invalid'); return; }
-
-      // 3. LAST FALLBACK: edge function
-      const { data, error } = await supabase.functions.invoke('validate-join-code', {
-        body: { join_code: code },
-      });
-      if (!error && data && !data.error) {
-        setCodeState('valid');
-        setBatchInfo(data);
+        // Auto-apply stream from legacy RPC too
+        if (row.stream) setStream(row.stream);
       } else {
         setCodeState('invalid');
       }
-    } catch {
+    } catch (err) {
+      console.error("Validation error:", err);
       setCodeState('invalid');
     }
   }, []);
@@ -284,7 +295,11 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     if (!user) return;
     setSaving(true);
     try {
-      const examGoal = EXAM_MAP[stream] ?? 'JEE Main';
+      // Use batch's config if available, else fall back to manually selected stream
+      const examGoal = batchInfo?.exam_type
+        ? (batchInfo.exam_type === 'JEE_MAINS' ? 'JEE Main' : batchInfo.exam_type)
+        : EXAM_MAP[stream] ?? 'JEE Main';
+      const effectiveStream = batchInfo?.stream || stream;
       const cls = studentClass || '11';
       let level = '11-12';
       if (stream === 'foundation') {
@@ -292,9 +307,9 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
         level = n <= 8 ? '6-8' : '9-10';
       }
 
-      if (stream === 'jee') setExamMode('jee');
-      else if (stream === 'neet') setExamMode('neet');
-      else if (stream === 'cuet') setExamMode('cuet');
+      if (effectiveStream === 'jee') setExamMode('jee');
+      else if (effectiveStream === 'neet') setExamMode('neet');
+      else if (effectiveStream === 'cuet') setExamMode('cuet');
       else setExamMode('jee');
 
       await updateProfile({
@@ -377,32 +392,21 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
       const payload = {
         name: batchName.trim() || `${institutionName || 'My'} Batch`,
         target_exam: teacherExam || 'JEE_MAINS',
-        teacher_id: user.id,
+        mentor_id: user.id,
         join_code: code,
         description: `Batch for ${teacherExam || 'JEE'}`,
       };
 
-      const { data, error } = await supabase.rpc('create_batch_v2' as any, {
-        p_name: payload.name,
-        p_teacher_id: payload.teacher_id,
-        p_join_code: payload.join_code,
-        p_target_exam: payload.target_exam,
-        p_description: payload.description,
-        p_subject: teacherExam || 'JEE',
-      });
+      const { data, error } = await supabase
+        .from('batches' as any)
+        .insert(payload)
+        .select('join_code')
+        .single();
 
       if (error) {
-        // Fallback direct insert
-        const { data: direct, error: directErr } = await supabase
-          .from('batches' as any)
-          .insert(payload)
-          .select('join_code')
-          .single();
-        if (directErr) throw directErr;
-        setGeneratedCode((direct as any).join_code || code);
+        throw error;
       } else {
-        const row = Array.isArray(data) ? data[0] : data;
-        setGeneratedCode(row?.join_code || code);
+        setGeneratedCode((data as any)?.join_code || code);
       }
 
       go(4);
@@ -596,6 +600,96 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     // ── STUDENT STEP 2: Goal selection (stream + class) ───────────────────────
     if (step === 2 && track === 'student') {
       const classes = stream === 'foundation' ? FOUNDATION_CLASSES : SENIOR_CLASSES;
+
+      // ── If batch info exists, show locked auto-detected view ─────────────
+      if (batchInfo) {
+        const streamLabel = STREAMS.find(s => s.value === stream)?.label ?? batchInfo.exam_type;
+        const streamEmoji = STREAMS.find(s => s.value === stream)?.emoji ?? '🎯';
+        return (
+          <div className="space-y-5">
+            <div className="text-center space-y-2">
+              <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
+                Your batch is set up!
+              </h1>
+              <p className="text-white/40 text-sm">Your teacher has already configured your exam and subject</p>
+            </div>
+
+            {/* Auto-detected exam — locked */}
+            <div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.06] p-5 space-y-4">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-amber-400 text-xs font-black uppercase tracking-[0.15em]">Auto-detected from batch</span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-2xl shrink-0">
+                  {streamEmoji}
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-bold text-base">{streamLabel}</p>
+                  <p className="text-white/40 text-sm">{batchInfo.subject}</p>
+                </div>
+                <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                  <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />
+                </div>
+              </div>
+
+              <div className="h-px bg-white/[0.06]" />
+
+              <div className="flex items-center gap-3 text-sm">
+                <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0">
+                  <Users className="w-4 h-4 text-white/40" />
+                </div>
+                <div>
+                  <p className="text-white/70 font-medium">{batchInfo.batch_name}</p>
+                  <p className="text-white/30 text-xs">by {batchInfo.teacher_name} · {batchInfo.total_students} students</p>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-center text-xs text-white/25">
+              Your exam and subjects are set by your teacher. Only your class selection is needed.
+            </p>
+
+            {/* Class selection — still required */}
+            <div className="space-y-2">
+              <p className="text-white/50 text-xs font-bold uppercase tracking-wider">Your class</p>
+              <div className="grid grid-cols-3 gap-2">
+                {classes.map(c => {
+                  const sel = studentClass === c.value;
+                  return (
+                    <button
+                      key={c.value}
+                      onClick={() => setStudentClass(c.value)}
+                      className={cn(
+                        'py-3 rounded-xl border text-center transition-all duration-200',
+                        sel ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' : 'border-white/[0.07] text-white/60 hover:border-white/20 hover:text-white'
+                      )}
+                    >
+                      <p className="font-bold text-sm">{c.label}</p>
+                      <p className="text-[10px] mt-0.5 opacity-60">{c.tag}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <PrimaryBtn
+              disabled={!studentClass}
+              loading={saving}
+              onClick={completeStudent}
+            >
+              {saving ? 'Setting up...' : <><Sparkles className="w-5 h-5" /> Join my batch</>}
+            </PrimaryBtn>
+
+            <GhostBtn onClick={() => go(1, -1)}>
+              <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
+            </GhostBtn>
+          </div>
+        );
+      }
+
+      // ── No batch: normal stream + class selection ──────────────────────
       return (
         <div className="space-y-5">
           <div className="text-center space-y-1">
@@ -642,7 +736,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
             </div>
           </div>
 
-          {/* Class — shown only when stream selected */}
+          {/* Class */}
           <AnimatePresence>
             {stream && (
               <motion.div
@@ -1049,9 +1143,9 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     <div className="min-h-screen bg-[#0B0F1A] flex flex-col relative overflow-hidden">
       <GlowBg />
 
-      <header className="relative z-10 p-5 sm:p-6">
-        <div className="max-w-lg mx-auto flex items-center justify-between">
-          <Logo />
+      <header className="relative z-10 pt-8 pb-4 px-5 sm:px-6">
+        <div className="max-w-lg mx-auto flex flex-col items-center gap-4">
+          <Logo size="lg" />
           {step > 0 && (
             <StepDots
               total={isTeacher ? totalTeacherSteps : totalStudentSteps}

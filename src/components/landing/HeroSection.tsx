@@ -1,254 +1,268 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Volume2, VolumeX } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { startSubscriptionCheckout } from '@/lib/paymentEngine';
-import { Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowRight, Play, Brain, Zap, Target } from 'lucide-react';
+import StudyVisual from '@/components/landing/StudyVisual';
 
-const formulas = ['E = mc²', 'F = ma', '∫ dx', 'Σ n²', 'λ = h/p', 'PV = nRT', 'DNA 🧬', '∇ × B'];
-
-const formulaPositions = [
-  { left: '10%', top: '15%' }, { left: '22%', top: '70%' },
-  { left: '75%', top: '20%' }, { left: '85%', top: '65%' },
-  { left: '50%', top: '80%' }, { left: '60%', top: '12%' },
-  { left: '35%', top: '45%' }, { left: '90%', top: '40%' },
-];
-
-export const HeroSection: React.FC = () => {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [isMuted, setIsMuted] = useState(true);
-  const [currentWord, setCurrentWord] = useState(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const handleTrialClick = async () => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    try {
-      setIsProcessing(true);
-      toast({ title: 'Connecting to Bank...', description: 'Securing connection via Cashfree Payments.' });
-      await startSubscriptionCheckout(49, user);
-      setIsProcessing(false);
-    } catch (err: any) {
-      setIsProcessing(false);
-      toast({ title: 'Payment Error', description: err.message || 'Failed to initialize checkout', variant: 'destructive' });
-    }
-  };
-
-  const words = ['Mentor', 'Guide', 'Coach', 'Teacher'];
-
+/* ── Particle canvas ── */
+const ParticleCanvas: React.FC = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWord((prev) => (prev + 1) % words.length);
-    }, 2500);
-    return () => clearInterval(interval);
+    const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext('2d')!;
+    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
+    resize();
+    window.addEventListener('resize', resize);
+    const pts = Array.from({ length: 45 }, () => ({
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+      r: Math.random() * 1.4 + 0.3,
+      dx: (Math.random() - 0.5) * 0.15, dy: (Math.random() - 0.5) * 0.15,
+      a: Math.random() * 0.3 + 0.06,
+    }));
+    let raf: number;
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pts.forEach(p => {
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,155,84,${p.a})`; ctx.fill();
+        p.x += p.dx; p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
   }, []);
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-35 pointer-events-none" />;
+};
 
-  return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-[#1E2A3A]">
-      {/* Video Background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#1E2A3A]/95 via-[#1E2A3A]/80 to-[#1E2A3A] z-10" />
-        <iframe
-          src={`https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`}
-          title="SETU Background"
-          className="absolute inset-0 w-[300%] h-[300%] -top-[100%] -left-[100%] opacity-30"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        />
+/* ── Dashboard mockup removed — see StudyVisual ── */
+const _Unused: React.FC = () => (
+  <div className="relative">
+    <div className="absolute -inset-10 bg-[#FF9B54]/6 blur-3xl rounded-full pointer-events-none" />
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.9, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="rounded-2xl border border-white/[0.1] bg-[#0D1520]/90 backdrop-blur-2xl shadow-2xl shadow-black/60 overflow-hidden"
+    >
+      {/* Chrome bar */}
+      <div className="px-5 py-3 border-b border-white/[0.06] flex items-center gap-2">
+        <div className="flex gap-1.5">
+          {['#ef4444','#f59e0b','#22c55e'].map(c => <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c + 'aa' }} />)}
+        </div>
+        <div className="flex-1 mx-4 h-5 rounded bg-white/[0.05] flex items-center px-3">
+          <span className="text-[10px] text-white/25">setu.ai · dashboard</span>
+        </div>
       </div>
 
-      {/* Static Grid Pattern */}
-      <div className="absolute inset-0 z-[5] opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `linear-gradient(hsl(var(--accent)/0.3) 1px, transparent 1px),
-                            linear-gradient(90deg, hsl(var(--accent)/0.3) 1px, transparent 1px)`,
-          backgroundSize: '50px 50px',
-        }} />
-      </div>
-
-      {/* CSS-only Floating Formulas */}
-      <div className="absolute inset-0 z-[6] overflow-hidden pointer-events-none">
-        {formulas.map((formula, i) => (
-          <div
-            key={formula}
-            className="absolute text-white/15 font-mono text-lg sm:text-2xl animate-float-slow"
-            style={{
-              ...formulaPositions[i],
-              animationDelay: `${i * 1.2}s`,
-            }}
-          >
-            {formula}
+      <div className="p-5 space-y-4">
+        {/* Greeting */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-white/40 text-xs">Good morning, Arjun 👋</p>
+            <p className="text-white font-semibold text-sm">Your JEE prep is on track</p>
           </div>
-        ))}
-      </div>
+          <div className="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/25">
+            <span className="text-emerald-400 text-xs font-bold">Day 14 🔥</span>
+          </div>
+        </div>
 
-      {/* Static Gradient Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-accent/15 rounded-full blur-[150px] z-[2]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/8 rounded-full blur-[120px] z-[2]" />
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {[
+            { l: 'Accuracy', v: '74%', c: 'text-[#FF9B54]', trend: '↑ +4%' },
+            { l: 'Syllabus', v: '62%', c: 'text-blue-400',  trend: '↑ +8%' },
+            { l: 'Rank est.', v: '11.2K', c: 'text-violet-400', trend: '↓ improving' },
+          ].map(s => (
+            <div key={s.l} className="rounded-xl bg-white/[0.04] border border-white/[0.05] p-3">
+              <p className="text-[9px] text-white/40 mb-1 uppercase tracking-wider">{s.l}</p>
+              <p className={`text-lg font-bold leading-none ${s.c}`}>{s.v}</p>
+              <p className="text-[9px] text-white/30 mt-1">{s.trend}</p>
+            </div>
+          ))}
+        </div>
 
-      {/* Main Content */}
-      <div className="relative z-20 min-h-screen flex flex-col justify-center px-6 sm:px-12 lg:px-20 pt-20">
-        <div className="max-w-5xl">
-          {/* Eyebrow */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-6"
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              Foundation for Class 6–12. Built for JEE, NEET & CUET.
-            </span>
-          </motion.div>
-
-          {/* Main Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.05] mb-6"
-          >
-            <span className="block">Your AI Learning</span>
-            <span className="block mt-2">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={currentWord}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="inline-block text-accent"
-                >
-                  {words[currentWord]}
-                </motion.span>
-              </AnimatePresence>
-            </span>
-            <span className="block mt-2 text-white/90 text-3xl sm:text-5xl lg:text-6xl xl:text-7xl">Foundations to Competitive Success</span>
-          </motion.h1>
-
-          {/* Subheading */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-lg sm:text-xl lg:text-2xl text-white/70 max-w-2xl mb-3 leading-relaxed"
-          >
-            Start strengthening concepts in school and seamlessly transition
-            <br className="hidden sm:block" />
-            into JEE, NEET, or CUET preparation — guided like <span className="text-accent font-semibold">a real teacher</span>.
-          </motion.p>
-
-          {/* Supporting line */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            className="text-sm sm:text-base text-white/50 max-w-2xl mb-10 leading-relaxed"
-          >
-            From building strong foundations in Class 6 to cracking competitive exams — SETU is one continuous learning journey.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-start gap-4 mb-4"
-          >
-            <Button
-              size="lg"
-              disabled={isProcessing}
-              onClick={handleTrialClick}
-              className="group h-14 px-8 text-lg font-semibold bg-accent text-primary hover:bg-accent/90 rounded-xl shadow-[0_0_40px_rgba(232,154,60,0.4)] hover:shadow-[0_0_60px_rgba(232,154,60,0.5)] transition-all duration-300 hover:-translate-y-1"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Connecting...
-                </>
-              ) : (
-                'Start Learning for ₹49'
-              )}
-              <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="h-14 px-8 text-lg font-medium border-2 border-white/30 text-white bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/50 rounded-xl transition-all duration-300"
-              onClick={() => {
-                document.getElementById('teacher-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Watch Demo
-            </Button>
-          </motion.div>
-
-          {/* Trust subtext + badge */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex flex-wrap items-center gap-3 mb-16"
-          >
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/20 text-accent text-xs font-semibold">
-              Student-Friendly Pricing
-            </span>
-            <span className="text-white/50 text-sm">Affordable AI teachership designed for serious aspirants.</span>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-wrap items-center gap-8 sm:gap-12"
-          >
+        {/* Weak topics */}
+        <div className="rounded-xl bg-white/[0.03] border border-white/[0.05] p-3.5">
+          <p className="text-xs font-semibold text-white/60 mb-3">🔍 Needs Attention</p>
+          <div className="space-y-2.5">
             {[
-              { value: '6–12', label: 'Classes Covered' },
-              { value: '50K+', label: 'PYQs & Questions' },
-              { value: '3', label: 'Competitive Exams' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center sm:text-left">
-                <div className="text-3xl sm:text-4xl font-bold text-white">{stat.value}</div>
-                <div className="text-sm text-white/50 mt-1">{stat.label}</div>
+              { n: 'Rotational Motion', p: 32, c: '#ef4444' },
+              { n: 'Electrochemistry',  p: 49, c: '#FF9B54' },
+              { n: 'Limits & Continuity', p: 58, c: '#facc15' },
+            ].map(t => (
+              <div key={t.n}>
+                <div className="flex justify-between mb-1">
+                  <span className="text-[11px] text-white/55">{t.n}</span>
+                  <span className="text-[10px]" style={{ color: t.c }}>{t.p}%</span>
+                </div>
+                <div className="h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${t.p}%` }}
+                    transition={{ duration: 1, delay: 0.7, ease: 'easeOut' }}
+                    className="h-full rounded-full"
+                    style={{ background: t.c }}
+                  />
+                </div>
               </div>
             ))}
-          </motion.div>
+          </div>
+        </div>
 
-          {/* Trust Line */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-8 text-sm text-white/40 max-w-2xl leading-relaxed"
+        {/* Today's plan */}
+        <div className="rounded-xl bg-white/[0.03] border border-white/[0.05] p-3.5">
+          <p className="text-xs font-semibold text-white/60 mb-3">🎯 AI Plan · Today</p>
+          <div className="space-y-1.5">
+            {[
+              { t: 'Revise Rotational Motion', tag: 'Priority', col: 'text-red-400 bg-red-500/10' },
+              { t: 'Practice 20 Electrochem MCQs', tag: 'AI Pick', col: 'text-[#FF9B54] bg-[#FF9B54]/10' },
+              { t: 'Full Mock — Physics', tag: 'Scheduled', col: 'text-blue-400 bg-blue-500/10' },
+            ].map((i, idx) => (
+              <div key={idx} className="flex items-center justify-between rounded-lg px-3 py-2 bg-white/[0.02]">
+                <div className="flex items-center gap-2">
+                  <div className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0" />
+                  <span className="text-[11px] text-white/65">{i.t}</span>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${i.col}`}>{i.tag}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Score trend mini chart */}
+        <div className="flex items-end gap-1.5 h-8 px-1">
+          {[38, 45, 52, 48, 63, 67, 74].map((h, i) => (
+            <motion.div
+              key={i}
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
+              transition={{ duration: 0.4, delay: 0.9 + i * 0.07, ease: 'easeOut' }}
+              style={{ height: `${h}%`, transformOrigin: 'bottom' }}
+              className={`flex-1 rounded-sm ${i === 6 ? 'bg-[#FF9B54]' : 'bg-white/[0.1]'}`}
+            />
+          ))}
+        </div>
+        <p className="text-[10px] text-white/30 text-center">Mock Test Score Trend ↑</p>
+      </div>
+    </motion.div>
+  </div>
+);
+
+const HeroSection: React.FC = () => {
+  const navigate = useNavigate();
+  return (
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      {/* BG */}
+      <div className="absolute inset-0 bg-[#07111F]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-5%,rgba(255,155,84,0.09),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_90%_70%,rgba(59,130,246,0.05),transparent)]" />
+      <div className="absolute inset-0 opacity-[0.022]" style={{
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px)`,
+        backgroundSize: '56px 56px',
+      }} />
+      <ParticleCanvas />
+
+      <div className="relative max-w-7xl mx-auto px-5 sm:px-8 py-16 lg:py-24 w-full">
+        <div className="grid lg:grid-cols-[1fr_1.05fr] gap-12 lg:gap-20 items-center">
+
+          {/* ── LEFT ── */}
+          <div className="space-y-7">
+            {/* Badge */}
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#FF9B54]/30 bg-[#FF9B54]/8 text-xs font-bold text-[#FF9B54] tracking-wide uppercase">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FF9B54] animate-pulse" />
+                AI Academic Operating System
+              </span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.08 }}>
+              <h1 className="text-[3.4rem] sm:text-6xl lg:text-[4.2rem] font-extrabold text-white leading-[1.04] tracking-[-0.02em]">
+                Stop Studying
+                <br />
+                <span className="bg-gradient-to-r from-[#FF9B54] via-[#ffb876] to-[#FF9B54] bg-clip-text text-transparent">
+                  Blindly.
+                </span>
+              </h1>
+              <h2 className="text-[3.4rem] sm:text-6xl lg:text-[4.2rem] font-extrabold text-white/85 leading-[1.04] tracking-[-0.02em] mt-1">
+                Prepare With
+                <br />
+                Precision.
+              </h2>
+            </motion.div>
+
+            {/* Sub */}
+            <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.18 }}
+              className="text-lg text-[#94A3B8] leading-relaxed max-w-lg">
+              SETU's AI engine identifies your weaknesses, adapts your learning path, and builds a precision strategy for JEE, NEET, and CUET.
+            </motion.p>
+
+            {/* Exam pills */}
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.25 }}
+              className="flex flex-wrap gap-2">
+              {[
+                { label: 'JEE Main & Advanced', icon: '🚀', path: '/auth?exam=jee' },
+                { label: 'NEET',                icon: '🔬', path: '/auth?exam=neet' },
+                { label: 'CUET',                icon: '🏛️', path: '/auth?exam=cuet' },
+              ].map(e => (
+                <button key={e.label} onClick={() => navigate(e.path)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-white/[0.1] bg-white/[0.04] text-white/70 text-xs font-semibold hover:border-[#FF9B54]/50 hover:text-[#FF9B54] hover:bg-[#FF9B54]/5 transition-all">
+                  {e.icon} {e.label}
+                </button>
+              ))}
+            </motion.div>
+
+            {/* CTAs */}
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4 pt-1">
+              <button
+                onClick={() => navigate('/auth?mode=signup')}
+                className="group flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#FF9B54] to-[#f07020] text-[#07111F] font-bold text-base hover:brightness-110 transition-all shadow-2xl shadow-[#FF9B54]/30 hover:shadow-[#FF9B54]/45 hover:-translate-y-1 duration-200"
+              >
+                Start Learning Free
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button
+                onClick={() => document.getElementById('ai-engine')?.scrollIntoView({ behavior: 'smooth' })}
+                className="flex items-center justify-center gap-2 px-7 py-4 rounded-2xl border border-white/[0.12] text-white/75 hover:text-white hover:border-white/25 hover:bg-white/[0.03] transition-all font-medium"
+              >
+                <Play className="h-4 w-4" />
+                See How It Works
+              </button>
+            </motion.div>
+
+            {/* Trust */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+              className="flex items-center gap-5 pt-2 flex-wrap">
+              {[
+                { icon: Brain,  text: 'Adaptive AI' },
+                { icon: Target, text: 'Weakness Detection' },
+                { icon: Zap,    text: 'Smart Practice' },
+              ].map(f => (
+                <div key={f.text} className="flex items-center gap-2 text-white/40 text-xs">
+                  <f.icon className="h-3.5 w-3.5 text-[#FF9B54]/60" />
+                  {f.text}
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* ── RIGHT — Dashboard ── */}
+          <motion.div
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="hidden lg:block"
           >
-            Built with insights from aspirants across India's leading coaching institutes — guided by experienced faculty teachers.
-          </motion.p>
+            <StudyVisual />
+          </motion.div>
         </div>
       </div>
-
-      {/* Sound Toggle */}
-      <button
-        onClick={() => setIsMuted(!isMuted)}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all border border-white/20"
-        aria-label={isMuted ? "Unmute" : "Mute"}
-      >
-        {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-      </button>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20">
-        <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2 animate-bounce" style={{ animationDuration: '2s' }}>
-          <div className="w-1 h-2 bg-white/50 rounded-full" />
-        </div>
-      </div>
-    </section >
+    </section>
   );
 };
+
+export default HeroSection;

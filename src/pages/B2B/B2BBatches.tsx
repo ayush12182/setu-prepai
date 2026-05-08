@@ -24,7 +24,7 @@ interface Batch {
   is_active: boolean;
   created_at: string;
   organization_id: string | null;
-  teacher_id: string | null;
+  mentor_id: string | null;
   studentCount: number;
   accuracy: number;
 }
@@ -52,7 +52,7 @@ const B2BBatches: React.FC = () => {
       
       // Teachers only see their assigned batches; Admins see ALL
       if (!isAdmin) {
-        query = query.eq('teacher_id', user.id);
+        query = query.eq('mentor_id', user.id);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });

@@ -10,7 +10,8 @@ import QuizInterface, { QuizResult } from '@/components/practice/QuizInterface';
 import QuizResults from '@/components/practice/QuizResults';
 import TestModeQuiz, { TestAnswer } from '@/components/practice/TestModeQuiz';
 import TestResults from '@/components/practice/TestResults';
-import { ArrowRight, Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter, Dna, FlaskConical } from 'lucide-react';
+import { ArrowRight, Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter, Dna, FlaskConical, Flame } from 'lucide-react';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -198,9 +199,37 @@ const PracticePage: React.FC = () => {
                 <h1 className="text-3xl font-display font-bold text-foreground">Training Center</h1>
                 <p className="text-muted-foreground mt-1 text-lg">Your adaptive practice engine tailored by AI.</p>
               </div>
-              <Button onClick={() => setIsSnapModalOpen(true)} className="gap-2 h-12 rounded-xl bg-accent text-primary font-bold shadow-lg shadow-accent/20 hover:shadow-accent/40 hover:-translate-y-0.5 transition-all">
-                <Camera size={20} /> Snap & Solve
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button 
+                  onClick={async () => {
+                    const { data: mapData } = await supabase.from('student_batch_map').select('batch_id').eq('student_id', user.id).maybeSingle();
+                    if (!mapData?.batch_id) return toast.error("You need a batch to send an SOS!");
+                    
+                    toast.promise(
+                      (async () => {
+                        const { data: room } = await supabase.from('commune_rooms').select('id').eq('title', `BATCH_${mapData.batch_id}`).maybeSingle();
+                        if (!room?.id) throw new Error("Batch room not initialized yet.");
+                        
+                        const { error } = await supabase.from('commune_messages').insert({
+                          room_id: room.id,
+                          user_id: user.id,
+                          user_name: 'Student', // Ideally full_name, fallback is fine here
+                          category: 'SOS',
+                          content: 'I need help with my practice questions!'
+                        });
+                        if (error) throw error;
+                      })(),
+                      { loading: 'Sending SOS...', success: 'SOS sent to Batch Commune! 🚨', error: 'Failed to send SOS' }
+                    );
+                  }} 
+                  className="gap-2 h-12 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 font-bold border border-rose-500/20"
+                >
+                  <Flame className="w-5 h-5" /> Send SOS
+                </Button>
+                <Button onClick={() => setIsSnapModalOpen(true)} className="gap-2 h-12 rounded-xl bg-accent text-primary font-bold shadow-lg shadow-accent/20 hover:shadow-accent/40 hover:-translate-y-0.5 transition-all">
+                  <Camera size={20} /> Snap & Solve
+                </Button>
+              </div>
             </div>
 
             {/* Assigned Tasks / Recommendations */}

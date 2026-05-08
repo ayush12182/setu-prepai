@@ -64,7 +64,7 @@ serve(async (req) => {
     }
 
     const upstream = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -86,7 +86,7 @@ serve(async (req) => {
     // Return OpenAI-compatible response
     return new Response(JSON.stringify({
       choices: [{ message: { role: "assistant", content: text }, finish_reason: "stop" }],
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

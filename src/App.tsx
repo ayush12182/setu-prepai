@@ -33,6 +33,7 @@ import TermsPage from "./pages/TermsPage";
 import NotFound from "./pages/NotFound";
 import SetuCirclesPage from "./pages/SetuCirclesPage";
 import CircleFocusRoomPage from "./pages/CircleFocusRoomPage";
+import BatchCommunePage from "./pages/BatchCommunePage";
 import FoundationAssessmentPage from "./pages/FoundationAssessmentPage";
 import LearningProfilePage from "./pages/LearningProfilePage";
 import ConceptGraphPage from "./pages/ConceptGraphPage";
@@ -71,9 +72,11 @@ import B2BLiveMonitor from "./pages/B2B/B2BLiveMonitor";
 const queryClient = new QueryClient();
 
 // ─── Route Guards ─────────────────────────────────────────────
+const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS === 'true';
 
 /** Only teachers/admins can access the Teacher Portal (/b2b) */
 const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
+  if (DEV_BYPASS) return <>{children}</>;
   const { profile, loading } = useAuth();
   if (loading) return null;
   const type = profile?.user_type;
@@ -87,6 +90,9 @@ const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
 
 /** Students go to /student-hub — but MUST have joined a batch first */
 const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
+  // DEV BYPASS: skip batch check entirely
+  if (DEV_BYPASS) return <>{children}</>;
+
   const { profile, loading } = useAuth();
   const [hasBatch, setHasBatch] = useState<boolean | null>(null);
 
@@ -107,7 +113,7 @@ const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
   if (!type) return <Navigate to="/auth" replace />;
 
   // Teachers and Admins go to the B2B portal
-  if (type === 'teacher' || type === 'admin') {
+  if (type === 'teacher' || type === 'admin' || type === 'b2b_institution') {
     return <Navigate to="/b2b" replace />;
   }
 
@@ -131,7 +137,7 @@ const B2CGateRoute = ({ children }: { children: React.ReactNode }) => {
   const { profile, loading } = useAuth();
   if (loading) return null;
   if (!profile?.user_type) return <Navigate to="/auth" replace />;
-  if (profile.user_type === 'teacher' || profile.user_type === 'admin') return <Navigate to="/b2b" replace />;
+  if (profile.user_type === 'teacher' || profile.user_type === 'admin' || profile.user_type === 'b2b_institution') return <Navigate to="/b2b" replace />;
   if (profile.user_type === 'student') return <Navigate to="/platform-updated" replace />;
   return <>{children}</>;
 };
@@ -174,6 +180,7 @@ const App = () => (
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/circles" element={<SetuCirclesPage />} />
                     <Route path="/circles/:roomId" element={<CircleFocusRoomPage />} />
+                    <Route path="/batch-commune" element={<BatchCommunePage />} />
                     <Route path="/foundation-assessment" element={<FoundationAssessmentPage />} />
                     <Route path="/diagnostic-test" element={<FoundationAssessmentPage />} /> {/* Legacy fallback */}
                     {/* B2B Assessment Taker - accessible without auth (students use share link) */}

@@ -1,35 +1,31 @@
 import React from 'react';
-import { LandingHeader } from '@/components/landing/LandingHeader';
-import { HeroSection } from '@/components/landing/HeroSection';
-import { MarqueeTicker } from '@/components/landing/MarqueeTicker';
-import { ProgramsSection } from '@/components/landing/ProgramsSection';
-import { PillarsSection } from '@/components/landing/PillarsSection';
-import { LearningJourneySection } from '@/components/landing/LearningJourneySection';
-import { ProblemSection } from '@/components/landing/ProblemSection';
-import { MentorSection } from '@/components/landing/MentorSection';
-import { TrustSection } from '@/components/landing/TrustSection';
-import { HowItWorksSection } from '@/components/landing/HowItWorksSection';
-import { PricingSection } from '@/components/landing/PricingSection';
-import { CTASection } from '@/components/landing/CTASection';
-import { LandingFooter } from '@/components/landing/LandingFooter';
-import { B2BSection } from '@/components/landing/B2BSection';
+import LandingNav from '@/components/landing/LandingNav';
+import HeroSection from '@/components/landing/HeroSection';
+import TrustStrip from '@/components/landing/TrustStrip';
+import ExamTracksSection from '@/components/landing/ExamTracksSection';
+import FeaturesSection from '@/components/landing/FeaturesSection';
+import AIEngineSection from '@/components/landing/AIEngineSection';
+import ResultsSection from '@/components/landing/ResultsSection';
+import PricingSection from '@/components/landing/PricingSection';
+import TestimonialsSection from '@/components/landing/TestimonialsSection';
+import LeadershipSection from '@/components/landing/LeadershipSection';
+import FinalCTA from '@/components/landing/FinalCTA';
+import LandingFooter from '@/components/landing/LandingFooter';
 
 const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-[#1E2A3A] text-white overflow-x-hidden">
-      <LandingHeader />
+    <div className="min-h-screen bg-[#07111F] text-white overflow-x-hidden">
+      <LandingNav />
       <HeroSection />
-      <MarqueeTicker />
-      <ProgramsSection />
-      <LearningJourneySection />
-      <PillarsSection />
-      <ProblemSection />
-      <MentorSection />
-      <HowItWorksSection />
-      <TrustSection />
+      <TrustStrip />
+      <ExamTracksSection />
+      <FeaturesSection />
+      <AIEngineSection />
+      <ResultsSection />
       <PricingSection />
-      <B2BSection />
-      <CTASection />
+      <TestimonialsSection />
+      <LeadershipSection />
+      <FinalCTA />
       <LandingFooter />
     </div>
   );

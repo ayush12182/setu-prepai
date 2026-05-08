@@ -1,0 +1,12 @@
+
+> vite_react_shadcn_ts@0.0.0 dev
+> vite --port 5173
+
+Port 5173 is in use, trying another one...
+Port 5174 is in use, trying another one...
+
+  VITE v5.4.19  ready in 254 ms
+
+  ➜  Local:   http://localhost:5175/
+  ➜  Network: http://10.32.94.192:5175/
+  ➜  press h + enter to show help

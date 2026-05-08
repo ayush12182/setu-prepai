@@ -11,6 +11,7 @@ export interface BatchInfo {
   totalQuestionsAttempted: number;
   mostStudiedTopic: string;
   mostMistakenTopic: string;
+  dailyLeaderboard?: { id: string; name: string; questions: number }[];
 }
 
 export function useBatchInfo() {
@@ -93,8 +94,24 @@ export function useBatchInfo() {
           .in('user_id', memberIds),
       ]);
 
-      // Count unique students practicing today
+      // Count unique students practicing today and build leaderboard
       const practicingToday = new Set((todayRes.data ?? []).map((r: any) => r.user_id)).size;
+      
+      const todayCounts: Record<string, number> = {};
+      (todayRes.data ?? []).forEach((r: any) => {
+        todayCounts[r.user_id] = (todayCounts[r.user_id] || 0) + 1;
+      });
+
+      // Create a map of member IDs to names
+      const memberNames: Record<string, string> = {};
+      (membersRes.data ?? []).forEach((m: any) => {
+        memberNames[m.student_id] = (m.profiles as any)?.full_name || 'Student';
+      });
+
+      const dailyLeaderboard = Object.entries(todayCounts)
+        .map(([id, count]) => ({ id, name: memberNames[id] || 'Student', questions: count }))
+        .sort((a, b) => b.questions - a.questions)
+        .slice(0, 5); // Top 5
 
       // Most studied topic
       const subjectCount: Record<string, number> = {};
@@ -113,7 +130,17 @@ export function useBatchInfo() {
       const mostMistakenTopic = Object.entries(wrongCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—';
 
       const totalQuestionsAttempted = totalQRes.count ?? 0;
-      setInfo({ batchId, batchName, mentorName, totalStudents, practicingToday, totalQuestionsAttempted, mostStudiedTopic, mostMistakenTopic });
+      setInfo({ 
+        batchId, 
+        batchName, 
+        mentorName, 
+        totalStudents, 
+        practicingToday, 
+        totalQuestionsAttempted, 
+        mostStudiedTopic, 
+        mostMistakenTopic,
+        dailyLeaderboard
+      });
     } catch (err) {
       console.error('[useBatchInfo]', err);
     } finally {

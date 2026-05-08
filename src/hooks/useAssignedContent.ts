@@ -44,7 +44,10 @@ export const useAssignedContent = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchContent = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
@@ -54,13 +57,15 @@ export const useAssignedContent = () => {
       
       if (error) {
         console.error('Error fetching assigned content:', error);
-        toast.error('Failed to load assignments.');
+        // Provide empty fallback to avoid stuck UI
+        setData({ tests: [], materials: [], alerts: { overdue: 0, due_soon: 0 } });
         return;
       }
       
       setData(dbData as AssignedContentData);
     } catch (err) {
       console.error('Unhandled exception in fetchContent:', err);
+      setData({ tests: [], materials: [], alerts: { overdue: 0, due_soon: 0 } });
     } finally {
       setLoading(false);
     }

@@ -107,7 +107,7 @@ const SENIOR_CLASS_OPTIONS = [
 
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, profile, refreshProfile, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple, signInWithPhone, verifyOTP, updateProfile, loading: authLoading } = useAuth();
+  const { user, profile, isMentor, userType, refreshProfile, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple, signInWithPhone, verifyOTP, updateProfile, loading: authLoading } = useAuth();
   const { setExamMode } = useExamMode();
 
   const [mode, setMode] = useState<AuthMode>('login');
@@ -122,6 +122,8 @@ const AuthPage: React.FC = () => {
 
   const [searchParams] = useSearchParams();
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [awaitingVerification, setAwaitingVerification] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState('');
 
   // Join-code validation state
   const [joinCodeInput, setJoinCodeInput] = useState('');
@@ -131,6 +133,8 @@ const AuthPage: React.FC = () => {
     batch_name: string;
     teacher_name: string;
     exam_type: string;
+    stream: string;
+    subject: string;
     total_students: number;
   } | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -174,8 +178,8 @@ const AuthPage: React.FC = () => {
       }
 
       if (profile) {
-        if (profile.user_type === 'teacher' || profile.user_type === 'admin') {
-          navigate('/teacher-dashboard');
+        if (isMentor) {
+          navigate('/b2b');
           return;
         }
 
@@ -235,27 +239,28 @@ const AuthPage: React.FC = () => {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(email) || !validatePassword(password)) return;
+    if (mode === 'signup' && !fullName.trim()) {
+      toast.error('Please enter your full name');
+      return;
+    }
     setLoading(true);
     try {
       if (mode === 'signup') {
-        await signUpWithEmail(email, password, fullName);
-        
-        try {
-          await signInWithEmail(email, password);
-        } catch (signInErr) {
-          console.warn("Auto sign-in after sign-up failed", signInErr);
-        }
+        // Sign up — Supabase will send a verification email
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName, user_type: 'student' },
+            emailRedirectTo: `${window.location.origin}/auth`,
+          },
+        });
+        if (error) throw error;
 
-        if (onboardingData.userType === 'student' && onboardingData.institutionName) {
-          toast.success("Account created! Joining your batch... 🎯");
-          setShowOnboarding(true);
-          await handleOnboardingComplete();
-          return;
-        }
-
-        toast.success("Account created! Let's set up your learning profile 🎯");
-        setShowOnboarding(true);
-        setOnboardingStep(getInitialStep());
+        // Show verification gate — do NOT sign in yet
+        setVerificationEmail(email);
+        setAwaitingVerification(true);
+        toast.success('Account created! Check your email to verify your account.');
       } else {
         await signInWithEmail(email, password);
       }
@@ -445,8 +450,9 @@ const AuthPage: React.FC = () => {
       }
 
       // 2. STUDENT PATH (Unified Coaching + Individual)
-      const stream = onboardingData.stream;
-      const examGoal = getExamGoalFromStream(stream as StreamType);
+      // If student joined via teacher batch code, use batch's exam config
+      const stream = (joinCodeResult?.stream || onboardingData.stream) as StreamType;
+      const examGoal = joinCodeResult?.exam_type || getExamGoalFromStream(onboardingData.stream as StreamType);
       const studentClass = onboardingData.studentClass || '11';
       const studentLevel = getStudentLevel();
 
@@ -542,8 +548,27 @@ const AuthPage: React.FC = () => {
       } else {
         setJoinCodeState('valid');
         setJoinCodeResult(data);
-        // Mirror to onboardingData so handleOnboardingComplete can use it
-        setOnboardingData(prev => ({ ...prev, institutionName: trimmed }));
+
+        // ── AUTO-APPLY batch exam/stream to student profile ──────────────
+        // Maps batch target_exam/stream → onboardingData so student
+        // inherits teacher's config without manual selection.
+        const examToStream: Record<string, string> = {
+          'JEE': 'jee', 'JEE Main': 'jee', 'JEE Advanced': 'jee',
+          'NEET': 'neet',
+          'CUET': 'cuet',
+          'Commerce': 'commerce', 'CA Foundation': 'commerce',
+          'Foundation': 'foundation',
+        };
+        const detectedStream = data.stream ||
+          examToStream[data.exam_type] ||
+          'jee';
+
+        setOnboardingData(prev => ({
+          ...prev,
+          institutionName: trimmed,         // join code stored here for batch join
+          stream: detectedStream as StreamType,
+          examGoal: data.exam_type,
+        }));
       }
     } catch {
       setJoinCodeState('invalid');
@@ -621,6 +646,66 @@ const AuthPage: React.FC = () => {
         initialUserType={initialType}
         skipToJoinCode={false}
       />
+    );
+  }
+
+  // ─── EMAIL VERIFICATION GATE ─────────────────────────────────────────────
+  if (awaitingVerification) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
+        <div className="w-full max-w-md text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Icon */}
+          <div className="w-20 h-20 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-6">
+            <Mail className="h-9 w-9 text-accent" />
+          </div>
+
+          <h2 className="font-serif text-3xl font-bold text-white mb-3">Check your inbox</h2>
+          <p className="text-white/40 text-sm mb-2">
+            We sent a verification link to
+          </p>
+          <p className="text-accent font-semibold text-base mb-6">{verificationEmail}</p>
+
+          <div className="bg-white/[0.04] rounded-2xl border border-white/[0.08] p-5 mb-6 text-left space-y-3">
+            {[
+              { n: '1', text: 'Open the email from SETU' },
+              { n: '2', text: 'Click "Verify your email"' },
+              { n: '3', text: 'You\'ll be redirected back to sign in' },
+            ].map(s => (
+              <div key={s.n} className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+                  <span className="text-accent text-xs font-bold">{s.n}</span>
+                </div>
+                <span className="text-white/60 text-sm">{s.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-white/25 text-xs mb-5">Can't find it? Check your spam folder.</p>
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  await supabase.auth.resend({ type: 'signup', email: verificationEmail });
+                  toast.success('Verification email resent!');
+                } catch { toast.error('Could not resend. Try again in a moment.'); }
+                finally { setLoading(false); }
+              }}
+              disabled={loading}
+              className="w-full h-11 rounded-xl border border-white/[0.1] text-white/60 hover:text-white hover:border-white/20 text-sm transition-all"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : 'Resend verification email'}
+            </button>
+            <button
+              onClick={() => { setAwaitingVerification(false); setMode('login'); }}
+              className="text-sm text-white/30 hover:text-white/60 transition-colors"
+            >
+              ← Back to sign in
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 

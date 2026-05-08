@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Bell, Settings, Globe, LogIn, LogOut, User, ArrowRightLeft } from 'lucide-react';
+import { Menu, Bell, Settings, Globe, LogIn, LogOut, User, ArrowRightLeft, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {

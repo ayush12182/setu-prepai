@@ -4,6 +4,36 @@ import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { toast } from 'sonner';
 
+// ─── DEV BYPASS ──────────────────────────────────────────────────────────────
+const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS === 'true';
+
+const MOCK_PROFILE = {
+  id: 'dev-student-001',
+  user_id: 'dev-student-001',
+  full_name: 'Dev Student',
+  phone: null,
+  avatar_url: null,
+  class: '12',
+  target_exam: 'JEE Advanced',
+  student_level: 'advanced',
+  user_type: 'student' as const,
+  organization_id: 'dev-org-001',
+  institution_name: 'Dev School',
+  teacher_id: 'dev-teacher-001',
+  teacher_code: 'DEV123',
+  subjects: ['Physics', 'Chemistry', 'Mathematics'],
+  mentor_name: 'Dev Teacher',
+  mentor_avatar: null,
+  diagnostic_completed: true,
+  exam_goal: 'JEE Advanced',
+};
+
+const MOCK_USER = {
+  id: 'dev-student-001',
+  email: 'dev@setu.ai',
+  user_metadata: { full_name: 'Dev Student', user_type: 'student' },
+} as unknown as User;
+
 interface Profile {
   id: string;
   user_id: string;
@@ -67,6 +97,39 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // ── DEV BYPASS: short-circuit the whole auth system ──
+  if (DEV_BYPASS) {
+    const noop = async () => {};
+    return (
+      <AuthContext.Provider
+        value={{
+          user: MOCK_USER,
+          session: null,
+          profile: MOCK_PROFILE as any,
+          loading: false,
+          subscription: { subscribed: true, productId: null, subscriptionEnd: null, loading: false },
+          userType: 'student',
+          isMentor: false,
+          isInstitution: false,
+          isB2C: false,
+          isB2BStudent: true,
+          signInWithEmail: noop as any,
+          signUpWithEmail: noop as any,
+          signInWithGoogle: noop,
+          signInWithApple: noop,
+          signInWithPhone: noop as any,
+          verifyOTP: noop as any,
+          signOut: noop,
+          updateProfile: noop as any,
+          checkSubscription: noop,
+          refreshProfile: noop,
+        }}
+      >
+        {children}
+      </AuthContext.Provider>
+    );
+  }
+
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -116,8 +179,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ...dbData,
         id: dbData?.id || userId,
         user_id: userId,
-        full_name: dbData?.full_name || meta.full_name || 'Student',
-        user_type: dbData?.user_type || meta.user_type || 'student',
+        full_name: dbData?.full_name || meta.full_name || 'User',
+        user_type: dbData?.user_type || meta.user_type || null,
         organization_id: dbData?.organization_id || meta.organization_id || null,
         teacher_id: dbData?.teacher_id || null,
       };
@@ -312,11 +375,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await fetchProfile(user.id);
   };
 
-  const userType = profile?.user_type ?? 'student';
-  const isMentor = userType === 'teacher' || userType === 'admin';
-  const isInstitution = userType === 'teacher' || userType === 'admin';
-  const isB2C = userType === 'student';
-  const isB2BStudent = userType === 'student';
+  const userType = profile?.user_type || null;
+  const isMentor = userType === 'teacher' || userType === 'admin' || userType === 'b2b_institution';
+  const isInstitution = isMentor;
+  const isB2C = userType === 'student' && !profile?.teacher_id;
+  const isB2BStudent = userType === 'student' && !!profile?.teacher_id;
 
   return (
     <AuthContext.Provider

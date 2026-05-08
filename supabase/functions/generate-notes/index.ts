@@ -256,7 +256,7 @@ serve(async (req) => {
 
     console.log(`[GenerateNotes] Chapter: ${chapterName} | Mode: ${noteMode} | SmartMode: ${smartMode}`);
 
-    const model = "gemini-1.5-flash";
+    const model = "gemini-2.5-flash";
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`,
