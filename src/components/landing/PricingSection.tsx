@@ -79,7 +79,7 @@ const PricingSection: React.FC = () => {
                   <p className="text-xs text-[#94A3B8]">per month</p>
                 </div>
               </div>
-              <p className="text-[#FF9B54] text-sm font-medium">For the first few users only</p>
+              <p className="text-[#FF9B54] text-sm font-medium">For limited users</p>
             </div>
 
             {/* Features */}
