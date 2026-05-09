@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { BookOpen, Check, Crown, Gift, Loader2, Share2, Sparkles, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
+import { useAuth } from '@/contexts/AuthContext';
+import { startSubscriptionCheckout } from '@/lib/paymentEngine';
 import { toast } from 'sonner';
 
 export const TrialExpiredScreen: React.FC = () => {
-    const { trialStatus, upgradeToPro, loading } = useTrialSystem();
+    const { trialStatus } = useTrialSystem();
+    const { user } = useAuth();
+    const [isProcessing, setIsProcessing] = useState(false);
     const [showReferral, setShowReferral] = useState(false);
 
     const features = [
@@ -34,6 +38,22 @@ export const TrialExpiredScreen: React.FC = () => {
         }
     };
 
+    const handleCheckout = async () => {
+        if (!user) {
+            toast.error('User not logged in');
+            return;
+        }
+        setIsProcessing(true);
+        toast.info('Connecting securely to Cashfree Payments...');
+        try {
+            await startSubscriptionCheckout(349.00, user);
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : 'Failed to initialize checkout');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex items-center justify-center p-4 sm:p-6">
             <div className="w-full max-w-lg animate-in fade-in zoom-in-95 duration-500">
@@ -56,19 +76,19 @@ export const TrialExpiredScreen: React.FC = () => {
                             Trial Ended
                         </h2>
                         <p className="text-white/40 text-sm leading-relaxed">
-                            Your 7-day SETU trial has ended. Continue learning with SETU Pro.
+                            Your 3-day SETU trial has ended. Continue learning with SETU Pro.
                         </p>
                     </div>
 
                     {/* Pro pricing */}
                     <div className="bg-white/[0.04] rounded-2xl p-5 border border-white/[0.06] mb-6">
                         <div className="flex items-baseline justify-center gap-2 mb-3">
-                            <span className="text-lg text-white/30 line-through">₹500</span>
-                            <span className="text-4xl font-bold text-accent">₹249</span>
+                            <span className="text-lg text-white/30 line-through">₹999</span>
+                            <span className="text-4xl font-bold text-accent">₹349</span>
                             <span className="text-white/40 text-sm">/ month</span>
                         </div>
                         <p className="text-center text-white/30 text-xs mb-4">
-                            50% off for early users • Cancel anytime
+                            Early adopter pricing • Cancel anytime
                         </p>
 
                         {/* Features */}
@@ -85,15 +105,15 @@ export const TrialExpiredScreen: React.FC = () => {
                     {/* Upgrade CTA */}
                     <Button
                         className="w-full h-13 rounded-xl text-sm font-semibold bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white shadow-lg shadow-accent/25 transition-all hover:shadow-xl hover:shadow-accent/30 mb-3"
-                        onClick={upgradeToPro}
-                        disabled={loading}
+                        onClick={handleCheckout}
+                        disabled={isProcessing}
                     >
-                        {loading ? (
+                        {isProcessing ? (
                             <Loader2 className="h-4 w-4 animate-spin mr-2" />
                         ) : (
                             <Sparkles className="h-4 w-4 mr-2" />
                         )}
-                        Upgrade to SETU Pro — ₹249/month
+                        Upgrade to SETU Pro — ₹349/month
                     </Button>
 
                     {/* Referral */}
@@ -137,3 +157,4 @@ export const TrialExpiredScreen: React.FC = () => {
         </div>
     );
 };
+

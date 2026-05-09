@@ -145,8 +145,12 @@ const AuthPage: React.FC = () => {
     const orgId = searchParams.get('org_id');
     const refParam = searchParams.get('ref') || searchParams.get('teacher_id');
     
+    let resolvedUserType: 'student' | 'teacher' | undefined = undefined;
+    if (typeParam === 'student' || typeParam === 'coaching' || orgId || orgName) resolvedUserType = 'student';
+    else if (typeParam === 'teacher' || typeParam === 'institution') resolvedUserType = 'teacher';
+
     return {
-      userType: typeParam === 'coaching' || orgId || orgName ? 'student' : 'student',
+      userType: resolvedUserType,
       institutionName: orgName || undefined,
       referenceCode: refParam || undefined,
       stream: '',
@@ -641,10 +645,13 @@ const AuthPage: React.FC = () => {
   // ─── ONBOARDING — new premium redesign ──────────────────────────────────────
   if (showOnboarding) {
     const initialType = onboardingData.userType as 'student' | 'teacher' | undefined;
+    const typeParam = searchParams.get('type');
+    const computedInitialType = initialType || (typeParam as 'student' | 'teacher') || undefined;
+    
     return (
       <OnboardingFlow
-        initialUserType={initialType}
-        skipToJoinCode={false}
+        initialUserType={computedInitialType}
+        skipToJoinCode={!!computedInitialType}
       />
     );
   }

@@ -144,16 +144,16 @@ const LandingNav: React.FC = () => {
           {/* Right CTAs */}
           <div className="hidden md:flex items-center gap-3 ml-auto">
             <button
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/auth?type=teacher')}
               className="text-sm text-[#94A3B8] hover:text-white transition px-3 py-2"
             >
-              Login
+              Faculty Login
             </button>
             <button
-              onClick={() => navigate('/auth?mode=signup')}
+              onClick={() => navigate('/auth?type=student')}
               className="text-sm font-bold px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF9B54] to-[#f07020] text-[#07111F] hover:brightness-110 transition-all shadow-lg shadow-[#FF9B54]/25 hover:-translate-y-0.5 duration-200"
             >
-              Start Free
+              Student Login
             </button>
           </div>
 
@@ -194,11 +194,11 @@ const LandingNav: React.FC = () => {
                 </button>
               ))}
               <div className="pt-3 space-y-2 border-t border-white/[0.06]">
-                <button onClick={() => { navigate('/auth'); setMobileOpen(false); }}
-                  className="w-full py-2.5 text-sm text-center text-[#94A3B8] hover:text-white">Login</button>
-                <button onClick={() => { navigate('/auth?mode=signup'); setMobileOpen(false); }}
+                <button onClick={() => { navigate('/auth?type=teacher'); setMobileOpen(false); }}
+                  className="w-full py-2.5 text-sm text-center text-[#94A3B8] hover:text-white">Faculty Login</button>
+                <button onClick={() => { navigate('/auth?type=student'); setMobileOpen(false); }}
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FF9B54] to-[#f07020] text-[#07111F] font-bold text-sm">
-                  Start Free
+                  Student Login
                 </button>
               </div>
             </motion.div>

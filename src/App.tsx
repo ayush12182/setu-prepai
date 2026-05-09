@@ -117,14 +117,7 @@ const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/b2b" replace />;
   }
 
-  // Student must be in a batch — redirect to auth (join-code step) if not
-  if (type === 'student' && hasBatch === false) {
-    return <Navigate to="/auth?require_batch=1" replace />;
-  }
-
-  // Still loading batch check
-  if (type === 'student' && hasBatch === null) return null;
-
+  // Allow all students (both individual and coaching) into the student hub
   return <>{children}</>;
 };
 

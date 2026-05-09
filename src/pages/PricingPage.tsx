@@ -96,7 +96,7 @@ const PricingPage: React.FC = () => {
               <p className="text-white/60 mb-6">The definitive unfair advantage.</p>
               
               <div className="mb-8 flex items-baseline gap-2">
-                <span className="text-5xl font-display font-bold text-white">₹999</span>
+                <span className="text-5xl font-display font-bold text-white">₹349</span>
                 <span className="text-white/50 font-medium">/month</span>
               </div>
               
@@ -114,7 +114,7 @@ const PricingPage: React.FC = () => {
               </ul>
               
               <Button 
-                onClick={() => handleCheckout(999.00)} 
+                onClick={() => handleCheckout(349.00)} 
                 disabled={isProcessing}
                 className="w-full bg-accent text-primary-foreground border-none rounded-xl h-14 font-bold text-lg hover:bg-accent/90 shadow-[0_0_20px_rgba(255,184,0,0.3)] hover:scale-[1.02] transition-all"
               >

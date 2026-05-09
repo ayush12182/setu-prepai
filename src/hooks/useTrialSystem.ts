@@ -52,7 +52,7 @@ export const useTrialSystem = () => {
 
         if (plan === 'trial' && trialStart) {
             const start = new Date(trialStart);
-            const totalDays = 7 + bonusDays;
+            const totalDays = 3 + bonusDays;
             const end = new Date(start);
             end.setDate(end.getDate() + totalDays);
 
@@ -115,7 +115,7 @@ export const useTrialSystem = () => {
             });
 
             if (error) throw error;
-            toast.success('🎉 Trial activated! You have 7 days of full access.');
+            toast.success('🎉 Trial activated! You have 3 days of full access.');
             await refreshStatus();
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to activate trial';

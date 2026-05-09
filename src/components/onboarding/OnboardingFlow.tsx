@@ -39,9 +39,7 @@ interface Props {
 const STREAMS = [
   { value: 'jee',        label: 'JEE Main & Advanced', sub: 'Physics · Chemistry · Maths',      emoji: '🚀', color: 'amber'   },
   { value: 'neet',       label: 'NEET',                sub: 'Physics · Chemistry · Biology',    emoji: '🔬', color: 'green'   },
-  { value: 'foundation', label: 'SETU Foundation',     sub: 'Maths · Science · Mental Ability', emoji: '🧠', color: 'teal'    },
-  { value: 'cuet',       label: 'CUET',                sub: 'General Test · Language · Domains', emoji: '🏛️', color: 'violet'  },
-  { value: 'commerce',   label: 'Commerce / CA',       sub: 'Accounts · Eco · Business Studies', emoji: '📊', color: 'blue'    },
+  { value: 'commerce',   label: 'Commerce / CUET',       sub: 'Accounts · Eco · Business Studies', emoji: '📊', color: 'blue'    },
 ];
 
 const FOUNDATION_CLASSES = [
@@ -212,7 +210,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     setStep(newStep);
   };
 
-  const totalStudentSteps = skipToJoinCode ? 2 : 4; // role → code → goal → done
+  const totalStudentSteps = skipToJoinCode ? 3 : 4; // role → study mode → code/goal
   const totalTeacherSteps = 5; // identity → goals → batch → code → done
 
   // ─── Join code validation ─────────────────────────────────────────────────
@@ -511,8 +509,64 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
       );
     }
 
-    // ── STUDENT STEP 1: Enter code ────────────────────────────────────────────
+    // ── STUDENT STEP 1: Study Mode ────────────────────────────────────────────
     if (step === 1 && track === 'student') {
+      return (
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
+              How are you studying?
+            </h1>
+            <p className="text-white/40 text-sm">Choose your learning path</p>
+          </div>
+
+          <div className="space-y-3 mt-2">
+            {/* Individually */}
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={() => { go(3); }}
+              className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-amber-400/30 hover:bg-amber-400/[0.03] transition-all text-left flex items-center gap-4 group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0 group-hover:bg-amber-400/20 transition-colors">
+                <Brain className="w-6 h-6 text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-semibold text-base" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>Individually</p>
+                <p className="text-white/40 text-sm mt-0.5">I am studying on my own</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-white/50 transition-colors" />
+            </motion.button>
+
+            {/* Through Coaching */}
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={() => { go(2); }}
+              className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-violet-400/30 hover:bg-violet-400/[0.03] transition-all text-left flex items-center gap-4 group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-violet-400/10 border border-violet-400/20 flex items-center justify-center shrink-0 group-hover:bg-violet-400/20 transition-colors">
+                <Building2 className="w-6 h-6 text-violet-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-white font-semibold text-base" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>Through Coaching</p>
+                <p className="text-white/40 text-sm mt-0.5">I have a batch code from my institute</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-white/50 transition-colors" />
+            </motion.button>
+          </div>
+
+          {!skipToJoinCode && (
+            <GhostBtn onClick={() => go(0, -1)}>
+              <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
+            </GhostBtn>
+          )}
+        </div>
+      );
+    }
+
+    // ── STUDENT STEP 2: Enter code ────────────────────────────────────────────
+    if (step === 2 && track === 'student') {
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
@@ -583,22 +637,20 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
 
           <PrimaryBtn
             disabled={codeState !== 'valid'}
-            onClick={() => go(2)}
+            onClick={() => go(3)}
           >
             Continue <ArrowRight className="w-5 h-5" />
           </PrimaryBtn>
 
-          {!skipToJoinCode && (
-            <GhostBtn onClick={() => go(0, -1)}>
-              <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-            </GhostBtn>
-          )}
+          <GhostBtn onClick={() => go(1, -1)}>
+            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
+          </GhostBtn>
         </div>
       );
     }
 
-    // ── STUDENT STEP 2: Goal selection (stream + class) ───────────────────────
-    if (step === 2 && track === 'student') {
+    // ── STUDENT STEP 3: Goal selection (stream + class) ───────────────────────
+    if (step === 3 && track === 'student') {
       const classes = stream === 'foundation' ? FOUNDATION_CLASSES : SENIOR_CLASSES;
 
       // ── If batch info exists, show locked auto-detected view ─────────────
@@ -682,7 +734,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
               {saving ? 'Setting up...' : <><Sparkles className="w-5 h-5" /> Join my batch</>}
             </PrimaryBtn>
 
-            <GhostBtn onClick={() => go(1, -1)}>
+            <GhostBtn onClick={() => go(2, -1)}>
               <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
             </GhostBtn>
           </div>
