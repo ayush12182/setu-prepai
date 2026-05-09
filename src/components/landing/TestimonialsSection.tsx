@@ -78,7 +78,7 @@ const TESTIMONIALS_ROW_2 = [
 ];
 
 const TestimonialCard = ({ t }: { t: any }) => (
-  <div className="w-[350px] sm:w-[400px] shrink-0 rounded-2xl border border-white/[0.08] bg-[#0E1726]/80 p-7 transition-all duration-300 hover:border-white/[0.2] hover:bg-[#0E1726] mx-3">
+  <div className="w-[350px] sm:w-[400px] shrink-0 whitespace-normal rounded-2xl border border-white/[0.08] bg-[#0E1726]/80 p-7 transition-all duration-300 hover:border-white/[0.2] hover:bg-[#0E1726] mx-3">
     <div className="text-4xl font-serif text-white/10 leading-none mb-4 select-none">"</div>
     <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed mb-6">
       {t.quote}
