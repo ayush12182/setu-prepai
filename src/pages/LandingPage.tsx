@@ -5,7 +5,6 @@ import TrustStrip from '@/components/landing/TrustStrip';
 import AboutSection from '@/components/landing/AboutSection';
 import ExamTracksSection from '@/components/landing/ExamTracksSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
-import AIEngineSection from '@/components/landing/AIEngineSection';
 import ResultsSection from '@/components/landing/ResultsSection';
 import PricingSection from '@/components/landing/PricingSection';
 import TestimonialsSection from '@/components/landing/TestimonialsSection';
@@ -19,10 +18,9 @@ const LandingPage: React.FC = () => {
       <LandingNav />
       <HeroSection />
       <TrustStrip />
-      <AboutSection />
       <ExamTracksSection />
       <FeaturesSection />
-      <AIEngineSection />
+      <AboutSection />
       <ResultsSection />
       <PricingSection />
       <TestimonialsSection />
