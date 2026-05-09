@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { Mail, Instagram, Linkedin } from 'lucide-react';
 
 const LandingFooter: React.FC = () => {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ const LandingFooter: React.FC = () => {
       links: [
         { label: 'About',           action: () => document.getElementById('leadership')?.scrollIntoView({ behavior: 'smooth' }) },
         { label: 'Leadership',      action: () => document.getElementById('leadership')?.scrollIntoView({ behavior: 'smooth' }) },
-        { label: 'Contact Us',      action: () => window.open('mailto:hello@setu.ai') },
+        { label: 'Contact Us',      action: () => window.open('mailto:setu.edu.1925@gmail.com') },
         { label: 'Testimonials',    action: () => document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }) },
       ],
     },
@@ -46,10 +46,9 @@ const LandingFooter: React.FC = () => {
   ];
 
   const socials = [
-    { Icon: Twitter,   href: '#', label: 'Twitter' },
-    { Icon: Instagram, href: '#', label: 'Instagram' },
-    { Icon: Linkedin,  href: '#', label: 'LinkedIn' },
-    { Icon: Mail,      href: 'mailto:hello@setu.ai', label: 'Email' },
+    { Icon: Instagram, href: 'https://www.instagram.com/setu.prep?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==', label: 'Instagram' },
+    { Icon: Linkedin,  href: 'https://www.linkedin.com/company/setu.ai/', label: 'LinkedIn' },
+    { Icon: Mail,      href: 'mailto:setu.edu.1925@gmail.com', label: 'Email' },
   ];
 
   return (

@@ -181,16 +181,10 @@ const HeroSection: React.FC = () => {
             {/* Headline */}
             <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.08 }}>
               <h1 className="text-[3.4rem] sm:text-6xl lg:text-[4.2rem] font-extrabold text-white leading-[1.04] tracking-[-0.02em]">
-                Stop Studying
-                <br />
-                <span className="bg-gradient-to-r from-[#FF9B54] via-[#ffb876] to-[#FF9B54] bg-clip-text text-transparent">
-                  Blindly.
-                </span>
+                Structured Preparation.
               </h1>
               <h2 className="text-[3.4rem] sm:text-6xl lg:text-[4.2rem] font-extrabold text-white/85 leading-[1.04] tracking-[-0.02em] mt-1">
-                Prepare With
-                <br />
-                Precision.
+                Better Results.
               </h2>
             </motion.div>
 
@@ -217,33 +211,29 @@ const HeroSection: React.FC = () => {
 
             {/* CTAs */}
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 pt-1">
+              className="pt-1">
               <button
                 onClick={() => navigate('/auth?mode=signup')}
-                className="group flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#FF9B54] to-[#f07020] text-[#07111F] font-bold text-base hover:brightness-110 transition-all shadow-2xl shadow-[#FF9B54]/30 hover:shadow-[#FF9B54]/45 hover:-translate-y-1 duration-200"
+                className="group flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-[#FF9B54] text-[#07111F] font-bold text-base hover:brightness-110 transition-all shadow-[0_0_40px_rgba(255,155,84,0.2)] hover:shadow-[0_0_60px_rgba(255,155,84,0.3)] hover:-translate-y-1 duration-200"
               >
-                Start Learning Free
+                Start 3-Day Free Trial
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button
-                onClick={() => document.getElementById('ai-engine')?.scrollIntoView({ behavior: 'smooth' })}
-                className="flex items-center justify-center gap-2 px-7 py-4 rounded-2xl border border-white/[0.12] text-white/75 hover:text-white hover:border-white/25 hover:bg-white/[0.03] transition-all font-medium"
-              >
-                <Play className="h-4 w-4" />
-                See How It Works
-              </button>
+              <p className="text-white/40 text-[11px] font-medium mt-3 ml-2">
+                No credit card required.
+              </p>
             </motion.div>
 
             {/* Trust */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
               className="flex items-center gap-5 pt-2 flex-wrap">
               {[
-                { icon: Brain,  text: 'Adaptive AI' },
-                { icon: Target, text: 'Weakness Detection' },
-                { icon: Zap,    text: 'Smart Practice' },
+                { icon: Brain,  text: 'AI-Powered Study Plans' },
+                { icon: Target, text: 'JEE / NEET / CUET Focused' },
+                { icon: Zap,    text: 'Adaptive Revision System' },
               ].map(f => (
-                <div key={f.text} className="flex items-center gap-2 text-white/40 text-xs">
-                  <f.icon className="h-3.5 w-3.5 text-[#FF9B54]/60" />
+                <div key={f.text} className="flex items-center gap-2 text-white/50 text-xs font-medium">
+                  <f.icon className="h-3.5 w-3.5 text-white/40" />
                   {f.text}
                 </div>
               ))}

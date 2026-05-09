@@ -147,6 +147,51 @@ const LeadershipSection: React.FC = () => (
           </p>
         </motion.div>
       </div>
+
+      {/* Trust Validation Strip */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="mt-16 sm:mt-24"
+      >
+        <div className="relative rounded-3xl border border-white/[0.08] bg-white/[0.01] p-8 sm:p-10 backdrop-blur-md overflow-hidden group">
+          {/* Soft ambient glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,155,84,0.03),transparent_70%)] pointer-events-none" />
+          
+          <div className="relative z-10 text-center max-w-3xl mx-auto mb-10">
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 tracking-tight">
+              Reviewed and validated by experienced educators from India’s leading coaching institutes.
+            </h3>
+            <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed">
+              SETU’s learning architecture and preparation methodology have been evaluated and approved by 50+ teachers and academic mentors associated with top competitive exam coaching ecosystems across India.
+            </p>
+          </div>
+
+          <div className="relative z-10 grid sm:grid-cols-3 gap-4 sm:gap-6">
+            {/* Metric Card 1 */}
+            <div className="rounded-2xl border border-white/[0.05] bg-white/[0.02] p-5 text-center transition-colors hover:bg-white/[0.04]">
+              <p className="text-2xl font-black text-[#FF9B54] mb-1">50+</p>
+              <p className="text-[#94A3B8] text-[11px] font-bold uppercase tracking-widest">Educators Reviewed</p>
+            </div>
+            
+            {/* Metric Card 2 */}
+            <div className="rounded-2xl border border-white/[0.05] bg-white/[0.02] p-5 text-center transition-colors hover:bg-white/[0.04]">
+              <p className="text-xl font-black text-white mb-1.5 flex items-center justify-center gap-2 mt-0.5">
+                JEE <span className="text-white/20">•</span> NEET <span className="text-white/20">•</span> CUET
+              </p>
+              <p className="text-[#94A3B8] text-[11px] font-bold uppercase tracking-widest">Preparation Focused</p>
+            </div>
+
+            {/* Metric Card 3 */}
+            <div className="rounded-2xl border border-white/[0.05] bg-white/[0.02] p-5 text-center transition-colors hover:bg-white/[0.04]">
+              <p className="text-lg font-black text-white mb-2 mt-1">AI + Academic Strategy</p>
+              <p className="text-[#94A3B8] text-[11px] font-bold uppercase tracking-widest">Learning Framework</p>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </div>
   </section>
 );

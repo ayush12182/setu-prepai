@@ -16,11 +16,11 @@ const FloatCard: React.FC<{
     <motion.div
       animate={{ y: [0, -6, 0] }}
       transition={{ duration: 4 + delay, repeat: Infinity, ease: 'easeInOut', delay: delay * 0.5 }}
-      className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl border backdrop-blur-xl shadow-xl"
+      className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl border backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
       style={{
-        background: 'rgba(14,23,38,0.82)',
+        background: 'rgba(11, 18, 30, 0.85)',
         borderColor: color + '30',
-        boxShadow: `0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px ${color}18`,
+        boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px ${color}18`,
       }}
     >
       <span className="text-base shrink-0">{icon}</span>
@@ -32,61 +32,77 @@ const FloatCard: React.FC<{
   </motion.div>
 );
 
-/* Laptop screen content — SETU AI roadmap */
-const SetuScreen: React.FC = () => (
-  <div className="w-full h-full bg-[#07111F] rounded-t-xl overflow-hidden p-4 space-y-3">
+/* New Exam Prep Screen Component */
+const ExamPrepScreen: React.FC = () => (
+  <div className="w-full h-full bg-[#07111F] rounded-t-xl overflow-hidden p-4 flex flex-col gap-3 relative">
+    {/* Subtle grid texture overlay for 'notebook' feel */}
+    <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+
     {/* Top bar */}
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between relative z-10">
       <div className="flex items-center gap-2">
         <img src="/setu-logo.png" alt="" className="h-5 w-5 object-contain" />
-        <span className="text-white text-xs font-bold tracking-wider">SETU</span>
+        <span className="text-white text-[11px] font-bold tracking-wider">SETU PREP</span>
       </div>
-      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">AI Active</span>
+      <div className="flex items-center gap-2">
+        <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-white/60 font-bold uppercase tracking-wider">JEE Target: <span className="text-white">AIR &lt; 5000</span></span>
+      </div>
     </div>
 
-    {/* AI message */}
-    <div className="rounded-xl bg-[#FF9B54]/8 border border-[#FF9B54]/15 p-3">
-      <p className="text-[10px] text-[#FF9B54]/70 mb-1 font-semibold uppercase tracking-wider">SETU AI</p>
-      <p className="text-white text-[11px] leading-relaxed">
-        Your Electrostatics score dropped to 34%. I've prioritized it in today's plan with targeted MCQs.
-      </p>
+    {/* Hero Stats Row */}
+    <div className="grid grid-cols-2 gap-2 relative z-10">
+      <div className="rounded-xl bg-white/[0.02] border border-white/[0.05] p-2.5">
+        <p className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-1">Rank Projection</p>
+        <p className="text-white font-bold text-lg leading-none">4,250 <span className="text-[10px] text-emerald-400 font-normal">↑ +350</span></p>
+      </div>
+      <div className="rounded-xl bg-white/[0.02] border border-white/[0.05] p-2.5">
+        <p className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-1">Study Timer</p>
+        <p className="text-[#FF9B54] font-bold text-lg leading-none">02:45<span className="text-[10px] text-[#FF9B54]/50 font-normal ml-0.5">hrs</span></p>
+      </div>
     </div>
 
-    {/* Study path nodes */}
-    <div className="space-y-1.5">
-      <p className="text-[9px] text-white/40 font-bold uppercase tracking-wider">JEE Physics · Week 4</p>
-      {[
-        { label: 'Laws of Motion',    done: true,  pct: 100 },
-        { label: 'Work & Energy',     done: true,  pct: 87  },
-        { label: 'Electrostatics',    done: false, pct: 34, active: true },
-        { label: 'Current Electricity',done: false, pct: 0  },
-      ].map(t => (
-        <div key={t.label} className={`flex items-center gap-2 px-2.5 py-2 rounded-lg ${t.active ? 'bg-[#FF9B54]/10 border border-[#FF9B54]/20' : 'bg-white/[0.02]'}`}>
-          <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${t.done ? 'bg-emerald-500 border-emerald-500' : t.active ? 'border-[#FF9B54]' : 'border-white/20'}`}>
-            {t.done && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
-            {t.active && <div className="w-1.5 h-1.5 bg-[#FF9B54] rounded-full animate-pulse" />}
+    {/* Subject Progress */}
+    <div className="rounded-xl bg-white/[0.02] border border-white/[0.05] p-3 relative z-10">
+      <p className="text-[9px] font-bold uppercase tracking-wider text-white/40 mb-2.5">Subject Mastery</p>
+      <div className="space-y-2">
+        {[
+          { subject: 'Physics', acc: 78, color: '#3b82f6' },
+          { subject: 'Chemistry', acc: 62, color: '#FF9B54', active: true },
+          { subject: 'Mathematics', acc: 51, color: '#ef4444' }
+        ].map(s => (
+          <div key={s.subject} className="flex items-center gap-2">
+            <span className="text-[10px] text-white/60 w-[55px] font-medium">{s.subject}</span>
+            <div className="flex-1 h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+              <div className="h-full rounded-full relative" style={{ width: `${s.acc}%`, backgroundColor: s.color }}>
+                 {s.active && <div className="absolute inset-0 bg-white/20 animate-pulse" />}
+              </div>
+            </div>
+            <span className="text-[9px] text-white/40 font-bold w-6 text-right">{s.acc}%</span>
           </div>
-          <span className={`text-[10px] flex-1 ${t.active ? 'text-[#FF9B54]' : t.done ? 'text-white/50 line-through' : 'text-white/40'}`}>{t.label}</span>
-          <span className={`text-[9px] font-bold ${t.done ? 'text-emerald-400' : t.active ? 'text-[#FF9B54]' : 'text-white/20'}`}>{t.pct}%</span>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
 
-    {/* Mock score mini chart */}
-    <div className="rounded-xl bg-white/[0.03] border border-white/[0.05] p-3">
-      <div className="flex justify-between mb-2">
-        <span className="text-[9px] text-white/40 uppercase tracking-wider font-semibold">Mock Score Trend</span>
-        <span className="text-[9px] text-emerald-400 font-bold">↑ +12%</span>
+    {/* AI Study Plan */}
+    <div className="rounded-xl bg-white/[0.02] border border-white/[0.05] p-3 relative z-10 flex-1">
+      <div className="flex justify-between items-center mb-2.5">
+        <p className="text-[9px] font-bold uppercase tracking-wider text-[#FF9B54]">Today's AI Targets</p>
+        <span className="text-[8px] bg-[#FF9B54]/10 text-[#FF9B54] px-1.5 py-0.5 rounded font-bold">3/5 DONE</span>
       </div>
-      <div className="flex items-end gap-1 h-7">
-        {[42, 51, 49, 63, 60, 72, 74].map((h, i) => (
-          <motion.div key={i}
-            initial={{ scaleY: 0 }}
-            animate={{ scaleY: 1 }}
-            transition={{ delay: 0.8 + i * 0.07, duration: 0.4, ease: 'easeOut' }}
-            style={{ height: `${h}%`, transformOrigin: 'bottom' }}
-            className={`flex-1 rounded-sm ${i === 6 ? 'bg-[#FF9B54]' : 'bg-white/[0.1]'}`}
-          />
+      <div className="space-y-1.5">
+        {[
+          { title: 'Revise Integration Formulas', type: 'REVISION', done: true },
+          { title: 'Solve 20 PYQs: Thermodynamics', type: 'PYQ', done: true },
+          { title: 'Fix Weakness: Electrostatics', type: 'FOCUS', active: true },
+        ].map((t, i) => (
+          <div key={i} className={`flex items-center gap-2 p-1.5 rounded-lg border ${t.active ? 'bg-white/[0.04] border-white/[0.08]' : 'bg-transparent border-transparent'}`}>
+            <div className={`w-3 h-3 rounded flex items-center justify-center shrink-0 border ${t.done ? 'bg-emerald-500/20 border-emerald-500/50' : t.active ? 'border-[#FF9B54]/50 bg-[#FF9B54]/10' : 'border-white/20'}`}>
+              {t.done && <svg className="w-2 h-2 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+              {t.active && <div className="w-1.5 h-1.5 rounded-full bg-[#FF9B54] animate-pulse" />}
+            </div>
+            <span className={`text-[10px] flex-1 truncate ${t.done ? 'text-white/30 line-through' : t.active ? 'text-white/90 font-medium' : 'text-white/50'}`}>{t.title}</span>
+            <span className={`text-[8px] font-bold tracking-wider px-1 rounded ${t.type === 'PYQ' ? 'text-blue-400 bg-blue-500/10' : t.type === 'FOCUS' ? 'text-rose-400 bg-rose-500/10' : 'text-emerald-400 bg-emerald-500/10'}`}>{t.type}</span>
+          </div>
         ))}
       </div>
     </div>
@@ -96,79 +112,72 @@ const SetuScreen: React.FC = () => (
 /* Main study visual */
 const StudyVisual: React.FC = () => (
   <div className="relative w-full h-[540px] select-none">
-    {/* Ambient desk lamp glow */}
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[420px] h-[320px] rounded-full bg-[#FF9B54]/[0.07] blur-3xl pointer-events-none" />
-    <div className="absolute bottom-0 right-10 w-[200px] h-[200px] rounded-full bg-blue-500/[0.04] blur-3xl pointer-events-none" />
+    {/* Ambient desk lamp glow - less orange, more cool white/blue mix */}
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px] rounded-full bg-blue-400/[0.03] blur-3xl pointer-events-none" />
+    <div className="absolute bottom-0 right-10 w-[200px] h-[200px] rounded-full bg-[#FF9B54]/[0.03] blur-3xl pointer-events-none" />
 
     {/* ── Laptop body ── */}
     <motion.div
       initial={{ opacity: 0, y: 28 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-      className="absolute left-1/2 top-8 -translate-x-1/2 w-[340px]"
+      className="absolute left-1/2 top-8 -translate-x-1/2 w-[350px] z-10"
     >
       {/* Screen bezel */}
-      <div className="rounded-xl overflow-hidden border border-white/[0.12] shadow-2xl shadow-black/70"
-        style={{ boxShadow: '0 0 60px rgba(255,155,84,0.08), 0 24px 80px rgba(0,0,0,0.7)' }}>
-        {/* Browser chrome */}
-        <div className="bg-[#0D1520] px-3 py-2 flex items-center gap-1.5 border-b border-white/[0.07]">
-          {['#ef4444','#f59e0b','#22c55e'].map(c => (
-            <div key={c} className="w-2 h-2 rounded-full" style={{ background: c + '99' }} />
-          ))}
-          <div className="flex-1 mx-2 bg-white/[0.05] rounded h-4 flex items-center px-2">
-            <span className="text-[8px] text-white/25">setu.ai/dashboard</span>
-          </div>
-        </div>
+      <div className="rounded-xl overflow-hidden border border-white/[0.1] bg-[#07111F] shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_40px_rgba(255,255,255,0.03)]">
         {/* Screen */}
-        <div className="h-[310px]">
-          <SetuScreen />
+        <div className="h-[330px]">
+          <ExamPrepScreen />
         </div>
       </div>
       {/* Laptop base */}
       <div className="h-3 bg-gradient-to-b from-[#1a2535] to-[#131f2e] rounded-b-xl border-x border-b border-white/[0.08] mx-1" />
-      <div className="h-1 bg-[#0a1320] rounded-b-xl mx-4 opacity-60" />
+      <div className="h-1.5 bg-[#050a10] rounded-b-xl mx-4 opacity-80" />
       {/* Desk surface reflection */}
-      <div className="mt-1 mx-8 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+      <div className="mt-1 mx-8 h-px bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
     </motion.div>
 
     {/* ── Desk surface ── */}
-    <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-[#0a1525]/80 to-transparent rounded-b-2xl" />
+    <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#050A10]/90 to-transparent rounded-b-2xl pointer-events-none" />
 
-    {/* ── Floating book stack (left) ── */}
+    {/* ── Floating notebook (left) ── */}
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, x: -20, rotate: -5 }}
+      animate={{ opacity: 1, x: 0, rotate: -2 }}
       transition={{ delay: 0.5, duration: 0.7 }}
-      className="absolute bottom-16 left-6 space-y-0.5"
+      className="absolute bottom-20 left-4 z-0 w-24 h-32 rounded bg-[#111A28] border border-white/[0.08] shadow-2xl flex"
     >
-      {[
-        { w: 44, col: '#1e3a5f', h: 6 },
-        { w: 40, col: '#2d1a4a', h: 5 },
-        { w: 48, col: '#1a3a2a', h: 7 },
-      ].map((b, i) => (
-        <div key={i} className="rounded-sm" style={{ width: b.w, height: b.h, background: b.col, border: '1px solid rgba(255,255,255,0.06)' }} />
-      ))}
+       <div className="w-1.5 h-full border-r border-black/30 bg-[#0A1019] rounded-l" />
+       <div className="flex-1 px-2 py-3 space-y-2 opacity-20">
+         <div className="h-0.5 w-full bg-white/50" />
+         <div className="h-0.5 w-3/4 bg-white/50" />
+         <div className="h-0.5 w-5/6 bg-white/50" />
+       </div>
     </motion.div>
 
-    {/* ── Coffee mug (right) ── */}
+    {/* ── Books stack (right) ── */}
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.55, duration: 0.7 }}
-      className="absolute bottom-16 right-8"
+      className="absolute bottom-16 right-8 z-0 space-y-1"
     >
-      <div className="w-8 h-9 rounded-b-lg border border-white/[0.12] bg-gradient-to-b from-[#1e2a3a] to-[#131d2a] relative">
-        <div className="absolute -right-2.5 top-2 w-2.5 h-4 rounded-r-full border border-white/[0.1] bg-transparent" />
-        <div className="absolute top-1 left-1 right-1 h-1 rounded-full bg-[#FF9B54]/20" />
-      </div>
-      <div className="h-0.5 w-10 -ml-1 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent mt-0.5" />
+      {[
+        { w: 60, col: '#1e293b', h: 8, label: 'PHYSICS' },
+        { w: 56, col: '#334155', h: 7, label: 'MATHS' },
+        { w: 64, col: '#0f172a', h: 10, label: 'CHEMISTRY' },
+      ].map((b, i) => (
+        <div key={i} className="rounded flex items-center px-2" style={{ width: b.w, height: b.h, background: b.col, border: '1px solid rgba(255,255,255,0.06)' }}>
+            <span className="text-[4px] font-black text-white/20 tracking-widest">{b.label}</span>
+        </div>
+      ))}
     </motion.div>
 
     {/* ── Floating indicator cards ── */}
-    <FloatCard icon="🔴" text="Weakest Topic" sub="Electrostatics · 34%" delay={0.7} x="2%" y="10%" color="#ef4444" />
-    <FloatCard icon="✅" text="Mock Accuracy" sub="+12% this week" delay={0.9} x="62%" y="4%" color="#34d399" />
-    <FloatCard icon="🤖" text="AI Plan Generated" sub="8 tasks for today" delay={1.1} x="60%" y="62%" color="#FF9B54" />
-    <FloatCard icon="⏰" text="Revision Due" sub="Optics · 2 days left" delay={1.3} x="-2%" y="55%" color="#a78bfa" />
+    <FloatCard icon="🎯" text="Mock Test Rank" sub="Top 12% in batch" delay={0.7} x="2%" y="12%" color="#3b82f6" />
+    <FloatCard icon="🔥" text="21-Day Streak" sub="Revision target hit" delay={0.9} x="62%" y="6%" color="#f59e0b" />
+    <FloatCard icon="🧠" text="Weakness Targeted" sub="Electrostatics focus" delay={1.1} x="-2%" y="55%" color="#ef4444" />
+    <FloatCard icon="📚" text="PYQs Completed" sub="Last 5 years done" delay={1.3} x="62%" y="65%" color="#10b981" />
   </div>
 );
 

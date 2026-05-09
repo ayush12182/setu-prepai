@@ -10,7 +10,7 @@ import QuizInterface, { QuizResult } from '@/components/practice/QuizInterface';
 import QuizResults from '@/components/practice/QuizResults';
 import TestModeQuiz, { TestAnswer } from '@/components/practice/TestModeQuiz';
 import TestResults from '@/components/practice/TestResults';
-import { ArrowRight, Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter, Dna, FlaskConical, Flame } from 'lucide-react';
+import { ArrowRight, Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter, Dna, FlaskConical, Flame, Calculator } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
@@ -288,11 +288,15 @@ const PracticePage: React.FC = () => {
                   <Target className="w-5 h-5 text-accent" /> Master Your Subjects
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[
+                  {(isNeet ? [
                     { id: 'biology', name: 'Biology', icon: Dna, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
                     { id: 'physics', name: 'Physics', icon: Zap, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
                     { id: 'chemistry', name: 'Chemistry', icon: FlaskConical, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-                  ].map((sub, i) => (
+                  ] : [
+                    { id: 'physics', name: 'Physics', icon: Zap, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+                    { id: 'chemistry', name: 'Chemistry', icon: FlaskConical, color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+                    { id: 'mathematics', name: 'Mathematics', icon: Calculator, color: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
+                  ]).map((sub, i) => (
                     <div 
                       key={i} 
                       className={cn("bg-card border-2 rounded-3xl p-6 transition-all", sub.border)}
