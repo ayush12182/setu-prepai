@@ -245,7 +245,7 @@ const TutorialSessionsPage: React.FC = () => {
           </div>
           <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
             <CheckCircle2 className="w-5 h-5 text-setu-success" />
-            <span className="text-sm text-foreground">Jeetu Bhaiya style</span>
+            <span className="text-sm text-foreground">SETU Mentor style</span>
           </div>
         </div>
       </div>

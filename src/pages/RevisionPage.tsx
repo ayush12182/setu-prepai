@@ -386,7 +386,7 @@ const RevisionPage: React.FC = () => {
             </div>
             <div>
               <p className="font-semibold text-foreground mb-1">
-                {isFoundation ? 'Study Tip' : "Jeetu Bhaiya's Revision Strategy"}
+                {isFoundation ? 'Study Tip' : "SETU Mentor's Revision Strategy"}
               </p>
               <p className="text-muted-foreground text-sm leading-relaxed">
                 {isFoundation

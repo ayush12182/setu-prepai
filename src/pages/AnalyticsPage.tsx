@@ -68,7 +68,7 @@ const AnalyticsPage: React.FC = () => {
     if (act.actionType === 'practice_chapter') {
       navigate('/practice');
     } else if (act.actionType === 'fix_mistakes') {
-      navigate('/ask-jeetu');
+      navigate('/ask-setu');
     } else if (act.actionType === 'focus_sprint') {
       navigate('/circles');
     }
@@ -197,7 +197,7 @@ const AnalyticsPage: React.FC = () => {
         </div>
 
         {/* ─── JEETU BHAIYA MENTOR RESPONSE ─── */}
-        {/* We keep this explicitly dark-themed because Jeetu's card is a premium focal point */}
+        {/* We keep this explicitly dark-themed because SETU's card is a premium focal point */}
         <div className="relative rounded-3xl p-[1px] bg-gradient-to-b from-accent/50 to-border shadow-xl">
           <div className="absolute inset-0 bg-accent/5 blur-xl rounded-3xl pointer-events-none" />
           <div className="bg-slate-950 rounded-[23px] p-6 lg:p-8 relative overflow-hidden">
@@ -208,7 +208,7 @@ const AnalyticsPage: React.FC = () => {
               <div className="flex-1">
                 <h2 className="text-xl font-bold text-white mb-4">Mentor's Verdict</h2>
                 <div className="text-white/90 whitespace-pre-wrap leading-relaxed font-medium">
-                  {report.jeetuMessage}
+                  {report.setuMessage}
                 </div>
                 
                 {/* Action Loop Buttons */}

@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { ChapterHeader } from '@/components/chapter/ChapterHeader';
 import { SubchapterCard } from '@/components/chapter/SubchapterCard';
 import { TrendingConcepts } from '@/components/chapter/TrendingConcepts';
-import { JeetuTip } from '@/components/chapter/JeetuTip';
+import { SETUTip } from '@/components/chapter/SETUTip';
 
 
 const ChapterPage: React.FC = () => {
@@ -43,8 +43,8 @@ const ChapterPage: React.FC = () => {
         {/* Chapter Header with Stats */}
         <ChapterHeader chapter={chapter} subchapterCount={subchapters.length} />
 
-        {/* Jeetu Bhaiya Tip */}
-        <JeetuTip chapter={chapter} subchapterCount={subchapters.length} />
+        {/* SETU Mentor Tip */}
+        <SETUTip chapter={chapter} subchapterCount={subchapters.length} />
 
         {/* ═══ The 4 Pillars of Foundation Learning ═══ */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4">

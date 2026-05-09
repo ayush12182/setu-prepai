@@ -145,7 +145,7 @@ export const useVoiceChat = ({
   const startListening = useCallback(() => {
     if (!recognitionRef.current) return;
     
-    // Stop speaking if Jeetu is talking
+    // Stop speaking if SETU is talking
     if (isSpeaking) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);

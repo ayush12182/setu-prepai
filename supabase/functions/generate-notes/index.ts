@@ -1,6 +1,6 @@
 /**
  * generate-notes — Supabase Edge Function
- * Structured 9-section notes system (Coaching / Tuition / Hybrid)
+ * 1-Page Smart Revision Notes Prompt
  * ENGINE: Gemini 1.5 Flash (streaming SSE)
  */
 
@@ -11,211 +11,179 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type SmartMode = "default" | "beginner" | "advanced" | "formulas_only" | "mistakes_only" | "revision";
-type NoteMode = "coaching" | "tuition" | "hybrid";
-type Language = "english" | "hindi" | "hinglish";
-
-function resolveNoteMode(smartMode: SmartMode): NoteMode {
-  if (smartMode === "beginner") return "tuition";
-  if (smartMode === "advanced") return "coaching";
-  return "hybrid";
-}
-
-function resolveLanguage(lang: string): Language {
-  const l = lang?.toLowerCase();
-  if (l === "hindi") return "hindi";
-  if (l === "hinglish") return "hinglish";
-  return "english";
-}
-
-function buildLanguageInstruction(_lang: Language): string {
-  return `LANGUAGE RULES:
-- Use pure, professional English ONLY.
-- Zero Hinglish or Hindi words in explanations, solutions, or tips.
-- All math MUST be written in LaTeX. Wrap inline math in $...$ (e.g., $v = u + at$) and display math in $$...$$.
-- Tone: Professional, clean, Kota-textbook style.`;
-}
-
-function buildFullStructurePrompt(
-  chapterName: string,
-  subject: string,
-  topics: string[],
-  examMode: string,
-  _mode: NoteMode,
-  lang: Language,
-  smartMode: SmartMode,
-): string {
-  const langInstruction = buildLanguageInstruction(lang);
+function buildPrompt(chapterName: string, subject: string, topics: string[], examMode: string): string {
   const topicList = topics.length > 0 ? topics.join(", ") : chapterName;
   const exam = examMode.toUpperCase().includes("NEET") ? "NEET" : examMode.toUpperCase().includes("CUET") ? "CUET" : "JEE";
 
-  if (smartMode === "formulas_only") {
-    return `You are a ${exam} coaching faculty specialising in ${subject}.
+  return `You are an expert ${exam} revision note creator for SETU.
 
-${langInstruction}
+Your task is to generate ultra-clean, exam-oriented 1-page revision notes for students who are revising 1 day before the exam.
 
-Generate a FORMULAS-ONLY reference sheet for "${chapterName}" (${subject}) for ${exam}.
+The output MUST feel like:
 
-# 🧮 Formula Bank: ${chapterName}
+Allen/Resonance short notes
+visually clean
+highly scannable
+formula-first
+zero fluff
+easy to revise in under 5 minutes
 
-## Core Formulas
-(List every important formula with: name, LaTeX expression wrapped in \\boxed{}, variables defined, conditions of use)
+The notes must be written in perfect rendering syntax using proper Markdown + LaTeX formatting.
 
-## Derived Formulas
-(Less obvious but exam-important derivations, each in \\boxed{})
+STRICT OUTPUT RULES
+1. Proper LaTeX Rendering (VERY IMPORTANT)
 
-## Quick Reference Table
-| Formula | Use Case | Condition |
-|---|---|---|
+Never output broken syntax like:
 
-## ⚡ Formula Tricks
-(Time-saving patterns and special cases)
+$$\\boxed{B = \\frac{\\mu_0}{4\\pi} ...
 
-Topics covered: ${topicList}
-Prioritize formulas that appear in ${exam} PYQs.`;
-  }
+Instead always render formulas cleanly using block math:
 
-  if (smartMode === "mistakes_only") {
-    return `You are a ${exam} coaching faculty specialising in ${subject}.
+\\[
+B = \\frac{\\mu_0 I}{2\\pi r}
+\\]
 
-${langInstruction}
+Inline math:
 
-Generate a COMMON MISTAKES & TRAPS sheet for "${chapterName}" (${subject}) for ${exam}.
+\\( F = qvB \\)
 
-# ⚠️ Common Mistakes: ${chapterName}
+Never show raw escape characters to users.
 
-## Conceptual Traps
-(Misconceptions students carry into exams)
+2. Structure of Notes
 
-## Formula Misuse
-(When students apply the wrong formula and why)
-
-## Calculation Pitfalls
-(Sign errors, unit mistakes, wrong substitutions)
-
-## ${exam} Specific Traps
-(Tricks the paper-setter uses to fool students)
-
-## How to Avoid Each Mistake
-(Specific, actionable fixes for each mistake listed above)
-
-Topics: ${topicList}`;
-  }
-
-  if (smartMode === "revision") {
-    return `You are a ${exam} coaching faculty specialising in ${subject}.
-
-${langInstruction}
-
-Generate a RAPID 1-MINUTE REVISION SHEET for "${chapterName}" (${subject}) for ${exam}.
-Make it ultra-compact. A student should be able to scan this in 60 seconds before an exam.
-
-# ⚡ 1-Min Revision: ${chapterName}
-
-## Core Idea (1 line)
-## Key Formulas (bullet points, \\boxed{} notation)
-## Top 3 Concepts to Remember
-## 3 Most Common Mistakes
-## ${exam} PYQ Hotspots
-## Last-minute Tips
-
-Topics: ${topicList}
-Keep it VERY short — flash card, not a textbook.`;
-  }
-
-  // Full structured notes (default / beginner / advanced)
-  return `You are a world-class ${exam} coaching faculty specialising in ${subject} at a top institute like Allen or FIITJEE.
-Your explanations must be physically intuitive, precise, and purely professional.
-
-${langInstruction}
-
-Generate comprehensive, high-quality study notes for "${chapterName}" (Subject: ${subject}) for ${exam}.
-Topics to cover: ${topicList}
-
-Follow this EXACT structure. Do not skip any section.
-
----
+The notes MUST follow this exact structure:
 
 # ${chapterName}
+## 1. Core Concepts
+1-line intuition
+only most important theory
+max 2–3 lines per concept
+## 2. Important Formula Sheet
+boxed formulas
+clean derivations only if extremely important
+variable meanings concise
+## 3. Graphs / Visual Memory Tricks
+ASCII graph / Mermaid / simple plotted explanation
+only exam-relevant graphs
+label axes properly
+## 4. Most Used Results
+direct formulas used in PYQs
+shortcuts
+approximations
+standard values
+## 5. Common Mistakes
+misconceptions
+sign convention mistakes
+unit mistakes
+## 6. PYQ Trigger Points
+what examiner usually asks
+pattern recognition
+## 7. 30-Second Final Revision Box
+ultra-short recap bullets
+
+3. Writing Style
+
+The style should be:
+
+concise
+topper-style notes
+high information density
+no storytelling
+no long paragraphs
+no unnecessary explanations
+
+Every line should help in solving questions.
+
+4. Formula Formatting Rules
+
+Every important formula should appear like:
+
+\\[
+B = \\frac{\\mu_0 I}{2\\pi r}
+\\]
+
+Use aligned equations where needed:
+
+\\[
+\\begin{aligned}
+F &= q(v \\times B) \\\\
+\\tau &= nBIA \\sin\\theta
+\\end{aligned}
+\\]
+
+5. Graph Rules
+
+Whenever applicable include:
+
+properly labeled graphs
+trend curves
+proportionality graphs
+field-line diagrams
+circuit mini diagrams
+
+Use Mermaid diagrams OR clean markdown-compatible visuals.
+
+6. Visual Hierarchy
+
+Use:
+
+headings
+tables
+bullet points
+highlights
+boxed results
+separators
+
+Avoid:
+
+huge paragraphs
+crowded text
+repeated explanations
+
+7. Accuracy Rules
+
+VERY IMPORTANT:
+
+formulas must be ${exam} accurate
+sign conventions correct
+dimensions correct
+units correct
+no hallucinated formulas
+only exam-relevant content
+
+8. Compression Rules (MOST IMPORTANT)
+
+This is NOT textbook content.
+
+This is:
+✅ last-day revision
+✅ 1-page memory sheet
+✅ formula booster
+✅ exam recall notes
+
+So:
+
+compress aggressively
+retain only high-yield information
+prioritize PYQ-used concepts
+remove low-weightage explanations
+
+9. Output Formatting
+
+Output must be:
+
+fully renderable markdown
+mobile friendly
+dark-theme compatible
+visually balanced
+proper spacing between sections
 
 ---
-
-## 🔍 1. Intuition First
-- Give a real-life analogy or visual that makes this topic instantly click.
-- Explain the "WHY" before any formula.
-
----
-
-## 📖 2. Concepts & Formulas
-For every major concept, provide:
-
-### Concept: [Name]
-Formula: $$\\boxed{formula} \\quad \\text{(condition)}$$
-Explanation: 3-4 lines of physical intuition.
-
-*(Repeat for all major topics)*
-
----
-
-## ⚡ 3. Shortcuts & Tricks
-- Time-saving methods that save 30-60 seconds per question
-- Pattern recognition tips for ${exam} questions
-
----
-
-## ⚠️ 4. Common Mistakes
-At least 3 specific mistakes:
-- The mistake → Why it's wrong → The correct approach
-
----
-
-## 🧠 5. Solved Examples
-
-### Level 1 — Easy (Direct Formula)
-**Given:** (all knowns in LaTeX)
-**To find:** (the unknown in LaTeX)
-**Concept:** (principle applied)
-**Solution:** (step-by-step, each line "Step X:")
-**Answer:** $$\\boxed{final answer with SI units}$$
-JEE Tip: (one-line examiner insight)
-
-### Level 2 — Medium (Application)
-**Given:** ...
-**To find:** ...
-**Concept:** ...
-**Solution:** ...
-**Answer:** $$\\boxed{...}$$
-JEE Tip: ...
-
-### Level 3 — ${exam} Level (Advanced)
-**Given:** ...
-**To find:** ...
-**Concept:** ...
-**Solution:** ...
-**Answer:** $$\\boxed{...}$$
-JEE Tip: ...
-
----
-
-## 📄 6. Quick Revision Sheet
-- Core concept in 1 sentence
-- Top 3 formulas (inline LaTeX)
-- Top 3 tricks
-
----
-
-## 🧪 7. Practice Questions
-5 questions (mixed difficulty):
-1. [Level 1] ...
-2. [Level 1] ...
-3. [Level 2] ...
-4. [Level 2] ...
-5. [Level 3] ...
-
-Answers: 1-?, 2-?, 3-?, 4-?, 5-?
-
----
-CRITICAL: Never write plain-text math like "v = u + at". All math MUST be in LaTeX ($...$).`;
+Subject: ${subject}
+Chapter: ${chapterName}
+Topics: ${topicList}
+Exam: ${exam}
+`;
 }
 
 serve(async (req) => {
@@ -238,8 +206,6 @@ serve(async (req) => {
       chapterName,
       subject = "Physics",
       topics = [],
-      smartMode = "default" as SmartMode,
-      language = "english",
       examMode = "JEE",
     } = body;
 
@@ -250,11 +216,9 @@ serve(async (req) => {
       });
     }
 
-    const lang = resolveLanguage(language);
-    const noteMode = resolveNoteMode(smartMode as SmartMode);
-    const prompt = buildFullStructurePrompt(chapterName, subject, topics, examMode, noteMode, lang, smartMode as SmartMode);
+    const prompt = buildPrompt(chapterName, subject, topics, examMode);
 
-    console.log(`[GenerateNotes] Chapter: ${chapterName} | Mode: ${noteMode} | SmartMode: ${smartMode}`);
+    console.log(`[GenerateNotes] Chapter: ${chapterName} | Exam: ${examMode}`);
 
     const model = "gemini-2.5-flash";
 

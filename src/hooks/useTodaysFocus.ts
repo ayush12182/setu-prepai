@@ -344,7 +344,7 @@ export const useTodaysFocus = () => {
             subchapter: todaysSubchapter.name,
             subchapterId: todaysSubchapter.id,
             task: `Focus on ${jeeAsk}`,
-            taskHinglish: todaysSubchapter.jeetuLine || `Aaj ${todaysSubchapter.name} pe focus karo!`,
+            taskHinglish: todaysSubchapter.setuLine || `Aaj ${todaysSubchapter.name} pe focus karo!`,
             suggestedTime: isCuet || isFoundation ? '1h 30m' : todaysChapter.difficulty === 'Hard' ? '3h' : todaysChapter.difficulty === 'Medium' ? '2h 30m' : '2h',
             streak: currentStreak,
             reason: 'schedule',

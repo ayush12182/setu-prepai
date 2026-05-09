@@ -201,7 +201,7 @@ const SubchapterSelector: React.FC<SubchapterSelectorProps> = ({ onSelect }) => 
                             jeeAsks: ["Foundation Practice"],
                             pyqFocus: { trends: [], patterns: [], traps: [] },
                             commonMistakes: [],
-                            jeetuLine: "Practice makes perfect."
+                            setuLine: "Practice makes perfect."
                           },
                           chapter,
                           selectedSubject

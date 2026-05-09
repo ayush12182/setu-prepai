@@ -260,7 +260,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
             {isAnalyzing ? (
               <>
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Jeetu Bhaiya is reading your notes...
+                SETU Mentor is reading your notes...
               </>
             ) : (
               <>
@@ -278,7 +278,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-setu-saffron" />
-              Jeetu Bhaiya's Analysis
+              SETU Mentor's Analysis
             </h3>
             {!isAnalyzing && (
               <Button variant="outline" size="sm" onClick={clearImage}>

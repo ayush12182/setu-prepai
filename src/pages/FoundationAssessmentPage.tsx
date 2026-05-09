@@ -709,7 +709,7 @@ const FoundationAssessmentPage: React.FC = () => {
                       ) : (
                         <>
                           <PlayCircle className="w-5 h-5" />
-                          Watch Visual Explanation (Jeetu Bhaiya Style)
+                          Watch Visual Explanation (SETU Mentor Style)
                         </>
                       )}
                     </Button>

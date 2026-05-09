@@ -251,7 +251,7 @@ const MajorTestResults: React.FC<MajorTestResultsProps> = ({
         <div className="flex gap-4 justify-center">
           <Button variant="outline" onClick={onGoHome}>Back to Dashboard</Button>
           <Button onClick={onViewMentorMessage} className="bg-primary text-primary-foreground">
-            View Jeetu Bhaiya's Message
+            View SETU Mentor's Message
           </Button>
         </div>
       </div>

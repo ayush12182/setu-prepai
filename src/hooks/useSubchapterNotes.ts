@@ -7,15 +7,25 @@ import { supabase } from '@/integrations/supabase/client';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+export interface StructuredNotes {
+  chapter: string;
+  formulaCards: { name: string; formula: string; variables: string; usage: string }[];
+  concepts: { title: string; description: string }[];
+  graphs: { title: string; description: string }[];
+  mistakes: { wrong: string; right: string; why: string }[];
+  pyqTriggers: { pattern: string; action: string }[];
+  quickRevision: string[];
+}
+
 interface UseSubchapterNotesResult {
-  notes: string;
+  notes: StructuredNotes | null;
   isLoading: boolean;
   error: string | null;
   generateNotes: (subchapter: Subchapter, chapterName: string, subject: string, examMode?: string) => Promise<void>;
 }
 
 export const useSubchapterNotes = (): UseSubchapterNotesResult => {
-  const [notes, setNotes] = useState<string>('');
+  const [notes, setNotes] = useState<StructuredNotes | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { language } = useLanguage();
@@ -29,11 +39,9 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
   ) => {
     setIsLoading(true);
     setError(null);
-    setNotes('');
+    setNotes(null);
 
-    console.log('Generating notes with language:', language);
     try {
-      // Get user session token for Edge Function auth
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token || SUPABASE_ANON_KEY;
 
@@ -61,39 +69,17 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
         throw new Error(`Failed to generate notes: ${response.status}`);
       }
 
-      if (!response.body) {
-        throw new Error('No response body');
+      const rawJsonString = await response.text();
+      try {
+        // Strip out any potential markdown block backticks just in case the LLM ignored instructions
+        const cleanJsonString = rawJsonString.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+        const data = JSON.parse(cleanJsonString);
+        setNotes(data as StructuredNotes);
+      } catch (e) {
+        console.error("Failed to parse JSON response:", rawJsonString);
+        throw new Error("Failed to parse notes format from AI.");
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulatedNotes = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                accumulatedNotes += content;
-                setNotes(accumulatedNotes);
-              }
-            } catch {
-              // Skip non-JSON lines
-            }
-          }
-        }
-      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error generating notes';
       setError(errorMessage);
@@ -101,7 +87,7 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
     } finally {
       setIsLoading(false);
     }
-  }, [language]);
+  }, [language, isNeet, jeeSubMode]);
 
   return { notes, isLoading, error, generateNotes };
 };

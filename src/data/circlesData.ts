@@ -302,7 +302,7 @@ export interface CircleMessage {
     text: string;
     timestamp: Date;
     upvotes: number;
-    isMentor?: boolean;  // Jeetu Bhaiya AI
+    isMentor?: boolean;  // SETU Mentor AI
     isModeration?: boolean;
 }
 
@@ -313,7 +313,7 @@ export function buildInitialMessages(exam: ExamType, topic: string): CircleMessa
     if (exam === 'jee') {
         return [
             {
-                id: 'seed-1', senderId: 'm1', senderName: 'Jeetu Bhaiya AI', senderPoints: 999,
+                id: 'seed-1', senderId: 'm1', senderName: 'SETU Mentor AI', senderPoints: 999,
                 category: 'Mentor', isMentor: true,
                 text: 'Focus on revising formulas before attempting PYQs today. Consistency beats cramming. 💪',
                 timestamp: min(20), upvotes: 12,

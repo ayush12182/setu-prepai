@@ -5,8 +5,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send, Sparkles, Camera, ImagePlus, X, Volume2, Loader2, Play, Pause, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
-import { getGreetingByLanguage } from '@/lib/jeetuBhaiya';
-import { useJeetuChat } from '@/hooks/useJeetuChat';
+import { getGreetingByLanguage } from '@/lib/setuMentor';
+import { useSetuChat } from '@/hooks/useSetuChat';
 import { useClassContext } from '@/contexts/ClassContext';
 
 
@@ -95,7 +95,7 @@ const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
         {/* Small Mentor Avatar with pulsing indicator */}
         <div className="relative flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-dark flex items-center justify-center border border-white/20 shadow-sm">
-            <span className="text-white font-bold text-[10px]">JB</span>
+            <span className="text-white font-bold text-[10px]">SM</span>
           </div>
           <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-setu-success animate-pulse"></span>
         </div>
@@ -116,7 +116,7 @@ const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
           </p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className="text-[9px] font-bold text-setu-saffron uppercase tracking-widest leading-none">
-              {localPlaying ? "Listened — keep going." : "Jeetu ki Seekh"}
+              {localPlaying ? "Listened — keep going." : "SETU Mentor Advice"}
             </span>
             {hasListened && !localPlaying && (
               <CheckCircle2 className="w-2.5 h-2.5 text-setu-success" />
@@ -135,16 +135,16 @@ const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
   );
 };
 
-const AskJeetuPage: React.FC = () => {
+const AskSetuPage: React.FC = () => {
   const { language } = useLanguage();
   const { isNeet, examMode } = useExamMode();
   const { aiContext } = useClassContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const isFoundation = aiContext?.learning_mode === 'foundation';
-  const { sendMessage, isLoading, error } = useJeetuChat();
+  const { sendMessage, isLoading, error } = useSetuChat();
   const [messages, setMessages] = useState<Message[]>(() => {
-    const saved = localStorage.getItem('jeetu-chat-history');
+    const saved = localStorage.getItem('setu-chat-history');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -164,7 +164,7 @@ const AskJeetuPage: React.FC = () => {
   });
 
   useEffect(() => {
-    localStorage.setItem('jeetu-chat-history', JSON.stringify(messages));
+    localStorage.setItem('setu-chat-history', JSON.stringify(messages));
   }, [messages]);
   const [input, setInput] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -363,7 +363,7 @@ const AskJeetuPage: React.FC = () => {
   };
 
   return (
-    <MainLayout title="Ask Jeetu Bhaiya">
+    <MainLayout title="Ask SETU Mentor">
       <Dialog
         open={showWelcomeVideo}
         onOpenChange={(open) => {
@@ -375,7 +375,7 @@ const AskJeetuPage: React.FC = () => {
       >
         <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-black border-none" aria-describedby={undefined}>
           <VisuallyHidden>
-            <DialogTitle>Jeetu Bhaiya Welcome Message</DialogTitle>
+            <DialogTitle>SETU Mentor Welcome Message</DialogTitle>
           </VisuallyHidden>
           <div className="relative">
             <div className="aspect-video">
@@ -398,10 +398,10 @@ const AskJeetuPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">JB</span>
+                    <span className="text-white font-bold text-sm">SM</span>
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold">Jeetu Bhaiya</h3>
+                    <h3 className="text-white font-semibold">SETU Mentor</h3>
                     <p className="text-white/70 text-sm">Welcome Message</p>
                   </div>
                 </div>
@@ -437,13 +437,13 @@ const AskJeetuPage: React.FC = () => {
         <div className="bg-card border border-border rounded-t-2xl p-4 flex items-center gap-4">
           <div className="relative">
             <div className="w-14 h-14 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-xl">JB</span>
+              <span className="text-white font-bold text-xl">SM</span>
             </div>
             <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-card bg-setu-success"></span>
           </div>
           <div className="flex-1">
             <h2 className="font-display font-bold text-lg text-foreground">
-              {isFoundation ? 'SETU Mentor' : 'Jeetu Bhaiya'}
+              {isFoundation ? 'SETU Mentor' : 'SETU Mentor'}
             </h2>
             <p className="text-sm text-setu-success flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
@@ -468,7 +468,7 @@ const AskJeetuPage: React.FC = () => {
                 >
                   {message.role === 'assistant' && (
                     <div className="w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
-                      <span className="text-setu-saffron font-bold text-xs">JB</span>
+                      <span className="text-setu-saffron font-bold text-xs">SM</span>
                     </div>
                   )}
                   <div
@@ -502,7 +502,7 @@ const AskJeetuPage: React.FC = () => {
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
             <div className="flex justify-start animate-fade-in">
               <div className="w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0">
-                <span className="text-setu-saffron font-bold text-xs">JB</span>
+                <span className="text-setu-saffron font-bold text-xs">SM</span>
               </div>
               <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                 <div className="flex gap-1.5">
@@ -587,7 +587,7 @@ const AskJeetuPage: React.FC = () => {
               size="icon"
               onClick={injectMotivationMessage}
               className="flex-shrink-0 rounded-xl border-setu-saffron/30 text-setu-saffron hover:bg-setu-saffron/10"
-              title="Jeetu Bhaiya ki Seekh suniye"
+              title="SETU Mentor ki Seekh suniye"
             >
               <Volume2 className="w-5 h-5" />
             </Button>
@@ -645,4 +645,4 @@ const AskJeetuPage: React.FC = () => {
   );
 };
 
-export default AskJeetuPage;
+export default AskSetuPage;

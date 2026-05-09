@@ -40,7 +40,7 @@ const getNavItems = () => [
   { path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬', badge: undefined },
   { path: '/analytics', icon: BarChart3, label: 'Analytics', emoji: '📊', badge: undefined },
   { path: '/profile', icon: User, label: 'My Profile', emoji: '👤', badge: undefined },
-  { path: '/ask-jeetu', icon: MessageCircle, label: 'Your Mentor', emoji: '💬', badge: undefined },
+  { path: '/ask-setu', icon: MessageCircle, label: 'Your Mentor', emoji: '💬', badge: undefined },
 ];
 
 const getB2BNavItems = (isMentor: boolean, isInstitution: boolean) => [

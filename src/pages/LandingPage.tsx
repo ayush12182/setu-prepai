@@ -2,6 +2,7 @@ import React from 'react';
 import LandingNav from '@/components/landing/LandingNav';
 import HeroSection from '@/components/landing/HeroSection';
 import TrustStrip from '@/components/landing/TrustStrip';
+import AboutSection from '@/components/landing/AboutSection';
 import ExamTracksSection from '@/components/landing/ExamTracksSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
 import AIEngineSection from '@/components/landing/AIEngineSection';
@@ -18,6 +19,7 @@ const LandingPage: React.FC = () => {
       <LandingNav />
       <HeroSection />
       <TrustStrip />
+      <AboutSection />
       <ExamTracksSection />
       <FeaturesSection />
       <AIEngineSection />

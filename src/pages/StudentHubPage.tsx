@@ -126,7 +126,7 @@ export default function StudentHubPage() {
               {[
                 { label: 'All Classes', icon: BookOpen, path: '/learn', color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
                 { label: 'All Tests', icon: ClipboardCheck, path: '/test', color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
-                { label: 'My Doubts', icon: MessageCircle, path: '/ask-jeetu', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                { label: 'My Doubts', icon: MessageCircle, path: '/ask-setu', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
               ].map(item => (
                 <div 
                   key={item.label}

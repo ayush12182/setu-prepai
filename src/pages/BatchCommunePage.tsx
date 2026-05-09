@@ -137,15 +137,15 @@ function BatchCommuneArena({ roomId, batchInfo, roster }: { roomId: string, batc
     toast.success("Focus sprint started! 🍅");
   };
 
-  const askJeetu = async (question: string) => {
+  const askSetu = async (question: string) => {
     try {
       const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (!apiKey) return "Jeetu AI is offline (missing API key).";
+      if (!apiKey) return "SETU AI is offline (missing API key).";
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: `You are Jeetu AI, an expert mentor for Indian students. Be concise, energetic, and helpful. Answer this doubt: ${question}` }] }],
+          contents: [{ role: 'user', parts: [{ text: `You are SETU AI, an expert mentor for Indian students. Be concise, energetic, and helpful. Answer this doubt: ${question}` }] }],
           generationConfig: { temperature: 0.7 }
         })
       });
@@ -174,16 +174,16 @@ function BatchCommuneArena({ roomId, batchInfo, roster }: { roomId: string, batc
       sendMessage('Doubt', currentText);
     }
 
-    // Feature 2: AI Jeetu Mentorship
-    if (currentText.toLowerCase().startsWith('@jeetu')) {
+    // Feature 2: AI SETU Mentorship
+    if (currentText.toLowerCase().startsWith('@setu')) {
       const question = currentText.substring(6).trim();
       if (!question) return;
       
-      const aiReply = await askJeetu(question);
+      const aiReply = await askSetu(question);
       await supabase.from('commune_messages').insert({
         room_id: roomId,
         user_id: '00000000-0000-0000-0000-000000000000',
-        user_name: 'Jeetu AI 🤖',
+        user_name: 'SETU AI 🤖',
         category: 'AI',
         content: aiReply
       });
@@ -262,7 +262,7 @@ function BatchCommuneArena({ roomId, batchInfo, roster }: { roomId: string, batc
             }
 
             const isMe = msg.user_id === user?.id;
-            const isJeetu = msg.category === 'AI';
+            const isSetu = msg.category === 'AI';
             const hasImage = msg.content.startsWith('[IMAGE] ');
             let imageUrl = '';
             let textContent = msg.content;
@@ -277,7 +277,7 @@ function BatchCommuneArena({ roomId, batchInfo, roster }: { roomId: string, batc
                 <span className="text-[10px] text-white/30 mb-1 px-1">{msg.user_name}</span>
                 <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
                   isMe ? 'bg-emerald-600/20 text-emerald-100 border border-emerald-500/30' : 
-                  isJeetu ? 'bg-blue-600/20 text-blue-100 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]' :
+                  isSetu ? 'bg-blue-600/20 text-blue-100 border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)]' :
                   'bg-white/5 text-white/90 border border-white/10'
                 }`}>
                   {hasImage && <img src={imageUrl} alt="Upload" className="max-w-[250px] rounded-lg mb-2 border border-white/10" />}
@@ -317,7 +317,7 @@ function BatchCommuneArena({ roomId, batchInfo, roster }: { roomId: string, batc
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask a doubt or type @Jeetu to ask AI..."
+              placeholder="Ask a doubt or type @setu to ask AI..."
               className="h-12 bg-white/5 border-white/10 focus-visible:ring-emerald-500/50 rounded-xl"
             />
             <Button 
@@ -341,14 +341,14 @@ function BatchCommuneArena({ roomId, batchInfo, roster }: { roomId: string, batc
         </div>
         
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {/* Jeetu AI Fixed Member */}
+          {/* SETU AI Fixed Member */}
           <div className="mb-4">
             <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-blue-500/[0.05] border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
               <div className="w-8 h-8 rounded-full bg-blue-950 flex items-center justify-center shrink-0 border border-blue-500/30">
                 <span className="text-xl">🤖</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-blue-50 truncate">Jeetu AI</p>
+                <p className="text-sm font-medium text-blue-50 truncate">SETU AI</p>
                 <p className="text-[10px] text-blue-400/70">Always Online</p>
               </div>
               <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />

@@ -171,8 +171,8 @@ export const VoiceChatButton: React.FC<VoiceChatProps> = ({
       <p className="text-xs text-muted-foreground mt-2 text-center">
         {isListening && voiceMode === 'push-to-talk' && '🎙️ Listening... Tap mic to send'}
         {isListening && voiceMode === 'continuous' && '🎙️ Listening... Will auto-send after pause'}
-        {isProcessing && '🧠 Jeetu Bhaiya soch raha hai...'}
-        {isSpeaking && '🔊 Jeetu Bhaiya bol raha hai... Tap to stop'}
+        {isProcessing && '🧠 SETU Mentor soch raha hai...'}
+        {isSpeaking && '🔊 SETU Mentor bol raha hai... Tap to stop'}
       </p>
     </div>
   );

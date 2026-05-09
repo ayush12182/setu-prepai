@@ -167,13 +167,13 @@ export const SubchapterCard: React.FC<SubchapterCardProps> = ({
         </Button>
       </div>
 
-      {/* Jeetu Line - Motivational */}
-      {subchapter.jeetuLine && (
+      {/* SETU Line - Motivational */}
+      {subchapter.setuLine && (
         <div className={cn(
           'mt-3 pt-3 border-t border-dashed border-border',
           'text-xs italic text-muted-foreground'
         )}>
-          💡 {subchapter.jeetuLine}
+          💡 {subchapter.setuLine}
         </div>
       )}
     </motion.div>

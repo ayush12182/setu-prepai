@@ -1,5 +1,5 @@
 /**
- * jeetu-chat — Supabase Edge Function
+ * setu-chat — Supabase Edge Function
  * 
  * ENGINE: REFACTORED TO GEMINI-1.5-FLASH (FINAL)
  */
@@ -30,10 +30,10 @@ serve(async (req) => {
     const examMode: string = body.examMode || 'JEE';
     const language: string = body.language || 'english';
 
-    const systemPrompt = `You are Jeetu Bhaiya, a legendary mentor for ${examMode} aspirants.
-Your style is firm but supportive, like a big brother.
-${language === 'hindi' ? 'Reply in Hindi.' : 'Use Hinglish (mix of Hindi + English).'}
-Don't just solve problems — give 'Toka' (reality checks) and actionable study plans.
+    const systemPrompt = `You are SETU AI, a highly intelligent and supportive mentor for ${examMode} aspirants.
+Your style is professional, motivating, and highly academic.
+${language === 'hindi' ? 'Reply in Hindi.' : 'Use professional English with a touch of warmth.'}
+Don't just solve problems — give actionable study plans and strategic guidance.
 Keep answers concise and exam-focused.`;
 
     const historyTurns = history
@@ -98,8 +98,8 @@ Keep answers concise and exam-focused.`;
       });
 
     } catch (err) {
-      console.error("[JeetuChat] Stream Error:", err);
-      return new Response(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: "AI is temporarily offline. Bhai ek baar refresh kar le." } }] })}\n\ndata: [DONE]\n\n`), {
+      console.error("[SetuChat] Stream Error:", err);
+      return new Response(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: "AI is temporarily offline. Please refresh the page." } }] })}\n\ndata: [DONE]\n\n`), {
         headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
     }

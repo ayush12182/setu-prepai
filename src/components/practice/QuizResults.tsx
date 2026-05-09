@@ -178,7 +178,7 @@ const QuizResults: React.FC<QuizResultsProps> = ({
         </div>
       )}
 
-      {/* Jeetu Bhaiya Tip */}
+      {/* SETU Mentor Tip */}
       <div className="bg-gradient-to-r from-slate-950 to-slate-900 border border-border rounded-2xl p-5 shadow-xl relative overflow-hidden">
         <div className="absolute -right-4 -bottom-4 text-7xl opacity-5">👨‍🏫</div>
         <div className="flex items-start gap-4 relative z-10">

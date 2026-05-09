@@ -70,7 +70,7 @@ export const MentorSection: React.FC = () => {
                 "Padhai sirf notes se nahi hoti. Ek teacher chahiye jo tumhe samjhe,
                 tumhari galtiyon ko pakde, aur sahi direction de."
               </p>
-              <p className="text-accent font-medium mt-4">— Jeetu Bhaiya's Philosophy</p>
+              <p className="text-accent font-medium mt-4">— SETU Mentor's Philosophy</p>
             </div>
 
             {/* Mentor Cards - Compact */}

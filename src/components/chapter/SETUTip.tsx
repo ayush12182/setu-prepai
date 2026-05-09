@@ -3,12 +3,12 @@ import { Lightbulb, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Chapter } from '@/data/syllabus';
 
-interface JeetuTipProps {
+interface SETUTipProps {
   chapter: Chapter;
   subchapterCount: number;
 }
 
-export const JeetuTip: React.FC<JeetuTipProps> = ({ chapter, subchapterCount }) => {
+export const SETUTip: React.FC<SETUTipProps> = ({ chapter, subchapterCount }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -27,7 +27,7 @@ export const JeetuTip: React.FC<JeetuTipProps> = ({ chapter, subchapterCount }) 
         
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <p className="font-semibold text-foreground">Jeetu Bhaiya says...</p>
+            <p className="font-semibold text-foreground">SETU Mentor says...</p>
             <Lightbulb className="w-4 h-4 text-setu-saffron" />
           </div>
           

@@ -222,7 +222,7 @@ const generateSchedule = (
       day, subject: subjectName, subjectId: chapter.subject as string,
       chapter: chapter.name, chapterId: chapter.id,
       subchapter: sub.name, subchapterId: sub.id,
-      task: sub.jeetuLine || `Focus on ${sub.name}`,
+      task: sub.setuLine || `Focus on ${sub.name}`,
       difficulty: chapter.difficulty,
       isToday: isSameDay(cycleStart, day, today),
       isPast: isPastDay(cycleStart, day, today),
@@ -485,12 +485,12 @@ export const TwentyOneDayPlan: React.FC = () => {
             {isHinglish ? 'Hum tumhe direction denge exam ke liye.' : "We'll give you direction for your exam."}
           </p>
 
-          {/* Jeetu Bhaiya motivational quote */}
+          {/* SETU Mentor motivational quote */}
           <div className="flex items-start gap-3 mb-6 bg-white/[0.06] backdrop-blur-sm rounded-xl p-4 border border-white/10">
             <Quote className="w-5 h-5 text-accent shrink-0 mt-0.5" />
             <div>
               <p className="text-sm text-white/90 italic leading-relaxed">"{todayQuote}"</p>
-              <p className="text-xs text-accent font-semibold mt-1.5">— Jeetu Bhaiya</p>
+              <p className="text-xs text-accent font-semibold mt-1.5">— SETU Mentor</p>
             </div>
           </div>
 

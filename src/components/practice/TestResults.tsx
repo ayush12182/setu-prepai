@@ -273,7 +273,7 @@ const TestResults: React.FC<TestResultsProps> = ({
         </div>
       )}
 
-      {/* Jeetu Bhaiya Tip */}
+      {/* SETU Mentor Tip */}
       <div className="bg-gradient-to-r from-setu-saffron/10 to-setu-green/10 border border-setu-saffron/20 rounded-xl p-4">
         <div className="flex items-start gap-3">
           <BookOpen className="w-5 h-5 text-setu-saffron flex-shrink-0 mt-0.5" />

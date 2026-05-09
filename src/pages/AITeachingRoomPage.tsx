@@ -111,9 +111,9 @@ const getDoubtPlaceholder = (name: string, lang: LanguageMode): string => {
 type TeacherId = keyof typeof TEACHERS;
 
 /* ────────────────────────────────────────────────
-   JEETU BHAIYA BASE TEACHING PROMPT
+   SETU MENTOR BASE TEACHING PROMPT
 ──────────────────────────────────────────────── */
-const BASE_TEACHING_PROMPT = `You teach exactly like Jeetu Bhaiya from Kota Factory teaches in his classroom. 
+const BASE_TEACHING_PROMPT = `You teach exactly like a highly-experienced expert teacher from Kota. 
 
 Your teaching style:
 - You build concepts from absolute zero. Never assume the student knows anything. "Dekh, pehle ye samajh — ye kyun hota hai"
@@ -266,7 +266,7 @@ OUTPUT STRUCTURE (always follow):
 } as const;
 
 const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts-stream`;
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jeetu-chat`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/setu-chat`;
 
 
 /* ────────────────────────────────────────────────
@@ -839,7 +839,7 @@ const AITeachingRoomPage: React.FC = () => {
     // 2. Build chat history
     chatHistoryRef.current.push({ role: 'user', content: userMessage });
 
-    // 3. Stream from jeetu-chat using the teacher's custom system prompt
+    // 3. Stream from setu-chat using the teacher's custom system prompt
     setIsStreaming(true);
     let accumulated = '';
     let spokenCursor = 0;

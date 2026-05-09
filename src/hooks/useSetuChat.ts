@@ -5,9 +5,9 @@ import { useClassContext } from '@/contexts/ClassContext';
 
 type Message = { role: 'user' | 'assistant'; content: any };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jeetu-chat`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/setu-chat`;
 
-export const useJeetuChat = () => {
+export const useSetuChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { examMode } = useExamMode();

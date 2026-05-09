@@ -23,7 +23,7 @@ import TestPage from "./pages/TestPage";
 import MajorTestPage from "./pages/MajorTestPage";
 import RevisionPage from "./pages/RevisionPage";
 import LectureSetu from "./pages/LectureSetu";
-import AskJeetuPage from "./pages/AskJeetuPage";
+import AskSetuPage from "./pages/AskSetuPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
@@ -164,7 +164,7 @@ const App = () => (
                     <Route path="/revision" element={<RevisionPage />} />
                     <Route path="/revision/:subject/:topic" element={<RevisionTopicPage />} />
                     <Route path="/lecture-setu" element={<LectureSetu />} />
-                    <Route path="/ask-jeetu" element={<AskJeetuPage />} />
+                    <Route path="/ask-setu" element={<AskSetuPage />} />
                     <Route path="/my-batch" element={<MyBatchPage />} />
                     <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />

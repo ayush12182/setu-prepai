@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { useJeetuChat } from './useJeetuChat';
+import { useSETUChat } from './useSETUChat';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
@@ -15,7 +15,7 @@ export const useVoiceAI = () => {
   const [voiceMode, setVoiceMode] = useState<VoiceMode>('push-to-talk');
   const [liveTranscript, setLiveTranscript] = useState('');
 
-  const { sendMessage, isLoading: isChatLoading } = useJeetuChat();
+  const { sendMessage, isLoading: isChatLoading } = useSETUChat();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -228,7 +228,7 @@ export const useVoiceAI = () => {
     setLiveTranscript('');
     setIsProcessing(true);
 
-    // Send to Jeetu Chat LLM
+    // Send to SETU Chat LLM
     const fullHistory = [...chatHistory, { role: 'user' as const, content: finalText }];
     let assistantFull = '';
 

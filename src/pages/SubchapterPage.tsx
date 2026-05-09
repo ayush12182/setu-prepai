@@ -1,6 +1,6 @@
 // SubchapterPage - Smallest learning unit in SETU
 // Follows: Subject → Chapter → Subchapter → Learn/Practice/Test/Analyze
-// With Jeetu Bhaiya-style notes generation and PDF download
+// With SETU Mentor-style notes generation and PDF download
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -287,13 +287,13 @@ const SubchapterPage: React.FC = () => {
               </div>
             )}
 
-            {/* E. Jeetu Bhaiya Line */}
+            {/* E. SETU Mentor Line */}
             <div className="bg-gradient-to-r from-setu-saffron/10 to-setu-green/10 border border-setu-saffron/20 rounded-xl p-5">
               <div className="flex items-start gap-3">
                 <MessageCircle className="w-5 h-5 text-setu-saffron mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-setu-saffron mb-1">Jeetu Bhaiya Says:</p>
-                  <p className="text-foreground italic text-sm">"{subchapter.jeetuLine}"</p>
+                  <p className="text-sm font-medium text-setu-saffron mb-1">SETU Mentor Says:</p>
+                  <p className="text-foreground italic text-sm">"{subchapter.setuLine || subchapter.setuLine}"</p>
                 </div>
               </div>
             </div>

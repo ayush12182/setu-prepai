@@ -12,7 +12,7 @@ const steps = [
   {
     number: '02',
     icon: Brain,
-    title: 'Learn with Jeetu Bhaiya',
+    title: 'Learn with SETU Mentor',
     description: 'Get concept notes, formulas, and teacher-style explanations — like sitting in a Kota classroom.',
   },
   {

@@ -16,7 +16,7 @@ export interface AIDiagnosisReport {
   timeInsight: string;
   benchmarks: { subject: string; message: string }[];
   weeklyStory: string;
-  jeetuMessage: string;
+  setuMessage: string;
   priorityActions: AIAction[];
   topWeakChapters: { subject: string; chapter: string; accuracy: number; attempts: number; marksLost: number }[];
   topMistakeType: { type: string; percentage: number };
@@ -29,7 +29,7 @@ export function generateDiagnosticReport(data: StudentAnalyticsData): AIDiagnosi
       isReliable: false,
       confidenceMessage: "Not enough data — attempt at least 100 questions for AI diagnosis.",
       problemSummary: '', rootCause: '', whatToFixFirst: '', marksPotential: '', timeInsight: '',
-      benchmarks: [], weeklyStory: '', jeetuMessage: '', priorityActions: [], topWeakChapters: [], topMistakeType: { type: '', percentage: 0 }
+      benchmarks: [], weeklyStory: '', setuMessage: '', priorityActions: [], topWeakChapters: [], topMistakeType: { type: '', percentage: 0 }
     };
   }
 
@@ -96,7 +96,7 @@ export function generateDiagnosticReport(data: StudentAnalyticsData): AIDiagnosi
   
   const weeklyStoryStr = `This week you pushed your ${data.weeklyImprovement.subject} by ${data.weeklyImprovement.percentage}%. But let's be honest, you are bleeding ~${topWeakChapters[0].marksLost} marks solely due to ${topWeakChapters[0].chapter}. You are ${benchmarks[0].message.toLowerCase()}, which is holding everything back.`;
 
-  const jeetuMessage = `Dekh bhai, tumhari sabse badi score-blocking problem ${topWeakChapters[0].chapter} aur ${topWeakChapters[1].chapter} hai.\n\nTere ${topMistakeType.percentage}% mistakes sirf ${topMistakeType.type.toLowerCase()} ki wajah se ho rahe hain. Dhyan se dekh, you are losing ~${totalMarksLost} marks just in these two chapters.\n\n${examStrategy}\n\nKya karega ab:\n1. Solve EXACTLY 10 questions of ${topWeakChapters[0].chapter} right now.\n2. Do not touch new topics until this leak is fixed.\n\n${predictionStr}`;
+  const setuMessage = `Listen, your biggest score-blocking problem is ${topWeakChapters[0].chapter} and ${topWeakChapters[1].chapter}.\n\nYour ${topMistakeType.percentage}% mistakes are happening just because of ${topMistakeType.type.toLowerCase()}. Pay attention, you are losing ~${totalMarksLost} marks just in these two chapters.\n\n${examStrategy}\n\nWhat to do now:\n1. Solve EXACTLY 10 questions of ${topWeakChapters[0].chapter} right now.\n2. Do not touch new topics until this leak is fixed.\n\n${predictionStr}`;
 
   // 5. Real-Time Action Engine
   const priorityActions: AIAction[] = [
@@ -114,7 +114,7 @@ export function generateDiagnosticReport(data: StudentAnalyticsData): AIDiagnosi
     timeInsight: timeInsightStr,
     benchmarks,
     weeklyStory: weeklyStoryStr,
-    jeetuMessage: jeetuMessage,
+    setuMessage: setuMessage,
     topWeakChapters: topWeakChapters,
     topMistakeType: topMistakeType,
     priorityActions: priorityActions

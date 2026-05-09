@@ -422,7 +422,7 @@ const ProfilePage: React.FC = () => {
           className="rounded-xl bg-accent/5 border border-accent/20 p-5"
         >
           <p className="font-semibold text-foreground mb-1 flex items-center gap-2">
-            <span className="text-lg">💡</span> Jeetu Bhaiya's Advice
+            <span className="text-lg">💡</span> SETU Mentor's Advice
           </p>
           <p className="text-muted-foreground text-sm leading-relaxed">
             Beta, apna profile complete rakho. Isse hum tumhare liye better personalized

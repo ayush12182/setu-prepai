@@ -28,7 +28,7 @@ const JEE_CONFIG: ExamModeConfig = {
     { key: 'chemistry', label: 'Chemistry', icon: '🧪' },
     { key: 'maths', label: 'Mathematics', icon: '📐' },
   ],
-  teacherName: 'Jeetu Bhaiya',
+  teacherName: 'SETU Mentor',
   teacherTag: 'Your JEE Mentor',
   accentHue: 32,
   learningFlow: 'Concept → Practice → Advanced → Analysis',

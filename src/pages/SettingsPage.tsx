@@ -182,7 +182,7 @@ const SettingsPage: React.FC = () => {
                         <Heart className="w-5 h-5 text-rose-500" />
                     </div>
                     <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                        Your preferences help Jeetu Bhaiya personalize your learning journey to perfection.
+                        Your preferences help SETU Mentor personalize your learning journey to perfection.
                     </p>
                 </motion.div>
             </div>

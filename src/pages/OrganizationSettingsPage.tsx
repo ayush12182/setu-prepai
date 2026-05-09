@@ -207,7 +207,7 @@ export default function OrganizationSettingsPage() {
                  <div className="p-4 flex items-center justify-between hover:bg-secondary/20 transition-colors border-b border-border">
                    <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-accent/20 text-accent font-bold flex items-center justify-center">JB</div>
-                     <span className="font-semibold text-foreground">Jeetu Bhaiya</span>
+                     <span className="font-semibold text-foreground">SETU Mentor</span>
                    </div>
                    <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Active</span>
                  </div>

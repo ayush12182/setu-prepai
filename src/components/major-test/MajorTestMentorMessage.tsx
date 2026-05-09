@@ -66,7 +66,7 @@ const MajorTestMentorMessage: React.FC<MajorTestMentorMessageProps> = ({
             </div>
             <div>
               <h2 className="text-xl font-display font-bold text-foreground mb-1">
-                Jeetu Bhaiya
+                SETU Mentor
               </h2>
               <p className="text-sm text-muted-foreground">Your JEE Mentor</p>
             </div>
@@ -139,7 +139,7 @@ const MajorTestMentorMessage: React.FC<MajorTestMentorMessageProps> = ({
           <p className="text-lg text-foreground italic mb-2">
             "Exam hall mein wohi zinda bachta hai jo apni weaknesses jaanta hai."
           </p>
-          <p className="text-sm text-primary font-medium">— Jeetu Bhaiya</p>
+          <p className="text-sm text-primary font-medium">— SETU Mentor</p>
         </div>
 
         {/* Continue Button */}

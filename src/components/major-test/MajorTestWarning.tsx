@@ -101,7 +101,7 @@ const MajorTestWarning: React.FC<MajorTestWarningProps> = ({
             <br /><br />
             Treat this like the real exam hall. Give it your best shot."
           </p>
-          <p className="text-sm text-primary mt-3 font-medium">— Jeetu Bhaiya</p>
+          <p className="text-sm text-primary mt-3 font-medium">— SETU Mentor</p>
         </div>
 
         {/* Acknowledgment */}
