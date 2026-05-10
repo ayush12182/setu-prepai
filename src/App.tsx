@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ExamModeProvider } from "@/contexts/ExamModeContext";
 import { ClassProvider } from "@/contexts/ClassContext";
 import LandingPage from "./pages/LandingPage";
+import AboutPage from "./pages/AboutPage";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import ExamSelectionPage from "./pages/ExamSelectionPage";
@@ -147,8 +148,11 @@ const App = () => (
                   <Toaster />
                   <Sonner />
                   <Routes>
-                    <Route path="/" element={<LandingPage />} />
+                    {/* Landing & Auth */}
+                    <Route path="/landing" element={<LandingPage />} />
+                    <Route path="/about" element={<AboutPage />} />
                     <Route path="/auth" element={<AuthPage />} />
+                    <Route path="/" element={<LandingPage />} />
                     <Route path="/select-exam" element={<ExamSelectionPage />} />
                     <Route path="/dashboard" element={<B2CGateRoute><Index /></B2CGateRoute>} />
                     <Route path="/platform-updated" element={<PlatformUpdatedPage />} />

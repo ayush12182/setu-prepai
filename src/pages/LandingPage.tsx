@@ -8,7 +8,6 @@ import FeaturesSection from '@/components/landing/FeaturesSection';
 import ResultsSection from '@/components/landing/ResultsSection';
 import PricingSection from '@/components/landing/PricingSection';
 import TestimonialsSection from '@/components/landing/TestimonialsSection';
-import LeadershipSection from '@/components/landing/LeadershipSection';
 import FinalCTA from '@/components/landing/FinalCTA';
 import LandingFooter from '@/components/landing/LandingFooter';
 
@@ -24,7 +23,6 @@ const LandingPage: React.FC = () => {
       <ResultsSection />
       <PricingSection />
       <TestimonialsSection />
-      <LeadershipSection />
       <FinalCTA />
       <LandingFooter />
     </div>
