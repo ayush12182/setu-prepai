@@ -1,11 +1,11 @@
 import React from 'react';
 
-const COACHING_NAMES = [
-  'Allen',
-  'Physics Wallah',
-  'Unacademy',
-  'Motion Education',
-  'VMC Classes',
+const COACHING_DATA = [
+  { name: 'Allen', logo: '/logos/allen.png' },
+  { name: 'Physics Wallah', logo: '/logos/pw.png' },
+  { name: 'Unacademy', logo: '/logos/unacademy.png' },
+  { name: 'Motion Education', logo: '/logos/motion.png' },
+  { name: 'VMC Classes', logo: '/logos/vmc.png' },
 ];
 
 const CoachingMarquee: React.FC = () => {
@@ -22,12 +22,28 @@ const CoachingMarquee: React.FC = () => {
           className="flex whitespace-nowrap animate-marquee items-center"
           style={{ animationDuration: '30s' }}
         >
-          {[...COACHING_NAMES, ...COACHING_NAMES, ...COACHING_NAMES].map((name, i) => (
+          {[...COACHING_DATA, ...COACHING_DATA, ...COACHING_DATA].map((item, i) => (
             <div 
               key={i}
-              className="mx-12 text-2xl sm:text-3xl font-black text-white/20 hover:text-white/40 transition-colors cursor-default select-none tracking-tight font-display"
+              className="mx-12 flex items-center justify-center grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-300 cursor-default select-none"
             >
-              {name}
+              <img 
+                src={item.logo} 
+                alt={item.name} 
+                className="h-8 sm:h-10 object-contain"
+                onError={(e) => {
+                  // Fallback to text if image fails
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    const text = document.createElement('span');
+                    text.innerText = item.name;
+                    text.className = 'text-xl font-bold text-white/20';
+                    parent.appendChild(text);
+                  }
+                }}
+              />
             </div>
           ))}
         </div>

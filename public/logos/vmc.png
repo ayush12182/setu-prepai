@@ -1,0 +1,122 @@
+<!DOCTYPE>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="description" content="Learn from the Best teachers for IIT-JEE, NEET & Foundation. VMC'S teaching pedagogy has been refined and articulated thoroughly over the decades for best possible learning outcomes. VMC is a leader in IIT-JEE and Medical preparations. ">
+    <meta name="keywords" content="VMC Founders & Management Team">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>404</title>
+    <link rel="stylesheet" type="text/css" href="../bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="../assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="../assets/css/responsive.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="../assets/css/uikit.css">
+    <!-- Google Tag Manager -->
+    <script>
+        (function(w, d, s, l, i) {
+            w[l] = w[l] || [];
+            // w[l].push({
+            //     'gtm.start': new Date().getTime(),
+            //     event: 'gtm.js'
+            // });
+            var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s),
+                dl = l != 'dataLayer' ? '&l=' + l : '';
+            j.async = true;
+            j.src =
+                'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+            f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-TJZHX5Q');
+    </script>
+    <!-- End Google Tag Manager -->
+     <style>
+
+     </style>
+</head>
+
+<body>
+
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TJZHX5Q"
+	height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <!--header-->
+    <div id="headerfile"></div>
+    <!--./header-->
+
+    <section class="py-5 px-0 text-center" style="background: radial-gradient(ellipse at center,  #fff787 0%,#ffffff 55%,#ffffff 100%);padding-top: 0px !important;">
+        <div class="container">
+
+       <img src="../assets/images/404-1.png" style="width: ;"/>
+       <p>
+        <a href="https://www.vidyamandir.com/" style="padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 23px;
+        background: #f5c504;
+        color: #000;
+        font-size: 21px;
+    ">Go to Home</a>
+       </p>
+
+        </div>
+    </section>
+
+
+    
+
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/bootstrap.min.js"></script>
+    <script src="../assets/js/font-kit.js"></script>
+    <script src="../assets/js/owl.carousel.js"></script>
+    <script src="../assets/js/uikit.js"></script>
+    <script src="../assets/js/uikit-icons.js"></script>
+    <script src="../assets/js/custom.js"></script>
+    <script src="../assets/js/slick.js"></script>
+    <script>
+        $('.owl-carousel-discover').owlCarousel({
+            items: 1,
+            nav: false,
+        });
+    </script>
+    <button type="button" class="npfWidgetButton npfWidget-1bd0d58b36c07467a60077341156646d">Enquire Now!</button>
+    <script src="https://in8cdn.npfs.co/js/widget/npfwpopup.js"></script>
+    <script>
+        let npfW1bd0d58b36c07467a60077341156646d = new NpfWidgetsInit({
+            "widgetId": "1bd0d58b36c07467a60077341156646d",
+            "baseurl": "widgets.in8.nopaperforms.com",
+            "formTitle": "Enquiry Form",
+            "titleColor": "#FF0033",
+            "backgroundColor": "#ddd",
+            "iframeHeight": "560px",
+            "buttonbgColor": "#4c79dc",
+            "buttonTextColor": "#FFF",
+        });
+    </script>
+    
+    <script type="text/javascript">
+        var s = document.createElement("script");
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://widgets.in8.nopaperforms.com/emwgts.js";
+        document.body.appendChild(s);
+    </script>
+    
+    <script type="text/javascript">
+        var npf_d = 'https://vidyamandirclasses.in8.nopaperforms.com','https://vidyamandirclassesoffline.in8.nopaperforms.com';
+        var npf_c = '5875',
+            '5876';
+        var npf_m = '1';
+        var s = document.createElement("script");
+        s.type = "text/javascript";
+        s.async = true;
+        s.src = "https://track.nopaperforms.com/js/track.js";
+        document.body.appendChild(s);
+    </script>
+    
+    <!-- Enquire now end -->
+</body>
+
+</html>
