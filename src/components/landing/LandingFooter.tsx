@@ -29,8 +29,8 @@ const LandingFooter: React.FC = () => {
     {
       title: 'Company',
       links: [
-        { label: 'About',           action: () => navigate('/about') },
-        { label: 'Leadership',      action: () => navigate('/about') },
+        { label: 'About',           action: () => document.getElementById('leadership')?.scrollIntoView({ behavior: 'smooth' }) },
+        { label: 'Leadership',      action: () => document.getElementById('leadership')?.scrollIntoView({ behavior: 'smooth' }) },
         { label: 'Contact Us',      action: () => window.open('mailto:setu.edu.1925@gmail.com') },
         { label: 'Testimonials',    action: () => document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }) },
       ],
