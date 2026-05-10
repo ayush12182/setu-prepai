@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 const COACHING_DATA = [
   { name: 'Allen', logo: '/logos/allen.png' },
@@ -9,51 +10,50 @@ const COACHING_DATA = [
 ];
 
 const CoachingMarquee: React.FC = () => {
+  // Triple the data to ensure seamless loop
+  const marqueeItems = [...COACHING_DATA, ...COACHING_DATA, ...COACHING_DATA];
+
   return (
-    <section className="relative py-12 bg-[#07111F] overflow-hidden border-b border-white/[0.06]">
-      <div className="max-w-7xl mx-auto px-5 mb-10 text-center">
-        <p className="text-white/60 text-sm font-bold uppercase tracking-[0.25em]">
+    <section className="relative py-16 bg-[#07111F] overflow-hidden border-b border-white/[0.06]">
+      <div className="max-w-7xl mx-auto px-5 mb-12 text-center">
+        <p className="text-white/70 text-xs sm:text-sm font-bold uppercase tracking-[0.3em]">
           Trusted by Teachers and Students of
         </p>
       </div>
 
-      <div className="relative flex overflow-x-hidden group py-4">
-        <div 
-          className="flex whitespace-nowrap animate-marquee items-center"
-          style={{ animationDuration: '40s' }}
+      <div className="relative flex items-center">
+        {/* Left fade gradient */}
+        <div className="absolute left-0 top-0 bottom-0 w-32 sm:w-64 bg-gradient-to-r from-[#07111F] via-[#07111F]/80 to-transparent z-10 pointer-events-none" />
+        
+        {/* Right fade gradient */}
+        <div className="absolute right-0 top-0 bottom-0 w-32 sm:w-64 bg-gradient-to-l from-[#07111F] via-[#07111F]/80 to-transparent z-10 pointer-events-none" />
+
+        <motion.div 
+          className="flex whitespace-nowrap items-center gap-20 sm:gap-32 px-10"
+          animate={{
+            x: ["0%", "-33.33%"]
+          }}
+          transition={{
+            duration: 25,
+            ease: "linear",
+            repeat: Infinity
+          }}
         >
-          {[...COACHING_DATA, ...COACHING_DATA, ...COACHING_DATA, ...COACHING_DATA, ...COACHING_DATA].map((item, i) => (
+          {marqueeItems.map((item, i) => (
             <div 
               key={i}
-              className="mx-14 flex items-center justify-center grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300 cursor-default select-none"
+              className="flex items-center justify-center min-w-[120px] sm:min-w-[180px] hover:scale-110 transition-transform duration-300"
             >
               <img 
                 src={item.logo} 
                 alt={item.name} 
-                className="h-10 sm:h-12 w-auto object-contain"
-                loading="lazy"
+                className="h-10 sm:h-14 w-auto object-contain brightness-110 contrast-110"
+                style={{ filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.1))' }}
               />
             </div>
           ))}
-        </div>
-
-        {/* Gradient Fades for a premium look */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-[#07111F] via-[#07111F]/80 to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-[#07111F] via-[#07111F]/80 to-transparent z-10" />
+        </motion.div>
       </div>
-
-      <style>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-20%); }
-        }
-        .animate-marquee {
-          animation: marquee linear infinite;
-        }
-        .animate-marquee:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
     </section>
   );
 };
