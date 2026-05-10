@@ -7,6 +7,7 @@ const COACHING_DATA = [
   { name: 'Unacademy', logo: '/logos/unacademy.png' },
   { name: 'Motion Education', logo: '/logos/motion.png' },
   { name: 'VMC Classes', logo: '/logos/vmc.png' },
+  { name: 'PACE IIT & Medical', logo: '/logos/pace.png' },
 ];
 
 const CoachingMarquee: React.FC = () => {
@@ -34,7 +35,7 @@ const CoachingMarquee: React.FC = () => {
             x: ["0%", "-33.33%"]
           }}
           transition={{
-            duration: 25,
+            duration: 30, // Increased slightly for more items
             ease: "linear",
             repeat: Infinity
           }}
