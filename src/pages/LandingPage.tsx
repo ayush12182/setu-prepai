@@ -1,7 +1,7 @@
 import React from 'react';
 import LandingNav from '@/components/landing/LandingNav';
 import HeroSection from '@/components/landing/HeroSection';
-import TrustStrip from '@/components/landing/TrustStrip';
+import CoachingMarquee from '@/components/landing/CoachingMarquee';
 import AboutSection from '@/components/landing/AboutSection';
 import ExamTracksSection from '@/components/landing/ExamTracksSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
@@ -17,7 +17,7 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-[#07111F] text-white overflow-x-hidden">
       <LandingNav />
       <HeroSection />
-      <TrustStrip />
+      <CoachingMarquee />
       <ExamTracksSection />
       <FeaturesSection />
       <AboutSection />
