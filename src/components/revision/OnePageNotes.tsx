@@ -9,8 +9,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { supabase } from '@/integrations/supabase/client';
-import Latex from 'react-latex-next';
-import 'katex/dist/katex.min.css';
+import { MathLine, processNotesContent } from '@/utils/mathRenderer';
 
 interface OnePageNotesProps {
   onBack: () => void;
@@ -457,68 +456,19 @@ How to revise in last 24 hours
 Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
   };
 
-  // Normalize AI LaTeX delimiters (\(...\) and \[...\]) to $...$ for react-latex-next
-  const normalizeLatex = (text: string): string => {
-    return text
-      .replace(/\\\[([\s\S]*?)\\\]/g, (_m, eq) => `$$${eq.trim()}$$`) // \[...\] → $$...$$
-      .replace(/\\\(([\s\S]*?)\\\)/g, (_m, eq) => `$${eq.trim()}$`)   // \(...\) → $...$
-      .replace(/\*\*([^*]+)\*\*/g, '$1');                               // strip **bold** markers
-  };
-
-  const renderNotes = (content: string) => {
-    // Normalize entire content first (handles multiline \[...\] and \(...\))
-    const normalized = normalizeLatex(content);
-
-    // Split into chunks: text segments vs $$...$$ block segments
-    const chunks: Array<{ type: 'text' | 'block'; value: string }> = [];
-    const blockRe = /\$\$([\s\S]*?)\$\$/g;
-    let lastIndex = 0;
-    let match;
-    while ((match = blockRe.exec(normalized)) !== null) {
-      if (match.index > lastIndex) {
-        chunks.push({ type: 'text', value: normalized.slice(lastIndex, match.index) });
-      }
-      chunks.push({ type: 'block', value: match[1].trim() });
-      lastIndex = blockRe.lastIndex;
-    }
-    if (lastIndex < normalized.length) {
-      chunks.push({ type: 'text', value: normalized.slice(lastIndex) });
-    }
-
-    const elements: React.ReactNode[] = [];
-    let keyIdx = 0;
-
-    chunks.forEach((chunk) => {
-      if (chunk.type === 'block') {
-        // Render as a centred display math block using KaTeX directly
-        try {
-          elements.push(
-            <div key={keyIdx++} className="my-4 flex justify-center overflow-x-auto">
-              <Latex>{`$$${chunk.value}$$`}</Latex>
-            </div>
-          );
-        } catch {
-          elements.push(<pre key={keyIdx++} className="my-2 text-sm text-muted-foreground">{chunk.value}</pre>);
-        }
-      } else {
-        chunk.value.split('\n').forEach((line) => {
-          const trimmed = line.trim();
-          const k = keyIdx++;
-          if (trimmed.startsWith('# ')) { elements.push(<h1 key={k} className="text-xl font-bold mt-0 mb-4"><Latex>{trimmed.slice(2)}</Latex></h1>); return; }
-          if (trimmed.startsWith('## ')) { elements.push(<h2 key={k} className="text-lg font-semibold mt-6 mb-3 text-primary"><Latex>{trimmed.slice(3)}</Latex></h2>); return; }
-          if (trimmed.startsWith('### ')) { elements.push(<h3 key={k} className="text-base font-medium mt-4 mb-2"><Latex>{trimmed.slice(4)}</Latex></h3>); return; }
-          if (trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) { elements.push(<p key={k} className="ml-4 my-1">• <Latex>{trimmed.slice(2)}</Latex></p>); return; }
-          if (trimmed.startsWith('⚡') || trimmed.startsWith('💡')) { elements.push(<p key={k} className="ml-4 my-1 text-setu-saffron font-medium"><Latex>{trimmed}</Latex></p>); return; }
-          if (trimmed.startsWith('---')) { elements.push(<hr key={k} className="my-4 border-border" />); return; }
-          if (trimmed.match(/^\d+\./)) { elements.push(<p key={k} className="ml-4 my-1"><Latex>{trimmed}</Latex></p>); return; }
-          if (trimmed) { elements.push(<p key={k} className="my-2"><Latex>{trimmed}</Latex></p>); return; }
-          elements.push(<br key={k} />);
-        });
-      }
+  const renderNotes = (content: string) =>
+    processNotesContent(content, (line, key) => {
+      const t = line.trim();
+      if (t.startsWith('# '))  return <h1  key={key} className="text-xl font-bold mt-0 mb-4"><MathLine>{t.slice(2)}</MathLine></h1>;
+      if (t.startsWith('## ')) return <h2  key={key} className="text-lg font-semibold mt-6 mb-3 text-primary"><MathLine>{t.slice(3)}</MathLine></h2>;
+      if (t.startsWith('### ')) return <h3 key={key} className="text-base font-medium mt-4 mb-2"><MathLine>{t.slice(4)}</MathLine></h3>;
+      if (t.startsWith('• ') || t.startsWith('- ') || t.startsWith('* ')) return <p key={key} className="ml-4 my-1">• <MathLine>{t.slice(2)}</MathLine></p>;
+      if (t.startsWith('⚡') || t.startsWith('💡')) return <p key={key} className="ml-4 my-1 text-setu-saffron font-medium"><MathLine>{t}</MathLine></p>;
+      if (t.startsWith('---')) return <hr key={key} className="my-4 border-border" />;
+      if (t.match(/^\d+\./)) return <p key={key} className="ml-4 my-1"><MathLine>{t}</MathLine></p>;
+      if (t) return <p key={key} className="my-2"><MathLine>{t}</MathLine></p>;
+      return <br key={key} />;
     });
-
-    return elements;
-  };
 
   if (selectedChapter) {
     return (

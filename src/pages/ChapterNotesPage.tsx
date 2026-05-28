@@ -16,8 +16,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { cn } from '@/lib/utils';
-import Latex from 'react-latex-next';
-import 'katex/dist/katex.min.css';
+import { MathLine, processNotesContent } from '@/utils/mathRenderer';
 
 type SmartMode = 'default' | 'beginner' | 'advanced' | 'formulas_only' | 'mistakes_only' | 'revision';
 
@@ -210,36 +209,20 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
     { id: 'revision',      label: '⚡ 1-Min Revision',  icon: RotateCcw,     color: 'text-accent' },
   ] as const;
 
-  const renderInline = (text: string, key?: number) => {
-    const parts = text.split(/(\*\*.*?\*\*)/g);
-    return (
-      <span key={key}>
-        {parts.map((p, x) =>
-          p.startsWith('**') && p.endsWith('**')
-            ? <strong key={x} className="font-bold text-foreground/90 bg-primary/5 px-1 rounded">
-                <Latex>{p.slice(2, -2)}</Latex>
-              </strong>
-            : <Latex key={x}>{p}</Latex>
-        )}
-      </span>
-    );
-  };
-
-  const renderNotes = (content: string) => {
-    return content.split('\n').map((line, i) => {
+  const renderNotes = (content: string) =>
+    processNotesContent(content, (line, i) => {
       const trimmed = line.trim();
       if (!trimmed) return <br key={i} />;
 
-      // Level badges (### Level 1/2/3)
-      const levelMatch = trimmed.match(/^#{1,3}\s*Level\s*([123])\s*[—–-]?\s*(.*)/i);
+      // Level badges
+      const levelMatch = trimmed.match(/^#{1,3}\s*Level\s*([123])\s*[\u2014\u2013-]?\s*(.*)/i);
       if (levelMatch) {
         const lvl = parseInt(levelMatch[1]) as 1 | 2 | 3;
         const style = LEVEL_STYLES[lvl];
-        const title = levelMatch[2].trim();
         return (
           <h3 key={i} className={cn('text-lg font-bold mt-8 mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl', style.wrapper)}>
             <div className={cn('w-2 h-2 rounded-full', style.dot)} />
-            {title ? <Latex>{title}</Latex> : `Level ${lvl}`}
+            <MathLine>{levelMatch[2].trim() || `Level ${lvl}`}</MathLine>
           </h3>
         );
       }
@@ -253,64 +236,58 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
               <Lightbulb className="w-4 h-4" /> JEE Tip
             </p>
             <p className="text-amber-800 dark:text-amber-200 text-sm leading-relaxed">
-              <Latex>{tipText}</Latex>
+              <MathLine>{tipText}</MathLine>
             </p>
           </div>
         );
       }
 
       // Structured solution fields
-      if (trimmed.startsWith('**Given:**')) return <p key={i} className="my-2"><strong className="text-foreground">Given:</strong> <Latex>{trimmed.replace('**Given:**', '').trim()}</Latex></p>;
-      if (trimmed.startsWith('**To find:**')) return <p key={i} className="my-2"><strong className="text-foreground">To find:</strong> <Latex>{trimmed.replace('**To find:**', '').trim()}</Latex></p>;
+      if (trimmed.startsWith('**Given:**'))   return <p key={i} className="my-2"><strong className="text-foreground">Given:</strong> <MathLine>{trimmed.replace('**Given:**', '').trim()}</MathLine></p>;
+      if (trimmed.startsWith('**To find:**')) return <p key={i} className="my-2"><strong className="text-foreground">To find:</strong> <MathLine>{trimmed.replace('**To find:**', '').trim()}</MathLine></p>;
       if (trimmed.startsWith('**Concept:**')) return (
         <p key={i} className="my-3 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm font-semibold">
-          <Layers className="w-4 h-4" /> Concept: <Latex>{trimmed.replace('**Concept:**', '').trim()}</Latex>
+          <Layers className="w-4 h-4" /> Concept: <MathLine>{trimmed.replace('**Concept:**', '').trim()}</MathLine>
         </p>
       );
       if (trimmed.startsWith('**Solution:**')) return <p key={i} className="mt-4 mb-2 font-bold text-foreground">Solution:</p>;
       if (trimmed.startsWith('**Answer:**')) return (
         <div key={i} className="my-4 p-4 bg-secondary/30 rounded-xl border border-border flex flex-wrap items-center gap-4">
           <strong className="text-foreground">Answer:</strong>
-          <div className="text-lg overflow-x-auto"><Latex>{trimmed.replace('**Answer:**', '').trim()}</Latex></div>
+          <div className="text-lg overflow-x-auto"><MathLine>{trimmed.replace('**Answer:**', '').trim()}</MathLine></div>
         </div>
       );
 
-      // Step lines inside solution
-      if (/^Step \d+:/i.test(trimmed)) return (
-        <p key={i} className="my-2 ml-4 text-muted-foreground"><Latex>{trimmed}</Latex></p>
-      );
+      if (/^Step \d+:/i.test(trimmed)) return <p key={i} className="my-2 ml-4 text-muted-foreground"><MathLine>{trimmed}</MathLine></p>;
 
-      // Standard headings
       if (trimmed.startsWith('# ')) return (
         <h1 key={i} className="text-3xl font-display font-bold mt-2 mb-6 text-foreground border-b border-border pb-2">
-          <Latex>{trimmed.slice(2)}</Latex>
+          <MathLine>{trimmed.slice(2)}</MathLine>
         </h1>
       );
       if (trimmed.startsWith('## ')) return (
         <h2 key={i} className="text-xl font-bold mt-10 mb-4 flex items-center gap-3 text-foreground bg-secondary/50 p-3 rounded-xl border border-border">
           <Layers className="w-5 h-5 text-accent shrink-0" />
-          <Latex>{trimmed.slice(3)}</Latex>
+          <MathLine>{trimmed.slice(3)}</MathLine>
         </h2>
       );
       if (trimmed.startsWith('### ')) return (
         <h3 key={i} className="text-lg font-bold mt-6 mb-2 text-foreground/90 flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-          <Latex>{trimmed.slice(4)}</Latex>
+          <MathLine>{trimmed.slice(4)}</MathLine>
         </h3>
       );
 
-      // Bullets
-      if (trimmed.startsWith('• ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) return (
+      if (trimmed.startsWith('\u2022 ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) return (
         <li key={i} className="ml-6 my-2 text-muted-foreground list-disc marker:text-accent font-medium leading-relaxed">
-          <Latex>{trimmed.slice(2).replace(/\*\*/g, '')}</Latex>
+          <MathLine>{trimmed.slice(2)}</MathLine>
         </li>
       );
 
-      // Accent callouts
-      if (trimmed.startsWith('⚡') || trimmed.startsWith('💡')) return (
+      if (trimmed.startsWith('\u26a1') || trimmed.startsWith('\ud83d\udca1')) return (
         <p key={i} className="ml-0 my-5 text-accent font-semibold bg-accent/5 p-4 rounded-xl border border-accent/20 leading-relaxed shadow-sm flex items-start gap-3">
           <span className="text-xl shrink-0 mt-0.5">{trimmed.substring(0, 2)}</span>
-          <span><Latex>{trimmed.substring(2).replace(/\*\*/g, '')}</Latex></span>
+          <span><MathLine>{trimmed.substring(2)}</MathLine></span>
         </p>
       );
 
@@ -318,23 +295,16 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
 
       if (trimmed.match(/^\d+\./)) return (
         <p key={i} className="ml-2 my-3 font-bold text-foreground/90 overflow-x-auto">
-          <Latex>{trimmed.replace(/\*\*/g, '')}</Latex>
+          <MathLine>{trimmed}</MathLine>
         </p>
       );
 
-      // Default paragraph with bold + LaTeX
-      const parts = trimmed.split(/(\*\*.*?\*\*)/g);
       return (
         <p key={i} className="my-4 text-muted-foreground leading-relaxed text-base overflow-x-auto">
-          {parts.map((p, x) =>
-            p.startsWith('**') && p.endsWith('**')
-              ? <strong key={x} className="font-bold text-foreground/90 bg-primary/5 px-1 rounded"><Latex>{p.slice(2, -2)}</Latex></strong>
-              : <Latex key={x}>{p}</Latex>
-          )}
+          <MathLine>{trimmed}</MathLine>
         </p>
       );
     });
-  };
 
   const formulas = extractFormulas(notes);
 
@@ -385,7 +355,7 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
               <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
                 {formulas.map((f, idx) => (
                   <div key={idx} className="shrink-0 px-4 py-2 bg-background rounded-lg border border-border shadow-sm flex items-center justify-center">
-                    <Latex>{`$${f}$`}</Latex>
+                    <MathLine>{`$${f}$`}</MathLine>
                   </div>
                 ))}
               </div>
