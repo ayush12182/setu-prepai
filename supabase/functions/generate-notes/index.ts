@@ -1,7 +1,7 @@
 /**
  * generate-notes — Supabase Edge Function
  * 1-Page Smart Revision Notes Prompt
- * ENGINE: Gemini 1.5 Flash (streaming SSE)
+ * ENGINE: Gemini 2.5 Flash (streaming SSE)
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -11,179 +11,568 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-function buildPrompt(chapterName: string, subject: string, topics: string[], examMode: string): string {
+function buildPrompt(chapterName: string, subject: string, topics: string[], examMode: string, mode: "notes" | "visual" = "notes", language = "english"): string {
   const topicList = topics.length > 0 ? topics.join(", ") : chapterName;
-  const exam = examMode.toUpperCase().includes("NEET") ? "NEET" : examMode.toUpperCase().includes("CUET") ? "CUET" : "JEE";
+  const exam = examMode.toUpperCase().includes("NEET") ? "NEET" : examMode.toUpperCase().includes("CUET") ? "CUET" : "JEE Main + Advanced";
 
-  return `You are an expert ${exam} revision note creator for SETU.
+  let languagePrompt = "";
+  const langLower = language.toLowerCase();
+  if (langLower === "english") {
+    languagePrompt = `═══════════════════════════════
+LANGUAGE RULES — STRICT
+═══════════════════════════════
+- Write ALL content in pure English only.
+- No Hinglish, no Hindi words, no "samjho", no "yaad rakho".
+- Tone: sharp coaching English — like Allen study material.
+- Example: "Remember:" not "Yaad rakho:".`;
+  } else if (langLower === "hindi") {
+    languagePrompt = `═══════════════════════════════
+LANGUAGE RULES — STRICT
+═══════════════════════════════
+- Write in Hinglish (Hindi + English mix).
+- Formulas always in English.
+- Explanation text in casual Hindi/Hinglish.
+- Jeetu Bhaiya tone: warm, motivating.
+- Example: "Yaad rakho — yeh formula direct use hota hai".`;
+  } else if (langLower === "hinglish") {
+    languagePrompt = `═══════════════════════════════
+LANGUAGE RULES — STRICT
+═══════════════════════════════
+- Mix freely — English structure, Hindi warmth.
+- Formulas in English always.
+- Labels and explanations can be Hinglish.`;
+  } else {
+    languagePrompt = `═══════════════════════════════
+LANGUAGE RULES — STRICT
+═══════════════════════════════
+- Write ALL content in pure English only.
+- No Hinglish, no Hindi words, no "samjho", no "yaad rakho".
+- Tone: sharp coaching English — like Allen study material.`;
+  }
 
-Your task is to generate ultra-clean, exam-oriented 1-page revision notes for students who are revising 1 day before the exam.
+  if (mode === "notes") {
+    return `SYSTEM PROMPT — PREMIUM AI NOTES FOR JEE + NEET + CUET
 
-The output MUST feel like:
+You are SETU's AI Notes Engine — an expert revision note creator for JEE Main, JEE Advanced, NEET, and CUET, using the exact pedagogy of premium coaching institutes like Allen, Resonance, FIITJEE, Vibrant, and Motion.
 
-Allen/Resonance short notes
-visually clean
-highly scannable
-formula-first
-zero fluff
-easy to revise in under 5 minutes
+Generate PREMIUM AI-generated revision notes for the chapter provided. The notes must feel like premium coaching modules and high-density revision sheets.
 
-The notes must be written in perfect rendering syntax using proper Markdown + LaTeX formatting.
+Avoid school notes, basic NCERT summaries, or basic explanations.
 
-STRICT OUTPUT RULES
-1. Proper LaTeX Rendering (VERY IMPORTANT)
+═══════════════════════════════
+OUTPUT STYLE
+═══════════════════════════════
+- Concise but information-dense
+- Visually structured
+- Easy to revise in 5-10 minutes
+- Tone: elite mentor, coaching faculty, sharp, concise
+- No filler text, no "basic concept samjho" storytelling, no motivational paragraphs
+- Prefer compact explanations, direct insights, advanced observations, PYQ patterns
 
-Never output broken syntax like:
+${languagePrompt}
 
-$$\\boxed{B = \\frac{\\mu_0}{4\\pi} ...
+═══════════════════════════════
+FORMULA STYLE
+═══════════════════════════════
+Use SIMPLE INLINE FORMULAS ONLY.
+Examples:
+  v = u + at
+  s = ut + ½at²
+  v² = u² + 2as
+  R = u²sin2θ/g
+  H = u²sin²θ/2g
+  T = 2usinθ/g
 
-Instead always render formulas cleanly using block math:
+DO NOT use latex blocks, rendered equations, or display math syntax ($$ or \\[ blocks).
+Formulas should feel like "premium coaching short notes".
 
-\\[
-B = \\frac{\\mu_0 I}{2\\pi r}
-\\]
-
-Inline math:
-
-\\( F = qvB \\)
-
-Never show raw escape characters to users.
-
-2. Structure of Notes
-
-The notes MUST follow this exact structure:
+═══════════════════════════════
+REQUIRED STRUCTURE (13 SECTIONS — MUST FOLLOW EXACTLY)
+═══════════════════════════════
 
 # ${chapterName}
-## 1. Core Concepts
-1-line intuition
-only most important theory
-max 2–3 lines per concept
-## 2. Important Formula Sheet
-boxed formulas
-clean derivations only if extremely important
-variable meanings concise
-## 3. Graphs / Visual Memory Tricks
-ASCII graph / Mermaid / simple plotted explanation
-only exam-relevant graphs
-label axes properly
-## 4. Most Used Results
-direct formulas used in PYQs
-shortcuts
-approximations
-standard values
-## 5. Common Mistakes
-misconceptions
-sign convention mistakes
-unit mistakes
-## 6. PYQ Trigger Points
-what examiner usually asks
-pattern recognition
-## 7. 30-Second Final Revision Box
-ultra-short recap bullets
-
-3. Writing Style
-
-The style should be:
-
-concise
-topper-style notes
-high information density
-no storytelling
-no long paragraphs
-no unnecessary explanations
-
-Every line should help in solving questions.
-
-4. Formula Formatting Rules
-
-Every important formula should appear like:
-
-\\[
-B = \\frac{\\mu_0 I}{2\\pi r}
-\\]
-
-Use aligned equations where needed:
-
-\\[
-\\begin{aligned}
-F &= q(v \\times B) \\\\
-\\tau &= nBIA \\sin\\theta
-\\end{aligned}
-\\]
-
-5. Graph Rules
-
-Whenever applicable include:
-
-properly labeled graphs
-trend curves
-proportionality graphs
-field-line diagrams
-circuit mini diagrams
-
-Use Mermaid diagrams OR clean markdown-compatible visuals.
-
-6. Visual Hierarchy
-
-Use:
-
-headings
-tables
-bullet points
-highlights
-boxed results
-separators
-
-Avoid:
-
-huge paragraphs
-crowded text
-repeated explanations
-
-7. Accuracy Rules
-
-VERY IMPORTANT:
-
-formulas must be ${exam} accurate
-sign conventions correct
-dimensions correct
-units correct
-no hallucinated formulas
-only exam-relevant content
-
-8. Compression Rules (MOST IMPORTANT)
-
-This is NOT textbook content.
-
-This is:
-✅ last-day revision
-✅ 1-page memory sheet
-✅ formula booster
-✅ exam recall notes
-
-So:
-
-compress aggressively
-retain only high-yield information
-prioritize PYQ-used concepts
-remove low-weightage explanations
-
-9. Output Formatting
-
-Output must be:
-
-fully renderable markdown
-mobile friendly
-dark-theme compatible
-visually balanced
-proper spacing between sections
 
 ---
-Subject: ${subject}
-Chapter: ${chapterName}
-Topics: ${topicList}
-Exam: ${exam}
+
+# 1. Chapter Overview
+Explain:
+- what chapter studies
+- why important
+- difficulty level
+- scoring potential
+- interconnection with other chapters
+Also mention JEE, NEET, and CUET levels.
+
+# 2. Exam-Wise Weightage Analysis
+Provide details and tag as HIGH / MEDIUM / LOW priority:
+### JEE Main
+- question trend, important topics, PYQ frequency
+### JEE Advanced
+- conceptual depth, multi-concept problems, graph-based questions
+### NEET
+- NCERT-focused areas, formula-based numericals, direct conceptual questions
+### CUET
+- theory-heavy portions, direct formula applications
+
+# 3. Syllabus Breakdown (Exam-Oriented)
+Subtopics with tags (e.g. VERY HIGH, HIGH, ADVANCED, EXTREMELY IMPORTANT).
+For each subtopic, list:
+- what exam asks
+- difficulty level
+- common traps
+
+# 4. Core Concepts That Actually Matter
+Write premium, useful insights (no basic concept samjho filler). Every single line must feel high-yield and directly useful.
+
+# 5. Formula Master Sheet
+Include ALL major formulas. Group by sub-topic. Clean, scannable, no prose.
+Include assumptions, conditions, and shortcut usage.
+
+# 6. Graph Interpretation & Visual Learning
+This section must feel PREMIUM. Explain:
+- slope meaning
+- area meaning
+- graph behavior
+- discontinuities
+- curve interpretation
+- Mention examiner traps explicitly.
+
+# 7. PYQ Pattern Analysis
+Specify 2020-2025 trends, post-COVID priority patterns, and what exams prefer.
+Tag as HIGH / MEDIUM / LOW priority.
+
+# 8. Topper Mistake Zone
+Include REAL common mistakes students make. Format:
+⚠ Mistake: [Common student mistake]
+✓ Correction: [Correct approach / explanation]
+(Minimum 10 mistakes required)
+
+# 9. Advanced Shortcuts & Rank Boosters
+High-level topper revision observations, complementary cases, reference frame tricks, shortcut bounds, named trends/exceptions.
+
+# 10. Trigger Recognition (MOST IMPORTANT)
+Format:
+"If question says [X] → immediately think [Y]"
+(Minimum 15 triggers required)
+
+# 11. Exam-Specific Preparation Strategy
+Custom, actionable strategies:
+- For JEE Main
+- For JEE Advanced
+- For NEET
+- For CUET
+
+# 12. Last 24-Hour Revision Plan
+Actual realistic schedule and steps (not generic advice).
+
+# 13. 30-Second Final Revision Box
+━━━━━━━━━━━━━━━━━━━━
+5-8 ultra-short bullets of absolute last-minute facts.
+━━━━━━━━━━━━━━━━━━━━
+
+═══════════════════════════════
+SUBJECT-SPECIFIC RULES
+═══════════════════════════════
+- PHYSICS: Emphasize units, vector vs scalar, sign conventions, limiting cases (r→0, r→∞, θ=0°, θ=90°).
+- CHEMISTRY: Highlight exceptions in bold, periodic trends with direction arrows, name reactions marked as ★ NAME REACTION.
+- MATHEMATICS: Domain/range limits, substitutions, standard identities.
+
+═══════════════════════════════
+INPUT DETAILS
+═══════════════════════════════
+  Chapter: ${chapterName}
+  Subject: ${subject}
+  Level: ${exam}
 `;
+  } else {
+    return `SYSTEM PROMPT — SETU VISUAL FORMULA SHEET GENERATOR (UNIVERSAL)
+
+You are SETU's Visual Formula Sheet Engine for JEE, NEET, and CUET students.
+Given a chapter, subject, and exam level, generate a complete visual formula sheet as a self-contained HTML file.
+
+═══════════════════════════════
+LANGUAGE
+═══════════════════════════════
+
+Selected language: ${language}
+
+${languagePrompt}
+
+═══════════════════════════════
+OUTPUT: SELF-CONTAINED HTML FILE
+═══════════════════════════════
+
+- Cream paper background: #FDFAF4
+- Ink color: #1a1a2e
+- Accent: #FF6B00
+- Fonts: Google Fonts — "Kalam" (handwritten feel) + "DM Sans" (labels)
+- 2-column card grid, responsive
+- Each formula = one card
+- Pure inline SVG diagrams only — no external images, no canvas, no chart libraries
+
+═══════════════════════════════
+CARD STRUCTURE (every card has):
+═══════════════════════════════
+
+[Orange circle badge with number] [Variable symbol large]
+[Formula in large orange text]
+[Name of formula]
+[SVG diagram — IF and ONLY IF one is meaningful]
+[One-line concept in muted text]
+[⚠ examiner trap if applicable]
+
+═══════════════════════════════
+DIAGRAM INTELLIGENCE — MOST CRITICAL RULE
+═══════════════════════════════
+
+For every formula, go through this decision tree:
+
+STEP 1: Does this formula have a natural, specific visual?
+  YES → draw it precisely (rules below)
+  NO  → leave diagram area completely empty
+
+STEP 2: The diagram must match THAT exact formula.
+Not a generic shape. Not a filler. The exact correct visual.
+
+STEP 3: If you cannot draw it correctly with SVG → draw NOTHING.
+A blank card is always better than a wrong diagram.
+
+BANNED FOREVER:
+✗ Random triangle with X and R labels
+✗ Partial arc with no meaning  
+✗ Sine wave on a non-wave formula
+✗ Placeholder text: "Labeled parameters for [chapter]"
+✗ Axes with nothing plotted on them
+✗ Any diagram that doesn't directly represent the formula
+
+═══════════════════════════════
+DIAGRAM LOOKUP TABLE (use exactly these for these formulas)
+═══════════════════════════════
+
+--- PHYSICS ---
+
+Projectile range R = u²sin2θ/g:
+<svg viewBox="0 0 130 65" width="130" height="65">
+  <line x1="10" y1="55" x2="120" y2="55" stroke="#1a1a2e" stroke-width="1"/>
+  <path d="M15,55 Q65,8 115,55" stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <text x="58" y="63" font-size="9" fill="#1a1a2e" font-family="DM Sans">R</text>
+  <line x1="65" y1="8" x2="65" y2="55" stroke="#888" stroke-width="0.8" stroke-dasharray="3,2"/>
+</svg>
+
+Max height H = u²sin²θ/2g:
+<svg viewBox="0 0 130 65" width="130" height="65">
+  <line x1="10" y1="55" x2="120" y2="55" stroke="#1a1a2e" stroke-width="1"/>
+  <path d="M15,55 Q65,8 115,55" stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <line x1="65" y1="8" x2="65" y2="55" stroke="#FF6B00" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="67" y="33" font-size="9" fill="#FF6B00" font-family="DM Sans">H</text>
+</svg>
+
+Time of flight T = 2usinθ/g:
+<svg viewBox="0 0 130 65" width="130" height="65">
+  <line x1="10" y1="55" x2="120" y2="55" stroke="#1a1a2e" stroke-width="1"/>
+  <path d="M15,55 Q65,8 115,55" stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <text x="48" y="63" font-size="9" fill="#FF6B00" font-family="DM Sans">←T→</text>
+</svg>
+
+Sine wave (f, T, ω, AC voltage, AC current, SHM):
+<svg viewBox="0 0 130 55" width="130" height="55">
+  <line x1="5" y1="27" x2="125" y2="27" stroke="#1a1a2e" stroke-width="0.8"/>
+  <path d="M10,27 C20,5 30,5 40,27 C50,49 60,49 70,27 C80,5 90,5 100,27 C110,49 120,49 125,38" 
+        stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <text x="15" y="50" font-size="8" fill="#1a1a2e" font-family="DM Sans">←— T —→</text>
+  <text x="38" y="14" font-size="8" fill="#FF6B00" font-family="DM Sans">A</text>
+</svg>
+
+v-t graph (v = u + at):
+<svg viewBox="0 0 90 65" width="90" height="65">
+  <line x1="15" y1="55" x2="15" y2="8" stroke="#1a1a2e" stroke-width="1"/>
+  <line x1="15" y1="55" x2="80" y2="55" stroke="#1a1a2e" stroke-width="1"/>
+  <line x1="15" y1="45" x2="75" y2="15" stroke="#FF6B00" stroke-width="1.8"/>
+  <text x="5" y="12" font-size="8" fill="#1a1a2e" font-family="DM Sans">v</text>
+  <text x="76" y="59" font-size="8" fill="#1a1a2e" font-family="DM Sans">t</text>
+  <text x="40" y="25" font-size="8" fill="#FF6B00" font-family="DM Sans">slope=a</text>
+</svg>
+
+s-t graph (s = ut + ½at²):
+<svg viewBox="0 0 90 65" width="90" height="65">
+  <line x1="15" y1="55" x2="15" y2="8" stroke="#1a1a2e" stroke-width="1"/>
+  <line x1="15" y1="55" x2="80" y2="55" stroke="#1a1a2e" stroke-width="1"/>
+  <path d="M15,55 Q35,50 75,15" stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <text x="5" y="12" font-size="8" fill="#1a1a2e" font-family="DM Sans">s</text>
+  <text x="76" y="59" font-size="8" fill="#1a1a2e" font-family="DM Sans">t</text>
+</svg>
+
+Electric field point charge (E = kq/r²):
+<svg viewBox="0 0 100 70" width="100" height="70">
+  <circle cx="50" cy="35" r="7" fill="#FF6B00" opacity="0.2" stroke="#FF6B00" stroke-width="1.2"/>
+  <text x="46" y="39" font-size="9" fill="#FF6B00" font-family="DM Sans">+q</text>
+  <line x1="57" y1="35" x2="80" y2="35" stroke="#1a1a2e" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="50" y1="28" x2="50" y2="8" stroke="#1a1a2e" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="44" y1="30" x2="28" y2="14" stroke="#1a1a2e" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="43" y1="35" x2="20" y2="35" stroke="#1a1a2e" stroke-width="1.2" marker-end="url(#arr)"/>
+  <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1a1a2e"/></marker></defs>
+</svg>
+
+E vs r graph (inside/outside sphere):
+<svg viewBox="0 0 110 65" width="110" height="65">
+  <line x1="10" y1="55" x2="100" y2="55" stroke="#1a1a2e" stroke-width="1"/>
+  <line x1="10" y1="55" x2="10" y2="8" stroke="#1a1a2e" stroke-width="1"/>
+  <line x1="45" y1="55" x2="45" y2="10" stroke="#888" stroke-width="0.8" stroke-dasharray="3,2"/>
+  <line x1="10" y1="55" x2="45" y2="12" stroke="#FF6B00" stroke-width="1.8"/>
+  <path d="M45,12 Q55,10 95,52" stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <text x="38" y="63" font-size="8" fill="#1a1a2e" font-family="DM Sans">R</text>
+  <text x="5" y="12" font-size="8" fill="#1a1a2e" font-family="DM Sans">E</text>
+  <text x="90" y="63" font-size="8" fill="#1a1a2e" font-family="DM Sans">r</text>
+</svg>
+
+Simple circuit (V = IR, P = VI):
+<svg viewBox="0 0 110 60" width="110" height="60">
+  <rect x="10" y="20" width="20" height="20" fill="none" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="14" y="34" font-size="9" fill="#FF6B00" font-family="DM Sans">EMF</text>
+  <rect x="70" y="20" width="25" height="20" fill="none" stroke="#1a1a2e" stroke-width="1.5"/>
+  <text x="74" y="34" font-size="9" fill="#1a1a2e" font-family="DM Sans">R</text>
+  <line x1="30" y1="30" x2="70" y2="30" stroke="#1a1a2e" stroke-width="1.2"/>
+  <line x1="10" y1="30" x2="10" y2="50" stroke="#1a1a2e" stroke-width="1.2"/>
+  <line x1="95" y1="30" x2="95" y2="50" stroke="#1a1a2e" stroke-width="1.2"/>
+  <line x1="10" y1="50" x2="95" y2="50" stroke="#1a1a2e" stroke-width="1.2"/>
+  <text x="42" y="25" font-size="8" fill="#1a1a2e" font-family="DM Sans">I →</text>
+</svg>
+
+Lens/mirror formula (1/v - 1/u = 1/f):
+<svg viewBox="0 0 120 60" width="120" height="60">
+  <line x1="10" y1="30" x2="110" y2="30" stroke="#1a1a2e" stroke-width="0.8"/>
+  <path d="M60,8 Q70,30 60,52" stroke="#1a1a2e" stroke-width="1.5" fill="none"/>
+  <path d="M60,8 Q50,30 60,52" stroke="#1a1a2e" stroke-width="1.5" fill="none"/>
+  <line x1="25" y1="20" x2="25" y2="40" stroke="#FF6B00" stroke-width="1.5"/>
+  <text x="20" y="48" font-size="8" fill="#FF6B00" font-family="DM Sans">O</text>
+  <text x="85" y="25" font-size="8" fill="#1a1a2e" font-family="DM Sans">I</text>
+  <text x="56" y="60" font-size="8" fill="#1a1a2e" font-family="DM Sans">f</text>
+</svg>
+
+SHM displacement (x = A sinωt):
+<svg viewBox="0 0 130 55" width="130" height="55">
+  <line x1="5" y1="27" x2="125" y2="27" stroke="#1a1a2e" stroke-width="0.8"/>
+  <line x1="10" y1="55" x2="10" y2="2" stroke="#1a1a2e" stroke-width="0.8"/>
+  <path d="M10,27 C20,5 30,5 40,27 C50,49 60,49 70,27 C80,5 90,5 100,27"
+        stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <text x="2" y="10" font-size="8" fill="#FF6B00" font-family="DM Sans">A</text>
+  <text x="2" y="46" font-size="8" fill="#FF6B00" font-family="DM Sans">-A</text>
+  <text x="100" y="59" font-size="8" fill="#1a1a2e" font-family="DM Sans">t</text>
+</svg>
+
+Bohr orbit (rₙ = n²a₀):
+<svg viewBox="0 0 90 80" width="90" height="80">
+  <circle cx="45" cy="40" r="5" fill="#FF6B00" opacity="0.3" stroke="#FF6B00" stroke-width="1.2"/>
+  <text x="41" y="44" font-size="7" fill="#FF6B00" font-family="DM Sans">+</text>
+  <circle cx="45" cy="40" r="16" fill="none" stroke="#1a1a2e" stroke-width="0.8" stroke-dasharray="3,2"/>
+  <circle cx="45" cy="40" r="28" fill="none" stroke="#1a1a2e" stroke-width="0.8" stroke-dasharray="3,2"/>
+  <circle cx="61" cy="40" r="3" fill="#1a1a2e" opacity="0.6"/>
+  <text x="62" y="35" font-size="7" fill="#1a1a2e" font-family="DM Sans">e⁻</text>
+  <text x="50" y="37" font-size="7" fill="#1a1a2e" font-family="DM Sans">r₁</text>
+  <text x="62" y="55" font-size="7" fill="#1a1a2e" font-family="DM Sans">r₂</text>
+</svg>
+
+--- MATHEMATICS ---
+
+Parabola (y = ax² + bx + c):
+<svg viewBox="0 0 90 65" width="90" height="65">
+  <line x1="10" y1="55" x2="80" y2="55" stroke="#1a1a2e" stroke-width="1"/>
+  <line x1="45" y1="58" x2="45" y2="5" stroke="#1a1a2e" stroke-width="1"/>
+  <path d="M15,52 Q45,5 75,52" stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <text x="40" y="63" font-size="8" fill="#1a1a2e" font-family="DM Sans">x</text>
+  <text x="5" y="12" font-size="8" fill="#1a1a2e" font-family="DM Sans">y</text>
+</svg>
+
+Circle x² + y² = r²:
+<svg viewBox="0 0 80 80" width="80" height="80">
+  <line x1="5" y1="40" x2="75" y2="40" stroke="#1a1a2e" stroke-width="0.8"/>
+  <line x1="40" y1="5" x2="40" y2="75" stroke="#1a1a2e" stroke-width="0.8"/>
+  <circle cx="40" cy="40" r="28" fill="none" stroke="#FF6B00" stroke-width="1.8"/>
+  <line x1="40" y1="40" x2="68" y2="40" stroke="#1a1a2e" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="50" y="37" font-size="9" fill="#1a1a2e" font-family="DM Sans">r</text>
+</svg>
+
+Straight line (y = mx + c):
+<svg viewBox="0 0 80 65" width="80" height="65">
+  <line x1="10" y1="55" x2="75" y2="55" stroke="#1a1a2e" stroke-width="1"/>
+  <line x1="15" y1="58" x2="15" y2="5" stroke="#1a1a2e" stroke-width="1"/>
+  <line x1="10" y1="45" x2="70" y2="15" stroke="#FF6B00" stroke-width="1.8"/>
+  <text x="55" y="12" font-size="8" fill="#FF6B00" font-family="DM Sans">slope=m</text>
+  <text x="5" y="42" font-size="8" fill="#1a1a2e" font-family="DM Sans">c</text>
+</svg>
+
+Ellipse x²/a² + y²/b² = 1:
+<svg viewBox="0 0 100 70" width="100" height="70">
+  <line x1="5" y1="35" x2="95" y2="35" stroke="#1a1a2e" stroke-width="0.8"/>
+  <line x1="50" y1="5" x2="50" y2="65" stroke="#1a1a2e" stroke-width="0.8"/>
+  <ellipse cx="50" cy="35" rx="38" ry="22" fill="none" stroke="#FF6B00" stroke-width="1.8"/>
+  <line x1="50" y1="35" x2="88" y2="35" stroke="#1a1a2e" stroke-width="1" stroke-dasharray="2,2"/>
+  <line x1="50" y1="35" x2="50" y2="13" stroke="#1a1a2e" stroke-width="1" stroke-dasharray="2,2"/>
+  <text x="66" y="32" font-size="8" fill="#1a1a2e" font-family="DM Sans">a</text>
+  <text x="52" y="26" font-size="8" fill="#1a1a2e" font-family="DM Sans">b</text>
+</svg>
+
+Hyperbola x²/a² - y²/b² = 1:
+<svg viewBox="0 0 100 70" width="100" height="70">
+  <line x1="5" y1="35" x2="95" y2="35" stroke="#1a1a2e" stroke-width="0.8"/>
+  <line x1="50" y1="5" x2="50" y2="65" stroke="#1a1a2e" stroke-width="0.8"/>
+  <path d="M30,8 Q42,35 30,62" stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <path d="M70,8 Q58,35 70,62" stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+</svg>
+
+Right triangle (sin/cos/tan):
+<svg viewBox="0 0 90 70" width="90" height="70">
+  <polygon points="15,60 75,60 75,15" fill="none" stroke="#1a1a2e" stroke-width="1.2"/>
+  <text x="38" y="58" font-size="8" fill="#1a1a2e" font-family="DM Sans">Base</text>
+  <text x="77" y="40" font-size="8" fill="#1a1a2e" font-family="DM Sans">P</text>
+  <path d="M28,60 Q32,56 32,50" fill="none" stroke="#FF6B00" stroke-width="1.2"/>
+  <text x="33" y="55" font-size="8" fill="#FF6B00" font-family="DM Sans">θ</text>
+  <text x="28" y="30" font-size="8" fill="#FF6B00" font-family="DM Sans">H</text>
+</svg>
+
+Number line / domain:
+<svg viewBox="0 0 120 30" width="120" height="30">
+  <line x1="10" y1="15" x2="110" y2="15" stroke="#1a1a2e" stroke-width="1"/>
+  <circle cx="35" cy="15" r="4" fill="white" stroke="#FF6B00" stroke-width="1.5"/>
+  <circle cx="85" cy="15" r="4" fill="#FF6B00" stroke="#FF6B00" stroke-width="1.5"/>
+  <line x1="35" y1="15" x2="85" y2="15" stroke="#FF6B00" stroke-width="2"/>
+  <text x="30" y="28" font-size="8" fill="#1a1a2e" font-family="DM Sans">a</text>
+  <text x="82" y="28" font-size="8" fill="#1a1a2e" font-family="DM Sans">b</text>
+</svg>
+
+--- CHEMISTRY ---
+
+Orbital s (spherical):
+<svg viewBox="0 0 70 70" width="70" height="70">
+  <circle cx="35" cy="35" r="25" fill="#FF6B00" opacity="0.12" stroke="#FF6B00" stroke-width="1.5"/>
+  <circle cx="35" cy="35" r="3" fill="#1a1a2e"/>
+  <text x="31" y="68" font-size="8" fill="#1a1a2e" font-family="DM Sans">1s</text>
+</svg>
+
+Orbital p (dumbbell):
+<svg viewBox="0 0 70 80" width="70" height="80">
+  <ellipse cx="35" cy="20" rx="12" ry="17" fill="#FF6B00" opacity="0.15" stroke="#FF6B00" stroke-width="1.5"/>
+  <ellipse cx="35" cy="60" rx="12" ry="17" fill="#1a1a2e" opacity="0.12" stroke="#1a1a2e" stroke-width="1.5"/>
+  <circle cx="35" cy="40" r="2.5" fill="#888"/>
+  <line x1="35" y1="5" x2="35" y2="75" stroke="#888" stroke-width="0.6" stroke-dasharray="2,2"/>
+  <text x="30" y="82" font-size="8" fill="#1a1a2e" font-family="DM Sans">2pz</text>
+</svg>
+
+Reaction arrow (A → B):
+<svg viewBox="0 0 120 40" width="120" height="40">
+  <text x="5" y="25" font-size="12" fill="#1a1a2e" font-family="DM Sans">A</text>
+  <line x1="28" y1="20" x2="88" y2="20" stroke="#FF6B00" stroke-width="1.5" marker-end="url(#ar2)"/>
+  <text x="45" y="14" font-size="8" fill="#888" font-family="DM Sans">condition</text>
+  <text x="92" y="25" font-size="12" fill="#1a1a2e" font-family="DM Sans">B</text>
+  <defs><marker id="ar2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#FF6B00"/></marker></defs>
+</svg>
+
+Equilibrium arrows (A ⇌ B):
+<svg viewBox="0 0 120 45" width="120" height="45">
+  <text x="5" y="28" font-size="12" fill="#1a1a2e" font-family="DM Sans">A</text>
+  <line x1="28" y1="18" x2="88" y2="18" stroke="#FF6B00" stroke-width="1.3" marker-end="url(#af)"/>
+  <line x1="88" y1="28" x2="28" y2="28" stroke="#1a1a2e" stroke-width="1.3" marker-end="url(#ab)"/>
+  <text x="92" y="28" font-size="12" fill="#1a1a2e" font-family="DM Sans">B</text>
+  <defs>
+    <marker id="af" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#FF6B00"/></marker>
+    <marker id="ab" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#1a1a2e"/></marker>
+  </defs>
+</svg>
+
+pH scale bar:
+<svg viewBox="0 0 160 35" width="160" height="35">
+  <defs>
+    <linearGradient id="ph" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#E24B4A"/>
+      <stop offset="50%" stop-color="#639922"/>
+      <stop offset="100%" stop-color="#185FA5"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="8" width="140" height="14" rx="4" fill="url(#ph)"/>
+  <text x="8" y="30" font-size="8" fill="#E24B4A" font-family="DM Sans">0</text>
+  <text x="72" y="30" font-size="8" fill="#639922" font-family="DM Sans">7</text>
+  <text x="144" y="30" font-size="8" fill="#185FA5" font-family="DM Sans">14</text>
+  <text x="2" y="8" font-size="7" fill="#888" font-family="DM Sans">acid</text>
+  <text x="120" y="8" font-size="7" fill="#888" font-family="DM Sans">base</text>
+</svg>
+
+Periodic trend arrow (up/down a group, across period):
+<svg viewBox="0 0 100 60" width="100" height="60">
+  <rect x="10" y="10" width="80" height="40" fill="none" stroke="#1a1a2e" stroke-width="0.8" rx="3"/>
+  <line x1="10" y1="25" x2="90" y2="25" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="10" y1="40" x2="90" y2="40" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="35" y1="10" x2="35" y2="50" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="60" y1="10" x2="60" y2="50" stroke="#ccc" stroke-width="0.5"/>
+  <line x1="18" y1="48" x2="82" y2="48" stroke="#FF6B00" stroke-width="1.5" marker-end="url(#pa)"/>
+  <line x1="88" y1="48" x2="88" y2="14" stroke="#1a1a2e" stroke-width="1.5" marker-end="url(#pu)"/>
+  <defs>
+    <marker id="pa" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#FF6B00"/></marker>
+    <marker id="pu" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#1a1a2e"/></marker>
+  </defs>
+</svg>
+
+--- BIOLOGY (NEET) ---
+
+Cell membrane (lipid bilayer cross-section):
+<svg viewBox="0 0 130 50" width="130" height="50">
+  <line x1="10" y1="18" x2="120" y2="18" stroke="#1a1a2e" stroke-width="1.2"/>
+  <line x1="10" y1="32" x2="120" y2="32" stroke="#1a1a2e" stroke-width="1.2"/>
+  <circle cx="25" cy="18" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <circle cx="45" cy="18" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <circle cx="65" cy="18" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <circle cx="85" cy="18" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <circle cx="105" cy="18" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <circle cx="25" cy="32" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <circle cx="45" cy="32" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <circle cx="65" cy="32" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <circle cx="85" cy="32" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <circle cx="105" cy="32" r="5" fill="#FF6B00" opacity="0.5" stroke="#FF6B00" stroke-width="1"/>
+  <text x="45" y="47" font-size="8" fill="#1a1a2e" font-family="DM Sans">Lipid Bilayer</text>
+</svg>
+
+DNA double helix (simplified):
+<svg viewBox="0 0 80 80" width="80" height="80">
+  <path d="M20,5 C35,20 45,20 60,35 C45,50 35,50 20,65 C35,80 45,80 60,95" stroke="#FF6B00" stroke-width="1.8" fill="none"/>
+  <path d="M60,5 C45,20 35,20 20,35 C35,50 45,50 60,65 C45,80 35,80 20,95" stroke="#1a1a2e" stroke-width="1.8" fill="none"/>
+  <line x1="40" y1="20" x2="40" y2="20" stroke="#888" stroke-width="1"/>
+  <line x1="28" y1="22" x2="52" y2="22" stroke="#888" stroke-width="0.8"/>
+  <line x1="22" y1="35" x2="58" y2="35" stroke="#888" stroke-width="0.8"/>
+  <line x1="28" y1="48" x2="52" y2="48" stroke="#888" stroke-width="0.8"/>
+  <line x1="22" y1="60" x2="58" y2="60" stroke="#888" stroke-width="0.8"/>
+</svg>
+
+═══════════════════════════════
+FORMULA CONTENT RULES
+═══════════════════════════════
+
+Generate 8–12 formula cards per chapter.
+Include:
+- Units after every formula: [Hz], [m/s], [J], [mol/L] etc.
+- Special conditions inline: "(only when θ = 90°)", "(for ideal gas)"
+- ⚠ examiner trap on cards where common mistakes occur
+- Leave diagram blank if no correct SVG exists for that formula
+
+═══════════════════════════════
+HTML OUTPUT RULES
+═══════════════════════════════
+
+- Fully self-contained HTML
+- No external images
+- Google Fonts loaded via <link>
+- Responsive: 2-col on desktop, 1-col on mobile
+- Paper feel: background #FDFAF4, ink #1a1a2e, accent #FF6B00
+- SETU header + chapter title + setulearning.in footer
+- Output only the HTML — no explanation before or after
+
+═══════════════════════════════
+INPUT
+═══════════════════════════════
+
+Chapter: ${chapterName}
+Subject: ${subject}
+Level: ${exam}
+`;
+  }
 }
 
 serve(async (req) => {
@@ -207,6 +596,8 @@ serve(async (req) => {
       subject = "Physics",
       topics = [],
       examMode = "JEE",
+      mode = "notes",
+      language = "english",
     } = body;
 
     if (!chapterName) {
@@ -216,9 +607,9 @@ serve(async (req) => {
       });
     }
 
-    const prompt = buildPrompt(chapterName, subject, topics, examMode);
+    const prompt = buildPrompt(chapterName, subject, topics, examMode, mode, language);
 
-    console.log(`[GenerateNotes] Chapter: ${chapterName} | Exam: ${examMode}`);
+    console.log(`[GenerateNotes] Chapter: ${chapterName} | Mode: ${mode} | Language: ${language} | Exam: ${examMode}`);
 
     const model = "gemini-2.5-flash";
 

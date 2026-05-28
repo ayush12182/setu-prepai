@@ -147,10 +147,20 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
     sociology: 'bg-lime-500/10 text-lime-500',
   };
 
-  const generateNotes = async (chapter: Chapter) => {
+  const [activeTab, setActiveTab] = useState<'notes' | 'visual'>('notes');
+  const [visualHtml, setVisualHtml] = useState<string>('');
+  const [isGeneratingNotes, setIsGeneratingNotes] = useState(false);
+  const [isGeneratingVisual, setIsGeneratingVisual] = useState(false);
+
+  const generateNotes = async (chapter: Chapter, mode: 'notes' | 'visual' = 'notes') => {
     setSelectedChapter(chapter);
-    setIsGenerating(true);
-    setNotes('');
+    if (mode === 'notes') {
+      setIsGeneratingNotes(true);
+      setNotes('');
+    } else {
+      setIsGeneratingVisual(true);
+      setVisualHtml('');
+    }
 
     try {
       // Get user session token for Edge Function auth
@@ -172,7 +182,8 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
           examTips: chapter.examTips,
           pyqData: chapter.pyqData,
           language,
-          examMode: isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE'
+          examMode: isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
+          mode
         }),
       });
 
@@ -181,7 +192,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let fullNotes = '';
+      let fullContent = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -193,19 +204,205 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
             try {
               const json = JSON.parse(line.slice(6));
               const content = json.choices?.[0]?.delta?.content;
-              if (content) { fullNotes += content; setNotes(fullNotes); }
+              if (content) {
+                fullContent += content;
+                if (mode === 'notes') {
+                  setNotes(fullContent);
+                } else {
+                  setVisualHtml(fullContent);
+                }
+              }
             } catch { /* Skip invalid JSON */ }
           }
         }
       }
     } catch (error) {
-      console.error('Error generating notes:', error);
-      toast.error('Failed to generate notes. Showing offline version.');
-      const fallbackNotes = generateFallbackNotes(chapter);
-      setNotes(fallbackNotes);
+      console.error(`Error generating ${mode}:`, error);
+      toast.error(`Failed to generate ${mode === 'notes' ? 'revision notes' : 'visual formula sheet'}. Showing offline version.`);
+      if (mode === 'notes') {
+        const fallbackNotes = generateFallbackNotes(chapter);
+        setNotes(fallbackNotes);
+      } else {
+        const fallbackHtml = generateFallbackVisualHtml(chapter);
+        setVisualHtml(fallbackHtml);
+      }
     } finally {
-      setIsGenerating(false);
+      if (mode === 'notes') {
+        setIsGeneratingNotes(false);
+      } else {
+        setIsGeneratingVisual(false);
+      }
     }
+  };
+
+  const generateFallbackVisualHtml = (chapter: Chapter): string => {
+    const examName = isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE Main + Advanced';
+    const cards = chapter.keyFormulas.map((f, i) => {
+      let svg = '';
+      if (i % 3 === 0) {
+        svg = `<svg viewBox="0 0 120 60" width="100%" height="100%"><line x1="10" y1="30" x2="110" y2="30" stroke="#1a1a2e" stroke-width="1.5"/><line x1="10" y1="5" x2="10" y2="55" stroke="#1a1a2e" stroke-width="1.5"/><path d="M10,30 C35,0 35,0 60,30 C85,60 85,60 110,30" stroke="#FF6B00" stroke-width="2" fill="none"/></svg>`;
+      } else if (i % 3 === 1) {
+        svg = `<svg viewBox="0 0 120 60" width="100%" height="100%"><circle cx="60" cy="30" r="20" stroke="#1a1a2e" stroke-width="1.5" fill="none"/><line x1="60" y1="30" x2="80" y2="30" stroke="#FF6B00" stroke-width="2"/><text x="65" y="25" font-size="8" font-family="DM Sans" fill="#FF6B00">r</text></svg>`;
+      } else {
+        svg = `<svg viewBox="0 0 120 60" width="100%" height="100%"><line x1="20" y1="50" x2="90" y2="50" stroke="#1a1a2e" stroke-width="1.5"/><line x1="90" y1="50" x2="90" y2="10" stroke="#1a1a2e" stroke-width="1.5"/><line x1="20" y1="50" x2="90" y2="10" stroke="#FF6B00" stroke-width="2"/><text x="50" y="58" font-size="8" font-family="DM Sans" fill="#1a1a2e">R</text><text x="94" y="32" font-size="8" font-family="DM Sans" fill="#1a1a2e">X</text></svg>`;
+      }
+
+      return `
+      <div class="card">
+        <div>
+          <div class="card-header">
+            <div class="number-badge">${i + 1}</div>
+            <div class="formula-name">${f.split('=')[0]?.trim() || 'Core Concept'}</div>
+          </div>
+          <div class="formula-body">
+            <div class="formula-text">${f.replace(/=/g, ' = ')}</div>
+            <div class="diagram-container">${svg}</div>
+          </div>
+        </div>
+        <div class="meaning">
+          Concept: Labeled parameters for ${chapter.name} curriculum. ⚠ Make sure you check dimensions and signs!
+        </div>
+      </div>`;
+    }).join('\n');
+
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #FDFAF4;
+      --text-color: #1A1A2E;
+      --accent-color: #FF6B00;
+      --card-bg: #FFFFFF;
+      --border-color: #E8E0D0;
+      --muted-text: #5E5E7A;
+    }
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'DM Sans', sans-serif;
+      padding: 24px;
+      line-height: 1.5;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px dashed var(--border-color);
+      padding-bottom: 16px;
+      margin-bottom: 32px;
+    }
+    .logo {
+      font-family: 'Kalam', cursive;
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--accent-color);
+    }
+    .title-area h1 {
+      font-family: 'Kalam', cursive;
+      font-size: 24px;
+      color: var(--text-color);
+    }
+    .meta-info {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted-text);
+      text-transform: uppercase;
+    }
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 768px) {
+      .formula-grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-left: 4px solid var(--accent-color);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .number-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--accent-color);
+      color: #FFFFFF;
+      font-family: 'Kalam', cursive;
+      font-weight: 700;
+      font-size: 16px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+    .formula-name {
+      font-family: 'Kalam', cursive;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .formula-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .formula-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-color);
+    }
+    .diagram-container {
+      width: 120px;
+      height: 60px;
+    }
+    .meaning {
+      font-size: 13px;
+      color: var(--muted-text);
+      border-top: 1px solid #F5EFEB;
+      padding-top: 10px;
+      margin-top: auto;
+    }
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 2px dashed var(--border-color);
+      font-family: 'Kalam', cursive;
+      font-size: 14px;
+      color: var(--muted-text);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">SETU</div>
+    <div class="title-area">
+      <h1>${chapter.name} Formula Sheet</h1>
+    </div>
+    <div class="meta-info">${examName}</div>
+  </header>
+  <main class="formula-grid">
+    ${cards}
+  </main>
+  <footer>setulearning.in</footer>
+</body>
+</html>`;
   };
 
   const generateFallbackNotes = (chapter: Chapter): string => {
@@ -275,33 +472,79 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
   if (selectedChapter) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => { setSelectedChapter(null); setNotes(''); }}>
-            <ChevronLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h2 className="text-xl font-bold">{selectedChapter.name}</h2>
-            <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize',
-              subjectBadgeColors[selectedChapter.subject as string] || 'bg-primary/10 text-primary'
-            )}>
-              {CUET_SUBJECTS.find(s => s.key === selectedChapter.subject as string)?.label || selectedChapter.subject}
-            </span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => { setSelectedChapter(null); setNotes(''); setVisualHtml(''); setActiveTab('notes'); }}>
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h2 className="text-xl font-bold">{selectedChapter.name}</h2>
+              <span className={cn('text-xs px-2 py-0.5 rounded-full capitalize',
+                subjectBadgeColors[selectedChapter.subject as string] || 'bg-primary/10 text-primary'
+              )}>
+                {CUET_SUBJECTS.find(s => s.key === selectedChapter.subject as string)?.label || selectedChapter.subject}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex bg-muted p-1 rounded-lg gap-1 border border-border">
+            <Button
+              variant={activeTab === 'notes' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('notes')}
+              className="flex items-center gap-1.5 text-xs font-medium"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Smart Revision Notes
+            </Button>
+            <Button
+              variant={activeTab === 'visual' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                setActiveTab('visual');
+                if (!visualHtml) {
+                  generateNotes(selectedChapter, 'visual');
+                }
+              }}
+              className="flex items-center gap-1.5 text-xs font-medium"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              Visual Formula Sheet
+            </Button>
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-6 max-h-[70vh] overflow-y-auto">
-          {isGenerating && notes === '' ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <span className="ml-3 text-muted-foreground">Generating comprehensive notes...</span>
-            </div>
-          ) : (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              {renderNotes(notes)}
-              {isGenerating && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />}
-            </div>
-          )}
-        </div>
+        {activeTab === 'notes' ? (
+          <div className="bg-card border border-border rounded-xl p-6 max-h-[70vh] overflow-y-auto shadow-sm">
+            {isGeneratingNotes && notes === '' ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+                <span className="text-sm text-muted-foreground">Generating comprehensive Kota-style notes...</span>
+              </div>
+            ) : (
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                {renderNotes(notes)}
+                {isGeneratingNotes && <span className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="bg-card border border-border rounded-xl p-0 h-[70vh] overflow-hidden relative shadow-sm">
+            {isGeneratingVisual && visualHtml === '' ? (
+              <div className="flex flex-col items-center justify-center h-full py-24">
+                <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+                <span className="text-sm text-muted-foreground font-medium">Drawing handwritten visual cards & SVGs...</span>
+              </div>
+            ) : (
+              <iframe
+                srcDoc={visualHtml}
+                className="w-full h-full border-none bg-[#FDFAF4]"
+                title="Visual Formula Sheet"
+                sandbox="allow-scripts"
+              />
+            )}
+          </div>
+        )}
       </div>
     );
   }
