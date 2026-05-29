@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { BlockMath } from 'react-katex';
 import { AlertTriangle, Lightbulb, Zap, LineChart, Target, HelpCircle } from 'lucide-react';
 import 'katex/dist/katex.min.css';
+import { MathLine } from '@/utils/mathRenderer';
 
 interface FormulaCardProps {
   name: string;
@@ -34,11 +35,11 @@ export const FormulaCard: React.FC<FormulaCardProps> = ({ name, formula, variabl
     <div className="space-y-2">
       <div className="text-xs">
         <span className="font-semibold text-muted-foreground uppercase">Variables:</span>{' '}
-        <span className="text-foreground/80">{variables}</span>
+        <span className="text-foreground/80"><MathLine>{variables}</MathLine></span>
       </div>
       <div className="text-xs">
         <span className="font-semibold text-muted-foreground uppercase">Usage:</span>{' '}
-        <span className="text-emerald-500 dark:text-emerald-400 font-medium">{usage}</span>
+        <span className="text-emerald-500 dark:text-emerald-400 font-medium"><MathLine>{usage}</MathLine></span>
       </div>
     </div>
   </motion.div>
@@ -61,8 +62,8 @@ export const ConceptCard: React.FC<ConceptCardProps> = ({ title, description, de
       <Lightbulb className="w-4 h-4 text-blue-500" />
     </div>
     <div>
-      <h4 className="font-semibold text-foreground text-sm mb-1">{title}</h4>
-      <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
+      <h4 className="font-semibold text-foreground text-sm mb-1"><MathLine>{title}</MathLine></h4>
+      <p className="text-xs text-muted-foreground leading-relaxed"><MathLine>{description}</MathLine></p>
     </div>
   </motion.div>
 );
@@ -107,17 +108,17 @@ export const MistakeCard: React.FC<MistakeCardProps> = ({ wrong, right, why, del
         <AlertTriangle className="w-4 h-4 text-red-500" />
         <span className="text-xs font-bold uppercase text-red-500 tracking-wider">Don't Do This</span>
       </div>
-      <p className="text-sm text-red-700 dark:text-red-300 line-through opacity-80">{wrong}</p>
+      <p className="text-sm text-red-700 dark:text-red-300 line-through opacity-80"><MathLine>{wrong}</MathLine></p>
     </div>
     <div className="bg-emerald-50 dark:bg-emerald-950/20 p-4">
       <div className="flex items-center gap-2 mb-2">
         <Zap className="w-4 h-4 text-emerald-500" />
         <span className="text-xs font-bold uppercase text-emerald-500 tracking-wider">Do This</span>
       </div>
-      <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium mb-2">{right}</p>
+      <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium mb-2"><MathLine>{right}</MathLine></p>
       <div className="text-xs text-emerald-600/70 dark:text-emerald-400/70 flex items-start gap-1">
         <HelpCircle className="w-3.5 h-3.5 shrink-0" />
-        <span>{why}</span>
+        <span><MathLine>{why}</MathLine></span>
       </div>
     </div>
   </motion.div>
@@ -137,9 +138,9 @@ export const PYQTriggerCard: React.FC<PYQTriggerCardProps> = ({ pattern, action,
     className="flex items-center gap-3 bg-amber-500/5 border border-amber-500/20 rounded-xl p-4"
   >
     <div className="bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded">IF</div>
-    <div className="flex-1 text-sm font-medium text-foreground">{pattern}</div>
+    <div className="flex-1 text-sm font-medium text-foreground"><MathLine>{pattern}</MathLine></div>
     <div className="bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded">THEN</div>
-    <div className="flex-1 text-sm font-bold text-amber-600 dark:text-amber-400">{action}</div>
+    <div className="flex-1 text-sm font-bold text-amber-600 dark:text-amber-400"><MathLine>{action}</MathLine></div>
   </motion.div>
 );
 
@@ -153,7 +154,7 @@ export const QuickRevisionBox: React.FC<{ points: string[] }> = ({ points }) => 
       {points.map((point, i) => (
         <li key={i} className="flex items-start gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-2 shrink-0" />
-          <span className="text-sm font-medium text-foreground/80">{point}</span>
+          <span className="text-sm font-medium text-foreground/80"><MathLine>{point}</MathLine></span>
         </li>
       ))}
     </ul>

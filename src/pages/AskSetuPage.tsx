@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { renderProseNotes } from '@/utils/mathRenderer';
 
 // Welcome video path
 const WELCOME_VIDEO_PATH = "/videos/jeetu-welcome.mp4";
@@ -345,23 +346,6 @@ const AskSetuPage: React.FC = () => {
     setInput(question);
   };
 
-  const formatMessage = (content: string) => {
-    return content.split('\n').map((line, i) => {
-      const parts = line.split(/(\*\*.*?\*\*)/g);
-      return (
-        <React.Fragment key={i}>
-          {parts.map((part, j) => {
-            if (part.startsWith('**') && part.endsWith('**')) {
-              return <strong key={j} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
-            }
-            return <span key={j}>{part}</span>;
-          })}
-          {i < content.split('\n').length - 1 && <br />}
-        </React.Fragment>
-      );
-    });
-  };
-
   return (
     <MainLayout title="Ask SETU Mentor">
       <Dialog
@@ -491,7 +475,7 @@ const AskSetuPage: React.FC = () => {
                       'text-sm leading-relaxed whitespace-pre-wrap',
                       message.role === 'assistant' && 'text-foreground'
                     )}>
-                      {message.role === 'assistant' ? formatMessage(message.content) : message.content}
+                      {message.role === 'assistant' ? renderProseNotes(message.content) : message.content}
                     </div>
                   </div>
                 </div>

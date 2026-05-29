@@ -9,6 +9,7 @@ import {
 import { MainLayout } from '@/components/layout/MainLayout';
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { DiagramRenderer } from '@/components/DiagramRenderer';
+import { normalizeMathDelimiters, MathLine } from '@/utils/mathRenderer';
 import { useEngagementDetector } from '@/hooks/useEngagementDetector';
 import { EngagementOverlay, SessionStatsCard } from '@/components/EngagementOverlay';
 import { getClosingFeedback } from '@/lib/closingFeedback';
@@ -371,18 +372,25 @@ function BlackboardText({ text = '' }: { text: string }) {
         if (seg.kind === 'diagram') {
           return <DiagramRenderer key={si} raw={seg.content} />;
         }
-        return seg.content?.split('\n').map((line, i) => {
+        // Normalize LaTeX delimiters before rendering
+        const normalized = normalizeMathDelimiters(seg.content ?? '');
+        return normalized.split('\n').map((line, i) => {
           const headingMatch = line.match(/^#{1,3}\s+(.*)/);
           const rawLine = headingMatch ? headingMatch[1] : line;
           const isHeading = !!headingMatch;
 
-          /** Render a line with bold/normal spans, chalk-char per character */
+          // Chalk-char render for bold segments, KaTeX for math
           const renderChalkLine = (raw: string, baseColor: string) =>
-            (raw || '').split(/(\*\*.*?\*\*)/g).map((part, j) =>
-              part.startsWith('**') && part.endsWith('**')
-                ? <span key={j} className="font-bold"><ChalkText text={part.slice(2, -2)} color="#ff9a9a" /></span>
-                : <ChalkText key={j} text={part} color={baseColor} />
-            );
+            (raw || '').split(/(\$\$[\s\S]*?\$\$|\$[^$\n]+?\$|\*\*.*?\*\*)/g).map((part, j) => {
+              if (part.startsWith('**') && part.endsWith('**')) {
+                return <span key={j} className="font-bold"><ChalkText text={part.slice(2, -2)} color="#ff9a9a" /></span>;
+              }
+              if (part.startsWith('$$') || part.startsWith('$')) {
+                // Render math inline with KaTeX (no chalk animation — KaTeX handles it)
+                return <span key={j} style={{ color: baseColor }}><MathLine>{part}</MathLine></span>;
+              }
+              return <ChalkText key={j} text={part} color={baseColor} />;
+            });
 
           if (isHeading) {
             return (

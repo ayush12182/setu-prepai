@@ -24,6 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useLectureNotes, LectureNote } from '@/hooks/useLectureNotes';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { renderProseNotes, MathLine } from '@/utils/mathRenderer';
 
 const LectureSetu: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState('');
@@ -235,8 +236,10 @@ const LectureResults: React.FC<{ note: LectureNote }> = ({ note }) => {
 
         <TabsContent value="notes">
           <Card className="border-border">
-            <CardContent className="p-6 prose prose-sm max-w-none dark:prose-invert">
-              {note.structured_notes ? <div className="whitespace-pre-wrap">{note.structured_notes}</div> : <p className="text-muted-foreground">No notes generated</p>}
+            <CardContent className="p-6">
+              {note.structured_notes
+                ? <div className="space-y-1">{renderProseNotes(note.structured_notes)}</div>
+                : <p className="text-muted-foreground">No notes generated</p>}
             </CardContent>
           </Card>
         </TabsContent>
@@ -246,7 +249,9 @@ const LectureResults: React.FC<{ note: LectureNote }> = ({ note }) => {
             {note.formulas && note.formulas.length > 0 ? note.formulas.map((formula, i) => (
               <Card key={i} className="border-border">
                 <CardContent className="p-4">
-                  <div className="font-mono text-lg mb-2 text-primary">{formula.formula}</div>
+              <div className="font-mono text-lg mb-2 text-primary overflow-x-auto">
+                  <MathLine>{formula.formula}</MathLine>
+                </div>
                   <div className="font-semibold">{formula.name}</div>
                   <div className="text-sm text-muted-foreground">{formula.usage}</div>
                 </CardContent>
@@ -280,7 +285,9 @@ const LectureResults: React.FC<{ note: LectureNote }> = ({ note }) => {
         <TabsContent value="summary">
           <Card className="border-border">
             <CardContent className="p-6">
-              {note.one_page_summary ? <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">{note.one_page_summary}</div> : <p className="text-muted-foreground text-center">No summary generated</p>}
+              {note.one_page_summary
+                ? <div className="space-y-1">{renderProseNotes(note.one_page_summary)}</div>
+                : <p className="text-muted-foreground text-center">No summary generated</p>}
             </CardContent>
           </Card>
         </TabsContent>

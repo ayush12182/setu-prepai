@@ -14,7 +14,6 @@ function katexToHtml(tex: string, displayMode: boolean): string {
       output: 'html',
     });
   } catch {
-    // Last-resort: strip commands and show plain text
     return tex
       .replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, '($1)/($2)')
       .replace(/\\sqrt\{([^}]*)\}/g, '√($1)')
@@ -26,7 +25,7 @@ function katexToHtml(tex: string, displayMode: boolean): string {
 
 // ─── Delimiter normalisation ──────────────────────────────────────────────────
 
-/** Convert all AI LaTeX delimiter styles → $$ and $ for unified parsing */
+/** Convert every AI LaTeX delimiter style → unified $$ / $ */
 export function normalizeMathDelimiters(text: string): string {
   return text
     .replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => `$$${inner.trim()}$$`)
@@ -62,8 +61,8 @@ function chunkText(text: string): MathChunk[] {
 // ─── Components ───────────────────────────────────────────────────────────────
 
 /**
- * Render a single line/sentence that may contain inline $...$ math.
- * Never shows raw LaTeX.
+ * MathLine — renders a single line/sentence that may contain inline $…$ math.
+ * Handles ALL AI delimiter styles. Never shows raw LaTeX.
  */
 export const MathLine: React.FC<{ children: string }> = ({ children }) => {
   const normalized = normalizeMathDelimiters(children);
@@ -94,7 +93,7 @@ export const MathLine: React.FC<{ children: string }> = ({ children }) => {
   );
 };
 
-/** Centred display-math block (for $$...$$ expressions) */
+/** Centred display-math block (for $$…$$ expressions) */
 export const DisplayMath: React.FC<{ tex: string }> = ({ tex }) => (
   <div
     className="my-5 py-2 overflow-x-auto flex justify-center"
@@ -105,11 +104,13 @@ export const DisplayMath: React.FC<{ tex: string }> = ({ tex }) => (
 // ─── Full-content processor ───────────────────────────────────────────────────
 
 /**
- * Process a full AI-generated notes string:
- *  1. Normalise all delimiter styles
- *  2. Split by $$...$$ display blocks
- *  3. Pass text segments line-by-line to `lineRenderer`
- *  4. Render display blocks with KaTeX (displayMode: true)
+ * processNotesContent — processes a full AI-generated markdown string:
+ *  1. Normalises all delimiter styles
+ *  2. Splits out $$…$$ display blocks
+ *  3. Passes text segments line-by-line to `lineRenderer`
+ *  4. Renders display blocks with KaTeX (displayMode: true)
+ *
+ * Used by: OnePageNotes, ChapterNotesPage, LectureSetu, AskSetu, AITeachingRoom
  */
 export function processNotesContent(
   content: string,
@@ -140,4 +141,28 @@ export function processNotesContent(
   }
 
   return elements;
+}
+
+// ─── Generic prose renderer ───────────────────────────────────────────────────
+
+/**
+ * renderProseNotes — lightweight renderer for chat/AI responses.
+ * Handles headings, bullets, bold, and all LaTeX styles.
+ * Use this for AskSetu, AITeachingRoom, LectureSetu notes, etc.
+ */
+export function renderProseNotes(content: string): React.ReactNode[] {
+  return processNotesContent(content, (line, key) => {
+    const t = line.trim();
+    if (!t) return <br key={key} />;
+    if (t.startsWith('# '))   return <h2 key={key} className="text-lg font-bold mt-4 mb-2 text-foreground"><MathLine>{t.slice(2)}</MathLine></h2>;
+    if (t.startsWith('## '))  return <h3 key={key} className="text-base font-semibold mt-3 mb-1 text-foreground"><MathLine>{t.slice(3)}</MathLine></h3>;
+    if (t.startsWith('### ')) return <h4 key={key} className="text-sm font-semibold mt-2 mb-1 text-foreground/90"><MathLine>{t.slice(4)}</MathLine></h4>;
+    if (t.startsWith('• ') || t.startsWith('- ') || t.startsWith('* '))
+      return <p key={key} className="ml-4 my-1 flex gap-2"><span className="shrink-0 mt-1 text-primary">•</span><MathLine>{t.slice(2)}</MathLine></p>;
+    if (t.startsWith('⚡') || t.startsWith('💡'))
+      return <p key={key} className="ml-0 my-2 font-semibold text-setu-saffron"><MathLine>{t}</MathLine></p>;
+    if (t.startsWith('---')) return <hr key={key} className="my-4 border-border" />;
+    if (t.match(/^\d+\./))   return <p key={key} className="ml-4 my-1 font-medium"><MathLine>{t}</MathLine></p>;
+    return <p key={key} className="my-1.5 leading-relaxed"><MathLine>{t}</MathLine></p>;
+  });
 }
