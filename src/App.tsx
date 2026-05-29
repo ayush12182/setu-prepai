@@ -43,6 +43,10 @@ import AITeachingRoomPage from "./pages/AITeachingRoomPage";
 import AITeachersDirectoryPage from "./pages/AITeachersDirectoryPage";
 import PricingPage from "./pages/PricingPage";
 
+// Hub Pages — Setu v2 Public Exam Prep Hub
+import ExamHubPage from "./pages/hub/ExamHubPage";
+import ResourceCategoryPage from "./pages/hub/ResourceCategoryPage";
+
 // B2B Pages
 import Overview from "./pages/TeacherHub/Overview";
 import B2BBatches from "./pages/B2B/B2BBatches";
@@ -218,6 +222,38 @@ const App = () => (
                     <Route path="/teaching-room/:teacherId" element={<AITeachingRoomPage />} />
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/premium" element={<PricingPage />} />
+
+                    {/* ─── Setu v2 — Public Exam Prep Hub ──────────────── */}
+                    {/* /hub → default to JEE Class 11 */}
+                    <Route path="/hub" element={<Navigate to="/jee/class-11" replace />} />
+
+                    {/* Exam shortcuts */}
+                    <Route path="/jee" element={<Navigate to="/jee/class-11" replace />} />
+                    <Route path="/neet" element={<Navigate to="/neet/class-11" replace />} />
+                    <Route path="/cuet" element={<Navigate to="/cuet/class-12" replace />} />
+
+                    {/* JEE */}
+                    <Route path="/jee/class-11" element={<ExamHubPage />} />
+                    <Route path="/jee/class-12" element={<ExamHubPage />} />
+                    <Route path="/jee/droppers" element={<ExamHubPage />} />
+                    <Route path="/jee/class-11/:category" element={<ResourceCategoryPage />} />
+                    <Route path="/jee/class-12/:category" element={<ResourceCategoryPage />} />
+                    <Route path="/jee/droppers/:category" element={<ResourceCategoryPage />} />
+
+                    {/* NEET */}
+                    <Route path="/neet/class-11" element={<ExamHubPage />} />
+                    <Route path="/neet/class-12" element={<ExamHubPage />} />
+                    <Route path="/neet/droppers" element={<ExamHubPage />} />
+                    <Route path="/neet/class-11/:category" element={<ResourceCategoryPage />} />
+                    <Route path="/neet/class-12/:category" element={<ResourceCategoryPage />} />
+                    <Route path="/neet/droppers/:category" element={<ResourceCategoryPage />} />
+
+                    {/* CUET */}
+                    <Route path="/cuet/class-12" element={<ExamHubPage />} />
+                    <Route path="/cuet/droppers" element={<ExamHubPage />} />
+                    <Route path="/cuet/class-12/:category" element={<ResourceCategoryPage />} />
+                    <Route path="/cuet/droppers/:category" element={<ResourceCategoryPage />} />
+
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </TooltipProvider>

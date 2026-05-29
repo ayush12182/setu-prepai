@@ -18,6 +18,7 @@ import {
   TrendingUp,
   AlertTriangle,
   Activity,
+  LayoutGrid,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ interface SidebarProps {
 
 const getNavItems = () => [
   { path: '/student-hub', icon: Home, label: 'Dashboard', emoji: '🏠', badge: undefined },
+  { path: '/hub', icon: LayoutGrid, label: 'Prep Hub', emoji: '📦', badge: 'NEW' },
   { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📚', badge: undefined },
   { path: '/practice', icon: PenTool, label: 'Practice', emoji: '✏️', badge: undefined },
   { path: '/test', icon: ClipboardCheck, label: 'Test', emoji: '📝', badge: undefined },
