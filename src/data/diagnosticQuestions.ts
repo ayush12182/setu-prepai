@@ -1,4 +1,4 @@
-// SETU ASAT-Level Diagnostic Questions — Class 11+12 Level
+// PrepEntrance ASAT-Level Diagnostic Questions — Class 11+12 Level
 // JEE: 10P + 10C + 10M | NEET: 15Bio + 8C + 7P | Commerce: 10Acc + 10Eco + 10BS
 
 export interface DiagnosticQuestion {

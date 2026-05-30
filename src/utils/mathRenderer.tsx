@@ -110,7 +110,7 @@ export const DisplayMath: React.FC<{ tex: string }> = ({ tex }) => (
  *  3. Passes text segments line-by-line to `lineRenderer`
  *  4. Renders display blocks with KaTeX (displayMode: true)
  *
- * Used by: OnePageNotes, ChapterNotesPage, LectureSetu, AskSetu, AITeachingRoom
+ * Used by: OnePageNotes, ChapterNotesPage, LecturePrepEntrance, AskPrepEntrance, AITeachingRoom
  */
 export function processNotesContent(
   content: string,
@@ -148,7 +148,7 @@ export function processNotesContent(
 /**
  * renderProseNotes — lightweight renderer for chat/AI responses.
  * Handles headings, bullets, bold, and all LaTeX styles.
- * Use this for AskSetu, AITeachingRoom, LectureSetu notes, etc.
+ * Use this for AskPrepEntrance, AITeachingRoom, LecturePrepEntrance notes, etc.
  */
 export function renderProseNotes(content: string): React.ReactNode[] {
   return processNotesContent(content, (line, key) => {
@@ -160,7 +160,7 @@ export function renderProseNotes(content: string): React.ReactNode[] {
     if (t.startsWith('• ') || t.startsWith('- ') || t.startsWith('* '))
       return <p key={key} className="ml-4 my-1 flex gap-2"><span className="shrink-0 mt-1 text-primary">•</span><MathLine>{t.slice(2)}</MathLine></p>;
     if (t.startsWith('⚡') || t.startsWith('💡'))
-      return <p key={key} className="ml-0 my-2 font-semibold text-setu-saffron"><MathLine>{t}</MathLine></p>;
+      return <p key={key} className="ml-0 my-2 font-semibold text-prepentrance-saffron"><MathLine>{t}</MathLine></p>;
     if (t.startsWith('---')) return <hr key={key} className="my-4 border-border" />;
     if (t.match(/^\d+\./))   return <p key={key} className="ml-4 my-1 font-medium"><MathLine>{t}</MathLine></p>;
     return <p key={key} className="my-1.5 leading-relaxed"><MathLine>{t}</MathLine></p>;

@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU Test Assignment & Visibility System
+-- PrepEntrance Test Assignment & Visibility System
 -- 20260419000000_test_assignment_system.sql
 -- ============================================================
 

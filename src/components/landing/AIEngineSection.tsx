@@ -160,7 +160,7 @@ const AIEngineSection: React.FC = () => (
               transition={{ delay: 0.15 }}
               className="text-[#94A3B8] text-lg leading-relaxed"
             >
-              SETU's adaptive preparation system learns from every question you
+              PrepEntrance's adaptive preparation system learns from every question you
               attempt. It identifies patterns in your mistakes and builds a
               precision plan to fix them — automatically.
             </motion.p>

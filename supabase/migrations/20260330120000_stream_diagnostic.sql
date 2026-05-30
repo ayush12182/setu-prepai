@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU STREAM DIAGNOSTIC + UNIFIED QUESTION BANK SCHEMA
+-- PrepEntrance STREAM DIAGNOSTIC + UNIFIED QUESTION BANK SCHEMA
 -- Adds: stream-awareness, proctoring, scalable question bank
 -- ============================================================
 

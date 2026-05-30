@@ -26,7 +26,7 @@ import { useLectureNotes, LectureNote } from '@/hooks/useLectureNotes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { renderProseNotes, MathLine } from '@/utils/mathRenderer';
 
-const LectureSetu: React.FC = () => {
+const LecturePrepEntrance: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState('');
   const { language } = useLanguage();
   const { isProcessing, currentNote, notes, processLecture, fetchUserNotes, setCurrentNote } = useLectureNotes();
@@ -56,10 +56,10 @@ const LectureSetu: React.FC = () => {
   ];
 
   return (
-    <MainLayout title="Lecture SETU">
+    <MainLayout title="Lecture PrepEntrance">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Hero Header */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(var(--setu-navy))] via-[hsl(var(--setu-navy-light))] to-[hsl(var(--setu-navy-dark))] p-8 sm:p-10">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(var(--prepentrance-navy))] via-[hsl(var(--prepentrance-navy-light))] to-[hsl(var(--prepentrance-navy-dark))] p-8 sm:p-10">
           <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4" />
           <div className="absolute inset-0 opacity-5" style={{
@@ -75,7 +75,7 @@ const LectureSetu: React.FC = () => {
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
-              Lecture SETU
+              Lecture PrepEntrance
             </h1>
             <p className="text-white/60 text-base max-w-md mx-auto">
               Paste any YouTube lecture link and get structured notes, timestamps, formulas, and flashcards instantly.
@@ -312,4 +312,4 @@ const LectureResults: React.FC<{ note: LectureNote }> = ({ note }) => {
   );
 };
 
-export default LectureSetu;
+export default LecturePrepEntrance;

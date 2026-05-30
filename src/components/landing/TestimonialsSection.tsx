@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const TESTIMONIALS_ROW_1 = [
   {
-    quote: "SETU helped me identify exactly where I was losing marks. Within two weeks I could see the difference in my mock scores.",
+    quote: "PrepEntrance helped me identify exactly where I was losing marks. Within two weeks I could see the difference in my mock scores.",
     name: "Arjun S.",
     tag: "JEE Main Aspirant",
     initials: "AS",
@@ -41,7 +41,7 @@ const TESTIMONIALS_ROW_1 = [
 
 const TESTIMONIALS_ROW_2 = [
   {
-    quote: "I was stuck at 450 in NEET mocks. SETU's diagnostic engine pinpointed my gaps in Plant Physiology. Scored 580 last week!",
+    quote: "I was stuck at 450 in NEET mocks. PrepEntrance's diagnostic engine pinpointed my gaps in Plant Physiology. Scored 580 last week!",
     name: "Ananya T.",
     tag: "NEET Aspirant",
     initials: "AT",

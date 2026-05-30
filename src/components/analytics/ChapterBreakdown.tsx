@@ -18,9 +18,9 @@ interface ChapterBreakdownProps {
 }
 
 const getStrength = (accuracy: number) => {
-  if (accuracy >= 80) return { label: 'Strong', color: 'bg-setu-success/15 text-setu-success border-setu-success/30', icon: CheckCircle2 };
-  if (accuracy >= 60) return { label: 'Moderate', color: 'bg-setu-saffron/15 text-setu-saffron border-setu-saffron/30', icon: Minus };
-  return { label: 'Weak', color: 'bg-setu-error/15 text-setu-error border-setu-error/30', icon: AlertTriangle };
+  if (accuracy >= 80) return { label: 'Strong', color: 'bg-prepentrance-success/15 text-prepentrance-success border-prepentrance-success/30', icon: CheckCircle2 };
+  if (accuracy >= 60) return { label: 'Moderate', color: 'bg-prepentrance-saffron/15 text-prepentrance-saffron border-prepentrance-saffron/30', icon: Minus };
+  return { label: 'Weak', color: 'bg-prepentrance-error/15 text-prepentrance-error border-prepentrance-error/30', icon: AlertTriangle };
 };
 
 export const ChapterBreakdown: React.FC<ChapterBreakdownProps> = ({ chapters }) => {
@@ -77,7 +77,7 @@ export const ChapterBreakdown: React.FC<ChapterBreakdownProps> = ({ chapters }) 
                 <p className="text-xs text-muted-foreground capitalize">{ch.subject} • {ch.total} questions • {ch.sessions} sessions</p>
               </div>
               <div className="text-right flex-shrink-0">
-                <p className={`text-lg font-bold ${ch.accuracy >= 60 ? 'text-setu-success' : 'text-setu-error'}`}>
+                <p className={`text-lg font-bold ${ch.accuracy >= 60 ? 'text-prepentrance-success' : 'text-prepentrance-error'}`}>
                   {ch.accuracy}%
                 </p>
                 <p className="text-[10px] text-muted-foreground">{ch.correct}/{ch.total}</p>

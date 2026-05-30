@@ -115,7 +115,7 @@ const LearningProfilePage: React.FC = () => {
     {
       icon: GraduationCap,
       title: 'Real Teachers, Real Guidance',
-      desc: 'SETU connects you with experienced teachers from top institutes who provide live doubt sessions, concept clarity calls, and personalized teachering — just like a classroom, but flexible.',
+      desc: 'PrepEntrance connects you with experienced teachers from top institutes who provide live doubt sessions, concept clarity calls, and personalized teachering — just like a classroom, but flexible.',
       features: ['1-on-1 doubt solving sessions', 'Weekly concept clarity calls', 'Personalized study plan reviews'],
       color: 'text-sky-400',
       bg: 'bg-sky-500/10',
@@ -133,7 +133,7 @@ const LearningProfilePage: React.FC = () => {
     {
       icon: Clock,
       title: 'Never Stuck — Anytime Support',
-      desc: 'Whether it\'s 2 PM or 2 AM, SETU is always available. AI handles instant queries while teachers are scheduled for deep learning sessions. You never have to wait to learn.',
+      desc: 'Whether it\'s 2 PM or 2 AM, PrepEntrance is always available. AI handles instant queries while teachers are scheduled for deep learning sessions. You never have to wait to learn.',
       features: ['AI available 24/7 for instant help', 'Teacher sessions bookable on your schedule', 'Voice & text chat for natural learning'],
       color: 'text-emerald-400',
       bg: 'bg-emerald-500/10',
@@ -394,13 +394,13 @@ const LearningProfilePage: React.FC = () => {
             <div className="flex-1 h-px bg-white/[0.06]" />
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/15">
               <Sparkles className="h-3.5 w-3.5 text-accent" />
-              <span className="text-[10px] font-medium text-accent uppercase tracking-wider">How SETU Helps You</span>
+              <span className="text-[10px] font-medium text-accent uppercase tracking-wider">How PrepEntrance Helps You</span>
             </div>
             <div className="flex-1 h-px bg-white/[0.06]" />
           </div>
         </motion.div>
 
-        {/* ═══════════ HOW SETU CAN HELP ═══════════ */}
+        {/* ═══════════ HOW PrepEntrance CAN HELP ═══════════ */}
         <div className="space-y-4 mb-6">
           {HELP_SECTIONS.map((section, i) => (
             <motion.div
@@ -486,7 +486,7 @@ const LearningProfilePage: React.FC = () => {
                 { step: '1', title: 'Your Personalized Roadmap', desc: 'AI creates a week-by-week plan targeting your weak zones first', icon: BookOpen },
                 { step: '2', title: 'Smart Practice Sessions', desc: 'Questions adapt to your level — easy when you\'re learning, harder as you grow', icon: Zap },
                 { step: '3', title: 'Teacher Check-ins', desc: 'Regular sessions with real teachers to review your progress and guide strategy', icon: Video },
-                { step: '4', title: 'Continuous Brain Mapping', desc: 'Your profile updates as you learn — SETU keeps getting smarter about you', icon: Brain },
+                { step: '4', title: 'Continuous Brain Mapping', desc: 'Your profile updates as you learn — PrepEntrance keeps getting smarter about you', icon: Brain },
               ].map((item, i) => (
                 <div key={item.step} className="flex items-start gap-4 relative z-10">
                   <div className="w-8 h-8 rounded-full bg-accent/20 border-2 border-slate-900 flex items-center justify-center shrink-0 text-accent text-sm font-bold shadow-sm backdrop-blur-md">
@@ -521,7 +521,7 @@ const LearningProfilePage: React.FC = () => {
         </motion.div>
 
         {/* Footer note */}
-        <p className="text-center text-[10px] text-white/15 mt-6">SETU Learning Report • Generated for you • Updates as you learn</p>
+        <p className="text-center text-[10px] text-white/15 mt-6">PrepEntrance Learning Report • Generated for you • Updates as you learn</p>
       </div >
     </div >
   );

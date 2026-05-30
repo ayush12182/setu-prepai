@@ -393,7 +393,7 @@ const DiagnosticTestPage: React.FC = () => {
                 <p className="text-white/40 text-xs mb-1.5">Traditional tests ask: <span className="text-white/60">"How much did you score?"</span></p>
                 <p className="text-accent/90 font-medium text-sm flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5" />
-                  SETU asks: "How does your brain learn best?"
+                  PrepEntrance asks: "How does your brain learn best?"
                 </p>
               </div>
 

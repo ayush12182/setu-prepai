@@ -36,7 +36,7 @@ interface OnboardingData {
 const STREAM_OPTIONS = [
   {
     value: 'foundation' as StreamType,
-    label: 'SETU Foundation',
+    label: 'PrepEntrance Foundation',
     subjects: 'Maths, Science, Mental Ability',
     badge: 'Classes 6–10',
     emoji: '🧠',
@@ -448,7 +448,7 @@ const AuthPage: React.FC = () => {
         } as any);
 
         await supabase.auth.updateUser({ data: { user_type: 'teacher', organization_id: orgId, target_exam: examGoal } });
-        toast.success('Teacher portal ready! Welcome to SETU 👨\u200d\uD83C\uDFEB');
+        toast.success('Teacher portal ready! Welcome to PrepEntrance 👨\u200d\uD83C\uDFEB');
         navigate('/b2b');
         return;
       }
@@ -674,7 +674,7 @@ const AuthPage: React.FC = () => {
 
           <div className="bg-white/[0.04] rounded-2xl border border-white/[0.08] p-5 mb-6 text-left space-y-3">
             {[
-              { n: '1', text: 'Open the email from SETU' },
+              { n: '1', text: 'Open the email from PrepEntrance' },
               { n: '2', text: 'Click "Verify your email"' },
               { n: '3', text: 'You\'ll be redirected back to sign in' },
             ].map(s => (
@@ -737,7 +737,7 @@ const AuthPage: React.FC = () => {
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center shadow-lg shadow-accent/30">
               <BookOpen className="h-5 w-5 text-white" />
             </div>
-            <span className="font-serif font-bold text-2xl text-white tracking-wide">SETU</span>
+            <span className="font-serif font-bold text-2xl text-white tracking-wide">PrepEntrance</span>
           </button>
         </div>
 
@@ -811,7 +811,7 @@ const AuthPage: React.FC = () => {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center shadow-lg shadow-accent/20">
                 <BookOpen className="h-4.5 w-4.5 text-white" />
               </div>
-              <span className="font-serif font-bold text-lg text-white tracking-wide">SETU</span>
+              <span className="font-serif font-bold text-lg text-white tracking-wide">PrepEntrance</span>
             </button>
           </div>
         </header>
@@ -826,12 +826,12 @@ const AuthPage: React.FC = () => {
           <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Welcome heading */}
             <div className="text-center mb-8">
-              {/* SETU Logo — desktop right panel */}
+              {/* PrepEntrance Logo — desktop right panel */}
               <div className="hidden lg:flex items-center justify-center gap-2.5 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center shadow-lg shadow-accent/25">
                   <BookOpen className="h-5 w-5 text-white" />
                 </div>
-                <span className="font-serif font-bold text-xl text-white tracking-wide">SETU</span>
+                <span className="font-serif font-bold text-xl text-white tracking-wide">PrepEntrance</span>
               </div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 mb-5">
                 <Sparkles className="h-3.5 w-3.5 text-accent" />

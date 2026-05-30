@@ -72,18 +72,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // SETU Custom Colors
-        setu: {
-          navy: "hsl(var(--setu-navy))",
-          "navy-light": "hsl(var(--setu-navy-light))",
-          "navy-dark": "hsl(var(--setu-navy-dark))",
-          saffron: "hsl(var(--setu-saffron))",
-          "saffron-light": "hsl(var(--setu-saffron-light))",
-          "saffron-dark": "hsl(var(--setu-saffron-dark))",
-          success: "hsl(var(--setu-success))",
-          warning: "hsl(var(--setu-warning))",
-          error: "hsl(var(--setu-error))",
-          info: "hsl(var(--setu-info))",
+        // PrepEntrance Custom Colors
+        prepentrance: {
+          navy: "hsl(var(--prepentrance-navy))",
+          "navy-light": "hsl(var(--prepentrance-navy-light))",
+          "navy-dark": "hsl(var(--prepentrance-navy-dark))",
+          saffron: "hsl(var(--prepentrance-saffron))",
+          "saffron-light": "hsl(var(--prepentrance-saffron-light))",
+          "saffron-dark": "hsl(var(--prepentrance-saffron-dark))",
+          success: "hsl(var(--prepentrance-success))",
+          warning: "hsl(var(--prepentrance-warning))",
+          error: "hsl(var(--prepentrance-error))",
+          info: "hsl(var(--prepentrance-info))",
         },
         // Subject Colors
         physics: "hsl(var(--physics-color))",

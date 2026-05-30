@@ -31,7 +31,7 @@ const PricingPage: React.FC = () => {
   };
 
   return (
-    <MainLayout title="Upgrade to SETU Pro">
+    <MainLayout title="Upgrade to PrepEntrance Pro">
       <div className="max-w-6xl mx-auto py-12 px-6">
         
         {/* Header */}
@@ -43,7 +43,7 @@ const PricingPage: React.FC = () => {
             Unlock your <span className="text-accent">Ultimate Rank</span>
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Upgrade to SETU Pro to unlock the AI Academic Coach, hyper-personalized Adaptive Mock Tests, and unlimited access to the Commune Focus Rooms.
+            Upgrade to PrepEntrance Pro to unlock the AI Academic Coach, hyper-personalized Adaptive Mock Tests, and unlimited access to the Commune Focus Rooms.
           </p>
         </div>
 
@@ -72,7 +72,7 @@ const PricingPage: React.FC = () => {
                 <Check className="w-5 h-5 opacity-0 shrink-0 mt-0.5" /> AI Academic Coach Engine
               </li>
               <li className="flex items-start gap-3 text-muted-foreground/50 line-through">
-                <Check className="w-5 h-5 opacity-0 shrink-0 mt-0.5" /> Unlimited SETU Commune Access
+                <Check className="w-5 h-5 opacity-0 shrink-0 mt-0.5" /> Unlimited PrepEntrance Commune Access
               </li>
             </ul>
             
@@ -91,7 +91,7 @@ const PricingPage: React.FC = () => {
 
             <div className="relative z-10">
               <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-accent" /> SETU Pro
+                <Sparkles className="w-5 h-5 text-accent" /> PrepEntrance Pro
               </h3>
               <p className="text-white/60 mb-6">The definitive unfair advantage.</p>
               

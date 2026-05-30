@@ -108,9 +108,9 @@ const CreateRoomDialog: React.FC<{
 const shareRoom = async (roomId: string, topic: string, e?: React.MouseEvent) => {
   e?.stopPropagation();
   const url = `${window.location.origin}/circles/${roomId}`;
-  const text = `Join me in "${topic}" on SETU Commune! 📚🔥`;
+  const text = `Join me in "${topic}" on PrepEntrance Commune! 📚🔥`;
   if (navigator.share) {
-    navigator.share({ title: 'SETU Commune', text, url }).catch(() => {});
+    navigator.share({ title: 'PrepEntrance Commune', text, url }).catch(() => {});
   } else {
     navigator.clipboard.writeText(`${text}\n${url}`);
     toast.success('Invite link copied! 🔥');
@@ -177,7 +177,7 @@ const ActiveRoomCard: React.FC<{ rs: RoomState; subject?: CircleSubject; onJoin:
 
 // ─── Main Page ─────────────────────────────────────────────────────────────
 
-const SetuCirclesPage: React.FC = () => {
+const PrepEntranceCirclesPage: React.FC = () => {
   const navigate = useNavigate();
   const { examMode, isNeet } = useExamMode();
   const { user } = useAuth();
@@ -227,7 +227,7 @@ const SetuCirclesPage: React.FC = () => {
 
   if (!user) {
     return (
-      <MainLayout title="SETU Commune">
+      <MainLayout title="PrepEntrance Commune">
         <div className="flex flex-col items-center justify-center py-32 gap-5 px-4 text-center">
           <div className="w-20 h-20 rounded-2xl bg-accent/10 flex items-center justify-center mb-2 shadow-[0_0_30px_rgba(234,88,12,0.15)]">
             <Flame className="w-10 h-10 text-accent" />
@@ -243,7 +243,7 @@ const SetuCirclesPage: React.FC = () => {
   }
 
   return (
-    <MainLayout title="SETU Commune">
+    <MainLayout title="PrepEntrance Commune">
       <div className="min-h-[calc(100vh-4rem)] bg-slate-950 pb-20">
         
         {/* ── Hero Lobby Dashboard ── */}
@@ -460,4 +460,4 @@ const SetuCirclesPage: React.FC = () => {
   );
 };
 
-export default SetuCirclesPage;
+export default PrepEntranceCirclesPage;

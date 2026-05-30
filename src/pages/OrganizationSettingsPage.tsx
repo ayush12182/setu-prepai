@@ -138,7 +138,7 @@ export default function OrganizationSettingsPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Global SETU Topic (Map)</label>
+                      <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 block">Global PrepEntrance Topic (Map)</label>
                       <input 
                         placeholder="e.g. Kinematics (1D)"
                         value={globalRef}
@@ -146,7 +146,7 @@ export default function OrganizationSettingsPage() {
                         className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
                       />
                       <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">
-                        This tells the SETU AI which question bank to pull from when automatically generating tests for your custom topic.
+                        This tells the PrepEntrance AI which question bank to pull from when automatically generating tests for your custom topic.
                       </p>
                     </div>
 
@@ -207,7 +207,7 @@ export default function OrganizationSettingsPage() {
                  <div className="p-4 flex items-center justify-between hover:bg-secondary/20 transition-colors border-b border-border">
                    <div className="flex items-center gap-3">
                      <div className="w-8 h-8 rounded-full bg-accent/20 text-accent font-bold flex items-center justify-center">JB</div>
-                     <span className="font-semibold text-foreground">SETU Mentor</span>
+                     <span className="font-semibold text-foreground">PrepEntrance Mentor</span>
                    </div>
                    <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Active</span>
                  </div>

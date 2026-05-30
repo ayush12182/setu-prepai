@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU Student Memory & Teacher Tasks Architecture
+-- PrepEntrance Student Memory & Teacher Tasks Architecture
 -- 20260408120000_student_memory_tasks.sql
 -- ============================================================
 

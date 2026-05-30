@@ -80,7 +80,7 @@ const ExamTracksSection: React.FC = () => {
             transition={{ delay: 0.14 }}
             className="text-[#94A3B8] text-lg max-w-lg mx-auto leading-relaxed"
           >
-            Select your target — SETU adapts the entire preparation engine to your syllabus, exam pattern, and timeline.
+            Select your target — PrepEntrance adapts the entire preparation engine to your syllabus, exam pattern, and timeline.
           </motion.p>
         </div>
 
@@ -184,7 +184,7 @@ const ExamTracksSection: React.FC = () => {
           transition={{ delay: 0.4 }}
           className="text-center text-[#94A3B8]/40 text-xs mt-10"
         >
-          SETU AI personalizes the full preparation system — syllabus, practice, revision, and analytics — for your selected exam.
+          PrepEntrance AI personalizes the full preparation system — syllabus, practice, revision, and analytics — for your selected exam.
         </motion.p>
       </div>
     </section>

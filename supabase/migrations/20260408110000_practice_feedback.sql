@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU Student Practice & Feedback Architecture
+-- PrepEntrance Student Practice & Feedback Architecture
 -- 20260408110000_practice_feedback.sql
 -- ============================================================
 

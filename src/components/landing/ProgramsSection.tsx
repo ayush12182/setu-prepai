@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const programs = [
     {
         id: 'foundation',
-        name: 'SETU Foundation',
+        name: 'PrepEntrance Foundation',
         tagline: 'Build unshakeable fundamentals',
         classes: 'Classes 6 – 10',
         icon: Brain,
@@ -32,7 +32,7 @@ const programs = [
     },
     {
         id: 'jee_core',
-        name: 'SETU JEE Core',
+        name: 'PrepEntrance JEE Core',
         tagline: 'Master the JEE foundation',
         classes: 'Class 11',
         icon: Rocket,
@@ -56,7 +56,7 @@ const programs = [
     },
     {
         id: 'jee_advanced',
-        name: 'SETU JEE Advanced',
+        name: 'PrepEntrance JEE Advanced',
         tagline: 'Crack the toughest exam',
         classes: 'Class 12',
         icon: Zap,
@@ -94,7 +94,7 @@ export const ProgramsSection: React.FC = () => {
     const navigate = useNavigate();
 
     return (
-        <section id="programs" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-setu-navy">
+        <section id="programs" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-prepentrance-navy">
             {/* Background */}
             <div className="absolute inset-0 opacity-15">
                 <div className="absolute top-1/3 right-0 w-[600px] h-[600px] bg-accent rounded-full blur-[200px]" />
@@ -118,7 +118,7 @@ export const ProgramsSection: React.FC = () => {
                         <span className="text-accent">three powerful programs</span>
                     </h2>
                     <p className="text-white/50 text-lg max-w-2xl mx-auto">
-                        From building fundamentals in Class 6 to cracking JEE Advanced in Class 12 — SETU adapts to your exact level.
+                        From building fundamentals in Class 6 to cracking JEE Advanced in Class 12 — PrepEntrance adapts to your exact level.
                     </p>
                 </motion.div>
 

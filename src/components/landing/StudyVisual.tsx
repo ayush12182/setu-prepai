@@ -41,8 +41,8 @@ const ExamPrepScreen: React.FC = () => (
     {/* Top bar */}
     <div className="flex items-center justify-between relative z-10">
       <div className="flex items-center gap-2">
-        <img src="/setu-logo.png" alt="" className="h-5 w-5 object-contain" />
-        <span className="text-white text-[11px] font-bold tracking-wider">SETU PREP</span>
+        <img src="/prepentrance-logo.png" alt="" className="h-5 w-5 object-contain" />
+        <span className="text-white text-[11px] font-bold tracking-wider">PrepEntrance PREP</span>
       </div>
       <div className="flex items-center gap-2">
         <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-white/60 font-bold uppercase tracking-wider">JEE Target: <span className="text-white">AIR &lt; 5000</span></span>

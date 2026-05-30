@@ -68,7 +68,7 @@ const AnalyticsPage: React.FC = () => {
     if (act.actionType === 'practice_chapter') {
       navigate('/practice');
     } else if (act.actionType === 'fix_mistakes') {
-      navigate('/ask-setu');
+      navigate('/ask-prepentrance');
     } else if (act.actionType === 'focus_sprint') {
       navigate('/circles');
     }
@@ -197,7 +197,7 @@ const AnalyticsPage: React.FC = () => {
         </div>
 
         {/* ─── JEETU BHAIYA MENTOR RESPONSE ─── */}
-        {/* We keep this explicitly dark-themed because SETU's card is a premium focal point */}
+        {/* We keep this explicitly dark-themed because PrepEntrance's card is a premium focal point */}
         <div className="relative rounded-3xl p-[1px] bg-gradient-to-b from-accent/50 to-border shadow-xl">
           <div className="absolute inset-0 bg-accent/5 blur-xl rounded-3xl pointer-events-none" />
           <div className="bg-slate-950 rounded-[23px] p-6 lg:p-8 relative overflow-hidden">

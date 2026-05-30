@@ -76,7 +76,7 @@ export const SnapAndSolveModal: React.FC<SnapAndSolveModalProps> = ({ onClose })
           <div className="p-6">
             {!imagePreview ? (
               <div className="space-y-4">
-                <p className="text-muted-foreground text-center mb-6">Capture or upload any handwritten question, printed textbook page, or worksheet. SETU Vision will parse and solve it instantly.</p>
+                <p className="text-muted-foreground text-center mb-6">Capture or upload any handwritten question, printed textbook page, or worksheet. PrepEntrance Vision will parse and solve it instantly.</p>
                 
                 {/* Hidden Inputs */}
                 <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleFileSelect} />

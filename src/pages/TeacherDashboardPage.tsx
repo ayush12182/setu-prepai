@@ -501,7 +501,7 @@ const TeacherDashboard: React.FC = () => {
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="font-display font-black text-2xl tracking-tighter">SETU.</span>
+            <span className="font-display font-black text-2xl tracking-tighter">PrepEntrance.</span>
             <span className="text-[10px] font-bold uppercase tracking-widest text-violet-400 bg-violet-500/10
               border border-violet-500/20 px-2 py-0.5 rounded-full">Teacher</span>
           </div>

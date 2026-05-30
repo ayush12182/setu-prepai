@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU Question Bank — questions_bank table
+-- PrepEntrance Question Bank — questions_bank table
 -- 20260408100000_questions_bank.sql
 -- ============================================================
 

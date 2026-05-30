@@ -34,15 +34,13 @@ interface SidebarProps {
 
 const getNavItems = () => [
   { path: '/student-hub', icon: Home, label: 'Dashboard', emoji: '🏠', badge: undefined },
-  { path: '/hub', icon: LayoutGrid, label: 'Prep Hub', emoji: '📦', badge: 'NEW' },
   { path: '/learn', icon: BookOpen, label: 'Learn', emoji: '📚', badge: undefined },
   { path: '/practice', icon: PenTool, label: 'Practice', emoji: '✏️', badge: undefined },
-  { path: '/test', icon: ClipboardCheck, label: 'Test', emoji: '📝', badge: undefined },
+  { path: '/test', icon: ClipboardCheck, label: 'Tests', emoji: '📝', badge: undefined },
   { path: '/revision', icon: RotateCcw, label: 'Revision', emoji: '🔄', badge: undefined },
-  { path: '/lecture-setu', icon: Video, label: 'Lecture SETU', emoji: '🎬', badge: undefined },
-  { path: '/analytics', icon: BarChart3, label: 'Analytics', emoji: '📊', badge: undefined },
-  { path: '/profile', icon: User, label: 'My Profile', emoji: '👤', badge: undefined },
-  { path: '/ask-setu', icon: MessageCircle, label: 'Your Mentor', emoji: '💬', badge: undefined },
+  { path: '/analytics', icon: BarChart3, label: 'Performance', emoji: '📊', badge: undefined },
+  { path: '/ask-prepentrance', icon: MessageCircle, label: 'Mentor', emoji: '💬', badge: undefined },
+  { path: '/profile', icon: User, label: 'Profile', emoji: '👤', badge: undefined },
 ];
 
 const getB2BNavItems = (isMentor: boolean, isInstitution: boolean) => [
@@ -97,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   <span className="text-white font-bold text-lg">S</span>
                 </div>
                 <div>
-                  <h1 className="font-display font-bold text-xl text-white tracking-wide">SETU</h1>
+                  <h1 className="font-display font-bold text-xl text-white tracking-wide">PrepEntrance</h1>
                   <p className="text-[11px] text-white/50 font-medium tracking-wider uppercase">
                     {isFoundation ? `${classLabel} • School` : `${config.label} Prep Mentor`}
                   </p>

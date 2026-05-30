@@ -34,8 +34,8 @@ export const NotesSection: React.FC<NotesSectionProps> = ({
   if (!notes && !isLoading && !error) {
     return (
       <div className="bg-card border border-border rounded-xl p-8 text-center">
-        <div className="w-16 h-16 rounded-full bg-setu-saffron/10 flex items-center justify-center mx-auto mb-4">
-          <BookOpen className="w-8 h-8 text-setu-saffron" />
+        <div className="w-16 h-16 rounded-full bg-prepentrance-saffron/10 flex items-center justify-center mx-auto mb-4">
+          <BookOpen className="w-8 h-8 text-prepentrance-saffron" />
         </div>
         <h3 className="text-lg font-semibold text-foreground mb-2">
           1-Day Exam Revision Sheet
@@ -43,7 +43,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({
         <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
           Premium topper-style short notes with perfect visual hierarchy. Highly compressed, formula-first, and optimized for fast recall.
         </p>
-        <Button onClick={onGenerate} className="bg-gradient-to-r from-setu-saffron to-setu-saffron/80 text-white">
+        <Button onClick={onGenerate} className="bg-gradient-to-r from-prepentrance-saffron to-prepentrance-saffron/80 text-white">
           <Sparkles className="w-4 h-4 mr-2" />
           Generate Sheet
         </Button>
@@ -56,7 +56,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({
     return (
       <div className="bg-card border border-border rounded-xl p-8">
         <div className="flex flex-col items-center justify-center py-10 space-y-4">
-          <div className="w-12 h-12 rounded-full border-4 border-setu-saffron border-t-transparent animate-spin" />
+          <div className="w-12 h-12 rounded-full border-4 border-prepentrance-saffron border-t-transparent animate-spin" />
           <h3 className="text-lg font-semibold text-foreground">Preparing Premium Notes</h3>
           <p className="text-sm text-muted-foreground max-w-sm text-center">
             Compressing {subchapterName} into a high-yield, 5-minute visual revision sheet...
@@ -85,8 +85,8 @@ export const NotesSection: React.FC<NotesSectionProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-8 pb-4 border-b border-border/50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-setu-saffron/10 flex items-center justify-center">
-            <BookOpen className="w-5 h-5 text-setu-saffron" />
+          <div className="w-10 h-10 rounded-lg bg-prepentrance-saffron/10 flex items-center justify-center">
+            <BookOpen className="w-5 h-5 text-prepentrance-saffron" />
           </div>
           <div>
             <h3 className="font-bold text-lg text-foreground tracking-tight">Revision Sheet</h3>
@@ -186,7 +186,7 @@ export const NotesSection: React.FC<NotesSectionProps> = ({
       {/* Mentor signature */}
       <div className="mt-12 pt-6 border-t border-border/50">
         <p className="text-xs text-muted-foreground text-center font-medium uppercase tracking-widest">
-          — DESIGNED BY SETU MENTOR —
+          — DESIGNED BY PrepEntrance MENTOR —
         </p>
       </div>
     </div>

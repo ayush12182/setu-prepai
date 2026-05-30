@@ -31,9 +31,9 @@ export const PracticeTimeline: React.FC<PracticeTimelineProps> = ({ last30Days, 
           Last 30 Days Activity
         </h3>
         {streak > 0 && (
-          <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-setu-saffron/10 border border-setu-saffron/20">
-            <Flame className="w-4 h-4 text-setu-saffron" />
-            <span className="text-sm font-bold text-setu-saffron">{streak} day streak</span>
+          <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-prepentrance-saffron/10 border border-prepentrance-saffron/20">
+            <Flame className="w-4 h-4 text-prepentrance-saffron" />
+            <span className="text-sm font-bold text-prepentrance-saffron">{streak} day streak</span>
           </div>
         )}
       </div>
@@ -44,7 +44,7 @@ export const PracticeTimeline: React.FC<PracticeTimelineProps> = ({ last30Days, 
           const accuracy = day.questions > 0 ? day.correct / day.questions : 0;
           const color = day.questions === 0
             ? 'bg-secondary'
-            : accuracy >= 0.7 ? 'bg-setu-success' : accuracy >= 0.5 ? 'bg-setu-saffron' : 'bg-setu-error';
+            : accuracy >= 0.7 ? 'bg-prepentrance-success' : accuracy >= 0.5 ? 'bg-prepentrance-saffron' : 'bg-prepentrance-error';
 
           return (
             <div key={i} className="flex-1 flex flex-col items-center group relative">
@@ -68,9 +68,9 @@ export const PracticeTimeline: React.FC<PracticeTimelineProps> = ({ last30Days, 
       </div>
 
       <div className="flex items-center gap-4 mt-3 justify-center">
-        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-setu-success" /><span className="text-[10px] text-muted-foreground">≥70%</span></div>
-        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-setu-saffron" /><span className="text-[10px] text-muted-foreground">50-70%</span></div>
-        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-setu-error" /><span className="text-[10px] text-muted-foreground">&lt;50%</span></div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-prepentrance-success" /><span className="text-[10px] text-muted-foreground">≥70%</span></div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-prepentrance-saffron" /><span className="text-[10px] text-muted-foreground">50-70%</span></div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-prepentrance-error" /><span className="text-[10px] text-muted-foreground">&lt;50%</span></div>
         <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-sm bg-secondary" /><span className="text-[10px] text-muted-foreground">No activity</span></div>
       </div>
     </div>

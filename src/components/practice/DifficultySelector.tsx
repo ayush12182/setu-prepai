@@ -40,8 +40,8 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
       description: 'NCERT level basics',
       timePerQ: '30-60 sec',
       icon: Zap,
-      color: 'bg-setu-success/10 border-setu-success/30 hover:bg-setu-success/20',
-      iconColor: 'text-setu-success',
+      color: 'bg-prepentrance-success/10 border-prepentrance-success/30 hover:bg-prepentrance-success/20',
+      iconColor: 'text-prepentrance-success',
       questions: 5
     },
     {
@@ -50,8 +50,8 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
       description: getMediumDesc(),
       timePerQ: '1-2 min',
       icon: Target,
-      color: 'bg-setu-warning/10 border-setu-warning/30 hover:bg-setu-warning/20',
-      iconColor: 'text-setu-warning',
+      color: 'bg-prepentrance-warning/10 border-prepentrance-warning/30 hover:bg-prepentrance-warning/20',
+      iconColor: 'text-prepentrance-warning',
       questions: 5
     },
     {

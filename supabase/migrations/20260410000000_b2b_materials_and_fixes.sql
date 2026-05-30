@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU B2B Fixes & Batch Materials Table
+-- PrepEntrance B2B Fixes & Batch Materials Table
 -- 20260410000000_b2b_materials_and_fixes.sql
 -- ============================================================
 

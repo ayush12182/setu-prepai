@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * SETU Question Bank Mega Seeder
+ * PrepEntrance Question Bank Mega Seeder
  * ───────────────────────────────
  * Generates 30,000+ MCQs across all 104 curriculum topics.
  * Runs locally (no timeout), calls Gemini directly, bulk-inserts into Supabase.
@@ -348,7 +348,7 @@ async function seedTopic(node, existingTexts, topicIndex) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   console.log("═══════════════════════════════════════════════════════════");
-  console.log("  SETU Question Bank Mega Seeder");
+  console.log("  PrepEntrance Question Bank Mega Seeder");
   console.log(`  Target: ${CURRICULUM.length} topics × ${QUESTIONS_PER_TOPIC} questions = ${CURRICULUM.length * QUESTIONS_PER_TOPIC} questions`);
   console.log("═══════════════════════════════════════════════════════════\n");
 

@@ -12,7 +12,7 @@
       "has": [
         {
           "type": "host",
-          "value": "setu-prepai\\.vercel\\.app"
+          "value": "prepentrance-prepai\\.vercel\\.app"
         }
       ],
       "destination": "https://setulearning.in/$1",

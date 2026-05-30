@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import setuLogo from '@/assets/setu-logo.png';
+import setuLogo from '@/assets/prepentrance-logo.png';
 
 export const LandingHeader: React.FC = () => {
   const navigate = useNavigate();
@@ -23,13 +23,13 @@ export const LandingHeader: React.FC = () => {
       transition={{ duration: 0.6 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? 'bg-setu-navy/95 backdrop-blur-md border-b border-white/10 py-3' 
+          ? 'bg-prepentrance-navy/95 backdrop-blur-md border-b border-white/10 py-3' 
           : 'bg-transparent py-5'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-12 flex items-center justify-between">
         <div className="flex items-center hover:scale-[1.02] transition-transform">
-          <img src={setuLogo} alt="SETU" className="h-10 sm:h-12 w-auto rounded-lg" />
+          <img src={setuLogo} alt="PrepEntrance" className="h-10 sm:h-12 w-auto rounded-lg" />
         </div>
         
         {/* Nav Links - Desktop */}

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * SETU PYQ Mega Seeder — v2
+ * PrepEntrance PYQ Mega Seeder — v2
  * ─────────────────────────
  * Seeds 10,000+ PYQs across JEE / NEET / CUET using chapter-level
  * batched requests with parallel workers and resume-safe dedup.
@@ -319,7 +319,7 @@ async function main() {
 
   // ── Header ─────────────────────────────────────────────────────
   console.log('\n' + bold('══════════════════════════════════════════════════════════'));
-  console.log(bold('  SETU PYQ Mega Seeder  v2'));
+  console.log(bold('  PrepEntrance PYQ Mega Seeder  v2'));
   console.log(bold('══════════════════════════════════════════════════════════'));
   console.log(dim(`  Supabase : ${SUPABASE_URL}`));
   console.log(dim(`  Batch    : ${BATCH_SIZE} q/call  |  Concurrency: ${CONCURRENCY}  |  Delay: ${DELAY_MS}ms`));

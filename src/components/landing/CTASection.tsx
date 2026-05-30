@@ -31,7 +31,7 @@ export const CTASection: React.FC = () => {
   };
 
   return (
-    <section className="relative py-32 px-6 sm:px-12 overflow-hidden bg-setu-navy">
+    <section className="relative py-32 px-6 sm:px-12 overflow-hidden bg-prepentrance-navy">
       {/* Animated Background */}
       <div className="absolute inset-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px]">
@@ -75,7 +75,7 @@ export const CTASection: React.FC = () => {
 
           {/* Subtext */}
           <p className="text-white/70 text-lg sm:text-xl max-w-lg mx-auto mb-10">
-            From Class 6 foundations to JEE/NEET/CUET success — join students who found clarity with SETU.
+            From Class 6 foundations to JEE/NEET/CUET success — join students who found clarity with PrepEntrance.
           </p>
 
           {/* CTA Button */}

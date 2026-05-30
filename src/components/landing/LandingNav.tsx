@@ -82,8 +82,8 @@ const LandingNav: React.FC = () => {
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center gap-2.5 shrink-0 group mr-2"
           >
-            <img src="/setu-logo.png" alt="SETU" className="h-8 w-8 object-contain" />
-            <span className="font-bold text-lg text-white tracking-wide hidden sm:block">SETU</span>
+            <img src="/prepentrance-logo.png" alt="PrepEntrance" className="h-8 w-8 object-contain" />
+            <span className="font-bold text-lg text-white tracking-wide hidden sm:block">PrepEntrance</span>
           </button>
 
           {/* All Exams dropdown */}

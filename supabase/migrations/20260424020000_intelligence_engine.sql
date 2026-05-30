@@ -1,4 +1,4 @@
--- SETU Intelligence Layer: Database Foundation
+-- PrepEntrance Intelligence Layer: Database Foundation
 -- This migration implements semantic search and weighted intelligence scoring
 
 -- 1. EXTEND LEARNING NODES FOR SEMANTIC SEARCH

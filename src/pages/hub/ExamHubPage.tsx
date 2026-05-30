@@ -51,7 +51,7 @@ const HubHero: React.FC<{ exam: Exam }> = ({ exam }) => {
           </span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-black text-white mb-2 leading-tight">
-          SETU — Your Exam<br className="hidden sm:block" /> Preparation Hub
+          PrepEntrance — Your Exam<br className="hidden sm:block" /> Preparation Hub
         </h1>
         <p className="text-sm sm:text-base mb-6 max-w-xl" style={{ color: 'rgba(255,255,255,0.55)' }}>
           Notes, PYQs, Tests, Revision Resources and AI Doubt Solving for {meta.label} Aspirants.
@@ -67,7 +67,7 @@ const StatsStrip: React.FC<{ exam: Exam; count: number }> = ({ exam, count }) =>
   const meta = EXAM_META[exam];
   const stats = [
     { icon: BookOpen, label: `${count} Resources`, sub: 'Notes, PYQs, Tests' },
-    { icon: TrendingUp, label: '10K+ Students', sub: 'Using SETU daily' },
+    { icon: TrendingUp, label: '10K+ Students', sub: 'Using PrepEntrance daily' },
     { icon: Clock, label: 'Updated May 2025', sub: 'Fresh content' },
     { icon: Sparkles, label: 'AI Mentor', sub: 'Instant doubts' },
   ];

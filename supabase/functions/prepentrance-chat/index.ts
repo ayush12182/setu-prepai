@@ -1,5 +1,5 @@
 /**
- * setu-chat — Supabase Edge Function
+ * prepentrance-chat — Supabase Edge Function
  * 
  * ENGINE: REFACTORED TO GEMINI-1.5-FLASH (FINAL)
  */
@@ -30,7 +30,7 @@ serve(async (req) => {
     const examMode: string = body.examMode || 'JEE';
     const language: string = body.language || 'english';
 
-    const systemPrompt = `You are SETU AI, a highly intelligent and supportive mentor for ${examMode} aspirants.
+    const systemPrompt = `You are PrepEntrance AI, a highly intelligent and supportive mentor for ${examMode} aspirants.
 Your style is professional, motivating, and highly academic.
 ${language === 'hindi' ? 'Reply in Hindi.' : 'Use professional English with a touch of warmth.'}
 Don't just solve problems — give actionable study plans and strategic guidance.

@@ -53,7 +53,7 @@ const _Unused: React.FC = () => (
           {['#ef4444','#f59e0b','#22c55e'].map(c => <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c + 'aa' }} />)}
         </div>
         <div className="flex-1 mx-4 h-5 rounded bg-white/[0.05] flex items-center px-3">
-          <span className="text-[10px] text-white/25">setu.ai · dashboard</span>
+          <span className="text-[10px] text-white/25">prepentrance.ai · dashboard</span>
         </div>
       </div>
 
@@ -191,7 +191,7 @@ const HeroSection: React.FC = () => {
             {/* Sub */}
             <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.18 }}
               className="text-lg text-[#94A3B8] leading-relaxed max-w-lg">
-              SETU's AI engine identifies your weaknesses, adapts your learning path, and builds a precision strategy for JEE, NEET, and CUET.
+              PrepEntrance's AI engine identifies your weaknesses, adapts your learning path, and builds a precision strategy for JEE, NEET, and CUET.
             </motion.p>
 
             {/* Exam pills */}

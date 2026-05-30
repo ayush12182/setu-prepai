@@ -30,7 +30,7 @@ export const MentorSection: React.FC = () => {
   const [isMuted, setIsMuted] = useState(true);
 
   return (
-    <section id="teacher-section" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-setu-navy">
+    <section id="teacher-section" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-prepentrance-navy">
       {/* Background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent rounded-full blur-[150px]" />
@@ -70,7 +70,7 @@ export const MentorSection: React.FC = () => {
                 "Padhai sirf notes se nahi hoti. Ek teacher chahiye jo tumhe samjhe,
                 tumhari galtiyon ko pakde, aur sahi direction de."
               </p>
-              <p className="text-accent font-medium mt-4">— SETU Mentor's Philosophy</p>
+              <p className="text-accent font-medium mt-4">— PrepEntrance Mentor's Philosophy</p>
             </div>
 
             {/* Mentor Cards - Compact */}
@@ -109,7 +109,7 @@ export const MentorSection: React.FC = () => {
             <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/20">
               <iframe
                 src={`https://www.youtube.com/embed/TMgBq8BvLcM?autoplay=${isPlaying ? 1 : 0}&mute=${isMuted ? 1 : 0}&loop=1&playlist=TMgBq8BvLcM&controls=0&showinfo=0&rel=0&modestbranding=1&enablejsapi=1`}
-                title="SETU Mentor"
+                title="PrepEntrance Mentor"
                 className="absolute inset-0 w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen

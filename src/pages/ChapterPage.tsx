@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { ChapterHeader } from '@/components/chapter/ChapterHeader';
 import { SubchapterCard } from '@/components/chapter/SubchapterCard';
 import { TrendingConcepts } from '@/components/chapter/TrendingConcepts';
-import { SETUTip } from '@/components/chapter/SETUTip';
+import { PrepEntranceTip } from '@/components/chapter/PrepEntranceTip';
 
 
 const ChapterPage: React.FC = () => {
@@ -43,8 +43,8 @@ const ChapterPage: React.FC = () => {
         {/* Chapter Header with Stats */}
         <ChapterHeader chapter={chapter} subchapterCount={subchapters.length} />
 
-        {/* SETU Mentor Tip */}
-        <SETUTip chapter={chapter} subchapterCount={subchapters.length} />
+        {/* PrepEntrance Mentor Tip */}
+        <PrepEntranceTip chapter={chapter} subchapterCount={subchapters.length} />
 
         {/* ═══ The 4 Pillars of Foundation Learning ═══ */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pb-4">
@@ -147,7 +147,7 @@ const ChapterPage: React.FC = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="bg-muted/50 border border-border rounded-2xl p-8 text-center"
             >
-              <AlertTriangle className="w-12 h-12 text-setu-warning mx-auto mb-4" />
+              <AlertTriangle className="w-12 h-12 text-prepentrance-warning mx-auto mb-4" />
               <p className="text-foreground font-medium mb-2">Topics are being prepared</p>
               <p className="text-sm text-muted-foreground mb-4">
                 Our team is adding content for this chapter. Check back soon!
@@ -171,7 +171,7 @@ const ChapterPage: React.FC = () => {
             className="bg-card border border-border rounded-2xl p-6 shadow-sm"
           >
             <h3 className="font-semibold mb-4 flex items-center gap-2 text-foreground">
-              <Zap className="w-5 h-5 text-setu-warning" />
+              <Zap className="w-5 h-5 text-prepentrance-warning" />
               Key Formulas (Quick Look)
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

@@ -1,5 +1,5 @@
 -- ══════════════════════════════════════════════════════════════════
--- Setu v2 — Exam Preparation Hub: Full Schema + Seed
+-- PrepEntrance v2 — Exam Preparation Hub: Full Schema + Seed
 -- Migration: 20260529000000_hub_resources.sql
 -- ══════════════════════════════════════════════════════════════════
 

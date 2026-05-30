@@ -29,9 +29,9 @@ export const TrialExpiredScreen: React.FC = () => {
     };
 
     const handleShare = () => {
-        const text = `Join SETU — India's smartest learning platform! Use my code ${trialStatus.referralCode} to get started. 🚀`;
+        const text = `Join PrepEntrance — India's smartest learning platform! Use my code ${trialStatus.referralCode} to get started. 🚀`;
         if (navigator.share) {
-            navigator.share({ title: 'Join SETU', text, url: 'https://setulearning.in' });
+            navigator.share({ title: 'Join PrepEntrance', text, url: 'https://setulearning.in' });
         } else {
             navigator.clipboard.writeText(text);
             toast.success('Share text copied to clipboard!');
@@ -62,7 +62,7 @@ export const TrialExpiredScreen: React.FC = () => {
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center shadow-lg shadow-accent/30">
                         <BookOpen className="h-5 w-5 text-white" />
                     </div>
-                    <span className="font-serif font-bold text-xl text-white tracking-wide">SETU</span>
+                    <span className="font-serif font-bold text-xl text-white tracking-wide">PrepEntrance</span>
                 </div>
 
                 {/* Card */}
@@ -76,7 +76,7 @@ export const TrialExpiredScreen: React.FC = () => {
                             Trial Ended
                         </h2>
                         <p className="text-white/40 text-sm leading-relaxed">
-                            Your 3-day SETU trial has ended. Continue learning with SETU Pro.
+                            Your 3-day PrepEntrance trial has ended. Continue learning with PrepEntrance Pro.
                         </p>
                     </div>
 
@@ -113,7 +113,7 @@ export const TrialExpiredScreen: React.FC = () => {
                         ) : (
                             <Sparkles className="h-4 w-4 mr-2" />
                         )}
-                        Upgrade to SETU Pro — ₹349/month
+                        Upgrade to PrepEntrance Pro — ₹349/month
                     </Button>
 
                     {/* Referral */}

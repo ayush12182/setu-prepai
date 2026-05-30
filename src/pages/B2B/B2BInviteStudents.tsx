@@ -99,7 +99,7 @@ export default function B2BInviteStudents() {
                <div className="space-y-4">
                  {[
                    { step: 1, text: 'Share your unique join code with your students.' },
-                   { step: 2, text: 'Students enter the code when they create their SETU accounts.' },
+                   { step: 2, text: 'Students enter the code when they create their PrepEntrance accounts.' },
                    { step: 3, text: 'They are automatically added to your batch for tracking.' }
                  ].map(s => (
                    <div key={s.step} className="flex gap-4 items-start">

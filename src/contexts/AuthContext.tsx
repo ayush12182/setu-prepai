@@ -30,7 +30,7 @@ const MOCK_PROFILE = {
 
 const MOCK_USER = {
   id: 'dev-student-001',
-  email: 'dev@setu.ai',
+  email: 'dev@prepentrance.ai',
   user_metadata: { full_name: 'Dev Student', user_type: 'student' },
 } as unknown as User;
 

@@ -31,7 +31,7 @@ const LandingFooter: React.FC = () => {
       links: [
         { label: 'About',           action: () => document.getElementById('leadership')?.scrollIntoView({ behavior: 'smooth' }) },
         { label: 'Leadership',      action: () => document.getElementById('leadership')?.scrollIntoView({ behavior: 'smooth' }) },
-        { label: 'Contact Us',      action: () => window.open('mailto:setu.edu.1925@gmail.com') },
+        { label: 'Contact Us',      action: () => window.open('mailto:prepentrance.edu.1925@gmail.com') },
         { label: 'Testimonials',    action: () => document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }) },
       ],
     },
@@ -46,9 +46,9 @@ const LandingFooter: React.FC = () => {
   ];
 
   const socials = [
-    { Icon: Instagram, href: 'https://www.instagram.com/setu.prep?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==', label: 'Instagram' },
-    { Icon: Linkedin,  href: 'https://www.linkedin.com/company/setu.ai/', label: 'LinkedIn' },
-    { Icon: Mail,      href: 'mailto:setu.edu.1925@gmail.com', label: 'Email' },
+    { Icon: Instagram, href: 'https://www.instagram.com/prepentrance.prep?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==', label: 'Instagram' },
+    { Icon: Linkedin,  href: 'https://www.linkedin.com/company/prepentrance.ai/', label: 'LinkedIn' },
+    { Icon: Mail,      href: 'mailto:prepentrance.edu.1925@gmail.com', label: 'Email' },
   ];
 
   return (
@@ -63,9 +63,9 @@ const LandingFooter: React.FC = () => {
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="flex items-center gap-3 group"
             >
-              <img src="/setu-logo.png" alt="SETU" className="h-9 w-9 object-contain" />
+              <img src="/prepentrance-logo.png" alt="PrepEntrance" className="h-9 w-9 object-contain" />
               <div>
-                <span className="font-bold text-xl text-white tracking-wide">SETU</span>
+                <span className="font-bold text-xl text-white tracking-wide">PrepEntrance</span>
                 <p className="text-[#94A3B8] text-[10px] leading-none mt-0.5">AI Academic OS</p>
               </div>
             </button>
@@ -126,7 +126,7 @@ const LandingFooter: React.FC = () => {
         {/* Bottom bar */}
         <div className="border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[#94A3B8]/45 text-xs">
-            © {new Date().getFullYear()} SETU. All rights reserved.
+            © {new Date().getFullYear()} PrepEntrance. All rights reserved.
           </p>
           <div className="flex items-center gap-5">
             <p className="text-[#94A3B8]/30 text-xs">Built for serious aspirants · India</p>

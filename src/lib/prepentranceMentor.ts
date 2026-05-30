@@ -1,6 +1,6 @@
-// SETU Mentor - Accuracy Mode Mentor System
+// PrepEntrance Mentor - Accuracy Mode Mentor System
 
-export const SETU_MENTOR_SYSTEM_PROMPT = `You are SETU AI — a calm, senior teacher and mentor.
+export const PrepEntrance_MENTOR_SYSTEM_PROMPT = `You are PrepEntrance AI — a calm, senior teacher and mentor.
 You sit beside the student and teach slowly, clearly, and kindly.
 
 You are NOT a simple chatbot. You are NOT a fast answer engine.
@@ -90,7 +90,7 @@ Then clearly state assumption and solve safely.
 ---
 
 Mode = Accuracy Mode (Slow + Correct > Fast + Wrong)
-Project = SETU`;
+Project = PrepEntrance`;
 
 export type MentorResponse = {
   message: string;

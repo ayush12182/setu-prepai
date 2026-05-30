@@ -66,7 +66,7 @@ export const SubchapterCard: React.FC<SubchapterCardProps> = ({
         'group relative bg-card border-2 rounded-2xl p-5 cursor-pointer',
         'transition-all duration-300 hover:shadow-lg hover:-translate-y-1',
         styles.border,
-        isCompleted && 'ring-2 ring-setu-success/30'
+        isCompleted && 'ring-2 ring-prepentrance-success/30'
       )}
       onClick={() => navigate(`/subchapter/${subchapter.id}`)}
     >
@@ -82,7 +82,7 @@ export const SubchapterCard: React.FC<SubchapterCardProps> = ({
         
         <div className="flex items-center gap-2">
           {isCompleted && (
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-setu-success/10 text-setu-success flex items-center gap-1">
+            <span className="text-xs font-medium px-2 py-1 rounded-full bg-prepentrance-success/10 text-prepentrance-success flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
               Done
             </span>
@@ -167,7 +167,7 @@ export const SubchapterCard: React.FC<SubchapterCardProps> = ({
         </Button>
       </div>
 
-      {/* SETU Line - Motivational */}
+      {/* PrepEntrance Line - Motivational */}
       {subchapter.setuLine && (
         <div className={cn(
           'mt-3 pt-3 border-t border-dashed border-border',

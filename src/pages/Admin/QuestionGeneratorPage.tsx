@@ -536,7 +536,7 @@ const QuestionGeneratorPage: React.FC = () => {
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-display font-black text-xl tracking-tighter">SETU.</span>
+            <span className="font-display font-black text-xl tracking-tighter">PrepEntrance.</span>
             <span className="text-xs font-bold uppercase tracking-widest text-orange-400 bg-orange-500/10
               border border-orange-500/20 px-2 py-0.5 rounded-full">Question Generator</span>
           </div>

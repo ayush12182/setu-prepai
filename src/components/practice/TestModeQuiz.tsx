@@ -120,8 +120,8 @@ const TestModeQuiz: React.FC<TestModeQuizProps> = ({
   const answeredCount = answers.size;
 
   const difficultyColors = {
-    easy: 'bg-setu-success/10 text-setu-success',
-    medium: 'bg-setu-warning/10 text-setu-warning',
+    easy: 'bg-prepentrance-success/10 text-prepentrance-success',
+    medium: 'bg-prepentrance-warning/10 text-prepentrance-warning',
     hard: 'bg-destructive/10 text-destructive'
   };
 
@@ -139,7 +139,7 @@ const TestModeQuiz: React.FC<TestModeQuizProps> = ({
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-sm font-mono bg-secondary px-3 py-1.5 rounded-lg">
-            <Clock className="w-4 h-4 text-setu-saffron" />
+            <Clock className="w-4 h-4 text-prepentrance-saffron" />
             <span className="font-semibold">{formatTime(elapsedTime)}</span>
           </div>
           <span className="text-sm text-muted-foreground">
@@ -161,9 +161,9 @@ const TestModeQuiz: React.FC<TestModeQuizProps> = ({
               'w-8 h-8 rounded-lg text-sm font-medium transition-all',
               idx === currentIndex && 'ring-2 ring-primary',
               answers.has(idx) 
-                ? 'bg-setu-success/20 text-setu-success' 
+                ? 'bg-prepentrance-success/20 text-prepentrance-success' 
                 : 'bg-secondary text-muted-foreground',
-              flagged.has(idx) && 'ring-2 ring-setu-warning'
+              flagged.has(idx) && 'ring-2 ring-prepentrance-warning'
             )}
           >
             {idx + 1}
@@ -180,7 +180,7 @@ const TestModeQuiz: React.FC<TestModeQuizProps> = ({
             className={cn(
               'p-2 rounded-lg transition-colors',
               flagged.has(currentIndex) 
-                ? 'bg-setu-warning/20 text-setu-warning' 
+                ? 'bg-prepentrance-warning/20 text-prepentrance-warning' 
                 : 'hover:bg-secondary text-muted-foreground'
             )}
             title="Flag for review"
@@ -250,7 +250,7 @@ const TestModeQuiz: React.FC<TestModeQuizProps> = ({
         ) : (
           <Button 
             onClick={handleSubmitTest} 
-            className="flex-1 h-12 bg-setu-success hover:bg-setu-success/90"
+            className="flex-1 h-12 bg-prepentrance-success hover:bg-prepentrance-success/90"
           >
             Submit Test
             <CheckCircle className="w-4 h-4 ml-2" />
@@ -260,7 +260,7 @@ const TestModeQuiz: React.FC<TestModeQuizProps> = ({
 
       {/* Unanswered Warning */}
       {answeredCount < questions.length && currentIndex === questions.length - 1 && (
-        <p className="text-center text-sm text-setu-warning">
+        <p className="text-center text-sm text-prepentrance-warning">
           ⚠️ {questions.length - answeredCount} question(s) unanswered
         </p>
       )}

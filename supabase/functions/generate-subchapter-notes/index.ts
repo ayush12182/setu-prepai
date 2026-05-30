@@ -58,10 +58,9 @@ serve(async (req) => {
     const pyqTraps = pyqFocus?.traps && Array.isArray(pyqFocus.traps) ? pyqFocus.traps.join(', ') : 'Common calculation errors';
     const mistakesText = Array.isArray(commonMistakes) && commonMistakes.length > 0
       ? commonMistakes.join(', ') : 'Standard student errors for this topic';
-
     const fullPrompt = `You are an expert exam mentor creating a 1-Page Premium Revision Sheet for ${examLabel}.
 
-CORE IDENTITY: You create visually clean, formula-first, highly-scannable short notes similar to Allen/Resonance topper notes.
+CORE IDENTITY: You create visually clean, formula-first, highly-scannable short notes similar to Allen/Resonance/PW topper notes.
 Language: ${language} (if hindi/regional, use English for scientific terms).
 
 ${getExamAdaptation(examMode, jeeSubMode)}

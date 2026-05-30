@@ -83,7 +83,7 @@ const AboutSection: React.FC = () => {
             transition={{ delay: 0.2 }}
             className="text-xl text-gray-400 max-w-3xl leading-relaxed"
           >
-            Setu is an AI-powered learning platform built to simplify competitive exam preparation for students across India. We combine structured learning, mentorship, adaptive practice, and smart revision tools to help aspirants study better — not longer.
+            PrepEntrance is an AI-powered learning platform built to simplify competitive exam preparation for students across India. We combine structured learning, mentorship, adaptive practice, and smart revision tools to help aspirants study better — not longer.
           </motion.p>
         </div>
 
@@ -139,7 +139,7 @@ const AboutSection: React.FC = () => {
               transition={{ delay: 0.2 }}
               className="text-lg text-gray-400 leading-relaxed"
             >
-              Instead of endless PDFs and random YouTube videos, Setu gives students smart revision notes, personalized practice, adaptive test analysis, AI doubt solving, exam-focused paths, and guidance from top educators.
+              Instead of endless PDFs and random YouTube videos, PrepEntrance gives students smart revision notes, personalized practice, adaptive test analysis, AI doubt solving, exam-focused paths, and guidance from top educators.
             </motion.p>
           </div>
 

@@ -35,7 +35,7 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
       {/* Mobile Topbar */}
       <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card">
         <div className="flex items-center gap-2">
-          <span className="font-display font-black tracking-tighter text-xl scale-y-110">SETU.</span>
+          <span className="font-display font-black tracking-tighter text-xl scale-y-110">PrepEntrance.</span>
           <span className="text-xs font-bold uppercase tracking-widest text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">Teacher</span>
         </div>
         <button onClick={() => setSidebarOpen(true)} className="p-2 text-foreground">
@@ -65,7 +65,7 @@ export const B2BSidebarLayout: React.FC<{ children: React.ReactNode; title: stri
       >
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-display font-black tracking-tighter text-2xl scale-y-110">SETU.</span>
+            <span className="font-display font-black tracking-tighter text-2xl scale-y-110">PrepEntrance.</span>
             <span className="text-[10px] font-bold uppercase tracking-widest text-violet-400 bg-violet-500/10 border border-violet-500/20 px-2 py-0.5 rounded-full mt-1">{t('teacherSidebar.portal')}</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="md:hidden p-2 text-muted-foreground hover:text-foreground">

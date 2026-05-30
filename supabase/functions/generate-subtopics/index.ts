@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const CURRICULUM_PROMPT = `You are the core curriculum intelligence engine for SETU, an AI exam prep platform.
+const CURRICULUM_PROMPT = `You are the core curriculum intelligence engine for PrepEntrance, an AI exam prep platform.
 Convert any chapter into a structured, exam-optimized learning tree. Return ONLY valid JSON.
 
 Output format:

@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU Analytics Bridge — Full Schema Migration
+-- PrepEntrance Analytics Bridge — Full Schema Migration
 -- 20260408_analytics_bridge.sql
 -- ============================================================
 

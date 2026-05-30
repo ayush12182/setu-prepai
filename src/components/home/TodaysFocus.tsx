@@ -25,7 +25,7 @@ export const TodaysFocus: React.FC<TodaysFocusProps> = ({ data, isLoading = fals
 
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-br from-primary to-setu-navy-light rounded-2xl p-6">
+      <div className="bg-gradient-to-br from-primary to-prepentrance-navy-light rounded-2xl p-6">
         <Skeleton className="h-6 w-32 mb-3 bg-white/20" />
         <Skeleton className="h-8 w-48 mb-2 bg-white/20" />
         <Skeleton className="h-4 w-24 mb-4 bg-white/20" />
@@ -37,7 +37,7 @@ export const TodaysFocus: React.FC<TodaysFocusProps> = ({ data, isLoading = fals
 
   if (!data) {
     return (
-      <div className="bg-gradient-to-br from-primary to-setu-navy-light rounded-2xl p-6">
+      <div className="bg-gradient-to-br from-primary to-prepentrance-navy-light rounded-2xl p-6">
         <p className="text-white">No focus topic available. Start practicing to unlock personalized recommendations!</p>
       </div>
     );

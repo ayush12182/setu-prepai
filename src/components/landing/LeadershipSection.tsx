@@ -5,7 +5,7 @@ import { Linkedin } from 'lucide-react';
 /* ─── Mentor / Leadership data ─────────────────────────────────── */
 const FOUNDER = {
   name: 'Ayush Dixit',
-  role: 'Founder, SETU',
+  role: 'Founder, PrepEntrance',
   initials: 'AD',
   color: '#FF9B54',
   bio: 'Focused on building an AI-powered academic system that helps students prepare with clarity, precision, and intelligent guidance instead of information overload.',
@@ -68,7 +68,7 @@ const LeadershipSection: React.FC = () => (
           transition={{ delay: 0.15 }}
           className="text-[#94A3B8] text-lg leading-relaxed"
         >
-          SETU is being developed with a vision to make exam preparation more structured,
+          PrepEntrance is being developed with a vision to make exam preparation more structured,
           data-driven, and intelligently personalized for every student.
         </motion.p>
       </div>
@@ -165,7 +165,7 @@ const LeadershipSection: React.FC = () => (
               Reviewed and validated by experienced educators from India’s leading coaching institutes.
             </h3>
             <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed">
-              SETU’s learning architecture and preparation methodology have been evaluated and approved by 50+ teachers and academic mentors associated with top competitive exam coaching ecosystems across India.
+              PrepEntrance’s learning architecture and preparation methodology have been evaluated and approved by 50+ teachers and academic mentors associated with top competitive exam coaching ecosystems across India.
             </p>
           </div>
 

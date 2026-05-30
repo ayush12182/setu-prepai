@@ -19,37 +19,37 @@ const TermsPage: React.FC = () => {
         <div className="space-y-8 text-white/70 leading-relaxed">
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using SETU, you agree to be bound by these Terms of Service. If you do not agree, please do not use the platform.</p>
+            <p>By accessing or using PrepEntrance, you agree to be bound by these Terms of Service. If you do not agree, please do not use the platform.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">2. Use of Service</h2>
-            <p>SETU is an AI-powered JEE preparation platform. You may use it for personal, non-commercial educational purposes. You agree not to misuse the platform, share your account credentials, or attempt to reverse-engineer any AI-generated content.</p>
+            <p>PrepEntrance is an AI-powered JEE preparation platform. You may use it for personal, non-commercial educational purposes. You agree not to misuse the platform, share your account credentials, or attempt to reverse-engineer any AI-generated content.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">3. User Accounts</h2>
-            <p>You are responsible for maintaining the security of your account. You must provide accurate information during registration. SETU reserves the right to suspend accounts that violate these terms.</p>
+            <p>You are responsible for maintaining the security of your account. You must provide accurate information during registration. PrepEntrance reserves the right to suspend accounts that violate these terms.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">4. Content & Intellectual Property</h2>
-            <p>All study materials, AI-generated questions, notes, and platform content are the intellectual property of SETU. You may not reproduce, distribute, or commercially exploit any content without prior written consent.</p>
+            <p>All study materials, AI-generated questions, notes, and platform content are the intellectual property of PrepEntrance. You may not reproduce, distribute, or commercially exploit any content without prior written consent.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">5. Free Plan & Pricing</h2>
-            <p>SETU currently offers a free plan with full access to all features. Pricing for premium plans will be announced in the future. We will notify users before any changes to the pricing structure.</p>
+            <p>PrepEntrance currently offers a free plan with full access to all features. Pricing for premium plans will be announced in the future. We will notify users before any changes to the pricing structure.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">6. Limitation of Liability</h2>
-            <p>SETU provides educational content on an "as is" basis. While we strive for accuracy, we do not guarantee specific exam results. SETU shall not be liable for any indirect or consequential damages arising from use of the platform.</p>
+            <p>PrepEntrance provides educational content on an "as is" basis. While we strive for accuracy, we do not guarantee specific exam results. PrepEntrance shall not be liable for any indirect or consequential damages arising from use of the platform.</p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">7. Contact</h2>
-            <p>For any questions about these terms, contact us at <span className="text-accent font-medium">setu.edu.1925@gmail.com</span>.</p>
+            <p>For any questions about these terms, contact us at <span className="text-accent font-medium">prepentrance.edu.1925@gmail.com</span>.</p>
           </section>
         </div>
       </div>

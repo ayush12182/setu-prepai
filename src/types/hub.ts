@@ -1,4 +1,4 @@
-// ─── Setu Hub — TypeScript Types ─────────────────────────────────────────────
+// ─── PrepEntrance Hub — TypeScript Types ─────────────────────────────────────────────
 
 export type Exam = 'jee' | 'neet' | 'cuet';
 export type ClassLevel = '11' | '12' | 'dropper';

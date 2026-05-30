@@ -1,5 +1,5 @@
 /**
- * SETU Exam Configuration — Single Source of Truth
+ * PrepEntrance Exam Configuration — Single Source of Truth
  * 
  * All exam-specific metadata lives here.
  * To add a new exam: add one entry to EXAM_CONFIG. Zero code changes needed elsewhere.

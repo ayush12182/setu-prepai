@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU B2B Assignments Schema & RPC
+-- PrepEntrance B2B Assignments Schema & RPC
 -- 20260425000000_b2b_assignments.sql
 -- ============================================================
 

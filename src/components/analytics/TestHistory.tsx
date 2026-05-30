@@ -34,7 +34,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ tests }) => {
   return (
     <div className="bg-card border border-border rounded-xl p-6">
       <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-        <Trophy className="w-5 h-5 text-setu-saffron" />
+        <Trophy className="w-5 h-5 text-prepentrance-saffron" />
         Major Test History
       </h3>
 
@@ -71,7 +71,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ tests }) => {
               </div>
 
               {test.percentile && (
-                <p className="text-xs text-setu-saffron mt-2 text-center font-medium">
+                <p className="text-xs text-prepentrance-saffron mt-2 text-center font-medium">
                   Est. Percentile: {test.percentile}%
                 </p>
               )}

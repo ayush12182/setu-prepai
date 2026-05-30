@@ -82,7 +82,7 @@ export default function JoinBatchPage() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="absolute top-6 left-6 flex items-center gap-2">
-        <span className="font-display font-black tracking-tighter text-2xl scale-y-110">SETU.</span>
+        <span className="font-display font-black tracking-tighter text-2xl scale-y-110">PrepEntrance.</span>
       </div>
 
       <AnimatePresence mode="wait">

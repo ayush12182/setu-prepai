@@ -709,7 +709,7 @@ const FoundationAssessmentPage: React.FC = () => {
                       ) : (
                         <>
                           <PlayCircle className="w-5 h-5" />
-                          Watch Visual Explanation (SETU Mentor Style)
+                          Watch Visual Explanation (PrepEntrance Mentor Style)
                         </>
                       )}
                     </Button>
@@ -761,7 +761,7 @@ const FoundationAssessmentPage: React.FC = () => {
               </div>
               <div>
                 <DialogTitle className="text-white font-black tracking-tight">Visual Concept Breakdown</DialogTitle>
-                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Powered by SETU Visual Engine</p>
+                <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Powered by PrepEntrance Visual Engine</p>
               </div>
             </div>
           </DialogHeader>

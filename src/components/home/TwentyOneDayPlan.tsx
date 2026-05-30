@@ -485,12 +485,12 @@ export const TwentyOneDayPlan: React.FC = () => {
             {isHinglish ? 'Hum tumhe direction denge exam ke liye.' : "We'll give you direction for your exam."}
           </p>
 
-          {/* SETU Mentor motivational quote */}
+          {/* PrepEntrance Mentor motivational quote */}
           <div className="flex items-start gap-3 mb-6 bg-white/[0.06] backdrop-blur-sm rounded-xl p-4 border border-white/10">
             <Quote className="w-5 h-5 text-accent shrink-0 mt-0.5" />
             <div>
               <p className="text-sm text-white/90 italic leading-relaxed">"{todayQuote}"</p>
-              <p className="text-xs text-accent font-semibold mt-1.5">— SETU Mentor</p>
+              <p className="text-xs text-accent font-semibold mt-1.5">— PrepEntrance Mentor</p>
             </div>
           </div>
 
@@ -535,10 +535,10 @@ export const TwentyOneDayPlan: React.FC = () => {
         </div>
       </div>
 
-      {/* Lecture SETU Highlight */}
+      {/* Lecture PrepEntrance Highlight */}
       <div
         className="flex items-center gap-4 p-4 rounded-xl bg-accent/10 border border-accent/25 cursor-pointer group hover:bg-accent/15 transition-colors"
-        onClick={() => navigate('/lecture-setu')}
+        onClick={() => navigate('/lecture-prepentrance')}
       >
         <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
           <Video className="w-5 h-5 text-accent" />
@@ -548,7 +548,7 @@ export const TwentyOneDayPlan: React.FC = () => {
             Don't waste time watching full lectures
           </h4>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Use <span className="font-semibold text-accent">Lecture SETU</span> — paste any YouTube link, get crisp notes in seconds. Study smarter, not longer.
+            Use <span className="font-semibold text-accent">Lecture PrepEntrance</span> — paste any YouTube link, get crisp notes in seconds. Study smarter, not longer.
           </p>
         </div>
         <ArrowRight className="w-4 h-4 text-accent shrink-0 group-hover:translate-x-1 transition-transform" />

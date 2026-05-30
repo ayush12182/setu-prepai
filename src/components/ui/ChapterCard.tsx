@@ -10,15 +10,15 @@ interface ChapterCardProps {
 }
 
 const weightageColors: Record<Weightage, string> = {
-  High: 'bg-setu-saffron/10 text-setu-saffron border-setu-saffron/30',
-  Medium: 'bg-setu-warning/10 text-setu-warning border-setu-warning/30',
+  High: 'bg-prepentrance-saffron/10 text-prepentrance-saffron border-prepentrance-saffron/30',
+  Medium: 'bg-prepentrance-warning/10 text-prepentrance-warning border-prepentrance-warning/30',
   Low: 'bg-muted text-muted-foreground border-border'
 };
 
 const difficultyColors: Record<Difficulty, string> = {
-  Easy: 'text-setu-success',
-  Medium: 'text-setu-warning',
-  Hard: 'text-setu-error'
+  Easy: 'text-prepentrance-success',
+  Medium: 'text-prepentrance-warning',
+  Hard: 'text-prepentrance-error'
 };
 
 export const ChapterCard: React.FC<ChapterCardProps> = ({
@@ -48,7 +48,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             </span>
           </div>
           
-          <h4 className="font-semibold text-foreground group-hover:text-setu-saffron transition-colors truncate">
+          <h4 className="font-semibold text-foreground group-hover:text-prepentrance-saffron transition-colors truncate">
             {chapter.name}
           </h4>
           
@@ -68,13 +68,13 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center">
             <span className="text-sm font-bold text-foreground">{progress}%</span>
           </div>
-          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-setu-saffron group-hover:translate-x-1 transition-all" />
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-prepentrance-saffron group-hover:translate-x-1 transition-all" />
         </div>
       </div>
       
       {progress > 0 && (
-        <div className="mt-3 progress-setu">
-          <div className="progress-setu-fill" style={{ width: `${progress}%` }} />
+        <div className="mt-3 progress-prepentrance">
+          <div className="progress-prepentrance-fill" style={{ width: `${progress}%` }} />
         </div>
       )}
     </div>

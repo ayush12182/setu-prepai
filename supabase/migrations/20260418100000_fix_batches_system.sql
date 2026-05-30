@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU B2B Batches System Fix
+-- PrepEntrance B2B Batches System Fix
 -- 20260418100000_fix_batches_system.sql
 -- ============================================================
 

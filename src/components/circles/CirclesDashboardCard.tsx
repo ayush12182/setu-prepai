@@ -28,7 +28,7 @@ export const CirclesDashboardCard: React.FC = () => {
               <Flame className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-white leading-tight">SETU Commune</h3>
+              <h3 className="font-bold text-sm text-white leading-tight">PrepEntrance Commune</h3>
               <p className="text-[10px] text-white/40">Real-time study rooms with peers</p>
             </div>
           </div>

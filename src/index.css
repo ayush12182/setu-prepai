@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   SETU DESIGN SYSTEM - Kota Coaching Notes Aesthetic
+   PrepEntrance DESIGN SYSTEM - Kota Coaching Notes Aesthetic
    Premium • Clear • Serious • Mentor-style
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -73,25 +73,25 @@
     --text-tip-on-dark: 32 100% 80%;
 
     /* ═══════════════════════════════════════════════════════
-       SETU CUSTOM TOKENS - Kota Coaching Palette
+       PrepEntrance CUSTOM TOKENS - Kota Coaching Palette
        ═══════════════════════════════════════════════════════ */
 
     /* Navy palette (#1E2A3A) */
-    --setu-navy: 213 32% 17%;
-    --setu-navy-light: 213 28% 25%;
-    --setu-navy-dark: 213 35% 12%;
+    --prepentrance-navy: 213 32% 17%;
+    --prepentrance-navy-light: 213 28% 25%;
+    --prepentrance-navy-dark: 213 35% 12%;
 
     /* Saffron palette (#E89A3C) */
-    --setu-saffron: 32 79% 57%;
-    --setu-saffron-light: 32 100% 96%;
+    --prepentrance-saffron: 32 79% 57%;
+    --prepentrance-saffron-light: 32 100% 96%;
     /* #FFF6EB - Light tint for cards */
-    --setu-saffron-dark: 32 85% 50%;
+    --prepentrance-saffron-dark: 32 85% 50%;
 
     /* Action Colors */
-    --setu-success: 145 50% 38%;
-    --setu-warning: 32 79% 57%;
-    --setu-error: 0 65% 48%;
-    --setu-info: 213 60% 50%;
+    --prepentrance-success: 145 50% 38%;
+    --prepentrance-warning: 32 79% 57%;
+    --prepentrance-error: 0 65% 48%;
+    --prepentrance-info: 213 60% 50%;
 
     /* Subject Colors */
     --physics-color: 213 60% 50%;
@@ -123,9 +123,9 @@
     --accent: 145 50% 38%;
     --accent-foreground: 0 0% 100%;
     --ring: 145 50% 38%;
-    --setu-saffron: 145 50% 38%;
-    --setu-saffron-light: 145 50% 96%;
-    --setu-saffron-dark: 145 55% 32%;
+    --prepentrance-saffron: 145 50% 38%;
+    --prepentrance-saffron-light: 145 50% 96%;
+    --prepentrance-saffron-dark: 145 55% 32%;
     --sidebar-primary: 145 50% 45%;
     --sidebar-ring: 145 50% 45%;
     --text-tip-on-dark: 145 70% 70%;
@@ -349,33 +349,33 @@
      PROGRESS & STATUS
      ───────────────────────────────────────────────────────── */
 
-  .progress-setu {
+  .progress-prepentrance {
     @apply h-2 bg-secondary rounded-full overflow-hidden;
   }
 
-  .progress-setu-fill {
+  .progress-prepentrance-fill {
     @apply h-full bg-primary rounded-full;
     @apply transition-all duration-500 ease-out;
   }
 
   .badge-success {
-    @apply bg-[hsl(var(--setu-success)/0.15)] font-medium;
-    color: hsl(var(--setu-success));
+    @apply bg-[hsl(var(--prepentrance-success)/0.15)] font-medium;
+    color: hsl(var(--prepentrance-success));
   }
 
   .badge-warning {
-    @apply bg-[hsl(var(--setu-warning)/0.15)] font-medium;
-    color: hsl(var(--setu-warning));
+    @apply bg-[hsl(var(--prepentrance-warning)/0.15)] font-medium;
+    color: hsl(var(--prepentrance-warning));
   }
 
   .badge-error {
-    @apply bg-[hsl(var(--setu-error)/0.15)] font-medium;
-    color: hsl(var(--setu-error));
+    @apply bg-[hsl(var(--prepentrance-error)/0.15)] font-medium;
+    color: hsl(var(--prepentrance-error));
   }
 
   .badge-info {
-    @apply bg-[hsl(var(--setu-info)/0.15)] font-medium;
-    color: hsl(var(--setu-info));
+    @apply bg-[hsl(var(--prepentrance-info)/0.15)] font-medium;
+    color: hsl(var(--prepentrance-info));
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -392,18 +392,18 @@
   }
 
   .mcq-option-correct {
-    @apply border-[hsl(var(--setu-success))] bg-[hsl(var(--setu-success)/0.1)];
+    @apply border-[hsl(var(--prepentrance-success))] bg-[hsl(var(--prepentrance-success)/0.1)];
   }
 
   .mcq-option-wrong {
-    @apply border-[hsl(var(--setu-error))] bg-[hsl(var(--setu-error)/0.1)];
+    @apply border-[hsl(var(--prepentrance-error))] bg-[hsl(var(--prepentrance-error)/0.1)];
   }
 
   /* ─────────────────────────────────────────────────────────
      FORM INPUTS
      ───────────────────────────────────────────────────────── */
 
-  .input-setu {
+  .input-prepentrance {
     @apply bg-card border-2 border-border rounded-lg px-4 py-3;
     @apply focus:border-primary focus:ring-2 focus:ring-primary/20;
     @apply placeholder:text-muted-foreground;

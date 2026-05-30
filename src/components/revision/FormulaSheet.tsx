@@ -232,8 +232,8 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
                         <p className="text-xs text-muted-foreground mb-1">Explanation:</p>
                         <p className="text-sm text-foreground">{item.explanation}</p>
                       </div>
-                      <div className="bg-setu-saffron/10 rounded-lg px-3 py-2">
-                        <p className="text-xs text-setu-saffron font-medium mb-1">When to use in exam:</p>
+                      <div className="bg-prepentrance-saffron/10 rounded-lg px-3 py-2">
+                        <p className="text-xs text-prepentrance-saffron font-medium mb-1">When to use in exam:</p>
                         <p className="text-sm text-foreground">{item.examTip}</p>
                       </div>
                     </div>

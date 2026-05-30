@@ -128,7 +128,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ activeExam, activeCl
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.35, duration: 0.3 }}
-        onClick={() => navigate('/ask-setu')}
+        onClick={() => navigate('/ask-prepentrance')}
         className="w-full flex items-center gap-4 rounded-2xl p-5 text-left transition-all duration-200 group"
         style={{
           background: 'linear-gradient(135deg, rgba(249,115,22,0.1) 0%, rgba(239,68,68,0.08) 100%)',

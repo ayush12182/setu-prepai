@@ -5,8 +5,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Send, Sparkles, Camera, ImagePlus, X, Volume2, Loader2, Play, Pause, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
-import { getGreetingByLanguage } from '@/lib/setuMentor';
-import { useSetuChat } from '@/hooks/useSetuChat';
+import { getGreetingByLanguage } from '@/lib/prepentranceMentor';
+import { usePrepEntranceChat } from '@/hooks/usePrepEntranceChat';
 import { useClassContext } from '@/contexts/ClassContext';
 
 
@@ -87,22 +87,22 @@ const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
       <div
         className={cn(
           "flex items-center gap-3 px-4 py-2.5 rounded-full shadow-lg transition-all duration-300 cursor-pointer max-w-[95%]",
-          "bg-white border border-setu-saffron/10",
-          "hover:shadow-setu-saffron/20 hover:border-setu-saffron/30",
-          localPlaying && "ring-2 ring-setu-saffron/20 shadow-xl scale-[1.02]"
+          "bg-white border border-prepentrance-saffron/10",
+          "hover:shadow-prepentrance-saffron/20 hover:border-prepentrance-saffron/30",
+          localPlaying && "ring-2 ring-prepentrance-saffron/20 shadow-xl scale-[1.02]"
         )}
         onClick={togglePlay}
       >
         {/* Small Mentor Avatar with pulsing indicator */}
         <div className="relative flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-dark flex items-center justify-center border border-white/20 shadow-sm">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-prepentrance-saffron to-prepentrance-saffron-dark flex items-center justify-center border border-white/20 shadow-sm">
             <span className="text-white font-bold text-[10px]">SM</span>
           </div>
-          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-setu-success animate-pulse"></span>
+          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-prepentrance-success animate-pulse"></span>
         </div>
 
         {/* Play Indicator / Waveform */}
-        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-setu-saffron/10 text-setu-saffron flex-shrink-0">
+        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-prepentrance-saffron/10 text-prepentrance-saffron flex-shrink-0">
           {localPlaying ? (
             <Pause className="w-3.5 h-3.5 fill-current" />
           ) : (
@@ -116,11 +116,11 @@ const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
             "{message.content}"
           </p>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-[9px] font-bold text-setu-saffron uppercase tracking-widest leading-none">
-              {localPlaying ? "Listened — keep going." : "SETU Mentor Advice"}
+            <span className="text-[9px] font-bold text-prepentrance-saffron uppercase tracking-widest leading-none">
+              {localPlaying ? "Listened — keep going." : "PrepEntrance Mentor Advice"}
             </span>
             {hasListened && !localPlaying && (
-              <CheckCircle2 className="w-2.5 h-2.5 text-setu-success" />
+              <CheckCircle2 className="w-2.5 h-2.5 text-prepentrance-success" />
             )}
           </div>
         </div>
@@ -136,16 +136,16 @@ const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
   );
 };
 
-const AskSetuPage: React.FC = () => {
+const AskPrepEntrancePage: React.FC = () => {
   const { language } = useLanguage();
   const { isNeet, examMode } = useExamMode();
   const { aiContext } = useClassContext();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const isFoundation = aiContext?.learning_mode === 'foundation';
-  const { sendMessage, isLoading, error } = useSetuChat();
+  const { sendMessage, isLoading, error } = usePrepEntranceChat();
   const [messages, setMessages] = useState<Message[]>(() => {
-    const saved = localStorage.getItem('setu-chat-history');
+    const saved = localStorage.getItem('prepentrance-chat-history');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -165,7 +165,7 @@ const AskSetuPage: React.FC = () => {
   });
 
   useEffect(() => {
-    localStorage.setItem('setu-chat-history', JSON.stringify(messages));
+    localStorage.setItem('prepentrance-chat-history', JSON.stringify(messages));
   }, [messages]);
   const [input, setInput] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -347,7 +347,7 @@ const AskSetuPage: React.FC = () => {
   };
 
   return (
-    <MainLayout title="Ask SETU Mentor">
+    <MainLayout title="Ask PrepEntrance Mentor">
       <Dialog
         open={showWelcomeVideo}
         onOpenChange={(open) => {
@@ -359,7 +359,7 @@ const AskSetuPage: React.FC = () => {
       >
         <DialogContent className="sm:max-w-2xl p-0 overflow-hidden bg-black border-none" aria-describedby={undefined}>
           <VisuallyHidden>
-            <DialogTitle>SETU Mentor Welcome Message</DialogTitle>
+            <DialogTitle>PrepEntrance Mentor Welcome Message</DialogTitle>
           </VisuallyHidden>
           <div className="relative">
             <div className="aspect-video">
@@ -381,11 +381,11 @@ const AskSetuPage: React.FC = () => {
             <div className="absolute bottom-14 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-prepentrance-saffron to-prepentrance-saffron-light flex items-center justify-center">
                     <span className="text-white font-bold text-sm">SM</span>
                   </div>
                   <div>
-                    <h3 className="text-white font-semibold">SETU Mentor</h3>
+                    <h3 className="text-white font-semibold">PrepEntrance Mentor</h3>
                     <p className="text-white/70 text-sm">Welcome Message</p>
                   </div>
                 </div>
@@ -396,7 +396,7 @@ const AskSetuPage: React.FC = () => {
                       localStorage.setItem(WELCOME_VIDEO_STORAGE_KEY, 'true');
                       setShowWelcomeVideo(false);
                     }}
-                    className="bg-setu-saffron hover:bg-setu-saffron/90 text-white rounded-full px-4"
+                    className="bg-prepentrance-saffron hover:bg-prepentrance-saffron/90 text-white rounded-full px-4"
                   >
                     Start Chatting
                   </Button>
@@ -420,16 +420,16 @@ const AskSetuPage: React.FC = () => {
       <div className="h-[calc(100vh-8rem)] flex flex-col max-w-4xl mx-auto">
         <div className="bg-card border border-border rounded-t-2xl p-4 flex items-center gap-4">
           <div className="relative">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-setu-saffron to-setu-saffron-light flex items-center justify-center shadow-lg">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-prepentrance-saffron to-prepentrance-saffron-light flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-xl">SM</span>
             </div>
-            <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-card bg-setu-success"></span>
+            <span className="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-card bg-prepentrance-success"></span>
           </div>
           <div className="flex-1">
             <h2 className="font-display font-bold text-lg text-foreground">
-              {isFoundation ? 'SETU Mentor' : 'SETU Mentor'}
+              {isFoundation ? 'PrepEntrance Mentor' : 'PrepEntrance Mentor'}
             </h2>
-            <p className="text-sm text-setu-success flex items-center gap-1">
+            <p className="text-sm text-prepentrance-success flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
               Online • Your {isFoundation ? 'School' : isNeet ? 'NEET' : 'JEE'} Mentor
             </p>
@@ -451,8 +451,8 @@ const AskSetuPage: React.FC = () => {
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   {message.role === 'assistant' && (
-                    <div className="w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
-                      <span className="text-setu-saffron font-bold text-xs">SM</span>
+                    <div className="w-8 h-8 rounded-full bg-prepentrance-saffron/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
+                      <span className="text-prepentrance-saffron font-bold text-xs">SM</span>
                     </div>
                   )}
                   <div
@@ -485,8 +485,8 @@ const AskSetuPage: React.FC = () => {
 
           {isLoading && messages[messages.length - 1]?.role === 'user' && (
             <div className="flex justify-start animate-fade-in">
-              <div className="w-8 h-8 rounded-full bg-setu-saffron/20 flex items-center justify-center mr-2 flex-shrink-0">
-                <span className="text-setu-saffron font-bold text-xs">SM</span>
+              <div className="w-8 h-8 rounded-full bg-prepentrance-saffron/20 flex items-center justify-center mr-2 flex-shrink-0">
+                <span className="text-prepentrance-saffron font-bold text-xs">SM</span>
               </div>
               <div className="bg-card border border-border rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
                 <div className="flex gap-1.5">
@@ -510,7 +510,7 @@ const AskSetuPage: React.FC = () => {
                     onClick={() => handleQuickQuestion(q)}
                     className={cn(
                       'text-sm bg-card border border-border rounded-xl px-4 py-2',
-                      'hover:border-setu-saffron hover:bg-setu-saffron/5 transition-all duration-200',
+                      'hover:border-prepentrance-saffron hover:bg-prepentrance-saffron/5 transition-all duration-200',
                       'text-left'
                     )}
                   >
@@ -570,8 +570,8 @@ const AskSetuPage: React.FC = () => {
               variant="outline"
               size="icon"
               onClick={injectMotivationMessage}
-              className="flex-shrink-0 rounded-xl border-setu-saffron/30 text-setu-saffron hover:bg-setu-saffron/10"
-              title="SETU Mentor ki Seekh suniye"
+              className="flex-shrink-0 rounded-xl border-prepentrance-saffron/30 text-prepentrance-saffron hover:bg-prepentrance-saffron/10"
+              title="PrepEntrance Mentor ki Seekh suniye"
             >
               <Volume2 className="w-5 h-5" />
             </Button>
@@ -629,4 +629,4 @@ const AskSetuPage: React.FC = () => {
   );
 };
 
-export default AskSetuPage;
+export default AskPrepEntrancePage;

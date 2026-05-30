@@ -80,7 +80,7 @@ export const VoiceChatButton: React.FC<VoiceChatProps> = ({
           className="flex-shrink-0 rounded-xl relative group"
           title="Start voice chat"
         >
-          <Mic className="w-5 h-5 text-setu-saffron" />
+          <Mic className="w-5 h-5 text-prepentrance-saffron" />
         </Button>
       </div>
     );
@@ -132,7 +132,7 @@ export const VoiceChatButton: React.FC<VoiceChatProps> = ({
           )}
 
           {isProcessing && (
-            <div className="w-16 h-16 rounded-full flex items-center justify-center bg-gradient-to-br from-setu-saffron to-setu-saffron-light shadow-lg">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center bg-gradient-to-br from-prepentrance-saffron to-prepentrance-saffron-light shadow-lg">
               <Loader2 className="w-7 h-7 text-white animate-spin" />
             </div>
           )}
@@ -142,14 +142,14 @@ export const VoiceChatButton: React.FC<VoiceChatProps> = ({
               onClick={stopAudio}
               className={cn(
                 'w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg',
-                'bg-gradient-to-br from-setu-saffron to-setu-saffron-light text-white',
+                'bg-gradient-to-br from-prepentrance-saffron to-prepentrance-saffron-light text-white',
                 'hover:scale-105 active:scale-95',
                 'relative'
               )}
               title="Tap to stop speaking"
             >
               {/* Speaking animation */}
-              <span className="absolute inset-[-4px] rounded-full border-2 border-setu-saffron/40 animate-pulse" />
+              <span className="absolute inset-[-4px] rounded-full border-2 border-prepentrance-saffron/40 animate-pulse" />
               <Volume2 className="w-7 h-7 relative z-10" />
             </button>
           )}
@@ -171,8 +171,8 @@ export const VoiceChatButton: React.FC<VoiceChatProps> = ({
       <p className="text-xs text-muted-foreground mt-2 text-center">
         {isListening && voiceMode === 'push-to-talk' && '🎙️ Listening... Tap mic to send'}
         {isListening && voiceMode === 'continuous' && '🎙️ Listening... Will auto-send after pause'}
-        {isProcessing && '🧠 SETU Mentor soch raha hai...'}
-        {isSpeaking && '🔊 SETU Mentor bol raha hai... Tap to stop'}
+        {isProcessing && '🧠 PrepEntrance Mentor soch raha hai...'}
+        {isSpeaking && '🔊 PrepEntrance Mentor bol raha hai... Tap to stop'}
       </p>
     </div>
   );

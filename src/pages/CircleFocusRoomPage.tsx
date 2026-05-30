@@ -265,7 +265,7 @@ const CircleFocusRoomPage: React.FC = () => {
 
   if (!user) {
     return (
-      <MainLayout title="SETU Commune">
+      <MainLayout title="PrepEntrance Commune">
         <div className="flex flex-col items-center justify-center py-32 gap-4 text-center">
           <ShieldAlert className="w-12 h-12 text-white/20" />
           <p className="text-white/50 text-lg">You must be logged in to enter the Arena.</p>
@@ -277,7 +277,7 @@ const CircleFocusRoomPage: React.FC = () => {
 
   if (loading) {
     return (
-      <MainLayout title="SETU Commune">
+      <MainLayout title="PrepEntrance Commune">
         <div className="flex flex-col items-center justify-center py-32 gap-6">
           <div className="relative">
             <div className="w-16 h-16 rounded-full border-4 border-white/10 border-t-accent animate-spin" />
@@ -291,7 +291,7 @@ const CircleFocusRoomPage: React.FC = () => {
 
   if (!room) {
     return (
-      <MainLayout title="SETU Commune">
+      <MainLayout title="PrepEntrance Commune">
         <div className="flex flex-col items-center justify-center py-32 gap-5 text-center px-4">
           <div className="w-20 h-20 rounded-2xl bg-white/5 flex items-center justify-center mb-2">
             <ShieldAlert className="w-10 h-10 text-white/30" />
@@ -400,9 +400,9 @@ const CircleFocusRoomPage: React.FC = () => {
               className="gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/10 font-medium"
               onClick={async () => {
                 const url = `${window.location.origin}/circles/${roomId}`;
-                const text = `Join me in "${room.title}" on SETU Commune! 📚🔥`;
+                const text = `Join me in "${room.title}" on PrepEntrance Commune! 📚🔥`;
                 try {
-                  if (navigator.share) await navigator.share({ title: 'SETU Commune', text, url });
+                  if (navigator.share) await navigator.share({ title: 'PrepEntrance Commune', text, url });
                   else { navigator.clipboard.writeText(`${text}\n${url}`); toast.success('Invite link copied! 🎉'); }
                 } catch { /* cancelled */ }
               }}

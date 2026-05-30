@@ -133,7 +133,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
         return <p key={i} className="ml-4 my-1">• {line.slice(2)}</p>;
       }
       if (line.startsWith('Acha beta') || line.startsWith('Bas beta')) {
-        return <p key={i} className="my-3 text-setu-saffron font-medium italic">{line}</p>;
+        return <p key={i} className="my-3 text-prepentrance-saffron font-medium italic">{line}</p>;
       }
       if (line.trim()) {
         return <p key={i} className="my-2">{line}</p>;
@@ -260,7 +260,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
             {isAnalyzing ? (
               <>
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                SETU Mentor is reading your notes...
+                PrepEntrance Mentor is reading your notes...
               </>
             ) : (
               <>
@@ -277,8 +277,8 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
         <div className="bg-card border border-border rounded-xl p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-setu-saffron" />
-              SETU Mentor's Analysis
+              <Sparkles className="w-5 h-5 text-prepentrance-saffron" />
+              PrepEntrance Mentor's Analysis
             </h3>
             {!isAnalyzing && (
               <Button variant="outline" size="sm" onClick={clearImage}>

@@ -29,7 +29,7 @@ export const HubLayout: React.FC<HubLayoutProps> = ({ children }) => {
               className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-black text-sm"
               style={{ background: 'linear-gradient(135deg,#F97316,#EF4444)' }}
             >S</div>
-            <span className="font-bold text-white text-[15px] hidden sm:block">SETU</span>
+            <span className="font-bold text-white text-[15px] hidden sm:block">PrepEntrance</span>
           </button>
 
           {/* Nav links */}
@@ -55,7 +55,7 @@ export const HubLayout: React.FC<HubLayoutProps> = ({ children }) => {
           {/* Right actions */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigate('/ask-setu')}
+              onClick={() => navigate('/ask-prepentrance')}
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
               style={{ background: 'rgba(249,115,22,0.15)', color: '#F97316', border: '1px solid rgba(249,115,22,0.3)' }}
             >
@@ -101,7 +101,7 @@ export const HubLayout: React.FC<HubLayoutProps> = ({ children }) => {
       {/* Footer */}
       <footer className="border-t mt-20 py-8 text-center" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
         <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
-          © 2025 SETU Prep — JEE · NEET · CUET preparation resources
+          © 2025 PrepEntrance Prep — JEE · NEET · CUET preparation resources
         </p>
       </footer>
     </div>

@@ -23,7 +23,7 @@ LANGUAGE RULES — STRICT
 ═══════════════════════════════
 - Write ALL content in pure English only.
 - No Hinglish, no Hindi words, no "samjho", no "yaad rakho".
-- Tone: sharp coaching English — like Allen study material.
+- Tone: sharp coaching English — like Allen/Aakash/PW study material.
 - Example: "Remember:" not "Yaad rakho:".`;
   } else if (langLower === "hindi") {
     languagePrompt = `═══════════════════════════════
@@ -32,7 +32,7 @@ LANGUAGE RULES — STRICT
 - Write in Hinglish (Hindi + English mix).
 - Formulas always in English.
 - Explanation text in casual Hindi/Hinglish.
-- Jeetu Bhaiya tone: warm, motivating.
+- Jeetu Bhaiya / Alakh Sir tone: warm, motivating, student-friendly.
 - Example: "Yaad rakho — yeh formula direct use hota hai".`;
   } else if (langLower === "hinglish") {
     languagePrompt = `═══════════════════════════════
@@ -47,15 +47,15 @@ LANGUAGE RULES — STRICT
 ═══════════════════════════════
 - Write ALL content in pure English only.
 - No Hinglish, no Hindi words, no "samjho", no "yaad rakho".
-- Tone: sharp coaching English — like Allen study material.`;
+- Tone: sharp coaching English — like Allen/Aakash/PW study material.`;
   }
 
   if (mode === "notes") {
     return `SYSTEM PROMPT — PREMIUM AI NOTES FOR JEE + NEET + CUET
 
-You are SETU's AI Notes Engine — an expert revision note creator for JEE Main, JEE Advanced, NEET, and CUET, using the exact pedagogy of premium coaching institutes like Allen, Resonance, FIITJEE, Vibrant, and Motion.
+You are PrepEntrance's AI Notes Engine — an expert revision note creator for JEE Main, JEE Advanced, NEET, and CUET, using the exact pedagogy and high-density content distribution of premium coaching modules like Allen, Resonance, Aakash, and Physics Wallah (PW).
 
-Generate PREMIUM AI-generated revision notes for the chapter provided. The notes must feel like premium coaching modules and high-density revision sheets.
+Generate PREMIUM AI-generated revision notes for the chapter provided. The notes must feel like premium coaching modules, high-density revision sheets, and PW/Allen master modules.
 
 Avoid school notes, basic NCERT summaries, or basic explanations.
 
@@ -185,9 +185,9 @@ INPUT DETAILS
   Level: ${exam}
 `;
   } else {
-    return `SYSTEM PROMPT — SETU VISUAL FORMULA SHEET GENERATOR (UNIVERSAL)
+    return `SYSTEM PROMPT — PrepEntrance VISUAL FORMULA SHEET GENERATOR (UNIVERSAL)
 
-You are SETU's Visual Formula Sheet Engine for JEE, NEET, and CUET students.
+You are PrepEntrance's Visual Formula Sheet Engine for JEE, NEET, and CUET students.
 Given a chapter, subject, and exam level, generate a complete visual formula sheet as a self-contained HTML file.
 
 ═══════════════════════════════
@@ -561,7 +561,7 @@ HTML OUTPUT RULES
 - Google Fonts loaded via <link>
 - Responsive: 2-col on desktop, 1-col on mobile
 - Paper feel: background #FDFAF4, ink #1a1a2e, accent #FF6B00
-- SETU header + chapter title + setulearning.in footer
+- PrepEntrance header + chapter title + setulearning.in footer
 - Output only the HTML — no explanation before or after
 
 ═══════════════════════════════

@@ -24,7 +24,7 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
   const variants = {
     default: 'bg-card hover:bg-secondary/50',
     primary: 'bg-primary',
-    accent: 'bg-gradient-to-br from-accent to-setu-saffron-light'
+    accent: 'bg-gradient-to-br from-accent to-prepentrance-saffron-light'
   };
 
   // Text colors based on variant

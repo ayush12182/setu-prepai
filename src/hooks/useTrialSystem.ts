@@ -93,7 +93,7 @@ export const useTrialSystem = () => {
 
     const generateReferralCode = (userId: string): string => {
         const short = userId.replace(/-/g, '').slice(0, 8).toUpperCase();
-        return `SETU-${short}`;
+        return `PrepEntrance-${short}`;
     };
 
     const activateTrial = useCallback(async () => {
@@ -132,7 +132,7 @@ export const useTrialSystem = () => {
                 data: { plan: 'pro' },
             });
             if (error) throw error;
-            toast.success('🚀 Welcome to SETU Pro!');
+            toast.success('🚀 Welcome to PrepEntrance Pro!');
             await refreshStatus();
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Failed to upgrade';
@@ -167,7 +167,7 @@ export const useTrialSystem = () => {
         setLoading(true);
         try {
             // For now, just validate and grant bonus
-            if (!code.startsWith('SETU-') || code.length < 10) {
+            if (!code.startsWith('PrepEntrance-') || code.length < 10) {
                 toast.error('Invalid referral code');
                 return;
             }

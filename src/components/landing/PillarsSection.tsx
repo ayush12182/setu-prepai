@@ -55,7 +55,7 @@ const pillars = [
 
 export const PillarsSection: React.FC = () => {
   return (
-    <section id="features" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-setu-navy">
+    <section id="features" className="relative py-28 px-6 sm:px-12 overflow-hidden bg-prepentrance-navy">
       {/* Background */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-accent rounded-full blur-[200px]" />
@@ -76,7 +76,7 @@ export const PillarsSection: React.FC = () => {
           className="text-center mb-20"
         >
           <span className="inline-block px-4 py-1.5 rounded-full bg-accent/20 text-accent text-sm font-medium mb-5 tracking-wide">
-            Why SETU Works
+            Why PrepEntrance Works
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
             Six pillars that make

@@ -228,7 +228,7 @@ export const useVoiceAI = () => {
     setLiveTranscript('');
     setIsProcessing(true);
 
-    // Send to SETU Chat LLM
+    // Send to PrepEntrance Chat LLM
     const fullHistory = [...chatHistory, { role: 'user' as const, content: finalText }];
     let assistantFull = '';
 

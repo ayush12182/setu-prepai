@@ -10,15 +10,15 @@ interface LanguageContextType {
 }
 
 const greetings: Record<LanguageMode, string> = {
-  english: "Hello! I'm SETU, your AI Mentor.",
-  hinglish: "Hey! Main hoon SETU, tumhara AI Mentor.",
-  hindi: "नमस्ते! मैं SETU हूं, आपका AI मेंटर।",
-  kannada: "ನಮಸ್ಕಾರ! ನಾನು SETU, ನಿಮ್ಮ AI ಮೆಂಟರ್.",
-  telugu: "నమస్కారం! నేను SETU, మీ AI మెంటార్.",
-  punjabi: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ SETU, ਤੁਹਾਡਾ AI ਮੈਂਟਰ।",
-  marathi: "नमस्कार! मी SETU, तुमचा AI मेंटर.",
-  tamil: "வணக்கம்! நான் SETU, உங்கள் AI வழிகாட்டி.",
-  gujarati: "નમસ્તે! હું SETU, તમારો AI મેન્ટર.",
+  english: "Hello! I'm PrepEntrance, your AI Mentor.",
+  hinglish: "Hey! Main hoon PrepEntrance, tumhara AI Mentor.",
+  hindi: "नमस्ते! मैं PrepEntrance हूं, आपका AI मेंटर।",
+  kannada: "ನಮಸ್ಕಾರ! ನಾನು PrepEntrance, ನಿಮ್ಮ AI ಮೆಂಟರ್.",
+  telugu: "నమస్కారం! నేను PrepEntrance, మీ AI మెంటార్.",
+  punjabi: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ PrepEntrance, ਤੁਹਾਡਾ AI ਮੈਂਟਰ।",
+  marathi: "नमस्कार! मी PrepEntrance, तुमचा AI मेंटर.",
+  tamil: "வணக்கம்! நான் PrepEntrance, உங்கள் AI வழிகாட்டி.",
+  gujarati: "નમસ્તે! હું PrepEntrance, તમારો AI મેન્ટર.",
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);

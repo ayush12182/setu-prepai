@@ -12,7 +12,7 @@ const steps = [
   {
     number: '02',
     icon: Brain,
-    title: 'Learn with SETU Mentor',
+    title: 'Learn with PrepEntrance Mentor',
     description: 'Get concept notes, formulas, and teacher-style explanations — like sitting in a Kota classroom.',
   },
   {
@@ -31,7 +31,7 @@ const steps = [
 
 export const HowItWorksSection: React.FC = () => {
   return (
-    <section id="how-it-works" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-setu-navy">
+    <section id="how-it-works" className="relative py-24 px-6 sm:px-12 overflow-hidden bg-prepentrance-navy">
       {/* Background */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 right-20 w-80 h-80 bg-accent rounded-full blur-3xl" />

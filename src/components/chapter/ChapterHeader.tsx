@@ -76,9 +76,9 @@ export const ChapterHeader: React.FC<ChapterHeaderProps> = ({ chapter, subchapte
               <span className={cn(
                 'text-xs font-semibold px-3 py-1 rounded-full border flex items-center gap-1.5',
                 chapter.weightage === 'High' 
-                  ? 'bg-setu-saffron/10 text-setu-saffron border-setu-saffron/30' 
+                  ? 'bg-prepentrance-saffron/10 text-prepentrance-saffron border-prepentrance-saffron/30' 
                   : chapter.weightage === 'Medium' 
-                    ? 'bg-setu-warning/10 text-setu-warning border-setu-warning/30'
+                    ? 'bg-prepentrance-warning/10 text-prepentrance-warning border-prepentrance-warning/30'
                     : 'bg-muted text-muted-foreground border-border'
               )}>
                 <Flame className="w-3 h-3" />
@@ -86,9 +86,9 @@ export const ChapterHeader: React.FC<ChapterHeaderProps> = ({ chapter, subchapte
               </span>
               <span className={cn(
                 'text-xs font-semibold px-3 py-1 rounded-full',
-                chapter.difficulty === 'Hard' ? 'bg-setu-error/10 text-setu-error' :
-                chapter.difficulty === 'Medium' ? 'bg-setu-warning/10 text-setu-warning' :
-                'bg-setu-success/10 text-setu-success'
+                chapter.difficulty === 'Hard' ? 'bg-prepentrance-error/10 text-prepentrance-error' :
+                chapter.difficulty === 'Medium' ? 'bg-prepentrance-warning/10 text-prepentrance-warning' :
+                'bg-prepentrance-success/10 text-prepentrance-success'
               )}>
                 {chapter.difficulty}
               </span>
@@ -125,8 +125,8 @@ export const ChapterHeader: React.FC<ChapterHeaderProps> = ({ chapter, subchapte
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-3 mt-6">
-          <div className="text-center p-4 bg-gradient-to-br from-setu-saffron/10 to-setu-saffron/5 rounded-xl border border-setu-saffron/20">
-            <p className="text-2xl font-bold text-setu-saffron">{chapter.pyqData.postCovid}</p>
+          <div className="text-center p-4 bg-gradient-to-br from-prepentrance-saffron/10 to-prepentrance-saffron/5 rounded-xl border border-prepentrance-saffron/20">
+            <p className="text-2xl font-bold text-prepentrance-saffron">{chapter.pyqData.postCovid}</p>
             <p className="text-xs text-muted-foreground mt-1">Recent PYQs</p>
           </div>
           <div className="text-center p-4 bg-secondary/50 rounded-xl border border-border">

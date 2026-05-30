@@ -101,15 +101,15 @@ const GlowBg: React.FC = () => (
 const Logo: React.FC<{ size?: 'sm' | 'lg' }> = ({ size = 'sm' }) => (
   <div className={`flex flex-col items-center gap-2 ${size === 'lg' ? '' : 'flex-row gap-2.5'}`}>
     <img
-      src="/setu-logo.png"
-      alt="SETU"
+      src="/prepentrance-logo.png"
+      alt="PrepEntrance"
       className={size === 'lg' ? 'w-16 h-16 object-contain' : 'w-8 h-8 object-contain'}
     />
     <span
       className={`text-white font-bold tracking-widest uppercase ${size === 'lg' ? 'text-2xl' : 'text-base'}`}
       style={{ fontFamily: 'Sora, Inter, sans-serif', letterSpacing: '0.2em' }}
     >
-      SETU
+      PrepEntrance
     </span>
   </div>
 );
@@ -190,6 +190,9 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
   const [batchInfo, setBatchInfo] = useState<BatchInfo | null>(null);
   const [stream, setStream] = useState('');
   const [studentClass, setStudentClass] = useState('');
+  const [targetYear, setTargetYear] = useState('');
+  const [currentLevel, setCurrentLevel] = useState('Intermediate');
+  const [isCoaching, setIsCoaching] = useState(false);
 
   // Teacher state
   const [institutionName, setInstitutionName] = useState('');
@@ -210,7 +213,8 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     setStep(newStep);
   };
 
-  const totalStudentSteps = skipToJoinCode ? 3 : 4; // role → study mode → code/goal
+  const isCoachingFlow = track === 'student' && isCoaching;
+  const totalStudentSteps = isCoachingFlow ? 6 : 5;
   const totalTeacherSteps = 5; // identity → goals → batch → code → done
 
   // ─── Join code validation ─────────────────────────────────────────────────
@@ -310,11 +314,40 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
       else if (effectiveStream === 'cuet') setExamMode('cuet');
       else setExamMode('jee');
 
+      const targetYearInt = parseInt(targetYear) || 2027;
+      let dbExam = 'JEE';
+      if (examGoal.toUpperCase().includes('NEET')) dbExam = 'NEET';
+      else if (examGoal.toUpperCase().includes('CUET')) dbExam = 'CUET';
+
+      // 1. Fetch matching cohort
+      const { data: cohortData } = await supabase
+        .from('cohorts')
+        .select('id')
+        .eq('exam', dbExam)
+        .eq('class', cls === 'dropper' ? 'dropper' : cls)
+        .eq('target_year', targetYearInt)
+        .maybeSingle();
+
+      const cohortId = cohortData?.id || null;
+
+      // 2. Update basic profiles
       await updateProfile({
         target_exam: examGoal,
         class: cls,
         student_level: level,
         user_type: 'student',
+      });
+
+      // 3. Upsert into student_profiles
+      await supabase.from('student_profiles').upsert({
+        student_id: user.id,
+        name: user.user_metadata?.full_name || null,
+        target_exam: examGoal,
+        class: cls,
+        target_year: targetYearInt,
+        current_level: currentLevel,
+        cohort_id: cohortId,
+        last_active: new Date().toISOString(),
       });
 
       // Join batch
@@ -463,7 +496,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
-            <p className="text-amber-400 text-xs font-bold uppercase tracking-[0.2em]">Welcome to SETU</p>
+            <p className="text-amber-400 text-xs font-bold uppercase tracking-[0.2em]">Welcome to PrepEntrance</p>
             <h1 className="text-white text-3xl sm:text-4xl font-bold leading-tight" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
               How are you joining?
             </h1>
@@ -525,7 +558,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
             <motion.button
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
-              onClick={() => { go(3); }}
+              onClick={() => { setIsCoaching(false); go(3); }}
               className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-amber-400/30 hover:bg-amber-400/[0.03] transition-all text-left flex items-center gap-4 group"
             >
               <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0 group-hover:bg-amber-400/20 transition-colors">
@@ -542,7 +575,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
             <motion.button
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
-              onClick={() => { go(2); }}
+              onClick={() => { setIsCoaching(true); go(2); }}
               className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-violet-400/30 hover:bg-violet-400/[0.03] transition-all text-left flex items-center gap-4 group"
             >
               <div className="w-12 h-12 rounded-2xl bg-violet-400/10 border border-violet-400/20 flex items-center justify-center shrink-0 group-hover:bg-violet-400/20 transition-colors">
@@ -649,30 +682,21 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
       );
     }
 
-    // ── STUDENT STEP 3: Goal selection (stream + class) ───────────────────────
+    // ── STUDENT STEP 3: Choose Exam ──────────────────────────────────────────
     if (step === 3 && track === 'student') {
-      const classes = stream === 'foundation' ? FOUNDATION_CLASSES : SENIOR_CLASSES;
-
-      // ── If batch info exists, show locked auto-detected view ─────────────
-      if (batchInfo) {
+      if (isCoaching && batchInfo) {
         const streamLabel = STREAMS.find(s => s.value === stream)?.label ?? batchInfo.exam_type;
         const streamEmoji = STREAMS.find(s => s.value === stream)?.emoji ?? '🎯';
         return (
           <div className="space-y-5">
             <div className="text-center space-y-2">
               <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-                Your batch is set up!
+                Your exam is set by batch!
               </h1>
-              <p className="text-white/40 text-sm">Your teacher has already configured your exam and subject</p>
+              <p className="text-white/40 text-sm">Your teacher has configured your exam path</p>
             </div>
 
-            {/* Auto-detected exam — locked */}
-            <div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.06] p-5 space-y-4">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span className="text-amber-400 text-xs font-black uppercase tracking-[0.15em]">Auto-detected from batch</span>
-              </div>
-
+            <div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.06] p-5">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-2xl shrink-0">
                   {streamEmoji}
@@ -685,152 +709,231 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
                   <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />
                 </div>
               </div>
-
-              <div className="h-px bg-white/[0.06]" />
-
-              <div className="flex items-center gap-3 text-sm">
-                <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0">
-                  <Users className="w-4 h-4 text-white/40" />
-                </div>
-                <div>
-                  <p className="text-white/70 font-medium">{batchInfo.batch_name}</p>
-                  <p className="text-white/30 text-xs">by {batchInfo.teacher_name} · {batchInfo.total_students} students</p>
-                </div>
-              </div>
             </div>
 
-            <p className="text-center text-xs text-white/25">
-              Your exam and subjects are set by your teacher. Only your class selection is needed.
-            </p>
-
-            {/* Class selection — still required */}
-            <div className="space-y-2">
-              <p className="text-white/50 text-xs font-bold uppercase tracking-wider">Your class</p>
-              <div className="grid grid-cols-3 gap-2">
-                {classes.map(c => {
-                  const sel = studentClass === c.value;
-                  return (
-                    <button
-                      key={c.value}
-                      onClick={() => setStudentClass(c.value)}
-                      className={cn(
-                        'py-3 rounded-xl border text-center transition-all duration-200',
-                        sel ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' : 'border-white/[0.07] text-white/60 hover:border-white/20 hover:text-white'
-                      )}
-                    >
-                      <p className="font-bold text-sm">{c.label}</p>
-                      <p className="text-[10px] mt-0.5 opacity-60">{c.tag}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <PrimaryBtn
-              disabled={!studentClass}
-              loading={saving}
-              onClick={completeStudent}
-            >
-              {saving ? 'Setting up...' : <><Sparkles className="w-5 h-5" /> Join my batch</>}
+            <PrimaryBtn onClick={() => go(4)}>
+              Continue <ArrowRight className="w-5 h-5" />
             </PrimaryBtn>
-
-            <GhostBtn onClick={() => go(2, -1)}>
-              <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-            </GhostBtn>
           </div>
         );
       }
 
-      // ── No batch: normal stream + class selection ──────────────────────
       return (
         <div className="space-y-5">
           <div className="text-center space-y-1">
             <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Set your goal
+              Choose your target exam
             </h1>
-            <p className="text-white/40 text-sm">We'll personalise everything for you</p>
+            <p className="text-white/40 text-sm">Select the exam you are preparing for</p>
           </div>
 
-          {/* Stream */}
           <div className="space-y-2">
-            <p className="text-white/50 text-xs font-bold uppercase tracking-wider">Exam / Program</p>
-            <div className="space-y-2">
-              {STREAMS.map(s => {
-                const selected = stream === s.value;
-                return (
-                  <motion.button
-                    key={s.value}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={() => { setStream(s.value); setStudentClass(''); }}
-                    className={cn(
-                      'w-full px-4 py-3.5 rounded-xl border text-left flex items-center justify-between transition-all duration-200',
-                      selected
-                        ? 'border-amber-400/40 bg-amber-400/[0.06] ring-1 ring-amber-400/20'
-                        : 'border-white/[0.07] hover:border-white/[0.14] hover:bg-white/[0.02]'
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg w-7 shrink-0">{s.emoji}</span>
-                      <div>
-                        <p className="text-white font-semibold text-sm">{s.label}</p>
-                        <p className="text-white/35 text-xs">{s.sub}</p>
-                      </div>
+            {STREAMS.map(s => {
+              const selected = stream === s.value;
+              return (
+                <motion.button
+                  key={s.value}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => { setStream(s.value); }}
+                  className={cn(
+                    'w-full px-4 py-3.5 rounded-xl border text-left flex items-center justify-between transition-all duration-200',
+                    selected
+                      ? 'border-amber-400/40 bg-amber-400/[0.06] ring-1 ring-amber-400/20'
+                      : 'border-white/[0.07] hover:border-white/[0.14] hover:bg-white/[0.02]'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg w-7 shrink-0">{s.emoji}</span>
+                    <div>
+                      <p className="text-white font-semibold text-sm">{s.label}</p>
+                      <p className="text-white/35 text-xs">{s.sub}</p>
                     </div>
-                    <div className={cn(
-                      'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                      selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
-                    )}>
-                      {selected && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
+                  </div>
+                  <div className={cn(
+                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
+                  )}>
+                    {selected && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
+                  </div>
+                </motion.button>
+              );
+            })}
           </div>
-
-          {/* Class */}
-          <AnimatePresence>
-            {stream && (
-              <motion.div
-                key="class-grid"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-2 overflow-hidden"
-              >
-                <p className="text-white/50 text-xs font-bold uppercase tracking-wider">Your class</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {classes.map(c => {
-                    const sel = studentClass === c.value;
-                    return (
-                      <button
-                        key={c.value}
-                        onClick={() => setStudentClass(c.value)}
-                        className={cn(
-                          'py-3 rounded-xl border text-center transition-all duration-200',
-                          sel ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' : 'border-white/[0.07] text-white/60 hover:border-white/20 hover:text-white'
-                        )}
-                      >
-                        <p className="font-bold text-sm">{c.label}</p>
-                        <p className="text-[10px] mt-0.5 opacity-60">{c.tag}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           <PrimaryBtn
-            disabled={!stream || !studentClass}
-            loading={saving}
-            onClick={completeStudent}
+            disabled={!stream}
+            onClick={() => go(4)}
           >
-            {saving ? 'Setting up...' : <><Sparkles className="w-5 h-5" /> Launch my learning</>}
+            Continue <ArrowRight className="w-5 h-5" />
           </PrimaryBtn>
 
           <GhostBtn onClick={() => go(1, -1)}>
+            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
+          </GhostBtn>
+        </div>
+      );
+    }
+
+    // ── STUDENT STEP 4: Choose Class ─────────────────────────────────────────
+    if (step === 4 && track === 'student') {
+      return (
+        <div className="space-y-5">
+          <div className="text-center space-y-1">
+            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
+              Select your Class
+            </h1>
+            <p className="text-white/40 text-sm">We'll isolate your study plan accordingly</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2">
+            {SENIOR_CLASSES.map(c => {
+              const selected = studentClass === c.value;
+              return (
+                <motion.button
+                  key={c.value}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => {
+                    setStudentClass(c.value);
+                    if (c.value === '11') setTargetYear('2028');
+                    else setTargetYear('2027');
+                  }}
+                  className={cn(
+                    'px-4 py-4 rounded-xl border text-left flex items-center justify-between transition-all duration-200',
+                    selected ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' : 'border-white/[0.07] text-white/70 hover:border-white/20'
+                  )}
+                >
+                  <div>
+                    <p className="font-bold text-sm">{c.label}</p>
+                    <p className="text-[11px] opacity-60 mt-0.5">{c.tag}</p>
+                  </div>
+                  <div className={cn(
+                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
+                  )}>
+                    {selected && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <PrimaryBtn
+            disabled={!studentClass}
+            onClick={() => go(5)}
+          >
+            Continue <ArrowRight className="w-5 h-5" />
+          </PrimaryBtn>
+
+          <GhostBtn onClick={() => go(3, -1)}>
+            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
+          </GhostBtn>
+        </div>
+      );
+    }
+
+    // ── STUDENT STEP 5: Target Year ──────────────────────────────────────────
+    if (step === 5 && track === 'student') {
+      const years = ['2027', '2028', '2029'];
+      return (
+        <div className="space-y-5">
+          <div className="text-center space-y-1">
+            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
+              Choose Target Year
+            </h1>
+            <p className="text-white/40 text-sm">Select your exam target milestone year</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2">
+            {years.map(y => {
+              const selected = targetYear === y;
+              return (
+                <motion.button
+                  key={y}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => setTargetYear(y)}
+                  className={cn(
+                    'px-4 py-4 rounded-xl border text-left flex items-center justify-between transition-all duration-200',
+                    selected ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' : 'border-white/[0.07] text-white/70 hover:border-white/20'
+                  )}
+                >
+                  <p className="font-bold text-sm">{y} Aspirant</p>
+                  <div className={cn(
+                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
+                  )}>
+                    {selected && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <PrimaryBtn
+            disabled={!targetYear}
+            onClick={() => go(6)}
+          >
+            Continue <ArrowRight className="w-5 h-5" />
+          </PrimaryBtn>
+
+          <GhostBtn onClick={() => go(4, -1)}>
+            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
+          </GhostBtn>
+        </div>
+      );
+    }
+
+    // ── STUDENT STEP 6: Current Level ────────────────────────────────────────
+    if (step === 6 && track === 'student') {
+      const levels = [
+        { value: 'Beginner',     label: 'Beginner',     sub: 'NCERT & school-level focus' },
+        { value: 'Intermediate', label: 'Intermediate', sub: 'Mains & standard prep level' },
+        { value: 'Advanced',     label: 'Advanced',     sub: 'Coaching tricks & multi-concept level' },
+      ];
+      return (
+        <div className="space-y-5">
+          <div className="text-center space-y-1">
+            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
+              Your Starting Level
+            </h1>
+            <p className="text-white/40 text-sm">We will tailor the revision complexity for you</p>
+          </div>
+
+          <div className="space-y-2">
+            {levels.map(l => {
+              const selected = currentLevel === l.value;
+              return (
+                <motion.button
+                  key={l.value}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => setCurrentLevel(l.value)}
+                  className={cn(
+                    'w-full px-4 py-3.5 rounded-xl border text-left flex items-center justify-between transition-all duration-200',
+                    selected ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' : 'border-white/[0.07] text-white/70 hover:border-white/20'
+                  )}
+                >
+                  <div>
+                    <p className="font-bold text-sm">{l.label}</p>
+                    <p className="text-[11px] opacity-60 mt-0.5">{l.sub}</p>
+                  </div>
+                  <div className={cn(
+                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
+                  )}>
+                    {selected && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <PrimaryBtn
+            loading={saving}
+            onClick={completeStudent}
+          >
+            {saving ? 'Personalizing Dashboard...' : <><Sparkles className="w-5 h-5" /> Launch My Dashboard</>}
+          </PrimaryBtn>
+
+          <GhostBtn onClick={() => go(5, -1)}>
             <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
           </GhostBtn>
         </div>
@@ -935,7 +1038,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
         <div className="space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              What do you want from SETU?
+              What do you want from PrepEntrance?
             </h1>
             <p className="text-white/40 text-sm">Select all that apply — we'll personalise your dashboard</p>
           </div>
@@ -1087,7 +1190,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
                 whileTap={{ scale: 0.97 }}
                 onClick={() => {
                   const origin = window.location.origin || 'https://app.setulearn.com';
-                  const text = encodeURIComponent(`Join my batch on SETU! Use code ${generatedCode} or click: ${origin}/join/${generatedCode}`);
+                  const text = encodeURIComponent(`Join my batch on PrepEntrance! Use code ${generatedCode} or click: ${origin}/join/${generatedCode}`);
                   window.open(`https://wa.me/?text=${text}`, '_blank');
                 }}
                 className="flex-1 h-11 rounded-xl border border-green-500/20 bg-green-500/[0.06] hover:bg-green-500/[0.1] text-green-400 hover:text-green-300 transition-all flex items-center justify-center gap-2 text-sm font-medium"
@@ -1099,7 +1202,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
 
           <div className="bg-violet-500/[0.07] rounded-2xl border border-violet-500/15 p-4 space-y-2">
             {[
-              'Students enter this code in the SETU app to join',
+              'Students enter this code in the PrepEntrance app to join',
               'You can find it anytime in your Batches section',
               'Create more batches from your dashboard',
             ].map((tip, i) => (
@@ -1169,7 +1272,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
             whileTap={{ scale: 0.97 }}
             onClick={() => {
               const origin = window.location.origin || 'https://app.setulearn.com';
-              const text = encodeURIComponent(`Join my batch on SETU! Use code ${generatedCode} or click: ${origin}/join/${generatedCode}`);
+              const text = encodeURIComponent(`Join my batch on PrepEntrance! Use code ${generatedCode} or click: ${origin}/join/${generatedCode}`);
               window.open(`https://wa.me/?text=${text}`, '_blank');
             }}
             className="w-full h-11 rounded-xl border border-green-500/20 bg-green-500/[0.06] hover:bg-green-500/[0.1] text-green-400 hover:text-green-300 transition-all flex items-center justify-center gap-2 text-sm font-medium"
@@ -1191,6 +1294,15 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
 
   const isTeacher = track === 'teacher';
 
+  let currentDotIndex = step - 1;
+  if (!isTeacher && track === 'student') {
+    if (!isCoaching) {
+      currentDotIndex = step === 1 ? 0 : step - 2;
+    } else {
+      currentDotIndex = step - 1;
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#0B0F1A] flex flex-col relative overflow-hidden">
       <GlowBg />
@@ -1201,7 +1313,7 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
           {step > 0 && (
             <StepDots
               total={isTeacher ? totalTeacherSteps : totalStudentSteps}
-              current={Math.min(step - 1, (isTeacher ? totalTeacherSteps : totalStudentSteps) - 1)}
+              current={Math.max(0, Math.min(currentDotIndex, (isTeacher ? totalTeacherSteps : totalStudentSteps) - 1))}
             />
           )}
         </div>

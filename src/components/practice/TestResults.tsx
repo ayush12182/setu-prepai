@@ -55,9 +55,9 @@ const TestResults: React.FC<TestResultsProps> = ({
   const wrongAnswers = answers.filter(a => !a.isCorrect);
   
   const getPerformanceLevel = () => {
-    if (accuracy >= 80) return { label: 'Excellent!', color: 'text-setu-success', emoji: '🏆', message: 'Outstanding performance! You\'ve mastered this topic.' };
-    if (accuracy >= 60) return { label: 'Good Job!', color: 'text-setu-saffron', emoji: '👍', message: 'Solid understanding. A bit more practice will make it perfect.' };
-    if (accuracy >= 40) return { label: 'Keep Practicing', color: 'text-setu-warning', emoji: '💪', message: 'You\'re getting there! Focus on the concepts you missed.' };
+    if (accuracy >= 80) return { label: 'Excellent!', color: 'text-prepentrance-success', emoji: '🏆', message: 'Outstanding performance! You\'ve mastered this topic.' };
+    if (accuracy >= 60) return { label: 'Good Job!', color: 'text-prepentrance-saffron', emoji: '👍', message: 'Solid understanding. A bit more practice will make it perfect.' };
+    if (accuracy >= 40) return { label: 'Keep Practicing', color: 'text-prepentrance-warning', emoji: '💪', message: 'You\'re getting there! Focus on the concepts you missed.' };
     return { label: 'Needs Work', color: 'text-destructive', emoji: '📚', message: 'Review the fundamentals before attempting more questions.' };
   };
 
@@ -107,8 +107,8 @@ const TestResults: React.FC<TestResultsProps> = ({
           <p className="text-xs text-muted-foreground">Accuracy</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4 text-center">
-          <CheckCircle className="w-6 h-6 mx-auto mb-2 text-setu-success" />
-          <p className="text-2xl font-bold text-setu-success">{correct}</p>
+          <CheckCircle className="w-6 h-6 mx-auto mb-2 text-prepentrance-success" />
+          <p className="text-2xl font-bold text-prepentrance-success">{correct}</p>
           <p className="text-xs text-muted-foreground">Correct</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4 text-center">
@@ -117,8 +117,8 @@ const TestResults: React.FC<TestResultsProps> = ({
           <p className="text-xs text-muted-foreground">Incorrect</p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4 text-center">
-          <Clock className="w-6 h-6 mx-auto mb-2 text-setu-saffron" />
-          <p className="text-2xl font-bold text-setu-saffron">{avgTimePerQuestion}s</p>
+          <Clock className="w-6 h-6 mx-auto mb-2 text-prepentrance-saffron" />
+          <p className="text-2xl font-bold text-prepentrance-saffron">{avgTimePerQuestion}s</p>
           <p className="text-xs text-muted-foreground">Avg Time</p>
         </div>
       </div>
@@ -127,7 +127,7 @@ const TestResults: React.FC<TestResultsProps> = ({
       {Object.keys(conceptGroups).length > 0 && (
         <div className="bg-card border border-border rounded-xl p-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-setu-warning" />
+            <AlertTriangle className="w-5 h-5 text-prepentrance-warning" />
             Weak Concepts to Focus On
           </h3>
           <div className="space-y-2">
@@ -189,7 +189,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                             Not answered
                           </span>
                         )}
-                        <span className="text-xs bg-setu-success/10 text-setu-success px-2 py-0.5 rounded">
+                        <span className="text-xs bg-prepentrance-success/10 text-prepentrance-success px-2 py-0.5 rounded">
                           Correct: {q.correct_option}
                         </span>
                       </div>
@@ -222,14 +222,14 @@ const TestResults: React.FC<TestResultsProps> = ({
                               key={opt}
                               className={cn(
                                 'p-3 rounded-lg flex items-start gap-2 text-sm',
-                                isCorrectOpt && 'bg-setu-success/10 border border-setu-success/30',
+                                isCorrectOpt && 'bg-prepentrance-success/10 border border-prepentrance-success/30',
                                 isSelected && !isCorrectOpt && 'bg-destructive/10 border border-destructive/30',
                                 !isCorrectOpt && !isSelected && 'bg-secondary/50'
                               )}
                             >
                               <span className="font-semibold">{opt}.</span>
                               <JeeOption option={optionText} className="flex-1" />
-                              {isCorrectOpt && <CheckCircle className="w-4 h-4 text-setu-success" />}
+                              {isCorrectOpt && <CheckCircle className="w-4 h-4 text-prepentrance-success" />}
                               {isSelected && !isCorrectOpt && <XCircle className="w-4 h-4 text-destructive" />}
                             </div>
                           );
@@ -239,7 +239,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                       {/* Explanation */}
                       <div className="space-y-3">
                         <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
-                          <Lightbulb className="w-5 h-5 text-setu-saffron mt-0.5 flex-shrink-0" />
+                          <Lightbulb className="w-5 h-5 text-prepentrance-saffron mt-0.5 flex-shrink-0" />
                           <div className="flex-1">
                             <p className="text-sm font-medium mb-1">Solution</p>
                             <JeeSolution solution={q.explanation} className="text-muted-foreground" />
@@ -255,8 +255,8 @@ const TestResults: React.FC<TestResultsProps> = ({
                         </div>
 
                         {q.common_mistake && (
-                          <div className="flex items-start gap-2 p-3 bg-setu-warning/10 rounded-lg">
-                            <AlertTriangle className="w-5 h-5 text-setu-warning mt-0.5 flex-shrink-0" />
+                          <div className="flex items-start gap-2 p-3 bg-prepentrance-warning/10 rounded-lg">
+                            <AlertTriangle className="w-5 h-5 text-prepentrance-warning mt-0.5 flex-shrink-0" />
                             <div>
                               <p className="text-sm font-medium">Common Mistake</p>
                               <p className="text-sm text-muted-foreground">{q.common_mistake}</p>
@@ -273,10 +273,10 @@ const TestResults: React.FC<TestResultsProps> = ({
         </div>
       )}
 
-      {/* SETU Mentor Tip */}
-      <div className="bg-gradient-to-r from-setu-saffron/10 to-setu-green/10 border border-setu-saffron/20 rounded-xl p-4">
+      {/* PrepEntrance Mentor Tip */}
+      <div className="bg-gradient-to-r from-prepentrance-saffron/10 to-prepentrance-green/10 border border-prepentrance-saffron/20 rounded-xl p-4">
         <div className="flex items-start gap-3">
-          <BookOpen className="w-5 h-5 text-setu-saffron flex-shrink-0 mt-0.5" />
+          <BookOpen className="w-5 h-5 text-prepentrance-saffron flex-shrink-0 mt-0.5" />
           <p className="text-sm text-muted-foreground">
             {accuracy >= 80 
               ? `Bahut badhiya beta! Ab ek level upar try karo. ${nextLevelLabel} lagao.`
@@ -300,7 +300,7 @@ const TestResults: React.FC<TestResultsProps> = ({
         {wrongAnswers.length > 0 && (
           <Button 
             onClick={onPracticeMistakes} 
-            className="h-12 bg-setu-warning hover:bg-setu-warning/90 sm:col-span-2"
+            className="h-12 bg-prepentrance-warning hover:bg-prepentrance-warning/90 sm:col-span-2"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Practice Similar Questions on Weak Concepts

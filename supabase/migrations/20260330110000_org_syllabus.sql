@@ -1,7 +1,7 @@
 -- ============================================================
--- SETU B2B CUSTOM SYLLABUS SCHEMA
+-- PrepEntrance B2B CUSTOM SYLLABUS SCHEMA
 -- Allows organizations to define their own chapters and topics,
--- mapping them to SETU's global concepts.
+-- mapping them to PrepEntrance's global concepts.
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS public.organization_syllabus (
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS public.organization_syllabus (
     subject TEXT NOT NULL,
     custom_chapter_name TEXT NOT NULL,
     custom_topic_name TEXT NOT NULL,
-    global_topic_reference TEXT, -- Maps to SETU's internal global topic/subtopic
+    global_topic_reference TEXT, -- Maps to PrepEntrance's internal global topic/subtopic
     order_index INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc', now()) NOT NULL

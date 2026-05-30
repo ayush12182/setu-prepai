@@ -112,7 +112,7 @@ const getDoubtPlaceholder = (name: string, lang: LanguageMode): string => {
 type TeacherId = keyof typeof TEACHERS;
 
 /* ────────────────────────────────────────────────
-   SETU MENTOR BASE TEACHING PROMPT
+   PrepEntrance MENTOR BASE TEACHING PROMPT
 ──────────────────────────────────────────────── */
 const BASE_TEACHING_PROMPT = `You teach exactly like a highly-experienced expert teacher from Kota. 
 
@@ -267,14 +267,14 @@ OUTPUT STRUCTURE (always follow):
 } as const;
 
 const TTS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/elevenlabs-tts-stream`;
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/setu-chat`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/prepentrance-chat`;
 
 
 /* ────────────────────────────────────────────────
    TYPEWRITER HOOK
 ──────────────────────────────────────────────── */
 /* Inject chalk-dust-appear keyframe once */
-const CHALK_STYLE_ID = 'setu-chalk-keyframe';
+const CHALK_STYLE_ID = 'prepentrance-chalk-keyframe';
 if (typeof document !== 'undefined' && !document.getElementById(CHALK_STYLE_ID)) {
   const s = document.createElement('style');
   s.id = CHALK_STYLE_ID;
@@ -847,7 +847,7 @@ const AITeachingRoomPage: React.FC = () => {
     // 2. Build chat history
     chatHistoryRef.current.push({ role: 'user', content: userMessage });
 
-    // 3. Stream from setu-chat using the teacher's custom system prompt
+    // 3. Stream from prepentrance-chat using the teacher's custom system prompt
     setIsStreaming(true);
     let accumulated = '';
     let spokenCursor = 0;

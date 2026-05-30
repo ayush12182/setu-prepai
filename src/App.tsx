@@ -22,8 +22,8 @@ import PracticePage from "./pages/PracticePage";
 import TestPage from "./pages/TestPage";
 import MajorTestPage from "./pages/MajorTestPage";
 import RevisionPage from "./pages/RevisionPage";
-import LectureSetu from "./pages/LectureSetu";
-import AskSetuPage from "./pages/AskSetuPage";
+import LecturePrepEntrance from "./pages/LecturePrepEntrance";
+import AskPrepEntrancePage from "./pages/AskPrepEntrancePage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
@@ -31,7 +31,7 @@ import RevisionTopicPage from "./pages/RevisionTopicPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import NotFound from "./pages/NotFound";
-import SetuCirclesPage from "./pages/SetuCirclesPage";
+import PrepEntranceCirclesPage from "./pages/PrepEntranceCirclesPage";
 import CircleFocusRoomPage from "./pages/CircleFocusRoomPage";
 import BatchCommunePage from "./pages/BatchCommunePage";
 import FoundationAssessmentPage from "./pages/FoundationAssessmentPage";
@@ -43,7 +43,7 @@ import AITeachingRoomPage from "./pages/AITeachingRoomPage";
 import AITeachersDirectoryPage from "./pages/AITeachersDirectoryPage";
 import PricingPage from "./pages/PricingPage";
 
-// Hub Pages — Setu v2 Public Exam Prep Hub
+// Hub Pages — PrepEntrance v2 Public Exam Prep Hub
 import ExamHubPage from "./pages/hub/ExamHubPage";
 import ResourceCategoryPage from "./pages/hub/ResourceCategoryPage";
 
@@ -167,15 +167,15 @@ const App = () => (
                     <Route path="/major-test" element={<MajorTestPage />} />
                     <Route path="/revision" element={<RevisionPage />} />
                     <Route path="/revision/:subject/:topic" element={<RevisionTopicPage />} />
-                    <Route path="/lecture-setu" element={<LectureSetu />} />
-                    <Route path="/ask-setu" element={<AskSetuPage />} />
+                    <Route path="/lecture-prepentrance" element={<LecturePrepEntrance />} />
+                    <Route path="/ask-prepentrance" element={<AskPrepEntrancePage />} />
                     <Route path="/my-batch" element={<MyBatchPage />} />
                     <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/terms" element={<TermsPage />} />
-                    <Route path="/circles" element={<SetuCirclesPage />} />
+                    <Route path="/circles" element={<PrepEntranceCirclesPage />} />
                     <Route path="/circles/:roomId" element={<CircleFocusRoomPage />} />
                     <Route path="/batch-commune" element={<BatchCommunePage />} />
                     <Route path="/foundation-assessment" element={<FoundationAssessmentPage />} />
@@ -223,7 +223,7 @@ const App = () => (
                     <Route path="/pricing" element={<PricingPage />} />
                     <Route path="/premium" element={<PricingPage />} />
 
-                    {/* ─── Setu v2 — Public Exam Prep Hub ──────────────── */}
+                    {/* ─── PrepEntrance v2 — Public Exam Prep Hub ──────────────── */}
                     {/* /hub → default to JEE Class 11 */}
                     <Route path="/hub" element={<Navigate to="/jee/class-11" replace />} />
 

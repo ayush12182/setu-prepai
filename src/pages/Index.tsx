@@ -2,7 +2,7 @@ import React from "react";
 import StudentHubPage from "./StudentHubPage";
 
 /**
- * Standardized SETU Dashboard
+ * Standardized PrepEntrance Dashboard
  * Universal Entry point for B2B and B2C students.
  */
 const Index: React.FC = () => {

@@ -337,7 +337,7 @@ const RevisionTopicPage: React.FC = () => {
         <div className="bg-accent/5 border border-accent/20 rounded-xl p-4 flex items-start gap-3">
           <Sparkles className="w-5 h-5 text-accent shrink-0 mt-0.5" />
           <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">SETU Mentor says:</span>{' '}
+            <span className="font-medium text-foreground">PrepEntrance Mentor says:</span>{' '}
             Beta, ek baar ye sab dekh lo aur fir directly PYQs lagao. Revision ka matlab hai — recall, not re-learn!
           </p>
         </div>

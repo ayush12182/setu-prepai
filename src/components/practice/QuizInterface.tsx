@@ -172,8 +172,8 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
   }, [hasSubmitted, selectedAnswer, confidence, currentQuestion.type, handleSubmit, handleNext]);
 
   const difficultyColors = {
-    easy: 'bg-setu-success/10 text-setu-success',
-    medium: 'bg-setu-warning/10 text-setu-warning',
+    easy: 'bg-prepentrance-success/10 text-prepentrance-success',
+    medium: 'bg-prepentrance-warning/10 text-prepentrance-warning',
     hard: 'bg-destructive/10 text-destructive'
   };
 
@@ -291,8 +291,8 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
               </div>
 
               {currentQuestion.common_mistake && (
-                <div className="flex items-start gap-2 p-3 bg-setu-warning/10 rounded-lg">
-                  <AlertTriangle className="w-5 h-5 text-setu-warning mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-2 p-3 bg-prepentrance-warning/10 rounded-lg">
+                  <AlertTriangle className="w-5 h-5 text-prepentrance-warning mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-medium">Common Mistake</p>
                     <p className="text-sm text-muted-foreground">{currentQuestion.common_mistake}</p>

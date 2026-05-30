@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const KOTA_NOTES_SYSTEM_PROMPT = `You are "Lecture-SETU Notes Engine (Kota Edition)" for JEE/NEET exam preparation.
+const KOTA_NOTES_SYSTEM_PROMPT = `You are "Lecture-PrepEntrance Notes Engine (Kota Edition)" for JEE/NEET exam preparation.
 
 ═══════════════════════════════════
 STRICT MATHEMATICAL SYNTAX (MANDATORY)

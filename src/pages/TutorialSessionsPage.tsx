@@ -236,16 +236,16 @@ const TutorialSessionsPage: React.FC = () => {
         {/* Info Footer */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
           <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
-            <CheckCircle2 className="w-5 h-5 text-setu-success" />
+            <CheckCircle2 className="w-5 h-5 text-prepentrance-success" />
             <span className="text-sm text-foreground">PYQ-focused content</span>
           </div>
           <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
-            <CheckCircle2 className="w-5 h-5 text-setu-success" />
+            <CheckCircle2 className="w-5 h-5 text-prepentrance-success" />
             <span className="text-sm text-foreground">Plain text formulas</span>
           </div>
           <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30">
-            <CheckCircle2 className="w-5 h-5 text-setu-success" />
-            <span className="text-sm text-foreground">SETU Mentor style</span>
+            <CheckCircle2 className="w-5 h-5 text-prepentrance-success" />
+            <span className="text-sm text-foreground">PrepEntrance Mentor style</span>
           </div>
         </div>
       </div>

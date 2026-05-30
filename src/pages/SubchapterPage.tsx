@@ -1,6 +1,6 @@
-// SubchapterPage - Smallest learning unit in SETU
+// SubchapterPage - Smallest learning unit in PrepEntrance
 // Follows: Subject → Chapter → Subchapter → Learn/Practice/Test/Analyze
-// With SETU Mentor-style notes generation and PDF download
+// With PrepEntrance Mentor-style notes generation and PDF download
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -159,7 +159,7 @@ const SubchapterPage: React.FC = () => {
               <Button
                 onClick={handleGenerateNotes}
                 disabled={isLoading}
-                className="bg-gradient-to-r from-setu-saffron to-setu-saffron/80 text-white"
+                className="bg-gradient-to-r from-prepentrance-saffron to-prepentrance-saffron/80 text-white"
                 size="sm"
               >
                 <Sparkles className="w-4 h-4 mr-1" />
@@ -218,7 +218,7 @@ const SubchapterPage: React.FC = () => {
                   <ul className="space-y-1.5">
                     {subchapter.jeeAsks.map((item, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-setu-success mt-0.5 flex-shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-prepentrance-success mt-0.5 flex-shrink-0" />
                         <span className="text-xs text-foreground">{item}</span>
                       </li>
                     ))}
@@ -229,15 +229,15 @@ const SubchapterPage: React.FC = () => {
               {/* C. Common Mistakes */}
               <div className="bg-card border border-border rounded-xl p-5">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-setu-error/10 flex items-center justify-center">
-                    <AlertTriangle className="w-4 h-4 text-setu-error" />
+                  <div className="w-8 h-8 rounded-lg bg-prepentrance-error/10 flex items-center justify-center">
+                    <AlertTriangle className="w-4 h-4 text-prepentrance-error" />
                   </div>
                   <h3 className="font-semibold text-foreground text-sm">Common Mistakes</h3>
                 </div>
                 <ul className="space-y-1.5">
                   {subchapter.commonMistakes.map((mistake, index) => (
                     <li key={index} className="flex items-start gap-2">
-                      <XCircle className="w-3.5 h-3.5 text-setu-error mt-0.5 flex-shrink-0" />
+                      <XCircle className="w-3.5 h-3.5 text-prepentrance-error mt-0.5 flex-shrink-0" />
                       <span className="text-xs text-foreground">{mistake}</span>
                     </li>
                   ))}
@@ -249,8 +249,8 @@ const SubchapterPage: React.FC = () => {
             {!isFoundation && (
               <div className="bg-card border border-border rounded-xl p-5">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-setu-saffron/10 flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-setu-saffron" />
+                  <div className="w-8 h-8 rounded-lg bg-prepentrance-saffron/10 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-prepentrance-saffron" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground text-sm">Post-2020 PYQ Focus</h3>
@@ -279,7 +279,7 @@ const SubchapterPage: React.FC = () => {
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Traps</h4>
                     <ul className="space-y-1">
                       {subchapter.pyqFocus.traps.map((item, index) => (
-                        <li key={index} className="text-xs text-setu-error">⚠ {item}</li>
+                        <li key={index} className="text-xs text-prepentrance-error">⚠ {item}</li>
                       ))}
                     </ul>
                   </div>
@@ -287,12 +287,12 @@ const SubchapterPage: React.FC = () => {
               </div>
             )}
 
-            {/* E. SETU Mentor Line */}
-            <div className="bg-gradient-to-r from-setu-saffron/10 to-setu-green/10 border border-setu-saffron/20 rounded-xl p-5">
+            {/* E. PrepEntrance Mentor Line */}
+            <div className="bg-gradient-to-r from-prepentrance-saffron/10 to-prepentrance-green/10 border border-prepentrance-saffron/20 rounded-xl p-5">
               <div className="flex items-start gap-3">
-                <MessageCircle className="w-5 h-5 text-setu-saffron mt-0.5" />
+                <MessageCircle className="w-5 h-5 text-prepentrance-saffron mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-setu-saffron mb-1">SETU Mentor Says:</p>
+                  <p className="text-sm font-medium text-prepentrance-saffron mb-1">PrepEntrance Mentor Says:</p>
                   <p className="text-foreground italic text-sm">"{subchapter.setuLine || subchapter.setuLine}"</p>
                 </div>
               </div>
@@ -328,7 +328,7 @@ const SubchapterPage: React.FC = () => {
                     className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
                     onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=easy`)}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-setu-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-lg bg-prepentrance-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🌱</span>
                     </div>
                     <h4 className="font-semibold text-foreground">
@@ -337,14 +337,14 @@ const SubchapterPage: React.FC = () => {
                     <p className="text-sm text-muted-foreground mt-1">
                       {isFoundation ? 'Direct understanding questions' : 'Basic understanding MCQs'}
                     </p>
-                    <p className="text-xs text-setu-success font-medium mt-2">15 Questions • Easy</p>
+                    <p className="text-xs text-prepentrance-success font-medium mt-2">15 Questions • Easy</p>
                   </div>
 
                   <div
                     className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
                     onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=medium`)}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-setu-warning/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-lg bg-prepentrance-warning/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🎯</span>
                     </div>
                     <h4 className="font-semibold text-foreground">
@@ -353,14 +353,14 @@ const SubchapterPage: React.FC = () => {
                     <p className="text-sm text-muted-foreground mt-1">
                       {isFoundation ? 'Use the concept in real situations' : 'Previous year pattern'}
                     </p>
-                    <p className="text-xs text-setu-warning font-medium mt-2">20 Questions • Medium</p>
+                    <p className="text-xs text-prepentrance-warning font-medium mt-2">20 Questions • Medium</p>
                   </div>
 
                   <div
                     className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
                     onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=hard`)}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-setu-error/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-lg bg-prepentrance-error/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🔥</span>
                     </div>
                     <h4 className="font-semibold text-foreground">
@@ -369,7 +369,7 @@ const SubchapterPage: React.FC = () => {
                     <p className="text-sm text-muted-foreground mt-1">
                       {isFoundation ? 'Challenge questions requiring reasoning' : 'Competition level'}
                     </p>
-                    <p className="text-xs text-setu-error font-medium mt-2">15 Questions • Hard</p>
+                    <p className="text-xs text-prepentrance-error font-medium mt-2">15 Questions • Hard</p>
                   </div>
                 </div>
 
@@ -452,8 +452,8 @@ const SubchapterPage: React.FC = () => {
                   onClick={() => setActiveTest({ type: 'pyq' })}
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-setu-saffron/10 flex items-center justify-center">
-                      <Target className="w-6 h-6 text-setu-saffron" />
+                    <div className="w-12 h-12 rounded-lg bg-prepentrance-saffron/10 flex items-center justify-center">
+                      <Target className="w-6 h-6 text-prepentrance-saffron" />
                     </div>
                     <div>
                       <h4 className="font-semibold">PYQ Test</h4>

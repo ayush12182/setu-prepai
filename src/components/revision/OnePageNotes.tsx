@@ -392,7 +392,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
 </head>
 <body>
   <header>
-    <div class="logo">SETU</div>
+    <div class="logo">PrepEntrance</div>
     <div class="title-area">
       <h1>${chapter.name} Formula Sheet</h1>
     </div>
@@ -463,7 +463,7 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
       if (t.startsWith('## ')) return <h2  key={key} className="text-lg font-semibold mt-6 mb-3 text-primary"><MathLine>{t.slice(3)}</MathLine></h2>;
       if (t.startsWith('### ')) return <h3 key={key} className="text-base font-medium mt-4 mb-2"><MathLine>{t.slice(4)}</MathLine></h3>;
       if (t.startsWith('• ') || t.startsWith('- ') || t.startsWith('* ')) return <p key={key} className="ml-4 my-1">• <MathLine>{t.slice(2)}</MathLine></p>;
-      if (t.startsWith('⚡') || t.startsWith('💡')) return <p key={key} className="ml-4 my-1 text-setu-saffron font-medium"><MathLine>{t}</MathLine></p>;
+      if (t.startsWith('⚡') || t.startsWith('💡')) return <p key={key} className="ml-4 my-1 text-prepentrance-saffron font-medium"><MathLine>{t}</MathLine></p>;
       if (t.startsWith('---')) return <hr key={key} className="my-4 border-border" />;
       if (t.match(/^\d+\./)) return <p key={key} className="ml-4 my-1"><MathLine>{t}</MathLine></p>;
       if (t) return <p key={key} className="my-2"><MathLine>{t}</MathLine></p>;

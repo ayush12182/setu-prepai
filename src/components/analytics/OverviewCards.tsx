@@ -14,12 +14,12 @@ export const OverviewCards: React.FC<OverviewCardsProps> = ({
   overallScore, questionsDone, studyTimeHours, weakChapters, totalCorrect, totalIncorrect,
 }) => {
   const cards = [
-    { icon: TrendingUp, value: `${overallScore}%`, label: 'Overall Accuracy', color: 'text-setu-success', bg: 'bg-setu-success/10' },
+    { icon: TrendingUp, value: `${overallScore}%`, label: 'Overall Accuracy', color: 'text-prepentrance-success', bg: 'bg-prepentrance-success/10' },
     { icon: Target, value: `${questionsDone}`, label: 'Questions Solved', color: 'text-physics', bg: 'bg-physics/10' },
-    { icon: CheckCircle2, value: `${totalCorrect}`, label: 'Correct', color: 'text-setu-success', bg: 'bg-setu-success/10' },
-    { icon: XCircle, value: `${totalIncorrect}`, label: 'Incorrect', color: 'text-setu-error', bg: 'bg-setu-error/10' },
-    { icon: Clock, value: `${studyTimeHours}h`, label: 'Study Time', color: 'text-setu-saffron', bg: 'bg-setu-saffron/10' },
-    { icon: AlertTriangle, value: `${weakChapters}`, label: 'Weak Chapters', color: 'text-setu-warning', bg: 'bg-setu-warning/10' },
+    { icon: CheckCircle2, value: `${totalCorrect}`, label: 'Correct', color: 'text-prepentrance-success', bg: 'bg-prepentrance-success/10' },
+    { icon: XCircle, value: `${totalIncorrect}`, label: 'Incorrect', color: 'text-prepentrance-error', bg: 'bg-prepentrance-error/10' },
+    { icon: Clock, value: `${studyTimeHours}h`, label: 'Study Time', color: 'text-prepentrance-saffron', bg: 'bg-prepentrance-saffron/10' },
+    { icon: AlertTriangle, value: `${weakChapters}`, label: 'Weak Chapters', color: 'text-prepentrance-warning', bg: 'bg-prepentrance-warning/10' },
   ];
 
   return (

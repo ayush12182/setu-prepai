@@ -74,10 +74,10 @@ const ExamSelectionPage: React.FC = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-[hsl(var(--setu-navy-light))] flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-[hsl(var(--prepentrance-navy-light))] flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-xl">S</span>
             </div>
-            <h1 className="text-3xl font-bold text-foreground tracking-wide">SETU</h1>
+            <h1 className="text-3xl font-bold text-foreground tracking-wide">PrepEntrance</h1>
           </div>
           <h2 className="text-xl font-semibold text-foreground mb-2">
             Choose Your Preparation Path

@@ -42,7 +42,7 @@ export default function AssessmentFlowPage() {
     if (profile?.full_name) setName(profile.full_name);
     
     // Rehydrate local storage answers if available
-    const stashed = localStorage.getItem(`setu_assess_${sessionId}`);
+    const stashed = localStorage.getItem(`prepentrance_assess_${sessionId}`);
     if (stashed) {
       try {
          const parsed = JSON.parse(stashed);
@@ -93,7 +93,7 @@ export default function AssessmentFlowPage() {
   useEffect(() => {
     if (step !== 'in_progress') return;
     const saveInterval = setInterval(() => {
-      localStorage.setItem(`setu_assess_${sessionId}`, JSON.stringify({ currentIdx, timeLeft }));
+      localStorage.setItem(`prepentrance_assess_${sessionId}`, JSON.stringify({ currentIdx, timeLeft }));
       setLastSyncIndicator(true);
       setTimeout(() => setLastSyncIndicator(false), 2000);
     }, 30000); // 30 seconds
@@ -162,7 +162,7 @@ export default function AssessmentFlowPage() {
     }
     
     setStep('completed');
-    localStorage.removeItem(`setu_assess_${sessionId}`); // Clear stash on submit
+    localStorage.removeItem(`prepentrance_assess_${sessionId}`); // Clear stash on submit
     setLoading(false);
   };
 
@@ -181,7 +181,7 @@ export default function AssessmentFlowPage() {
           
           <div className="bg-card border border-border w-full max-w-lg rounded-3xl p-10 shadow-2xl relative z-10">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-display font-bold">SETU Assessment</h1>
+              <h1 className="text-3xl font-display font-bold">PrepEntrance Assessment</h1>
               <p className="text-muted-foreground mt-2">{sessionData.exam_type} • Class {sessionData.class}</p>
             </div>
             

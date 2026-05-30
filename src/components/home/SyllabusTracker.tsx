@@ -34,7 +34,7 @@ export const SyllabusTracker: React.FC = () => {
         <h2 className="text-xl font-semibold text-foreground">Syllabus Tracker</h2>
         <button 
           onClick={() => navigate('/learn')}
-          className="text-sm text-accent hover:text-setu-saffron-dark font-medium transition-colors"
+          className="text-sm text-accent hover:text-prepentrance-saffron-dark font-medium transition-colors"
         >
           View All
         </button>

@@ -184,7 +184,7 @@ const ProfilePage: React.FC = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(var(--setu-navy))] via-[hsl(var(--setu-navy-light))] to-[hsl(var(--accent)/0.8)] p-8"
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(var(--prepentrance-navy))] via-[hsl(var(--prepentrance-navy-light))] to-[hsl(var(--accent)/0.8)] p-8"
         >
           {/* Decorative background */}
           <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
@@ -422,7 +422,7 @@ const ProfilePage: React.FC = () => {
           className="rounded-xl bg-accent/5 border border-accent/20 p-5"
         >
           <p className="font-semibold text-foreground mb-1 flex items-center gap-2">
-            <span className="text-lg">💡</span> SETU Mentor's Advice
+            <span className="text-lg">💡</span> PrepEntrance Mentor's Advice
           </p>
           <p className="text-muted-foreground text-sm leading-relaxed">
             Beta, apna profile complete rakho. Isse hum tumhare liye better personalized

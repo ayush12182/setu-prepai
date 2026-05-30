@@ -1,5 +1,5 @@
 -- ============================================================
--- SETU UNIFIED B2B/B2C SCHEMA
+-- PrepEntrance UNIFIED B2B/B2C SCHEMA
 -- Adds: organizations, batches, user_type, tests, assigned_practice
 -- All attempts still go into user_mcq_attempts (shared backend)
 -- ============================================================

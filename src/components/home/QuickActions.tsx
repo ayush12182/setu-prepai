@@ -38,8 +38,8 @@ export const QuickActions: React.FC = () => {
       { icon: PenTool, title: 'Practice', description: 'Chapter-wise MCQs', path: '/practice', gradient: 'from-emerald-500 to-teal-500', emoji: '✍️' },
       { icon: ClipboardCheck, title: 'Test', description: 'Test your understanding', path: '/test', gradient: 'from-violet-500 to-purple-500', emoji: '📋' },
       { icon: RotateCcw, title: 'Revision', description: 'Quick notes & flashcards', path: '/revision', gradient: 'from-amber-500 to-orange-500', emoji: '🔄' },
-      { icon: Video, title: 'Lecture SETU', description: 'Video → structured notes', path: '/lecture-setu', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' },
-      { icon: MessageCircle, title: 'Ask Mentor', description: 'Any doubt, any time', path: '/ask-setu', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
+      { icon: Video, title: 'Lecture PrepEntrance', description: 'Video → structured notes', path: '/lecture-prepentrance', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' },
+      { icon: MessageCircle, title: 'Ask Mentor', description: 'Any doubt, any time', path: '/ask-prepentrance', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
       { icon: BarChart3, title: 'Progress', description: 'Track your mastery', path: '/analytics', gradient: 'from-teal-500 to-cyan-500', emoji: '📊' },
     ]
     : [
@@ -47,11 +47,11 @@ export const QuickActions: React.FC = () => {
       { icon: PenTool, title: 'Practice', description: isNeet ? 'NCERT MCQs' : 'MCQs by difficulty', path: '/practice', gradient: 'from-emerald-500 to-teal-500', emoji: '✍️' },
       { icon: ClipboardCheck, title: 'Test', description: isNeet ? 'Biology-heavy tests' : 'Chapter & PYQ tests', path: '/test', gradient: 'from-violet-500 to-purple-500', emoji: '📋' },
       { icon: RotateCcw, title: 'Revision', description: isNeet ? 'NCERT flashcards' : 'Formula sheets', path: '/revision', gradient: 'from-amber-500 to-orange-500', emoji: '🔄' },
-      ...(!isB2BStudent ? [{ icon: Video, title: 'Lecture SETU', description: 'Video → structured notes', path: '/lecture-setu', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' }] as ActionItem[] : []),
-      { icon: MessageCircle, title: isNeet ? 'Ask NEET Mentor' : 'Ask SETU Mentor', description: 'Doubts & strategy', path: '/ask-setu', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
+      ...(!isB2BStudent ? [{ icon: Video, title: 'Lecture PrepEntrance', description: 'Video → structured notes', path: '/lecture-prepentrance', gradient: 'from-rose-500 to-pink-500', emoji: '🎬', badge: 'New' }] as ActionItem[] : []),
+      { icon: MessageCircle, title: isNeet ? 'Ask NEET Mentor' : 'Ask PrepEntrance Mentor', description: 'Doubts & strategy', path: '/ask-prepentrance', gradient: 'from-primary to-[hsl(213_28%_25%)]', emoji: '💬' },
       { icon: BarChart3, title: 'Analytics', description: 'Accuracy & trends', path: '/analytics', gradient: 'from-teal-500 to-cyan-500', emoji: '📊' },
-      ...(!isB2BStudent ? [{ icon: Users, title: 'SETU Circles', description: 'Live study rooms', path: '/circles', gradient: 'from-amber-500 via-rose-500 to-violet-500', emoji: '🔥', badge: 'Live' }] as ActionItem[] : []),
-    ].filter(a => !isB2BStudent || !['/lecture-setu', '/circles', '/ai-teachers'].includes(a.path));
+      ...(!isB2BStudent ? [{ icon: Users, title: 'PrepEntrance Circles', description: 'Live study rooms', path: '/circles', gradient: 'from-amber-500 via-rose-500 to-violet-500', emoji: '🔥', badge: 'Live' }] as ActionItem[] : []),
+    ].filter(a => !isB2BStudent || !['/lecture-prepentrance', '/circles', '/ai-teachers'].includes(a.path));
 
   return (
     <div className="w-full mx-auto">

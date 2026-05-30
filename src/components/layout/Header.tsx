@@ -41,7 +41,7 @@ const examLabels: Record<ExamMode, { label: string; emoji: string }> = {
   cuet: { label: 'CUET', emoji: '🎯' },
 };
 
-export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) => {
+export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'PrepEntrance' }) => {
   const { language, setLanguage } = useLanguage();
   const { user, profile, signOut, updateProfile } = useAuth();
   const { examMode, setExamMode, isLocked } = useExamMode();
@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'SETU' }) =
           </Button>
 
           <Link to="/dashboard" className="flex items-center">
-            <img src="/setu-logo.png" alt="SETU" className="h-12 w-auto rounded-lg shadow-sm hover:opacity-80 transition-opacity" />
+            <img src="/prepentrance-logo.png" alt="PrepEntrance" className="h-12 w-auto rounded-lg shadow-sm hover:opacity-80 transition-opacity" />
           </Link>
         </div>
 

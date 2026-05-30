@@ -53,7 +53,7 @@ const SettingsPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <CardTitle className="text-lg">Appearance</CardTitle>
-                                    <CardDescription className="text-xs">Customize the look and feel of SETU.</CardDescription>
+                                    <CardDescription className="text-xs">Customize the look and feel of PrepEntrance.</CardDescription>
                                 </div>
                             </div>
                         </CardHeader>
@@ -182,7 +182,7 @@ const SettingsPage: React.FC = () => {
                         <Heart className="w-5 h-5 text-rose-500" />
                     </div>
                     <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                        Your preferences help SETU Mentor personalize your learning journey to perfection.
+                        Your preferences help PrepEntrance Mentor personalize your learning journey to perfection.
                     </p>
                 </motion.div>
             </div>
