@@ -78,64 +78,13 @@ const queryClient = new QueryClient();
 // ─── Route Guards ─────────────────────────────────────────────
 const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS === 'true';
 
-/** Only teachers/admins can access the Teacher Portal (/b2b) */
-const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
-  if (DEV_BYPASS) return <>{children}</>;
-  const { profile, loading } = useAuth();
-  if (loading) return null;
-  const type = profile?.user_type;
-  if (!type) return <Navigate to="/auth" replace />;
-
-  // Students are directed to their hub
-  if (type === 'student') return <Navigate to="/student-hub" replace />;
-
-  return <>{children}</>;
-};
-
-/** Students go to /student-hub — but MUST have joined a batch first */
+/** Direct B2C Student Hub Route Access Guard */
 const StudentHubRoute = ({ children }: { children: React.ReactNode }) => {
-  // DEV BYPASS: skip batch check entirely
-  if (DEV_BYPASS) return <>{children}</>;
-
   const { profile, loading } = useAuth();
-  const [hasBatch, setHasBatch] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (!profile || profile.user_type !== 'student') return;
-    // Check if this student has an entry in student_batch_map
-    import('@/integrations/supabase/client').then(({ supabase }) => {
-      supabase
-        .from('student_batch_map' as any)
-        .select('id', { count: 'exact', head: true })
-        .eq('student_id', (profile as any).user_id ?? profile.id)
-        .then(({ count }) => setHasBatch((count ?? 0) > 0));
-    });
-  }, [profile]);
 
   if (loading) return null;
-  const type = profile?.user_type;
-  if (!type) return <Navigate to="/auth" replace />;
+  if (!profile) return <Navigate to="/auth" replace />;
 
-  // Teachers and Admins go to the B2B portal
-  if (type === 'teacher' || type === 'admin' || type === 'b2b_institution') {
-    return <Navigate to="/b2b" replace />;
-  }
-
-  // Allow all students (both individual and coaching) into the student hub
-  return <>{children}</>;
-};
-
-
-/**
- * Redirects users who hit legacy B2C dashboard routes.
- * Teachers → /b2b  |  Students → /platform-updated  |  No auth → /auth
- */
-const B2CGateRoute = ({ children }: { children: React.ReactNode }) => {
-  const { profile, loading } = useAuth();
-  if (loading) return null;
-  if (!profile?.user_type) return <Navigate to="/auth" replace />;
-  if (profile.user_type === 'teacher' || profile.user_type === 'admin' || profile.user_type === 'b2b_institution') return <Navigate to="/b2b" replace />;
-  if (profile.user_type === 'student') return <Navigate to="/platform-updated" replace />;
   return <>{children}</>;
 };
 
@@ -154,8 +103,8 @@ const App = () => (
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/auth" element={<AuthPage />} />
                     <Route path="/select-exam" element={<ExamSelectionPage />} />
-                    <Route path="/dashboard" element={<B2CGateRoute><Index /></B2CGateRoute>} />
-                    <Route path="/platform-updated" element={<PlatformUpdatedPage />} />
+                    <Route path="/dashboard" element={<Navigate to="/student-hub" replace />} />
+                    <Route path="/platform-updated" element={<Navigate to="/student-hub" replace />} />
                     <Route path="/learn" element={<PreparationPage />} />
                     <Route path="/preparation" element={<PreparationPage />} />
                     <Route path="/tutorial-sessions" element={<TutorialSessionsPage />} />
@@ -169,7 +118,7 @@ const App = () => (
                     <Route path="/revision/:subject/:topic" element={<RevisionTopicPage />} />
                     <Route path="/lecture-prepentrance" element={<LecturePrepEntrance />} />
                     <Route path="/ask-prepentrance" element={<AskPrepEntrancePage />} />
-                    <Route path="/my-batch" element={<MyBatchPage />} />
+                    <Route path="/my-batch" element={<Navigate to="/student-hub" replace />} />
                     <Route path="/analytics" element={<AnalyticsPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/settings" element={<SettingsPage />} />
@@ -177,31 +126,21 @@ const App = () => (
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/circles" element={<PrepEntranceCirclesPage />} />
                     <Route path="/circles/:roomId" element={<CircleFocusRoomPage />} />
-                    <Route path="/batch-commune" element={<BatchCommunePage />} />
+                    <Route path="/batch-commune" element={<Navigate to="/student-hub" replace />} />
                     <Route path="/foundation-assessment" element={<FoundationAssessmentPage />} />
                     <Route path="/diagnostic-test" element={<FoundationAssessmentPage />} /> {/* Legacy fallback */}
-                    {/* B2B Assessment Taker - accessible without auth (students use share link) */}
-                    <Route path="/assess/:sessionId" element={<B2BAssessmentTakerPage />} />
+                    {/* B2B Assessment Taker - redirect since we are pure B2C */}
+                    <Route path="/assess/:sessionId" element={<Navigate to="/student-hub" replace />} />
                     <Route path="/learning-profile" element={<LearningProfilePage />} />
                     <Route path="/concept-graph" element={<ConceptGraphPage />} />
                     <Route path="/learning-roadmap" element={<LearningRoadmapPage />} />
-                    <Route path="/teacher-dashboard" element={<Navigate to="/b2b" replace />} />
+                    <Route path="/teacher-dashboard" element={<Navigate to="/student-hub" replace />} />
                     
-                    {/* B2B Dashboard Routes — Teacher Portal (teachers only) */}
-                    <Route path="/b2b" element={<TeacherRoute><Outlet /></TeacherRoute>}>
-                      <Route index element={<TeacherRoute><Overview /></TeacherRoute>} />
-                      <Route path="batches" element={<TeacherRoute><B2BBatches /></TeacherRoute>} />
-                      <Route path="materials" element={<TeacherRoute><B2BMaterials /></TeacherRoute>} />
-                      <Route path="students" element={<TeacherRoute><B2BStudents /></TeacherRoute>} />
-                      <Route path="tests" element={<TeacherRoute><B2BTests /></TeacherRoute>} />
-                      <Route path="monitor/:sessionId" element={<TeacherRoute><B2BLiveMonitor /></TeacherRoute>} />
-                      <Route path="analytics" element={<TeacherRoute><B2BAnalytics /></TeacherRoute>} />
-                      <Route path="invite" element={<TeacherRoute><B2BInviteStudents /></TeacherRoute>} />
-                      <Route path="settings" element={<TeacherRoute><B2BSettings /></TeacherRoute>} />
-                    </Route>
+                    {/* B2B Dashboard Routes — Redirect to Student Hub */}
+                    <Route path="/b2b" element={<Navigate to="/student-hub" replace />} />
                     
                     {/* Student Join Route */}
-                    <Route path="/join/:inviteCode" element={<JoinBatchPage />} />
+                    <Route path="/join/:inviteCode" element={<Navigate to="/student-hub" replace />} />
                     
                     {/* Admin Routes */}
                     <Route path="/admin/qc" element={<QuestionQCPanel />} />
@@ -212,9 +151,9 @@ const App = () => (
                     <Route path="/practice/adaptive" element={<AdaptivePracticePage />} />
 
                     {/* Teacher analytics */}
-                    <Route path="/teacher/student-analytics" element={<StudentAnalyticsPage />} />
+                    <Route path="/teacher/student-analytics" element={<Navigate to="/student-hub" replace />} />
                     
-                    {/* Student Hub — B2B students only */}
+                    {/* Student Hub */}
                     <Route path="/student-hub" element={<StudentHubRoute><StudentHubPage /></StudentHubRoute>} />
                     {/* Material Viewer */}
                     <Route path="/materials/:id" element={<MaterialViewerPage />} />

@@ -15,9 +15,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
         serif: ['Source Serif 4', 'Georgia', 'serif'],
-        display: ['Inter', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         // Heading sizes with proper line-height

@@ -2,9 +2,11 @@ import React from 'react';
 import LandingNav from '@/components/landing/LandingNav';
 import HeroSection from '@/components/landing/HeroSection';
 import CoachingMarquee from '@/components/landing/CoachingMarquee';
-import AboutSection from '@/components/landing/AboutSection';
-import ExamTracksSection from '@/components/landing/ExamTracksSection';
+import CourseDiscoverySection from '@/components/landing/CourseDiscoverySection';
+import PrepJourneySection from '@/components/landing/PrepJourneySection';
+import AIAssistantSection from '@/components/landing/AIAssistantSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
+import AboutSection from '@/components/landing/AboutSection';
 import ResultsSection from '@/components/landing/ResultsSection';
 import PricingSection from '@/components/landing/PricingSection';
 import TestimonialsSection from '@/components/landing/TestimonialsSection';
@@ -18,7 +20,9 @@ const LandingPage: React.FC = () => {
       <LandingNav />
       <HeroSection />
       <CoachingMarquee />
-      <ExamTracksSection />
+      <CourseDiscoverySection />
+      <PrepJourneySection />
+      <AIAssistantSection />
       <FeaturesSection />
       <AboutSection />
       <ResultsSection />

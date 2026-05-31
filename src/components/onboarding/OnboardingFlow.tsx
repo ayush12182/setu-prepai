@@ -1,11 +1,10 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowRight, ArrowLeft, Check, Loader2, Copy, Share2,
-  Users, GraduationCap, BookOpen, Sparkles, Rocket,
-  Brain, Zap, ShieldCheck, XCircle, CheckCircle2,
-  Building2, ChevronRight, Languages, Award
+  ArrowRight, ArrowLeft, Check, Loader2,
+  Users, BookOpen, Sparkles, Rocket,
+  Brain, Zap, CheckCircle2, Award
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,21 +12,6 @@ import { useExamMode } from '@/contexts/ExamModeContext';
 import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type Track = 'student' | 'teacher';
-type CodeState = 'idle' | 'checking' | 'valid' | 'invalid';
-
-interface BatchInfo {
-  batch_id: string;
-  batch_name: string;
-  teacher_name: string;
-  exam_type: string;
-  stream: string;
-  subject: string;
-  total_students: number;
-}
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
@@ -41,23 +25,6 @@ const SENIOR_CLASSES = [
   { value: '11', label: 'Class 11', tag: 'Foundation Prep' },
   { value: '12', label: 'Class 12', tag: 'Board + Entrance Prep' },
   { value: 'dropper', label: 'Dropper', tag: 'Full Revision Focus' },
-];
-
-const TEACHER_SUBJECTS = [
-  { value: 'physics',   label: 'Physics',        emoji: '⚡' },
-  { value: 'chemistry', label: 'Chemistry',      emoji: '🧪' },
-  { value: 'maths',     label: 'Mathematics',    emoji: '📐' },
-  { value: 'biology',   label: 'Biology',        emoji: '🔬' },
-  { value: 'english',   label: 'English',        emoji: '📝' },
-  { value: 'commerce',  label: 'Commerce',       emoji: '📊' },
-];
-
-const TEACHER_GOALS = [
-  { value: 'test_analysis',  label: 'Assign & analyse tests',      emoji: '📋' },
-  { value: 'performance',    label: 'Track student performance',   emoji: '📈' },
-  { value: 'materials',      label: 'Share study materials',       emoji: '📚' },
-  { value: 'batches',        label: 'Manage multiple batches',     emoji: '👥' },
-  { value: 'all',            label: 'All of the above',            emoji: '🚀' },
 ];
 
 // ─── Slide animation variants ─────────────────────────────────────────────────
@@ -158,23 +125,18 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
   const { setExamMode } = useExamMode();
   const { setLanguage } = useLanguage();
 
-  // Track & step (1 to 7 for students)
-  const [track, setTrack] = useState<Track | null>(null);
+  // 1 to 7 for students
   const [step, setStep] = useState(1);
   const [dir, setDir] = useState(1);
 
   // Shared loading
   const [saving, setSaving] = useState(false);
 
-  // Student rebrand-onboarding state
-  const [stream, setStream] = useState(''); // Screen 2: Select Exam ('jee' | 'neet' | 'cuet')
-  const [studentClass, setStudentClass] = useState(''); // Screen 3: Select Class ('11' | '12' | 'dropper')
-  const [targetYear, setTargetYear] = useState(''); // Screen 4: Target Year ('2027' | '2028')
+  // Student rebrand onboarding state
+  const [stream, setStream] = useState(''); // Screen 2: Select Exam
+  const [studentClass, setStudentClass] = useState(''); // Screen 3: Select Class
+  const [targetYear, setTargetYear] = useState(''); // Screen 4: Target Year
   const [prefLanguage, setPrefLanguage] = useState<LanguageMode>('english'); // Screen 5: Language Preference
-  const [joinCode, setJoinCode] = useState(''); // Join via batch code trigger
-  const [isCoaching, setIsCoaching] = useState(false);
-  const [codeState, setCodeState] = useState<CodeState>('idle');
-  const [batchInfo, setBatchInfo] = useState<BatchInfo | null>(null);
 
   // Screen 6: Diagnostic Assessment State
   const [currentDiagIdx, setCurrentDiagIdx] = useState(0);
@@ -257,54 +219,9 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
     }
   }, [stream]);
 
-  // Teacher state
-  const [institutionName, setInstitutionName] = useState('');
-  const [teacherExam, setTeacherExam] = useState('');
-  const [teacherSubjects, setTeacherSubjects] = useState<string[]>([]);
-  const [teacherGoals, setTeacherGoals] = useState<string[]>([]);
-  const [batchName, setBatchName] = useState('');
-  const [generatedCode, setGeneratedCode] = useState('');
-  const [copied, setCopied] = useState(false);
-
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
   const go = (newStep: number, direction = 1) => {
     setDir(direction);
     setStep(newStep);
-  };
-
-  // ─── Join code validation ─────────────────────────────────────────────────
-
-  const handleCodeChange = async (val: string) => {
-    const clean = val.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    setJoinCode(clean);
-    
-    if (clean.length < 6) {
-      setCodeState('idle');
-      return;
-    }
-    
-    setCodeState('checking');
-    try {
-      const { data, error } = await supabase.functions.invoke('validate-join-code', {
-        body: { join_code: clean },
-      });
-
-      if (!error && data && data.valid) {
-        setCodeState('valid');
-        setBatchInfo(data);
-        // Auto-assign stream/class based on batch code
-        const detectedStream = data.stream || 'jee';
-        setStream(detectedStream);
-        setStudentClass(data.student_class || '11');
-        setTargetYear(data.target_year ? String(data.target_year) : '2028');
-        toast.success("Valid Batch Code!");
-      } else {
-        setCodeState('invalid');
-      }
-    } catch {
-      setCodeState('invalid');
-    }
   };
 
   // ─── Student complete profile upsert ─────────────────────────────────────────
@@ -314,7 +231,6 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
     setSaving(true);
 
     try {
-      // 1. Identify levels based on diagnostic MCQ scores
       const pAns = diagAnswers[0];
       const cAns = diagAnswers[1];
       const mAns = diagAnswers[2];
@@ -325,7 +241,7 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
 
       const overallLvl = (pLvl === 'Advanced' && cLvl === 'Advanced') ? 'Advanced' : 'Intermediate';
 
-      let examGoal = 'JEE';
+      let examGoal = 'JEE Main';
       let dbExam = 'JEE';
       if (stream === 'neet') {
         examGoal = 'NEET';
@@ -338,7 +254,7 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
       const cls = studentClass || '11';
       const targetYearInt = parseInt(targetYear || '2028');
 
-      // Sync language preference in state/context
+      // Sync language preference in context
       setLanguage(prefLanguage);
       localStorage.setItem('preferredLanguage', prefLanguage);
 
@@ -377,13 +293,6 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
         last_active: new Date().toISOString(),
       });
 
-      // Join batch if applicable
-      if (isCoaching && batchInfo) {
-        await supabase
-          .from('student_batch_map' as any)
-          .insert({ student_id: user.id, batch_id: batchInfo.batch_id });
-      }
-
       await refreshProfile();
       toast.success("Welcome aboard! Preparing classroom...");
       
@@ -398,55 +307,11 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
     }
   };
 
-  // ─── Teacher — create batch ────────────────────────────────────────────────
-
-  const createTeacherBatch = async () => {
-    if (!user) return;
-    setSaving(true);
-    try {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let code = '';
-      for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-
-      const { data, error } = await supabase
-        .from('batches' as any)
-        .insert({
-          name: batchName || 'New Batch',
-          mentor_id: user.id,
-          join_code: code,
-          target_exam: teacherExam || 'JEE',
-          description: `PrepEntrance Class Batch for ${teacherExam}`,
-        })
-        .select('id')
-        .single();
-
-      if (error) throw error;
-
-      setGeneratedCode(code);
-      await updateProfile({ user_type: 'teacher' });
-      await refreshProfile();
-      go(4); // navigate to display code
-    } catch (e: any) {
-      toast.error(e.message || 'Could not create batch.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const copyCode = () => {
-    navigator.clipboard.writeText(generatedCode);
-    setCopied(true);
-    toast.success("Code copied!");
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   // ─── STEP RENDER LOGIC ──────────────────────────────────────────────────────
 
   const renderStep = () => {
     // ════════════════ SCREEN 1: WELCOME SCREEN ════════════════
-    if (step === 1 && !track) {
+    if (step === 1) {
       return (
         <div className="space-y-6 text-center">
           <Logo size="lg" />
@@ -461,23 +326,16 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
           </div>
 
           <div className="space-y-3 pt-4">
-            <PrimaryBtn onClick={() => { setTrack('student'); go(2); }}>
+            <PrimaryBtn onClick={() => go(2)}>
               Start Setup <ArrowRight className="w-5 h-5" />
             </PrimaryBtn>
-            
-            <button 
-              onClick={() => { setTrack('teacher'); go(1); }}
-              className="text-white/40 hover:text-white/70 text-xs font-semibold tracking-wider uppercase py-2 transition-colors"
-            >
-              Are you a Teacher? Create Batch ➔
-            </button>
           </div>
         </div>
       );
     }
 
     // ════════════════ SCREEN 2: SELECT EXAM ════════════════
-    if (step === 2 && track === 'student') {
+    if (step === 2) {
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
@@ -521,21 +379,8 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
             })}
           </div>
 
-          <div className="pt-2">
-            {/* Batch Code Entry Bridge */}
-            <div className="bg-white/[0.01] border border-white/[0.04] rounded-2xl p-4 flex items-center justify-between">
-              <span className="text-xs text-white/40 font-medium">Joined a coaching batch?</span>
-              <button 
-                onClick={() => { setIsCoaching(true); go(99); }}
-                className="text-xs text-amber-400 font-extrabold hover:underline"
-              >
-                Enter Batch Code ➔
-              </button>
-            </div>
-          </div>
-
           <div className="flex gap-3">
-            <GhostBtn onClick={() => { setTrack(null); go(1, -1); }}>
+            <GhostBtn onClick={() => go(1, -1)}>
               <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
             </GhostBtn>
             <PrimaryBtn disabled={!stream} onClick={() => go(3)}>
@@ -546,69 +391,8 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
       );
     }
 
-    // ════════════════ BATCH CODE BRIDGE SCREEN ════════════════
-    if (step === 99 && track === 'student') {
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Enter your Batch Code
-            </h1>
-            <p className="text-white/40 text-sm">Enter the 6-character code provided by your coaching center.</p>
-          </div>
-
-          <div className={cn(
-            'rounded-2xl border p-5 space-y-4 transition-all duration-300',
-            codeState === 'valid'    ? 'border-emerald-500/40 bg-emerald-500/[0.04] shadow-[0_0_24px_rgba(16,185,129,0.15)]' :
-            codeState === 'invalid'  ? 'border-red-500/30 bg-red-500/[0.03]' :
-            codeState === 'checking' ? 'border-amber-400/30 bg-amber-400/[0.03]' :
-            'border-white/[0.08]'
-          )}>
-            <div className="relative">
-              <input
-                autoFocus
-                type="text"
-                value={joinCode}
-                maxLength={8}
-                onChange={e => handleCodeChange(e.target.value)}
-                placeholder="K8ZX2W"
-                className="w-full h-16 bg-white/[0.04] border border-white/[0.1] rounded-xl text-center text-2xl text-white font-mono tracking-[0.5em] placeholder:text-white/10 focus:outline-none focus:border-amber-400/40 transition-all pr-14"
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                {codeState === 'checking' && <Loader2 className="w-5 h-5 animate-spin text-amber-400" />}
-                {codeState === 'valid'    && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
-                {codeState === 'invalid'  && <XCircle className="w-5 h-5 text-red-400" />}
-              </div>
-            </div>
-
-            {codeState === 'valid' && batchInfo && (
-              <div className="bg-emerald-500/[0.08] border border-emerald-500/20 rounded-xl p-4 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
-                  <Users className="w-5 h-5 text-emerald-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-emerald-400 text-[10px] font-black uppercase tracking-wider">Batch Found</p>
-                  <p className="text-white font-bold truncate text-sm">{batchInfo.batch_name}</p>
-                  <p className="text-white/40 text-[11px]">Mentor: {batchInfo.teacher_name}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="flex gap-3">
-            <GhostBtn onClick={() => { setIsCoaching(false); go(2, -1); }}>
-              Cancel
-            </GhostBtn>
-            <PrimaryBtn disabled={codeState !== 'valid'} onClick={() => go(7)}>
-              Continue to Cohort <ArrowRight className="w-4 h-4" />
-            </PrimaryBtn>
-          </div>
-        </div>
-      );
-    }
-
     // ════════════════ SCREEN 3: SELECT CLASS ════════════════
-    if (step === 3 && track === 'student') {
+    if (step === 3) {
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
@@ -628,7 +412,6 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
                   whileTap={{ scale: 0.995 }}
                   onClick={() => {
                     setStudentClass(c.value);
-                    // Screen 4 auto-suggestion logic based on class:
                     if (c.value === '11') setTargetYear('2028');
                     else setTargetYear('2027');
                   }}
@@ -667,7 +450,7 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
     }
 
     // ════════════════ SCREEN 4: TARGET YEAR ════════════════
-    if (step === 4 && track === 'student') {
+    if (step === 4) {
       const suggestedYear = studentClass === '11' ? '2028' : '2027';
       const optionalYears = ['2027', '2028', '2029'].filter(y => y !== suggestedYear);
       const displayYears = [suggestedYear, ...optionalYears];
@@ -680,7 +463,7 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
               Select your Target Year
             </h1>
             <p className="text-white/40 text-sm">
-              Suggested: <span className="text-amber-400 font-bold">{suggestedYear}</span> (based on your Class {studentClass})
+              Suggested: <span className="text-amber-400 font-bold">{suggestedYear}</span> (based on Class {studentClass})
             </p>
           </div>
 
@@ -736,7 +519,7 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
     }
 
     // ════════════════ SCREEN 5: LANGUAGE PREFERENCE ════════════════
-    if (step === 5 && track === 'student') {
+    if (step === 5) {
       const languages: { key: LanguageMode; label: string; sub: string }[] = [
         { key: 'english', label: 'English', sub: 'Entire theory & notes in pure English' },
         { key: 'hinglish', label: 'Hinglish', sub: 'Concepts explained in interactive Hindi + English' },
@@ -796,7 +579,7 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
     }
 
     // ════════════════ SCREEN 6: DIAGNOSTIC ASSESSMENT ════════════════
-    if (step === 6 && track === 'student') {
+    if (step === 6) {
       const activeQ = diagQuestions[currentDiagIdx];
       const selectedOption = diagAnswers[currentDiagIdx];
 
@@ -808,7 +591,6 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
         if (currentDiagIdx < diagQuestions.length - 1) {
           setCurrentDiagIdx(prev => prev + 1);
         } else {
-          // Finished Diagnostic test! Go to Cohort assignment
           go(7);
         }
       };
@@ -825,7 +607,6 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
             </p>
           </div>
 
-          {/* Question card */}
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
               <span className="text-[10px] bg-amber-400/10 text-amber-400 border border-amber-400/20 font-black uppercase px-2 py-0.5 rounded tracking-widest">
@@ -886,7 +667,7 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
     }
 
     // ════════════════ SCREEN 7: COHORT ASSIGNMENT ════════════════
-    if (step === 7 && track === 'student') {
+    if (step === 7) {
       const examName = stream.toUpperCase();
       const className = studentClass === 'dropper' ? 'Dropper' : `Class ${studentClass}`;
       const cohortName = `${examName} ${targetYear} ${className}`;
@@ -909,7 +690,6 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
             </p>
           </div>
 
-          {/* Cohort Stats summary */}
           <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-5 text-left space-y-4 max-w-sm mx-auto">
             <h3 className="text-xs font-bold text-white/55 uppercase tracking-wider">Cohort Enrollment Details</h3>
             
@@ -941,188 +721,6 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
         </div>
       );
     }
-
-    // ── TEACHER STEP 1: Set up portal ──────────────────────────────────────────
-    if (step === 1 && track === 'teacher') {
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Set up your portal
-            </h1>
-            <p className="text-white/40 text-sm">Tell us about your organization or coaching institute</p>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Organization/Coaching Name</label>
-              <input
-                autoFocus
-                type="text"
-                value={institutionName}
-                onChange={e => setInstitutionName(e.target.value)}
-                placeholder="Allen, Physics Wallah, Resonance etc."
-                className="w-full h-13 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 text-white text-sm focus:outline-none focus:border-amber-400/40"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Exam Category</label>
-              <div className="grid grid-cols-3 gap-2">
-                {['JEE', 'NEET', 'CUET'].map(e => {
-                  const selected = teacherExam === e;
-                  return (
-                    <button
-                      key={e}
-                      type="button"
-                      onClick={() => setTeacherExam(e)}
-                      className={cn(
-                        'h-12 rounded-xl border text-sm font-bold transition-all',
-                        selected ? 'border-amber-400 bg-amber-400/5 text-amber-400' : 'border-white/[0.08] hover:border-white/20 text-white/70'
-                      )}
-                    >
-                      {e}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <GhostBtn onClick={() => { setTrack(null); go(1, -1); }}>
-              Back
-            </GhostBtn>
-            <PrimaryBtn disabled={!institutionName || !teacherExam} onClick={() => go(2)}>
-              Continue <ArrowRight className="w-4 h-4" />
-            </PrimaryBtn>
-          </div>
-        </div>
-      );
-    }
-
-    // ── TEACHER STEP 2: Choose Subjects ─────────────────────────────────────────
-    if (step === 2 && track === 'teacher') {
-      const toggleSubject = (val: string) => {
-        setTeacherSubjects(prev =>
-          prev.includes(val) ? prev.filter(p => p !== val) : [...prev, val]
-        );
-      };
-
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Select Subjects
-            </h1>
-            <p className="text-white/40 text-sm">Which subjects do you teach in your batch?</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {TEACHER_SUBJECTS.map(s => {
-              const selected = teacherSubjects.includes(s.value);
-              return (
-                <button
-                  key={s.value}
-                  type="button"
-                  onClick={() => toggleSubject(s.value)}
-                  className={cn(
-                    'p-4 rounded-xl border text-left flex items-center justify-between transition-all',
-                    selected ? 'border-amber-400 bg-amber-400/5 text-amber-400 font-bold' : 'border-white/[0.08] text-white/70 hover:border-white/20'
-                  )}
-                >
-                  <span className="text-sm">{s.emoji} {s.label}</span>
-                  <div className={cn(
-                    'w-4 h-4 rounded border flex items-center justify-center shrink-0',
-                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
-                  )}>
-                    {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex gap-3">
-            <GhostBtn onClick={() => go(1, -1)}>
-              Back
-            </GhostBtn>
-            <PrimaryBtn disabled={teacherSubjects.length === 0} onClick={() => go(3)}>
-              Continue <ArrowRight className="w-4 h-4" />
-            </PrimaryBtn>
-          </div>
-        </div>
-      );
-    }
-
-    // ── TEACHER STEP 3: Create Batch ────────────────────────────────────────────
-    if (step === 3 && track === 'teacher') {
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Create your Classroom Batch
-            </h1>
-            <p className="text-white/40 text-sm">Students will use this batch to join your isolated classroom.</p>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Classroom Batch Name</label>
-            <input
-              autoFocus
-              type="text"
-              value={batchName}
-              onChange={e => setBatchName(e.target.value)}
-              placeholder="e.g. JEE 2026 Achiever Batch"
-              className="w-full h-13 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 text-white text-sm focus:outline-none focus:border-amber-400/40"
-            />
-          </div>
-
-          <div className="flex gap-3">
-            <GhostBtn onClick={() => go(2, -1)}>
-              Back
-            </GhostBtn>
-            <PrimaryBtn loading={saving} disabled={!batchName} onClick={createTeacherBatch}>
-              {saving ? 'Creating Batch...' : 'Generate Batch Code'}
-            </PrimaryBtn>
-          </div>
-        </div>
-      );
-    }
-
-    // ── TEACHER STEP 4: Display Code & Finish ──────────────────────────────────
-    if (step === 4 && track === 'teacher') {
-      return (
-        <div className="space-y-6 text-center">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-2">
-            <CheckCircle2 className="w-8 h-8 text-emerald-400" />
-          </div>
-
-          <div className="space-y-2">
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Classroom Batch is Live!
-            </h1>
-            <p className="text-white/40 text-sm">Share this unique batch code with your students so they can join.</p>
-          </div>
-
-          {/* Batch Code Display Box */}
-          <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-5 space-y-4 max-w-xs mx-auto">
-            <div className="text-3xl font-black text-amber-400 font-mono tracking-widest uppercase">
-              {generatedCode}
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <Button size="sm" onClick={copyCode} className="h-9 px-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white flex items-center gap-2">
-                <Copy className="w-3.5 h-3.5" /> {copied ? 'Copied!' : 'Copy Code'}
-              </Button>
-            </div>
-          </div>
-
-          <PrimaryBtn onClick={() => { window.location.href = '/b2b'; }}>
-            Launch Teacher Portal <ArrowRight className="w-4 h-4" />
-          </PrimaryBtn>
-        </div>
-      );
-    }
   };
 
   return (
@@ -1131,19 +729,15 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
       
       <div className="w-full max-w-[480px] relative z-10 space-y-6 py-10">
         <div className="flex items-center justify-between px-2">
-          {/* Only display dots for active steps */}
-          {track === 'student' && step > 1 && step <= 7 && (
+          {step > 1 && step <= 7 && (
             <StepDots total={6} current={step - 2} />
-          )}
-          {track === 'teacher' && step <= 4 && (
-            <StepDots total={4} current={step - 1} />
           )}
         </div>
 
         <Card>
           <AnimatePresence mode="wait" custom={dir}>
             <motion.div
-              key={`${track}-${step}`}
+              key={step}
               custom={dir}
               variants={slide}
               initial="enter"

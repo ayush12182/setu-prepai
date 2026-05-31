@@ -140,19 +140,8 @@ const AuthPage: React.FC = () => {
   const [showWelcome, setShowWelcome] = useState(false);
 
   const [onboardingData, setOnboardingData] = useState<OnboardingData>(() => {
-    const typeParam = searchParams.get('type');
-    const orgName = searchParams.get('org_name');
-    const orgId = searchParams.get('org_id');
-    const refParam = searchParams.get('ref') || searchParams.get('teacher_id');
-    
-    let resolvedUserType: 'student' | 'teacher' | undefined = undefined;
-    if (typeParam === 'student' || typeParam === 'coaching' || orgId || orgName) resolvedUserType = 'student';
-    else if (typeParam === 'teacher' || typeParam === 'institution') resolvedUserType = 'teacher';
-
     return {
-      userType: resolvedUserType,
-      institutionName: orgName || undefined,
-      referenceCode: refParam || undefined,
+      userType: 'student',
       stream: '',
       studentClass: '',
       examGoal: '',
@@ -161,9 +150,6 @@ const AuthPage: React.FC = () => {
 
   // Start at step 0 (who are you?) unless auto-detected as B2B from URL
   const getInitialStep = (): OnboardingStep => {
-    const typeParam = searchParams.get('type');
-    const orgName = searchParams.get('org_name');
-    if (typeParam === 'coaching' || orgName) return 1; // Already know they're coaching
     return 0;
   };
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(getInitialStep());
@@ -174,34 +160,14 @@ const AuthPage: React.FC = () => {
     if (user && !authLoading) {
       if (showOnboarding || showWelcome) return;
 
-      // Redirected here because student has no batch yet — go straight to join-code step
-      if (searchParams.get('require_batch') === '1' && profile?.user_type === 'student') {
-        setShowOnboarding(true);
-        setOnboardingStep(3);
-        return;
-      }
-
       if (profile) {
-        if (isMentor) {
-          navigate('/b2b');
+        if (profile.class) {
+          navigate('/student-hub');
           return;
-        }
-
-        if (profile.user_type === 'student') {
-          if (profile.class) {
-            navigate('/student-hub');
-            return;
-          } else {
-            console.log("Incomplete student profile, staying in onboarding.");
-            setShowOnboarding(true);
-            return;
-          }
-        }
-
-        if (!profile.class) {
-          setShowOnboarding(true);
         } else {
-          navigate('/dashboard');
+          console.log("Incomplete student profile, staying in onboarding.");
+          setShowOnboarding(true);
+          return;
         }
       }
     }
@@ -415,48 +381,11 @@ const AuthPage: React.FC = () => {
 
   const handleOnboardingComplete = async () => {
     setLoading(true);
-    console.log("Finalizing onboarding for user type:", onboardingData.userType);
+    console.log("Finalizing B2C student onboarding");
 
     try {
-      // 1. TEACHER PATH
-      if (onboardingData.userType === 'teacher') {
-        const examGoal = getExamGoalFromStream(onboardingData.stream as StreamType) || 'JEE Main';
-        const { data: { user: currentUser } } = await supabase.auth.getUser();
-        let orgId: string | null = null;
-
-        if (currentUser) {
-          const displayName = fullName || currentUser.email?.split('@')[0] || 'Teacher';
-          const institutionLabel = onboardingData.institutionName?.trim() || `${displayName.split(' ')[0]}'s Institute`;
-          const slug = institutionLabel.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').slice(0, 40) + '-' + Date.now();
-          
-          const { data: newOrg, error: orgErr } = await (supabase as any)
-            .from('organizations')
-            .insert({ name: institutionLabel, slug, created_by: currentUser.id })
-            .select('id')
-            .single();
-
-          if (!orgErr && newOrg) orgId = (newOrg as any).id;
-          else console.warn('Org insert error (non-fatal):', orgErr?.message);
-        }
-
-        await updateProfile({
-          target_exam: examGoal,
-          class: null,
-          user_type: 'teacher',
-          institution_name: onboardingData.institutionName?.trim() || null,
-          organization_id: orgId,
-        } as any);
-
-        await supabase.auth.updateUser({ data: { user_type: 'teacher', organization_id: orgId, target_exam: examGoal } });
-        toast.success('Teacher portal ready! Welcome to PrepEntrance 👨\u200d\uD83C\uDFEB');
-        navigate('/b2b');
-        return;
-      }
-
-      // 2. STUDENT PATH (Unified Coaching + Individual)
-      // If student joined via teacher batch code, use batch's exam config
-      const stream = (joinCodeResult?.stream || onboardingData.stream) as StreamType;
-      const examGoal = joinCodeResult?.exam_type || getExamGoalFromStream(onboardingData.stream as StreamType);
+      const stream = onboardingData.stream as StreamType;
+      const examGoal = getExamGoalFromStream(onboardingData.stream as StreamType);
       const studentClass = onboardingData.studentClass || '11';
       const studentLevel = getStudentLevel();
 
@@ -466,7 +395,7 @@ const AuthPage: React.FC = () => {
       else if (stream === 'cuet') setExamMode('cuet');
       else setExamMode('jee');
 
-      console.log("Updating student profile:", { examGoal, studentClass, studentLevel });
+      console.log("Updating B2C student profile:", { examGoal, studentClass, studentLevel });
 
       // Create/Update profile
       await updateProfile({
@@ -474,32 +403,7 @@ const AuthPage: React.FC = () => {
         class: studentClass,
         student_level: studentLevel,
         user_type: 'student',
-        institution_name: onboardingData.institutionName || null,
-        teacher_id: onboardingData.referenceCode || null, // Auto-assign if ref present
       });
-
-      // BATCH JOIN — validated code is REQUIRED; persist via edge function
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      const joinCode = (onboardingData.institutionName || '').trim().toUpperCase();
-
-      if (joinCode && currentUser) {
-        console.log("Joining batch with code:", joinCode);
-        const { data: joinData, error: joinErr } = await supabase.functions.invoke('validate-join-code', {
-          body: { join_code: joinCode, student_id: currentUser.id },
-        });
-
-        if (joinErr || joinData?.error) {
-          toast.error('Could not join batch. Please check your code and try again.');
-          setLoading(false);
-          return;
-        }
-
-        // Show welcome screen before navigating to student hub
-        setJoinCodeResult(joinData);
-        setShowWelcome(true);
-        setLoading(false);
-        return; // welcome screen handles final navigation
-      }
 
       // Final synchronization
       await refreshProfile();
@@ -535,77 +439,21 @@ const AuthPage: React.FC = () => {
   };
 
   const validateJoinCode = useCallback(async (code: string) => {
-    const trimmed = code.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (trimmed.length < 6) return;
-
-    setJoinCodeState('checking');
-    setJoinCodeResult(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('validate-join-code', {
-        body: { join_code: trimmed },
-      });
-
-      if (error || data?.error) {
-        setJoinCodeState('invalid');
-        setJoinCodeResult(null);
-      } else {
-        setJoinCodeState('valid');
-        setJoinCodeResult(data);
-
-        // ── AUTO-APPLY batch exam/stream to student profile ──────────────
-        // Maps batch target_exam/stream → onboardingData so student
-        // inherits teacher's config without manual selection.
-        const examToStream: Record<string, string> = {
-          'JEE': 'jee', 'JEE Main': 'jee', 'JEE Advanced': 'jee',
-          'NEET': 'neet',
-          'CUET': 'cuet',
-          'Commerce': 'commerce', 'CA Foundation': 'commerce',
-          'Foundation': 'foundation',
-        };
-        const detectedStream = data.stream ||
-          examToStream[data.exam_type] ||
-          'jee';
-
-        setOnboardingData(prev => ({
-          ...prev,
-          institutionName: trimmed,         // join code stored here for batch join
-          stream: detectedStream as StreamType,
-          examGoal: data.exam_type,
-        }));
-      }
-    } catch {
-      setJoinCodeState('invalid');
-    }
+    // Legacy stub
   }, []);
 
   const handleOnboardingNext = async () => {
     if (onboardingStep === 0) {
-      if (!onboardingData.userType) {
-        toast.error('Please select your role');
-        return;
-      }
       setOnboardingStep(1);
     } else if (onboardingStep === 1) {
       if (!onboardingData.stream) {
         toast.error('Please select your stream');
         return;
       }
-      if (onboardingData.userType === 'teacher') {
-        handleOnboardingComplete();
-      } else {
-        setOnboardingStep(2);
-      }
+      setOnboardingStep(2);
     } else if (onboardingStep === 2) {
       if (!onboardingData.studentClass) {
         toast.error('Please select your class');
-        return;
-      }
-      setOnboardingStep(3);
-    } else if (onboardingStep === 3) {
-      // STRICT: student MUST have a validated join code
-      if (onboardingData.userType === 'student' && joinCodeState !== 'valid') {
-        toast.error('Please enter a valid teacher code to continue.');
         return;
       }
       handleOnboardingComplete();

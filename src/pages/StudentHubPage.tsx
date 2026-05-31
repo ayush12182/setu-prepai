@@ -6,7 +6,7 @@ import {
   Play, BookOpen, PenTool, ClipboardCheck, MessageCircle, BarChart3,
   ChevronRight, Zap, Target, Flame, Users, CalendarDays, Eye, Sparkles,
   TrendingUp, AlertTriangle, Activity, Loader2, Clock, CheckCircle, ArrowRight,
-  TrendingDown, Info, Megaphone, Trophy, HelpCircle, GraduationCap, RefreshCw
+  TrendingDown, Info, Trophy, HelpCircle, GraduationCap, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useExamMode } from '@/contexts/ExamModeContext';
@@ -15,7 +15,6 @@ import { useStudentStats } from '@/hooks/useStudentStats';
 import { useBatchInfo } from '@/hooks/useBatchInfo';
 import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { AssignedContent } from '@/components/student/AssignedContent';
 import { toast } from 'sonner';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
@@ -500,10 +499,6 @@ export default function StudentHubPage() {
                   ))}
                 </div>
 
-                <div className="h-px bg-white/[0.06]" />
-
-                {/* Legacy assigned homework integration */}
-                <AssignedContent />
               </div>
 
               {/* 6. CONTINUE LEARNING */}
@@ -734,36 +729,6 @@ export default function StudentHubPage() {
                 </div>
               </div>
 
-              {/* 12. BATCH ANNOUNCEMENTS */}
-              <div className="rounded-3xl border border-white/[0.06] bg-card p-5 space-y-4">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Megaphone className="w-4 h-4 text-orange-400" /> Batch Announcements
-                </h3>
-
-                <div className="space-y-3">
-                  <div className="bg-white/[0.01] border border-white/[0.04] rounded-xl p-3.5 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-orange-400 font-bold uppercase">Class Teacher</span>
-                      <span className="text-[9px] text-white/30">May 29</span>
-                    </div>
-                    <p className="text-xs font-bold text-white">Laws of Motion DPP 1 solutions uploaded</p>
-                    <p className="text-[10px] text-white/40 leading-relaxed">
-                      Written solutions and explanation files are uploaded. Open Practice menu to view.
-                    </p>
-                  </div>
-
-                  <div className="bg-white/[0.01] border border-white/[0.04] rounded-xl p-3.5 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-indigo-400 font-bold uppercase">Administration</span>
-                      <span className="text-[9px] text-white/30">May 28</span>
-                    </div>
-                    <p className="text-xs font-bold text-white">Sunday Major Mock Test rescheduled</p>
-                    <p className="text-[10px] text-white/40 leading-relaxed">
-                      Please note: Sunday mock test will start at 10:00 AM instead of 9:00 AM due to maintenance.
-                    </p>
-                  </div>
-                </div>
-              </div>
 
               {/* 13. MENTOR ACCESS CARD (SECONDARY) */}
               <div 
