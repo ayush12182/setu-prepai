@@ -146,7 +146,7 @@ CREATE POLICY "batch members read batch resources"
   ON public.batch_resources FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM public.batch_members bm
+      SELECT 1 FROM public.student_batch_map bm
       WHERE bm.batch_id = public.batch_resources.batch_id
         AND bm.student_id = auth.uid()
     )

@@ -5,11 +5,12 @@ import {
   ArrowRight, ArrowLeft, Check, Loader2, Copy, Share2,
   Users, GraduationCap, BookOpen, Sparkles, Rocket,
   Brain, Zap, ShieldCheck, XCircle, CheckCircle2,
-  Building2, ChevronRight,
+  Building2, ChevronRight, Languages, Award
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -28,36 +29,19 @@ interface BatchInfo {
   total_students: number;
 }
 
-interface Props {
-  initialUserType?: Track;
-  skipToJoinCode?: boolean;
-  onComplete?: () => void;
-}
-
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 const STREAMS = [
-  { value: 'jee',        label: 'JEE Main & Advanced', sub: 'Physics · Chemistry · Maths',      emoji: '🚀', color: 'amber'   },
-  { value: 'neet',       label: 'NEET',                sub: 'Physics · Chemistry · Biology',    emoji: '🔬', color: 'green'   },
-  { value: 'commerce',   label: 'Commerce / CUET',       sub: 'Accounts · Eco · Business Studies', emoji: '📊', color: 'blue'    },
+  { value: 'jee',        label: 'JEE',        sub: 'Physics · Chemistry · Mathematics',      emoji: '⚡', color: 'amber'   },
+  { value: 'neet',       label: 'NEET',       sub: 'Physics · Chemistry · Biology',    emoji: '🧬', color: 'green'   },
+  { value: 'cuet',       label: 'CUET',       sub: 'Languages · NCERT Domain Subjects · General Test', emoji: '🎯', color: 'blue'    },
 ];
 
-const FOUNDATION_CLASSES = [
-  { value: '6', label: 'Class 6', tag: 'Foundation' },
-  { value: '7', label: 'Class 7', tag: 'Foundation' },
-  { value: '8', label: 'Class 8', tag: 'Foundation' },
-  { value: '9', label: 'Class 9', tag: 'Board Prep' },
-  { value: '10', label: 'Class 10', tag: 'Board Prep' },
-];
 const SENIOR_CLASSES = [
-  { value: '11', label: 'Class 11', tag: 'Just Starting' },
-  { value: '12', label: 'Class 12', tag: 'Board + Entrance' },
-  { value: '13', label: 'Dropper', tag: 'Full Focus Year' },
+  { value: '11', label: 'Class 11', tag: 'Foundation Prep' },
+  { value: '12', label: 'Class 12', tag: 'Board + Entrance Prep' },
+  { value: 'dropper', label: 'Dropper', tag: 'Full Revision Focus' },
 ];
-
-const EXAM_MAP: Record<string, string> = {
-  jee: 'JEE Main', neet: 'NEET', foundation: 'Foundation', cuet: 'CUET', commerce: 'CA Foundation',
-};
 
 const TEACHER_SUBJECTS = [
   { value: 'physics',   label: 'Physics',        emoji: '⚡' },
@@ -65,7 +49,6 @@ const TEACHER_SUBJECTS = [
   { value: 'maths',     label: 'Mathematics',    emoji: '📐' },
   { value: 'biology',   label: 'Biology',        emoji: '🔬' },
   { value: 'english',   label: 'English',        emoji: '📝' },
-  { value: 'social',    label: 'Social Science', emoji: '🌍' },
   { value: 'commerce',  label: 'Commerce',       emoji: '📊' },
 ];
 
@@ -76,9 +59,6 @@ const TEACHER_GOALS = [
   { value: 'batches',        label: 'Manage multiple batches',     emoji: '👥' },
   { value: 'all',            label: 'All of the above',            emoji: '🚀' },
 ];
-
-const ALLOWED_GOAL_VALUES = new Set(TEACHER_GOALS.filter(g => g.value !== 'all').map(g => g.value));
-const GOAL_SORT_ORDER = TEACHER_GOALS.filter(g => g.value !== 'all').map(g => g.value);
 
 // ─── Slide animation variants ─────────────────────────────────────────────────
 
@@ -100,13 +80,14 @@ const GlowBg: React.FC = () => (
 
 const Logo: React.FC<{ size?: 'sm' | 'lg' }> = ({ size = 'sm' }) => (
   <div className={`flex flex-col items-center gap-2 ${size === 'lg' ? '' : 'flex-row gap-2.5'}`}>
-    <img
-      src="/prepentrance-logo.png"
-      alt="PrepEntrance"
-      className={size === 'lg' ? 'w-16 h-16 object-contain' : 'w-8 h-8 object-contain'}
-    />
+    <div className={cn(
+      "rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shadow-lg",
+      size === 'lg' ? "w-16 h-16 shadow-amber-500/10" : "w-8 h-8 shadow-amber-500/5"
+    )}>
+      <span className={cn("text-slate-950 font-black", size === 'lg' ? "text-2xl" : "text-sm")}>P</span>
+    </div>
     <span
-      className={`text-white font-bold tracking-widest uppercase ${size === 'lg' ? 'text-2xl' : 'text-base'}`}
+      className={cn('text-white font-black tracking-widest uppercase', size === 'lg' ? 'text-2xl' : 'text-base')}
       style={{ fontFamily: 'Sora, Inter, sans-serif', letterSpacing: '0.2em' }}
     >
       PrepEntrance
@@ -128,7 +109,7 @@ const StepDots: React.FC<{ total: number; current: number }> = ({ total, current
 );
 
 const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={cn('bg-white/[0.04] backdrop-blur-2xl rounded-3xl border border-white/[0.08] shadow-2xl shadow-black/30 p-7 sm:p-8', className)}>
+  <div className={cn('bg-white/[0.03] backdrop-blur-2xl rounded-3xl border border-white/[0.06] shadow-2xl shadow-black/40 p-6 sm:p-8', className)}>
     {children}
   </div>
 );
@@ -148,7 +129,7 @@ const PrimaryBtn: React.FC<{
     whileHover={!disabled && !loading ? { y: -2, boxShadow: '0 8px 32px rgba(245,158,11,0.35)' } : {}}
     whileTap={!disabled && !loading ? { scale: 0.98 } : {}}
     className={cn(
-      'w-full h-14 rounded-2xl font-bold text-base flex items-center justify-center gap-2 transition-colors',
+      'w-full h-14 rounded-2xl font-black text-base flex items-center justify-center gap-2 transition-colors',
       'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950',
       'disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none',
       'shadow-lg shadow-amber-500/25',
@@ -171,28 +152,110 @@ const GhostBtn: React.FC<{ onClick: () => void; children: React.ReactNode }> = (
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 
-const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onComplete }) => {
+const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
   const navigate = useNavigate();
   const { user, updateProfile, refreshProfile } = useAuth();
   const { setExamMode } = useExamMode();
+  const { setLanguage } = useLanguage();
 
-  // Track & step
-  const [track, setTrack] = useState<Track | null>(initialUserType ?? null);
-  const [step, setStep] = useState(skipToJoinCode ? 1 : 0);
+  // Track & step (1 to 7 for students)
+  const [track, setTrack] = useState<Track | null>(null);
+  const [step, setStep] = useState(1);
   const [dir, setDir] = useState(1);
 
   // Shared loading
   const [saving, setSaving] = useState(false);
 
-  // Student state
-  const [joinCode, setJoinCode] = useState('');
+  // Student rebrand-onboarding state
+  const [stream, setStream] = useState(''); // Screen 2: Select Exam ('jee' | 'neet' | 'cuet')
+  const [studentClass, setStudentClass] = useState(''); // Screen 3: Select Class ('11' | '12' | 'dropper')
+  const [targetYear, setTargetYear] = useState(''); // Screen 4: Target Year ('2027' | '2028')
+  const [prefLanguage, setPrefLanguage] = useState<LanguageMode>('english'); // Screen 5: Language Preference
+  const [joinCode, setJoinCode] = useState(''); // Join via batch code trigger
+  const [isCoaching, setIsCoaching] = useState(false);
   const [codeState, setCodeState] = useState<CodeState>('idle');
   const [batchInfo, setBatchInfo] = useState<BatchInfo | null>(null);
-  const [stream, setStream] = useState('');
-  const [studentClass, setStudentClass] = useState('');
-  const [targetYear, setTargetYear] = useState('');
-  const [currentLevel, setCurrentLevel] = useState('Intermediate');
-  const [isCoaching, setIsCoaching] = useState(false);
+
+  // Screen 6: Diagnostic Assessment State
+  const [currentDiagIdx, setCurrentDiagIdx] = useState(0);
+  const [diagAnswers, setDiagAnswers] = useState<Record<number, number>>({});
+
+  // Dynamic diagnostic questions based on chosen exam stream
+  const diagQuestions = React.useMemo(() => {
+    if (stream === 'neet') {
+      return [
+        {
+          id: 1,
+          subject: 'physics',
+          question: "A car travels at 20 m/s for 10 seconds. What is its displacement under constant speed?",
+          options: ["100 meters", "200 meters", "50 meters", "400 meters"],
+          correct: 1
+        },
+        {
+          id: 2,
+          subject: 'chemistry',
+          question: "Which of the following processes represents a chemical change?",
+          options: ["Melting of ice", "Rusting of iron nail", "Boiling of water", "Dissolving sugar in water"],
+          correct: 1
+        },
+        {
+          id: 3,
+          subject: 'biology',
+          question: "Which cell organelle is famously known as the powerhouse of the cell?",
+          options: ["Mitochondria", "Nucleus", "Ribosome", "Lysosome"],
+          correct: 0
+        }
+      ];
+    } else if (stream === 'cuet') {
+      return [
+        {
+          id: 1,
+          subject: 'maths',
+          question: "If 2x + 5 = 15, what is the value of x?",
+          options: ["3", "5", "4", "10"],
+          correct: 1
+        },
+        {
+          id: 2,
+          subject: 'chemistry',
+          question: "Find the synonym of the word 'Abundant'.",
+          options: ["Scarce", "Plentiful", "Rare", "Empty"],
+          correct: 1
+        },
+        {
+          id: 3,
+          subject: 'physics',
+          question: "A body stays at rest unless acted upon by a external force. Which law is this?",
+          options: ["Newton's First Law", "Newton's Second Law", "Newton's Third Law", "Kepler's Law"],
+          correct: 0
+        }
+      ];
+    } else { // default to jee
+      return [
+        {
+          id: 1,
+          subject: 'physics',
+          question: "A car travels at 20 m/s for 10 seconds. What is its displacement under constant speed?",
+          options: ["100 meters", "200 meters", "50 meters", "400 meters"],
+          correct: 1
+        },
+        {
+          id: 2,
+          subject: 'chemistry',
+          question: "Which of the following processes represents a chemical change?",
+          options: ["Melting of ice", "Rusting of iron nail", "Boiling of water", "Dissolving sugar in water"],
+          correct: 1
+        },
+        {
+          id: 3,
+          subject: 'maths',
+          question: "If A = {1, 2} and B = {3, 4}, what is the union of sets A and B?",
+          options: ["{1, 2, 3, 4}", "{1, 2}", "{3, 4}", "Empty Set {}"],
+          correct: 0
+        }
+      ];
+    }
+  }, [stream]);
 
   // Teacher state
   const [institutionName, setInstitutionName] = useState('');
@@ -202,9 +265,6 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
   const [batchName, setBatchName] = useState('');
   const [generatedCode, setGeneratedCode] = useState('');
   const [copied, setCopied] = useState(false);
-  const [profileSaved, setProfileSaved] = useState(false);
-
-  const codeDebounce = useRef<NodeJS.Timeout>();
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -213,113 +273,76 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     setStep(newStep);
   };
 
-  const isCoachingFlow = track === 'student' && isCoaching;
-  const totalStudentSteps = isCoachingFlow ? 6 : 5;
-  const totalTeacherSteps = 5; // identity → goals → batch → code → done
-
   // ─── Join code validation ─────────────────────────────────────────────────
 
-  const validateCode = useCallback(async (raw: string) => {
-    const code = raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (code.length < 6) return;
-
+  const handleCodeChange = async (val: string) => {
+    const clean = val.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    setJoinCode(clean);
+    
+    if (clean.length < 6) {
+      setCodeState('idle');
+      return;
+    }
+    
+    setCodeState('checking');
     try {
-      setCodeState('checking');
-      
-      // 1. PRIMARY: Edge Function (Standardized for B2B)
       const { data, error } = await supabase.functions.invoke('validate-join-code', {
-        body: { join_code: code },
+        body: { join_code: clean },
       });
 
       if (!error && data && data.valid) {
         setCodeState('valid');
         setBatchInfo(data);
-        // ── AUTO-APPLY teacher's exam/stream to student ──────────────────
-        const detectedStream = data.stream || (() => {
-          const m: Record<string, string> = {
-            'JEE': 'jee', 'JEE Main': 'jee', 'JEE Advanced': 'jee',
-            'NEET': 'neet', 'CUET': 'cuet',
-            'Commerce': 'commerce', 'CA Foundation': 'commerce',
-            'Foundation': 'foundation',
-          };
-          return m[data.exam_type] ?? 'jee';
-        })();
+        // Auto-assign stream/class based on batch code
+        const detectedStream = data.stream || 'jee';
         setStream(detectedStream);
-        return;
-      }
-      
-      if (data?.error?.includes('Invalid code')) {
-        setCodeState('invalid');
-        return;
-      }
-
-      // 2. FALLBACK: SECURITY DEFINER RPC (legacy compatibility)
-      const { data: rows, error: rpcErr } = await supabase
-        .rpc('validate_batch_code' as any, { p_code: code });
-
-      if (!rpcErr && rows && (rows as any[]).length > 0) {
-        const row = (rows as any[])[0];
-        setCodeState('valid');
-        setBatchInfo({
-          batch_id:       row.batch_id,
-          batch_name:     row.batch_name,
-          teacher_name:   row.teacher_name,
-          exam_type:      row.exam_type,
-          stream:         row.stream ?? 'jee',
-          subject:        row.subject ?? 'All Subjects',
-          total_students: Number(row.total_students ?? 0),
-        });
-        // Auto-apply stream from legacy RPC too
-        if (row.stream) setStream(row.stream);
+        setStudentClass(data.student_class || '11');
+        setTargetYear(data.target_year ? String(data.target_year) : '2028');
+        toast.success("Valid Batch Code!");
       } else {
         setCodeState('invalid');
       }
-    } catch (err) {
-      console.error("Validation error:", err);
+    } catch {
       setCodeState('invalid');
-    }
-  }, []);
-
-  const handleCodeChange = (raw: string) => {
-    const val = raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
-    setJoinCode(val);
-    setCodeState('idle');
-    setBatchInfo(null);
-    clearTimeout(codeDebounce.current);
-    if (val.length >= 6) {
-      codeDebounce.current = setTimeout(() => validateCode(val), 500);
     }
   };
 
-  // ─── Student completion ────────────────────────────────────────────────────
+  // ─── Student complete profile upsert ─────────────────────────────────────────
 
   const completeStudent = async () => {
     if (!user) return;
     setSaving(true);
+
     try {
-      // Use batch's config if available, else fall back to manually selected stream
-      const examGoal = batchInfo?.exam_type
-        ? (batchInfo.exam_type === 'JEE_MAINS' ? 'JEE Main' : batchInfo.exam_type)
-        : EXAM_MAP[stream] ?? 'JEE Main';
-      const effectiveStream = batchInfo?.stream || stream;
-      const cls = studentClass || '11';
-      let level = '11-12';
-      if (stream === 'foundation') {
-        const n = parseInt(cls);
-        level = n <= 8 ? '6-8' : '9-10';
+      // 1. Identify levels based on diagnostic MCQ scores
+      const pAns = diagAnswers[0];
+      const cAns = diagAnswers[1];
+      const mAns = diagAnswers[2];
+
+      const pLvl = pAns === diagQuestions[0].correct ? 'Advanced' : 'Beginner';
+      const cLvl = cAns === diagQuestions[1].correct ? 'Advanced' : 'Beginner';
+      const mLvl = mAns === diagQuestions[2].correct ? 'Advanced' : 'Beginner';
+
+      const overallLvl = (pLvl === 'Advanced' && cLvl === 'Advanced') ? 'Advanced' : 'Intermediate';
+
+      let examGoal = 'JEE';
+      let dbExam = 'JEE';
+      if (stream === 'neet') {
+        examGoal = 'NEET';
+        dbExam = 'NEET';
+      } else if (stream === 'cuet') {
+        examGoal = 'CUET';
+        dbExam = 'CUET';
       }
 
-      if (effectiveStream === 'jee') setExamMode('jee');
-      else if (effectiveStream === 'neet') setExamMode('neet');
-      else if (effectiveStream === 'cuet') setExamMode('cuet');
-      else setExamMode('jee');
+      const cls = studentClass || '11';
+      const targetYearInt = parseInt(targetYear || '2028');
 
-      const targetYearInt = parseInt(targetYear) || 2027;
-      let dbExam = 'JEE';
-      if (examGoal.toUpperCase().includes('NEET')) dbExam = 'NEET';
-      else if (examGoal.toUpperCase().includes('CUET')) dbExam = 'CUET';
+      // Sync language preference in state/context
+      setLanguage(prefLanguage);
+      localStorage.setItem('preferredLanguage', prefLanguage);
 
-      // 1. Fetch matching cohort
+      // Query database matching cohort_id
       const { data: cohortData } = await supabase
         .from('cohorts')
         .select('id')
@@ -330,81 +353,47 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
 
       const cohortId = cohortData?.id || null;
 
-      // 2. Update basic profiles
+      // Update basic profiles
       await updateProfile({
         target_exam: examGoal,
         class: cls,
-        student_level: level,
+        student_level: overallLvl,
         user_type: 'student',
       });
 
-      // 3. Upsert into student_profiles
+      // Upsert into student_profiles table (including newly migrated subject levels)
       await supabase.from('student_profiles').upsert({
         student_id: user.id,
         name: user.user_metadata?.full_name || null,
         target_exam: examGoal,
         class: cls,
         target_year: targetYearInt,
-        current_level: currentLevel,
+        current_level: overallLvl,
         cohort_id: cohortId,
+        physics_level: pLvl,
+        chemistry_level: cLvl,
+        maths_level: stream === 'neet' ? 'Intermediate' : mLvl,
+        biology_level: stream === 'neet' ? mLvl : 'Intermediate',
         last_active: new Date().toISOString(),
       });
 
-      // Join batch
-      if (batchInfo) {
-        let joined = false;
-
-        // Primary: Vercel API route with 8s timeout
-        try {
-          const ctrl = new AbortController();
-          const timer = setTimeout(() => ctrl.abort(), 8000);
-          const res = await fetch('/api/validate-code', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code: joinCode.toUpperCase(), student_id: user.id }),
-            signal: ctrl.signal,
-          });
-          clearTimeout(timer);
-          joined = res.ok;
-        } catch { /* fall through */ }
-
-        // Fallback: SECURITY DEFINER RPC
-        if (!joined) {
-          const { data: joinRows, error: joinRpcErr } = await supabase
-            .rpc('student_join_batch' as any, {
-              p_code:       joinCode.toUpperCase(),
-              p_student_id: user.id,
-            });
-          joined = !joinRpcErr && joinRows && (joinRows as any[]).length > 0;
-        }
-
-        // Last fallback: edge function
-        if (!joined) {
-          await supabase.functions.invoke('validate-join-code', {
-            body: { join_code: joinCode.toUpperCase(), student_id: user.id },
-          });
-        }
-
-        // Confirm join landed in DB before navigating (prevents StudentHubRoute bounce)
-        const { count } = await supabase
+      // Join batch if applicable
+      if (isCoaching && batchInfo) {
+        await supabase
           .from('student_batch_map' as any)
-          .select('id', { count: 'exact', head: true })
-          .eq('student_id', user.id);
-
-        if ((count ?? 0) === 0) {
-          toast.error('Could not join the batch. Please check your code and try again.');
-          setSaving(false);
-          return;
-        }
+          .insert({ student_id: user.id, batch_id: batchInfo.batch_id });
       }
 
       await refreshProfile();
-      onComplete?.();
-      // Full reload so StudentHubRoute reads the freshly committed profile
-      window.location.href = '/student-hub';
+      toast.success("Welcome aboard! Preparing classroom...");
+      
+      // Navigate to student hub
+      setTimeout(() => {
+        window.location.href = '/student-hub';
+      }, 1500);
+
     } catch (e: any) {
       toast.error(e.message || 'Something went wrong. Please try again.');
-    } finally {
       setSaving(false);
     }
   };
@@ -415,208 +404,162 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
     if (!user) return;
     setSaving(true);
     try {
-      // generate unique code
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       let code = '';
-      for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-
-      const payload = {
-        name: batchName.trim() || `${institutionName || 'My'} Batch`,
-        target_exam: teacherExam || 'JEE_MAINS',
-        mentor_id: user.id,
-        join_code: code,
-        description: `Batch for ${teacherExam || 'JEE'}`,
-      };
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
 
       const { data, error } = await supabase
         .from('batches' as any)
-        .insert(payload)
-        .select('join_code')
+        .insert({
+          name: batchName || 'New Batch',
+          mentor_id: user.id,
+          join_code: code,
+          target_exam: teacherExam || 'JEE',
+          description: `PrepEntrance Class Batch for ${teacherExam}`,
+        })
+        .select('id')
         .single();
 
-      if (error) {
-        throw error;
-      } else {
-        setGeneratedCode((data as any)?.join_code || code);
-      }
+      if (error) throw error;
 
-      go(4);
-    } catch (e: any) {
-      toast.error(e.message || 'Batch creation failed.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const completeTeacher = async () => {
-    if (!user) return;
-    setSaving(true);
-    try {
-      const examGoal = EXAM_MAP[teacherExam] ?? 'JEE Main';
-      const displayName = institutionName.trim() || null;
-      const goalsToSave = [...new Set(
-        teacherGoals.filter(v => v !== 'all' && ALLOWED_GOAL_VALUES.has(v))
-      )]
-        .sort((a, b) => GOAL_SORT_ORDER.indexOf(a) - GOAL_SORT_ORDER.indexOf(b))
-        .slice(0, 4);
-      await updateProfile({
-        user_type: 'teacher',
-        target_exam: examGoal,
-        institution_name: displayName,
-        full_name: displayName || undefined,
-        subjects: teacherSubjects.length > 0 ? teacherSubjects : null,
-        coach_goals: goalsToSave.length > 0 ? goalsToSave : null,
-      } as any);
+      setGeneratedCode(code);
+      await updateProfile({ user_type: 'teacher' });
       await refreshProfile();
-      onComplete?.();
-      setProfileSaved(true);
-      go(5);
+      go(4); // navigate to display code
     } catch (e: any) {
-      toast.error(e.message || 'Something went wrong.');
+      toast.error(e.message || 'Could not create batch.');
     } finally {
       setSaving(false);
     }
   };
 
-  const copyCode = async () => {
-    await navigator.clipboard.writeText(generatedCode);
+  const copyCode = () => {
+    navigator.clipboard.writeText(generatedCode);
     setCopied(true);
+    toast.success("Code copied!");
     setTimeout(() => setCopied(false), 2000);
-    toast.success('Code copied!');
   };
 
-  // ─── Render steps ─────────────────────────────────────────────────────────
-
-  const currentSteps = track === 'teacher' ? totalTeacherSteps : totalStudentSteps;
-  const displayStep = skipToJoinCode ? step - 1 : step; // so dots start at 0 for skip case
+  // ─── STEP RENDER LOGIC ──────────────────────────────────────────────────────
 
   const renderStep = () => {
-    // ── STEP 0: Choose Role ──────────────────────────────────────────────────
-    if (step === 0) {
+    // ════════════════ SCREEN 1: WELCOME SCREEN ════════════════
+    if (step === 1 && !track) {
       return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <p className="text-amber-400 text-xs font-bold uppercase tracking-[0.2em]">Welcome to PrepEntrance</p>
-            <h1 className="text-white text-3xl sm:text-4xl font-bold leading-tight" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              How are you joining?
+        <div className="space-y-6 text-center">
+          <Logo size="lg" />
+          <div className="space-y-3 pt-4">
+            <p className="text-amber-400 text-xs font-black uppercase tracking-[0.25em]">Personalized Learning Ecosystem</p>
+            <h1 className="text-white text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight">
+              Personalized Preparation for JEE, NEET & CUET
             </h1>
-            <p className="text-white/40 text-sm">Choose your role to get started</p>
+            <p className="text-white/50 text-sm max-w-sm mx-auto leading-relaxed">
+              Step into an isolated digital classroom designed strictly around your target exam, class, and milestones.
+            </p>
           </div>
 
-          <div className="space-y-3 mt-2">
-            {/* Student */}
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => { setTrack('student'); go(1); }}
-              className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-amber-400/30 hover:bg-amber-400/[0.03] transition-all text-left flex items-center gap-4 group"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0 group-hover:bg-amber-400/20 transition-colors">
-                <Users className="w-6 h-6 text-amber-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-white font-semibold text-base" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>I'm a Student</p>
-                <p className="text-white/40 text-sm mt-0.5">I have a teacher's batch code</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-white/50 transition-colors" />
-            </motion.button>
-
-            {/* Teacher */}
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
+          <div className="space-y-3 pt-4">
+            <PrimaryBtn onClick={() => { setTrack('student'); go(2); }}>
+              Start Setup <ArrowRight className="w-5 h-5" />
+            </PrimaryBtn>
+            
+            <button 
               onClick={() => { setTrack('teacher'); go(1); }}
-              className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-violet-400/30 hover:bg-violet-400/[0.03] transition-all text-left flex items-center gap-4 group"
+              className="text-white/40 hover:text-white/70 text-xs font-semibold tracking-wider uppercase py-2 transition-colors"
             >
-              <div className="w-12 h-12 rounded-2xl bg-violet-400/10 border border-violet-400/20 flex items-center justify-center shrink-0 group-hover:bg-violet-400/20 transition-colors">
-                <GraduationCap className="w-6 h-6 text-violet-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-white font-semibold text-base" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>I'm a Teacher</p>
-                <p className="text-white/40 text-sm mt-0.5">I'll create a batch for my students</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-white/50 transition-colors" />
-            </motion.button>
+              Are you a Teacher? Create Batch ➔
+            </button>
           </div>
         </div>
       );
     }
 
-    // ── STUDENT STEP 1: Study Mode ────────────────────────────────────────────
-    if (step === 1 && track === 'student') {
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              How are you studying?
-            </h1>
-            <p className="text-white/40 text-sm">Choose your learning path</p>
-          </div>
-
-          <div className="space-y-3 mt-2">
-            {/* Individually */}
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => { setIsCoaching(false); go(3); }}
-              className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-amber-400/30 hover:bg-amber-400/[0.03] transition-all text-left flex items-center gap-4 group"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0 group-hover:bg-amber-400/20 transition-colors">
-                <Brain className="w-6 h-6 text-amber-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-white font-semibold text-base" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>Individually</p>
-                <p className="text-white/40 text-sm mt-0.5">I am studying on my own</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-white/50 transition-colors" />
-            </motion.button>
-
-            {/* Through Coaching */}
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => { setIsCoaching(true); go(2); }}
-              className="w-full p-5 rounded-2xl border border-white/[0.08] hover:border-violet-400/30 hover:bg-violet-400/[0.03] transition-all text-left flex items-center gap-4 group"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-violet-400/10 border border-violet-400/20 flex items-center justify-center shrink-0 group-hover:bg-violet-400/20 transition-colors">
-                <Building2 className="w-6 h-6 text-violet-400" />
-              </div>
-              <div className="flex-1">
-                <p className="text-white font-semibold text-base" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>Through Coaching</p>
-                <p className="text-white/40 text-sm mt-0.5">I have a batch code from my institute</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-white/20 group-hover:text-white/50 transition-colors" />
-            </motion.button>
-          </div>
-
-          {!skipToJoinCode && (
-            <GhostBtn onClick={() => go(0, -1)}>
-              <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-            </GhostBtn>
-          )}
-        </div>
-      );
-    }
-
-    // ── STUDENT STEP 2: Enter code ────────────────────────────────────────────
+    // ════════════════ SCREEN 2: SELECT EXAM ════════════════
     if (step === 2 && track === 'student') {
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/20 mb-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-amber-400 text-xs font-bold uppercase tracking-[0.15em]">Required</span>
-            </div>
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Enter your class code
+            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 2 of 7</p>
+            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Which exam are you preparing for?
             </h1>
-            <p className="text-white/40 text-sm">Get this 6-character code from your teacher</p>
+            <p className="text-white/40 text-sm">Your learning scope will be locked to this exam.</p>
           </div>
 
-          {/* Code input */}
+          <div className="space-y-2.5">
+            {STREAMS.map(s => {
+              const selected = stream === s.value;
+              return (
+                <motion.button
+                  key={s.value}
+                  whileTap={{ scale: 0.995 }}
+                  onClick={() => setStream(s.value)}
+                  className={cn(
+                    'w-full p-4 sm:p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200',
+                    selected
+                      ? 'border-amber-400/40 bg-amber-400/[0.06] ring-1 ring-amber-400/10'
+                      : 'border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.01]'
+                  )}
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="text-2xl w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">{s.emoji}</span>
+                    <div>
+                      <p className="text-white font-extrabold text-sm sm:text-base">{s.label}</p>
+                      <p className="text-white/30 text-xs mt-0.5">{s.sub}</p>
+                    </div>
+                  </div>
+                  <div className={cn(
+                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
+                  )}>
+                    {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <div className="pt-2">
+            {/* Batch Code Entry Bridge */}
+            <div className="bg-white/[0.01] border border-white/[0.04] rounded-2xl p-4 flex items-center justify-between">
+              <span className="text-xs text-white/40 font-medium">Joined a coaching batch?</span>
+              <button 
+                onClick={() => { setIsCoaching(true); go(99); }}
+                className="text-xs text-amber-400 font-extrabold hover:underline"
+              >
+                Enter Batch Code ➔
+              </button>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <GhostBtn onClick={() => { setTrack(null); go(1, -1); }}>
+              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
+            </GhostBtn>
+            <PrimaryBtn disabled={!stream} onClick={() => go(3)}>
+              Continue <ArrowRight className="w-4 h-4" />
+            </PrimaryBtn>
+          </div>
+        </div>
+      );
+    }
+
+    // ════════════════ BATCH CODE BRIDGE SCREEN ════════════════
+    if (step === 99 && track === 'student') {
+      return (
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Enter your Batch Code
+            </h1>
+            <p className="text-white/40 text-sm">Enter the 6-character code provided by your coaching center.</p>
+          </div>
+
           <div className={cn(
             'rounded-2xl border p-5 space-y-4 transition-all duration-300',
-            codeState === 'valid'    ? 'border-emerald-500/40 bg-emerald-500/[0.04] shadow-[0_0_24px_rgba(16,185,129,0.1)]' :
+            codeState === 'valid'    ? 'border-emerald-500/40 bg-emerald-500/[0.04] shadow-[0_0_24px_rgba(16,185,129,0.15)]' :
             codeState === 'invalid'  ? 'border-red-500/30 bg-red-500/[0.03]' :
             codeState === 'checking' ? 'border-amber-400/30 bg-amber-400/[0.03]' :
             'border-white/[0.08]'
@@ -629,318 +572,377 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
                 maxLength={8}
                 onChange={e => handleCodeChange(e.target.value)}
                 placeholder="K8ZX2W"
-                className="w-full h-16 bg-white/[0.04] border border-white/[0.1] rounded-xl text-center text-2xl text-white font-mono tracking-[0.5em] placeholder:text-white/15 focus:outline-none focus:border-amber-400/40 focus:ring-1 focus:ring-amber-400/20 transition-all pr-14"
+                className="w-full h-16 bg-white/[0.04] border border-white/[0.1] rounded-xl text-center text-2xl text-white font-mono tracking-[0.5em] placeholder:text-white/10 focus:outline-none focus:border-amber-400/40 transition-all pr-14"
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2">
                 {codeState === 'checking' && <Loader2 className="w-5 h-5 animate-spin text-amber-400" />}
-                {codeState === 'valid'    && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 400 }}><CheckCircle2 className="w-5 h-5 text-emerald-400" /></motion.div>}
+                {codeState === 'valid'    && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
                 {codeState === 'invalid'  && <XCircle className="w-5 h-5 text-red-400" />}
               </div>
             </div>
 
-            {codeState === 'invalid' && (
-              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-red-400 text-sm flex items-center gap-2">
-                <XCircle className="w-4 h-4 shrink-0" /> Invalid code. Check with your teacher.
-              </motion.p>
-            )}
-
-            {/* Batch preview on valid */}
             {codeState === 'valid' && batchInfo && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-emerald-500/[0.08] border border-emerald-500/20 rounded-xl p-4 flex items-center gap-3"
-              >
+              <div className="bg-emerald-500/[0.08] border border-emerald-500/20 rounded-xl p-4 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
                   <Users className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-emerald-400 text-[11px] font-black uppercase tracking-widest">Batch Found</p>
-                  <p className="text-white font-semibold truncate">{batchInfo.batch_name}</p>
-                  <p className="text-white/40 text-xs">by {batchInfo.teacher_name} · {batchInfo.total_students} students</p>
+                  <p className="text-emerald-400 text-[10px] font-black uppercase tracking-wider">Batch Found</p>
+                  <p className="text-white font-bold truncate text-sm">{batchInfo.batch_name}</p>
+                  <p className="text-white/40 text-[11px]">Mentor: {batchInfo.teacher_name}</p>
                 </div>
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-              </motion.div>
+              </div>
             )}
           </div>
 
-          <p className="text-center text-xs text-white/25">
-            Don't have a code? Ask your teacher to generate one from their dashboard.
-          </p>
-
-          <PrimaryBtn
-            disabled={codeState !== 'valid'}
-            onClick={() => go(3)}
-          >
-            Continue <ArrowRight className="w-5 h-5" />
-          </PrimaryBtn>
-
-          <GhostBtn onClick={() => go(1, -1)}>
-            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-          </GhostBtn>
+          <div className="flex gap-3">
+            <GhostBtn onClick={() => { setIsCoaching(false); go(2, -1); }}>
+              Cancel
+            </GhostBtn>
+            <PrimaryBtn disabled={codeState !== 'valid'} onClick={() => go(7)}>
+              Continue to Cohort <ArrowRight className="w-4 h-4" />
+            </PrimaryBtn>
+          </div>
         </div>
       );
     }
 
-    // ── STUDENT STEP 3: Choose Exam ──────────────────────────────────────────
+    // ════════════════ SCREEN 3: SELECT CLASS ════════════════
     if (step === 3 && track === 'student') {
-      if (isCoaching && batchInfo) {
-        const streamLabel = STREAMS.find(s => s.value === stream)?.label ?? batchInfo.exam_type;
-        const streamEmoji = STREAMS.find(s => s.value === stream)?.emoji ?? '🎯';
-        return (
-          <div className="space-y-5">
-            <div className="text-center space-y-2">
-              <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-                Your exam is set by batch!
-              </h1>
-              <p className="text-white/40 text-sm">Your teacher has configured your exam path</p>
-            </div>
-
-            <div className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.06] p-5">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center text-2xl shrink-0">
-                  {streamEmoji}
-                </div>
-                <div className="flex-1">
-                  <p className="text-white font-bold text-base">{streamLabel}</p>
-                  <p className="text-white/40 text-sm">{batchInfo.subject}</p>
-                </div>
-                <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />
-                </div>
-              </div>
-            </div>
-
-            <PrimaryBtn onClick={() => go(4)}>
-              Continue <ArrowRight className="w-5 h-5" />
-            </PrimaryBtn>
-          </div>
-        );
-      }
-
       return (
-        <div className="space-y-5">
-          <div className="text-center space-y-1">
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Choose your target exam
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 3 of 7</p>
+            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Which class are you studying in?
             </h1>
-            <p className="text-white/40 text-sm">Select the exam you are preparing for</p>
+            <p className="text-white/40 text-sm">We construct your isolated academic tracker based on class.</p>
           </div>
 
           <div className="space-y-2">
-            {STREAMS.map(s => {
-              const selected = stream === s.value;
-              return (
-                <motion.button
-                  key={s.value}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={() => { setStream(s.value); }}
-                  className={cn(
-                    'w-full px-4 py-3.5 rounded-xl border text-left flex items-center justify-between transition-all duration-200',
-                    selected
-                      ? 'border-amber-400/40 bg-amber-400/[0.06] ring-1 ring-amber-400/20'
-                      : 'border-white/[0.07] hover:border-white/[0.14] hover:bg-white/[0.02]'
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-lg w-7 shrink-0">{s.emoji}</span>
-                    <div>
-                      <p className="text-white font-semibold text-sm">{s.label}</p>
-                      <p className="text-white/35 text-xs">{s.sub}</p>
-                    </div>
-                  </div>
-                  <div className={cn(
-                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
-                  )}>
-                    {selected && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
-
-          <PrimaryBtn
-            disabled={!stream}
-            onClick={() => go(4)}
-          >
-            Continue <ArrowRight className="w-5 h-5" />
-          </PrimaryBtn>
-
-          <GhostBtn onClick={() => go(1, -1)}>
-            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-          </GhostBtn>
-        </div>
-      );
-    }
-
-    // ── STUDENT STEP 4: Choose Class ─────────────────────────────────────────
-    if (step === 4 && track === 'student') {
-      return (
-        <div className="space-y-5">
-          <div className="text-center space-y-1">
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Select your Class
-            </h1>
-            <p className="text-white/40 text-sm">We'll isolate your study plan accordingly</p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2">
             {SENIOR_CLASSES.map(c => {
               const selected = studentClass === c.value;
               return (
                 <motion.button
                   key={c.value}
-                  whileTap={{ scale: 0.99 }}
+                  whileTap={{ scale: 0.995 }}
                   onClick={() => {
                     setStudentClass(c.value);
+                    // Screen 4 auto-suggestion logic based on class:
                     if (c.value === '11') setTargetYear('2028');
                     else setTargetYear('2027');
                   }}
                   className={cn(
-                    'px-4 py-4 rounded-xl border text-left flex items-center justify-between transition-all duration-200',
-                    selected ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' : 'border-white/[0.07] text-white/70 hover:border-white/20'
+                    'w-full p-4.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200',
+                    selected 
+                      ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' 
+                      : 'border-white/[0.06] text-white/70 hover:border-white/20 hover:bg-white/[0.01]'
                   )}
                 >
                   <div>
-                    <p className="font-bold text-sm">{c.label}</p>
-                    <p className="text-[11px] opacity-60 mt-0.5">{c.tag}</p>
+                    <p className="font-extrabold text-sm sm:text-base">{c.label}</p>
+                    <p className="text-[11px] opacity-50 mt-0.5">{c.tag}</p>
                   </div>
                   <div className={cn(
                     'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
                     selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
                   )}>
-                    {selected && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                    {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
                   </div>
                 </motion.button>
               );
             })}
           </div>
 
-          <PrimaryBtn
-            disabled={!studentClass}
-            onClick={() => go(5)}
-          >
-            Continue <ArrowRight className="w-5 h-5" />
-          </PrimaryBtn>
-
-          <GhostBtn onClick={() => go(3, -1)}>
-            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-          </GhostBtn>
+          <div className="flex gap-3">
+            <GhostBtn onClick={() => go(2, -1)}>
+              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
+            </GhostBtn>
+            <PrimaryBtn disabled={!studentClass} onClick={() => go(4)}>
+              Continue <ArrowRight className="w-4 h-4" />
+            </PrimaryBtn>
+          </div>
         </div>
       );
     }
 
-    // ── STUDENT STEP 5: Target Year ──────────────────────────────────────────
-    if (step === 5 && track === 'student') {
-      const years = ['2027', '2028', '2029'];
+    // ════════════════ SCREEN 4: TARGET YEAR ════════════════
+    if (step === 4 && track === 'student') {
+      const suggestedYear = studentClass === '11' ? '2028' : '2027';
+      const optionalYears = ['2027', '2028', '2029'].filter(y => y !== suggestedYear);
+      const displayYears = [suggestedYear, ...optionalYears];
+
       return (
-        <div className="space-y-5">
-          <div className="text-center space-y-1">
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Choose Target Year
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 4 of 7</p>
+            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Select your Target Year
             </h1>
-            <p className="text-white/40 text-sm">Select your exam target milestone year</p>
+            <p className="text-white/40 text-sm">
+              Suggested: <span className="text-amber-400 font-bold">{suggestedYear}</span> (based on your Class {studentClass})
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-2">
-            {years.map(y => {
+          <div className="space-y-2.5">
+            {displayYears.map((y, idx) => {
               const selected = targetYear === y;
+              const isSuggested = idx === 0;
               return (
                 <motion.button
                   key={y}
-                  whileTap={{ scale: 0.99 }}
+                  whileTap={{ scale: 0.995 }}
                   onClick={() => setTargetYear(y)}
                   className={cn(
-                    'px-4 py-4 rounded-xl border text-left flex items-center justify-between transition-all duration-200',
-                    selected ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' : 'border-white/[0.07] text-white/70 hover:border-white/20'
-                  )}
-                >
-                  <p className="font-bold text-sm">{y} Aspirant</p>
-                  <div className={cn(
-                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
-                  )}>
-                    {selected && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
-
-          <PrimaryBtn
-            disabled={!targetYear}
-            onClick={() => go(6)}
-          >
-            Continue <ArrowRight className="w-5 h-5" />
-          </PrimaryBtn>
-
-          <GhostBtn onClick={() => go(4, -1)}>
-            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-          </GhostBtn>
-        </div>
-      );
-    }
-
-    // ── STUDENT STEP 6: Current Level ────────────────────────────────────────
-    if (step === 6 && track === 'student') {
-      const levels = [
-        { value: 'Beginner',     label: 'Beginner',     sub: 'NCERT & school-level focus' },
-        { value: 'Intermediate', label: 'Intermediate', sub: 'Mains & standard prep level' },
-        { value: 'Advanced',     label: 'Advanced',     sub: 'Coaching tricks & multi-concept level' },
-      ];
-      return (
-        <div className="space-y-5">
-          <div className="text-center space-y-1">
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Your Starting Level
-            </h1>
-            <p className="text-white/40 text-sm">We will tailor the revision complexity for you</p>
-          </div>
-
-          <div className="space-y-2">
-            {levels.map(l => {
-              const selected = currentLevel === l.value;
-              return (
-                <motion.button
-                  key={l.value}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={() => setCurrentLevel(l.value)}
-                  className={cn(
-                    'w-full px-4 py-3.5 rounded-xl border text-left flex items-center justify-between transition-all duration-200',
-                    selected ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' : 'border-white/[0.07] text-white/70 hover:border-white/20'
+                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200',
+                    selected 
+                      ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' 
+                      : 'border-white/[0.06] text-white/70 hover:border-white/20 hover:bg-white/[0.01]'
                   )}
                 >
                   <div>
-                    <p className="font-bold text-sm">{l.label}</p>
-                    <p className="text-[11px] opacity-60 mt-0.5">{l.sub}</p>
+                    <p className="font-extrabold text-sm sm:text-base">{y} Aspirant</p>
+                    <p className="text-[11px] opacity-50 mt-0.5">{isSuggested ? 'Standard Suggested Target Year' : 'Alternate target year path'}</p>
                   </div>
-                  <div className={cn(
-                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
-                  )}>
-                    {selected && <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />}
+                  
+                  <div className="flex items-center gap-3">
+                    {isSuggested && (
+                      <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 font-black uppercase rounded px-2 py-0.5 tracking-wider">
+                        Suggested
+                      </span>
+                    )}
+                    <div className={cn(
+                      'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+                      selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
+                    )}>
+                      {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
+                    </div>
                   </div>
                 </motion.button>
               );
             })}
           </div>
 
-          <PrimaryBtn
-            loading={saving}
-            onClick={completeStudent}
-          >
-            {saving ? 'Personalizing Dashboard...' : <><Sparkles className="w-5 h-5" /> Launch My Dashboard</>}
-          </PrimaryBtn>
-
-          <GhostBtn onClick={() => go(5, -1)}>
-            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-          </GhostBtn>
+          <div className="flex gap-3">
+            <GhostBtn onClick={() => go(3, -1)}>
+              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
+            </GhostBtn>
+            <PrimaryBtn disabled={!targetYear} onClick={() => go(5)}>
+              Continue <ArrowRight className="w-4 h-4" />
+            </PrimaryBtn>
+          </div>
         </div>
       );
     }
 
-    // ── TEACHER STEP 1: Identity ────────────────────────────────────────────
+    // ════════════════ SCREEN 5: LANGUAGE PREFERENCE ════════════════
+    if (step === 5 && track === 'student') {
+      const languages: { key: LanguageMode; label: string; sub: string }[] = [
+        { key: 'english', label: 'English', sub: 'Entire theory & notes in pure English' },
+        { key: 'hinglish', label: 'Hinglish', sub: 'Concepts explained in interactive Hindi + English' },
+        { key: 'hindi', label: 'Hindi', sub: 'हिंदी माध्यम - complete Hindi curriculum' }
+      ];
+
+      return (
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 5 of 7</p>
+            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Select your Language Preference
+            </h1>
+            <p className="text-white/40 text-sm">We translate all lectures, notes, and study material to this language.</p>
+          </div>
+
+          <div className="space-y-2.5">
+            {languages.map(lang => {
+              const selected = prefLanguage === lang.key;
+              return (
+                <motion.button
+                  key={lang.key}
+                  whileTap={{ scale: 0.995 }}
+                  onClick={() => setPrefLanguage(lang.key)}
+                  className={cn(
+                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200',
+                    selected 
+                      ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' 
+                      : 'border-white/[0.06] text-white/70 hover:border-white/20 hover:bg-white/[0.01]'
+                  )}
+                >
+                  <div>
+                    <p className="font-extrabold text-sm sm:text-base">{lang.label}</p>
+                    <p className="text-[11px] opacity-55 mt-0.5">{lang.sub}</p>
+                  </div>
+                  <div className={cn(
+                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
+                  )}>
+                    {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
+                  </div>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          <div className="flex gap-3">
+            <GhostBtn onClick={() => go(4, -1)}>
+              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
+            </GhostBtn>
+            <PrimaryBtn onClick={() => go(6)}>
+              Continue <ArrowRight className="w-4 h-4" />
+            </PrimaryBtn>
+          </div>
+        </div>
+      );
+    }
+
+    // ════════════════ SCREEN 6: DIAGNOSTIC ASSESSMENT ════════════════
+    if (step === 6 && track === 'student') {
+      const activeQ = diagQuestions[currentDiagIdx];
+      const selectedOption = diagAnswers[currentDiagIdx];
+
+      const handleAnswerSelect = (optionIdx: number) => {
+        setDiagAnswers(prev => ({ ...prev, [currentDiagIdx]: optionIdx }));
+      };
+
+      const handleNextQuestion = () => {
+        if (currentDiagIdx < diagQuestions.length - 1) {
+          setCurrentDiagIdx(prev => prev + 1);
+        } else {
+          // Finished Diagnostic test! Go to Cohort assignment
+          go(7);
+        }
+      };
+
+      return (
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 6 of 7: Diagnostic</p>
+            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Adaptive Concept Benchmark
+            </h1>
+            <p className="text-white/40 text-sm">
+              Answering these brief conceptual benchmarks sets your starting profile and predicts your initial AIR range.
+            </p>
+          </div>
+
+          {/* Question card */}
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-5 sm:p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <span className="text-[10px] bg-amber-400/10 text-amber-400 border border-amber-400/20 font-black uppercase px-2 py-0.5 rounded tracking-widest">
+                {activeQ.subject.toUpperCase()} Evaluation
+              </span>
+              <span className="text-xs text-white/35 font-bold">
+                Question {currentDiagIdx + 1} of {diagQuestions.length}
+              </span>
+            </div>
+
+            <p className="text-white text-sm sm:text-base font-semibold leading-relaxed pt-2">
+              {activeQ.question}
+            </p>
+
+            <div className="space-y-2 pt-3">
+              {activeQ.options.map((opt, oIdx) => {
+                const isSelected = selectedOption === oIdx;
+                return (
+                  <button
+                    key={oIdx}
+                    onClick={() => handleAnswerSelect(oIdx)}
+                    className={cn(
+                      'w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all duration-200 text-sm',
+                      isSelected
+                        ? 'border-amber-400 bg-amber-400/5 text-amber-400 font-bold'
+                        : 'border-white/[0.05] bg-white/[0.01] hover:bg-white/[0.03] text-white/70'
+                    )}
+                  >
+                    <span>{opt}</span>
+                    <div className={cn(
+                      'w-4 h-4 rounded-full border flex items-center justify-center shrink-0',
+                      isSelected ? 'bg-amber-400 border-amber-400' : 'border-white/10'
+                    )}>
+                      {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <GhostBtn onClick={() => {
+              if (currentDiagIdx > 0) setCurrentDiagIdx(prev => prev - 1);
+              else go(5, -1);
+            }}>
+              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
+            </GhostBtn>
+            <PrimaryBtn 
+              disabled={selectedOption === undefined}
+              onClick={handleNextQuestion}
+            >
+              {currentDiagIdx === diagQuestions.length - 1 ? 'Analyze Performance' : 'Next Question'} <ArrowRight className="w-4 h-4" />
+            </PrimaryBtn>
+          </div>
+        </div>
+      );
+    }
+
+    // ════════════════ SCREEN 7: COHORT ASSIGNMENT ════════════════
+    if (step === 7 && track === 'student') {
+      const examName = stream.toUpperCase();
+      const className = studentClass === 'dropper' ? 'Dropper' : `Class ${studentClass}`;
+      const cohortName = `${examName} ${targetYear} ${className}`;
+
+      return (
+        <div className="space-y-6 text-center">
+          <div className="w-16 h-16 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center mx-auto mb-4">
+            <Award className="w-8 h-8 text-amber-400 animate-bounce" />
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-1.5 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> System Configured successfully
+            </p>
+            <h1 className="text-white text-3xl font-black tracking-tight" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
+              🎉 Welcome to {cohortName} Cohort
+            </h1>
+            <p className="text-white/50 text-sm max-w-sm mx-auto leading-relaxed">
+              Your isolated classroom and study paths are ready. Standard syllabus limits and tests are synced to your target year.
+            </p>
+          </div>
+
+          {/* Cohort Stats summary */}
+          <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-5 text-left space-y-4 max-w-sm mx-auto">
+            <h3 className="text-xs font-bold text-white/55 uppercase tracking-wider">Cohort Enrollment Details</h3>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between border-b border-white/[0.04] pb-2">
+                <span className="text-white/40">Class & Exam:</span>
+                <span className="font-bold text-white">{examName} | {className}</span>
+              </div>
+              <div className="flex justify-between border-b border-white/[0.04] pb-2">
+                <span className="text-white/40">Target Year:</span>
+                <span className="font-bold text-white">{targetYear} Goal</span>
+              </div>
+              <div className="flex justify-between border-b border-white/[0.04] pb-2">
+                <span className="text-white/40">Language:</span>
+                <span className="font-bold text-white uppercase">{prefLanguage}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/40">Diagnostic Benchmark:</span>
+                <span className="font-bold text-amber-400">Intermediate Classroom Assigned</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2 pt-2">
+            <PrimaryBtn loading={saving} onClick={completeStudent}>
+              {saving ? 'Opening Classroom Door...' : <><Rocket className="w-5 h-5" /> Launch My Classroom</>}
+            </PrimaryBtn>
+          </div>
+        </div>
+      );
+    }
+
+    // ── TEACHER STEP 1: Set up portal ──────────────────────────────────────────
     if (step === 1 && track === 'teacher') {
       return (
         <div className="space-y-6">
@@ -948,68 +950,38 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
             <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
               Set up your portal
             </h1>
-            <p className="text-white/40 text-sm">Tell us about your institute</p>
+            <p className="text-white/40 text-sm">Tell us about your organization or coaching institute</p>
           </div>
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-white/50 text-xs font-bold uppercase tracking-wider">Institute / Coaching name</label>
-              <div className="relative">
-                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/25" />
-                <input
-                  autoFocus
-                  type="text"
-                  value={institutionName}
-                  onChange={e => setInstitutionName(e.target.value)}
-                  placeholder="e.g. Momentum Academy"
-                  className="w-full h-12 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:border-amber-400/40 focus:ring-1 focus:ring-amber-400/20 transition-all pl-11 pr-4 text-sm"
-                />
-              </div>
+            <div>
+              <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Organization/Coaching Name</label>
+              <input
+                autoFocus
+                type="text"
+                value={institutionName}
+                onChange={e => setInstitutionName(e.target.value)}
+                placeholder="Allen, Physics Wallah, Resonance etc."
+                className="w-full h-13 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 text-white text-sm focus:outline-none focus:border-amber-400/40"
+              />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-white/50 text-xs font-bold uppercase tracking-wider">Primary exam you teach</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {STREAMS.map(s => {
-                  const sel = teacherExam === s.value;
+            <div>
+              <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Exam Category</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['JEE', 'NEET', 'CUET'].map(e => {
+                  const selected = teacherExam === e;
                   return (
                     <button
-                      key={s.value}
-                      onClick={() => setTeacherExam(s.value)}
-                      className={cn(
-                        'py-3 px-3 rounded-xl border text-left transition-all duration-200',
-                        sel ? 'border-violet-400/50 bg-violet-400/[0.08] ring-1 ring-violet-400/20' : 'border-white/[0.07] hover:border-white/[0.14]'
-                      )}
-                    >
-                      <span className="text-base block mb-0.5">{s.emoji}</span>
-                      <p className={cn('text-xs font-semibold truncate', sel ? 'text-violet-300' : 'text-white/70')}>{s.label}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-white/50 text-xs font-bold uppercase tracking-wider">Subjects you teach</label>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {TEACHER_SUBJECTS.map(s => {
-                  const sel = teacherSubjects.includes(s.value);
-                  return (
-                    <button
-                      key={s.value}
+                      key={e}
                       type="button"
-                      onClick={() => setTeacherSubjects(prev =>
-                        sel ? prev.filter(v => v !== s.value) : [...prev, s.value]
-                      )}
+                      onClick={() => setTeacherExam(e)}
                       className={cn(
-                        'py-2.5 px-2 rounded-xl border text-center transition-all duration-200',
-                        sel
-                          ? 'border-violet-400/50 bg-violet-400/[0.08] ring-1 ring-violet-400/20'
-                          : 'border-white/[0.07] hover:border-white/[0.14]'
+                        'h-12 rounded-xl border text-sm font-bold transition-all',
+                        selected ? 'border-amber-400 bg-amber-400/5 text-amber-400' : 'border-white/[0.08] hover:border-white/20 text-white/70'
                       )}
                     >
-                      <span className="text-base block mb-0.5">{s.emoji}</span>
-                      <p className={cn('text-[11px] font-semibold leading-tight', sel ? 'text-violet-300' : 'text-white/60')}>{s.label}</p>
+                      {e}
                     </button>
                   );
                 })}
@@ -1017,332 +989,172 @@ const OnboardingFlow: React.FC<Props> = ({ initialUserType, skipToJoinCode, onCo
             </div>
           </div>
 
-          <PrimaryBtn
-            disabled={!teacherExam}
-            onClick={() => go(2)}
-          >
-            Continue <ArrowRight className="w-5 h-5" />
-          </PrimaryBtn>
-
-          <GhostBtn onClick={() => go(0, -1)}>
-            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-          </GhostBtn>
+          <div className="flex gap-3">
+            <GhostBtn onClick={() => { setTrack(null); go(1, -1); }}>
+              Back
+            </GhostBtn>
+            <PrimaryBtn disabled={!institutionName || !teacherExam} onClick={() => go(2)}>
+              Continue <ArrowRight className="w-4 h-4" />
+            </PrimaryBtn>
+          </div>
         </div>
       );
     }
 
-    // ── TEACHER STEP 2: Goals ─────────────────────────────────────────────────
+    // ── TEACHER STEP 2: Choose Subjects ─────────────────────────────────────────
     if (step === 2 && track === 'teacher') {
-      if (!teacherExam) { toast.info("Let's complete the previous step first"); go(1, -1); return null; }
+      const toggleSubject = (val: string) => {
+        setTeacherSubjects(prev =>
+          prev.includes(val) ? prev.filter(p => p !== val) : [...prev, val]
+        );
+      };
+
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              What do you want from PrepEntrance?
+              Select Subjects
             </h1>
-            <p className="text-white/40 text-sm">Select all that apply — we'll personalise your dashboard</p>
+            <p className="text-white/40 text-sm">Which subjects do you teach in your batch?</p>
           </div>
 
-          <div className="space-y-2">
-            {TEACHER_GOALS.map(g => {
-              const sel = teacherGoals.includes(g.value);
+          <div className="grid grid-cols-2 gap-2">
+            {TEACHER_SUBJECTS.map(s => {
+              const selected = teacherSubjects.includes(s.value);
               return (
-                <motion.button
-                  key={g.value}
-                  whileTap={{ scale: 0.99 }}
+                <button
+                  key={s.value}
                   type="button"
-                  onClick={() => {
-                    if (g.value === 'all') {
-                      setTeacherGoals(sel ? [] : TEACHER_GOALS.map(x => x.value));
-                    } else {
-                      setTeacherGoals(prev => {
-                        const next = sel
-                          ? prev.filter(v => v !== 'all' && v !== g.value)
-                          : [...prev.filter(v => v !== 'all'), g.value];
-                        const individuals = TEACHER_GOALS.filter(x => x.value !== 'all').map(x => x.value);
-                        return individuals.every(v => next.includes(v)) ? [...next, 'all'] : next;
-                      });
-                    }
-                  }}
+                  onClick={() => toggleSubject(s.value)}
                   className={cn(
-                    'w-full px-4 py-3.5 rounded-xl border text-left flex items-center gap-3 transition-all duration-200',
-                    sel
-                      ? 'border-violet-400/40 bg-violet-400/[0.06] ring-1 ring-violet-400/20'
-                      : 'border-white/[0.07] hover:border-white/[0.14] hover:bg-white/[0.02]'
+                    'p-4 rounded-xl border text-left flex items-center justify-between transition-all',
+                    selected ? 'border-amber-400 bg-amber-400/5 text-amber-400 font-bold' : 'border-white/[0.08] text-white/70 hover:border-white/20'
                   )}
                 >
-                  <span className="text-xl w-7 shrink-0">{g.emoji}</span>
-                  <p className={cn('text-sm font-semibold flex-1', sel ? 'text-violet-300' : 'text-white/70')}>{g.label}</p>
+                  <span className="text-sm">{s.emoji} {s.label}</span>
                   <div className={cn(
-                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                    sel ? 'bg-violet-400 border-violet-400' : 'border-white/20'
+                    'w-4 h-4 rounded border flex items-center justify-center shrink-0',
+                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
                   )}>
-                    {sel && <Check className="w-3 h-3 text-slate-950 stroke-[3]" />}
+                    {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
                   </div>
-                </motion.button>
+                </button>
               );
             })}
           </div>
 
-          <PrimaryBtn
-            disabled={teacherGoals.length === 0}
-            onClick={() => go(3)}
-            className="from-violet-400 to-violet-500 shadow-violet-500/25"
-          >
-            Continue <ArrowRight className="w-5 h-5" />
-          </PrimaryBtn>
-
-          <GhostBtn onClick={() => go(1, -1)}>
-            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-          </GhostBtn>
+          <div className="flex gap-3">
+            <GhostBtn onClick={() => go(1, -1)}>
+              Back
+            </GhostBtn>
+            <PrimaryBtn disabled={teacherSubjects.length === 0} onClick={() => go(3)}>
+              Continue <ArrowRight className="w-4 h-4" />
+            </PrimaryBtn>
+          </div>
         </div>
       );
     }
 
-    // ── TEACHER STEP 3: Create batch ──────────────────────────────────────────
+    // ── TEACHER STEP 3: Create Batch ────────────────────────────────────────────
     if (step === 3 && track === 'teacher') {
-      if (teacherGoals.length === 0) { toast.info("Let's complete the previous step first"); go(2, -1); return null; }
       return (
         <div className="space-y-6">
           <div className="text-center space-y-2">
-            <div className="w-14 h-14 rounded-2xl bg-violet-400/10 border border-violet-400/20 flex items-center justify-center mx-auto mb-4">
-              <Users className="w-7 h-7 text-violet-400" />
-            </div>
             <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Create your first batch
+              Create your Classroom Batch
             </h1>
-            <p className="text-white/40 text-sm">Students will join using a unique code</p>
+            <p className="text-white/40 text-sm">Students will use this batch to join your isolated classroom.</p>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-white/50 text-xs font-bold uppercase tracking-wider">Batch name</label>
+          <div>
+            <label className="block text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Classroom Batch Name</label>
             <input
               autoFocus
               type="text"
               value={batchName}
               onChange={e => setBatchName(e.target.value)}
-              placeholder={`e.g. ${EXAM_MAP[teacherExam] ?? 'JEE'} 2026 Batch A`}
-              className="w-full h-12 bg-white/[0.04] border border-white/[0.08] rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:border-violet-400/40 focus:ring-1 focus:ring-violet-400/20 transition-all px-4 text-sm"
+              placeholder="e.g. JEE 2026 Achiever Batch"
+              className="w-full h-13 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 text-white text-sm focus:outline-none focus:border-amber-400/40"
             />
           </div>
 
-          <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] p-4 flex items-start gap-3">
-            <Sparkles className="w-4 h-4 text-violet-400 mt-0.5 shrink-0" />
-            <p className="text-white/50 text-xs leading-relaxed">
-              A unique join code will be generated for this batch. Share it with your students so they can join.
-            </p>
+          <div className="flex gap-3">
+            <GhostBtn onClick={() => go(2, -1)}>
+              Back
+            </GhostBtn>
+            <PrimaryBtn loading={saving} disabled={!batchName} onClick={createTeacherBatch}>
+              {saving ? 'Creating Batch...' : 'Generate Batch Code'}
+            </PrimaryBtn>
           </div>
-
-          <PrimaryBtn
-            loading={saving}
-            onClick={createTeacherBatch}
-            className="from-violet-400 to-violet-500 shadow-violet-500/25"
-          >
-            Generate Join Code <Rocket className="w-5 h-5" />
-          </PrimaryBtn>
-
-          <GhostBtn onClick={() => go(2, -1)}>
-            <ArrowLeft className="w-4 h-4 inline mr-1.5" />Back
-          </GhostBtn>
         </div>
       );
     }
 
-    // ── TEACHER STEP 4: Show join code ─────────────────────────────────────────
+    // ── TEACHER STEP 4: Display Code & Finish ──────────────────────────────────
     if (step === 4 && track === 'teacher') {
-      if (!generatedCode) { toast.info("Let's complete the previous step first"); go(3, -1); return null; }
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 280, damping: 20 }}
-              className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4"
-            >
-              <CheckCircle2 className="w-8 h-8 text-emerald-400" />
-            </motion.div>
-            <p className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em]">Batch Created!</p>
-            <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Your join code
-            </h1>
-            <p className="text-white/40 text-sm">Share this with your students</p>
-          </div>
-
-          {/* Code display */}
-          <div className="bg-white/[0.04] rounded-2xl border border-white/[0.1] p-6 text-center space-y-4">
-            <div className="font-mono text-4xl font-black tracking-[0.4em] text-amber-400 select-all">
-              {generatedCode}
-            </div>
-            <p className="text-white/30 text-xs break-all select-all">
-              {`${window.location.origin || 'https://app.setulearn.com'}/join/${generatedCode}`}
-            </p>
-            <div className="flex gap-3">
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={copyCode}
-                className="flex-1 h-11 rounded-xl border border-white/[0.1] bg-white/[0.03] hover:bg-white/[0.07] text-white/70 hover:text-white transition-all flex items-center justify-center gap-2 text-sm font-medium"
-              >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                {copied ? 'Copied!' : 'Copy'}
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={() => {
-                  const origin = window.location.origin || 'https://app.setulearn.com';
-                  const text = encodeURIComponent(`Join my batch on PrepEntrance! Use code ${generatedCode} or click: ${origin}/join/${generatedCode}`);
-                  window.open(`https://wa.me/?text=${text}`, '_blank');
-                }}
-                className="flex-1 h-11 rounded-xl border border-green-500/20 bg-green-500/[0.06] hover:bg-green-500/[0.1] text-green-400 hover:text-green-300 transition-all flex items-center justify-center gap-2 text-sm font-medium"
-              >
-                <Share2 className="w-4 h-4" /> WhatsApp
-              </motion.button>
-            </div>
-          </div>
-
-          <div className="bg-violet-500/[0.07] rounded-2xl border border-violet-500/15 p-4 space-y-2">
-            {[
-              'Students enter this code in the PrepEntrance app to join',
-              'You can find it anytime in your Batches section',
-              'Create more batches from your dashboard',
-            ].map((tip, i) => (
-              <div key={i} className="flex items-start gap-2.5 text-sm text-white/50">
-                <div className="w-1.5 h-1.5 rounded-full bg-violet-400 mt-1.5 shrink-0" />
-                {tip}
-              </div>
-            ))}
-          </div>
-
-          <PrimaryBtn
-            loading={saving}
-            onClick={completeTeacher}
-            className="from-violet-400 to-violet-500 shadow-violet-500/25"
-          >
-            Save & Continue <ArrowRight className="w-5 h-5" />
-          </PrimaryBtn>
-        </div>
-      );
-    }
-
-    // ── TEACHER STEP 5: Completion ─────────────────────────────────────────────
-    if (step === 5 && track === 'teacher') {
-      if (!profileSaved) { toast.info("Let's complete the previous step first"); go(4, -1); return null; }
       return (
         <div className="space-y-6 text-center">
-          <motion.div
-            initial={{ scale: 0, rotate: -10 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-            className="w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-400/20 to-amber-600/20 border border-amber-400/30 flex items-center justify-center mx-auto"
-          >
-            <Rocket className="w-10 h-10 text-amber-400" />
-          </motion.div>
+          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-2">
+            <CheckCircle2 className="w-8 h-8 text-emerald-400" />
+          </div>
 
           <div className="space-y-2">
-            <p className="text-amber-400 text-xs font-black uppercase tracking-[0.2em]">You're all set!</p>
             <h1 className="text-white text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              Your portal is ready
+              Classroom Batch is Live!
             </h1>
-            <p className="text-white/40 text-sm leading-relaxed">
-              Your batch is live and students can join right now. Head to the dashboard to get started.
-            </p>
+            <p className="text-white/40 text-sm">Share this unique batch code with your students so they can join.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 text-left">
-            {[
-              { icon: Users,  label: 'Batch',    value: batchName || `${EXAM_MAP[teacherExam] ?? 'My'} Batch` },
-              { icon: Brain,  label: 'Exam',     value: EXAM_MAP[teacherExam] ?? '—' },
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="bg-white/[0.03] rounded-2xl border border-white/[0.06] p-4 text-center">
-                <Icon className="w-5 h-5 text-violet-400 mx-auto mb-1.5" />
-                <p className="text-white/30 text-[10px] font-bold uppercase tracking-wider">{label}</p>
-                <p className="text-white font-semibold text-sm mt-0.5 truncate">{value}</p>
-              </div>
-            ))}
+          {/* Batch Code Display Box */}
+          <div className="bg-white/[0.02] border border-white/[0.08] rounded-2xl p-5 space-y-4 max-w-xs mx-auto">
+            <div className="text-3xl font-black text-amber-400 font-mono tracking-widest uppercase">
+              {generatedCode}
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <Button size="sm" onClick={copyCode} className="h-9 px-4 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-white flex items-center gap-2">
+                <Copy className="w-3.5 h-3.5" /> {copied ? 'Copied!' : 'Copy Code'}
+              </Button>
+            </div>
           </div>
 
-          <PrimaryBtn
-            onClick={() => navigate('/b2b/invite')}
-            className="from-violet-400 to-violet-500 shadow-violet-500/25"
-          >
-            <Users className="w-5 h-5" /> Add your first student
+          <PrimaryBtn onClick={() => { window.location.href = '/b2b'; }}>
+            Launch Teacher Portal <ArrowRight className="w-4 h-4" />
           </PrimaryBtn>
-
-          <motion.button
-            whileTap={{ scale: 0.97 }}
-            onClick={() => {
-              const origin = window.location.origin || 'https://app.setulearn.com';
-              const text = encodeURIComponent(`Join my batch on PrepEntrance! Use code ${generatedCode} or click: ${origin}/join/${generatedCode}`);
-              window.open(`https://wa.me/?text=${text}`, '_blank');
-            }}
-            className="w-full h-11 rounded-xl border border-green-500/20 bg-green-500/[0.06] hover:bg-green-500/[0.1] text-green-400 hover:text-green-300 transition-all flex items-center justify-center gap-2 text-sm font-medium"
-          >
-            <Share2 className="w-4 h-4" /> Share invite via WhatsApp
-          </motion.button>
-
-          <GhostBtn onClick={() => navigate('/b2b')}>
-            Skip — go to dashboard
-          </GhostBtn>
         </div>
       );
     }
-
-    return null;
   };
 
-  // ─── Layout ────────────────────────────────────────────────────────────────
-
-  const isTeacher = track === 'teacher';
-
-  let currentDotIndex = step - 1;
-  if (!isTeacher && track === 'student') {
-    if (!isCoaching) {
-      currentDotIndex = step === 1 ? 0 : step - 2;
-    } else {
-      currentDotIndex = step - 1;
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-[#0B0F1A] flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-[#06080D] relative flex items-center justify-center p-4">
       <GlowBg />
-
-      <header className="relative z-10 pt-8 pb-4 px-5 sm:px-6">
-        <div className="max-w-lg mx-auto flex flex-col items-center gap-4">
-          <Logo size="lg" />
-          {step > 0 && (
-            <StepDots
-              total={isTeacher ? totalTeacherSteps : totalStudentSteps}
-              current={Math.max(0, Math.min(currentDotIndex, (isTeacher ? totalTeacherSteps : totalStudentSteps) - 1))}
-            />
+      
+      <div className="w-full max-w-[480px] relative z-10 space-y-6 py-10">
+        <div className="flex items-center justify-between px-2">
+          {/* Only display dots for active steps */}
+          {track === 'student' && step > 1 && step <= 7 && (
+            <StepDots total={6} current={step - 2} />
+          )}
+          {track === 'teacher' && step <= 4 && (
+            <StepDots total={4} current={step - 1} />
           )}
         </div>
-      </header>
 
-      <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
-        <div className="w-full max-w-md">
-          <Card>
-            <AnimatePresence mode="wait" custom={dir}>
-              <motion.div
-                key={`${track ?? 'role'}-${step}`}
-                custom={dir}
-                variants={slide}
-                initial="enter"
-                animate="center"
-                exit="exit"
-              >
-                {renderStep()}
-              </motion.div>
-            </AnimatePresence>
-          </Card>
-
-          {/* Security note */}
-          <div className="mt-5 flex items-center justify-center gap-2 text-white/10">
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-            <span className="text-[10px] tracking-wide">Secured with Supabase Auth</span>
-          </div>
-        </div>
-      </main>
+        <Card>
+          <AnimatePresence mode="wait" custom={dir}>
+            <motion.div
+              key={`${track}-${step}`}
+              custom={dir}
+              variants={slide}
+              initial="enter"
+              animate="center"
+              exit="exit"
+            >
+              {renderStep()}
+            </motion.div>
+          </AnimatePresence>
+        </Card>
+      </div>
     </div>
   );
 };
