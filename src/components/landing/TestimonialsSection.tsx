@@ -1,168 +1,205 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const TESTIMONIALS_ROW_1 = [
+interface Testimonial {
+  initials: string;
+  name: string;
+  tag: string;
+  quote: string;
+  avatarBg: string;
+  avatarColor: string;
+}
+
+const TESTIMONIALS: Testimonial[] = [
   {
-    quote: "PrepEntrance helped me identify exactly where I was losing marks. Within two weeks I could see the difference in my mock scores.",
-    name: "Arjun S.",
-    tag: "JEE Main Aspirant",
-    initials: "AS",
-    color: "#FF9B54",
+    initials: 'RS',
+    name: 'Rahul Sharma',
+    tag: 'JEE Advanced Aspirant',
+    quote: '"The AI mentor explained thermodynamics better than my coaching teacher. My mock score jumped from 85 to 142 in just 6 weeks."',
+    avatarBg: 'bg-[#EFF6FF]',
+    avatarColor: 'text-[#2563EB]',
   },
   {
-    quote: "The weakness detection is genuinely useful. It doesn't just tell you what you got wrong — it shows you the pattern.",
-    name: "Priya M.",
-    tag: "NEET Aspirant",
-    initials: "PM",
-    color: "#60a5fa",
+    initials: 'PN',
+    name: 'Priya Nair',
+    tag: 'NEET Aspirant',
+    quote: '"Daily study plans kept me consistent for 3 months straight. I never had to wonder what to study next."',
+    avatarBg: 'bg-[#F0FDF4]',
+    avatarColor: 'text-[#16A34A]',
   },
   {
-    quote: "I used to revise everything randomly. Now I have a structured daily plan and my accuracy in Chemistry has improved significantly.",
-    name: "Rohan K.",
-    tag: "CUET Aspirant",
-    initials: "RK",
-    color: "#34d399",
+    initials: 'AK',
+    name: 'Arjun Kapoor',
+    tag: 'JEE Mains Aspirant',
+    quote: '"Snap & Solve is unbelievable. I cleared my entire Physics backlog in one weekend. Highly recommend."',
+    avatarBg: 'bg-[#FFF7ED]',
+    avatarColor: 'text-[#FF6B00]',
   },
   {
-    quote: "The 1-page smart revision notes are a lifesaver. I revised the entire Optics chapter in just 5 minutes before my test.",
-    name: "Sneha D.",
-    tag: "Board Student",
-    initials: "SD",
-    color: "#c084fc",
-  },
-  {
-    quote: "The AI mentor explains physics concepts better than my coaching teacher. No fluff, just pure clarity.",
-    name: "Vikram R.",
-    tag: "JEE Advanced Aspirant",
-    initials: "VR",
-    color: "#f472b6",
+    initials: 'SM',
+    name: 'Sneha Mehta',
+    tag: 'CUET Aspirant',
+    quote: '"The rank predictor was shockingly accurate. Helped me finalize my college strategy 2 months before the exam."',
+    avatarBg: 'bg-[#FDF4FF]',
+    avatarColor: 'text-[#9333EA]',
   },
 ];
 
-const TESTIMONIALS_ROW_2 = [
-  {
-    quote: "I was stuck at 450 in NEET mocks. PrepEntrance's diagnostic engine pinpointed my gaps in Plant Physiology. Scored 580 last week!",
-    name: "Ananya T.",
-    tag: "NEET Aspirant",
-    initials: "AT",
-    color: "#2dd4bf",
-  },
-  {
-    quote: "The best part is how it tracks my time allocation. I realized I was spending way too much time on easy questions.",
-    name: "Kabir M.",
-    tag: "JEE Main Aspirant",
-    initials: "KM",
-    color: "#fbbf24",
-  },
-  {
-    quote: "CUET pattern questions are hard to find. The AI generates authentic, NCERT-based MCQs that perfectly match the real exam.",
-    name: "Riya P.",
-    tag: "CUET Aspirant",
-    initials: "RP",
-    color: "#818cf8",
-  },
-  {
-    quote: "Being able to just ask the AI mentor to simplify a complex Organic Chemistry reaction changed the game for me.",
-    name: "Aditya V.",
-    tag: "JEE Aspirant",
-    initials: "AV",
-    color: "#e879f9",
-  },
-  {
-    quote: "It feels like having a personal tutor who knows exactly what I need to study today. Highly recommended for self-studiers.",
-    name: "Meera J.",
-    tag: "NEET Aspirant",
-    initials: "MJ",
-    color: "#a3e635",
-  },
-];
+const TestimonialsSection: React.FC = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-const TestimonialCard = ({ t }: { t: any }) => (
-  <div className="w-[350px] sm:w-[400px] shrink-0 whitespace-normal rounded-2xl border border-white/[0.08] bg-[#0E1726]/80 p-7 transition-all duration-300 hover:border-white/[0.2] hover:bg-[#0E1726] mx-3">
-    <div className="text-4xl font-serif text-white/10 leading-none mb-4 select-none">"</div>
-    <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed mb-6">
-      {t.quote}
-    </p>
-    <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06]">
-      <div
-        className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-        style={{ backgroundColor: t.color + '22', border: `1px solid ${t.color}44` }}
-      >
-        {t.initials}
+  // Since we show 2 testimonials at a time on desktop, total slides = length - 1
+  const totalSlides = TESTIMONIALS.length - 1;
+
+  const handleNext = () => {
+    setActiveIndex((prev) => (prev >= totalSlides ? 0 : prev + 1));
+  };
+
+  const handlePrev = () => {
+    setActiveIndex((prev) => (prev <= 0 ? totalSlides : prev - 1));
+  };
+
+  useEffect(() => {
+    if (isPaused) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+
+    timerRef.current = setInterval(() => {
+      handleNext();
+    }, 5000); // 5s interval
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPaused, activeIndex]);
+
+  return (
+    <section 
+      id="testimonials" 
+      className="py-20 bg-[#FAFAF7] select-none overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <div className="max-w-7xl mx-auto px-5 sm:px-20 relative z-10">
+        
+        {/* Header Section with Navigation controls */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="text-left">
+            <h2 className="text-3xl sm:text-[42px] font-display font-black text-[#0D1117] leading-tight">
+              What our <span className="text-[#FF6B00]">students</span> have to say?
+            </h2>
+            <p className="text-[#6B7280] text-base sm:text-lg font-sans mt-2">
+              Hear it from the toppers.
+            </p>
+          </div>
+
+          {/* Navigation Arrows */}
+          <div className="flex items-center gap-3 self-start md:self-end">
+            <button
+              onClick={handlePrev}
+              className="w-11 h-11 rounded-xl border border-[#F0EDE6] hover:border-[#FF6B00]/40 bg-white hover:bg-[#FF6B00]/5 flex items-center justify-center text-[#374151] hover:text-[#FF6B00] transition-all duration-300 shadow-sm"
+              aria-label="Previous Testimonials"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleNext}
+              className="w-11 h-11 rounded-xl border border-[#F0EDE6] hover:border-[#FF6B00]/40 bg-white hover:bg-[#FF6B00]/5 flex items-center justify-center text-[#374151] hover:text-[#FF6B00] transition-all duration-300 shadow-sm"
+              aria-label="Next Testimonials"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Carousel sliding view */}
+        <div className="relative overflow-hidden w-full py-4">
+          <div 
+            className="flex transition-transform duration-500 ease-out gap-6"
+            style={{ transform: `translateX(-${activeIndex * 50}%)` }}
+          >
+            {TESTIMONIALS.map((t, idx) => (
+              <div 
+                key={idx}
+                className="reveal w-full md:w-[48%] shrink-0 whitespace-normal rounded-2xl bg-white border-[1.5px] border-[#F0EDE6] p-7 shadow-sm hover:border-[#FF6B00]/30 transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  {/* Top row: Avatar circle + name + exam tag */}
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {/* Initials Custom Color Avatar (44px circle) with Verified Badge */}
+                      <div className="relative shrink-0 select-none">
+                        <div className={`w-11 h-11 rounded-full ${t.avatarBg} ${t.avatarColor} font-display font-black flex items-center justify-center text-sm shadow-sm`}>
+                          {t.initials}
+                        </div>
+                        {/* Small verified checkmark circle (16px, bg #FF6B00) */}
+                        <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-[#FF6B00] border border-white text-white font-sans font-black flex items-center justify-center text-[9px] shadow-sm select-none">
+                          ✓
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h4 className="text-[#0D1117] text-sm sm:text-base font-bold font-display leading-tight">{t.name}</h4>
+                        <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#F0F9FF] text-[#0369A1] font-sans font-bold text-[10px] mt-1 shadow-sm">
+                          {t.tag}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stars + star count text */}
+                  <div className="flex items-center gap-2 my-3 select-none">
+                    <div className="flex gap-1 text-[#FF6B00] text-lg">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span key={i}>★</span>
+                      ))}
+                    </div>
+                    {/* Add star count text: "5.0" next to stars in Inter 600 14px #FF6B00 */}
+                    <span className="font-sans font-semibold text-sm text-[#FF6B00] mt-0.5">5.0</span>
+                  </div>
+
+                  {/* Quote: Inter 400 15px #374151 italic */}
+                  <p className="text-[#374151] text-sm sm:text-[15px] font-sans font-medium italic leading-relaxed">
+                    {t.quote}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Indicator dots */}
+        <div className="flex justify-center items-center gap-2 mt-8 select-none">
+          {Array.from({ length: TESTIMONIALS.length - 1 }).map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveIndex(idx)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                activeIndex === idx ? 'w-6 bg-[#FF6B00]' : 'w-2 bg-white/20 border border-gray-300'
+              }`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+
       </div>
-      <div>
-        <p className="text-white text-sm font-semibold">{t.name}</p>
-        <p className="text-[#94A3B8] text-xs">{t.tag}</p>
-      </div>
-    </div>
-  </div>
-);
 
-const TestimonialsSection: React.FC = () => (
-  <section id="testimonials" className="py-28 relative overflow-hidden">
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_100%,rgba(59,130,246,0.04),transparent)]" />
-    
-    <div className="max-w-7xl mx-auto px-5 sm:px-8 relative z-10">
-      <div className="text-center max-w-xl mx-auto mb-16">
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-xs font-bold uppercase tracking-[0.2em] text-[#FF9B54] mb-4"
-        >
-          Validation
-        </motion.p>
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
-          className="text-4xl sm:text-5xl font-bold text-white tracking-tight"
-        >
-          What Aspirants Say
-        </motion.h2>
-      </div>
-    </div>
-
-    {/* Marquee Track 1 (Left to Right) */}
-    <div className="relative flex overflow-x-hidden group mb-6">
-      <div 
-        className="flex whitespace-nowrap group-hover:[animation-play-state:paused]"
-        style={{ animation: 'marquee 40s linear infinite' }}
-      >
-        {[...TESTIMONIALS_ROW_1, ...TESTIMONIALS_ROW_1, ...TESTIMONIALS_ROW_1].map((t, i) => (
-          <TestimonialCard key={i} t={t} />
-        ))}
-      </div>
-    </div>
-
-    {/* Marquee Track 2 (Right to Left) */}
-    <div className="relative flex overflow-x-hidden group">
-      <div 
-        className="flex whitespace-nowrap group-hover:[animation-play-state:paused]"
-        style={{ animation: 'marquee-reverse 45s linear infinite' }}
-      >
-        {[...TESTIMONIALS_ROW_2, ...TESTIMONIALS_ROW_2, ...TESTIMONIALS_ROW_2].map((t, i) => (
-          <TestimonialCard key={i} t={t} />
-        ))}
-      </div>
-    </div>
-
-    {/* Left/Right Fades */}
-    <div className="pointer-events-none absolute inset-y-0 left-0 w-1/6 bg-gradient-to-r from-[#07111F] to-transparent z-20" />
-    <div className="pointer-events-none absolute inset-y-0 right-0 w-1/6 bg-gradient-to-l from-[#07111F] to-transparent z-20" />
-
-    <style>{`
-      @keyframes marquee {
-        0% { transform: translateX(0); }
-        100% { transform: translateX(-33.333%); }
-      }
-      @keyframes marquee-reverse {
-        0% { transform: translateX(-33.333%); }
-        100% { transform: translateX(0); }
-      }
-    `}</style>
-  </section>
-);
+      {/* Responsive mobile slider logical overlay */}
+      <style>{`
+        @media (max-width: 768px) {
+          #testimonials .flex {
+            transform: translateX(-${activeIndex * 100}%) !important;
+          }
+          #testimonials .shrink-0 {
+            width: 100% !important;
+          }
+        }
+      `}</style>
+    </section>
+  );
+};
 
 export default TestimonialsSection;

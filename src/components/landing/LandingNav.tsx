@@ -1,203 +1,214 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, X } from 'lucide-react';
-
-const EXAMS = [
-  { label: 'JEE Main & Advanced', sub: 'Physics · Chemistry · Maths',   emoji: '🚀', path: '/auth?exam=jee' },
-  { label: 'NEET',                sub: 'Physics · Chemistry · Biology', emoji: '🔬', path: '/auth?exam=neet' },
-  { label: 'CUET',                sub: 'General Test · Domains',        emoji: '🏛️', path: '/auth?exam=cuet' },
-];
+import { Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
-  { label: 'Features',     href: '#features' },
-  { label: 'AI Mentor',    href: '#ai-engine' },
-  { label: 'Results',      href: '#results' },
-  { label: 'Pricing',      href: '#pricing' },
-  { label: 'About Us',      href: '#leadership' },
+  { label: 'Home',        id: 'hero' },
+  { label: 'AI Mentor',   id: 'challenges' },
+  { label: 'Features',    id: 'features' },
+  { label: 'Test Series', id: 'pricing' },
+  { label: 'Pricing',     id: 'pricing' },
+  { label: 'About Us',    id: 'footer' },
 ];
 
 const LandingNav: React.FC = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const [examOpen, setExamOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [bannerVisible, setBannerVisible] = useState(true);
+  const [activeSection, setActiveSection] = useState('hero');
 
+  // Track active section and navbar scrolling
   useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 16);
-    window.addEventListener('scroll', h);
-    return () => window.removeEventListener('scroll', h);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+      
+      const sections = NAV_LINKS.map(link => link.id);
+      const uniqueSections = Array.from(new Set(sections));
+      
+      for (const sectionId of uniqueSections) {
+        const el = document.getElementById(sectionId);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          // If section is currently centered or occupying the top viewport segment
+          if (rect.top <= 140 && rect.bottom >= 140) {
+            setActiveSection(sectionId);
+            break;
+          }
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollTo = (href: string) => {
-    document.getElementById(href.replace('#', ''))?.scrollIntoView({ behavior: 'smooth' });
+  const scrollTo = (id: string) => {
     setMobileOpen(false);
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      scrollTo(id);
+    }
   };
 
   return (
-    <>
-      {/* ── Top announcement strip ── */}
-      <AnimatePresence>
-        {bannerVisible && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="bg-gradient-to-r from-[#FF9B54]/90 via-[#f07020]/90 to-[#FF9B54]/90 text-[#07111F] text-center text-xs sm:text-sm font-semibold py-2.5 px-4 flex items-center justify-center gap-3 relative"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#07111F]/50 animate-pulse shrink-0" />
-            🎓 Early Access is LIVE — AI Prep for JEE · NEET · CUET at just ₹349/month
-            <button
-              onClick={() => navigate('/auth?mode=signup')}
-              className="ml-2 px-3 py-0.5 rounded-full bg-[#07111F]/20 hover:bg-[#07111F]/30 transition text-xs font-bold"
-            >
-              Claim Now →
-            </button>
-            <button
-              onClick={() => setBannerVisible(false)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-[#07111F]/10 rounded-full transition"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <nav
+      className={`sticky top-0 z-50 w-full h-20 transition-all duration-300 flex items-center font-sans select-none border-b border-[#F0EDE6]/30 ${
+        scrolled 
+          ? 'bg-white/85 backdrop-blur-[20px] shadow-[0_2px_15px_rgba(0,0,0,0.03)]' 
+          : 'bg-white/95 backdrop-blur-md'
+      }`}
+      aria-label="Main Navigation"
+    >
+      {/* 80px padding on desktop (px-5 sm:px-20 matches 80px) */}
+      <div className="max-w-7xl mx-auto px-5 sm:px-20 w-full flex items-center justify-between">
+        
+        {/* Left: Brand Lockup (Logo increased 35% to h-11 w-11, spacing gaps matched) */}
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="flex items-center gap-3 shrink-0 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00] rounded-lg"
+          aria-label="PrepEntrance Home"
+        >
+          <img 
+            src="/prepentrance-logo.png" 
+            alt="PrepEntrance Logo" 
+            className="h-11 w-11 object-contain transition-transform duration-200 group-hover:scale-105" 
+          />
+          <span className="font-sans font-bold text-[20px] text-[#0D1117] tracking-tight leading-none">
+            PrepEntrance
+          </span>
+        </button>
 
-      {/* ── Main navbar ── */}
-      <motion.nav
-        initial={{ y: -16, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-[#07111F]/90 backdrop-blur-2xl border-b border-white/[0.07] shadow-2xl shadow-black/40'
-            : 'bg-[#07111F]/60 backdrop-blur-lg border-b border-white/[0.04]'
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center gap-4">
-
-          {/* Logo */}
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="flex items-center gap-2.5 shrink-0 group mr-2"
-          >
-            <img src="/prepentrance-logo.png" alt="PrepEntrance" className="h-8 w-8 object-contain" />
-            <span className="font-bold text-lg text-white tracking-wide hidden sm:block">PrepEntrance</span>
-          </button>
-
-          {/* All Exams dropdown */}
-          <div className="relative">
+        {/* Center: nav links with motion active orange underlines */}
+        <div className="hidden lg:flex items-center gap-7">
+          {NAV_LINKS.map(l => (
             <button
-              onClick={() => setExamOpen(!examOpen)}
-              className={`hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-xl border text-sm font-medium transition-all duration-200 ${
-                examOpen
-                  ? 'border-[#FF9B54]/50 bg-[#FF9B54]/10 text-[#FF9B54]'
-                  : 'border-white/[0.12] text-white/80 hover:border-white/25 hover:text-white'
+              key={l.label}
+              onClick={() => scrollTo(l.id)}
+              onKeyDown={(e) => handleKeyDown(e, l.id)}
+              className={`relative py-1 text-[15px] font-semibold transition-colors duration-200 focus:outline-none focus-visible:text-[#FF6B00] ${
+                activeSection === l.id ? 'text-[#FF6B00]' : 'text-[#374151] hover:text-[#FF6B00]'
               }`}
+              aria-label={`Scroll to ${l.label}`}
             >
-              All Exams
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${examOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <AnimatePresence>
-              {examOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                  transition={{ duration: 0.18 }}
-                  className="absolute top-full left-0 mt-2 w-72 rounded-2xl border border-white/[0.1] bg-[#0E1726]/95 backdrop-blur-2xl shadow-2xl shadow-black/50 overflow-hidden"
-                  onMouseLeave={() => setExamOpen(false)}
-                >
-                  {EXAMS.map(e => (
-                    <button
-                      key={e.label}
-                      onClick={() => { navigate(e.path); setExamOpen(false); }}
-                      className="w-full flex items-center gap-3 px-5 py-4 hover:bg-white/[0.05] transition-colors text-left group border-b border-white/[0.04] last:border-0"
-                    >
-                      <span className="text-xl shrink-0">{e.emoji}</span>
-                      <div>
-                        <p className="text-white font-semibold text-sm group-hover:text-[#FF9B54] transition-colors">{e.label}</p>
-                        <p className="text-[#94A3B8] text-xs">{e.sub}</p>
-                      </div>
-                    </button>
-                  ))}
-                </motion.div>
+              {l.label}
+              {activeSection === l.id && (
+                <motion.span
+                  layoutId="activeNavUnderline"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FF6B00] rounded-full"
+                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                />
               )}
-            </AnimatePresence>
-          </div>
-
-          {/* Nav links */}
-          <div className="hidden lg:flex items-center gap-0.5 flex-1">
-            {NAV_LINKS.map(l => (
-              <button
-                key={l.label}
-                onClick={() => scrollTo(l.href)}
-                className="px-3.5 py-2 text-sm text-[#94A3B8] hover:text-white hover:bg-white/[0.04] rounded-lg transition-all"
-              >
-                {l.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Right CTAs */}
-          <div className="hidden md:flex items-center gap-3 ml-auto">
-            <button
-              onClick={() => navigate('/auth')}
-              className="text-sm font-bold px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#FF9B54] to-[#f07020] text-[#07111F] hover:brightness-110 transition-all shadow-lg shadow-[#FF9B54]/25 hover:-translate-y-0.5 duration-200"
-            >
-              Login / Get Started
             </button>
-          </div>
+          ))}
+        </div>
 
-          {/* Mobile toggle */}
+        {/* Right: Premium Unicorn startup buttons */}
+        <div className="hidden md:flex items-center gap-4">
+          {/* Ghost button, scale 1.03 on hover, fill orange on hover */}
           <button
-            className="md:hidden ml-auto p-2 text-white/60 hover:text-white"
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => navigate('/login')}
+            className="text-[14px] font-bold px-5 py-2.5 rounded-lg border-[1.5px] border-[#FF6B00] text-[#FF6B00] bg-transparent hover:bg-[#FF6B00] hover:text-white hover:scale-[1.03] transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]"
+            aria-label="Log in to your account"
           >
-            <div className="space-y-1.5 w-5">
-              <span className={`block h-0.5 bg-current transition-all origin-center ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`} />
-              <span className={`block h-0.5 bg-current transition-all ${mobileOpen ? 'opacity-0 scale-x-0' : ''}`} />
-              <span className={`block h-0.5 bg-current transition-all origin-center ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-            </div>
+            Login
+          </button>
+          
+          {/* Solid orange button with gradient hover, slight lift, premium shadow */}
+          <button
+            onClick={() => navigate('/signup')}
+            className="text-[14px] font-bold px-[22px] py-2.5 rounded-lg bg-[#FF6B00] hover:bg-gradient-to-r hover:from-[#FF6B00] hover:to-[#E55A00] text-white hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md shadow-[#FF6B00]/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00]"
+            aria-label="Start your free trial"
+          >
+            Free Trial →
           </button>
         </div>
 
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {mobileOpen && (
+        {/* Mobile toggle */}
+        <button
+          className="lg:hidden p-2 text-[#0D1117] hover:text-[#FF6B00] transition-colors focus:outline-none"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle Navigation Menu"
+        >
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+
+      {/* Mobile DrawerOverlay slides from right */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+            />
+            {/* Drawer */}
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-[#0E1726]/98 border-t border-white/[0.06] px-5 py-4 space-y-1 overflow-hidden"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.25 }}
+              className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-white border-l border-[#F0EDE6] p-6 flex flex-col gap-6 lg:hidden"
             >
-              {EXAMS.map(e => (
-                <button key={e.label} onClick={() => { navigate(e.path); setMobileOpen(false); }}
-                  className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-white/[0.04] text-left">
-                  <span>{e.emoji}</span>
-                  <span className="text-white text-sm font-medium">{e.label}</span>
+              <div className="flex items-center justify-between">
+                <span className="font-sans font-extrabold text-[#0D1117] text-lg">Menu</span>
+                <button 
+                  onClick={() => setMobileOpen(false)}
+                  className="p-1 rounded-full text-[#0D1117]/60 hover:bg-black/5 focus:outline-none"
+                  aria-label="Close menu"
+                >
+                  <X className="w-5 h-5" />
                 </button>
-              ))}
-              <div className="my-2 border-t border-white/[0.06]" />
-              {NAV_LINKS.map(l => (
-                <button key={l.label} onClick={() => scrollTo(l.href)}
-                  className="block w-full text-left px-3 py-2.5 text-sm text-[#94A3B8] hover:text-white rounded-lg">
-                  {l.label}
+              </div>
+
+              <div className="flex flex-col gap-3 pt-2">
+                {NAV_LINKS.map(l => (
+                  <button 
+                    key={l.label} 
+                    onClick={() => scrollTo(l.id)}
+                    className={`text-left py-2.5 text-base font-bold font-sans border-b border-[#F0EDE6]/50 transition-colors focus:outline-none ${
+                      activeSection === l.id ? 'text-[#FF6B00]' : 'text-[#374151] hover:text-[#FF6B00]'
+                    }`}
+                    aria-label={`Scroll to ${l.label}`}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-[#F0EDE6]/55">
+                <button 
+                  onClick={() => { navigate('/login'); setMobileOpen(false); }}
+                  className="w-full py-3 rounded-lg border-[1.5px] border-[#FF6B00] text-[#FF6B00] font-bold text-center hover:bg-[#FFF5EF] transition-all"
+                  aria-label="Log in page"
+                >
+                  Login
                 </button>
-              ))}
-              <div className="pt-3 space-y-2 border-t border-white/[0.06]">
-                <button onClick={() => { navigate('/auth'); setMobileOpen(false); }}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#FF9B54] to-[#f07020] text-[#07111F] font-bold text-sm">
-                  Login / Get Started
+                <button 
+                  onClick={() => { navigate('/signup'); setMobileOpen(false); }}
+                  className="w-full py-3 rounded-lg bg-[#FF6B00] text-white font-bold text-center hover:bg-[#E55A00] transition-all shadow-md shadow-[#FF6B00]/10"
+                  aria-label="Sign up page"
+                >
+                  Free Trial →
                 </button>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
-    </>
+          </>
+        )}
+      </AnimatePresence>
+    </nav>
   );
 };
 

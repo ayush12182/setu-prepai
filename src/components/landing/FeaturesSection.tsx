@@ -1,122 +1,116 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Brain, Target, Zap, BarChart3, RefreshCw, FileText } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, Bot, Camera, BarChart3 } from 'lucide-react';
 
-const FEATURES = [
+interface FeatureItem {
+  Icon: React.ComponentType<any>;
+  iconBg: string;
+  iconColor: string;
+  title: string;
+  desc: string;
+  isPopular?: boolean;
+}
+
+const FEATURES: FeatureItem[] = [
   {
-    icon: Brain,
-    title: 'Adaptive Learning Engine',
-    desc: 'AI dynamically changes difficulty based on student performance, ensuring every session is optimally challenging.',
-    color: 'from-violet-500/10 to-purple-500/5',
-    border: 'border-violet-500/15 hover:border-violet-500/30',
-    iconBg: 'bg-violet-500/10',
-    iconColor: 'text-violet-400',
+    Icon: Calendar,
+    iconBg: 'bg-[#EFF6FF]',
+    iconColor: 'text-[#2563EB]',
+    title: 'Daily Study Plans',
+    desc: 'Personalized schedules built around your weak areas and exam date.',
   },
   {
-    icon: Target,
-    title: 'Weakness Detection',
-    desc: 'Automatically identifies conceptual gaps across chapters and subjects with pinpoint accuracy.',
-    color: 'from-red-500/10 to-rose-500/5',
-    border: 'border-red-500/15 hover:border-red-500/30',
-    iconBg: 'bg-red-500/10',
-    iconColor: 'text-red-400',
+    Icon: Bot,
+    iconBg: 'bg-[#FFF7ED]',
+    iconColor: 'text-[#FF6B00]',
+    title: 'AI Mentor (24/7)',
+    desc: 'Ask anything, get instant concept explanations. 50,000+ questions answered.',
+    isPopular: true,
   },
   {
-    icon: Zap,
-    title: 'Smart Practice System',
-    desc: 'Practice is curated based on accuracy and retention patterns — not just syllabus order.',
-    color: 'from-[#FF9B54]/10 to-amber-500/5',
-    border: 'border-[#FF9B54]/15 hover:border-[#FF9B54]/30',
-    iconBg: 'bg-[#FF9B54]/10',
-    iconColor: 'text-[#FF9B54]',
+    Icon: Camera,
+    iconBg: 'bg-[#F0FDF4]',
+    iconColor: 'text-[#16A34A]',
+    title: 'Snap & Solve',
+    desc: 'Snap a photo, get your solution. Step-by-step solutions in under 3 seconds.',
   },
   {
-    icon: BarChart3,
-    title: 'AI Performance Analytics',
-    desc: 'Detailed exam-level insights, subject trends, and chapter-wise performance breakdowns.',
-    color: 'from-blue-500/10 to-cyan-500/5',
-    border: 'border-blue-500/15 hover:border-blue-500/30',
-    iconBg: 'bg-blue-500/10',
-    iconColor: 'text-blue-400',
-  },
-  {
-    icon: RefreshCw,
-    title: 'Precision Revision',
-    desc: 'Revision plans generated automatically based on spaced repetition and test proximity.',
-    color: 'from-emerald-500/10 to-teal-500/5',
-    border: 'border-emerald-500/15 hover:border-emerald-500/30',
-    iconBg: 'bg-emerald-500/10',
-    iconColor: 'text-emerald-400',
-  },
-  {
-    icon: FileText,
-    title: 'Mock Test Intelligence',
-    desc: 'Full-length test analytics with detailed improvement recommendations and rank trajectory.',
-    color: 'from-pink-500/10 to-fuchsia-500/5',
-    border: 'border-pink-500/15 hover:border-pink-500/30',
-    iconBg: 'bg-pink-500/10',
-    iconColor: 'text-pink-400',
+    Icon: BarChart3,
+    iconBg: 'bg-[#FDF4FF]',
+    iconColor: 'text-[#9333EA]',
+    title: 'Rank Predictor',
+    desc: 'See your expected rank based on your mock performance. Plan smarter.',
   },
 ];
 
-const FeaturesSection: React.FC = () => (
-  <section id="features" className="py-28 relative">
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_100%,rgba(255,155,84,0.04),transparent)]" />
-    <div className="max-w-7xl mx-auto px-5 sm:px-8">
-      {/* Header */}
-      <div className="text-center max-w-2xl mx-auto mb-18">
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-xs font-bold uppercase tracking-[0.2em] text-[#FF9B54] mb-4"
-        >
-          Capabilities
-        </motion.p>
-        <motion.h2
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
-          className="text-4xl sm:text-5xl font-bold text-white leading-tight tracking-tight mb-5"
-        >
-          Built for Serious Aspirants
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.15 }}
-          className="text-[#94A3B8] text-lg leading-relaxed"
-        >
-          Every feature is designed around one goal — improving your rank.
-        </motion.p>
-      </div>
+const FeaturesSection: React.FC = () => {
+  const navigate = useNavigate();
 
-      {/* Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {FEATURES.map((f, i) => (
-          <motion.div
-            key={f.title}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: i * 0.08 }}
-            whileHover={{ y: -4 }}
-            className={`relative rounded-2xl border bg-gradient-to-br ${f.color} ${f.border} p-7 transition-all duration-300 cursor-default group`}
-          >
-            <div className={`w-11 h-11 rounded-xl ${f.iconBg} flex items-center justify-center mb-5`}>
-              <f.icon className={`h-5 w-5 ${f.iconColor}`} />
+  const handleTryFeature = () => {
+    navigate('/signup');
+  };
+
+  return (
+    <section id="features" className="py-20 bg-white select-none">
+      <div className="max-w-7xl mx-auto px-5 sm:px-20">
+        
+        {/* Header Section */}
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <p className="text-xs font-bold uppercase tracking-[2px] text-[#FF6B00] mb-3 font-sans">
+            WHAT YOU GET
+          </p>
+          <h2 className="text-3xl sm:text-[42px] font-display font-black text-[#0D1117] leading-tight">
+            Everything You Need to <span className="text-[#FF6B00]">Crack the Exam</span>
+          </h2>
+          <p className="text-[#6B7280] text-base sm:text-lg font-sans mt-3">
+            One platform. Every tool. Zero compromise.
+          </p>
+        </div>
+
+        {/* 2x2 Grid of Feature Cards */}
+        <div className="grid md:grid-cols-2 gap-5 max-w-4xl mx-auto mt-12">
+          {FEATURES.map((item, index) => (
+            <div
+              key={index}
+              style={{ contentVisibility: 'auto' }}
+              className="reveal rounded-2xl bg-[#FAFAF7] border-[1.5px] border-[#F0EDE6] hover:border-[#FF6B00] p-7 transition-all duration-200 cursor-default overflow-hidden relative group hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(255,107,0,0.06)]"
+            >
+              {/* Optional "POPULAR" Badge at top-right corner */}
+              {item.isPopular && (
+                <span className="absolute top-4 right-4 bg-[#FF6B00] text-white font-sans font-extrabold text-[10px] px-3 py-1 rounded-full shadow-sm select-none">
+                  POPULAR
+                </span>
+              )}
+
+              {/* 56x56px rounded square icon container */}
+              <div className={`w-14 h-14 rounded-2xl ${item.iconBg} ${item.iconColor} flex items-center justify-center mb-5 shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-105`}>
+                <item.Icon className="w-7 h-7 stroke-[1.8]" />
+              </div>
+
+              {/* Title (Nunito, 800, 20px) */}
+              <h3 className="text-xl sm:text-[20px] font-bold text-[#0D1117] font-display mb-2">
+                {item.title}
+              </h3>
+
+              {/* Description (Inter, 400, 15px) */}
+              <p className="text-[#6B7280] text-sm sm:text-[15px] font-sans leading-relaxed mb-4">
+                {item.desc}
+              </p>
+
+              {/* Saffron Try this feature link */}
+              <button
+                onClick={handleTryFeature}
+                className="text-[14px] font-bold text-[#FF6B00] hover:underline flex items-center gap-0.5 bg-transparent border-none p-0 cursor-pointer"
+              >
+                Try this feature →
+              </button>
             </div>
-            <h3 className="text-white font-semibold text-lg mb-2.5 leading-snug">{f.title}</h3>
-            <p className="text-[#94A3B8] text-sm leading-relaxed">{f.desc}</p>
-            {/* Hover shimmer */}
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-br from-white/[0.02] to-transparent" />
-          </motion.div>
-        ))}
+          ))}
+        </div>
+
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default FeaturesSection;

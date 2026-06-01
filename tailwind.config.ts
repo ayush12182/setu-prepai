@@ -15,9 +15,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Inter"', 'sans-serif'],
         serif: ['Source Serif 4', 'Georgia', 'serif'],
-        display: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['"Nunito"', 'sans-serif'],
       },
       fontSize: {
         // Heading sizes with proper line-height
@@ -29,6 +29,9 @@ export default {
         'small': ['0.875rem', { lineHeight: '1.4', fontWeight: '400' }],
       },
       colors: {
+        navy: '#0D1117',
+        saffron: '#FF6B00',
+        cream: '#FAFAF7',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

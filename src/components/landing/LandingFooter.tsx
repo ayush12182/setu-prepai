@@ -1,142 +1,146 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Instagram, Linkedin } from 'lucide-react';
+import { Instagram, Twitter, Youtube, Linkedin } from 'lucide-react';
 
 const LandingFooter: React.FC = () => {
   const navigate = useNavigate();
 
-  const sections = [
-    {
-      title: 'Product',
-      links: [
-        { label: 'Features',        action: () => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }) },
-        { label: 'AI Engine',       action: () => document.getElementById('ai-engine')?.scrollIntoView({ behavior: 'smooth' }) },
-        { label: 'Analytics',       action: () => document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' }) },
-        { label: 'Pricing',         action: () => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }) },
-      ],
-    },
-    {
-      title: 'Exams',
-      links: [
-        { label: 'JEE Main',        action: () => navigate('/auth?exam=jee') },
-        { label: 'JEE Advanced',    action: () => navigate('/auth?exam=jee') },
-        { label: 'NEET UG',         action: () => navigate('/auth?exam=neet') },
-        { label: 'CUET UG',         action: () => navigate('/auth?exam=cuet') },
-        { label: 'Class 11',        action: () => navigate('/auth?class=11') },
-        { label: 'Class 12',        action: () => navigate('/auth?class=12') },
-      ],
-    },
-    {
-      title: 'Company',
-      links: [
-        { label: 'About',           action: () => document.getElementById('leadership')?.scrollIntoView({ behavior: 'smooth' }) },
-        { label: 'Leadership',      action: () => document.getElementById('leadership')?.scrollIntoView({ behavior: 'smooth' }) },
-        { label: 'Contact Us',      action: () => window.open('mailto:prepentrance.edu.1925@gmail.com') },
-        { label: 'Testimonials',    action: () => document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' }) },
-      ],
-    },
-    {
-      title: 'Legal',
-      links: [
-        { label: 'Terms of Service', action: () => {} },
-        { label: 'Privacy Policy',   action: () => {} },
-        { label: 'Refund Policy',    action: () => {} },
-      ],
-    },
-  ];
+  const handleScrollTo = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   const socials = [
-    { Icon: Instagram, href: 'https://www.instagram.com/prepentrance.prep?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==', label: 'Instagram' },
-    { Icon: Linkedin,  href: 'https://www.linkedin.com/company/prepentrance.ai/', label: 'LinkedIn' },
-    { Icon: Mail,      href: 'mailto:prepentrance.edu.1925@gmail.com', label: 'Email' },
+    { Icon: Instagram, href: 'https://instagram.com/prepentrance', label: 'Instagram' },
+    { Icon: Twitter, href: 'https://twitter.com/prepentrance', label: 'Twitter' },
+    { Icon: Youtube, href: 'https://youtube.com/prepentrance', label: 'YouTube' },
+    { Icon: Linkedin, href: 'https://linkedin.com/company/prepentrance', label: 'LinkedIn' },
   ];
 
   return (
-    <footer className="border-t border-white/[0.06] bg-[#07111F]">
-      {/* Main grid */}
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 pt-16 pb-10">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 mb-14">
-
-          {/* Brand column */}
-          <div className="col-span-2 sm:col-span-3 lg:col-span-1 space-y-5">
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="flex items-center gap-3 group"
-            >
-              <img src="/prepentrance-logo.png" alt="PrepEntrance" className="h-9 w-9 object-contain" />
-              <div>
-                <span className="font-bold text-xl text-white tracking-wide">PrepEntrance</span>
-                <p className="text-[#94A3B8] text-[10px] leading-none mt-0.5">AI Academic OS</p>
-              </div>
-            </button>
-            <p className="text-[#94A3B8] text-sm leading-relaxed max-w-xs">
-              Your AI Academic Operating System for JEE, NEET, and CUET. Precision preparation for Class 11 & 12 aspirants.
-            </p>
-
-            {/* Social links */}
-            <div>
-              <p className="text-white/40 text-xs font-semibold uppercase tracking-wider mb-3">Connect</p>
-              <div className="flex items-center gap-3">
-                {socials.map(({ Icon, href, label }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    aria-label={label}
-                    className="w-9 h-9 rounded-xl border border-white/[0.1] flex items-center justify-center text-[#94A3B8] hover:text-white hover:border-[#FF9B54]/40 hover:bg-[#FF9B54]/8 transition-all"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </a>
-                ))}
-              </div>
+    <footer className="bg-[#0D1117] text-[#F9FAFB] pt-[60px] pb-[32px] px-5 md:px-[80px] font-sans selection:bg-[#FF6B00] selection:text-[#0D1117] relative z-10">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16 items-start">
+          
+          {/* Col 1 — Brand */}
+          <div className="flex flex-col items-start">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/prepentrance-logo.png" 
+                alt="PrepEntrance" 
+                className="h-9 w-9 object-contain brightness-0 invert" 
+              />
+              <span className="font-display font-black text-xl tracking-wide text-white">
+                PrepEntrance
+              </span>
             </div>
-
-            {/* App badges placeholder */}
-            <div className="flex gap-3">
-              <div className="px-4 py-2.5 rounded-xl border border-white/[0.1] text-center hover:border-white/20 transition cursor-pointer group">
-                <p className="text-[9px] text-white/40 group-hover:text-white/60">GET IT ON</p>
-                <p className="text-xs text-white font-semibold">Google Play</p>
-              </div>
-              <div className="px-4 py-2.5 rounded-xl border border-white/[0.1] text-center hover:border-white/20 transition cursor-pointer group">
-                <p className="text-[9px] text-white/40 group-hover:text-white/60">DOWNLOAD ON</p>
-                <p className="text-xs text-white font-semibold">App Store</p>
-              </div>
+            <p className="font-sans font-normal text-sm text-[#9CA3AF] mt-[8px]">
+              Your Complete Exam Prep Partner
+            </p>
+            <div className="flex items-center gap-4 mt-[16px]">
+              {socials.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className="text-[#9CA3AF] hover:text-[#FF6B00] transition-colors duration-200 cursor-pointer"
+                >
+                  <social.Icon className="h-5 w-5" />
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Link columns */}
-          {sections.map(s => (
-            <div key={s.title}>
-              <p className="text-white text-xs font-bold uppercase tracking-[0.15em] mb-5">{s.title}</p>
-              <ul className="space-y-3.5">
-                {s.links.map(l => (
-                  <li key={l.label}>
-                    <button
-                      onClick={l.action}
-                      className="text-[#94A3B8] text-sm hover:text-white transition-colors text-left leading-relaxed"
-                    >
-                      {l.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+          {/* Col 2 — Product */}
+          <div className="flex flex-col items-start">
+            <h4 className="font-sans font-semibold text-[12px] text-[#6B7280] uppercase tracking-wider mb-[16px]">
+              Product
+            </h4>
+            <div className="flex flex-col gap-2 font-sans font-normal text-sm text-[#9CA3AF]">
+              <button 
+                onClick={() => handleScrollTo('hero')}
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                Home
+              </button>
+              <button 
+                onClick={() => handleScrollTo('features')}
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                AI Mentor
+              </button>
+              <button 
+                onClick={() => handleScrollTo('features')}
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                Features
+              </button>
+              <button 
+                onClick={() => handleScrollTo('pricing')}
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                Test Series
+              </button>
+              <button 
+                onClick={() => handleScrollTo('pricing')}
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                Pricing
+              </button>
+              <button 
+                onClick={() => handleScrollTo('hero')}
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                About Us
+              </button>
             </div>
-          ))}
+          </div>
+
+          {/* Col 3 — Support */}
+          <div className="flex flex-col items-start">
+            <h4 className="font-sans font-semibold text-[12px] text-[#6B7280] uppercase tracking-wider mb-[16px]">
+              Support
+            </h4>
+            <div className="flex flex-col gap-2 font-sans font-normal text-sm text-[#9CA3AF]">
+              <a 
+                href="mailto:support@prepentrance.com"
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                Contact Us
+              </a>
+              <button 
+                onClick={() => navigate('/signup')}
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                Privacy Policy
+              </button>
+              <button 
+                onClick={() => navigate('/signup')}
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                Terms of Service
+              </button>
+              <button 
+                onClick={() => navigate('/signup')}
+                className="hover:text-white text-left block transition-colors duration-200"
+              >
+                Refund Policy
+              </button>
+            </div>
+          </div>
+
         </div>
 
-        {/* Bottom bar */}
-        <div className="border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[#94A3B8]/45 text-xs">
-            © {new Date().getFullYear()} PrepEntrance. All rights reserved.
-          </p>
-          <div className="flex items-center gap-5">
-            <p className="text-[#94A3B8]/30 text-xs">Built for serious aspirants · India</p>
-            <button
-              onClick={() => navigate('/auth?mode=signup')}
-              className="text-xs font-semibold px-4 py-2 rounded-xl bg-[#FF9B54]/10 border border-[#FF9B54]/25 text-[#FF9B54] hover:bg-[#FF9B54]/15 transition"
-            >
-              Start Free →
-            </button>
-          </div>
+        {/* Bottom strip */}
+        <div className="border-t border-[#1F2937] pt-[24px] mt-[40px] flex flex-col sm:flex-row items-center justify-between gap-4 font-sans text-[13px] text-[#6B7280]">
+          <p>© 2025 PrepEntrance. All rights reserved.</p>
+          <p>Made with ❤️ for Indian students</p>
         </div>
       </div>
     </footer>
