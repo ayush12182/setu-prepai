@@ -110,7 +110,19 @@ const AuthPage: React.FC = () => {
   const { user, profile, isMentor, userType, refreshProfile, signInWithEmail, signUpWithEmail, signInWithGoogle, signInWithApple, signInWithPhone, verifyOTP, updateProfile, loading: authLoading } = useAuth();
   const { setExamMode } = useExamMode();
 
-  const [mode, setMode] = useState<AuthMode>('login');
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState<AuthMode>(() => {
+    const modeParam = searchParams.get('mode');
+    return modeParam === 'signup' ? 'signup' : 'login';
+  });
+
+  useEffect(() => {
+    const modeParam = searchParams.get('mode');
+    if (modeParam === 'signup' || modeParam === 'login') {
+      setMode(modeParam as AuthMode);
+    }
+  }, [searchParams]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -120,7 +132,6 @@ const AuthPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [searchParams] = useSearchParams();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [awaitingVerification, setAwaitingVerification] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState('');

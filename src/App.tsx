@@ -102,7 +102,9 @@ const App = () => (
                   <Routes>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/auth" element={<AuthPage />} />
-                    <Route path="/select-exam" element={<ExamSelectionPage />} />
+                    <Route path="/login" element={<Navigate to="/auth?mode=login" replace />} />
+                    <Route path="/signup" element={<Navigate to="/auth?mode=signup" replace />} />
+                    <Route path="/select-exam" element={<Navigate to="/auth" replace />} />
                     <Route path="/dashboard" element={<Navigate to="/student-hub" replace />} />
                     <Route path="/platform-updated" element={<Navigate to="/student-hub" replace />} />
                     <Route path="/learn" element={<PreparationPage />} />
