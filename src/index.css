@@ -154,7 +154,7 @@
     --muted: 213 15% 22%;
     --muted-foreground: 40 10% 60%;
 
-    --destructive: 0 55% 50%;
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 213 15% 25%;
@@ -167,6 +167,17 @@
 
     --sidebar-background: 213 30% 8%;
     --sidebar-foreground: 40 15% 95%;
+
+    /* PrepEntrance Vibrant Custom Colors for Dark Theme */
+    --prepentrance-success: 142 75% 50%;
+    --prepentrance-warning: 32 95% 60%;
+    --prepentrance-error: 0 90% 62%;
+    --prepentrance-info: 213 90% 60%;
+
+    /* Vibrant Subject Colors for Dark Theme */
+    --physics-color: 213 90% 65%;
+    --chemistry-color: 142 75% 50%;
+    --maths-color: 280 85% 70%;
   }
 }
 
