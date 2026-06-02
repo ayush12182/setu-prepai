@@ -9,6 +9,7 @@ import FeaturesSection from '@/components/landing/FeaturesSection';
 import WhyUs from '@/components/landing/WhyUs';
 import TestimonialsSection from '@/components/landing/TestimonialsSection';
 import PricingSection from '@/components/landing/PricingSection';
+import AboutSection from '@/components/landing/AboutSection';
 import LandingFooter from '@/components/landing/LandingFooter';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -54,6 +55,11 @@ const LandingPage: React.FC = () => {
       {/* 8. PricingSection (Student ₹249 vs Institute ₹349 side-by-side featured cards) */}
       <div id="pricing">
         <PricingSection />
+      </div>
+
+      {/* 8.5. AboutSection (Premium About Us component with id="about") */}
+      <div id="about">
+        <AboutSection />
       </div>
       
       {/* 9. LandingFooter (Brand columns with social Lucide icons & tagline) */}

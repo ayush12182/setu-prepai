@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { label: 'Features',    id: 'features' },
   { label: 'Test Series', id: 'pricing' },
   { label: 'Pricing',     id: 'pricing' },
-  { label: 'About Us',    id: 'footer' },
+  { label: 'About Us',    id: 'about' },
 ];
 
 const LandingNav: React.FC = () => {

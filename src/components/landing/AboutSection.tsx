@@ -1,180 +1,220 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Sparkles, Users, BrainCircuit, Target, BookOpenCheck, GraduationCap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Target, Bot, BarChart3, Trophy, Phone, Mail, Globe, Sparkles } from 'lucide-react';
 
-const trustCards = [
+const FEATURE_CARDS = [
   {
-    icon: <Users className="w-6 h-6 text-blue-400" />,
-    title: "52+ Verified Teachers",
-    desc: "Learn from the best minds in the country.",
-    delay: 0.1
+    Icon: Target,
+    title: 'Personalized Learning',
+    desc: 'Study plans tailored to your goals, strengths, and weaknesses.',
   },
   {
-    icon: <BrainCircuit className="w-6 h-6 text-violet-400" />,
-    title: "AI-Powered Learning",
-    desc: "Adaptive algorithms that learn your weaknesses.",
-    delay: 0.2
+    Icon: Bot,
+    title: 'AI Mentor',
+    desc: 'Get instant doubt solving, concept explanations, and study guidance 24/7.',
   },
   {
-    icon: <Target className="w-6 h-6 text-cyan-400" />,
-    title: "Competitive Focused",
-    desc: "Zero fluff, purely exam-oriented preparation.",
-    delay: 0.3
+    Icon: BarChart3,
+    title: 'Performance Analytics',
+    desc: 'Track progress, identify weak areas, and improve strategically.',
   },
   {
-    icon: <GraduationCap className="w-6 h-6 text-fuchsia-400" />,
-    title: "JEE, NEET & Boards",
-    desc: "Comprehensive tracks for all major Indian exams.",
-    delay: 0.4
+    Icon: Trophy,
+    title: 'Exam-Focused Preparation',
+    desc: 'Mock tests, PYQs, revision plans, and exam-specific resources.',
+  },
+];
+
+const CONTACT_CARDS = [
+  {
+    Icon: Phone,
+    label: 'Phone',
+    value: '7022030404',
+    link: 'tel:7022030404',
   },
   {
-    icon: <BookOpenCheck className="w-6 h-6 text-indigo-400" />,
-    title: "Smart Revision",
-    desc: "Formula-first short notes and pyq triggers.",
-    delay: 0.5
+    Icon: Mail,
+    label: 'Email',
+    value: 'contact.prepentrance@gmail.com',
+    link: 'mailto:contact.prepentrance@gmail.com',
   },
   {
-    icon: <Sparkles className="w-6 h-6 text-sky-400" />,
-    title: "Student-First",
-    desc: "Designed around your focus, memory and retention.",
-    delay: 0.6
-  }
+    Icon: Globe,
+    label: 'Platform',
+    value: 'PrepEntrance',
+    link: 'https://prepentrance.com',
+  },
 ];
 
 const AboutSection: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
-    <section className="relative py-32 overflow-hidden bg-[#07111F]">
-      
-      {/* Background Glow Elements */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] opacity-20 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-violet-600 blur-[120px] rounded-full mix-blend-screen" />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+    <section className="bg-white py-24 px-6 md:px-20 select-none font-sans overflow-hidden border-t border-[#F0EDE6]/50">
+      <div className="max-w-[1200px] mx-auto">
         
-        {/* HEADER SECTION */}
-        <div className="flex flex-col items-center text-center mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8"
-          >
-            <Sparkles className="w-4 h-4 text-blue-400" />
-            <span className="text-sm font-medium tracking-wide text-gray-300">
-              Built by students. Backed by mentors. Designed for aspirants.
+        {/* SECTION 1: HEADER & HEADLINE */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start mb-20">
+          
+          {/* Left Column (Section Title & Saffron Eyebrow) */}
+          <div className="lg:col-span-5 reveal">
+            <span className="text-[11px] font-sans font-extrabold uppercase tracking-[2px] text-[#FF6B00] mb-3 block">
+              ABOUT US
             </span>
-          </motion.div>
+            <h2 className="text-3xl sm:text-[44px] font-sans font-black text-[#0D1117] leading-tight tracking-tight">
+              About PrepEntrance
+            </h2>
+            <div className="w-16 h-1 bg-[#FF6B00] rounded-full mt-4" />
+          </div>
 
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 mb-8"
-          >
-            Who Are We?
-          </motion.h2>
+          {/* Right Column (Headline & Detailed Descriptions) */}
+          <div className="lg:col-span-7 flex flex-col gap-6 font-sans text-[#374151] text-[16px] leading-[1.65] font-medium reveal">
+            <h3 className="text-xl sm:text-[24px] font-sans font-extrabold text-[#0D1117] leading-snug tracking-tight mb-2">
+              Empowering Every Student to Reach Their Dream College.
+            </h3>
+            
+            <p className="text-[#374151]">
+              PrepEntrance is an AI-powered learning platform built to make entrance exam preparation smarter, more personalized, and more effective.
+            </p>
+            
+            <p className="text-[#374151]">
+              Whether you're preparing for JEE, NEET, CUET, Olympiads, or school examinations, our platform combines structured study plans, intelligent practice, mock tests, PYQs, and an AI Mentor to guide you every step of the way.
+            </p>
+            
+            <p className="text-[#374151]">
+              We believe every student deserves access to high-quality preparation, clear guidance, and personalized support—regardless of their background or location.
+            </p>
+            
+            <div className="pt-2">
+              <span className="text-[#FF6B00] font-sans font-extrabold text-[12px] uppercase tracking-wider block mb-1">
+                OUR MISSION IS SIMPLE
+              </span>
+              <p className="text-lg font-sans font-extrabold text-[#0D1117] leading-relaxed">
+                Help students learn better, stay consistent, and achieve their academic goals with confidence.
+              </p>
+            </div>
+          </div>
 
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-xl text-gray-400 max-w-3xl leading-relaxed"
-          >
-            PrepEntrance is an AI-powered learning platform built to simplify competitive exam preparation for students across India. We combine structured learning, mentorship, adaptive practice, and smart revision tools to help aspirants study better — not longer.
-          </motion.p>
         </div>
 
-        {/* BENTO GRID - TRUST CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-32">
-          {trustCards.map((card, idx) => (
-            <motion.div
+        {/* SECTION 2: 2x2 DETAILED FEATURE CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-24">
+          {FEATURE_CARDS.map((card, idx) => (
+            <div
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: card.delay }}
-              className="group relative"
+              className="reveal flex items-start gap-5 p-7 rounded-[20px] bg-[#FAFAF7] border border-[#F0EDE6] shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:translate-y-[-6px] hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] transition-all duration-300 cursor-default"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-violet-500 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
-              <div className="relative h-full p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 backdrop-blur-sm transition-all duration-300">
-                <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
-                  {card.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">{card.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{card.desc}</p>
+              {/* Colored icon container (40px circle) */}
+              <div className="w-11 h-11 rounded-full bg-[#FFF0E6] text-[#FF6B00] flex items-center justify-center shrink-0 shadow-sm">
+                <card.Icon className="w-5.5 h-5.5 stroke-[1.8]" />
               </div>
-            </motion.div>
+              
+              <div>
+                <h4 className="font-sans font-extrabold text-lg text-[#0D1117] mb-1.5 leading-snug">
+                  {card.title}
+                </h4>
+                <p className="font-sans font-medium text-sm text-[#374151] leading-relaxed">
+                  {card.desc}
+                </p>
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* SECTION 2: WHAT ARE WE BUILDING */}
-        <div className="flex flex-col lg:flex-row gap-16 items-center mb-16">
-          <div className="flex-1 space-y-8">
-            <motion.h2 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-bold tracking-tight text-white"
-            >
-              What Are We Building?
-            </motion.h2>
-            
-            <motion.p 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-lg text-gray-400 leading-relaxed"
-            >
-              We are building the future learning ecosystem for Indian students — where AI, mentorship, and proven teaching methods work together.
-            </motion.p>
-            
-            <motion.p 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="text-lg text-gray-400 leading-relaxed"
-            >
-              Instead of endless PDFs and random YouTube videos, PrepEntrance gives students smart revision notes, personalized practice, adaptive test analysis, AI doubt solving, exam-focused paths, and guidance from top educators.
-            </motion.p>
-          </div>
-
-          {/* VISION CARD */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="flex-1 w-full"
-          >
-            <div className="relative group">
-              {/* Outer Glow */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 rounded-[2rem] blur opacity-30 group-hover:opacity-70 transition duration-1000 group-hover:duration-200 animate-gradient-xy" />
-              
-              {/* Glass Card */}
-              <div className="relative p-12 rounded-[2rem] bg-black/60 backdrop-blur-xl border border-white/10 overflow-hidden">
-                
-                {/* Subtle Grid Background inside card */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px] opacity-20" />
-                
-                {/* Floating Particles (CSS Animation simulated) */}
-                <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-blue-400 rounded-full blur-[1px] animate-pulse" />
-                <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-violet-400 rounded-full blur-[1px] animate-ping" />
-                <div className="absolute top-1/2 right-1/3 w-3 h-3 bg-cyan-400/30 rounded-full blur-[2px] animate-bounce" />
-
-                <div className="relative z-10">
-                  <Sparkles className="w-10 h-10 text-white/40 mb-8" />
-                  <h3 className="text-2xl md:text-3xl font-medium leading-relaxed text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400">
-                    "Our mission is to make high-quality competitive exam preparation accessible, structured, and affordable for every student in India."
-                  </h3>
+        {/* SECTION 3: MISSION & VISION SIDE-BY-SIDE PANELS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24">
+          
+          {/* Mission Card */}
+          <div className="reveal relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-[#FF6B00] to-[#E55A00] rounded-[20px] blur opacity-10 group-hover:opacity-20 transition duration-300" />
+            <div className="relative p-9 rounded-[20px] bg-white border border-[#F0EDE6] shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between h-full hover:border-[#FF6B00]/20 transition-all duration-300">
+              <div>
+                <div className="w-10 h-10 rounded-full bg-[#FFF0E6] text-[#FF6B00] flex items-center justify-center mb-6 shadow-sm shrink-0">
+                  <Sparkles className="w-5 h-5" />
                 </div>
+                <h4 className="font-sans font-extrabold text-2xl text-[#0D1117] mb-4">
+                  Our Mission
+                </h4>
+                <p className="font-sans font-medium text-[15px] text-[#374151] leading-[1.65]">
+                  To democratize quality education by combining technology, artificial intelligence, and proven learning strategies so every student can unlock their true potential.
+                </p>
               </div>
             </div>
-          </motion.div>
+          </div>
+
+          {/* Vision Card */}
+          <div className="reveal relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-500 to-indigo-500 rounded-[20px] blur opacity-10 group-hover:opacity-20 transition duration-300" />
+            <div className="relative p-9 rounded-[20px] bg-white border border-[#F0EDE6] shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col justify-between h-full hover:border-indigo-500/20 transition-all duration-300">
+              <div>
+                <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mb-6 shadow-sm shrink-0">
+                  <Target className="w-5 h-5" />
+                </div>
+                <h4 className="font-sans font-extrabold text-2xl text-[#0D1117] mb-4">
+                  Our Vision
+                </h4>
+                <p className="font-sans font-medium text-[15px] text-[#374151] leading-[1.65]">
+                  To become India's most trusted AI-powered academic companion for students preparing for competitive and board examinations.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* SECTION 4: CONTACT & GET IN TOUCH */}
+        <div className="border-t border-[#F0EDE6]/50 pt-16 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          
+          {/* Contact Left Column */}
+          <div className="lg:col-span-5 reveal">
+            <span className="text-[11px] font-sans font-extrabold uppercase tracking-[2px] text-[#FF6B00] mb-2 block">
+              SUPPORT CHANNEL
+            </span>
+            <h3 className="text-2xl sm:text-[32px] font-sans font-extrabold text-[#0D1117] mb-3 leading-tight tracking-tight">
+              Get in Touch
+            </h3>
+            <p className="font-sans font-medium text-sm text-[#374151] leading-relaxed max-w-[85%]">
+              Have questions, feedback, or need assistance? We'd love to hear from you.
+            </p>
+          </div>
+
+          {/* Contact Right Column (3 Columns of Channels) */}
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4 reveal">
+            {CONTACT_CARDS.map((channel, idx) => (
+              <a
+                href={channel.link}
+                key={idx}
+                target={channel.label === 'Platform' ? '_blank' : undefined}
+                rel={channel.label === 'Platform' ? 'noopener noreferrer' : undefined}
+                className="flex flex-col items-center text-center p-6 rounded-[20px] bg-[#FAFAF7] border border-[#F0EDE6] hover:border-[#FF6B00]/30 hover:bg-white hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all duration-300 group"
+              >
+                <div className="w-10 h-10 rounded-full bg-[#FFF0E6] text-[#FF6B00] flex items-center justify-center mb-3 shrink-0 shadow-sm">
+                  <channel.Icon className="w-4.5 h-4.5 stroke-[1.8]" />
+                </div>
+                <span className="font-sans font-extrabold text-[12px] text-[#475569] uppercase tracking-wide">
+                  {channel.label}
+                </span>
+                <span className="font-sans font-bold text-sm text-[#0D1117] mt-1 break-all select-all">
+                  {channel.value}
+                </span>
+              </a>
+            ))}
+          </div>
+
+        </div>
+
+        {/* SECTION 5: FINAL CTA BUTTON */}
+        <div className="flex flex-col items-center justify-center text-center mt-20 pt-8 border-t border-[#F0EDE6]/50 reveal">
+          <p className="font-sans font-bold text-[#374151] text-sm mb-4">
+            Start Your Learning Journey
+          </p>
+          <button
+            onClick={() => navigate('/signup')}
+            className="text-sm font-sans font-extrabold px-8 py-3.5 rounded-xl bg-[#FF6B00] hover:bg-gradient-to-r hover:from-[#FF6B00] hover:to-[#E55A00] text-white hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 shadow-md shadow-[#FF6B00]/10 cursor-pointer"
+            aria-label="Start Free Trial"
+          >
+            Start Free Trial
+          </button>
         </div>
 
       </div>
