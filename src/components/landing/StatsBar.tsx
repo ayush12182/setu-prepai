@@ -50,21 +50,21 @@ const CountUpStat: React.FC<StatProps> = ({ Icon, target, suffix, label, decimal
   return (
     <div 
       ref={ref} 
-      className="flex flex-col items-center text-center bg-white border-[1.5px] border-[#F0EDE6] rounded-2xl py-6 px-8 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border-b-[3px] border-b-[#FF6B00] rounded-b-2xl space-y-3 reveal"
+      className="flex flex-col items-center text-center bg-white/70 backdrop-blur-md border-[1.5px] border-[#F0EDE6] rounded-2xl py-7 px-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_15px_35px_rgba(255,107,0,0.04)] hover:border-[#FF6B00]/30 hover:translate-y-[-4px] transition-all duration-300 border-b-[3.5px] border-b-[#FF6B00] space-y-3 shrink-0 reveal"
     >
-      {/* Colored icon background circle (bg #FFF0E6, width 48px, height 48px, border-radius 50%) */}
-      <div className="w-12 h-12 rounded-full bg-[#FFF0E6] flex items-center justify-center text-[#FF6B00] shrink-0 shadow-sm">
+      {/* Colored icon background circle */}
+      <div className="w-12 h-12 rounded-full bg-[#FFF0E6]/90 text-[#FF6B00] flex items-center justify-center shrink-0 shadow-sm transition-transform duration-200 hover:scale-105">
         <Icon className="w-6 h-6 stroke-[1.8]" />
       </div>
 
-      {/* Number (Nunito 900, 36px, saffron) */}
-      <span className="text-3xl sm:text-[36px] font-display font-black text-[#FF6B00] tracking-tight leading-none">
+      {/* Number */}
+      <span className="text-3xl sm:text-[38px] font-display font-black text-[#FF6B00] tracking-tight leading-none">
         {formattedValue}
         {suffix}
       </span>
 
-      {/* Label (Inter 400, 15px, muted) */}
-      <span className="text-[#6B7280] text-sm sm:text-[15px] font-sans font-medium mt-1">
+      {/* Label */}
+      <span className="text-[#374151] text-sm sm:text-[15px] font-sans font-bold tracking-normal leading-normal">
         {label}
       </span>
     </div>

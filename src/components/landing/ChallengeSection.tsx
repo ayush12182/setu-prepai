@@ -232,7 +232,7 @@ const ChallengeSection: React.FC = () => {
           <h2 className="text-3xl sm:text-[42px] font-sans font-extrabold text-[#0D1117] leading-tight">
             What's Your Biggest <span className="text-[#FF6B00]">Challenge?</span>
           </h2>
-          <p className="text-[#6B7280] text-base sm:text-[17px] font-sans font-medium mt-3 leading-relaxed">
+          <p className="text-[#374151] text-base sm:text-[17px] font-sans font-medium mt-3 leading-relaxed">
             PrepEntrance has a dedicated AI solution for every problem.
           </p>
         </div>
@@ -264,7 +264,7 @@ const ChallengeSection: React.FC = () => {
               <div className="p-6 pb-4 flex flex-col justify-between flex-1 relative min-h-[220px]">
                 <div className="relative z-10">
                   {/* Category label */}
-                  <span className="text-[11px] font-sans font-extrabold uppercase tracking-[1.5px] text-[#6B7280]">
+                  <span className="text-[11px] font-sans font-extrabold uppercase tracking-[1.5px] text-[#475569]">
                     {card.category}
                   </span>
 
@@ -274,7 +274,7 @@ const ChallengeSection: React.FC = () => {
                   </h3>
 
                   {/* Subheadline (Inter/Plus Jakarta Sans) */}
-                  <p className="text-sm font-sans font-medium text-[#6B7280] leading-relaxed line-clamp-3">
+                  <p className="text-sm font-sans font-medium text-[#374151] leading-relaxed line-clamp-3">
                     {card.howItHelps}
                   </p>
                 </div>
