@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import {
-  ArrowRight, ArrowLeft, Check, Loader2,
-  Users, BookOpen, Sparkles, Rocket,
-  Brain, Zap, CheckCircle2, Award
+import { 
+  ArrowRight, ArrowLeft, Check, Loader2, 
+  Sparkles, Rocket, Brain, Zap, GraduationCap, Award
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,234 +12,109 @@ import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
+type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+type StreamType = 'jee' | 'neet' | 'cuet' | '';
 
-const STREAMS = [
-  { value: 'jee',        label: 'JEE',        sub: 'Physics · Chemistry · Mathematics',      emoji: '⚡', color: 'amber'   },
-  { value: 'neet',       label: 'NEET',       sub: 'Physics · Chemistry · Biology',    emoji: '🧬', color: 'green'   },
-  { value: 'cuet',       label: 'CUET',       sub: 'Languages · NCERT Domain Subjects · General Test', emoji: '🎯', color: 'blue'    },
-];
+// Custom Glow Background for Immersive Linear-style depth
+const GlowBg: React.FC = () => (
+  <div className="pointer-events-none fixed inset-0 overflow-hidden bg-[#06080D]">
+    <div className="absolute top-[-20%] left-1/4 w-[750px] h-[750px] rounded-full bg-[#FF6B00]/[0.05] blur-[150px]" />
+    <div className="absolute bottom-[-10%] right-1/4 w-[600px] h-[600px] rounded-full bg-violet-600/[0.04] blur-[130px]" />
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-[#FF6B00]/[0.02] blur-[110px]" />
+    {/* Clean subtle dot grid overlay */}
+    <div className="absolute inset-0 opacity-[0.02]" style={{
+      backgroundImage: `radial-gradient(circle, #FF6B00 1px, transparent 1px)`,
+      backgroundSize: '24px 24px',
+    }} />
+  </div>
+);
 
-const SENIOR_CLASSES = [
-  { value: '11', label: 'Class 11', tag: 'Foundation Prep' },
-  { value: '12', label: 'Class 12', tag: 'Board + Entrance Prep' },
-  { value: 'dropper', label: 'Dropper', tag: 'Full Revision Focus' },
-];
-
-// ─── Slide animation variants ─────────────────────────────────────────────────
-
+// Slide animation variants
 const slide = {
-  enter: (dir: number) => ({ x: dir > 0 ? 56 : -56, opacity: 0 }),
-  center: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 340, damping: 30 } },
-  exit:  (dir: number) => ({ x: dir > 0 ? -56 : 56, opacity: 0, transition: { duration: 0.18 } }),
+  enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
+  center: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 25 } },
+  exit: (dir: number) => ({ x: dir > 0 ? -60 : 60, opacity: 0, transition: { duration: 0.2 } }),
 };
 
-// ─── Micro-components ─────────────────────────────────────────────────────────
+interface OnboardingFlowProps {
+  initialUserType?: 'student' | 'teacher';
+  skipToJoinCode?: boolean;
+  onComplete?: () => void;
+}
 
-const GlowBg: React.FC = () => (
-  <div className="pointer-events-none fixed inset-0 overflow-hidden">
-    <div className="absolute -top-40 left-1/4 w-[700px] h-[700px] rounded-full bg-amber-500/[0.06] blur-[160px]" />
-    <div className="absolute -bottom-20 right-1/4 w-[500px] h-[500px] rounded-full bg-violet-500/[0.05] blur-[140px]" />
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-amber-500/[0.03] blur-[100px]" />
-  </div>
-);
-
-const Logo: React.FC<{ size?: 'sm' | 'lg' }> = ({ size = 'sm' }) => (
-  <div className={`flex flex-col items-center gap-2 ${size === 'lg' ? '' : 'flex-row gap-2.5'}`}>
-    <div className={cn(
-      "rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center shadow-lg",
-      size === 'lg' ? "w-16 h-16 shadow-amber-500/10" : "w-8 h-8 shadow-amber-500/5"
-    )}>
-      <span className={cn("text-slate-950 font-black", size === 'lg' ? "text-2xl" : "text-sm")}>P</span>
-    </div>
-    <span
-      className={cn('text-white font-black tracking-widest uppercase', size === 'lg' ? 'text-2xl' : 'text-base')}
-      style={{ fontFamily: 'Sora, Inter, sans-serif', letterSpacing: '0.2em' }}
-    >
-      PrepEntrance
-    </span>
-  </div>
-);
-
-const StepDots: React.FC<{ total: number; current: number }> = ({ total, current }) => (
-  <div className="flex items-center gap-2">
-    {Array.from({ length: total }).map((_, i) => (
-      <motion.div
-        key={i}
-        animate={{ width: i === current ? 24 : 8, opacity: i <= current ? 1 : 0.25 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className={cn('h-1.5 rounded-full', i <= current ? 'bg-amber-400' : 'bg-white/20')}
-      />
-    ))}
-  </div>
-);
-
-const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
-  <div className={cn('bg-white/[0.03] backdrop-blur-2xl rounded-3xl border border-white/[0.06] shadow-2xl shadow-black/40 p-6 sm:p-8', className)}>
-    {children}
-  </div>
-);
-
-const PrimaryBtn: React.FC<{
-  onClick?: () => void;
-  disabled?: boolean;
-  loading?: boolean;
-  children: React.ReactNode;
-  type?: 'button' | 'submit';
-  className?: string;
-}> = ({ onClick, disabled, loading, children, type = 'button', className }) => (
-  <motion.button
-    type={type}
-    onClick={onClick}
-    disabled={disabled || loading}
-    whileHover={!disabled && !loading ? { y: -2, boxShadow: '0 8px 32px rgba(245,158,11,0.35)' } : {}}
-    whileTap={!disabled && !loading ? { scale: 0.98 } : {}}
-    className={cn(
-      'w-full h-14 rounded-2xl font-black text-base flex items-center justify-center gap-2 transition-colors',
-      'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950',
-      'disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none',
-      'shadow-lg shadow-amber-500/25',
-      className,
-    )}
-  >
-    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : children}
-  </motion.button>
-);
-
-const GhostBtn: React.FC<{ onClick: () => void; children: React.ReactNode }> = ({ onClick, children }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="w-full h-11 rounded-xl text-white/40 hover:text-white/70 hover:bg-white/[0.04] transition-all text-sm font-medium"
-  >
-    {children}
-  </button>
-);
-
-// ─── Main Component ────────────────────────────────────────────────────────────
-
-const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
+const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipToJoinCode, onComplete }) => {
   const navigate = useNavigate();
   const { user, updateProfile, refreshProfile } = useAuth();
   const { setExamMode } = useExamMode();
   const { setLanguage } = useLanguage();
 
-  // 1 to 7 for students
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<OnboardingStep>(1);
   const [dir, setDir] = useState(1);
+  
+  // Selections State
+  const [stream, setStream] = useState<StreamType>('');
+  const [studentClass, setStudentClass] = useState('');
+  const [prefLanguage, setPrefLanguage] = useState<LanguageMode>('english');
 
-  // Shared loading
-  const [saving, setSaving] = useState(false);
+  // Loading Synthesis State
+  const [loadingPhase, setLoadingPhase] = useState(0);
+  const [isCompiling, setIsCompiling] = useState(false);
 
-  // Student rebrand onboarding state
-  const [stream, setStream] = useState(''); // Screen 2: Select Exam
-  const [studentClass, setStudentClass] = useState(''); // Screen 3: Select Class
-  const [targetYear, setTargetYear] = useState(''); // Screen 4: Target Year
-  const [prefLanguage, setPrefLanguage] = useState<LanguageMode>('english'); // Screen 5: Language Preference
-
-  // Screen 6: Diagnostic Assessment State
-  const [currentDiagIdx, setCurrentDiagIdx] = useState(0);
-  const [diagAnswers, setDiagAnswers] = useState<Record<number, number>>({});
-
-  // Dynamic diagnostic questions based on chosen exam stream
-  const diagQuestions = React.useMemo(() => {
-    if (stream === 'neet') {
-      return [
-        {
-          id: 1,
-          subject: 'physics',
-          question: "A car travels at 20 m/s for 10 seconds. What is its displacement under constant speed?",
-          options: ["100 meters", "200 meters", "50 meters", "400 meters"],
-          correct: 1
-        },
-        {
-          id: 2,
-          subject: 'chemistry',
-          question: "Which of the following processes represents a chemical change?",
-          options: ["Melting of ice", "Rusting of iron nail", "Boiling of water", "Dissolving sugar in water"],
-          correct: 1
-        },
-        {
-          id: 3,
-          subject: 'biology',
-          question: "Which cell organelle is famously known as the powerhouse of the cell?",
-          options: ["Mitochondria", "Nucleus", "Ribosome", "Lysosome"],
-          correct: 0
-        }
-      ];
-    } else if (stream === 'cuet') {
-      return [
-        {
-          id: 1,
-          subject: 'maths',
-          question: "If 2x + 5 = 15, what is the value of x?",
-          options: ["3", "5", "4", "10"],
-          correct: 1
-        },
-        {
-          id: 2,
-          subject: 'chemistry',
-          question: "Find the synonym of the word 'Abundant'.",
-          options: ["Scarce", "Plentiful", "Rare", "Empty"],
-          correct: 1
-        },
-        {
-          id: 3,
-          subject: 'physics',
-          question: "A body stays at rest unless acted upon by a external force. Which law is this?",
-          options: ["Newton's First Law", "Newton's Second Law", "Newton's Third Law", "Kepler's Law"],
-          correct: 0
-        }
-      ];
-    } else { // default to jee
-      return [
-        {
-          id: 1,
-          subject: 'physics',
-          question: "A car travels at 20 m/s for 10 seconds. What is its displacement under constant speed?",
-          options: ["100 meters", "200 meters", "50 meters", "400 meters"],
-          correct: 1
-        },
-        {
-          id: 2,
-          subject: 'chemistry',
-          question: "Which of the following processes represents a chemical change?",
-          options: ["Melting of ice", "Rusting of iron nail", "Boiling of water", "Dissolving sugar in water"],
-          correct: 1
-        },
-        {
-          id: 3,
-          subject: 'maths',
-          question: "If A = {1, 2} and B = {3, 4}, what is the union of sets A and B?",
-          options: ["{1, 2, 3, 4}", "{1, 2}", "{3, 4}", "Empty Set {}"],
-          correct: 0
-        }
-      ];
-    }
-  }, [stream]);
-
-  const go = (newStep: number, direction = 1) => {
+  const go = (newStep: OnboardingStep, direction = 1) => {
     setDir(direction);
     setStep(newStep);
   };
 
-  // ─── Student complete profile upsert ─────────────────────────────────────────
+  // Keyboard navigation listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // If we are in the compiling loading screen, ignore keypresses
+      if (isCompiling) return;
 
-  const completeStudent = async () => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // Continue actions
+        if (step === 1) go(2);
+        else if (step === 2 && stream) go(3);
+        else if (step === 3 && studentClass) go(4);
+        else if (step === 4) handleStartSynthesis();
+      }
+
+      // Handle card selections via number keys (1, 2, 3)
+      if (e.key === '1' || e.key === '2' || e.key === '3') {
+        const index = parseInt(e.key) - 1;
+        if (step === 2) {
+          const streams: StreamType[] = ['jee', 'neet', 'cuet'];
+          setStream(streams[index]);
+        } else if (step === 3) {
+          const classes = ['11', '12', 'dropper'];
+          setStudentClass(classes[index]);
+        } else if (step === 4) {
+          const langs: LanguageMode[] = ['english', 'hinglish', 'hindi'];
+          setPrefLanguage(langs[index]);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [step, stream, studentClass, prefLanguage, isCompiling]);
+
+  // AI Classroom Synthesis phases
+  const handleStartSynthesis = async () => {
     if (!user) return;
-    setSaving(true);
+    setIsCompiling(true);
+    go(5);
 
+    // Cycle through visual database synthesis phases
+    const phaseDelays = [1000, 1000, 1000, 800];
+    for (let i = 0; i < phaseDelays.length; i++) {
+      await new Promise((r) => setTimeout(r, phaseDelays[i]));
+      setLoadingPhase((prev) => prev + 1);
+    }
+
+    // Upsert into Supabase profile tables
     try {
-      const pAns = diagAnswers[0];
-      const cAns = diagAnswers[1];
-      const mAns = diagAnswers[2];
-
-      const pLvl = pAns === diagQuestions[0].correct ? 'Advanced' : 'Beginner';
-      const cLvl = cAns === diagQuestions[1].correct ? 'Advanced' : 'Beginner';
-      const mLvl = mAns === diagQuestions[2].correct ? 'Advanced' : 'Beginner';
-
-      const overallLvl = (pLvl === 'Advanced' && cLvl === 'Advanced') ? 'Advanced' : 'Intermediate';
-
       let examGoal = 'JEE Main';
       let dbExam = 'JEE';
       if (stream === 'neet') {
@@ -252,13 +126,16 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
       }
 
       const cls = studentClass || '11';
-      const targetYearInt = parseInt(targetYear || '2028');
+      const targetYearInt = cls === '11' ? 2028 : (cls === '12' ? 2027 : 2027);
 
-      // Sync language preference in context
+      // Set exam mode and language
+      if (stream === 'jee') setExamMode('jee');
+      else if (stream === 'neet') setExamMode('neet');
+      else if (stream === 'cuet') setExamMode('cuet');
+
       setLanguage(prefLanguage);
       localStorage.setItem('preferredLanguage', prefLanguage);
 
-      // Query database matching cohort_id
       const { data: cohortData } = await supabase
         .from('cohorts')
         .select('id')
@@ -269,454 +146,377 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
 
       const cohortId = cohortData?.id || null;
 
-      // Update basic profiles
+      // Update auth profile
       await updateProfile({
         target_exam: examGoal,
         class: cls,
-        student_level: overallLvl,
+        student_level: 'Intermediate',
         user_type: 'student',
       });
 
-      // Upsert into student_profiles table (including newly migrated subject levels)
+      // Synchronize in student_profiles
       await supabase.from('student_profiles').upsert({
         student_id: user.id,
         name: user.user_metadata?.full_name || null,
         target_exam: examGoal,
         class: cls,
         target_year: targetYearInt,
-        current_level: overallLvl,
+        current_level: 'Intermediate',
         cohort_id: cohortId,
-        physics_level: pLvl,
-        chemistry_level: cLvl,
-        maths_level: stream === 'neet' ? 'Intermediate' : mLvl,
-        biology_level: stream === 'neet' ? mLvl : 'Intermediate',
+        physics_level: 'Intermediate',
+        chemistry_level: 'Intermediate',
+        maths_level: stream === 'neet' ? 'Intermediate' : 'Intermediate',
+        biology_level: stream === 'neet' ? 'Intermediate' : 'Intermediate',
         last_active: new Date().toISOString(),
       });
 
       await refreshProfile();
-      toast.success("Welcome aboard! Preparing classroom...");
       
-      // Navigate to student hub
+      // Inject Mock Task for first-time B2C students
+      try {
+        await supabase.from('assigned_tasks').insert({
+          student_id: user.id,
+          teacher_id: user.id,
+          topic: examGoal === 'NEET' ? 'Cell Biology' : 'Kinematics',
+          subtopic: examGoal === 'NEET' ? 'Cell Cycle and Cell Division' : 'Motion in 1D',
+          status: 'pending',
+          initial_accuracy: 50.0,
+        });
+      } catch (e) {
+        console.warn('First task creation skipped');
+      }
+
+      toast.success("Workspace synced! Opening classroom door...");
+      
+      // Load student hub
       setTimeout(() => {
         window.location.href = '/student-hub';
-      }, 1500);
+      }, 500);
 
     } catch (e: any) {
-      toast.error(e.message || 'Something went wrong. Please try again.');
-      setSaving(false);
+      toast.error(e.message || 'Something went wrong during setup.');
+      setIsCompiling(false);
+      go(4, -1);
     }
   };
 
-  // ─── STEP RENDER LOGIC ──────────────────────────────────────────────────────
-
   const renderStep = () => {
-    // ════════════════ SCREEN 1: WELCOME SCREEN ════════════════
+    // ════════════════ STEP 1: WELCOME & BEGIN ════════════════
     if (step === 1) {
       return (
-        <div className="space-y-6 text-center">
-          <Logo size="lg" />
-          <div className="space-y-3 pt-4">
-            <p className="text-amber-400 text-xs font-black uppercase tracking-[0.25em]">Personalized Learning Ecosystem</p>
-            <h1 className="text-white text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight">
-              Personalized Preparation for JEE, NEET & CUET
+        <div className="space-y-7 text-center py-6">
+          <div className="w-20 h-20 rounded-3xl bg-[#FF6B00]/10 border border-[#FF6B00]/25 flex items-center justify-center mx-auto mb-6 shadow-md shadow-[#FF6B00]/5 animate-pulse-soft">
+            <Sparkles className="w-10 h-10 text-[#FF6B00]" />
+          </div>
+          
+          <div className="space-y-3">
+            <span className="text-[#FF6B00] text-xs font-black uppercase tracking-[0.25em] block leading-none">
+              Welcome to PrepEntrance
+            </span>
+            <h1 className="text-white text-3xl sm:text-[38px] font-black leading-tight tracking-tight font-display">
+              Let's Personalize <br />Your Preparation.
             </h1>
-            <p className="text-white/50 text-sm max-w-sm mx-auto leading-relaxed">
-              Step into an isolated digital classroom designed strictly around your target exam, class, and milestones.
+            <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed font-sans font-medium">
+              We construct your isolated academic tracker based strictly on your target exam, class, and study preferences.
             </p>
           </div>
 
-          <div className="space-y-3 pt-4">
-            <PrimaryBtn onClick={() => go(2)}>
-              Start Setup <ArrowRight className="w-5 h-5" />
-            </PrimaryBtn>
+          <div className="pt-6 space-y-4">
+            <button
+              onClick={() => go(2)}
+              className="w-full h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-gradient-to-r from-[#FF6B00] to-[#E55A00] text-white shadow-lg shadow-[#FF6B00]/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+            >
+              Get Started <ArrowRight className="w-5 h-5" />
+            </button>
+            <span className="text-slate-500 text-[10px] font-sans font-bold block">
+              Press <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 font-mono font-bold">Enter</span> to begin
+            </span>
           </div>
         </div>
       );
     }
 
-    // ════════════════ SCREEN 2: SELECT EXAM ════════════════
+    // ════════════════ STEP 2: SELECT EXAM ════════════════
     if (step === 2) {
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 2 of 7</p>
-            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Which exam are you preparing for?
-            </h1>
-            <p className="text-white/40 text-sm">Your learning scope will be locked to this exam.</p>
-          </div>
-
-          <div className="space-y-2.5">
-            {STREAMS.map(s => {
-              const selected = stream === s.value;
-              return (
-                <motion.button
-                  key={s.value}
-                  whileTap={{ scale: 0.995 }}
-                  onClick={() => setStream(s.value)}
-                  className={cn(
-                    'w-full p-4 sm:p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200',
-                    selected
-                      ? 'border-amber-400/40 bg-amber-400/[0.06] ring-1 ring-amber-400/10'
-                      : 'border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.01]'
-                  )}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="text-2xl w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">{s.emoji}</span>
-                    <div>
-                      <p className="text-white font-extrabold text-sm sm:text-base">{s.label}</p>
-                      <p className="text-white/30 text-xs mt-0.5">{s.sub}</p>
-                    </div>
-                  </div>
-                  <div className={cn(
-                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
-                  )}>
-                    {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
-
-          <div className="flex gap-3">
-            <GhostBtn onClick={() => go(1, -1)}>
-              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
-            </GhostBtn>
-            <PrimaryBtn disabled={!stream} onClick={() => go(3)}>
-              Continue <ArrowRight className="w-4 h-4" />
-            </PrimaryBtn>
-          </div>
-        </div>
-      );
-    }
-
-    // ════════════════ SCREEN 3: SELECT CLASS ════════════════
-    if (step === 3) {
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 3 of 7</p>
-            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Which class are you studying in?
-            </h1>
-            <p className="text-white/40 text-sm">We construct your isolated academic tracker based on class.</p>
-          </div>
-
-          <div className="space-y-2">
-            {SENIOR_CLASSES.map(c => {
-              const selected = studentClass === c.value;
-              return (
-                <motion.button
-                  key={c.value}
-                  whileTap={{ scale: 0.995 }}
-                  onClick={() => {
-                    setStudentClass(c.value);
-                    if (c.value === '11') setTargetYear('2028');
-                    else setTargetYear('2027');
-                  }}
-                  className={cn(
-                    'w-full p-4.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200',
-                    selected 
-                      ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' 
-                      : 'border-white/[0.06] text-white/70 hover:border-white/20 hover:bg-white/[0.01]'
-                  )}
-                >
-                  <div>
-                    <p className="font-extrabold text-sm sm:text-base">{c.label}</p>
-                    <p className="text-[11px] opacity-50 mt-0.5">{c.tag}</p>
-                  </div>
-                  <div className={cn(
-                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
-                  )}>
-                    {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
-
-          <div className="flex gap-3">
-            <GhostBtn onClick={() => go(2, -1)}>
-              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
-            </GhostBtn>
-            <PrimaryBtn disabled={!studentClass} onClick={() => go(4)}>
-              Continue <ArrowRight className="w-4 h-4" />
-            </PrimaryBtn>
-          </div>
-        </div>
-      );
-    }
-
-    // ════════════════ SCREEN 4: TARGET YEAR ════════════════
-    if (step === 4) {
-      const suggestedYear = studentClass === '11' ? '2028' : '2027';
-      const optionalYears = ['2027', '2028', '2029'].filter(y => y !== suggestedYear);
-      const displayYears = [suggestedYear, ...optionalYears];
-
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 4 of 7</p>
-            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Select your Target Year
-            </h1>
-            <p className="text-white/40 text-sm">
-              Suggested: <span className="text-amber-400 font-bold">{suggestedYear}</span> (based on Class {studentClass})
-            </p>
-          </div>
-
-          <div className="space-y-2.5">
-            {displayYears.map((y, idx) => {
-              const selected = targetYear === y;
-              const isSuggested = idx === 0;
-              return (
-                <motion.button
-                  key={y}
-                  whileTap={{ scale: 0.995 }}
-                  onClick={() => setTargetYear(y)}
-                  className={cn(
-                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200',
-                    selected 
-                      ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' 
-                      : 'border-white/[0.06] text-white/70 hover:border-white/20 hover:bg-white/[0.01]'
-                  )}
-                >
-                  <div>
-                    <p className="font-extrabold text-sm sm:text-base">{y} Aspirant</p>
-                    <p className="text-[11px] opacity-50 mt-0.5">{isSuggested ? 'Standard Suggested Target Year' : 'Alternate target year path'}</p>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    {isSuggested && (
-                      <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 font-black uppercase rounded px-2 py-0.5 tracking-wider">
-                        Suggested
-                      </span>
-                    )}
-                    <div className={cn(
-                      'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                      selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
-                    )}>
-                      {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
-                    </div>
-                  </div>
-                </motion.button>
-              );
-            })}
-          </div>
-
-          <div className="flex gap-3">
-            <GhostBtn onClick={() => go(3, -1)}>
-              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
-            </GhostBtn>
-            <PrimaryBtn disabled={!targetYear} onClick={() => go(5)}>
-              Continue <ArrowRight className="w-4 h-4" />
-            </PrimaryBtn>
-          </div>
-        </div>
-      );
-    }
-
-    // ════════════════ SCREEN 5: LANGUAGE PREFERENCE ════════════════
-    if (step === 5) {
-      const languages: { key: LanguageMode; label: string; sub: string }[] = [
-        { key: 'english', label: 'English', sub: 'Entire theory & notes in pure English' },
-        { key: 'hinglish', label: 'Hinglish', sub: 'Concepts explained in interactive Hindi + English' },
-        { key: 'hindi', label: 'Hindi', sub: 'हिंदी माध्यम - complete Hindi curriculum' }
+      const streams = [
+        { key: 'jee' as StreamType, title: 'JEE Main & Advanced', desc: 'Physics · Chemistry · Mathematics', icon: Rocket, keybind: '1' },
+        { key: 'neet' as StreamType, title: 'NEET Core', desc: 'Physics · Chemistry · Biology', icon: Zap, keybind: '2' },
+        { key: 'cuet' as StreamType, title: 'CUET Domain Prep', desc: 'Domain Subjects · General Test', icon: GraduationCap, keybind: '3' },
       ];
 
       return (
-        <div className="space-y-6">
+        <div className="space-y-6 py-2">
           <div className="text-center space-y-2">
-            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 5 of 7</p>
-            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Select your Language Preference
-            </h1>
-            <p className="text-white/40 text-sm">We translate all lectures, notes, and study material to this language.</p>
+            <h2 className="text-white text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
+              What is your target exam?
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm font-sans font-medium leading-relaxed">
+              Your syllabus timelines and mock tests will adapt directly to this goal.
+            </p>
           </div>
 
-          <div className="space-y-2.5">
-            {languages.map(lang => {
-              const selected = prefLanguage === lang.key;
+          <div className="space-y-3.5 pt-2">
+            {streams.map((s) => {
+              const isSelected = stream === s.key;
               return (
-                <motion.button
-                  key={lang.key}
-                  whileTap={{ scale: 0.995 }}
-                  onClick={() => setPrefLanguage(lang.key)}
+                <button
+                  key={s.key}
+                  onClick={() => setStream(s.key)}
                   className={cn(
-                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200',
-                    selected 
-                      ? 'border-amber-400/50 bg-amber-400/[0.08] text-amber-400' 
-                      : 'border-white/[0.06] text-white/70 hover:border-white/20 hover:bg-white/[0.01]'
+                    'w-full p-4.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 cursor-pointer select-none group',
+                    isSelected
+                      ? 'border-[#FF6B00]/40 bg-[#FF6B00]/[0.06] shadow-[0_8px_24px_rgba(255,107,0,0.04)]'
+                      : 'border-white/[0.05] bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
                   )}
                 >
-                  <div>
-                    <p className="font-extrabold text-sm sm:text-base">{lang.label}</p>
-                    <p className="text-[11px] opacity-55 mt-0.5">{lang.sub}</p>
+                  <div className="flex items-center gap-4">
+                    <div className={cn(
+                      'w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors shadow-sm',
+                      isSelected ? 'bg-[#FF6B00]/10 border-[#FF6B00]/25 text-[#FF6B00]' : 'bg-white/[0.03] border-white/[0.06] text-slate-400 group-hover:text-slate-300'
+                    )}>
+                      <s.icon className="w-5.5 h-5.5" />
+                    </div>
+                    <div>
+                      <p className="text-white font-extrabold text-sm sm:text-base leading-snug">{s.title}</p>
+                      <p className="text-slate-500 text-xs mt-0.5 font-sans font-semibold">{s.desc}</p>
+                    </div>
                   </div>
-                  <div className={cn(
-                    'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                    selected ? 'bg-amber-400 border-amber-400' : 'border-white/20'
-                  )}>
-                    {selected && <Check className="w-3 text-slate-950 stroke-[3]" />}
+
+                  <div className="flex items-center gap-3">
+                    <span className="hidden sm:inline-block text-[9px] bg-slate-900 border border-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
+                      Key {s.keybind}
+                    </span>
+                    <div className={cn(
+                      'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200',
+                      isSelected ? 'bg-[#FF6B00] border-[#FF6B00] scale-105' : 'border-slate-700/60'
+                    )}>
+                      {isSelected && <Check className="w-3 text-white stroke-[4]" />}
+                    </div>
                   </div>
-                </motion.button>
+                </button>
               );
             })}
           </div>
 
-          <div className="flex gap-3">
-            <GhostBtn onClick={() => go(4, -1)}>
-              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
-            </GhostBtn>
-            <PrimaryBtn onClick={() => go(6)}>
-              Continue <ArrowRight className="w-4 h-4" />
-            </PrimaryBtn>
-          </div>
-        </div>
-      );
-    }
-
-    // ════════════════ SCREEN 6: DIAGNOSTIC ASSESSMENT ════════════════
-    if (step === 6) {
-      const activeQ = diagQuestions[currentDiagIdx];
-      const selectedOption = diagAnswers[currentDiagIdx];
-
-      const handleAnswerSelect = (optionIdx: number) => {
-        setDiagAnswers(prev => ({ ...prev, [currentDiagIdx]: optionIdx }));
-      };
-
-      const handleNextQuestion = () => {
-        if (currentDiagIdx < diagQuestions.length - 1) {
-          setCurrentDiagIdx(prev => prev + 1);
-        } else {
-          go(7);
-        }
-      };
-
-      return (
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <p className="text-amber-400 text-[10px] font-black uppercase tracking-[0.2em]">Step 6 of 7: Diagnostic</p>
-            <h1 className="text-white text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Adaptive Concept Benchmark
-            </h1>
-            <p className="text-white/40 text-sm">
-              Answering these brief conceptual benchmarks sets your starting profile and predicts your initial AIR range.
-            </p>
-          </div>
-
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-5 sm:p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <span className="text-[10px] bg-amber-400/10 text-amber-400 border border-amber-400/20 font-black uppercase px-2 py-0.5 rounded tracking-widest">
-                {activeQ.subject.toUpperCase()} Evaluation
-              </span>
-              <span className="text-xs text-white/35 font-bold">
-                Question {currentDiagIdx + 1} of {diagQuestions.length}
-              </span>
-            </div>
-
-            <p className="text-white text-sm sm:text-base font-semibold leading-relaxed pt-2">
-              {activeQ.question}
-            </p>
-
-            <div className="space-y-2 pt-3">
-              {activeQ.options.map((opt, oIdx) => {
-                const isSelected = selectedOption === oIdx;
-                return (
-                  <button
-                    key={oIdx}
-                    onClick={() => handleAnswerSelect(oIdx)}
-                    className={cn(
-                      'w-full p-4 rounded-xl border text-left flex items-center justify-between transition-all duration-200 text-sm',
-                      isSelected
-                        ? 'border-amber-400 bg-amber-400/5 text-amber-400 font-bold'
-                        : 'border-white/[0.05] bg-white/[0.01] hover:bg-white/[0.03] text-white/70'
-                    )}
-                  >
-                    <span>{opt}</span>
-                    <div className={cn(
-                      'w-4 h-4 rounded-full border flex items-center justify-center shrink-0',
-                      isSelected ? 'bg-amber-400 border-amber-400' : 'border-white/10'
-                    )}>
-                      {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-slate-950" />}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <GhostBtn onClick={() => {
-              if (currentDiagIdx > 0) setCurrentDiagIdx(prev => prev - 1);
-              else go(5, -1);
-            }}>
-              <ArrowLeft className="w-4 h-4 inline mr-1" /> Back
-            </GhostBtn>
-            <PrimaryBtn 
-              disabled={selectedOption === undefined}
-              onClick={handleNextQuestion}
+          <div className="flex items-center gap-3 pt-4 shrink-0">
+            <button
+              onClick={() => go(1, -1)}
+              className="w-1/3 h-14 rounded-2xl border border-white/[0.08] bg-white/[0.02] text-slate-400 hover:text-white hover:bg-white/[0.04] text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
             >
-              {currentDiagIdx === diagQuestions.length - 1 ? 'Analyze Performance' : 'Next Question'} <ArrowRight className="w-4 h-4" />
-            </PrimaryBtn>
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+            <button
+              disabled={!stream}
+              onClick={() => go(3)}
+              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-[#E55A00] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md shadow-[#FF6B00]/10"
+            >
+              Continue <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
       );
     }
 
-    // ════════════════ SCREEN 7: COHORT ASSIGNMENT ════════════════
-    if (step === 7) {
-      const examName = stream.toUpperCase();
-      const className = studentClass === 'dropper' ? 'Dropper' : `Class ${studentClass}`;
-      const cohortName = `${examName} ${targetYear} ${className}`;
+    // ════════════════ STEP 3: SELECT CLASS ════════════════
+    if (step === 3) {
+      const classes = [
+        { key: '11', label: 'Class 11', desc: 'Foundation Core Prep', keybind: '1' },
+        { key: '12', label: 'Class 12', desc: 'Board + Targeted Mock Prep', keybind: '2' },
+        { key: 'dropper', label: 'Dropper / Repeater', desc: 'Full Spaced Revision', keybind: '3' },
+      ];
 
       return (
-        <div className="space-y-6 text-center">
-          <div className="w-16 h-16 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center mx-auto mb-4">
-            <Award className="w-8 h-8 text-amber-400 animate-bounce" />
+        <div className="space-y-6 py-2">
+          <div className="text-center space-y-2">
+            <h2 className="text-white text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
+              What is your current class?
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm font-sans font-medium leading-relaxed">
+              We compile your mock tests and study milestones based on class.
+            </p>
+          </div>
+
+          <div className="space-y-3.5 pt-2">
+            {classes.map((c) => {
+              const isSelected = studentClass === c.key;
+              return (
+                <button
+                  key={c.key}
+                  onClick={() => setStudentClass(c.key)}
+                  className={cn(
+                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 cursor-pointer select-none group',
+                    isSelected
+                      ? 'border-[#FF6B00]/40 bg-[#FF6B00]/[0.06] shadow-[0_8px_24px_rgba(255,107,0,0.04)]'
+                      : 'border-white/[0.05] bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
+                  )}
+                >
+                  <div>
+                    <p className="text-white font-extrabold text-sm sm:text-base leading-snug">{c.label}</p>
+                    <p className="text-slate-500 text-xs mt-0.5 font-sans font-semibold">{c.desc}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="hidden sm:inline-block text-[9px] bg-slate-900 border border-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
+                      Key {c.keybind}
+                    </span>
+                    <div className={cn(
+                      'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200',
+                      isSelected ? 'bg-[#FF6B00] border-[#FF6B00] scale-105' : 'border-slate-700/60'
+                    )}>
+                      {isSelected && <Check className="w-3 text-white stroke-[4]" />}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-3 pt-4 shrink-0">
+            <button
+              onClick={() => go(2, -1)}
+              className="w-1/3 h-14 rounded-2xl border border-white/[0.08] bg-white/[0.02] text-slate-400 hover:text-white hover:bg-white/[0.04] text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+            <button
+              disabled={!studentClass}
+              onClick={() => go(4)}
+              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-[#E55A00] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md shadow-[#FF6B00]/10"
+            >
+              Continue <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ════════════════ STEP 4: STUDY LANGUAGE ════════════════
+    if (step === 4) {
+      const languages: { key: LanguageMode; label: string; desc: string; keybind: string }[] = [
+        { key: 'english', label: 'English medium', desc: 'Pure English theory, revision sheets & practice', keybind: '1' },
+        { key: 'hinglish', label: 'Hinglish medium', desc: 'Hybrid Hindi explanation + English keynotes', keybind: '2' },
+        { key: 'hindi', label: 'Hindi medium', desc: 'complete हिंदी माध्यम curriculum', keybind: '3' },
+      ];
+
+      return (
+        <div className="space-y-6 py-2">
+          <div className="text-center space-y-2">
+            <h2 className="text-white text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
+              Select your Language
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm font-sans font-medium leading-relaxed">
+              We sync your notes, lectures, and mock question sheets to this language.
+            </p>
+          </div>
+
+          <div className="space-y-3.5 pt-2">
+            {languages.map((lang) => {
+              const isSelected = prefLanguage === lang.key;
+              return (
+                <button
+                  key={lang.key}
+                  onClick={() => setPrefLanguage(lang.key)}
+                  className={cn(
+                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 cursor-pointer select-none group',
+                    isSelected
+                      ? 'border-[#FF6B00]/40 bg-[#FF6B00]/[0.06] shadow-[0_8px_24px_rgba(255,107,0,0.04)]'
+                      : 'border-white/[0.05] bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
+                  )}
+                >
+                  <div>
+                    <p className="text-white font-extrabold text-sm sm:text-base leading-snug">{lang.label}</p>
+                    <p className="text-slate-500 text-xs mt-0.5 font-sans font-semibold">{lang.desc}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="hidden sm:inline-block text-[9px] bg-slate-900 border border-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
+                      Key {lang.keybind}
+                    </span>
+                    <div className={cn(
+                      'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200',
+                      isSelected ? 'bg-[#FF6B00] border-[#FF6B00] scale-105' : 'border-slate-700/60'
+                    )}>
+                      {isSelected && <Check className="w-3 text-white stroke-[4]" />}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-3 pt-4 shrink-0">
+            <button
+              onClick={() => go(3, -1)}
+              className="w-1/3 h-14 rounded-2xl border border-white/[0.08] bg-white/[0.02] text-slate-400 hover:text-white hover:bg-white/[0.04] text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+            <button
+              onClick={handleStartSynthesis}
+              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-[#E55A00] text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md shadow-[#FF6B00]/10"
+            >
+              Launch Dashboard <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ════════════════ STEP 5: PREMIUM DYNAMIC SYNTHESIS LOADING ════════════════
+    if (step === 5) {
+      const phases = [
+        { icon: Brain, label: 'Securing your isolated prep classroom...' },
+        { icon: Rocket, label: 'Synthesizing adaptive JEE/NEET study roadmaps...' },
+        { icon: Zap, label: 'Configuring your 24/7 AI Mentor index...' },
+        { icon: Award, label: 'Workspace synced! Opening classroom door...' },
+      ];
+
+      return (
+        <div className="space-y-8 py-8 text-center">
+          <div className="w-20 h-20 rounded-full bg-[#FF6B00]/10 border border-[#FF6B00]/25 flex items-center justify-center mx-auto shadow-md relative z-10 animate-spin">
+            <Loader2 className="w-10 h-10 text-[#FF6B00]" />
           </div>
 
           <div className="space-y-3">
-            <p className="text-emerald-400 text-xs font-black uppercase tracking-[0.2em] flex items-center justify-center gap-1.5 animate-pulse">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> System Configured successfully
-            </p>
-            <h1 className="text-white text-3xl font-black tracking-tight" style={{ fontFamily: 'Sora, Inter, sans-serif' }}>
-              🎉 Welcome to {cohortName} Cohort
-            </h1>
-            <p className="text-white/50 text-sm max-w-sm mx-auto leading-relaxed">
-              Your isolated classroom and study paths are ready. Standard syllabus limits and tests are synced to your target year.
+            <h2 className="text-white text-2xl font-black font-display tracking-tight leading-snug">
+              Creating Your Engine
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm font-sans font-medium max-w-xs mx-auto leading-relaxed">
+              PrepEntrance is initializing your personalized dashboard modules.
             </p>
           </div>
 
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-5 text-left space-y-4 max-w-sm mx-auto">
-            <h3 className="text-xs font-bold text-white/55 uppercase tracking-wider">Cohort Enrollment Details</h3>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between border-b border-white/[0.04] pb-2">
-                <span className="text-white/40">Class & Exam:</span>
-                <span className="font-bold text-white">{examName} | {className}</span>
-              </div>
-              <div className="flex justify-between border-b border-white/[0.04] pb-2">
-                <span className="text-white/40">Target Year:</span>
-                <span className="font-bold text-white">{targetYear} Goal</span>
-              </div>
-              <div className="flex justify-between border-b border-white/[0.04] pb-2">
-                <span className="text-white/40">Language:</span>
-                <span className="font-bold text-white uppercase">{prefLanguage}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-white/40">Diagnostic Benchmark:</span>
-                <span className="font-bold text-amber-400">Intermediate Classroom Assigned</span>
-              </div>
-            </div>
-          </div>
+          {/* Animated phase status blocks */}
+          <div className="space-y-3 max-w-sm mx-auto text-left bg-white/[0.02] border border-white/[0.05] rounded-3xl p-5 relative z-10">
+            {phases.map((p, idx) => {
+              const isActive = loadingPhase === idx;
+              const isDone = loadingPhase > idx;
+              const Icon = p.icon;
 
-          <div className="space-y-2 pt-2">
-            <PrimaryBtn loading={saving} onClick={completeStudent}>
-              {saving ? 'Opening Classroom Door...' : <><Rocket className="w-5 h-5" /> Launch My Classroom</>}
-            </PrimaryBtn>
+              return (
+                <div
+                  key={idx}
+                  className={cn(
+                    'flex items-center gap-3 p-2.5 rounded-xl transition-all duration-300',
+                    isActive ? 'bg-[#FF6B00]/10 border border-[#FF6B00]/20' : 'opacity-40 border border-transparent'
+                  )}
+                >
+                  <div className={cn(
+                    'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border',
+                    isDone ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400' : 
+                    (isActive ? 'bg-[#FF6B00]/10 border-[#FF6B00]/25 text-[#FF6B00]' : 'bg-white/5 border-white/10 text-slate-500')
+                  )}>
+                    {isDone ? <Check className="w-4 h-4 stroke-[3.5]" /> : <Icon className={cn('w-4 h-4', isActive && 'animate-pulse')} />}
+                  </div>
+                  <span className={cn(
+                    'text-[12.5px] font-sans font-bold leading-none tracking-normal',
+                    isDone ? 'text-slate-400 line-through' : (isActive ? 'text-white' : 'text-slate-500')
+                  )}>
+                    {p.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       );
@@ -724,17 +524,25 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
   };
 
   return (
-    <div className="min-h-screen bg-[#06080D] relative flex items-center justify-center p-4">
+    <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden">
+      {/* Visual background overlays */}
       <GlowBg />
       
-      <div className="w-full max-w-[480px] relative z-10 space-y-6 py-10">
-        <div className="flex items-center justify-between px-2">
-          {step > 1 && step <= 7 && (
-            <StepDots total={6} current={step - 2} />
-          )}
-        </div>
+      <div className="w-full max-w-[480px] relative z-10 space-y-6 py-8">
+        
+        {/* Dynamic horizontal progress bar indicator at top */}
+        {step < 5 && (
+          <div className="w-full h-1.5 bg-slate-900 border border-slate-800 rounded-full overflow-hidden select-none shrink-0">
+            <motion.div
+              animate={{ width: `${(step / 4) * 100}%` }}
+              transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+              className="h-full bg-gradient-to-r from-[#FF6B00] to-[#E55A00] rounded-full"
+            />
+          </div>
+        )}
 
-        <Card>
+        {/* Premium glassmorphic card container */}
+        <div className="bg-white/[0.03] backdrop-blur-2xl rounded-3xl border border-white/[0.06] shadow-2xl shadow-black/40 p-7 sm:p-9">
           <AnimatePresence mode="wait" custom={dir}>
             <motion.div
               key={step}
@@ -747,7 +555,8 @@ const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) =
               {renderStep()}
             </motion.div>
           </AnimatePresence>
-        </Card>
+        </div>
+
       </div>
     </div>
   );
