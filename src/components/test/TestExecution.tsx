@@ -321,19 +321,6 @@ const TestExecution: React.FC<TestExecutionProps> = ({
   const countMarked = Array.from(statuses.values()).filter(s => s === 'marked').length;
   const countAnsweredMarked = Array.from(statuses.values()).filter(s => s === 'answered_marked').length;
 
-  // 1. Loading screen
-  if (loading || !fetchDone || step === 'loading') {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 max-w-md mx-auto text-center space-y-4">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-        <div>
-          <p className="text-sm font-bold text-white uppercase tracking-wider">Loading Mock Test Details</p>
-          <p className="text-xs text-slate-400 mt-1">Generating mock candidate questions matching official standards...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Error screen
   if (error) {
     return (
@@ -343,6 +330,19 @@ const TestExecution: React.FC<TestExecutionProps> = ({
         <div className="flex gap-3">
           <Button variant="outline" onClick={onExit}>Exit</Button>
           <Button onClick={handleRetry}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // 1. Loading screen
+  if (loading || !fetchDone || step === 'loading') {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 max-w-md mx-auto text-center space-y-4">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        <div>
+          <p className="text-sm font-bold text-white uppercase tracking-wider">Loading Mock Test Details</p>
+          <p className="text-xs text-slate-400 mt-1">Generating mock candidate questions matching official standards...</p>
         </div>
       </div>
     );

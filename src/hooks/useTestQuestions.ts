@@ -131,21 +131,30 @@ export const useTestQuestions = () => {
           allQuestions.push(...shuffled);
         } else {
           // Generate questions if none exist
-          const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
-            body: {
-              subchapterId: chapter.subchapterId || chapter.chapterId,
-              subchapterName: chapter.subchapterName || chapter.chapterName,
-              chapterId: chapter.chapterId,
-              chapterName: chapter.chapterName,
-              subject: chapter.subject,
-              difficulty: 'medium',
-              count: questionsPerChapter,
-              examMode: examModeUpper,
-            }
-          });
+          let generatedData = null;
+          let generatedError = null;
+          try {
+            const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
+              body: {
+                subchapterId: chapter.subchapterId || chapter.chapterId,
+                subchapterName: chapter.subchapterName || chapter.chapterName,
+                chapterId: chapter.chapterId,
+                chapterName: chapter.chapterName,
+                subject: chapter.subject,
+                difficulty: 'medium',
+                count: questionsPerChapter,
+                examMode: examModeUpper,
+              }
+            });
+            generatedData = data;
+            generatedError = fnError;
+          } catch (invokeErr) {
+            console.warn('Failed to invoke generate-questions edge function:', invokeErr);
+            generatedError = invokeErr;
+          }
 
-          if (!fnError && data?.questions) {
-            const mappedQuestions = data.questions.map(shuffleQuestionOptions);
+          if (!generatedError && generatedData?.questions) {
+            const mappedQuestions = generatedData.questions.map(shuffleQuestionOptions);
             allQuestions.push(...mappedQuestions);
           } else {
             // Frontend Gemini fallback
@@ -230,17 +239,26 @@ export const useTestQuestions = () => {
         ? { start: 2013, end: 2024 }
         : { start: 2004, end: 2024 };
 
-      const { data, error: fnError } = await supabase.functions.invoke('generate-pyq-questions', {
-        body: {
-          subject,
-          chapterId,
-          yearRange: yearRange || defaultYearRange,
-          count,
-          examMode: examModeUpper,
-        }
-      });
+      let generatedData = null;
+      let generatedError = null;
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke('generate-pyq-questions', {
+          body: {
+            subject,
+            chapterId,
+            yearRange: yearRange || defaultYearRange,
+            count,
+            examMode: examModeUpper,
+          }
+        });
+        generatedData = data;
+        generatedError = fnError;
+      } catch (invokeErr) {
+        console.warn('Failed to invoke generate-pyq-questions edge function:', invokeErr);
+        generatedError = invokeErr;
+      }
 
-      if (fnError || data?.error) {
+      if (generatedError || generatedData?.error) {
         // Frontend Gemini fallback for PYQ-style questions
         try {
           const geminiQs = await generateQuestionsGemini(
@@ -282,11 +300,20 @@ export const useTestQuestions = () => {
     setQuestions([]);
 
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('generate-adaptive-test', {
-        body: { count }
-      });
+      let generatedData = null;
+      let generatedError = null;
+      try {
+        const { data, error: fnError } = await supabase.functions.invoke('generate-adaptive-test', {
+          body: { count }
+        });
+        generatedData = data;
+        generatedError = fnError;
+      } catch (invokeErr) {
+        console.warn('Failed to invoke generate-adaptive-test edge function:', invokeErr);
+        generatedError = invokeErr;
+      }
 
-      if (fnError || data?.error || !data?.questions?.length) {
+      if (generatedError || generatedData?.error || !generatedData?.questions?.length) {
         // Frontend Gemini fallback for adaptive test
         try {
           const geminiQs = await generateQuestionsGemini(
