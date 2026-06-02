@@ -460,6 +460,8 @@ const TestPage: React.FC = () => {
     setActiveTest({ type: 'pyq', subject: config.subject, yearRange: config.yearRange, questionCount: config.count });
   };
 
+  const handleTestComplete = () => setActiveTest(null);
+
   const getCategoryTitle = () => {
     if (activeCategory.includes('pyq')) return '📚 Previous Year Questions (PYQs)';
     if (activeCategory.includes('topic')) return '🎯 Topic & Chapter Mocks';
