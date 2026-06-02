@@ -6,6 +6,29 @@ import { shuffleQuestionOptions } from '@/utils/questionUtils';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { generateQuestionsGemini } from '@/lib/gemini';
 
+const mapDbQuestionToQuestion = (dbQ: any): Question => {
+  return {
+    id: dbQ.id,
+    node_id: dbQ.chapter_id || dbQ.topic_id || 'chapter',
+    type: (dbQ.question_type || 'MCQ') as any,
+    exam_type: dbQ.exam_type || 'JEE',
+    difficulty: (dbQ.difficulty || 'medium').toLowerCase() as any,
+    question_text: dbQ.content?.question || dbQ.question_text || '',
+    options: dbQ.content?.options || {
+      A: dbQ.option_a || '',
+      B: dbQ.option_b || '',
+      C: dbQ.option_c || '',
+      D: dbQ.option_d || ''
+    },
+    answer: dbQ.answer || dbQ.correct_option || 'A',
+    explanation: dbQ.metadata?.explanation || dbQ.explanation || '',
+    concept_tested: dbQ.metadata?.concept || dbQ.concept_tested || 'General',
+    common_mistake: dbQ.metadata?.common_mistake,
+    is_verified: dbQ.is_verified,
+    generation_model: dbQ.metadata?.model,
+  };
+};
+
 function generateOfflineMockQuestions(
   topicName: string,
   exam: string,
@@ -126,9 +149,12 @@ export const useTestQuestions = () => {
 
         if (existingQuestions && existingQuestions.length > 0) {
           // Shuffle and take required number
-          let shuffled = existingQuestions.sort(() => Math.random() - 0.5);
-          shuffled = (shuffled.slice(0, questionsPerChapter) as Question[]).map(shuffleQuestionOptions);
-          allQuestions.push(...shuffled);
+          const shuffled = existingQuestions.sort(() => Math.random() - 0.5);
+          const mapped = shuffled.slice(0, questionsPerChapter).map((q: any) => {
+            const shuffledQ = shuffleQuestionOptions(q);
+            return mapDbQuestionToQuestion(shuffledQ);
+          });
+          allQuestions.push(...mapped);
         } else {
           // Generate questions if none exist
           let generatedData = null;
@@ -154,7 +180,10 @@ export const useTestQuestions = () => {
           }
 
           if (!generatedError && generatedData?.questions) {
-            const mappedQuestions = generatedData.questions.map(shuffleQuestionOptions);
+            const mappedQuestions = generatedData.questions.map((q: any) => {
+              const shuffledQ = shuffleQuestionOptions(q);
+              return mapDbQuestionToQuestion(shuffledQ);
+            });
             allQuestions.push(...mappedQuestions);
           } else {
             // Frontend Gemini fallback
@@ -226,10 +255,13 @@ export const useTestQuestions = () => {
 
       if (pyqQuestions && pyqQuestions.length > 0) {
         // Shuffle the questions order, then shuffle options per question
-        let shuffled = pyqQuestions.sort(() => Math.random() - 0.5) as Question[];
-        shuffled = shuffled.map(shuffleQuestionOptions);
-        setQuestions(shuffled);
-        return shuffled;
+        const shuffled = pyqQuestions.sort(() => Math.random() - 0.5);
+        const mapped = shuffled.map((q: any) => {
+          const shuffledQ = shuffleQuestionOptions(q);
+          return mapDbQuestionToQuestion(shuffledQ);
+        });
+        setQuestions(mapped);
+        return mapped;
       }
 
       // If no PYQs found, generate PYQ-style questions using the correct exam mode
@@ -275,8 +307,11 @@ export const useTestQuestions = () => {
         }
       }
 
-      if (data?.questions) {
-        const mappedQuestions = data.questions.map(shuffleQuestionOptions);
+      if (generatedData?.questions) {
+        const mappedQuestions = generatedData.questions.map((q: any) => {
+          const shuffledQ = shuffleQuestionOptions(q);
+          return mapDbQuestionToQuestion(shuffledQ);
+        });
         setQuestions(mappedQuestions);
         return mappedQuestions;
       }
@@ -330,7 +365,10 @@ export const useTestQuestions = () => {
         }
       }
 
-      const mappedQuestions = (data.questions as Question[]).map(shuffleQuestionOptions);
+      const mappedQuestions = (generatedData.questions as any[]).map((q: any) => {
+        const shuffledQ = shuffleQuestionOptions(q);
+        return mapDbQuestionToQuestion(shuffledQ);
+      });
       setQuestions(mappedQuestions);
       return mappedQuestions;
     } catch (err) {
