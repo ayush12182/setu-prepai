@@ -7,6 +7,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { JEE_PROMPT_CONSTRAINTS } from "../_shared/gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,7 +34,13 @@ serve(async (req) => {
       }).eq("id", job_id);
     }
 
-    const systemPrompt = `You are an expert ${exam} question designer. Generate authentic PYQ-style MCQs. Return a JSON object with a "questions" array.`;
+    const isJee = (exam || "").toUpperCase().includes("JEE");
+    const systemPrompt = isJee
+      ? `You are an expert JEE exam question setter. Generate questions indistinguishable from authentic JEE Main and JEE Advanced questions. Avoid school-level, textbook-level, and direct formula-substitution questions. Reject any question that can be solved instantly without conceptual reasoning. Return ONLY a JSON object with a "questions" array. No markdown, no backticks.
+
+${JEE_PROMPT_CONSTRAINTS}`
+      : `You are an expert ${exam} question designer. Generate authentic PYQ-style MCQs. Return a JSON object with a "questions" array.`;
+
     const userPrompt = `Generate ${count} questions for ${subject} - ${chapter}. Difficulty: ${difficulty}. Include options, correct_option, and explanation.`;
 
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");

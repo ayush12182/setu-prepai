@@ -186,9 +186,12 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
         {subjects.map((subject) => (
           <Button
             key={subject.key}
-            variant={activeSubject === subject.key ? 'default' : 'outline'}
             onClick={() => handleSubjectChange(subject.key)}
-            className={cn(activeSubject === subject.key && (subjectColors[subject.key] || ''))}
+            className={cn(
+              activeSubject === subject.key 
+                ? "bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-[#FF6B00]" 
+                : "bg-[rgba(251,146,60,0.08)] border-[rgba(251,146,60,0.25)] text-white hover:bg-[rgba(251,146,60,0.15)] hover:border-[rgba(251,146,60,0.4)] hover:text-white"
+            )}
           >
             {subject.label}
           </Button>

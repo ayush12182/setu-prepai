@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { JEE_PROMPT_CONSTRAINTS } from "../_shared/gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,6 +53,7 @@ serve(async (req) => {
 
     const isCuet = examMode === "CUET";
     const isNeet = examMode === "NEET";
+    const isJee = examMode === "JEE";
 
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
@@ -71,7 +73,12 @@ serve(async (req) => {
     const subjectFilter = subject ? `for ${subject}` : `across ${isCuet ? "all CUET domain subjects" : isNeet ? "Physics, Chemistry, Biology" : "Physics, Chemistry, Mathematics"}`;
     const topicContext = subchapterName ? ` specifically on the topic "${subchapterName}" (${chapterName})` : "";
 
-    const systemPrompt = `You are a world-class ${examMode} PYQ specialist. Generate authentic previous year style questions. Return ONLY a JSON object with a "questions" array.`;
+    const systemPrompt = isJee
+      ? `You are an expert JEE exam question setter. Generate questions indistinguishable from authentic JEE Main and JEE Advanced previous year questions. Avoid school-level, textbook-level, and direct formula-substitution questions. Reject any question that can be solved instantly without conceptual reasoning. Return ONLY a JSON object with a "questions" array. No markdown, no backticks.
+
+${JEE_PROMPT_CONSTRAINTS}`
+      : `You are a world-class ${examMode} PYQ specialist. Generate authentic previous year style questions. Return ONLY a JSON object with a "questions" array.`;
+
     const userPrompt = `Generate ${count} authentic ${examMode} PYQ-style questions ${subjectFilter}${topicContext} for years ${effectiveYearRange.start}-${effectiveYearRange.end}.
     Include question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), explanation, concept_tested, common_mistake, pyq_year, and source.
     Wait, return ONLY JSON.`;

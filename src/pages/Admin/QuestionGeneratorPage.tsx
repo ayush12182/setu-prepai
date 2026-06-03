@@ -7,7 +7,7 @@ import {
   Sparkles, CheckCircle, XCircle, RefreshCw, Save,
   ChevronDown, ChevronUp, Eye, EyeOff, ShieldCheck,
   BookOpen, Zap, AlertTriangle, Filter, Download,
-  ClipboardCheck, BarChart2, Layers
+  ClipboardCheck, BarChart2, Layers, Upload, FileText, Edit3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -52,6 +52,21 @@ interface GeneratedQuestion {
   _approved?:             boolean;
   _rejected?:             boolean;
 }
+
+// Helper to load external scripts dynamically
+const loadScript = (src: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script ${src}`));
+    document.head.appendChild(script);
+  });
+};
 
 // ─── Static config ─────────────────────────────────────────────
 const EXAM_SUBJECTS: Record<string, { class11: string[]; class12: string[] }> = {
@@ -110,7 +125,7 @@ const DIFF_COLORS: Record<string, string> = {
   Hard:   'bg-red-500/10 text-red-400 border-red-500/20',
 };
 
-// ─── Question Card Component ──────────────────────────────────
+// ─── AI Question Card Component ───────────────────────────────
 const QuestionCard: React.FC<{
   q: GeneratedQuestion;
   index: number;
@@ -310,10 +325,298 @@ const QuestionCard: React.FC<{
   );
 };
 
+// ─── PDF Parsed Question Card Component ────────────────────────
+const ParsedPdfQuestionCard: React.FC<{
+  q: any;
+  index: number;
+  onVerify: () => void;
+  onDiscard: () => void;
+  onUpdate: (updatedQ: any) => void;
+  savingId: string | null;
+}> = ({ q, index, onVerify, onDiscard, onUpdate, savingId }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState<any>({ ...q });
+
+  const handleSave = () => {
+    onUpdate(editForm);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditForm({ ...q });
+    setIsEditing(false);
+  };
+
+  const formatDifficulty = (diff: string) => {
+    if (!diff) return 'Medium';
+    const d = diff.toLowerCase();
+    if (d === 'easy') return '🟢 Easy';
+    if (d === 'medium') return '🟡 Medium';
+    if (d === 'hard') return '🔴 Hard';
+    return diff;
+  };
+
+  const getDiffColor = (diff: string) => {
+    if (!diff) return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    const d = diff.toLowerCase();
+    if (d === 'easy') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+    if (d === 'medium') return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+    return 'bg-red-500/10 text-red-400 border-red-500/20';
+  };
+
+  return (
+    <motion.div
+      layout
+      className={cn(
+        'bg-card border rounded-2xl overflow-hidden border-border',
+        q.is_verified && 'border-emerald-500/40'
+      )}
+    >
+      {isEditing ? (
+        <div className="p-5 space-y-4">
+          <div className="flex justify-between items-center pb-2 border-b border-border">
+            <span className="text-xs font-bold text-orange-400">Edit Mode (Question #{index + 1})</span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost" onClick={handleCancel} className="h-7 text-xs border border-border">Cancel</Button>
+              <Button size="sm" onClick={handleSave} className="h-7 text-xs bg-orange-400 hover:bg-orange-300 text-black font-bold"><Save className="w-3 h-3 mr-1" /> Save Temp</Button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Question Text</label>
+              <textarea
+                className="w-full bg-secondary/50 border border-border rounded-xl p-3 text-sm focus:outline-none focus:border-accent"
+                value={editForm.question_text || ''}
+                onChange={e => setEditForm({ ...editForm, question_text: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(editForm.options || ['', '', '', '']).map((opt: string, i: number) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name={`correct-opt-${q.id}`}
+                    checked={editForm.correct_index === i}
+                    onChange={() => setEditForm({ ...editForm, correct_index: i })}
+                    className="accent-accent"
+                  />
+                  <input
+                    className="flex-1 bg-secondary/50 border border-border rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-accent"
+                    value={opt}
+                    onChange={e => {
+                      const newOpts = [...(editForm.options || ['', '', '', ''])];
+                      newOpts[i] = e.target.value;
+                      setEditForm({ ...editForm, options: newOpts });
+                    }}
+                    placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Difficulty</label>
+                <select
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:border-accent"
+                  value={editForm.difficulty || 'medium'}
+                  onChange={e => setEditForm({ ...editForm, difficulty: e.target.value })}
+                >
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Subtopic</label>
+                <input
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
+                  value={editForm.subtopic || ''}
+                  onChange={e => setEditForm({ ...editForm, subtopic: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Concept</label>
+                <input
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
+                  value={editForm.concept || ''}
+                  onChange={e => setEditForm({ ...editForm, concept: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Mistake Type</label>
+                <select
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:border-accent"
+                  value={editForm.mistake_type || 'None'}
+                  onChange={e => setEditForm({ ...editForm, mistake_type: e.target.value })}
+                >
+                  <option value="None">None</option>
+                  <option value="Conceptual">Conceptual</option>
+                  <option value="Calculation">Calculation</option>
+                  <option value="Silly">Silly</option>
+                  <option value="Guessed">Guessed</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Time (seconds)</label>
+                <input
+                  type="number"
+                  className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
+                  value={editForm.avg_time_seconds || 120}
+                  onChange={e => setEditForm({ ...editForm, avg_time_seconds: parseInt(e.target.value) || 120 })}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Brief Explanation</label>
+              <textarea
+                className="w-full bg-secondary/50 border border-border rounded-xl p-3 text-xs focus:outline-none focus:border-accent"
+                value={editForm.explanation || ''}
+                onChange={e => setEditForm({ ...editForm, explanation: e.target.value })}
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Solution Steps (one step per line)</label>
+              <textarea
+                className="w-full bg-secondary/50 border border-border rounded-xl p-3 text-xs focus:outline-none focus:border-accent"
+                value={Array.isArray(editForm.solution_steps) ? editForm.solution_steps.join('\n') : editForm.solution_steps || ''}
+                onChange={e => setEditForm({ ...editForm, solution_steps: e.target.value.split('\n') })}
+                rows={3}
+                placeholder="Step 1...&#13;Step 2..."
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div>
+          {/* Card header */}
+          <div className="p-4 flex items-start gap-3">
+            <span className="text-xs font-mono text-muted-foreground mt-0.5 flex-shrink-0">
+              #{index + 1}
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                <span className={cn('text-xs font-bold px-2 py-0.5 rounded border', getDiffColor(q.difficulty))}>
+                  {formatDifficulty(q.difficulty)}
+                </span>
+                <span className="text-xs px-2 py-0.5 bg-secondary/50 border border-border rounded text-muted-foreground">
+                  {q.subject} • {q.subtopic || 'General'}
+                </span>
+                {q.concept && (
+                  <span className="text-xs px-2 py-0.5 bg-violet-500/10 border border-violet-500/20 text-violet-400 rounded">
+                    🏷️ {q.concept}
+                  </span>
+                )}
+                {q.is_verified && (
+                  <span className="text-xs px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded font-bold">
+                    ✅ Live & Verified
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-foreground leading-relaxed font-medium">{q.question_text}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Chapter: {q.chapter || 'Unknown'} · Class: {q.class} · ⏱ {q.avg_time_seconds || 120}s
+              </p>
+            </div>
+
+            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+              <button onClick={() => setExpanded(e => !e)} className="p-1 hover:bg-secondary rounded-lg transition-colors">
+                {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Expandable details */}
+          <AnimatePresence>
+            {expanded && (
+              <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }}
+                className="overflow-hidden border-t border-border">
+                <div className="p-4 space-y-4">
+                  {/* Options */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {(q.options || []).map((opt: string, i: number) => (
+                      <div key={i}
+                        className={cn('flex items-start gap-2 p-2.5 rounded-xl border text-sm',
+                          i === q.correct_index
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                            : 'bg-secondary/30 border-border text-muted-foreground'
+                        )}>
+                        <span className={cn('font-bold text-xs flex-shrink-0',
+                          i === q.correct_index ? 'text-emerald-400' : 'text-muted-foreground')}>
+                          {String.fromCharCode(65 + i)}.
+                        </span>
+                        <span>{opt}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Explanation */}
+                  <div className="bg-secondary/20 border border-border rounded-xl p-3 space-y-2">
+                    <p className="text-xs font-bold text-accent uppercase tracking-wider">Explanation</p>
+                    <p className="text-sm text-foreground">{q.explanation}</p>
+                    {q.solution_steps && q.solution_steps.length > 0 && (
+                      <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                        {q.solution_steps.map((s: string, idx: number) => <li key={idx}>{s}</li>)}
+                      </ol>
+                    )}
+                    {q.common_mistake && (
+                      <p className="text-xs text-amber-400 bg-amber-500/5 rounded px-2 py-1">
+                        ⚠️ <strong>Common Mistake:</strong> {q.common_mistake}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Card footer actions */}
+          <div className="border-t border-border px-4 py-3 flex flex-wrap items-center gap-2 bg-card">
+            {!q.is_verified ? (
+              <>
+                <Button size="sm" onClick={onVerify} disabled={savingId === q.id}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white h-7 text-xs">
+                  <CheckCircle className="w-3 h-3 mr-1" /> Verify & Publish
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setIsEditing(true)}
+                  className="text-xs h-7 border border-border">
+                  <Edit3 className="w-3 h-3 mr-1" /> Edit
+                </Button>
+                <Button size="sm" variant="ghost" onClick={onDiscard} disabled={savingId === q.id}
+                  className="text-xs h-7 text-red-400 hover:text-red-300">
+                  <XCircle className="w-3 h-3 mr-1" /> Discard
+                </Button>
+              </>
+            ) : (
+              <span className="text-xs text-emerald-400 font-medium flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" /> Live in Question Bank
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
 // ─── Main Admin Page ──────────────────────────────────────────
 const QuestionGeneratorPage: React.FC = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'generate' | 'pdf-parse'>('generate');
 
   // Admin guard
   React.useEffect(() => {
@@ -341,12 +644,227 @@ const QuestionGeneratorPage: React.FC = () => {
   const [filterType, setFilterType]  = useState<string>('all');
   const [filterDiff, setFilterDiff]  = useState<string>('all');
 
+  // ─ PDF Extract state ─
+  const [pdfMetadata, setPdfMetadata] = useState({
+    exam: 'JEE_MAINS',
+    subject: 'Physics',
+    userClass: '12' as '11' | '12' | 'dropper'
+  });
+  const [uploading, setUploading] = useState(false);
+  const [pdfFiles, setPdfFiles] = useState<any[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<any | null>(null);
+  const [extractedText, setExtractedText] = useState('');
+  const [extracting, setExtracting] = useState(false);
+  const [extractProgress, setExtractProgress] = useState(0);
+  const [parsing, setParsing] = useState(false);
+  const [extractedQs, setExtractedQs] = useState<any[]>([]);
+
   const subjects = [...(EXAM_SUBJECTS[exam]?.class11 || []), ...(EXAM_SUBJECTS[exam]?.class12 || [])];
   const uniqueSubjects = [...new Set(subjects)];
   const chapters = (NCERT_CHAPTERS[subject]?.[ncertClass] || []);
 
   const toggleType = (t: string) => {
     setSelectedTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
+  };
+
+  // Fetch files when switching to pdf-parse tab
+  const fetchPdfFiles = useCallback(async () => {
+    setLoadingFiles(true);
+    try {
+      const { data, error } = await supabase.storage
+        .from('question-papers')
+        .list();
+        
+      if (error) throw error;
+      const filtered = (data || []).filter(f => f.name && !f.name.startsWith('.'));
+      setPdfFiles(filtered);
+    } catch (err: any) {
+      console.error('Failed to list PDFs:', err);
+      toast.error('Could not list PDF files from bucket');
+    } finally {
+      setLoadingFiles(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (activeTab === 'pdf-parse') {
+      fetchPdfFiles();
+    }
+  }, [activeTab, fetchPdfFiles]);
+
+  // Upload handler for PDFs
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf') {
+      toast.error('Only PDF files are allowed');
+      return;
+    }
+    
+    setUploading(true);
+    try {
+      const fileName = `${Date.now()}_${file.name}`;
+      const { error } = await supabase.storage
+        .from('question-papers')
+        .upload(fileName, file);
+        
+      if (error) throw error;
+      toast.success('PDF uploaded successfully!');
+      fetchPdfFiles();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to upload PDF');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Select PDF and run client-side extraction using PDF.js CDN
+  const handleSelectFile = async (file: any) => {
+    setSelectedFile(file);
+    setExtractedText('');
+    setExtractProgress(0);
+    setExtractedQs([]);
+    
+    setExtracting(true);
+    try {
+      // 1. Download file blob from Storage
+      const { data: fileBlob, error: downloadError } = await supabase.storage
+        .from('question-papers')
+        .download(file.name);
+        
+      if (downloadError) throw downloadError;
+      
+      // 2. Extract text client-side
+      const arrayBuffer = await fileBlob.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js');
+      const pdfjsLib = (window as any).pdfjsLib;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+      const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+      const pdfDoc = await loadingTask.promise;
+      const numPages = pdfDoc.numPages;
+      let text = '';
+      
+      for (let i = 1; i <= numPages; i++) {
+        const page = await pdfDoc.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item: any) => item.str).join(' ');
+        text += pageText + '\n';
+        setExtractProgress(Math.round((i / numPages) * 100));
+      }
+      
+      if (!text.trim()) {
+        throw new Error('Extracted text is empty. The PDF might be scanned or image-only.');
+      }
+      
+      setExtractedText(text);
+      toast.success(`Successfully extracted ${text.length} characters of text!`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to extract text from PDF');
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  // Invoke parse-questions-ai edge function
+  const handleParseText = async () => {
+    if (!extractedText.trim()) {
+      toast.error('No text extracted yet');
+      return;
+    }
+    
+    setParsing(true);
+    setExtractedQs([]);
+    try {
+      const { data, error } = await supabase.functions.invoke('parse-questions-ai', {
+        body: {
+          rawText: extractedText,
+          source: 'PDF_UPLOAD',
+          exam: pdfMetadata.exam,
+          subject: pdfMetadata.subject,
+          userClass: pdfMetadata.userClass
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data && data.success) {
+        setExtractedQs(data.data || []);
+        toast.success(`Successfully parsed ${data.count} questions!`);
+      } else {
+        throw new Error(data.error || 'Parsing failed');
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to parse questions via AI');
+    } finally {
+      setParsing(false);
+    }
+  };
+
+  // PDF Question verify/publish handler
+  const handleVerifyPdfQuestion = async (id: string, index: number) => {
+    setSavingId(id);
+    try {
+      const { error } = await supabase
+        .from('questions')
+        .update({ is_verified: true })
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      toast.success('Question verified and live!');
+      setExtractedQs(prev => prev.map((q, i) => i === index ? { ...q, is_verified: true } : q));
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to verify question');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  // PDF Question discard/delete handler
+  const handleDiscardPdfQuestion = async (id: string, index: number) => {
+    setSavingId(id);
+    try {
+      const { error } = await supabase
+        .from('questions')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      toast.success('Question discarded and removed.');
+      setExtractedQs(prev => prev.filter((_, i) => i !== index));
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to discard question');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  // PDF Question inline update handler
+  const handleUpdatePdfQuestion = async (updatedQ: any, index: number) => {
+    setSavingId(updatedQ.id);
+    try {
+      const { id, ...updates } = updatedQ;
+      const { error } = await supabase
+        .from('questions')
+        .update(updates)
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      setExtractedQs(prev => prev.map((q, i) => i === index ? updatedQ : q));
+      toast.success('Changes saved successfully!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save changes');
+    } finally {
+      setSavingId(null);
+    }
   };
 
   // ─── Generate ─────────────────────────────────────────────
@@ -531,7 +1049,7 @@ const QuestionGeneratorPage: React.FC = () => {
 
   // ─── RENDER ───────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
@@ -547,229 +1065,486 @@ const QuestionGeneratorPage: React.FC = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col lg:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        {/* Tab switcher */}
+        <div className="flex border-b border-border mb-6">
+          <button
+            onClick={() => setActiveTab('generate')}
+            className={cn(
+              "px-5 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 relative",
+              activeTab === 'generate' ? "border-orange-400 text-orange-400 font-extrabold" : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Sparkles className="w-4 h-4" />
+            Generate via AI
+          </button>
+          <button
+            onClick={() => setActiveTab('pdf-parse')}
+            className={cn(
+              "px-5 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 relative",
+              activeTab === 'pdf-parse' ? "border-orange-400 text-orange-400 font-extrabold" : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <BookOpen className="w-4 h-4" />
+            Extract from PDF
+          </button>
+        </div>
 
-        {/* ── Left: Form ── */}
-        <aside className="w-full lg:w-80 flex-shrink-0 space-y-4">
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
-            <h2 className="font-bold text-foreground">Generate Questions</h2>
+        {activeTab === 'generate' ? (
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* ── Left: Form ── */}
+            <aside className="w-full lg:w-80 flex-shrink-0 space-y-4">
+              <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+                <h2 className="font-bold text-foreground">Generate Questions</h2>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Exam</label>
-              <select value={exam} onChange={e => setExam(e.target.value)}
-                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent">
-                <option value="CUET">CUET (UG)</option>
-                <option value="JEE_MAINS">JEE Mains</option>
-                <option value="NEET">NEET</option>
-              </select>
-            </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Exam</label>
+                  <select value={exam} onChange={e => setExam(e.target.value)}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent">
+                    <option value="CUET">CUET (UG)</option>
+                    <option value="JEE_MAINS">JEE Mains</option>
+                    <option value="NEET">NEET</option>
+                  </select>
+                </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">NCERT Class</label>
-              <div className="flex gap-2">
-                {[11, 12].map(c => (
-                  <button key={c} onClick={() => setNcertClass(c as 11|12)}
-                    className={cn('flex-1 py-2 rounded-xl border text-sm font-bold transition-all',
-                      ncertClass === c ? 'bg-accent text-black border-accent' : 'border-border text-muted-foreground hover:border-accent/50')}>
-                    Class {c}
-                  </button>
-                ))}
-              </div>
-            </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">NCERT Class</label>
+                  <div className="flex gap-2">
+                    {[11, 12].map(c => (
+                      <button key={c} onClick={() => setNcertClass(c as 11|12)}
+                        className={cn('flex-1 py-2 rounded-xl border text-sm font-bold transition-all',
+                          ncertClass === c ? 'bg-accent text-black border-accent' : 'border-border text-muted-foreground hover:border-accent/50')}>
+                        Class {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Subject</label>
-              <select value={subject} onChange={e => { setSubject(e.target.value); setChapter(''); }}
-                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent">
-                {uniqueSubjects.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Subject</label>
+                  <select value={subject} onChange={e => { setSubject(e.target.value); setChapter(''); }}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent">
+                    {uniqueSubjects.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Chapter</label>
-              <select value={chapter} onChange={e => setChapter(e.target.value)}
-                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent">
-                <option value="">Select chapter...</option>
-                {chapters.map((ch, i) => <option key={ch} value={ch}>Ch {i+1}: {ch}</option>)}
-              </select>
-            </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Chapter</label>
+                  <select value={chapter} onChange={e => setChapter(e.target.value)}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent">
+                    <option value="">Select chapter...</option>
+                    {chapters.map((ch, i) => <option key={ch} value={ch}>Ch {i+1}: {ch}</option>)}
+                  </select>
+                </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Topic (optional)</label>
-              <input value={topic} onChange={e => setTopic(e.target.value)}
-                placeholder="e.g. Equations of Motion"
-                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent" />
-            </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Topic (optional)</label>
+                  <input value={topic} onChange={e => setTopic(e.target.value)}
+                    placeholder="e.g. Equations of Motion"
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent" />
+                </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Exam Stage</label>
-              <select value={examStage} onChange={e => setExamStage(e.target.value)}
-                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent">
-                <option value="practice">Practice</option>
-                <option value="chapter_test">Chapter Test</option>
-                <option value="mock_test">Mock Test</option>
-                <option value="pyq_style">PYQ Style ⚡</option>
-              </select>
-            </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Exam Stage</label>
+                  <select value={examStage} onChange={e => setExamStage(e.target.value)}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent">
+                    <option value="practice">Practice</option>
+                    <option value="chapter_test">Chapter Test</option>
+                    <option value="mock_test">Mock Test</option>
+                    <option value="pyq_style">PYQ Style ⚡</option>
+                  </select>
+                </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Question Types</label>
-              <div className="flex flex-wrap gap-1.5">
-                {QUESTION_TYPES.map(t => (
-                  <button key={t} onClick={() => toggleType(t)}
-                    className={cn('text-xs px-2 py-1 rounded-lg border transition-all',
-                      selectedTypes.includes(t) ? 'bg-accent text-black border-accent' : 'border-border text-muted-foreground hover:border-accent/50')}>
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Question Types</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {QUESTION_TYPES.map(t => (
+                      <button key={t} onClick={() => toggleType(t)}
+                        className={cn('text-xs px-2 py-1 rounded-lg border transition-all',
+                          selectedTypes.includes(t) ? 'bg-accent text-black border-accent' : 'border-border text-muted-foreground hover:border-accent/50')}>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Difficulty Mix (%)</label>
-              <div className="space-y-2">
-                {(['Easy','Medium','Hard'] as const).map(d => (
-                  <div key={d} className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-muted-foreground w-14">{d}</span>
-                    <input type="range" min={0} max={100} value={diffMix[d]}
-                      onChange={e => setDiffMix(prev => ({ ...prev, [d]: parseInt(e.target.value) }))}
-                      className="flex-1 accent-orange-400" />
-                    <span className={cn('text-xs font-mono w-8 text-right font-bold',
-                      d === 'Easy' ? 'text-emerald-400' : d === 'Medium' ? 'text-amber-400' : 'text-red-400')}>
-                      {diffMix[d]}%
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Difficulty Mix (%)</label>
+                  <div className="space-y-2">
+                    {(['Easy','Medium','Hard'] as const).map(d => (
+                      <div key={d} className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-muted-foreground w-14">{d}</span>
+                        <input type="range" min={0} max={100} value={diffMix[d]}
+                          onChange={e => setDiffMix(prev => ({ ...prev, [d]: parseInt(e.target.value) }))}
+                          className="flex-1 accent-orange-400" />
+                        <span className={cn('text-xs font-mono w-8 text-right font-bold',
+                          d === 'Easy' ? 'text-emerald-400' : d === 'Medium' ? 'text-amber-400' : 'text-red-400')}>
+                          {diffMix[d]}%
+                        </span>
+                      </div>
+                    ))}
+                    <p className={cn('text-xs', diffMix.Easy + diffMix.Medium + diffMix.Hard === 100 ? 'text-emerald-400' : 'text-red-400')}>
+                      Total: {diffMix.Easy + diffMix.Medium + diffMix.Hard}% {diffMix.Easy + diffMix.Medium + diffMix.Hard !== 100 ? '⚠️ must be 100%' : '✓'}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Count (max 20)</label>
+                  <input type="number" min={1} max={20} value={count}
+                    onChange={e => setCount(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent" />
+                </div>
+
+                <Button onClick={handleGenerate} disabled={generating || !chapter}
+                  className="w-full bg-accent text-black h-12 font-bold">
+                  {generating ? (
+                    <span className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin" /> Generating...
                     </span>
-                  </div>
-                ))}
-                <p className={cn('text-xs', diffMix.Easy + diffMix.Medium + diffMix.Hard === 100 ? 'text-emerald-400' : 'text-red-400')}>
-                  Total: {diffMix.Easy + diffMix.Medium + diffMix.Hard}% {diffMix.Easy + diffMix.Medium + diffMix.Hard !== 100 ? '⚠️ must be 100%' : '✓'}
-                </p>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" /> Generate {count} Questions
+                    </span>
+                  )}
+                </Button>
               </div>
-            </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Count (max 20)</label>
-              <input type="number" min={1} max={20} value={count}
-                onChange={e => setCount(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
-                className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent" />
-            </div>
-
-            <Button onClick={handleGenerate} disabled={generating || !chapter}
-              className="w-full bg-accent text-black h-12 font-bold">
-              {generating ? (
-                <span className="flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4 animate-spin" /> Generating...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" /> Generate {count} Questions
-                </span>
+              {/* Stats */}
+              {stats && (
+                <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <BarChart2 className="w-4 h-4 text-accent" /> Batch Stats
+                  </h3>
+                  {[
+                    { label: 'Requested', value: stats.requested, color: 'text-foreground' },
+                    { label: 'Passed Gate', value: passingCount, color: 'text-emerald-400' },
+                    { label: 'Saved to DB', value: stats.saved, color: 'text-blue-400' },
+                    { label: 'Approved', value: approvedCount, color: 'text-emerald-400' },
+                    { label: 'Rejected', value: rejectedCount, color: 'text-red-400' },
+                  ].map(s => (
+                    <div key={s.label} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{s.label}</span>
+                      <span className={cn('font-bold', s.color)}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
               )}
-            </Button>
-          </div>
+            </aside>
 
-          {/* Stats */}
-          {stats && (
-            <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-                <BarChart2 className="w-4 h-4 text-accent" /> Batch Stats
-              </h3>
-              {[
-                { label: 'Requested', value: stats.requested, color: 'text-foreground' },
-                { label: 'Passed Gate', value: passingCount, color: 'text-emerald-400' },
-                { label: 'Saved to DB', value: stats.saved, color: 'text-blue-400' },
-                { label: 'Approved', value: approvedCount, color: 'text-emerald-400' },
-                { label: 'Rejected', value: rejectedCount, color: 'text-red-400' },
-              ].map(s => (
-                <div key={s.label} className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{s.label}</span>
-                  <span className={cn('font-bold', s.color)}>{s.value}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </aside>
-
-        {/* ── Right: Results ── */}
-        <main className="flex-1 space-y-4 min-w-0">
-          {questions.length > 0 && (
-            <>
-              {/* Controls bar */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted-foreground font-medium">
-                  {filteredQs.length} of {questions.length} questions
-                </span>
-                <div className="flex gap-1 ml-auto">
-                  <select value={filterDiff} onChange={e => setFilterDiff(e.target.value)}
-                    className="text-xs bg-secondary/50 border border-border rounded-lg px-2 py-1.5 focus:outline-none">
-                    <option value="all">All Difficulties</option>
-                    <option value="Easy">Easy</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Hard">Hard</option>
-                  </select>
-                  <select value={filterType} onChange={e => setFilterType(e.target.value)}
-                    className="text-xs bg-secondary/50 border border-border rounded-lg px-2 py-1.5 focus:outline-none">
-                    <option value="all">All Types</option>
-                    {QUESTION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <Button onClick={handleBulkApprove} size="sm"
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white h-8 text-xs">
-                    <ClipboardCheck className="w-3 h-3 mr-1" />
-                    Bulk Approve ({passingCount - approvedCount})
-                  </Button>
-                </div>
-              </div>
-
-              {/* Question cards */}
-              <div className="space-y-3">
-                {filteredQs.map((q, i) => (
-                  <QuestionCard
-                    key={q.question_id + i}
-                    q={q}
-                    index={i}
-                    savingId={savingId}
-                    onApprove={() => handleApprove(q, questions.indexOf(q))}
-                    onReject={() => handleReject(questions.indexOf(q))}
-                    onRegenerate={() => handleRegenerate(questions.indexOf(q))}
-                    onVerify={() => handleVerify(q, questions.indexOf(q))}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Empty state */}
-          {!generating && questions.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
-                <Sparkles className="w-8 h-8 text-accent" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground mb-2">Ready to Generate</h3>
-              <p className="text-sm text-muted-foreground max-w-xs">
-                Configure the exam, subject, and chapter on the left, then click Generate.
-                Every question goes through a 6-point quality gate before saving.
-              </p>
-            </div>
-          )}
-
-          {/* Loading state */}
-          {generating && (
-            <div className="space-y-3">
-              {Array(count).fill(0).map((_, i) => (
-                <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-pulse">
-                  <div className="flex gap-2 mb-3">
-                    <div className="h-5 w-16 bg-muted rounded-full" />
-                    <div className="h-5 w-20 bg-muted rounded-full" />
+            {/* ── Right: Results ── */}
+            <main className="flex-1 space-y-4 min-w-0">
+              {questions.length > 0 && (
+                <>
+                  {/* Controls bar */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm text-muted-foreground font-medium">
+                      {filteredQs.length} of {questions.length} questions
+                    </span>
+                    <div className="flex gap-1 ml-auto">
+                      <select value={filterDiff} onChange={e => setFilterDiff(e.target.value)}
+                        className="text-xs bg-secondary/50 border border-border rounded-lg px-2 py-1.5 focus:outline-none">
+                        <option value="all">All Difficulties</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
+                      </select>
+                      <select value={filterType} onChange={e => setFilterType(e.target.value)}
+                        className="text-xs bg-secondary/50 border border-border rounded-lg px-2 py-1.5 focus:outline-none">
+                        <option value="all">All Types</option>
+                        {QUESTION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                      <Button onClick={handleBulkApprove} size="sm"
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white h-8 text-xs">
+                        <ClipboardCheck className="w-3 h-3 mr-1" />
+                        Bulk Approve ({passingCount - approvedCount})
+                      </Button>
+                    </div>
                   </div>
-                  <div className="h-4 bg-muted rounded w-full mb-2" />
-                  <div className="h-4 bg-muted rounded w-3/4" />
+
+                  {/* Question cards */}
+                  <div className="space-y-3">
+                    {filteredQs.map((q, i) => (
+                      <QuestionCard
+                        key={q.question_id + i}
+                        q={q}
+                        index={i}
+                        savingId={savingId}
+                        onApprove={() => handleApprove(q, questions.indexOf(q))}
+                        onReject={() => handleReject(questions.indexOf(q))}
+                        onRegenerate={() => handleRegenerate(questions.indexOf(q))}
+                        onVerify={() => handleVerify(q, questions.indexOf(q))}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Empty state */}
+              {!generating && questions.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
+                    <Sparkles className="w-8 h-8 text-accent" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground mb-2">Ready to Generate</h3>
+                  <p className="text-sm text-muted-foreground max-w-xs">
+                    Configure the exam, subject, and chapter on the left, then click Generate.
+                    Every question goes through a 6-point quality gate before saving.
+                  </p>
                 </div>
-              ))}
-              <p className="text-center text-sm text-muted-foreground animate-pulse">
-                🧠 Claude is generating {count} CUET-quality questions...
-              </p>
-            </div>
-          )}
-        </main>
+              )}
+
+              {/* Loading state */}
+              {generating && (
+                <div className="space-y-3">
+                  {Array(count).fill(0).map((_, i) => (
+                    <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-pulse">
+                      <div className="flex gap-2 mb-3">
+                        <div className="h-5 w-16 bg-muted rounded-full" />
+                        <div className="h-5 w-20 bg-muted rounded-full" />
+                      </div>
+                      <div className="h-4 bg-muted rounded w-full mb-2" />
+                      <div className="h-4 bg-muted rounded w-3/4" />
+                    </div>
+                  ))}
+                  <p className="text-center text-sm text-muted-foreground animate-pulse">
+                    🧠 Claude is generating {count} CUET-quality questions...
+                  </p>
+                </div>
+              )}
+            </main>
+          </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* ── Left Sidebar: PDF Ingestion Config ── */}
+            <aside className="w-full lg:w-80 flex-shrink-0 space-y-4">
+              <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+                <h2 className="font-bold text-foreground">PDF Extraction Config</h2>
+                
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Target Exam</label>
+                  <select
+                    value={pdfMetadata.exam}
+                    onChange={e => setPdfMetadata(prev => ({ ...prev, exam: e.target.value }))}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent"
+                  >
+                    <option value="JEE_MAINS">JEE Mains</option>
+                    <option value="NEET">NEET</option>
+                    <option value="CUET">CUET (UG)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Target Subject</label>
+                  <select
+                    value={pdfMetadata.subject}
+                    onChange={e => setPdfMetadata(prev => ({ ...prev, subject: e.target.value }))}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent"
+                  >
+                    <option value="Physics">Physics</option>
+                    <option value="Chemistry">Chemistry</option>
+                    <option value="Maths">Maths</option>
+                    <option value="Biology">Biology</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Target Class</label>
+                  <select
+                    value={pdfMetadata.userClass}
+                    onChange={e => setPdfMetadata(prev => ({ ...prev, userClass: e.target.value as any }))}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent"
+                  >
+                    <option value="11">Class 11</option>
+                    <option value="12">Class 12</option>
+                    <option value="dropper">Dropper</option>
+                  </select>
+                </div>
+
+                {/* Upload Section */}
+                <div className="border-t border-border pt-4">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Upload New PDF</label>
+                  <div className="relative border-2 border-dashed border-border hover:border-orange-500/30 rounded-xl p-4 transition-all text-center cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleUpload}
+                      disabled={uploading}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    {uploading ? (
+                      <div className="flex flex-col items-center justify-center gap-1">
+                        <RefreshCw className="w-5 h-5 animate-spin text-orange-400" />
+                        <span className="text-xs font-semibold">Uploading...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center gap-1">
+                        <Upload className="w-5 h-5 text-muted-foreground" />
+                        <span className="text-xs font-semibold">Choose PDF File</span>
+                        <span className="text-[10px] text-muted-foreground">or drag and drop here</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Bucket Files Listing */}
+                <div className="border-t border-border pt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Uploaded PDFs</label>
+                    <button onClick={fetchPdfFiles} disabled={loadingFiles} className="p-1 hover:bg-secondary rounded transition-colors">
+                      <RefreshCw className={cn("w-3 h-3 text-muted-foreground", loadingFiles && "animate-spin")} />
+                    </button>
+                  </div>
+
+                  <div className="max-h-60 overflow-y-auto space-y-2 pr-1">
+                    {loadingFiles ? (
+                      <div className="text-xs text-muted-foreground text-center py-4">Listing files...</div>
+                    ) : pdfFiles.length === 0 ? (
+                      <div className="text-xs text-muted-foreground text-center py-4">No PDFs in storage.</div>
+                    ) : (
+                      pdfFiles.map((file) => {
+                        const isSelected = selectedFile?.name === file.name;
+                        const sizeMB = (file.metadata?.size / (1024 * 1024)).toFixed(2);
+                        return (
+                          <button
+                            key={file.id || file.name}
+                            onClick={() => handleSelectFile(file)}
+                            disabled={extracting}
+                            className={cn(
+                              "w-full text-left p-2.5 rounded-xl border text-xs transition-all flex flex-col gap-1",
+                              isSelected
+                                ? "bg-orange-500/10 border-orange-500/30 text-orange-400"
+                                : "bg-secondary/20 border-border hover:border-orange-500/20 text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <div className="font-semibold truncate flex items-center gap-1.5">
+                              <FileText className="w-3.5 h-3.5 flex-shrink-0" />
+                              <span className="truncate">{file.name.replace(/^\d+_/, '')}</span>
+                            </div>
+                            <div className="flex justify-between text-[10px] opacity-75">
+                              <span>{sizeMB} MB</span>
+                              <span>{new Date(file.created_at).toLocaleDateString()}</span>
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            {/* ── Right Content Area: Extracted Text & Ingestion Results ── */}
+            <main className="flex-1 space-y-4 min-w-0">
+              {/* Empty state when nothing selected */}
+              {!selectedFile && extractedQs.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center mb-4">
+                    <BookOpen className="w-8 h-8 text-orange-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-foreground mb-2">Ingest via PDF Question Paper</h3>
+                  <p className="text-sm text-muted-foreground max-w-xs">
+                    Select a PDF from the sidebar list (or upload a new one) to extract text client-side, and then trigger Claude to parse questions.
+                  </p>
+                </div>
+              )}
+
+              {/* Text extraction progress */}
+              {extracting && (
+                <div className="bg-card border border-border rounded-2xl p-6 text-center space-y-4 animate-pulse">
+                  <RefreshCw className="w-8 h-8 animate-spin text-orange-400 mx-auto" />
+                  <div>
+                    <h4 className="font-bold">Extracting PDF Text content...</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Downloading file and running text layout engine in browser</p>
+                  </div>
+                  <div className="w-full bg-secondary rounded-full h-1.5 max-w-xs mx-auto">
+                    <div className="bg-orange-400 h-1.5 rounded-full transition-all" style={{ width: `${extractProgress}%` }} />
+                  </div>
+                  <span className="text-xs font-mono">{extractProgress}% Complete</span>
+                </div>
+              )}
+
+              {/* Text preview & Parse trigger button */}
+              {selectedFile && !extracting && (
+                <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-border">
+                    <div>
+                      <h3 className="font-bold text-foreground truncate max-w-md">
+                        Selected: {selectedFile.name.replace(/^\d+_/, '')}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Size: {(selectedFile.metadata?.size / (1024 * 1024)).toFixed(2)} MB · {extractedText.length} characters extracted
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleParseText}
+                      disabled={parsing || !extractedText}
+                      className="bg-orange-400 hover:bg-orange-300 text-black font-bold h-10 px-6 shrink-0"
+                    >
+                      {parsing ? (
+                        <span className="flex items-center gap-2">
+                          <RefreshCw className="w-4 h-4 animate-spin" /> Ingesting & Parsing...
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <Zap className="w-4 h-4 fill-black text-black" /> Run Claude Parser
+                        </span>
+                      )}
+                    </Button>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Extracted Content Preview</label>
+                    <div className="bg-secondary/35 border border-border rounded-xl p-4 max-h-48 overflow-y-auto font-mono text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                      {extractedText.slice(0, 1000)}
+                      {extractedText.length > 1000 && `\n\n... [Preview Truncated: ${extractedText.length - 1000} characters remaining]`}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading AI parsing */}
+              {parsing && (
+                <div className="space-y-3">
+                  {Array(3).fill(0).map((_, i) => (
+                    <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-pulse">
+                      <div className="h-5 w-24 bg-muted rounded mb-3" />
+                      <div className="h-4 bg-muted rounded w-full mb-2" />
+                      <div className="h-4 bg-muted rounded w-2/3" />
+                    </div>
+                  ))}
+                  <p className="text-center text-sm text-muted-foreground animate-pulse">
+                    🧠 Claude is analyzing questions structure, extracting options and solutions...
+                  </p>
+                </div>
+              )}
+
+              {/* Parsed questions preview */}
+              {extractedQs.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-foreground">AI Parsed Questions ({extractedQs.length})</h3>
+                    <span className="text-xs text-muted-foreground">Pending manual verification & publish</span>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {extractedQs.map((q, i) => (
+                      <ParsedPdfQuestionCard
+                        key={q.id || i}
+                        q={q}
+                        index={i}
+                        savingId={savingId}
+                        onVerify={() => handleVerifyPdfQuestion(q.id, i)}
+                        onDiscard={() => handleDiscardPdfQuestion(q.id, i)}
+                        onUpdate={(updatedForm) => handleUpdatePdfQuestion(updatedForm, i)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </main>
+          </div>
+        )}
       </div>
     </div>
   );

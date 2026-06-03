@@ -2,10 +2,11 @@ import { useState, useCallback } from 'react';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useClassContext } from '@/contexts/ClassContext';
+import { getResponseForQuery } from '@/lib/prepentranceMentor';
 
 type Message = { role: 'user' | 'assistant'; content: any };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/prepentrance-chat`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jeetu-chat`;
 
 export const usePrepEntranceChat = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -30,30 +31,60 @@ export const usePrepEntranceChat = () => {
         ? lastMsg.content
         : JSON.stringify(lastMsg?.content ?? '');
 
-      const resp = await fetch(CHAT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
-          message: messageText,
-          history,
-          examMode: aiContext.learning_mode === 'foundation' ? 'foundation' : examMode,
-          language,
-          classContext: {
-            ...aiContext,
-            strict_class_only: true,
-            strict_stage_control: true,
-            teaching_style: aiContext.teaching_tone,
-          }
-        }),
-      });
+      let resp: Response | null = null;
+      let retries = 0;
+      const maxRetries = 3;
+      let success = false;
 
-      if (!resp.ok) {
-        const errorData = await resp.json().catch(() => ({}));
-        const errorMessage = errorData.error || "Connection failed. Try again.";
-        setError(errorMessage);
+      while (retries < maxRetries && !success) {
+        try {
+          if (retries > 0) {
+            setError(`⚠️ Mentor is reconnecting... Retrying (${retries}/${maxRetries})`);
+          }
+          resp = await fetch(CHAT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({
+              message: messageText,
+              history,
+              examMode: aiContext.learning_mode === 'foundation' ? 'foundation' : examMode,
+              language,
+              classContext: {
+                ...aiContext,
+                strict_class_only: true,
+                strict_stage_control: true,
+                teaching_style: aiContext.teaching_tone,
+              }
+            }),
+          });
+          
+          if (resp.ok) {
+            success = true;
+          } else {
+            retries++;
+            if (retries < maxRetries) {
+              await new Promise((resolve) => setTimeout(resolve, 1500));
+            }
+          }
+        } catch (e) {
+          retries++;
+          if (retries < maxRetries) {
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+          }
+        }
+      }
+
+      if (!success || !resp) {
+        setError("Working offline... Generating response locally...");
+        const localResp = getResponseForQuery(messageText);
+        const words = localResp.message.split(' ');
+        for (let i = 0; i < words.length; i++) {
+          onDelta((i === 0 ? "" : " ") + words[i]);
+          await new Promise((resolve) => setTimeout(resolve, 55));
+        }
         setIsLoading(false);
         onDone();
         return;
@@ -119,7 +150,15 @@ export const usePrepEntranceChat = () => {
       onDone();
     } catch (e) {
       console.error("Chat error:", e);
-      setError("Connection failed. Try again.");
+      setError("⚠️ Mentor server temporarily unavailable.\n\nYou can:\n• Retry\n• Upload image again\n• Continue in offline doubt mode");
+      
+      // Fallback to local offline response
+      const localResp = getResponseForQuery(messageText);
+      const words = localResp.message.split(' ');
+      for (let i = 0; i < words.length; i++) {
+        onDelta((i === 0 ? "" : " ") + words[i]);
+        await new Promise((resolve) => setTimeout(resolve, 55));
+      }
       onDone();
     } finally {
       setIsLoading(false);

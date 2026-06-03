@@ -132,6 +132,26 @@
     --biology-color: 145 50% 38%;
   }
 
+  .light {
+    --background: 228 16% 94%;
+    --foreground: 213 32% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 213 32% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 213 32% 17%;
+    --primary: 213 32% 17%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 216 10% 40%;
+    --accent: 32 79% 57%;
+    --accent-foreground: 213 32% 17%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 215 8% 58%;
+    --border: 220 14% 88%;
+    --input: 220 14% 88%;
+    --ring: 32 79% 57%;
+  }
+
   .dark {
     --background: 213 25% 10%;
     --foreground: 40 15% 95%;
@@ -708,4 +728,27 @@
 /* Conic gradient for animated backgrounds */
 .bg-gradient-conic {
   background: conic-gradient(from 0deg, var(--tw-gradient-stops));
+}
+
+/* ─────────────────────────────────────────────────────────
+   GLOBAL INTERACTIVE STATE RULES
+   ───────────────────────────────────────────────────────── */
+button:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled,
+[disabled] {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+}
+
+.btn-primary-cta {
+  background-color: #FB923C !important;
+  color: #ffffff !important;
+  border-color: #FB923C !important;
+}
+
+.btn-primary-cta:hover {
+  background-color: #F97316 !important;
+  border-color: #F97316 !important;
 }

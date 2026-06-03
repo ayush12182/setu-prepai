@@ -151,8 +151,8 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               className={cn(
                 "p-5 rounded-2xl border-2 transition-all text-left space-y-3 flex flex-col justify-between",
                 selectedDifficulty === 'easy' 
-                  ? "border-emerald-500 bg-emerald-500/5 text-white" 
-                  : "bg-white/[0.02] border-white/[0.06] hover:border-white/10"
+                  ? "border-emerald-500 bg-emerald-500/20 text-white shadow-[0_0_15px_rgba(16,185,129,0.15)]" 
+                  : "bg-emerald-950/10 border-emerald-500/30 text-emerald-100 hover:border-emerald-500/60"
               )}
             >
               <div className="flex justify-between items-start w-full">
@@ -163,7 +163,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               </div>
               <div>
                 <h4 className="font-extrabold text-sm text-white">Easy (NCERT Foundation)</h4>
-                <p className="text-[10px] text-[#94A3B8] mt-1 leading-relaxed">
+                <p className="text-[10px] text-slate-300 mt-1 leading-relaxed">
                   Focus: Concept clarity & formula definitions.
                 </p>
                 <div className="text-[10px] text-emerald-400 font-bold mt-2.5">
@@ -181,8 +181,8 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               className={cn(
                 "p-5 rounded-2xl border-2 transition-all text-left space-y-3 flex flex-col justify-between",
                 selectedDifficulty === 'medium' 
-                  ? "border-amber-500 bg-amber-500/5 text-white" 
-                  : "bg-white/[0.02] border-white/[0.06] hover:border-white/10"
+                  ? "border-amber-500 bg-amber-500/20 text-white shadow-[0_0_15px_rgba(245,158,11,0.15)]" 
+                  : "bg-amber-950/10 border-amber-500/30 text-amber-100 hover:border-amber-500/60"
               )}
             >
               <div className="flex justify-between items-start w-full">
@@ -193,7 +193,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               </div>
               <div>
                 <h4 className="font-extrabold text-sm text-white">Medium (JEE Main)</h4>
-                <p className="text-[10px] text-[#94A3B8] mt-1 leading-relaxed">
+                <p className="text-[10px] text-slate-300 mt-1 leading-relaxed">
                   Focus: Relative motion, graph analysis, multi-concepts.
                 </p>
                 <div className="text-[10px] text-amber-400 font-bold mt-2.5">
@@ -211,8 +211,8 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               className={cn(
                 "p-5 rounded-2xl border-2 transition-all text-left space-y-3 flex flex-col justify-between",
                 selectedDifficulty === 'hard' 
-                  ? "border-red-500 bg-red-500/5 text-white" 
-                  : "bg-white/[0.02] border-white/[0.06] hover:border-white/10"
+                  ? "border-red-500 bg-red-500/20 text-white shadow-[0_0_15px_rgba(239,68,68,0.15)]" 
+                  : "bg-red-950/10 border-red-500/30 text-red-100 hover:border-red-500/60"
               )}
             >
               <div className="flex justify-between items-start w-full">

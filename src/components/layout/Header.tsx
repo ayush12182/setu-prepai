@@ -126,9 +126,13 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'PrepEntran
           {/* Language Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 bg-[rgba(251,146,60,0.08)] border-[rgba(251,146,60,0.25)] text-white hover:bg-[#FB923C] hover:text-white data-[state=open]:bg-[#FB923C] data-[state=open]:text-white font-semibold transition-all shadow-sm"
+              >
                 <Globe className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm font-medium">{languageLabels[language]}</span>
+                <span className="hidden sm:inline text-sm">{languageLabels[language]}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

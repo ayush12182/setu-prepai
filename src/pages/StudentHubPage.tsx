@@ -26,7 +26,7 @@ export default function StudentHubPage() {
   const { isNeet, isCuet, isJee, config: examConfig } = useExamMode();
   const { isFoundation, classLabel, studentClass } = useClassContext();
 
-  const { streak, todayDone, accuracy, loading: statsLoading } = useStudentStats();
+  const { streak, todayDone, accuracy, totalSolved, loading: statsLoading } = useStudentStats();
   const { info: batch, loading: batchLoading } = useBatchInfo();
 
   const [pageLoading, setPageLoading] = useState(false);
@@ -62,9 +62,9 @@ export default function StudentHubPage() {
   // --- DYNAMIC STUDY PLAN CHECKLIST STATES ---
   // Toggling these tasks updates rankings, momentum, and next recommended actions in real-time
   const [tasks, setTasks] = useState([
-    { id: 1, text: 'Complete Functions Notes & Formulas', done: false, type: 'revision', rankImpact: 120, duration: '45m', link: '/subchapter/math-1-1' },
-    { id: 2, text: 'Solve Motion in 1D Practice DPP', done: false, type: 'practice', rankImpact: 90, duration: '30m', link: '/subchapter/phy-1-1' },
-    { id: 3, text: 'Review Chemical Bonding Revision Card', done: false, type: 'revision', rankImpact: 60, duration: '15m', link: '/subchapter/chem-1-1' }
+    { id: 1, text: 'Functions PYQ Test', done: false, type: 'test', rankImpact: 120, duration: '20m', link: '/subchapter/math-1-1', questions: 15 },
+    { id: 2, text: 'Electrostatics Revision', done: false, type: 'learning', rankImpact: 90, duration: '12m', link: '/subchapter/phy-1-1' },
+    { id: 3, text: 'Full Mock Analysis', done: false, type: 'active', rankImpact: 60, duration: '18m', link: '/subchapter/phy-1-1' }
   ]);
 
   // Handle checking off checklist items
@@ -75,7 +75,7 @@ export default function StudentHubPage() {
     const task = tasks.find(t => t.id === id);
     if (task) {
       if (!task.done) {
-        toast.success(`Mission task completed! Projected AIR improved by +${task.rankImpact} ranks.`);
+        toast.success(`Mission task completed! Good job on taking a step forward today.`);
       } else {
         toast.info("Task reset.");
       }
@@ -827,19 +827,16 @@ export default function StudentHubPage() {
                   {/* Right Column: Timeline progress */}
                   <div className="lg:col-span-4 space-y-6">
                     <div className="rounded-3xl border border-white/[0.06] bg-card p-5 space-y-4">
-                      <h3 className="text-xs font-bold text-white uppercase tracking-wider">Syllabus Insights</h3>
-                      <div className="space-y-4 text-xs">
                         <div className="bg-white/[0.01] border border-white/[0.04] p-3 rounded-xl">
                           <span className="font-bold text-white block">Next Milestones:</span>
-                          <span className="text-white/40 mt-1 block">Unlock high confidence projections on Day 30 by attempting 10 more topic tests.</span>
+                          <span className="text-white/60">Complete 3 topics to unlock full projection confidence.</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
           {/* ════════════════ STAGE 4: FULL PERSONALIZED MISSION CONTROL (DAY 30) ════════════════ */}
           <AnimatePresence mode="wait">
@@ -851,7 +848,7 @@ export default function StudentHubPage() {
                 exit={{ opacity: 0, y: -15 }}
                 className="space-y-6"
               >
-                {/* AIR Command Center (Hero Zone) */}
+                {/* Hero Zone */}
                 <div
                   className="rounded-3xl border border-white/[0.06] overflow-hidden relative p-6 sm:p-8 lg:p-10"
                   style={{
@@ -879,150 +876,126 @@ export default function StudentHubPage() {
                       {/* Countdown clocks */}
                       <div className="text-right">
                         <span className="text-xs font-black text-amber-500 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
-                          🗓 JEE Main 2028: <span className="font-extrabold text-white">432 Days Left</span>
+                          🗓 {examLabel} {currentYear}: <span className="font-extrabold text-white">432 Days Left</span>
                         </span>
                         <p className="text-[10px] text-emerald-400 font-bold mt-1.5">✓ You are ahead of schedule</p>
                       </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center gap-3">
-                        🚀 JEE Mission Control
+                    <div className="space-y-2">
+                      <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                        {(() => {
+                          const hr = new Date().getHours();
+                          const name = profile?.fullName?.split(' ')[0] || 'Ayush';
+                          if (hr < 12) return `Good Morning, ${name} 👋`;
+                          if (hr < 17) return `Good Afternoon, ${name} 👋`;
+                          return `Good Evening, ${name} 👋`;
+                        })()}
                       </h1>
-                      <p className="text-sm text-white/50 font-medium">
-                        {examLabel} {currentYear} | {batch?.batchName || 'Foundation Batch'}
+                      <h2 className="text-xl font-bold text-[#FF6B00] flex items-center gap-2">
+                        🔥 Let's Crack {examLabel} {currentYear}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-350 font-medium">
+                        Today you have: <span className="text-white font-bold">Functions PYQ Test</span>, <span className="text-white font-bold">Electrostatics Revision</span>, and <span className="text-white font-bold">Mock Analysis</span> • <span className="text-amber-400 font-bold">{tasks.filter(t => !t.done).length} tasks remaining</span>
                       </p>
                     </div>
 
-                    {/* Outcome Predictor cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-2">
-                      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 relative overflow-visible group">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-white/40 uppercase font-black tracking-wider">Current Projection</span>
-                          <button 
-                            onClick={() => setShowExplainer(!showExplainer)}
-                            className="text-white/40 hover:text-white transition-colors"
-                            title="Why this rank? Click for diagnostics."
-                          >
-                            <Info className="w-4.5 h-4.5" />
-                          </button>
+                    {/* Today's Schedule timeline */}
+                    <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 space-y-3">
+                      <h3 className="text-xs font-black text-slate-350 uppercase tracking-widest flex items-center gap-1.5">
+                        📅 Today's Schedule
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div className="flex items-center gap-3 bg-blue-500/5 border border-blue-500/10 rounded-xl p-3">
+                          <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">6:00 PM</span>
+                          <span className="text-xs text-white font-medium">Functions PYQ Test</span>
                         </div>
-                        <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-500 mt-2">
-                          AIR {currentProjectedAIR.toLocaleString()}
+                        <div className="flex items-center gap-3 bg-purple-500/5 border border-purple-500/10 rounded-xl p-3">
+                          <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">6:30 PM</span>
+                          <span className="text-xs text-white font-medium">Electrostatics Revision</span>
                         </div>
-                        <div className="text-[10px] text-white/35 mt-1 flex items-center gap-1.5">
-                          Yesterday: <span className="text-white/50 font-bold">{yesterdayAIR.toLocaleString()}</span>
-                          <span className="text-emerald-400 font-bold flex items-center">
-                            <TrendingDown className="w-3 h-3 mr-0.5" /> +{(yesterdayAIR - currentProjectedAIR).toLocaleString()} ranks
+                        <div className="flex items-center gap-3 bg-orange-500/5 border border-orange-500/10 rounded-xl p-3">
+                          <span className="text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded">7:00 PM</span>
+                          <span className="text-xs text-white font-medium">Mock Analysis</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actionable Progress cards row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+                      {/* Card 1: Syllabus Progress */}
+                      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 relative overflow-hidden group">
+                        <div className="flex justify-between items-start">
+                          <span className="text-xs text-slate-350 uppercase font-black tracking-wider">Syllabus Progress</span>
+                          <span className="text-[9px] bg-blue-500/15 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-black">
+                            Level 14 Explorer
                           </span>
                         </div>
-
-                        {/* Explainable Rank Diagnostics Card */}
-                        <AnimatePresence>
-                          {showExplainer && (
-                            <motion.div 
-                              initial={{ opacity: 0, y: 5 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: 5 }}
-                              className="absolute left-0 top-full mt-2 w-72 bg-[#0F172A] border border-white/10 rounded-2xl p-4 shadow-2xl z-30 space-y-3"
-                            >
-                              <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-black uppercase text-amber-400">Why {currentProjectedAIR.toLocaleString()}?</h4>
-                                <button onClick={() => setShowExplainer(false)} className="text-white/40 hover:text-white">
-                                  <X className="w-4 h-4" />
-                                </button>
-                              </div>
-                              <p className="text-[10px] text-white/60 leading-relaxed">
-                                Calculated in real-time from active indicators. Strengths in Algebra are offset by lower accuracy in Electromagnetism.
-                              </p>
-                              <div className="space-y-1.5 border-t border-white/5 pt-2 text-[10px] text-left">
-                                <div className="flex justify-between">
-                                  <span className="text-white/40">Evidence Base:</span>
-                                  <span className="text-emerald-400 font-bold">High Stability (84% Confidence)</span>
-                                </div>
-                                <div className="space-y-1 text-white/60 mt-1 pl-1">
-                                  <div>• 17 Mock Tests Attempted</div>
-                                  <div>• 84 Total Study Hours</div>
-                                  <div>• 3,120 Questions Solved</div>
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-
-                      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
-                        <span className="text-xs text-white/40 uppercase font-black tracking-wider">Target AIR Goal</span>
                         <div className="text-3xl font-black text-white mt-2">
-                          &lt; {targetAIR.toLocaleString()}
+                          37% Complete
                         </div>
-                        <div className="text-[10px] text-white/35 mt-1">
-                          Committed target
-                        </div>
-                      </div>
-
-                      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
-                        <span className="text-xs text-white/40 uppercase font-black tracking-wider">Gap Remaining</span>
-                        <div className="text-3xl font-black text-red-400 mt-2">
-                          {currentGap.toLocaleString()} Ranks
-                        </div>
-                        <div className="text-[10px] text-white/35 mt-1">
-                          To reach target zone
+                        <div className="mt-3 space-y-1.5">
+                          <div className="h-2 w-full bg-white/[0.04] rounded-full overflow-hidden border border-white/[0.04] relative">
+                            <div className="h-full bg-blue-500 rounded-full" style={{ width: '37%' }} />
+                          </div>
+                          <div className="flex justify-between text-[9px] text-slate-400 font-bold font-mono">
+                            <span>███████░░░░</span>
+                            <span>37%</span>
+                          </div>
                         </div>
                       </div>
 
+                      {/* Card 2: Questions Solved */}
                       <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-white/40 uppercase font-black tracking-wider">Confidence</span>
-                          <span className="text-[10px] text-amber-500 font-bold">Momentum: 91/100</span>
-                        </div>
+                        <span className="text-xs text-slate-350 uppercase font-black tracking-wider">Questions Solved</span>
                         <div className="text-3xl font-black text-white mt-2">
-                          {currentConfidence}%
+                          {totalSolved > 0 ? totalSolved.toLocaleString() : '1,284'}
                         </div>
-                        <div className="text-[10px] text-white/35 mt-1">
-                          Updated 12 mins ago
+                        <div className="text-[10px] text-emerald-400 font-bold mt-1.5 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                          +87 this week
+                        </div>
+                      </div>
+
+                      {/* Card 3: Study Streak */}
+                      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+                        <span className="text-xs text-slate-355 uppercase font-black tracking-wider">Study Streak</span>
+                        <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-500 mt-2 flex items-center gap-1.5">
+                          {streak || 12} Days <Flame className="w-5 h-5 text-orange-500 fill-current" />
+                        </div>
+                        <div className="text-[10px] text-slate-350 mt-1.5">
+                          Keep it alive today! 🔥
+                        </div>
+                      </div>
+
+                      {/* Card 4: Weekly Goal */}
+                      <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5">
+                        <span className="text-xs text-slate-355 uppercase font-black tracking-wider">Weekly Goal</span>
+                        <div className="text-3xl font-black text-white mt-2">
+                          4/6 Missions
+                        </div>
+                        <div className="mt-3 space-y-1">
+                          <div className="h-1.5 w-full bg-white/[0.04] rounded-full overflow-hidden border border-white/[0.04]">
+                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: '68%' }} />
+                          </div>
+                          <div className="text-[9px] text-slate-400 font-bold text-right">
+                            68% Complete
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Battle Mode progress bar */}
-                    <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 space-y-2 mt-1">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="font-extrabold text-white/70">⚔ Battle Mode: You vs Target AIR</span>
-                        <span className="font-black text-amber-400">{currentGap.toLocaleString()} Ranks to Target</span>
-                      </div>
-                      <div className="h-3 w-full bg-white/[0.04] rounded-full overflow-hidden border border-white/[0.04] relative">
-                        <motion.div 
-                          layout
-                          className="h-full rounded-full bg-gradient-to-r from-red-500 via-amber-500 to-emerald-500"
-                          style={{ width: `${Math.max(10, Math.min(100, (1 - currentGap / baseProjectedAIR) * 100))}%` }}
-                        />
-                        <div className="absolute inset-y-0 right-[20%] w-0.5 bg-white/30" />
-                      </div>
-                    </div>
-
-                    {/* Dynamic Action Callout Banner */}
-                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
-                        <p className="text-xs text-white/80 font-medium">
-                          Finish today's mission to advance your projection: 
-                          <span className="text-white font-extrabold ml-1">AIR {currentProjectedAIR.toLocaleString()}</span>
-                          <span className="text-amber-400 font-extrabold mx-1.5">➔</span>
-                          <span className="text-emerald-400 font-extrabold">AIR {nextTargetAIR.toLocaleString()}</span>
-                          <span className="text-emerald-400 font-bold ml-1.5">(+{todayPotentialGain} ranks!)</span>
+                    {/* Coach Mascot widget */}
+                    <div className="bg-gradient-to-r from-orange-500/10 via-amber-500/5 to-transparent border border-orange-500/20 rounded-2xl p-4 flex items-start gap-4">
+                      <span className="text-3xl shrink-0">🧑‍🏫</span>
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400">PrepEntrance Coach</h4>
+                        <p className="text-xs text-slate-300 mt-0.5 leading-relaxed font-medium">
+                          "{profile?.fullName?.split(' ')[0] || 'Ayush'}, Functions is currently your highest ROI chapter. Finish the PYQ test today to unlock an expected gain of <strong className="text-white">+3 to +5 marks</strong> in your next mock."
                         </p>
                       </div>
-                      {todayPotentialGain > 0 && (
-                        <Button 
-                          onClick={() => navigate('/subchapter/math-1-1')}
-                          size="sm"
-                          className="bg-accent text-primary hover:bg-accent/90 rounded-lg text-xs font-bold font-display shadow-lg shrink-0 w-full sm:w-auto"
-                        >
-                          Complete Now
-                        </Button>
-                      )}
                     </div>
+
                   </div>
                 </div>
 
@@ -1048,58 +1021,117 @@ export default function StudentHubPage() {
                       <Button onClick={() => navigate('/subchapter/math-1-1')} className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm px-6 py-5">▶ Continue Learning</Button>
                     </div>
 
-                    {/* Checklist */}
+                    {/* Today's Mission Cards Checklist */}
                     <div className="rounded-3xl border border-white/[0.06] bg-card p-6 lg:p-8 space-y-6">
                       <div className="flex flex-wrap items-center justify-between gap-4">
-                        <h3 className="text-md font-bold text-white flex items-center gap-2">🎯 Today's Mission</h3>
-                        <span className="text-xs text-accent font-bold bg-accent/10 border border-accent/20 rounded-lg px-2.5 py-1">
+                        <h3 className="text-md font-extrabold text-white flex items-center gap-2">🔥 Today's Mission</h3>
+                        <span className="text-xs text-accent font-bold bg-accent/15 border border-accent/25 rounded-lg px-2.5 py-1">
                           {tasks.filter(t => t.done).length}/{tasks.length} Completed
                         </span>
                       </div>
 
-                      <div className="space-y-3">
-                        {tasks.map(item => (
-                          <div 
-                            key={item.id}
-                            onClick={() => toggleChecklistItem(item.id)}
-                            className={`flex items-start gap-4 p-4 rounded-xl border transition-all cursor-pointer ${
-                              item.done 
-                              ? 'bg-emerald-500/5 border-emerald-500/20 text-white/60' 
-                              : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.04] text-white hover:border-white/10'
-                            }`}
-                          >
-                            <div className="pt-0.5">
-                              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
-                                item.done 
-                                ? 'bg-emerald-500 border-emerald-400 text-white' 
-                                : 'border-white/20 hover:border-accent'
-                              }`}>
-                                {item.done && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      <div className="space-y-4">
+                        {/* Task 1: Functions PYQ Test */}
+                        <div 
+                          onClick={() => toggleChecklistItem(1)}
+                          className={cn(
+                            "p-4 rounded-2xl border transition-all cursor-pointer flex flex-col gap-3",
+                            tasks.find(t => t.id === 1)?.done 
+                              ? "bg-emerald-500/5 border-emerald-500/20 text-white/70"
+                              : "bg-[#0B1524] border-blue-500/20 hover:border-blue-500/40 text-white"
+                          )}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-5 h-5 rounded border flex items-center justify-center transition-all",
+                                tasks.find(t => t.id === 1)?.done 
+                                  ? "bg-emerald-500 border-emerald-400 text-white" 
+                                  : "border-white/20"
+                              )}>
+                                {tasks.find(t => t.id === 1)?.done && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                              </div>
+                              <div>
+                                <h4 className={cn("text-sm font-bold", tasks.find(t => t.id === 1)?.done && "line-through text-white/40")}>1. Functions PYQ Test</h4>
+                                <p className="text-[10px] text-slate-300">15 Questions • 18 mins</p>
                               </div>
                             </div>
-
-                            <div className="flex-1 space-y-1">
-                              <p className={`text-sm font-semibold ${item.done ? 'line-through text-white/40' : ''}`}>{item.text}</p>
-                              <div className="flex items-center gap-2">
-                                <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                                  item.type === 'revision' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'
-                                }`}>
-                                  {item.type}
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="text-right shrink-0">
-                              {item.done ? (
-                                <span className="text-xs font-bold text-emerald-400">✓ +{item.rankImpact} ranks gained</span>
-                              ) : (
-                                <span className="text-xs font-bold text-amber-500/90 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">
-                                  +{item.rankImpact} AIR Gain
-                                </span>
-                              )}
-                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">
+                              Test
+                            </span>
                           </div>
-                        ))}
+                          <div className="h-1.5 w-full bg-white/[0.04] rounded-full overflow-hidden">
+                            <div className="h-full bg-blue-500 rounded-full transition-all duration-300" style={{ width: tasks.find(t => t.id === 1)?.done ? '100%' : '0%' }} />
+                          </div>
+                        </div>
+
+                        {/* Task 2: Electrostatics Revision */}
+                        <div 
+                          onClick={() => toggleChecklistItem(2)}
+                          className={cn(
+                            "p-4 rounded-2xl border transition-all cursor-pointer flex flex-col gap-3",
+                            tasks.find(t => t.id === 2)?.done 
+                              ? "bg-emerald-500/5 border-emerald-500/20 text-white/70"
+                              : "bg-[#181124] border-purple-500/20 hover:border-purple-500/40 text-white"
+                          )}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-5 h-5 rounded border flex items-center justify-center transition-all",
+                                tasks.find(t => t.id === 2)?.done 
+                                  ? "bg-emerald-500 border-emerald-400 text-white" 
+                                  : "border-white/20"
+                              )}>
+                                {tasks.find(t => t.id === 2)?.done && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                              </div>
+                              <div>
+                                <h4 className={cn("text-sm font-bold", tasks.find(t => t.id === 2)?.done && "line-through text-white/40")}>2. Electrostatics Revision</h4>
+                                <p className="text-[10px] text-slate-300">12 mins left</p>
+                              </div>
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400">
+                              Learning
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full bg-white/[0.04] rounded-full overflow-hidden">
+                            <div className="h-full bg-purple-500 rounded-full transition-all duration-300" style={{ width: tasks.find(t => t.id === 2)?.done ? '100%' : '0%' }} />
+                          </div>
+                        </div>
+
+                        {/* Task 3: Mock Analysis */}
+                        <div 
+                          onClick={() => toggleChecklistItem(3)}
+                          className={cn(
+                            "p-4 rounded-2xl border transition-all cursor-pointer flex flex-col gap-3",
+                            tasks.find(t => t.id === 3)?.done 
+                              ? "bg-emerald-500/5 border-emerald-500/20 text-white/70"
+                              : "bg-[#1E140C] border-orange-500/20 hover:border-orange-500/40 text-white"
+                          )}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-5 h-5 rounded border flex items-center justify-center transition-all",
+                                tasks.find(t => t.id === 3)?.done 
+                                  ? "bg-emerald-500 border-emerald-400 text-white" 
+                                  : "border-white/20"
+                              )}>
+                                {tasks.find(t => t.id === 3)?.done && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                              </div>
+                              <div>
+                                <h4 className={cn("text-sm font-bold", tasks.find(t => t.id === 3)?.done && "line-through text-white/40")}>3. Mock Analysis</h4>
+                                <p className="text-[10px] text-slate-300">22 mins review</p>
+                              </div>
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-orange-500/15 text-orange-400">
+                              Active Task
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full bg-white/[0.04] rounded-full overflow-hidden">
+                            <div className="h-full bg-orange-500 rounded-full transition-all duration-300" style={{ width: tasks.find(t => t.id === 3)?.done ? '100%' : '0%' }} />
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -1142,55 +1174,26 @@ export default function StudentHubPage() {
 
                   {/* Right Column content */}
                   <div className="lg:col-span-4 space-y-6">
-                    {/* Weekly Wins */}
+                    {/* 🏆 This Week Progress Tracker */}
                     <div className="rounded-3xl border border-white/[0.06] bg-card p-5 space-y-4">
-                      <h3 className="text-sm font-bold text-white flex items-center gap-2">🏆 Weekly Wins</h3>
-                      <div className="grid grid-cols-2 gap-2 text-center text-xs">
-                        <div className="bg-white/[0.01] border border-white/[0.04] p-3 rounded-xl">
-                          <span className="text-white/40 block">Chapters</span>
-                          <span className="text-lg font-black text-white mt-1 block">+4</span>
+                      <h3 className="text-sm font-bold text-white flex items-center gap-2">🏆 This Week</h3>
+                      <div className="space-y-3.5 text-xs">
+                        <div className="flex items-center gap-2.5 text-slate-300">
+                          <span className="text-emerald-400 font-extrabold text-sm">✓</span>
+                          <span><strong>4 Chapters</strong> Completed</span>
                         </div>
-                        <div className="bg-white/[0.01] border border-white/[0.04] p-3 rounded-xl">
-                          <span className="text-white/40 block">AIR Improved</span>
-                          <span className="text-lg font-black text-emerald-400 mt-1 block">-{totalRankGain > 0 ? totalRankGain.toLocaleString() : '2,100'}</span>
+                        <div className="flex items-center gap-2.5 text-slate-300">
+                          <span className="text-emerald-400 font-extrabold text-sm">✓</span>
+                          <span><strong>2 Mock Tests</strong> Attempted</span>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Expected outcomes */}
-                    <div className="rounded-3xl border border-white/[0.06] bg-[#0F1E19] p-5 space-y-4">
-                      <h3 className="text-sm font-bold text-white flex items-center gap-2">🎯 If Exam Was Today</h3>
-                      <div className="space-y-3.5 bg-black/40 border border-white/[0.05] rounded-2xl p-4 text-xs">
-                        <div className="flex justify-between border-b border-white/[0.05] pb-2">
-                          <span>Percentile</span>
-                          <span className="font-extrabold text-emerald-400">96.4 – 97.1</span>
+                        <div className="flex items-center gap-2.5 text-slate-300">
+                          <span className="text-emerald-400 font-extrabold text-sm">✓</span>
+                          <span><strong>187 Questions</strong> Solved</span>
                         </div>
-                        <div className="flex justify-between border-b border-white/[0.05] pb-2">
-                          <span>Projected AIR</span>
-                          <span className="font-extrabold text-emerald-400">{currentProjectedAIR.toLocaleString()}</span>
+                        <div className="flex items-center gap-2.5 text-slate-300">
+                          <span className="text-emerald-400 font-extrabold text-sm">✓</span>
+                          <span><strong>{accuracy > 0 ? accuracy : 78}%</strong> Average Accuracy</span>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Weekly Rank line graph */}
-                    <div className="rounded-3xl border border-white/[0.06] bg-card p-5 space-y-4">
-                      <h3 className="text-sm font-bold text-white">📊 Weekly Rank Movement</h3>
-                      <div className="h-44 w-full pt-2">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                            <defs>
-                              <linearGradient id="colorRank" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.25}/>
-                                <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.03)" vertical={false} />
-                            <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={9} />
-                            <YAxis reversed={true} domain={[15000, 60000]} stroke="rgba(255,255,255,0.3)" fontSize={9} />
-                            <Tooltip />
-                            <Area type="monotone" dataKey="rank" name="Projected AIR" stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#colorRank)" />
-                          </AreaChart>
-                        </ResponsiveContainer>
                       </div>
                     </div>
 
@@ -1217,9 +1220,9 @@ export default function StudentHubPage() {
                     {/* Subject Detail Progression */}
                     <div className="space-y-3.5">
                       {[
-                        { subject: 'Physics', progress: 42, color: 'from-blue-500 to-cyan-400 bg-blue-500/5 border-blue-500/10', colorText: 'text-blue-400', weakest: 'Electrostatics', potential: '+230 Ranks' },
-                        { subject: 'Chemistry', progress: 38, color: 'from-emerald-500 to-teal-400 bg-emerald-500/5 border-emerald-500/10', colorText: 'text-emerald-400', weakest: 'Chemical Bonding', potential: '+120 Ranks' },
-                        { subject: 'Mathematics', progress: 31, color: 'from-violet-500 to-purple-400 bg-violet-500/5 border-violet-500/10', colorText: 'text-violet-400', weakest: 'Functions', potential: '+190 Ranks' }
+                        { subject: 'Physics', progress: 42, color: 'from-blue-500 to-cyan-400 bg-blue-500/5 border-blue-500/10', colorText: 'text-blue-400', weakest: 'Electrostatics', potential: '+12 Marks potential' },
+                        { subject: 'Chemistry', progress: 38, color: 'from-emerald-500 to-teal-400 bg-emerald-500/5 border-emerald-500/10', colorText: 'text-emerald-400', weakest: 'Chemical Bonding', potential: '+8 Marks potential' },
+                        { subject: 'Mathematics', progress: 31, color: 'from-violet-500 to-purple-400 bg-violet-500/5 border-violet-500/10', colorText: 'text-violet-400', weakest: 'Functions', potential: '+16 Marks potential' }
                       ].map(subj => (
                         <div key={subj.subject} className={`rounded-2xl border ${subj.color} p-4 space-y-3`}>
                           <div className="flex justify-between items-center text-xs">

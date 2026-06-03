@@ -325,51 +325,51 @@ const SubchapterPage: React.FC = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div
-                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
+                    className="bg-emerald-500/5 border border-emerald-500/25 rounded-xl p-6 cursor-pointer card-hover group transition-all duration-200 hover:bg-emerald-500/10 hover:border-emerald-500/50"
                     onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=easy`)}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-prepentrance-success/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-lg bg-emerald-500/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🌱</span>
                     </div>
-                    <h4 className="font-semibold text-foreground">
+                    <h4 className="font-bold text-emerald-950">
                       {isFoundation ? 'Level 1: Basic Understanding' : 'Level 1: Concept'}
                     </h4>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-emerald-800/80 mt-1">
                       {isFoundation ? 'Direct understanding questions' : 'Basic understanding MCQs'}
                     </p>
-                    <p className="text-xs text-prepentrance-success font-medium mt-2">15 Questions • Easy</p>
+                    <p className="text-xs text-emerald-600 font-bold mt-2.5">15 Questions • Easy</p>
                   </div>
 
                   <div
-                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
+                    className="bg-amber-500/5 border border-amber-500/25 rounded-xl p-6 cursor-pointer card-hover group transition-all duration-200 hover:bg-amber-500/10 hover:border-amber-500/50"
                     onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=medium`)}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-prepentrance-warning/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-lg bg-amber-500/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🎯</span>
                     </div>
-                    <h4 className="font-semibold text-foreground">
+                    <h4 className="font-bold text-amber-950">
                       {isFoundation ? 'Level 2: Application' : 'Level 2: Exam Pattern'}
                     </h4>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-amber-800/80 mt-1">
                       {isFoundation ? 'Use the concept in real situations' : 'Previous year pattern'}
                     </p>
-                    <p className="text-xs text-prepentrance-warning font-medium mt-2">20 Questions • Medium</p>
+                    <p className="text-xs text-amber-600 font-bold mt-2.5">20 Questions • Medium</p>
                   </div>
 
                   <div
-                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover group"
+                    className="bg-red-500/5 border border-red-500/25 rounded-xl p-6 cursor-pointer card-hover group transition-all duration-200 hover:bg-red-500/10 hover:border-red-500/50"
                     onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=hard`)}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-prepentrance-error/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-lg bg-red-500/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🔥</span>
                     </div>
-                    <h4 className="font-semibold text-foreground">
+                    <h4 className="font-bold text-red-950">
                       {isFoundation ? 'Level 3: Advanced Thinking' : 'Level 3: Advanced'}
                     </h4>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-red-800/80 mt-1">
                       {isFoundation ? 'Challenge questions requiring reasoning' : 'Competition level'}
                     </p>
-                    <p className="text-xs text-prepentrance-error font-medium mt-2">15 Questions • Hard</p>
+                    <p className="text-xs text-red-600 font-bold mt-2.5">15 Questions • Hard</p>
                   </div>
                 </div>
 

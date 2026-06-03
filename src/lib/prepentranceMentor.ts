@@ -158,11 +158,13 @@ Decide one chapter. Complete it by tomorrow.`,
     hasAction: true
   },
   'default': {
-    message: `Tell me, what is your doubt?
+    message: `Bhai, tension mat le.
 
-Tell me the subject, chapter, and specific problem.
+Sabse pehle bata:
+Question kaha atak raha hai?
 
-Let's not waste time.`,
+Concept nahi samajh aa raha,
+ya question solve nahi ho raha?`,
     hasAction: true
   }
 };
@@ -187,9 +189,39 @@ export const getResponseForQuery = (query: string): MentorResponse => {
 };
 
 export const getGreetingByLanguage = (language: string): string => {
-  const englishMessage = `Hey, I’m your personal teacher.\nYou can be completely honest with me — I’m here to help you with your studies, doubts, and even the stuff you hesitate to ask others.\n\nNo judgment, no pressure — just clear guidance, step by step.\n\nThink of me as someone who actually understands what you’re going through… and helps you get better every day.`;
+  const englishMessage = `👋 Hi Bhai,
 
-  const hindiMessage = `अरे, मैं आपका पर्सनल मेंटर हूँ।\nआप मुझसे पूरी तरह खुलकर बात कर सकते हैं — मैं यहाँ आपकी पढ़ाई, डाउट्स, और उन चीज़ों में मदद करने के लिए हूँ जो आप दूसरों से पूछने में हिचकिचाते हैं।\n\nकोई जजमेंट नहीं, कोई दबाव नहीं — बस सही मार्गदर्शन, कदम दर कदम।\n\nमुझे ऐसा इंसान समझें जो सच में समझता है कि आप किस दौर से गुज़र रहे हैं... और हर दिन आपको बेहतर बनने में मदद करता है।`;
+I'm your PrepEntrance Mentor.
+
+Stuck in Physics?
+Confused in Organic?
+Can't solve a question?
+
+Just type your doubt normally.
+
+Example:
+• "Integration samajh nahi aa rahi"
+• "Is question mein friction kyun laga?"
+• "Mera score 120 se upar nahi ja raha"
+
+I'll help you step by step.`;
+
+  const hindiMessage = `👋 नमस्ते भाई,
+
+मैं आपका PrepEntrance मेंटर हूँ।
+
+फ़िज़िक्स में अटक गए हो?
+ऑर्गेनिक केमिस्ट्री परेशां कर रही है?
+या कोई कठिन सवाल सॉल्व नहीं हो रहा?
+
+बस अपना डाउट बिना किसी झिझक के यहाँ टाइप करो।
+
+जैसे:
+• "Integration समझ नहीं आ रहा"
+• "इस question में friction क्यों लगा?"
+• "मेरा score 120 से ऊपर नहीं जा रहा"
+
+मैं कदम-दर-कदम तुम्हारी मदद करूँगा।`;
 
   const kannadaMessage = `ಹೇ, ನಾನು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಮಾರ್ಗದರ್ಶಿ.\nನೀವು ನನ್ನೊಂದಿಗೆ ಸಂಪೂರ್ಣವಾಗಿ ಮುಕ್ತವಾಗಿರಬಹುದು — ನಿಮ್ಮ ಅಧ್ಯಯನ, ಅನುಮಾನಗಳು ಮತ್ತು ಇತರರಲ್ಲಿ ಕೇಳಲು ನೀವು ಹಿಂಜರಿಯುವ ವಿಷಯಗಳಲ್ಲಿ ಸಹಾಯ ಮಾಡಲು ನಾನಿದ್ದೇನೆ.\n\nಯಾವುದೇ ತೀರ್ಪಿಲ್ಲ, ಯಾವುದೇ ಒತ್ತಡವಿಲ್ಲ — ಕೇವಲ ಸ್ಪಷ್ಟ ಮಾರ್ಗದರ್ಶನ, ಹಂತ ಹಂತವಾಗಿ.\n\nನೀವು ಅನುಭವಿಸುತ್ತಿರುವುದನ್ನು ನಿಜವಾಗಿಯೂ ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವ... ಮತ್ತು ಪ್ರತಿದಿನ ನೀವು ಉತ್ತಮವಾಗಿರಲು ಸಹಾಯ ಮಾಡುವ ವ್ಯಕ್ತಿ ಎಂದು ನನ್ನನ್ನು ಭಾವಿಸಿ.`;
 

@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { callGeminiJSON } from "../_shared/gemini.ts";
+import { callGeminiJSON, JEE_PROMPT_CONSTRAINTS } from "../_shared/gemini.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,7 +24,13 @@ serve(async (req) => {
     const { job_id, examMode, subject, chapterId, chapterName, subchapterId, subchapterName, difficulty, count = 5 } = await req.json();
     jobId = job_id;
 
-    const systemPrompt = `You are a world-class ${examMode} exam designer. Generate high-quality MCQs for ${subject}. Return a JSON object with a "questions" array. No markdown, no backticks.`;
+    const isJee = (examMode || "").toUpperCase().includes("JEE");
+    const systemPrompt = isJee
+      ? `You are an expert JEE exam question setter. Generate questions indistinguishable from authentic JEE Main and JEE Advanced questions. Avoid school-level, textbook-level, and direct formula-substitution questions. Reject any question that can be solved instantly without conceptual reasoning. Return ONLY a JSON object with a "questions" array. No markdown, no backticks.
+
+${JEE_PROMPT_CONSTRAINTS}`
+      : `You are a world-class ${examMode} exam designer. Generate high-quality MCQs for ${subject}. Return a JSON object with a "questions" array. No markdown, no backticks.`;
+
     const userPrompt = `Generate ${count} questions for ${chapterName} - ${subchapterName}. Difficulty: ${difficulty}. Each question must have: question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), explanation, concept_tested.`;
 
     const data = await callGeminiJSON<{ questions: any[] }>(GEMINI_API_KEY, systemPrompt, userPrompt, 0.3);
