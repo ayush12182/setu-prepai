@@ -1,69 +1,116 @@
-import React from 'react';
-import { Clock, Gift, TrendingUp, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Clock, Sparkles, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTrialSystem } from '@/hooks/useTrialSystem';
+import { useAuth } from '@/contexts/AuthContext';
+import { startSubscriptionCheckout } from '@/lib/paymentEngine';
+import { toast } from 'sonner';
 
 export const TrialStatusBar: React.FC = () => {
     const { trialStatus } = useTrialSystem();
+    const { user } = useAuth();
+    const [isDismissed, setIsDismissed] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    if (trialStatus.plan !== 'trial' || !trialStatus.isTrialActive) return null;
+    // Check if user dismissed it in this session
+    useEffect(() => {
+        const dismissed = sessionStorage.getItem('dismiss_trial_banner') === 'true';
+        setIsDismissed(dismissed);
+    }, []);
 
-    const totalDays = 7 + trialStatus.bonusDays;
-    const usedDays = totalDays - trialStatus.trialDaysRemaining;
-    const progress = Math.min(100, (usedDays / totalDays) * 100);
+    const handleDismiss = () => {
+        sessionStorage.setItem('dismiss_trial_banner', 'true');
+        setIsDismissed(true);
+    };
+
+    const handleUpgrade = async () => {
+        if (!user) {
+            toast.error('User not logged in');
+            return;
+        }
+        setIsProcessing(true);
+        toast.info('Connecting securely to Cashfree Payments...');
+        try {
+            await startSubscriptionCheckout(249.00, user);
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : 'Failed to initialize checkout');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    if (trialStatus.plan !== 'trial' || !trialStatus.isTrialActive || isDismissed) {
+        return null;
+    }
+
+    const { daysLeft, hoursLeft, minutesLeft } = trialStatus;
+    const isCritical = daysLeft === 0; // Less than 24 hours remaining
 
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-accent/20 bg-gradient-to-r from-accent/[0.08] via-amber-500/[0.05] to-accent/[0.08] p-4 sm:p-5 mb-6">
-            {/* Subtle glow */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+        <div className={`relative w-full border-b transition-all duration-300 ${
+            isCritical 
+                ? 'border-red-500/20 bg-gradient-to-r from-red-950/40 via-orange-950/20 to-red-950/40' 
+                : 'border-amber-500/10 bg-gradient-to-r from-amber-950/30 via-slate-900/40 to-amber-950/30'
+        }`}>
+            {/* Ambient subtle glow background */}
+            <div className={`absolute top-0 right-1/4 w-96 h-full opacity-20 blur-3xl pointer-events-none rounded-full ${
+                isCritical ? 'bg-red-500/10' : 'bg-amber-500/10'
+            }`} />
 
-            <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
-                {/* Timer */}
-                <div className="flex items-center gap-3 flex-1">
-                    <div className="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center shrink-0">
-                        <Clock className="w-5 h-5 text-accent" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm font-semibold text-foreground">
-                                Trial: {trialStatus.trialDaysRemaining} day{trialStatus.trialDaysRemaining !== 1 ? 's' : ''} remaining
+            <div className="max-w-7xl mx-auto px-4 py-2 sm:py-2.5 flex items-center justify-between gap-3 text-xs md:text-sm relative z-10">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold uppercase text-[9px] tracking-wider shrink-0 ${
+                        isCritical 
+                            ? 'bg-red-500/20 text-red-400 animate-pulse' 
+                            : 'bg-amber-500/10 text-amber-400'
+                    }`}>
+                        🔥 Free Trial Active
+                    </span>
+
+                    <span className="text-white/40 hidden sm:inline">|</span>
+
+                    <span className={`flex items-center gap-1.5 font-medium truncate ${
+                        isCritical ? 'text-red-300 font-bold' : 'text-slate-300'
+                    }`}>
+                        <Clock className={`w-3.5 h-3.5 shrink-0 ${isCritical ? 'text-red-400 animate-spin-slow' : 'text-amber-400'}`} />
+                        {isCritical ? (
+                            <span>Last Day! Only <strong className="text-red-400">{hoursLeft} hours {minutesLeft}m</strong> remaining</span>
+                        ) : (
+                            <span>
+                                <strong>{daysLeft} Day{daysLeft !== 1 ? 's' : ''} {hoursLeft} Hour{hoursLeft !== 1 ? 's' : ''}</strong> remaining
                             </span>
-                            {trialStatus.bonusDays > 0 && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[10px] font-semibold">
-                                    <Gift className="w-3 h-3" /> +{trialStatus.bonusDays} bonus
-                                </span>
-                            )}
-                        </div>
-                        {/* Progress bar */}
-                        <div className="h-1.5 bg-white/[0.08] rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-gradient-to-r from-accent to-amber-500 rounded-full transition-all duration-500"
-                                style={{ width: `${progress}%` }}
-                            />
-                        </div>
-                    </div>
+                        )}
+                        <span className="text-white/40 hidden md:inline ml-1 font-normal">• Premium features will lock afterwards</span>
+                    </span>
                 </div>
 
-                {/* Quick stats */}
-                <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
-                        <TrendingUp className="w-3 h-3 text-emerald-400" />
-                        <span>Progress tracked</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
-                        <Zap className="w-3 h-3 text-amber-400" />
-                        <span>Full access</span>
-                    </div>
-                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                    <Button
+                        size="sm"
+                        onClick={handleUpgrade}
+                        disabled={isProcessing}
+                        className={`h-7.5 px-3.5 text-xs font-bold rounded-lg transition-all duration-300 shadow-md ${
+                            isCritical
+                                ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/20'
+                                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 shadow-amber-500/10 hover:shadow-amber-500/20'
+                        }`}
+                    >
+                        {isProcessing ? (
+                            <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                        ) : (
+                            <Sparkles className="w-3 h-3 mr-1" />
+                        )}
+                        Upgrade ₹249/mo
+                    </Button>
 
-                {/* Upgrade CTA */}
-                <Button
-                    size="sm"
-                    className="shrink-0 h-9 px-4 text-xs font-semibold bg-accent hover:bg-accent/90 text-primary rounded-lg"
-                    onClick={() => window.location.hash = '#pricing'}
-                >
-                    Upgrade to Pro
-                </Button>
+                    <button 
+                        onClick={handleDismiss}
+                        className="text-white/40 hover:text-white/80 transition-colors p-1"
+                        aria-label="Dismiss banner"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -46,7 +46,7 @@ export const TrialExpiredScreen: React.FC = () => {
         setIsProcessing(true);
         toast.info('Connecting securely to Cashfree Payments...');
         try {
-            await startSubscriptionCheckout(349.00, user);
+            await startSubscriptionCheckout(249.00, user);
         } catch (err: unknown) {
             toast.error(err instanceof Error ? err.message : 'Failed to initialize checkout');
         } finally {
@@ -84,7 +84,7 @@ export const TrialExpiredScreen: React.FC = () => {
                     <div className="bg-white/[0.04] rounded-2xl p-5 border border-white/[0.06] mb-6">
                         <div className="flex items-baseline justify-center gap-2 mb-3">
                             <span className="text-lg text-white/30 line-through">₹999</span>
-                            <span className="text-4xl font-bold text-accent">₹349</span>
+                            <span className="text-4xl font-bold text-accent">₹249</span>
                             <span className="text-white/40 text-sm">/ month</span>
                         </div>
                         <p className="text-center text-white/30 text-xs mb-4">
@@ -104,7 +104,7 @@ export const TrialExpiredScreen: React.FC = () => {
 
                     {/* Upgrade CTA */}
                     <Button
-                        className="w-full h-13 rounded-xl text-sm font-semibold bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white shadow-lg shadow-accent/25 transition-all hover:shadow-xl hover:shadow-accent/30 mb-3"
+                        className="w-full h-13 rounded-xl text-sm font-semibold bg-gradient-to-r from-accent to-amber-600 hover:from-accent/90 hover:to-amber-600/90 text-white shadow-lg shadow-accent/25 transition-all hover:shadow-xl hover:shadow-accent/30 mb-2.5"
                         onClick={handleCheckout}
                         disabled={isProcessing}
                     >
@@ -113,7 +113,16 @@ export const TrialExpiredScreen: React.FC = () => {
                         ) : (
                             <Sparkles className="h-4 w-4 mr-2" />
                         )}
-                        Upgrade to PrepEntrance Pro — ₹349/month
+                        Upgrade to PrepEntrance Pro — ₹249/month
+                    </Button>
+
+                    {/* View Plans secondary button */}
+                    <Button
+                        variant="outline"
+                        className="w-full h-13 rounded-xl text-sm font-semibold border-white/10 text-white/80 hover:bg-white/10 mb-3"
+                        onClick={() => window.location.href = '/pricing'}
+                    >
+                        View Plans
                     </Button>
 
                     {/* Referral */}

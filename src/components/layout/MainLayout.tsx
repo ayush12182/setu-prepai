@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { cn } from '@/lib/utils';
+import { TrialStatusBar } from '../trial/TrialStatusBar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -18,6 +19,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, title, fullHei
       
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} title={title} />
+        <TrialStatusBar />
         
         <main className={cn("flex-1", fullHeight ? "overflow-hidden" : "overflow-auto")}>
           {fullHeight ? (

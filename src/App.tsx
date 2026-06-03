@@ -42,6 +42,7 @@ import LearningRoadmapPage from "./pages/LearningRoadmapPage";
 import AITeachingRoomPage from "./pages/AITeachingRoomPage";
 import AITeachersDirectoryPage from "./pages/AITeachersDirectoryPage";
 import PricingPage from "./pages/PricingPage";
+import { TrialGate } from "./components/trial/TrialGate";
 
 // Hub Pages — PrepEntrance v2 Public Exam Prep Hub
 import ExamHubPage from "./pages/hub/ExamHubPage";
@@ -113,15 +114,15 @@ const App = () => (
                     <Route path="/chapter/:chapterId" element={<ChapterPage />} />
                     <Route path="/chapter/:chapterId/notes" element={<ChapterNotesPage />} />
                     <Route path="/subchapter/:subchapterId" element={<SubchapterPage />} />
-                    <Route path="/practice" element={<PracticePage />} />
-                    <Route path="/test" element={<TestPage />} />
-                    <Route path="/major-test" element={<MajorTestPage />} />
-                    <Route path="/revision" element={<RevisionPage />} />
-                    <Route path="/revision/:subject/:topic" element={<RevisionTopicPage />} />
+                    <Route path="/practice" element={<TrialGate><PracticePage /></TrialGate>} />
+                    <Route path="/test" element={<TrialGate><TestPage /></TrialGate>} />
+                    <Route path="/major-test" element={<TrialGate><MajorTestPage /></TrialGate>} />
+                    <Route path="/revision" element={<TrialGate><RevisionPage /></TrialGate>} />
+                    <Route path="/revision/:subject/:topic" element={<TrialGate><RevisionTopicPage /></TrialGate>} />
                     <Route path="/lecture-prepentrance" element={<LecturePrepEntrance />} />
-                    <Route path="/ask-prepentrance" element={<AskPrepEntrancePage />} />
+                    <Route path="/ask-prepentrance" element={<TrialGate><AskPrepEntrancePage /></TrialGate>} />
                     <Route path="/my-batch" element={<Navigate to="/student-hub" replace />} />
-                    <Route path="/analytics" element={<AnalyticsPage />} />
+                    <Route path="/analytics" element={<TrialGate><AnalyticsPage /></TrialGate>} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/settings" element={<SettingsPage />} />
                     <Route path="/privacy" element={<PrivacyPage />} />
@@ -150,7 +151,7 @@ const App = () => (
                     <Route path="/admin/bulk-pyq-generator" element={<BulkPYQGenerator />} />
                     
                     {/* Adaptive Practice Engine */}
-                    <Route path="/practice/adaptive" element={<AdaptivePracticePage />} />
+                    <Route path="/practice/adaptive" element={<TrialGate><AdaptivePracticePage /></TrialGate>} />
 
                     {/* Teacher analytics */}
                     <Route path="/teacher/student-analytics" element={<Navigate to="/student-hub" replace />} />

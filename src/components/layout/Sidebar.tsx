@@ -12,12 +12,14 @@ import {
   X,
   Sparkles,
   Activity,
+  Crown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTrialSystem } from '@/hooks/useTrialSystem';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -39,6 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { config, isNeet, isCuet } = useExamMode();
   const { isFoundation, classLabel } = useClassContext();
   const { profile } = useAuth();
+  const { trialStatus } = useTrialSystem();
   const navItems = getNavItems();
 
   return (
@@ -204,6 +207,43 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               );
             })}
           </nav>
+
+          {/* Subscription Status Card */}
+          <div className="p-4 bg-white/[0.02] border-t border-white/[0.05] mt-auto">
+            {trialStatus.plan === 'pro' ? (
+              <div className="flex items-center gap-3 bg-gradient-to-r from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+                  <Crown className="w-4 h-4 text-amber-400" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-black text-amber-400 tracking-wider uppercase">PREMIUM MEMBER</p>
+                  <p className="text-white/60 text-[11px] font-semibold">✓ Active Plan</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between bg-white/[0.04] border border-white/[0.08] rounded-xl p-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-white/50 tracking-wider uppercase">FREE TRIAL</p>
+                    <p className="text-amber-500 text-[11px] font-bold truncate">
+                      🔥 {trialStatus.daysLeft} Day{trialStatus.daysLeft !== 1 ? 's' : ''} Left
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="h-7 px-2 text-[10px] font-bold text-amber-400 hover:text-amber-300 hover:bg-white/5"
+                  onClick={() => window.location.href = '/pricing'}
+                >
+                  Upgrade
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
     </>
