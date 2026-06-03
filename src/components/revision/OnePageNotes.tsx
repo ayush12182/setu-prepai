@@ -587,7 +587,7 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
                 <button
                   key={chapter.id}
                   onClick={() => generateNotes(chapter)}
-                  className="bg-card border border-border rounded-xl p-4 text-left hover:border-primary transition-all group"
+                  className="bg-card border border-border rounded-xl p-4 text-left card-clickable group"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
@@ -606,7 +606,7 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
                         {chapter.topics.length} topics • {chapter.keyFormulas.length} formulas • {chapter.pyqData.postCovid} recent PYQs
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-[#FB923C] opacity-60 group-hover:opacity-100 transition-opacity ml-4">
                       <Sparkles className="w-4 h-4" />
                       Generate
                     </div>

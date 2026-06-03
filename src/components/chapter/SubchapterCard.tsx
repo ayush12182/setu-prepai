@@ -124,15 +124,10 @@ export const SubchapterCard: React.FC<SubchapterCardProps> = ({
         </span>
       </div>
 
-      {/* Quick Actions - Show on Hover */}
-      <div className={cn(
-        'flex items-center gap-2 pt-3 border-t border-border',
-        'opacity-70 group-hover:opacity-100 transition-opacity'
-      )}>
-        <Button 
-          size="sm" 
-          variant="ghost"
-          className={cn('flex-1 h-9 text-xs', styles.bg)}
+      {/* Quick Actions - Always Visible with semantic action colors */}
+      <div className="flex items-center gap-2 pt-3 border-t border-border">
+        <button
+          className="action-learn flex-1 h-9 text-xs rounded-md flex items-center justify-center font-medium"
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/subchapter/${subchapter.id}?tab=learn`);
@@ -140,11 +135,9 @@ export const SubchapterCard: React.FC<SubchapterCardProps> = ({
         >
           <BookOpen className="w-3.5 h-3.5 mr-1.5" />
           Learn
-        </Button>
-        <Button 
-          size="sm" 
-          variant="ghost"
-          className={cn('flex-1 h-9 text-xs', styles.bg)}
+        </button>
+        <button
+          className="action-practice flex-1 h-9 text-xs rounded-md flex items-center justify-center font-medium"
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/subchapter/${subchapter.id}?tab=practice`);
@@ -152,11 +145,9 @@ export const SubchapterCard: React.FC<SubchapterCardProps> = ({
         >
           <Target className="w-3.5 h-3.5 mr-1.5" />
           Practice
-        </Button>
-        <Button 
-          size="sm" 
-          variant="ghost"
-          className={cn('flex-1 h-9 text-xs', styles.bg)}
+        </button>
+        <button
+          className="action-test flex-1 h-9 text-xs rounded-md flex items-center justify-center font-medium"
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/subchapter/${subchapter.id}?tab=test`);
@@ -164,7 +155,7 @@ export const SubchapterCard: React.FC<SubchapterCardProps> = ({
         >
           <TrendingUp className="w-3.5 h-3.5 mr-1.5" />
           Test
-        </Button>
+        </button>
       </div>
 
       {/* PrepEntrance Line - Motivational */}

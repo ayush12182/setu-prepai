@@ -52,17 +52,16 @@ const ChapterPage: React.FC = () => {
             whileHover={{ y: -5 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => {
-              // Scroll to topics
               document.getElementById('topics-section')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors"
+            className="action-learn flex flex-col items-center justify-center gap-3 p-6 rounded-2xl"
           >
-            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-primary" />
+            <div className="w-12 h-12 rounded-full bg-blue-500/25 flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-blue-400" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-foreground">Learn</p>
-              <p className="text-xs text-muted-foreground">Read topics</p>
+              <p className="font-semibold text-white">Learn</p>
+              <p className="text-xs text-blue-300/80">Read topics</p>
             </div>
           </motion.button>
 
@@ -70,14 +69,14 @@ const ChapterPage: React.FC = () => {
             whileHover={{ y: -5 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate(`/chapter/${chapter.id}/notes`)}
-            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 transition-colors"
+            className="action-learn flex flex-col items-center justify-center gap-3 p-6 rounded-2xl"
           >
-            <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-emerald-500" />
+            <div className="w-12 h-12 rounded-full bg-blue-500/25 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-blue-400" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-foreground">Notes</p>
-              <p className="text-xs text-muted-foreground">Quick revision</p>
+              <p className="font-semibold text-white">Notes</p>
+              <p className="text-xs text-blue-300/80">Quick revision</p>
             </div>
           </motion.button>
 
@@ -85,14 +84,14 @@ const ChapterPage: React.FC = () => {
             whileHover={{ y: -5 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate(`/practice?chapter=${chapter.id}`)}
-            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 transition-colors"
+            className="action-practice flex flex-col items-center justify-center gap-3 p-6 rounded-2xl"
           >
-            <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-              <PenTool className="w-6 h-6 text-amber-500" />
+            <div className="w-12 h-12 rounded-full bg-purple-500/25 flex items-center justify-center">
+              <PenTool className="w-6 h-6 text-purple-400" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-foreground">Practice</p>
-              <p className="text-xs text-muted-foreground">Solve MCQs</p>
+              <p className="font-semibold text-white">Practice</p>
+              <p className="text-xs text-purple-300/80">Solve MCQs</p>
             </div>
           </motion.button>
 
@@ -100,14 +99,14 @@ const ChapterPage: React.FC = () => {
             whileHover={{ y: -5 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate(`/test?chapter=${chapter.id}`)}
-            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition-colors"
+            className="action-test flex flex-col items-center justify-center gap-3 p-6 rounded-2xl"
           >
-            <div className="w-12 h-12 rounded-full bg-rose-500/20 flex items-center justify-center">
-              <CheckSquare className="w-6 h-6 text-rose-500" />
+            <div className="w-12 h-12 rounded-full bg-orange-500/25 flex items-center justify-center">
+              <CheckSquare className="w-6 h-6 text-orange-400" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-foreground">Test</p>
-              <p className="text-xs text-muted-foreground">Assess yourself</p>
+              <p className="font-semibold text-white">Test</p>
+              <p className="text-xs text-orange-300/80">Assess yourself</p>
             </div>
           </motion.button>
         </div>

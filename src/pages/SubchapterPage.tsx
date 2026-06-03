@@ -325,76 +325,76 @@ const SubchapterPage: React.FC = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div
-                    className="bg-emerald-500/5 border border-emerald-500/25 rounded-xl p-6 cursor-pointer card-hover group transition-all duration-200 hover:bg-emerald-500/10 hover:border-emerald-500/50"
+                    className="action-practice rounded-xl p-6 cursor-pointer card-clickable group transition-all duration-200"
                     onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=easy`)}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-emerald-500/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🌱</span>
                     </div>
-                    <h4 className="font-bold text-emerald-950">
+                    <h4 className="font-bold text-white">
                       {isFoundation ? 'Level 1: Basic Understanding' : 'Level 1: Concept'}
                     </h4>
-                    <p className="text-sm text-emerald-800/80 mt-1">
+                    <p className="text-sm text-purple-300/80 mt-1">
                       {isFoundation ? 'Direct understanding questions' : 'Basic understanding MCQs'}
                     </p>
-                    <p className="text-xs text-emerald-600 font-bold mt-2.5">15 Questions • Easy</p>
+                    <p className="text-xs text-purple-300 font-bold mt-2.5">15 Questions • Easy</p>
                   </div>
 
                   <div
-                    className="bg-amber-500/5 border border-amber-500/25 rounded-xl p-6 cursor-pointer card-hover group transition-all duration-200 hover:bg-amber-500/10 hover:border-amber-500/50"
+                    className="action-practice rounded-xl p-6 cursor-pointer card-clickable group transition-all duration-200"
                     onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=medium`)}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-amber-500/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🎯</span>
                     </div>
-                    <h4 className="font-bold text-amber-950">
+                    <h4 className="font-bold text-white">
                       {isFoundation ? 'Level 2: Application' : 'Level 2: Exam Pattern'}
                     </h4>
-                    <p className="text-sm text-amber-800/80 mt-1">
+                    <p className="text-sm text-purple-300/80 mt-1">
                       {isFoundation ? 'Use the concept in real situations' : 'Previous year pattern'}
                     </p>
-                    <p className="text-xs text-amber-600 font-bold mt-2.5">20 Questions • Medium</p>
+                    <p className="text-xs text-purple-300 font-bold mt-2.5">20 Questions • Medium</p>
                   </div>
 
                   <div
-                    className="bg-red-500/5 border border-red-500/25 rounded-xl p-6 cursor-pointer card-hover group transition-all duration-200 hover:bg-red-500/10 hover:border-red-500/50"
+                    className="action-practice rounded-xl p-6 cursor-pointer card-clickable group transition-all duration-200"
                     onClick={() => navigate(`/practice?subchapter=${subchapterId}&difficulty=hard`)}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-red-500/15 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <span className="text-2xl">🔥</span>
                     </div>
-                    <h4 className="font-bold text-red-950">
+                    <h4 className="font-bold text-white">
                       {isFoundation ? 'Level 3: Advanced Thinking' : 'Level 3: Advanced'}
                     </h4>
-                    <p className="text-sm text-red-800/80 mt-1">
+                    <p className="text-sm text-purple-300/80 mt-1">
                       {isFoundation ? 'Challenge questions requiring reasoning' : 'Competition level'}
                     </p>
-                    <p className="text-xs text-red-600 font-bold mt-2.5">15 Questions • Hard</p>
+                    <p className="text-xs text-purple-300 font-bold mt-2.5">15 Questions • Hard</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div
-                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                    className="action-practice rounded-xl p-6 cursor-pointer card-clickable"
                     onClick={() => setActivePracticeMode('integer')}
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-xl">🔢</span>
-                      <h4 className="font-semibold">Integer Type</h4>
+                      <h4 className="font-semibold text-white">Integer Type</h4>
                     </div>
-                    <p className="text-sm text-muted-foreground">Numerical answer practice</p>
-                    <p className="text-xs text-primary font-medium mt-2">5 Questions • Type your answer</p>
+                    <p className="text-sm text-purple-300/80">Numerical answer practice</p>
+                    <p className="text-xs text-purple-300 font-medium mt-2">5 Questions • Type your answer</p>
                   </div>
                   <div
-                    className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                    className="action-practice rounded-xl p-6 cursor-pointer card-clickable"
                     onClick={() => setActivePracticeMode('match')}
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-xl">🔗</span>
-                      <h4 className="font-semibold">Match the Following</h4>
+                      <h4 className="font-semibold text-white">Match the Following</h4>
                     </div>
-                    <p className="text-sm text-muted-foreground">Matrix matching practice</p>
-                    <p className="text-xs text-primary font-medium mt-2">3 Sets • Click to match</p>
+                    <p className="text-sm text-purple-300/80">Matrix matching practice</p>
+                    <p className="text-xs text-purple-300 font-medium mt-2">3 Sets • Click to match</p>
                   </div>
                 </div>
 
@@ -430,37 +430,37 @@ const SubchapterPage: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div
-                  className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                  className="action-test rounded-xl p-6 cursor-pointer card-clickable"
                   onClick={() => setActiveTest({ type: 'chapter' })}
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-physics/10 flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-physics" />
+                    <div className="w-12 h-12 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-orange-400" />
                     </div>
                     <div>
-                      <h4 className="font-semibold">Subchapter Test</h4>
-                      <p className="text-sm text-muted-foreground">15 mins • 10 Questions</p>
+                      <h4 className="font-semibold text-white">Subchapter Test</h4>
+                      <p className="text-sm text-orange-300/70">15 mins • 10 Questions</p>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-orange-300/70">
                     Quick test covering all concepts from {subchapter.name}
                   </p>
                 </div>
 
                 <div
-                  className="bg-card border border-border rounded-xl p-6 cursor-pointer card-hover"
+                  className="action-test rounded-xl p-6 cursor-pointer card-clickable"
                   onClick={() => setActiveTest({ type: 'pyq' })}
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-lg bg-prepentrance-saffron/10 flex items-center justify-center">
-                      <Target className="w-6 h-6 text-prepentrance-saffron" />
+                    <div className="w-12 h-12 rounded-lg bg-orange-500/20 flex items-center justify-center">
+                      <Target className="w-6 h-6 text-orange-400" />
                     </div>
                     <div>
-                      <h4 className="font-semibold">PYQ Test</h4>
-                      <p className="text-sm text-muted-foreground">20 mins • Past Year Questions</p>
+                      <h4 className="font-semibold text-white">PYQ Test</h4>
+                      <p className="text-sm text-orange-300/70">20 mins • Past Year Questions</p>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-orange-300/70">
                     Real JEE questions from this topic
                   </p>
                 </div>
