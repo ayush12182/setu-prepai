@@ -155,21 +155,51 @@ export class AdaptiveEngine {
    * Otherwise, it loads a curated set of random verified questions.
    */
   static async generateAdaptiveSprint(studentId: string, count: number = 20): Promise<any[]> {
-    const targetSubtopic = await this.getNextSubtopic(studentId);
+    const { data: map, error } = await (supabase as any)
+      .from('student_weakness_map')
+      .select('*')
+      .eq('student_id', studentId)
+      .order('accuracy_percent', { ascending: true }) // Lowest accuracy first
+      .limit(1)
+      .single();
 
-    let query = (supabase as any).from('questions').select('*').eq('is_verified', true);
+    let query = (supabase as any)
+      .from('questions')
+      .select('*')
+      .eq('verification_status', 'APPROVED');
     
-    if (targetSubtopic) {
-        // Bias heavily toward their weakness but allow a mix to prevent extreme frustration.
-        // For simplicity, we just pull from the weak subtopic in this engine version.
-        query = query.eq('subtopic', targetSubtopic);
+    if (map) {
+      query = query.eq('subchapter_id', map.subtopic);
+      
+      // Dynamic difficulty scaling based on student accuracy
+      const accuracy = map.accuracy_percent;
+      if (accuracy >= 80) {
+        // High accuracy -> serve Harder questions (difficulty_score >= 65)
+        query = query.gte('difficulty_score', 65);
+      } else if (accuracy < 50) {
+        // Low accuracy -> serve Easier questions (difficulty_score < 35)
+        query = query.lt('difficulty_score', 35);
+      } else {
+        // Medium accuracy -> serve Medium questions (difficulty_score between 35 and 65)
+        query = query.between('difficulty_score', 35, 65);
+      }
     }
     
-    // In production, we'd use `.order('RANDOM()')` via an RPC. 
-    // Here we use updated_at to spoof some randomness or just take the top rows.
     query = query.limit(count);
 
     const { data } = await query;
+    
+    // Fallback: if not enough matching range, grab any approved questions for this subtopic
+    if (data && data.length < count && map) {
+      const { data: fallbackData } = await (supabase as any)
+        .from('questions')
+        .select('*')
+        .eq('verification_status', 'APPROVED')
+        .eq('subchapter_id', map.subtopic)
+        .limit(count);
+      return fallbackData || data || [];
+    }
+    
     return data || [];
   }
   

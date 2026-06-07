@@ -191,9 +191,9 @@ serve(async (req) => {
     console.log('Processing:', displayTitle);
     console.log('Has transcript:', transcript.length > 0, 'length:', transcript.length);
 
-    // Build prompt with real content
+    // Build prompt with real content (increased limit to 800,000 to support 10+ hour lectures)
     const transcriptSection = transcript
-      ? `\n\nACTUAL VIDEO TRANSCRIPT:\n"""\n${transcript.substring(0, 12000)}\n"""`
+      ? `\n\nACTUAL VIDEO TRANSCRIPT:\n"""\n${transcript.substring(0, 800000)}\n"""`
       : '';
 
     const isHinglish = language === 'hinglish' || language === 'hindi' || language === 'crisp';

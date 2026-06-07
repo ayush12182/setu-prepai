@@ -97,39 +97,6 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // ── DEV BYPASS: short-circuit the whole auth system ──
-  if (DEV_BYPASS) {
-    const noop = async () => {};
-    return (
-      <AuthContext.Provider
-        value={{
-          user: MOCK_USER,
-          session: null,
-          profile: MOCK_PROFILE as any,
-          loading: false,
-          subscription: { subscribed: true, productId: null, subscriptionEnd: null, loading: false },
-          userType: 'student',
-          isMentor: false,
-          isInstitution: false,
-          isB2C: false,
-          isB2BStudent: true,
-          signInWithEmail: noop as any,
-          signUpWithEmail: noop as any,
-          signInWithGoogle: noop,
-          signInWithApple: noop,
-          signInWithPhone: noop as any,
-          verifyOTP: noop as any,
-          signOut: noop,
-          updateProfile: noop as any,
-          checkSubscription: noop,
-          refreshProfile: noop,
-        }}
-      >
-        {children}
-      </AuthContext.Provider>
-    );
-  }
-
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -142,6 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const fetchProfile = async (userId: string) => {
+    if (DEV_BYPASS) return;
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) {
@@ -149,11 +117,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // 1. Try to fetch existing profile
-      let { data, error } = await supabase
+      const { data: initialData, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .maybeSingle();
+
+      let data = initialData;
 
       // 2. AUTO-RECOVERY: If no profile exists, create it immediately
       if (!data && !error) {
@@ -207,6 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const checkSubscription = useCallback(async () => {
+    if (DEV_BYPASS) return;
     try {
       setSubscription(prev => ({ ...prev, loading: true }));
       const { data, error } = await supabase.functions.invoke('check-subscription');
@@ -229,6 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    if (DEV_BYPASS) return;
     const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
@@ -261,6 +233,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check subscription when user is available
   useEffect(() => {
+    if (DEV_BYPASS) return;
     if (user) {
       checkSubscription();
     }
@@ -268,7 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auto-refresh subscription every 60 seconds
   useEffect(() => {
-    if (!user) return;
+    if (DEV_BYPASS || !user) return;
     const interval = setInterval(checkSubscription, 60000);
     return () => clearInterval(interval);
   }, [user, checkSubscription]);
@@ -381,6 +354,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isB2C = userType === 'student' && !profile?.teacher_id;
   const isB2BStudent = userType === 'student' && !!profile?.teacher_id;
 
+  // ── DEV BYPASS: short-circuit the whole auth system return ──
+  if (DEV_BYPASS) {
+    const noop = async () => {};
+    return (
+      <AuthContext.Provider
+        value={{
+          user: MOCK_USER,
+          session: null,
+          profile: MOCK_PROFILE as any,
+          loading: false,
+          subscription: { subscribed: true, productId: null, subscriptionEnd: null, loading: false },
+          userType: 'student',
+          isMentor: false,
+          isInstitution: false,
+          isB2C: false,
+          isB2BStudent: true,
+          signInWithEmail: noop as any,
+          signUpWithEmail: noop as any,
+          signInWithGoogle: noop,
+          signInWithApple: noop,
+          signInWithPhone: noop as any,
+          verifyOTP: noop as any,
+          signOut: noop,
+          updateProfile: noop as any,
+          checkSubscription: noop,
+          refreshProfile: noop,
+        }}
+      >
+        {children}
+      </AuthContext.Provider>
+    );
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -405,7 +411,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         checkSubscription,
         refreshProfile: () => user ? fetchProfile(user.id) : Promise.resolve(),
       }}
-
     >
       {children}
     </AuthContext.Provider>

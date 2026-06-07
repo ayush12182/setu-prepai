@@ -78,7 +78,7 @@ export const useStudentStats = () => {
 
           if (hasToday || hasYesterday) {
             streak = 1;
-            let current = hasToday ? new Date() : new Date(Date.now() - 86400000);
+            const current = hasToday ? new Date() : new Date(Date.now() - 86400000);
             
             for (let i = 1; i < 30; i++) {
               const prevDate = new Date(current.getTime() - i * 86400000).toDateString();

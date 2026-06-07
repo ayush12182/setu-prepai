@@ -47,3 +47,16 @@ Thumbs.db
 *.temp
 
 .npm-cache/
+
+# Test artifacts
+*-screenshot.png
+*-errors.json
+practice-click-results.json
+practice-content.png
+practice-difficulty-selector.png
+practice-after-select.png
+check_*
+test_*
+*.js.map
+*.d.ts
+

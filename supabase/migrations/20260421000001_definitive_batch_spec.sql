@@ -18,7 +18,8 @@ BEGIN
         );
     ELSE
         -- Rename column back to mentor_id if it was renamed to teacher_id
-        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'batches' AND column_name = 'teacher_id') THEN
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'batches' AND column_name = 'teacher_id') 
+           AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'batches' AND column_name = 'mentor_id') THEN
             ALTER TABLE public.batches RENAME COLUMN teacher_id TO mentor_id;
         END IF;
     END IF;
@@ -43,35 +44,35 @@ BEGIN
             );
         END IF;
     END IF;
-
-    -- 3. Update create_batch_v2 to follow mentor_id spec
-    DROP FUNCTION IF EXISTS public.create_batch_v2(text, uuid, text, text, text, text);
-    CREATE OR REPLACE FUNCTION public.create_batch_v2(
-      p_name TEXT,
-      p_mentor_id UUID,
-      p_join_code TEXT,
-      p_target_exam TEXT DEFAULT 'JEE_MAINS',
-      p_description TEXT DEFAULT '',
-      p_subject TEXT DEFAULT 'All Subjects'
-    )
-    RETURNS TABLE (
-      id UUID,
-      name TEXT,
-      mentor_id UUID,
-      join_code TEXT,
-      target_exam TEXT,
-      description TEXT,
-      created_at TIMESTAMPTZ
-    ) AS $$
-    BEGIN
-      RETURN QUERY
-      INSERT INTO public.batches (name, mentor_id, join_code, target_exam, description)
-      VALUES (p_name, p_mentor_id, p_join_code, p_target_exam, p_description)
-      RETURNING public.batches.id, public.batches.name, public.batches.mentor_id, public.batches.join_code, public.batches.target_exam, public.batches.description, public.batches.created_at;
-    END;
-    $$ LANGUAGE plpgsql SECURITY DEFINER;
-
-    -- Force reload schema
-    EXECUTE 'NOTIFY pgrst, ''reload schema''';
-
 END $$;
+
+-- 3. Update create_batch_v2 to follow mentor_id spec
+DROP FUNCTION IF EXISTS public.create_batch_v2(text, uuid, text, text, text, text);
+CREATE OR REPLACE FUNCTION public.create_batch_v2(
+  p_name TEXT,
+  p_mentor_id UUID,
+  p_join_code TEXT,
+  p_target_exam TEXT DEFAULT 'JEE_MAINS',
+  p_description TEXT DEFAULT '',
+  p_subject TEXT DEFAULT 'All Subjects'
+)
+RETURNS TABLE (
+  id UUID,
+  name TEXT,
+  mentor_id UUID,
+  join_code TEXT,
+  target_exam TEXT,
+  description TEXT,
+  created_at TIMESTAMPTZ
+) AS $$
+BEGIN
+  RETURN QUERY
+  INSERT INTO public.batches (name, mentor_id, join_code, target_exam, description)
+  VALUES (p_name, p_mentor_id, p_join_code, p_target_exam, p_description)
+  RETURNING public.batches.id, public.batches.name, public.batches.mentor_id, public.batches.join_code, public.batches.target_exam, public.batches.description, public.batches.created_at;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Force reload schema
+NOTIFY pgrst, 'reload schema';
+

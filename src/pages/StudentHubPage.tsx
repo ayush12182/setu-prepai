@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { toast } from 'sonner';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { StudyMomentumWidget } from '@/components/dashboard/StudyMomentumWidget';
 
 export default function StudentHubPage() {
   const navigate = useNavigate();
@@ -1197,25 +1198,8 @@ export default function StudentHubPage() {
                       </div>
                     </div>
 
-                    {/* Study Heatmap */}
-                    <div className="rounded-3xl border border-white/[0.06] bg-card p-5 space-y-4">
-                      <h3 className="text-sm font-bold text-white">📅 Consistency Index</h3>
-                      <div className="grid grid-cols-7 gap-1.5 p-1 bg-black/20 border border-white/5 rounded-xl">
-                        {heatmapData.map((d) => (
-                          <div 
-                            key={d.day}
-                            className={cn(
-                              "w-full aspect-square rounded-md transition-all cursor-pointer bg-white/[0.04]",
-                              d.hours > 0 && d.hours <= 4.5 ? "bg-accent/25" :
-                              d.hours > 4.5 && d.hours <= 6.5 ? "bg-accent/50" :
-                              d.hours > 6.5 && d.hours <= 7.5 ? "bg-accent/75" :
-                              d.hours > 7.5 ? "bg-accent" : ""
-                            )}
-                            title={`June ${d.day}: ${d.hours} Hours`}
-                          />
-                        ))}
-                      </div>
-                    </div>
+                    {/* Study Momentum v2 Widget */}
+                    <StudyMomentumWidget initialStreak={streak || 14} />
 
                     {/* Subject Detail Progression */}
                     <div className="space-y-3.5">

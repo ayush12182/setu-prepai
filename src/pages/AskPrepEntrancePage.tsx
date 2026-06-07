@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Sparkles, Camera, ImagePlus, X, Volume2, Loader2, Play, Pause, CheckCircle2, Flame, BookOpen, AlertTriangle, BarChart2 } from 'lucide-react';
+import { Send, Sparkles, Camera, ImagePlus, X, Volume2, VolumeX, Loader2, Play, Pause, CheckCircle2, Flame, BookOpen, AlertTriangle, BarChart2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { getGreetingByLanguage } from '@/lib/prepentranceMentor';
@@ -62,76 +62,60 @@ interface Message {
   mediaUrl?: string;
 }
 
-const MotivationBubble: React.FC<{ message: Message }> = ({ message }) => {
-  const [localPlaying, setLocalPlaying] = useState(false);
-  const [hasListened, setHasListened] = useState(false);
-  const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement | null>(null);
+interface MotivationBubbleProps {
+  message: Message;
+  onClose: () => void;
+}
 
-  const togglePlay = () => {
-    if (localPlaying) {
-      mediaRef.current?.pause();
-      setLocalPlaying(false);
-    } else {
-      mediaRef.current?.play().catch(() => {
-        toast.info("Media file not found. Here is the quote:", {
-          description: message.content,
-          duration: 5000
-        });
-      });
-      setLocalPlaying(true);
-      if (!hasListened) setHasListened(true);
-    }
-  };
-
+const MotivationBubble: React.FC<MotivationBubbleProps> = ({ message, onClose }) => {
   return (
     <div className="flex justify-center w-full my-4 animate-fade-in group">
       <div
         className={cn(
-          "flex items-center gap-3 px-4 py-2.5 rounded-full shadow-lg transition-all duration-300 cursor-pointer max-w-[95%]",
-          "bg-white border border-purple-500/10",
-          "hover:shadow-purple-500/20 hover:border-purple-500/30",
-          localPlaying && "ring-2 ring-purple-500/20 shadow-xl scale-[1.02]"
+          "flex items-start gap-4 p-4 rounded-[20px] transition-all duration-300 cursor-pointer max-w-[95%] w-full relative",
+          "bg-[#111827] border border-[rgba(245,158,11,0.3)] text-white hover:border-[rgba(245,158,11,0.5)]"
         )}
-        onClick={togglePlay}
+        style={{
+          boxShadow: '0 0 20px rgba(245,158,11,0.15)'
+        }}
+        onClick={onClose}
       >
+        {/* Close Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute top-3 right-3 text-slate-400 hover:text-white transition-colors"
+          title="Dismiss"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
         {/* Small Mentor Avatar with pulsing indicator */}
-        <div className="relative flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center border border-white/20 shadow-sm">
-            <span className="text-white font-bold text-[10px]">JM</span>
+        <div className="relative flex-shrink-0 mt-0.5">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center border border-[#111827] shadow-sm">
+            <span className="text-white font-bold text-xs">JM</span>
           </div>
-          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-prepentrance-success animate-pulse"></span>
+          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#111827] bg-prepentrance-success animate-pulse"></span>
         </div>
 
-        {/* Play Indicator / Waveform */}
-        <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-500/10 text-purple-600 flex-shrink-0">
-          {localPlaying ? (
-            <Pause className="w-3.5 h-3.5 fill-current" />
-          ) : (
-            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-          )}
-        </div>
-
-        {/* Minimalist Text Label */}
-        <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-medium text-foreground/90 truncate italic leading-relaxed">
+        {/* Text Label */}
+        <div className="flex-1 min-w-0 space-y-1 pr-6">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-[#F59E0B] uppercase tracking-widest leading-none">
+              Listened — keep going.
+            </span>
+          </div>
+          <p className="text-[13px] font-medium text-slate-200 italic leading-relaxed whitespace-pre-wrap">
             "{message.content}"
           </p>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-[9px] font-bold text-purple-600 uppercase tracking-widest leading-none">
-              {localPlaying ? "Listened — keep going." : "PrepEntrance Mentor Advice"}
-            </span>
-            {hasListened && !localPlaying && (
-              <CheckCircle2 className="w-2.5 h-2.5 text-prepentrance-success" />
-            )}
-          </div>
         </div>
 
-        <audio
-          ref={mediaRef as React.LegacyRef<HTMLAudioElement>}
-          src={message.mediaUrl}
-          onEnded={() => setLocalPlaying(false)}
-          className="hidden"
-        />
+        {/* Play/Pause Indicator */}
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500/10 text-[#F59E0B] flex-shrink-0 self-center hover:bg-amber-500/20 transition-colors mr-2">
+          <Pause className="w-4 h-4 fill-current" />
+        </div>
       </div>
     </div>
   );
@@ -146,6 +130,58 @@ const AskPrepEntrancePage: React.FC = () => {
   const isFoundation = aiContext?.learning_mode === 'foundation';
   const { sendMessage, isLoading, error } = usePrepEntranceChat();
   const { streak, weakTopic, lastActivityTopic, accuracy, totalSolved } = useStudentStats();
+
+  const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleSpeakerClick = useCallback(() => {
+    if (playingMessageId && activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      setPlayingMessageId(null);
+    } else {
+      const audioQuote = "Education hai yaar, abhi education ke naam pe kisi bacche ko failure ya successful bolna sahi nahi hai. Mujhe lagta hai ki hume successful selection ke saath-saath successful preparation ko bhi celebrate karna chahiye. Jeet ki taiyari nahi, taiyari hi jeet hai bhai. Right, taiyari hi jeet hai. Ab se mera slogan bhi yahi hoga bhaiya.";
+      const msgId = 'motiv-' + Date.now();
+
+      const newMsg: Message = {
+        id: msgId,
+        role: 'motivation',
+        content: audioQuote,
+        timestamp: new Date(),
+        mediaType: 'audio',
+        mediaUrl: MOTIVATION_AUDIO_PATH
+      };
+
+      setMessages(prev => [...prev, newMsg]);
+
+      // Play audio immediately
+      const audio = new Audio(MOTIVATION_AUDIO_PATH);
+      activeAudioRef.current = audio;
+      setPlayingMessageId(msgId);
+
+      audio.onended = () => {
+        setPlayingMessageId(null);
+        activeAudioRef.current = null;
+      };
+      
+      audio.onerror = () => {
+        setPlayingMessageId(null);
+        activeAudioRef.current = null;
+        toast.info("Media file not found. Here is the quote:", {
+          description: audioQuote,
+          duration: 5000
+        });
+      };
+
+      audio.play().catch(() => {
+        setPlayingMessageId(null);
+        activeAudioRef.current = null;
+        toast.info("Media file not found. Here is the quote:", {
+          description: audioQuote,
+          duration: 5000
+        });
+      });
+    }
+  }, [playingMessageId]);
 
   const KOTA_MENTOR_GREETING = `🧑‍🏫 PrepEntrance Mentor
 JEE Physics • Chemistry • Maths
@@ -205,24 +241,7 @@ Main solution ke saath approach bhi samjhaunga.`;
     return () => clearInterval(interval);
   }, [isLoading]);
 
-  const injectMotivationMessage = useCallback(() => {
-    let quotes = JEE_MOTIVATION_QUOTES;
-    if (isFoundation) quotes = FOUNDATION_MOTIVATION_QUOTES;
-    else if (isNeet) quotes = NEET_MOTIVATION_QUOTES;
 
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-
-    const newMsg: Message = {
-      id: 'motiv-' + Date.now(),
-      role: 'motivation',
-      content: randomQuote,
-      timestamp: new Date(),
-      mediaType: 'audio',
-      mediaUrl: MOTIVATION_AUDIO_PATH
-    };
-
-    setMessages(prev => [...prev, newMsg]);
-  }, [isNeet, isFoundation]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -534,31 +553,31 @@ Main solution ke saath approach bhi samjhaunga.`;
         </div>
 
         {/* RIGHT SIDE: Chat Arena (3 cols) */}
-        <div className="lg:col-span-3 flex flex-col h-full bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+        <div className="lg:col-span-3 flex flex-col h-full bg-[#111827] border border-[#1e293b] rounded-2xl overflow-hidden shadow-sm">
           {/* Header */}
-          <div className="bg-card border-b border-border p-4 flex items-center gap-4">
+          <div className="bg-[#111827]/90 backdrop-blur-md border-b border-[#1e293b] p-4 flex items-center gap-4">
             <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center shadow-md">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-md border border-[#1e293b]">
                 <span className="text-white font-bold text-lg">JM</span>
               </div>
-              <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-card bg-prepentrance-success animate-pulse"></span>
+              <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[#111827] bg-prepentrance-success animate-pulse"></span>
             </div>
             <div className="flex-1">
-              <h2 className="font-display font-bold text-base text-foreground">
+              <h2 className="font-display font-extrabold text-base text-white tracking-tight">
                 PrepEntrance Mentor
               </h2>
-              <p className="text-xs text-prepentrance-success flex items-center gap-1.5 font-medium">
-                <span className="w-2 h-2 rounded-full bg-prepentrance-success animate-pulse inline-block" />
+              <p className="text-xs text-emerald-400 flex items-center gap-1.5 font-semibold">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
                 Online • Your {isFoundation ? 'School' : isNeet ? 'NEET' : 'JEE'} Mentor
               </p>
             </div>
-            <div className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/30 px-2.5 py-1 rounded-full font-bold">
+            <div className="text-[10px] text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full font-bold">
               🟢 Responds in ~5 sec
             </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto bg-secondary/30 p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto bg-[#0b0f19] p-6 space-y-6">
             {messages.map((message, index) => (
               <React.Fragment key={message.id}>
                 {message.role !== 'motivation' && (
@@ -570,15 +589,15 @@ Main solution ke saath approach bhi samjhaunga.`;
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
                     {message.role === 'assistant' && (
-                      <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
-                        <span className="text-purple-500 font-bold text-xs">JM</span>
+                      <div className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
+                        <span className="text-[#F59E0B] font-bold text-xs">JM</span>
                       </div>
                     )}
                     <div
                       className={cn(
                         message.role === 'user'
-                          ? 'bg-gradient-to-br from-prepentrance-saffron to-prepentrance-saffron-dark text-white rounded-2xl rounded-tr-none px-5 py-3.5 max-w-[60%] shadow-sm font-medium text-[15px]'
-                          : 'bg-card border border-border rounded-2xl rounded-bl-none px-4 py-3 max-w-[85%] shadow-sm text-sm'
+                          ? 'bg-[#D97706] text-white rounded-2xl rounded-tr-none px-5 py-3.5 max-w-[75%] shadow-sm font-medium text-[14px]'
+                          : 'bg-[#111827] border border-[#1e293b] rounded-2xl rounded-bl-none px-5 py-4 max-w-[85%] shadow-md text-[14px]'
                       )}
                     >
                       {message.image && (
@@ -591,7 +610,7 @@ Main solution ke saath approach bhi samjhaunga.`;
 
                       <div className={cn(
                         'leading-relaxed whitespace-pre-wrap',
-                        message.role === 'assistant' ? 'text-foreground' : 'text-white'
+                        message.role === 'assistant' ? 'text-slate-100' : 'text-white'
                       )}>
                         {message.role === 'assistant' ? renderProseNotes(message.content) : message.content}
                       </div>
@@ -603,15 +622,15 @@ Main solution ke saath approach bhi samjhaunga.`;
 
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
               <div className="flex justify-start animate-fade-in items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-purple-500 font-bold text-xs">JM</span>
+                <div className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[#F59E0B] font-bold text-xs">JM</span>
                 </div>
-                <div className="bg-card border border-border rounded-2xl rounded-bl-none px-4 py-3 shadow-sm flex items-center gap-2">
-                  <span className="text-xs font-semibold text-muted-foreground animate-pulse">{thinkingState}</span>
+                <div className="bg-[#111827] border border-[#1e293b] rounded-2xl rounded-bl-none px-4 py-3 shadow-md flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-400 animate-pulse">{thinkingState}</span>
                   <span className="flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </span>
                 </div>
               </div>
@@ -628,8 +647,8 @@ Main solution ke saath approach bhi samjhaunga.`;
                       key={i}
                       onClick={() => handleQuickQuestion(q)}
                       className={cn(
-                        'text-xs bg-[rgba(251,146,60,0.08)] border border-[rgba(251,146,60,0.25)] text-white rounded-xl px-3.5 py-2 text-left font-medium',
-                        'hover:border-[rgba(251,146,60,0.4)] hover:bg-[rgba(251,146,60,0.15)] transition-all duration-200 shadow-sm'
+                        'text-xs bg-slate-900/60 border border-slate-800/80 text-slate-300 rounded-xl px-3.5 py-2 text-left font-medium transition-all',
+                        'hover:border-[#F59E0B]/30 hover:bg-[#F59E0B]/5 hover:text-white duration-200 shadow-sm'
                       )}
                     >
                       {q}
@@ -643,11 +662,14 @@ Main solution ke saath approach bhi samjhaunga.`;
           </div>
 
           {/* Footer Area */}
-          <div className="bg-card border-t border-border p-4 relative">
-            {messages.filter(m => m.role === 'motivation').length > 0 && (
+          <div className="bg-[#111827] border-t border-[#1e293b] p-4 relative">
+            {playingMessageId && messages.filter(m => m.role === 'motivation').length > 0 && (
               <div className="absolute bottom-full left-0 right-0 px-4 pb-2 z-20 pointer-events-none">
                 <div className="pointer-events-auto max-w-lg mx-auto">
-                  <MotivationBubble message={messages.filter(m => m.role === 'motivation').slice(-1)[0]} />
+                  <MotivationBubble 
+                    message={messages.filter(m => m.role === 'motivation').slice(-1)[0]} 
+                    onClose={handleSpeakerClick}
+                  />
                 </div>
               </div>
             )}
@@ -688,18 +710,27 @@ Main solution ke saath approach bhi samjhaunga.`;
               <Button
                 variant="outline"
                 size="icon"
-                onClick={injectMotivationMessage}
-                className="flex-shrink-0 rounded-xl bg-[rgba(251,146,60,0.08)] border border-[rgba(251,146,60,0.25)] text-white hover:bg-[rgba(251,146,60,0.15)] hover:border-[rgba(251,146,60,0.4)]"
-                title="PrepEntrance Mentor ki Seekh suniye"
+                onClick={handleSpeakerClick}
+                className={cn(
+                  "flex-shrink-0 rounded-xl transition-all duration-200",
+                  playingMessageId
+                    ? "bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20 hover:border-amber-500/40"
+                    : "bg-slate-900/60 border border-slate-800 text-slate-300 hover:text-white hover:border-[#F59E0B]/40 hover:bg-[#F59E0B]/5"
+                )}
+                title={playingMessageId ? "Stop playing motivation" : "PrepEntrance Mentor ki Seekh suniye"}
               >
-                <Volume2 className="w-5 h-5" />
+                {playingMessageId ? (
+                  <VolumeX className="w-5 h-5 animate-pulse" />
+                ) : (
+                  <Volume2 className="w-5 h-5" />
+                )}
               </Button>
 
               <Button
                 variant="outline"
                 size="icon"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex-shrink-0 rounded-xl bg-[rgba(251,146,60,0.08)] border border-[rgba(251,146,60,0.25)] text-white hover:bg-[rgba(251,146,60,0.15)] hover:border-[rgba(251,146,60,0.4)]"
+                className="flex-shrink-0 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-[#F59E0B]/40 hover:bg-[#F59E0B]/5 text-slate-300 hover:text-white transition-all duration-200"
                 disabled={isLoading}
                 title="Upload from gallery"
               >
@@ -710,7 +741,7 @@ Main solution ke saath approach bhi samjhaunga.`;
                 variant="outline"
                 size="icon"
                 onClick={() => cameraInputRef.current?.click()}
-                className="flex-shrink-0 rounded-xl bg-[rgba(251,146,60,0.08)] border border-[rgba(251,146,60,0.25)] text-white hover:bg-[rgba(251,146,60,0.15)] hover:border-[rgba(251,146,60,0.4)]"
+                className="flex-shrink-0 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-[#F59E0B]/40 hover:bg-[#F59E0B]/5 text-slate-300 hover:text-white transition-all duration-200"
                 disabled={isLoading}
                 title="Take photo"
               >

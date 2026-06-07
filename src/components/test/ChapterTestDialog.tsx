@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { getSchoolSubjects, getSchoolChapters } from '@/data/schoolSyllabus';
+import { getCuetChaptersBySubject, CUET_SUBJECTS } from '@/data/cuetSyllabus';
 
 
 interface ChapterTestDialogProps {
@@ -36,7 +37,7 @@ const ChapterTestDialog: React.FC<ChapterTestDialogProps> = ({
   onOpenChange,
   onStart
 }) => {
-  const { isNeet } = useExamMode();
+  const { isNeet, isCuet } = useExamMode();
   const { isFoundation, studentClass } = useClassContext();
 
   const subjectsData = isFoundation
@@ -45,19 +46,31 @@ const ChapterTestDialog: React.FC<ChapterTestDialogProps> = ({
       name: s.label,
       chapters: getSchoolChapters(studentClass, s.key).map(c => ({ id: c.id, name: c.name }))
     }))
-    : isNeet
-      ? [
-        { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters },
-        { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters },
-        { id: 'biology', name: 'Biology', chapters: neetBiologyChapters },
-      ]
-      : [
-        { id: 'physics', name: 'Physics', chapters: physicsChapters },
-        { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters },
-        { id: 'maths', name: 'Mathematics', chapters: mathsChapters },
-      ];
+    : isCuet
+      ? CUET_SUBJECTS.map(s => {
+          let chapters = getCuetChaptersBySubject(s.key);
+          if (chapters.length === 0) {
+            if (s.key === 'physics') chapters = neetPhysicsChapters;
+            else if (s.key === 'chemistry') chapters = neetChemistryChapters;
+            else if (s.key === 'biology') chapters = neetBiologyChapters;
+            else if (s.key === 'mathematics' || s.key === 'maths') chapters = mathsChapters;
+          }
+          return { id: s.key, name: s.label, chapters };
+        })
+      : isNeet
+        ? [
+          { id: 'physics', name: 'Physics', chapters: neetPhysicsChapters },
+          { id: 'chemistry', name: 'Chemistry', chapters: neetChemistryChapters },
+          { id: 'biology', name: 'Biology', chapters: neetBiologyChapters },
+        ]
+        : [
+          { id: 'physics', name: 'Physics', chapters: physicsChapters },
+          { id: 'chemistry', name: 'Chemistry', chapters: chemistryChapters },
+          { id: 'maths', name: 'Mathematics', chapters: mathsChapters },
+        ];
   const [selectedSubject, setSelectedSubject] = useState<string>('');
   const [selectedChapter, setSelectedChapter] = useState<string>('');
+  const [selectedStyle, setSelectedStyle] = useState<string>('MIXED');
   const selectedSubjectData = subjectsData.find(s => s.id === selectedSubject);
 
   const handleStart = () => {
@@ -80,12 +93,14 @@ const ChapterTestDialog: React.FC<ChapterTestDialogProps> = ({
       chapterName: chapter.name,
       subject: selectedSubject,
       subchapterId: firstSubchapter?.id,
-      subchapterName: firstSubchapter?.name
+      subchapterName: firstSubchapter?.name,
+      selectedStyle: selectedStyle
     });
 
     // Reset selections
     setSelectedSubject('');
     setSelectedChapter('');
+    setSelectedStyle('MIXED');
   };
 
   return (
@@ -134,6 +149,24 @@ const ChapterTestDialog: React.FC<ChapterTestDialogProps> = ({
                       {chapter.name}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {selectedChapter && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Test Style</label>
+              <Select value={selectedStyle} onValueChange={setSelectedStyle}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select test style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MIXED">Mixed / Standard Style</SelectItem>
+                  <SelectItem value="PYQ">JEE Main PYQ Style</SelectItem>
+                  <SelectItem value="ALLEN">Allen Style</SelectItem>
+                  <SelectItem value="RESONANCE">Resonance Style</SelectItem>
+                  <SelectItem value="FIITJEE">FIITJEE Style</SelectItem>
                 </SelectContent>
               </Select>
             </div>

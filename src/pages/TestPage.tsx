@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { 
@@ -35,6 +35,8 @@ import { ChapterSelection } from '@/hooks/useTestQuestions';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { toast } from 'sonner';
+import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
+import { getCuetChaptersBySubject } from '@/data/cuetSyllabus';
 
 type ExecutableTestType = 'chapter' | 'mixed' | 'pyq' | 'adaptive';
 
@@ -162,76 +164,129 @@ const renderPYQTimeline = (timeline: Record<number, boolean>) => {
 };
 
 // Programmatic test set generator to avoid boilerplate and keep file compact
-const generateChapterTests = (chapterId: string, chapterName: string, mastery: number): TestItem[] => {
+// Programmatic test set generator to avoid boilerplate and keep file compact
+const generateChapterTestsForMode = (
+  chapterId: string, 
+  chapterName: string, 
+  mastery: number, 
+  examMode: 'jee' | 'neet' | 'cuet'
+): TestItem[] => {
   const attemptedFirst = mastery > 50;
+  let qCount = 25;
+  let duration = 50;
+  let marks = 100;
+  if (examMode === 'neet') {
+    qCount = 45;
+    duration = 45;
+    marks = 180;
+  } else if (examMode === 'cuet') {
+    qCount = 40;
+    duration = 45;
+    marks = 200;
+  }
   return [
     {
       id: `${chapterId}-t1`,
       name: `${chapterName} - Practice Set 1`,
-      questions: 25,
-      duration: 50,
-      marks: 100,
+      questions: qCount,
+      duration: duration,
+      marks: marks,
       attempted: attemptedFirst,
-      score: attemptedFirst ? mastery : undefined,
+      score: attemptedFirst ? Math.round((mastery / 100) * marks) : undefined,
       yearsCovered: "2019-2021"
     },
     {
       id: `${chapterId}-t2`,
       name: `${chapterName} - Practice Set 2`,
-      questions: 25,
-      duration: 50,
-      marks: 100,
+      questions: qCount,
+      duration: duration,
+      marks: marks,
       attempted: false,
       yearsCovered: "2022-2023"
     },
     {
       id: `${chapterId}-t3`,
       name: `${chapterName} - PYQ Chapter Test`,
-      questions: 20,
-      duration: 40,
-      marks: 80,
+      questions: Math.round(qCount * 0.8),
+      duration: Math.round(duration * 0.8),
+      marks: Math.round(marks * 0.8),
       attempted: false,
       yearsCovered: "2024-2025"
     }
   ];
 };
 
+const mapToChapterData = (
+  ch: any, 
+  index: number, 
+  examMode: 'jee' | 'neet' | 'cuet'
+): ChapterData => {
+  let mastery = 65;
+  const charSum = ch.name.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
+  mastery = 30 + (charSum % 65);
+  
+  const status = mastery >= 75 ? 'green' : mastery >= 50 ? 'yellow' : 'red';
+  const difficulty = (ch.difficulty?.toLowerCase() || 'medium') as 'easy' | 'medium' | 'hard';
+  const questionsSolved = Math.round((mastery / 100) * 50);
+  const questionsRemaining = 50 - questionsSolved;
+  
+  const emojis = ['🧬', '🧪', '⚛️', '📐', '🧠', '📊', '📈', '🔬', '🌍', '📝', '🎯', '📚'];
+  const emoji = ch.emoji || emojis[charSum % emojis.length];
+
+  const maxMarks = examMode === 'neet' ? 180 : examMode === 'cuet' ? 200 : 100;
+
+  return {
+    id: ch.id,
+    name: ch.name,
+    mastery,
+    testsCount: 3,
+    pyqsCount: ch.pyqData?.total || 30,
+    lastAttempt: mastery % 2 === 0 ? '2 days ago' : '1 week ago',
+    status,
+    difficulty,
+    emoji,
+    keywords: ch.topics || [],
+    questionsSolved,
+    questionsRemaining,
+    lastScore: mastery > 40 ? Math.round((mastery / 100) * maxMarks) : null,
+    pyqTimeline: { 2019: true, 2020: true, 2021: true, 2022: mastery > 50, 2023: mastery > 70, 2024: mastery > 80, 2025: false },
+    tests: generateChapterTestsForMode(ch.id, ch.name, mastery, examMode),
+    aiRecommendation: mastery < 50 ? {
+      lostMarks: examMode === 'neet' ? 36 : examMode === 'cuet' ? 40 : 20,
+      recommendedNotes: `Focus on ${ch.topics?.[0] || 'core concepts'} and practice trending PYQ questions.`
+    } : undefined
+  };
+};
+
+const generateChapterTests = (chapterId: string, chapterName: string, mastery: number): TestItem[] => {
+  return generateChapterTestsForMode(chapterId, chapterName, mastery, 'jee');
+};
+
 const TestPage: React.FC = () => {
   const navigate = useNavigate();
-  const { isNeet, isCuet } = useExamMode();
+  const { isNeet, isCuet, config } = useExamMode();
   const { isFoundation, classLabel } = useClassContext();
 
-  const getSubjectStats = (categoryId: string) => {
-    let chaptersList: ChapterData[] = [];
-    if (categoryId.includes('physics')) {
-      chaptersList = physicsChapters;
-    } else if (categoryId.includes('chemistry')) {
-      chaptersList = chemistryChapters;
-    } else if (categoryId.includes('maths') || categoryId.includes('mathematics')) {
-      chaptersList = mathsChapters;
-    } else if (categoryId === 'part-test') {
-      chaptersList = partTestsChapters;
-    } else if (categoryId === 'full-mock') {
-      chaptersList = fullTestsChapters;
-    }
+  // Sidebar selection (clean light mode subjects) - default dynamically
+  const [activeCategory, setActiveCategory] = useState<string>(() => {
+    const mode = localStorage.getItem('examMode') || 'jee';
+    if (mode === 'neet') return 'biology';
+    if (mode === 'cuet') return 'english';
+    return 'physics';
+  });
 
-    const totalTests = chaptersList.reduce((acc, ch) => acc + ch.testsCount, 0);
-    const completed = chaptersList.reduce((acc, ch) => acc + ch.tests.filter(t => t.attempted).length, 0);
-    const totalMastery = chaptersList.length > 0
-      ? Math.round(chaptersList.reduce((acc, ch) => acc + ch.mastery, 0) / chaptersList.length)
-      : 0;
-
-    return { totalTests, completed, mastery: totalMastery };
-  };
+  // Sync activeCategory when examMode changes
+  React.useEffect(() => {
+    if (isNeet) setActiveCategory('biology');
+    else if (isCuet) setActiveCategory('english');
+    else setActiveCategory('physics');
+  }, [isNeet, isCuet]);
 
   // Dialog states
   const [showChapterSelect, setShowChapterSelect] = useState(false);
   const [showMixedSelect, setShowMixedSelect] = useState(false);
   const [showPYQSelect, setShowPYQSelect] = useState(false);
   const [activeTest, setActiveTest] = useState<TestConfig | null>(null);
-
-  // Sidebar selection (clean light mode subjects)
-  const [activeCategory, setActiveCategory] = useState<string>('physics');
 
   // Search filter
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -245,12 +300,55 @@ const TestPage: React.FC = () => {
   // Syllabus Modal popup details
   const [syllabusModalText, setSyllabusModalText] = useState<string | null>(null);
 
+  const getSubjectStats = (categoryId: string) => {
+    let chaptersList: ChapterData[] = [];
+    if (categoryId === 'part-test') {
+      chaptersList = partTestsChapters;
+    } else if (categoryId === 'full-mock') {
+      chaptersList = fullTestsChapters;
+    } else if (isNeet) {
+      if (categoryId === 'biology') chaptersList = neetBiology;
+      else if (categoryId === 'chemistry') chaptersList = neetChemistry;
+      else if (categoryId === 'physics') chaptersList = neetPhysics;
+    } else if (isCuet) {
+      chaptersList = cuetChaptersForSubject(categoryId);
+    } else {
+      if (categoryId === 'physics') chaptersList = physicsChapters;
+      else if (categoryId === 'chemistry') chaptersList = chemistryChapters;
+      else if (categoryId === 'mathematics' || categoryId === 'maths') chaptersList = mathsChapters;
+    }
+
+    const totalTests = chaptersList.reduce((acc, ch) => acc + ch.testsCount, 0);
+    const completed = chaptersList.reduce((acc, ch) => acc + ch.tests.filter(t => t.attempted).length, 0);
+    const totalMastery = chaptersList.length > 0
+      ? Math.round(chaptersList.reduce((acc, ch) => acc + ch.mastery, 0) / chaptersList.length)
+      : 0;
+
+    return { totalTests, completed, mastery: totalMastery };
+  };
+
   // Static target chapters for adaptive weakness mock runs
-  const weakChapters: ChapterSelection[] = [
-    { chapterId: 'ch-rotation', chapterName: 'Rotational Motion', subject: 'physics' },
-    { chapterId: 'ch-functions', chapterName: 'Functions & Relations', subject: 'mathematics' },
-    { chapterId: 'ch-electrostatics', chapterName: 'Electrostatics', subject: 'physics' }
-  ];
+  const weakChapters = useMemo<ChapterSelection[]>(() => {
+    if (isNeet) {
+      return [
+        { chapterId: 'neet-phy-1', chapterName: 'Mechanics (Rotational focus)', subject: 'physics' },
+        { chapterId: 'neet-bio-4', chapterName: 'Genetics & Evolution', subject: 'biology' },
+        { chapterId: 'neet-phy-3', chapterName: 'Electrostatics', subject: 'physics' }
+      ];
+    }
+    if (isCuet) {
+      return [
+        { chapterId: 'cuet-eco-1', chapterName: 'Microeconomics', subject: 'economics' },
+        { chapterId: 'cuet-gt-1', chapterName: 'Logical Reasoning', subject: 'general_test' },
+        { chapterId: 'cuet-eng-2', chapterName: 'Grammar & Vocabulary', subject: 'english' }
+      ];
+    }
+    return [
+      { chapterId: 'ch-rotation', chapterName: 'Rotational Motion', subject: 'physics' },
+      { chapterId: 'ch-functions', chapterName: 'Functions & Relations', subject: 'mathematics' },
+      { chapterId: 'ch-electrostatics', chapterName: 'Electrostatics', subject: 'physics' }
+    ];
+  }, [isNeet, isCuet]);
 
   // =========================================================================
   // COMPLETE PHYSICS SYLLABUS (24 CHAPTERS)
@@ -1163,73 +1261,214 @@ const TestPage: React.FC = () => {
     }));
   }, []);
 
-  // MOCK TESTS (Part and Full Mocks remain custom styled)
-  const partTestsChapters: ChapterData[] = [
-    {
-      id: 'ch-part-11',
-      name: 'Class 11 Mock Syllabus Mocks',
-      mastery: 65,
-      testsCount: 2,
-      pyqsCount: 0,
-      lastAttempt: '2 weeks ago',
-      status: 'yellow',
-      difficulty: 'hard' as const,
-      emoji: '🏆',
-      keywords: ['part mock', 'pcm', 'class 11'],
-      questionsSolved: 75,
-      questionsRemaining: 45,
-      lastScore: 55,
-      pyqTimeline: {},
-      tests: [
-        { id: 't-part11-1', name: 'Class 11 Part Test (QPT-1) - PCM', questions: 75, duration: 150, marks: 300, attempted: true, score: 165, yearsCovered: "2019-2023" },
-        { id: 't-part11-2', name: 'Class 11 Part Test (QPT-2) - Mechanics Focus', questions: 45, duration: 90, marks: 180, attempted: false, yearsCovered: "2024-2025" }
-      ]
-    }
-  ];
+  // NEET Chapters memoized
+  const neetBiology = useMemo(() => {
+    return neetBiologyChapters.map((ch, idx) => mapToChapterData(ch, idx, 'neet'));
+  }, []);
 
-  const fullTestsChapters: ChapterData[] = [
-    {
-      id: 'ch-full-main',
-      name: 'Full Syllabus Mock Tests',
-      mastery: 49,
-      testsCount: 3,
-      pyqsCount: 0,
-      lastAttempt: '1 week ago',
-      status: 'yellow',
-      difficulty: 'hard' as const,
-      emoji: '🏛',
-      keywords: ['full mock', 'syllabus assessment', 'main mock'],
-      questionsSolved: 90,
-      questionsRemaining: 180,
-      lastScore: 49,
-      pyqTimeline: {},
-      tests: [
-        { id: 't-full-1', name: 'Full Mock Test 1 (Closest to Real Exam)', questions: 90, duration: 180, marks: 300, attempted: true, score: 147, yearsCovered: "2019-2023" },
-        { id: 't-full-2', name: 'Full Mock Test 2 (Advanced Traps)', questions: 90, duration: 180, marks: 300, attempted: false, yearsCovered: "2024" },
-        { id: 't-full-3', name: 'Full Mock Test 3 (High Weightage Focus)', questions: 90, duration: 180, marks: 300, attempted: false, yearsCovered: "2025" }
-      ]
+  const neetChemistry = useMemo(() => {
+    return neetChemistryChapters.map((ch, idx) => mapToChapterData(ch, idx, 'neet'));
+  }, []);
+
+  const neetPhysics = useMemo(() => {
+    return neetPhysicsChapters.map((ch, idx) => mapToChapterData(ch, idx, 'neet'));
+  }, []);
+
+  // CUET Chapters callback
+  const cuetChaptersForSubject = useCallback((subjKey: string) => {
+    const rawChapters = getCuetChaptersBySubject(subjKey);
+    let chaptersToMap = rawChapters;
+    if (rawChapters.length === 0) {
+      if (subjKey === 'physics') chaptersToMap = neetPhysicsChapters;
+      else if (subjKey === 'chemistry') chaptersToMap = neetChemistryChapters;
+      else if (subjKey === 'biology') chaptersToMap = neetBiologyChapters;
+      else if (subjKey === 'mathematics' || subjKey === 'maths') chaptersToMap = mathsChaptersRaw;
     }
-  ];
+    return chaptersToMap.map((ch, idx) => mapToChapterData(ch, idx, 'cuet'));
+  }, [mathsChaptersRaw]);
+
+  // MOCK TESTS (Part and Full Mocks remain custom styled)
+  const partTestsChapters: ChapterData[] = useMemo(() => {
+    if (isNeet) {
+      return [
+        {
+          id: 'ch-part-11',
+          name: 'Class 11 Mock Syllabus Mocks',
+          mastery: 65,
+          testsCount: 2,
+          pyqsCount: 0,
+          lastAttempt: '2 weeks ago',
+          status: 'yellow' as const,
+          difficulty: 'hard' as const,
+          emoji: '🏆',
+          keywords: ['part mock', 'pcb', 'class 11'],
+          questionsSolved: 120,
+          questionsRemaining: 60,
+          lastScore: 55,
+          pyqTimeline: {},
+          tests: [
+            { id: 't-part11-1', name: 'Class 11 Part Test (QPT-1) - PCB', questions: 180, duration: 180, marks: 720, attempted: true, score: 396, yearsCovered: "2019-2023" },
+            { id: 't-part11-2', name: 'Class 11 Part Test (QPT-2) - Physiology Focus', questions: 90, duration: 90, marks: 360, attempted: false, yearsCovered: "2024-2025" }
+          ]
+        }
+      ];
+    }
+    if (isCuet) {
+      return [
+        {
+          id: 'ch-part-11',
+          name: 'CUET Domain Mocks',
+          mastery: 65,
+          testsCount: 2,
+          pyqsCount: 0,
+          lastAttempt: '2 weeks ago',
+          status: 'yellow' as const,
+          difficulty: 'hard' as const,
+          emoji: '🏆',
+          keywords: ['part mock', 'domain', 'general'],
+          questionsSolved: 40,
+          questionsRemaining: 40,
+          lastScore: 55,
+          pyqTimeline: {},
+          tests: [
+            { id: 't-part11-1', name: 'CUET General Test Mock 1', questions: 60, duration: 60, marks: 300, attempted: true, score: 195, yearsCovered: "2022-2023" },
+            { id: 't-part11-2', name: 'CUET Domain Subject Mock 1', questions: 40, duration: 45, marks: 200, attempted: false, yearsCovered: "2024-2025" }
+          ]
+        }
+      ];
+    }
+    return [
+      {
+        id: 'ch-part-11',
+        name: 'Class 11 Mock Syllabus Mocks',
+        mastery: 65,
+        testsCount: 2,
+        pyqsCount: 0,
+        lastAttempt: '2 weeks ago',
+        status: 'yellow' as const,
+        difficulty: 'hard' as const,
+        emoji: '🏆',
+        keywords: ['part mock', 'pcm', 'class 11'],
+        questionsSolved: 75,
+        questionsRemaining: 45,
+        lastScore: 55,
+        pyqTimeline: {},
+        tests: [
+          { id: 't-part11-1', name: 'Class 11 Part Test (QPT-1) - PCM', questions: 75, duration: 150, marks: 300, attempted: true, score: 165, yearsCovered: "2019-2023" },
+          { id: 't-full-1-maths', name: 'Class 11 Part Test (QPT-2) - Mechanics Focus', questions: 45, duration: 90, marks: 180, attempted: false, yearsCovered: "2024-2025" }
+        ]
+      }
+    ];
+  }, [isNeet, isCuet]);
+
+  const fullTestsChapters: ChapterData[] = useMemo(() => {
+    if (isNeet) {
+      return [
+        {
+          id: 'ch-full-main',
+          name: 'Full Syllabus Mock Tests',
+          mastery: 49,
+          testsCount: 3,
+          pyqsCount: 0,
+          lastAttempt: '1 week ago',
+          status: 'yellow' as const,
+          difficulty: 'hard' as const,
+          emoji: '🏛',
+          keywords: ['full mock', 'syllabus assessment', 'neet mock'],
+          questionsSolved: 180,
+          questionsRemaining: 360,
+          lastScore: 49,
+          pyqTimeline: {},
+          tests: [
+            { id: 't-full-1', name: 'NEET Full Mock Test 1 (Closest to Real Exam)', questions: 180, duration: 180, marks: 720, attempted: true, score: 352, yearsCovered: "2019-2023" },
+            { id: 't-full-2', name: 'NEET Full Mock Test 2 (High Yield Concepts)', questions: 180, duration: 180, marks: 720, attempted: false, yearsCovered: "2024" },
+            { id: 't-full-3', name: 'NEET Full Mock Test 3 (NCERT-based Drills)', questions: 180, duration: 180, marks: 720, attempted: false, yearsCovered: "2025" }
+          ]
+        }
+      ];
+    }
+    if (isCuet) {
+      return [
+        {
+          id: 'ch-full-main',
+          name: 'Full Syllabus Mock Tests',
+          mastery: 49,
+          testsCount: 3,
+          pyqsCount: 0,
+          lastAttempt: '1 week ago',
+          status: 'yellow' as const,
+          difficulty: 'hard' as const,
+          emoji: '🏛',
+          keywords: ['full mock', 'syllabus assessment', 'cuet mock'],
+          questionsSolved: 40,
+          questionsRemaining: 80,
+          lastScore: 49,
+          pyqTimeline: {},
+          tests: [
+            { id: 't-full-1', name: 'CUET Full Mock Test 1 (English + Domain)', questions: 80, duration: 90, marks: 500, attempted: true, score: 245, yearsCovered: "2022-2023" },
+            { id: 't-full-2', name: 'CUET Full Mock Test 2 (Domain Subjects Combo)', questions: 80, duration: 90, marks: 400, attempted: false, yearsCovered: "2024" },
+            { id: 't-full-3', name: 'CUET Full Mock Test 3 (General Test + English)', questions: 100, duration: 105, marks: 500, attempted: false, yearsCovered: "2025" }
+          ]
+        }
+      ];
+    }
+    return [
+      {
+        id: 'ch-full-main',
+        name: 'Full Syllabus Mock Tests',
+        mastery: 49,
+        testsCount: 3,
+        pyqsCount: 0,
+        lastAttempt: '1 week ago',
+        status: 'yellow' as const,
+        difficulty: 'hard' as const,
+        emoji: '🏛',
+        keywords: ['full mock', 'syllabus assessment', 'main mock'],
+        questionsSolved: 90,
+        questionsRemaining: 180,
+        lastScore: 49,
+        pyqTimeline: {},
+        tests: [
+          { id: 't-full-1', name: 'Full Mock Test 1 (Closest to Real Exam)', questions: 90, duration: 180, marks: 300, attempted: true, score: 147, yearsCovered: "2019-2023" },
+          { id: 't-full-2', name: 'Full Mock Test 2 (Advanced Traps)', questions: 90, duration: 180, marks: 300, attempted: false, yearsCovered: "2024" },
+          { id: 't-full-3', name: 'Full Mock Test 3 (High Weightage Focus)', questions: 90, duration: 180, marks: 300, attempted: false, yearsCovered: "2025" }
+        ]
+      }
+    ];
+  }, [isNeet, isCuet]);
 
   // Category array resolver
   const getActiveChaptersList = (): ChapterData[] => {
-    switch (activeCategory) {
-      case 'physics-pyq':
-      case 'physics-topic':
-        return physicsChapters;
-      case 'chemistry-pyq':
-      case 'chemistry-topic':
-        return chemistryChapters;
-      case 'maths-pyq':
-      case 'maths-topic':
-        return mathsChapters;
-      case 'part-test':
-        return partTestsChapters;
-      case 'full-mock':
-        return fullTestsChapters;
-      default:
-        return physicsChapters;
+    if (activeCategory === 'part-test') {
+      return partTestsChapters;
     }
+    if (activeCategory === 'full-mock') {
+      return fullTestsChapters;
+    }
+
+    if (isNeet) {
+      if (activeCategory.includes('biology')) return neetBiology;
+      if (activeCategory.includes('chemistry')) return neetChemistry;
+      if (activeCategory.includes('physics')) return neetPhysics;
+      return neetBiology;
+    }
+
+    if (isCuet) {
+      return cuetChaptersForSubject(activeCategory);
+    }
+
+    // Default to JEE
+    if (activeCategory.includes('physics')) {
+      return physicsChapters;
+    }
+    if (activeCategory.includes('chemistry')) {
+      return chemistryChapters;
+    }
+    if (activeCategory.includes('maths') || activeCategory.includes('mathematics')) {
+      return mathsChapters;
+    }
+
+    return physicsChapters;
   };
 
   // Search & Filter Memo
@@ -1282,7 +1521,7 @@ const TestPage: React.FC = () => {
         {
           chapterId: chapter.id,
           chapterName: chapter.name,
-          subject: activeCategory.includes('physics') ? 'physics' : activeCategory.includes('chemistry') ? 'chemistry' : 'mathematics'
+          subject: activeCategory
         }
       ]
     };
@@ -1300,7 +1539,7 @@ const TestPage: React.FC = () => {
         {
           chapterId: chapter.id,
           chapterName: chapter.name,
-          subject: activeCategory.includes('physics') ? 'physics' : activeCategory.includes('chemistry') ? 'chemistry' : 'mathematics'
+          subject: activeCategory
         }
       ]
     };
@@ -1312,7 +1551,7 @@ const TestPage: React.FC = () => {
   const handleViewSyllabus = (test: TestItem, chapter: ChapterData) => {
     const isMock = activeCategory === 'part-test' || activeCategory === 'full-mock';
     if (isMock) {
-      setSyllabusModalText(`Full syllabus coverage according to standard JEE Main guidelines. Includes Physics, Chemistry, and Mathematics sections. Total marks: ${test.marks}, Questions: ${test.questions}.`);
+      setSyllabusModalText(`Full syllabus coverage according to standard ${config.label} guidelines. Includes ${config.subjects.map(s => s.label).join(', ')} sections. Total marks: ${test.marks}, Questions: ${test.questions}.`);
     } else {
       setSyllabusModalText(`Complete chapter syllabus for ${chapter.name}: covers core concepts, derivations, formulas, and targeted previous year question patterns. Total marks: ${test.marks}, Questions: ${test.questions}.`);
     }
@@ -1336,25 +1575,22 @@ const TestPage: React.FC = () => {
   const handleTestComplete = () => setActiveTest(null);
 
   const getCategoryTitle = () => {
-    if (activeCategory === 'physics') return 'Physics';
-    if (activeCategory === 'chemistry') return 'Chemistry';
-    if (activeCategory === 'mathematics') return 'Mathematics';
     if (activeCategory === 'part-test') return 'Part Syllabus Mocks';
-    return 'Full Syllabus Mocks';
+    if (activeCategory === 'full-mock') return 'Full Syllabus Mocks';
+    const sub = config.subjects.find(s => s.key === activeCategory);
+    return sub ? sub.label : activeCategory;
   };
 
   const getSubjectEmoji = (cat: string) => {
-    if (cat === 'physics') return '⚛';
-    if (cat === 'chemistry') return '🧪';
-    if (cat === 'mathematics') return '📐';
     if (cat === 'part-test') return '🏆';
-    return '🏛';
+    if (cat === 'full-mock') return '🏛';
+    const sub = config.subjects.find(s => s.key === cat);
+    return sub ? sub.icon : '📚';
   };
 
   const getSubjectLabel = (cat: string) => {
-    if (cat === 'physics') return 'Physics';
-    if (cat === 'chemistry') return 'Chemistry';
-    return 'Mathematics';
+    const sub = config.subjects.find(s => s.key === cat);
+    return sub ? sub.label : cat;
   };
 
   if (activeTest) {
@@ -1393,18 +1629,28 @@ const TestPage: React.FC = () => {
               <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest block pl-2 mb-2">
                 Core Subjects
               </span>
-              {[
-                { id: 'physics', label: 'Physics', icon: '⚛', color: 'text-blue-500' },
-                { id: 'chemistry', label: 'Chemistry', icon: '🧪', color: 'text-emerald-500' },
-                { id: 'mathematics', label: 'Mathematics', icon: '📐', color: 'text-amber-500' }
-              ].map((item) => {
-                const stats = getSubjectStats(item.id);
-                const isActive = activeCategory === item.id;
+              {config.subjects.map((sub) => {
+                const colorsMap: Record<string, string> = {
+                  physics: 'text-blue-500',
+                  chemistry: 'text-emerald-500',
+                  maths: 'text-amber-500',
+                  mathematics: 'text-amber-500',
+                  biology: 'text-rose-500',
+                  english: 'text-cyan-500',
+                  general_test: 'text-violet-500',
+                  economics: 'text-green-500',
+                  political_science: 'text-indigo-500',
+                  history: 'text-orange-500',
+                  psychology: 'text-purple-500',
+                };
+                const color = colorsMap[sub.key] || 'text-slate-500';
+                const stats = getSubjectStats(sub.key);
+                const isActive = activeCategory === sub.key;
                 return (
                   <button
-                    key={item.id}
+                    key={sub.key}
                     onClick={() => {
-                      setActiveCategory(item.id);
+                      setActiveCategory(sub.key);
                       setSearchQuery('');
                     }}
                     className={cn(
@@ -1416,8 +1662,8 @@ const TestPage: React.FC = () => {
                   >
                     <div className="flex items-center justify-between w-full">
                       <span className="flex items-center gap-2.5">
-                        <span className={cn("text-base shrink-0", item.color)}>{item.icon}</span>
-                        <span className="text-sm font-bold tracking-tight">{item.label}</span>
+                        <span className={cn("text-base shrink-0", color)}>{sub.icon}</span>
+                        <span className="text-sm font-bold tracking-tight">{sub.label}</span>
                       </span>
                       {isActive && <div className="w-1.5 h-1.5 rounded-full bg-[#FF6B00]" />}
                     </div>

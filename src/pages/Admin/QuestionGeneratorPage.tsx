@@ -331,20 +331,100 @@ const ParsedPdfQuestionCard: React.FC<{
   index: number;
   onVerify: () => void;
   onDiscard: () => void;
-  onUpdate: (updatedQ: any) => void;
+  onUpdate: (updatedQ: any, index: number) => void;
   savingId: string | null;
 }> = ({ q, index, onVerify, onDiscard, onUpdate, savingId }) => {
   const [expanded, setExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<any>({ ...q });
+
+  // Helper to convert options (which might be array, object or separate fields) into a clean array of 4 strings
+  const getOptionsArray = useCallback((optionsVal: any, item: any): string[] => {
+    if (Array.isArray(optionsVal)) {
+      return [...optionsVal];
+    }
+    if (optionsVal && typeof optionsVal === 'object') {
+      return [
+        optionsVal.A || optionsVal['0'] || item.option_a || '',
+        optionsVal.B || optionsVal['1'] || item.option_b || '',
+        optionsVal.C || optionsVal['2'] || item.option_c || '',
+        optionsVal.D || optionsVal['3'] || item.option_d || ''
+      ];
+    }
+    return [
+      item.option_a || '',
+      item.option_b || '',
+      item.option_c || '',
+      item.option_d || ''
+    ];
+  }, []);
+
+  // Helper to find the correct option index (0 to 3) from correct_answer / correct_option
+  const getCorrectIndex = useCallback((item: any): number => {
+    if (typeof item.correct_index === 'number') {
+      return item.correct_index;
+    }
+    const answer = (item.correct_answer || item.correct_option || '').trim().toUpperCase();
+    if (answer === 'A' || answer === '0') return 0;
+    if (answer === 'B' || answer === '1') return 1;
+    if (answer === 'C' || answer === '2') return 2;
+    if (answer === 'D' || answer === '3') return 3;
+    
+    // Check if options array contains the correct answer directly
+    const opts = getOptionsArray(item.options, item);
+    const idx = opts.indexOf(item.correct_answer || item.correct_option);
+    if (idx !== -1) return idx;
+    
+    return 0;
+  }, [getOptionsArray]);
+
+  const [editForm, setEditForm] = useState<any>(() => {
+    const optsArray = getOptionsArray(q.options, q);
+    const correctIdx = getCorrectIndex(q);
+    return {
+      ...q,
+      options: optsArray,
+      correct_index: correctIdx
+    };
+  });
+
+  React.useEffect(() => {
+    const optsArray = getOptionsArray(q.options, q);
+    const correctIdx = getCorrectIndex(q);
+    setEditForm({
+      ...q,
+      options: optsArray,
+      correct_index: correctIdx
+    });
+  }, [q, getOptionsArray, getCorrectIndex]);
 
   const handleSave = () => {
-    onUpdate(editForm);
+    // Map options array back to object format for DB
+    const keys = ['A', 'B', 'C', 'D'];
+    const optionsObj: Record<string, string> = {};
+    editForm.options.forEach((opt: string, idx: number) => {
+      optionsObj[keys[idx]] = opt;
+    });
+
+    const correctAns = keys[editForm.correct_index] || 'A';
+
+    const updatedQ = {
+      ...editForm,
+      options: optionsObj,
+      correct_answer: correctAns,
+      correct_option: correctAns, // also sync legacy
+    };
+    onUpdate(updatedQ, index);
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setEditForm({ ...q });
+    const optsArray = getOptionsArray(q.options, q);
+    const correctIdx = getCorrectIndex(q);
+    setEditForm({
+      ...q,
+      options: optsArray,
+      correct_index: correctIdx
+    });
     setIsEditing(false);
   };
 
@@ -436,8 +516,8 @@ const ParsedPdfQuestionCard: React.FC<{
                 <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Subtopic</label>
                 <input
                   className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
-                  value={editForm.subtopic || ''}
-                  onChange={e => setEditForm({ ...editForm, subtopic: e.target.value })}
+                  value={editForm.subtopic || editForm.subchapter_id || ''}
+                  onChange={e => setEditForm({ ...editForm, subtopic: e.target.value, subchapter_id: e.target.value })}
                 />
               </div>
 
@@ -445,8 +525,8 @@ const ParsedPdfQuestionCard: React.FC<{
                 <label className="text-xs text-muted-foreground uppercase font-bold block mb-1">Concept</label>
                 <input
                   className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
-                  value={editForm.concept || ''}
-                  onChange={e => setEditForm({ ...editForm, concept: e.target.value })}
+                  value={editForm.concept || editForm.concept_tested || ''}
+                  onChange={e => setEditForm({ ...editForm, concept: e.target.value, concept_tested: e.target.value })}
                 />
               </div>
 
@@ -470,8 +550,8 @@ const ParsedPdfQuestionCard: React.FC<{
                 <input
                   type="number"
                   className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-accent"
-                  value={editForm.avg_time_seconds || 120}
-                  onChange={e => setEditForm({ ...editForm, avg_time_seconds: parseInt(e.target.value) || 120 })}
+                  value={editForm.avg_time_seconds || editForm.avg_time_taken || 120}
+                  onChange={e => setEditForm({ ...editForm, avg_time_seconds: parseInt(e.target.value) || 120, avg_time_taken: parseInt(e.target.value) || 120 })}
                 />
               </div>
             </div>
@@ -511,11 +591,11 @@ const ParsedPdfQuestionCard: React.FC<{
                   {formatDifficulty(q.difficulty)}
                 </span>
                 <span className="text-xs px-2 py-0.5 bg-secondary/50 border border-border rounded text-muted-foreground">
-                  {q.subject} • {q.subtopic || 'General'}
+                  {q.subject} • {q.subtopic || q.subchapter_id || 'General'}
                 </span>
-                {q.concept && (
+                {(q.concept || q.concept_tested) && (
                   <span className="text-xs px-2 py-0.5 bg-violet-500/10 border border-violet-500/20 text-violet-400 rounded">
-                    🏷️ {q.concept}
+                    🏷️ {q.concept || q.concept_tested}
                   </span>
                 )}
                 {q.is_verified && (
@@ -526,7 +606,7 @@ const ParsedPdfQuestionCard: React.FC<{
               </div>
               <p className="text-sm text-foreground leading-relaxed font-medium">{q.question_text}</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Chapter: {q.chapter || 'Unknown'} · Class: {q.class} · ⏱ {q.avg_time_seconds || 120}s
+                Chapter: {q.chapter || q.chapter_id || 'Unknown'} · Class: {q.class || q.ncert_class || '11/12'} · ⏱ {q.avg_time_seconds || q.avg_time_taken || 120}s
               </p>
             </div>
 
@@ -545,15 +625,15 @@ const ParsedPdfQuestionCard: React.FC<{
                 <div className="p-4 space-y-4">
                   {/* Options */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {(q.options || []).map((opt: string, i: number) => (
+                    {getOptionsArray(q.options, q).map((opt: string, i: number) => (
                       <div key={i}
                         className={cn('flex items-start gap-2 p-2.5 rounded-xl border text-sm',
-                          i === q.correct_index
+                          i === getCorrectIndex(q)
                             ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                             : 'bg-secondary/30 border-border text-muted-foreground'
                         )}>
                         <span className={cn('font-bold text-xs flex-shrink-0',
-                          i === q.correct_index ? 'text-emerald-400' : 'text-muted-foreground')}>
+                          i === getCorrectIndex(q) ? 'text-emerald-400' : 'text-muted-foreground')}>
                           {String.fromCharCode(65 + i)}.
                         </span>
                         <span>{opt}</span>
@@ -616,7 +696,10 @@ const QuestionGeneratorPage: React.FC = () => {
   const { profile } = useAuth();
 
   // Tab state
-  const [activeTab, setActiveTab] = useState<'generate' | 'pdf-parse'>('generate');
+  const [activeTab, setActiveTab] = useState<'generate' | 'pdf-parse' | 'pending-review'>('generate');
+  const [pendingQs, setPendingQs] = useState<any[]>([]);
+  const [loadingPending, setLoadingPending] = useState(false);
+  const [uploadStyle, setUploadStyle] = useState<'ALLEN' | 'RESONANCE' | 'FIITJEE' | 'PYQ' | 'STANDARD'>('STANDARD');
 
   // Admin guard
   React.useEffect(() => {
@@ -668,20 +751,20 @@ const QuestionGeneratorPage: React.FC = () => {
     setSelectedTypes(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
   };
 
-  // Fetch files when switching to pdf-parse tab
+  // Fetch files from database pdf_sources table
   const fetchPdfFiles = useCallback(async () => {
     setLoadingFiles(true);
     try {
-      const { data, error } = await supabase.storage
-        .from('question-papers')
-        .list();
+      const { data, error } = await supabase
+        .from('pdf_sources')
+        .select('*')
+        .order('uploaded_at', { ascending: false });
         
       if (error) throw error;
-      const filtered = (data || []).filter(f => f.name && !f.name.startsWith('.'));
-      setPdfFiles(filtered);
+      setPdfFiles(data || []);
     } catch (err: any) {
       console.error('Failed to list PDFs:', err);
-      toast.error('Could not list PDF files from bucket');
+      toast.error('Could not list PDF files from database');
     } finally {
       setLoadingFiles(false);
     }
@@ -693,7 +776,7 @@ const QuestionGeneratorPage: React.FC = () => {
     }
   }, [activeTab, fetchPdfFiles]);
 
-  // Upload handler for PDFs
+  // Upload handler for PDFs (saves record to pdf_sources)
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -710,12 +793,108 @@ const QuestionGeneratorPage: React.FC = () => {
         .upload(fileName, file);
         
       if (error) throw error;
-      toast.success('PDF uploaded successfully!');
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('question-papers')
+        .getPublicUrl(fileName);
+
+      const { error: dbError } = await supabase
+        .from('pdf_sources')
+        .insert({
+          file_name: fileName,
+          file_url: publicUrl,
+          source_style: uploadStyle
+        });
+
+      if (dbError) throw dbError;
+
+      toast.success('PDF uploaded and registered successfully!');
       fetchPdfFiles();
     } catch (err: any) {
       toast.error(err.message || 'Failed to upload PDF');
     } finally {
       setUploading(false);
+    }
+  };
+
+  // Pending questions review handlers
+  const fetchPendingQuestions = useCallback(async () => {
+    setLoadingPending(true);
+    try {
+      const { data, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('verification_status', 'PENDING')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPendingQs(data || []);
+    } catch (err: any) {
+      console.error('Failed to list pending questions:', err);
+      toast.error('Could not list pending questions from database');
+    } finally {
+      setLoadingPending(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (activeTab === 'pending-review') {
+      fetchPendingQuestions();
+    }
+  }, [activeTab, fetchPendingQuestions]);
+
+  const handleVerifyPending = async (id: string, index: number) => {
+    setSavingId(id);
+    try {
+      const { error } = await supabase
+        .from('questions')
+        .update({ verification_status: 'APPROVED', is_verified: true })
+        .eq('id', id);
+
+      if (error) throw error;
+      toast.success('Question approved and published!');
+      setPendingQs(prev => prev.filter((_, i) => i !== index));
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to approve question');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const handleDiscardPending = async (id: string, index: number) => {
+    setSavingId(id);
+    try {
+      const { error } = await supabase
+        .from('questions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      toast.success('Question deleted successfully');
+      setPendingQs(prev => prev.filter((_, i) => i !== index));
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete question');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const handleUpdatePending = async (updatedQ: any, index: number) => {
+    setSavingId(updatedQ.id);
+    try {
+      const { id, ...updates } = updatedQ;
+      const { error } = await supabase
+        .from('questions')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+      setPendingQs(prev => prev.map((q, i) => i === index ? updatedQ : q));
+      toast.success('Changes saved successfully!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save changes');
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -731,7 +910,7 @@ const QuestionGeneratorPage: React.FC = () => {
       // 1. Download file blob from Storage
       const { data: fileBlob, error: downloadError } = await supabase.storage
         .from('question-papers')
-        .download(file.name);
+        .download(file.file_name || file.name);
         
       if (downloadError) throw downloadError;
       
@@ -1088,9 +1267,24 @@ const QuestionGeneratorPage: React.FC = () => {
             <BookOpen className="w-4 h-4" />
             Extract from PDF
           </button>
+          <button
+            onClick={() => setActiveTab('pending-review')}
+            className={cn(
+              "px-5 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 relative",
+              activeTab === 'pending-review' ? "border-orange-400 text-orange-400 font-extrabold" : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            Pending Review
+            {pendingQs.length > 0 && (
+              <span className="ml-1.5 px-2 py-0.5 text-xs font-bold bg-orange-500 text-black rounded-full">
+                {pendingQs.length}
+              </span>
+            )}
+          </button>
         </div>
 
-        {activeTab === 'generate' ? (
+        {activeTab === 'generate' && (
           <div className="flex flex-col lg:flex-row gap-8">
             {/* ── Left: Form ── */}
             <aside className="w-full lg:w-80 flex-shrink-0 space-y-4">
@@ -1314,12 +1508,30 @@ const QuestionGeneratorPage: React.FC = () => {
               )}
             </main>
           </div>
-        ) : (
+        )}
+
+        {activeTab === 'pdf-parse' && (
           <div className="flex flex-col lg:flex-row gap-8">
             {/* ── Left Sidebar: PDF Ingestion Config ── */}
             <aside className="w-full lg:w-80 flex-shrink-0 space-y-4">
               <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
                 <h2 className="font-bold text-foreground">PDF Extraction Config</h2>
+
+                {/* Source Style Selector */}
+                <div>
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Source PDF Style</label>
+                  <select
+                    value={uploadStyle}
+                    onChange={e => setUploadStyle(e.target.value as any)}
+                    className="w-full bg-secondary/50 border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-accent mb-1"
+                  >
+                    <option value="STANDARD">Standard/Default</option>
+                    <option value="ALLEN">Allen Style</option>
+                    <option value="RESONANCE">Resonance Style</option>
+                    <option value="FIITJEE">FIITJEE Style</option>
+                    <option value="PYQ">PYQ Style</option>
+                  </select>
+                </div>
                 
                 <div>
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1.5">Target Exam</label>
@@ -1543,6 +1755,61 @@ const QuestionGeneratorPage: React.FC = () => {
                 </div>
               )}
             </main>
+          </div>
+        )}
+
+        {activeTab === 'pending-review' && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold text-foreground">Pending Review Queue</h2>
+                <p className="text-sm text-muted-foreground">AI generated questions that need verification before going live.</p>
+              </div>
+              <button 
+                onClick={fetchPendingQuestions} 
+                disabled={loadingPending}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground bg-secondary/50 border border-border px-3 py-1.5 rounded-lg transition-all"
+              >
+                <RefreshCw className={cn("w-3.5 h-3.5", loadingPending && "animate-spin")} />
+                Refresh Queue
+              </button>
+            </div>
+
+            {loadingPending ? (
+              <div className="space-y-3">
+                {Array(3).fill(0).map((_, i) => (
+                  <div key={i} className="bg-card border border-border rounded-2xl p-4 animate-pulse">
+                    <div className="h-5 w-24 bg-muted rounded mb-3" />
+                    <div className="h-4 bg-muted rounded w-full mb-2" />
+                    <div className="h-4 bg-muted rounded w-2/3" />
+                  </div>
+                ))}
+              </div>
+            ) : pendingQs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-border rounded-2xl bg-card">
+                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-4">
+                  <CheckCircle className="w-8 h-8 text-emerald-400" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-2">Queue is Clear!</h3>
+                <p className="text-sm text-muted-foreground max-w-xs">
+                  All AI generated questions have been reviewed and published.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pendingQs.map((q, i) => (
+                  <ParsedPdfQuestionCard
+                    key={q.id || i}
+                    q={q}
+                    index={i}
+                    savingId={savingId}
+                    onVerify={() => handleVerifyPending(q.id, i)}
+                    onDiscard={() => handleDiscardPending(q.id, i)}
+                    onUpdate={(updatedForm) => handleUpdatePending(updatedForm, i)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

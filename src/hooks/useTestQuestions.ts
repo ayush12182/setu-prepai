@@ -315,26 +315,77 @@ export const useTestQuestions = () => {
       // Fetch questions from each chapter
       for (const chapter of chapters) {
         // First try to get existing questions from database
+        // Select pdf_sources relation to verify style
         let query = supabase
           .from('questions')
-          .select('*')
+          .select('*, pdf_sources(*)')
+          .eq('verification_status', 'APPROVED')
           .eq('chapter_id', chapter.chapterId);
 
         if (chapter.subchapterId) {
           query = query.eq('subchapter_id', chapter.subchapterId);
         }
 
-        const { data: existingQuestions, error: fetchError } = await query.limit(questionsPerChapter);
+        const { data: dbData, error: fetchError } = await query;
 
         if (fetchError) {
           console.error('Error fetching questions for chapter:', chapter.chapterId, fetchError);
           continue;
         }
 
-        if (existingQuestions && existingQuestions.length > 0) {
-          // Shuffle and take required number
-          const shuffled = existingQuestions.sort(() => Math.random() - 0.5);
-          const mapped = shuffled.slice(0, questionsPerChapter).map((q: any) => {
+        let chapterQuestions: any[] = [];
+
+        if (dbData && dbData.length > 0) {
+          // Separate real vs. approved AI questions
+          const realQs = dbData.filter(q => !q.is_ai_generated);
+          const aiQs = dbData.filter(q => q.is_ai_generated);
+
+          // Helper to sort questions by style matching and quality
+          const sortPool = (pool: any[], style?: string) => {
+            return pool.sort((a, b) => {
+              // 1. Prioritize style match
+              if (style && style !== 'MIXED') {
+                const styleA = a.pdf_sources?.source_style === style ? 1 : 0;
+                const styleB = b.pdf_sources?.source_style === style ? 1 : 0;
+                if (styleA !== styleB) return styleB - styleA;
+              }
+              // 2. Prioritize quality score (ELITE > GOOD > AVERAGE > REJECTED)
+              const qualityOrder: Record<string, number> = { 'ELITE': 3, 'GOOD': 2, 'AVERAGE': 1, 'REJECTED': 0 };
+              const qA = qualityOrder[a.question_quality_score || 'AVERAGE'] || 1;
+              const qB = qualityOrder[b.question_quality_score || 'AVERAGE'] || 1;
+              if (qA !== qB) return qB - qA;
+
+              // 3. Random shuffle as fallback
+              return Math.random() - 0.5;
+            });
+          };
+
+          // Sort both pools
+          const sortedReal = sortPool([...realQs], chapter.selectedStyle);
+          const sortedAI = sortPool([...aiQs], chapter.selectedStyle);
+
+          // Calculate 70/30 distribution
+          const targetRealCount = Math.max(1, Math.round(questionsPerChapter * 0.7));
+          const targetAICount = questionsPerChapter - targetRealCount;
+
+          // Select questions
+          const selectedReal = sortedReal.slice(0, targetRealCount);
+          const selectedAI = sortedAI.slice(0, targetAICount);
+
+          chapterQuestions = [...selectedReal, ...selectedAI];
+
+          // Fill gap from remaining pools if needed
+          if (chapterQuestions.length < questionsPerChapter) {
+            const remainingReal = sortedReal.slice(targetRealCount);
+            const remainingAI = sortedAI.slice(targetAICount);
+            const extraPool = [...remainingReal, ...remainingAI].sort(() => Math.random() - 0.5);
+            const gap = questionsPerChapter - chapterQuestions.length;
+            chapterQuestions.push(...extraPool.slice(0, gap));
+          }
+        }
+
+        if (chapterQuestions.length >= questionsPerChapter) {
+          const mapped = chapterQuestions.map((q: any) => {
             const shuffledQ = shuffleQuestionOptions(q);
             return mapDbQuestionToQuestion(shuffledQ);
           });

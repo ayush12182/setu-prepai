@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Chapter, getChapterById, physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
+import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
+import { getCuetChaptersBySubject } from '@/data/cuetSyllabus';
 import { Subchapter, getSubchapterById } from '@/data/subchapters';
 import { usePracticeQuestions } from '@/hooks/usePracticeQuestions';
+import { QuestionStatusWidget } from '@/components/practice/QuestionStatusWidget';
+import { checkAIAvailability } from '@/utils/aiAvailability';
 import SubchapterSelector from '@/components/practice/SubchapterSelector';
 import DifficultySelector from '@/components/practice/DifficultySelector';
 import QuizInterface, { QuizResult } from '@/components/practice/QuizInterface';
@@ -44,7 +48,7 @@ const PracticePage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, profile, loading: authLoading } = useAuth();
-  const { isNeet, isCuet } = useExamMode();
+  const { isNeet, isCuet, config } = useExamMode();
   const { isFoundation } = useClassContext();
   const { selectedNode, setSelectedNode } = usePracticeStore();
   const [state, setState] = useState<PracticeState>({ step: 'select-mode' });
@@ -55,14 +59,42 @@ const PracticePage: React.FC = () => {
   const [isSnapModalOpen, setIsSnapModalOpen] = useState(false);
 
   // --- NEW RESONANCE/ALLEN LIBRARY STATES ---
-  const [activeSubject, setActiveSubject] = useState<'physics' | 'chemistry' | 'maths'>('physics');
+  const [activeSubject, setActiveSubject] = useState<string>(() => {
+    const mode = localStorage.getItem('examMode') || 'jee';
+    if (mode === 'neet') return 'biology';
+    if (mode === 'cuet') return 'english';
+    return 'physics';
+  });
+
+  // Sync activeSubject when examMode changes
+  useEffect(() => {
+    if (isNeet) setActiveSubject('biology');
+    else if (isCuet) setActiveSubject('english');
+    else setActiveSubject('physics');
+  }, [isNeet, isCuet]);
+
   const [expandedChapterId, setExpandedChapterId] = useState<string | null>(null);
   const [activePracticeTab, setActivePracticeTab] = useState<'library' | 'pyq-explorer' | 'weakest-attack'>('library');
 
   // --- PYQ EXPLORER STATES ---
   const [pyqYear, setPyqYear] = useState<string>('2025');
   const [pyqDifficulty, setPyqDifficulty] = useState<'easy' | 'medium' | 'hard' | 'mixed'>('mixed');
-  const [pyqChapterId, setPyqChapterId] = useState<string>('phy-1');
+  
+  // Set default pyqChapterId dynamically based on exam mode
+  const [pyqChapterId, setPyqChapterId] = useState<string>(() => {
+    const mode = localStorage.getItem('examMode') || 'jee';
+    if (mode === 'neet') return 'neet-bio-1';
+    if (mode === 'cuet') return 'cuet-eng-1';
+    return 'ch-units';
+  });
+
+  // Sync default pyqChapterId when mode changes
+  useEffect(() => {
+    if (isNeet) setPyqChapterId('neet-bio-1');
+    else if (isCuet) setPyqChapterId('cuet-eng-1');
+    else setPyqChapterId('ch-units');
+  }, [isNeet, isCuet]);
+
   const [pyqShift, setPyqShift] = useState<string>('Shift 1 (Morning)');
 
   // Dynamic statistics calculator (evidential & honest)
@@ -93,26 +125,64 @@ const PracticePage: React.FC = () => {
     };
   };
 
-  const getCategoryForChapter = (chapter: Chapter) => {
+  // Helper functions for dynamic chapters mapping
+  const getChaptersForSubject = React.useCallback((subjKey: string) => {
+    if (isNeet) {
+      if (subjKey === 'biology') return neetBiologyChapters;
+      if (subjKey === 'chemistry') return neetChemistryChapters;
+      if (subjKey === 'physics') return neetPhysicsChapters;
+      return neetBiologyChapters;
+    }
+    if (isCuet) {
+      const rawChapters = getCuetChaptersBySubject(subjKey);
+      if (rawChapters.length === 0) {
+        if (subjKey === 'physics') return neetPhysicsChapters;
+        else if (subjKey === 'chemistry') return neetChemistryChapters;
+        else if (subjKey === 'biology') return neetBiologyChapters;
+        else if (subjKey === 'mathematics' || subjKey === 'maths') return mathsChapters;
+      }
+      return rawChapters;
+    }
+    // JEE
+    if (subjKey === 'physics') return physicsChapters;
+    if (subjKey === 'chemistry') return chemistryChapters;
+    if (subjKey === 'mathematics' || subjKey === 'maths') return mathsChapters;
+    return physicsChapters;
+  }, [isNeet, isCuet]);
+
+  const activeChapters = useMemo(() => {
+    return getChaptersForSubject(activeSubject);
+  }, [activeSubject, getChaptersForSubject]);
+
+  const getCategoryForChapter = (chapter: any) => {
     if (chapter.subject === 'physics') {
-      if (['phy-1', 'phy-2', 'phy-3', 'phy-4', 'phy-5'].includes(chapter.id)) return 'Mechanics';
-      if (['phy-6', 'phy-7'].includes(chapter.id)) return 'Thermodynamics & Waves';
-      if (['phy-8', 'phy-9', 'phy-10'].includes(chapter.id)) return 'Electrodynamics';
+      if (['phy-1', 'phy-2', 'phy-3', 'phy-4', 'phy-5', 'ch-units', 'ch-kin-1d', 'ch-kin-2d', 'ch-nlm', 'ch-wep'].includes(chapter.id)) return 'Mechanics';
+      if (['phy-6', 'phy-7', 'ch-com', 'ch-rotation', 'ch-gravitation', 'ch-solids', 'ch-fluids', 'ch-ktg', 'ch-thermodynamics'].includes(chapter.id)) return 'Thermodynamics & Solids';
+      if (['phy-8', 'phy-9', 'phy-10', 'ch-shm', 'ch-waves', 'ch-electrostatics', 'ch-capacitance', 'ch-current-elec', 'ch-magnetism', 'ch-emi', 'ch-ac'].includes(chapter.id)) return 'Electromagnetism';
       return 'Optics & Modern Physics';
     }
     if (chapter.subject === 'chemistry') {
       if (chapter.chemistryType) return `${chapter.chemistryType} Chemistry`;
-      return 'Physical Chemistry';
+      if (chapter.id.includes('org') || ['ch-goc', 'ch-hydrocarbons'].includes(chapter.id)) return 'Organic Chemistry';
+      if (['ch-mole', 'ch-atomic', 'ch-bonding', 'ch-chem-thermo', 'ch-equilibrium', 'ch-solutions', 'ch-electro', 'ch-kinetics'].includes(chapter.id)) return 'Physical Chemistry';
+      return 'Inorganic Chemistry';
     }
-    if (chapter.subject === 'maths') {
-      if (['math-1', 'math-2', 'math-3', 'math-4', 'math-5'].includes(chapter.id)) return 'Algebra';
+    if (chapter.subject === 'maths' || chapter.subject === 'mathematics') {
+      if (['math-1', 'math-2', 'math-3', 'math-4', 'math-5', 'ch-functions', 'ch-itf', 'ch-trig'].includes(chapter.id)) return 'Algebra & Functions';
       return 'Calculus & Geometry';
     }
-    return 'General';
+    return 'General domain';
   };
 
-  const { questions, loading, error, generationStatus, generateQuestions, submitPracticeReport, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
+  const { questions, loading, error, generationStatus, generationMode, generateQuestions, submitPracticeReport, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
   const { markComplete: markCycleComplete } = useStudentCycle();
+
+  const [aiAvailabilityMode, setAiAvailabilityMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('fetching');
+  useEffect(() => {
+    checkAIAvailability().then(res => {
+      setAiAvailabilityMode(res.mode);
+    });
+  }, []);
 
   // Derive correct exam string from context
   const examParam = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE_MAINS';
@@ -235,6 +305,105 @@ const PracticePage: React.FC = () => {
     return getSimilarQuestions(question.concept_tested, state.node?.name || 'Mixed', 'Mixed', question.question_text);
   };
 
+  const renderQuizContent = () => {
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-32 animate-fade-in">
+          <QuestionStatusWidget mode={generationMode} className="mb-8" />
+          <div className="w-16 h-16 rounded-full border-4 border-accent/20 border-t-accent animate-spin mb-6" />
+          <h2 className="text-xl font-bold text-foreground mb-2">
+            {generationStatus === 'generating'
+              ? 'Generating your personalized questions...'
+              : generationStatus === 'polling'
+              ? 'AI is hard at work — almost ready...'
+              : state.adaptiveMode ? `Adapting Engine for ${state.adaptiveMode}...` : 'Loading Questions...'}
+          </h2>
+          <p className="text-muted-foreground text-sm max-w-xs text-center">
+            {generationStatus === 'polling'
+              ? 'Questions are being compiled and quality-checked. This takes up to 30 seconds on first run.'
+              : 'Selecting the perfect difficulty tier based on your accuracy.'}
+          </p>
+          {/* Premium Skeleton Loader */}
+          <div className="w-full max-w-3xl mt-8 space-y-6">
+            <div className="flex items-center justify-between mb-2">
+              <div className="h-4 bg-muted rounded-full w-32 animate-pulse" />
+              <div className="h-4 bg-muted rounded-full w-24 animate-pulse" />
+            </div>
+            {[1,2,3].map(i => (
+              <div key={i} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 animate-pulse relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                <div className="h-5 bg-muted rounded-xl w-5/6 mb-4" />
+                <div className="h-3 bg-muted rounded-xl w-1/2 mb-8" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
+                  <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
+                  <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
+                  <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (error === 'generation_failed') {
+      return (
+        <div className="text-center py-20 animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+            <Brain className="w-8 h-8 text-destructive" />
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-2">Generation timed out</h2>
+          <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
+            AI question generation can take up to 60 seconds on cold start. Click retry to try again.
+          </p>
+          <Button
+            onClick={() => handleDifficultySelect(state.difficulty)}
+            className="bg-accent text-primary-foreground rounded-xl font-bold"
+          >
+            Retry Generation
+          </Button>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-center py-20">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={() => handleDifficultySelect(state.difficulty)} variant="outline">Try again</Button>
+        </div>
+      );
+    }
+
+    if (questions.length > 0) {
+      return (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center bg-card border border-border/40 p-4 rounded-2xl">
+            <span className="text-sm font-bold text-muted-foreground">Active Quiz System Status:</span>
+            <QuestionStatusWidget mode={generationMode} />
+          </div>
+          <QuizInterface 
+            questions={questions} 
+            subchapterName={state.node?.name || 'Mixed Syllabus'} 
+            difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} 
+            onComplete={handleQuizComplete} 
+            onGetSimilar={handleGetSimilar} 
+            onRecordAttempt={(qId, sel, corr, time, conf) => {
+              recordAttempt(qId, sel, corr, time, conf, {
+                subject: state.node?.id === 'adaptive' ? 'Mixed' : undefined,
+                topic: state.node?.name,
+                batch_id: profile?.batch_id
+              });
+            }} 
+          />
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center">
@@ -254,8 +423,11 @@ const PracticePage: React.FC = () => {
             {/* Header / Top Action center */}
             <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-black text-white tracking-tight">JEE Training Center</h1>
-                <p className="text-[#C7D2FE] mt-1 text-sm font-semibold">Resonance-pw library of standard JEE chapters & question banks.</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-3xl font-black text-white tracking-tight">{config.label} Training Center</h1>
+                  <QuestionStatusWidget mode={aiAvailabilityMode} />
+                </div>
+                <p className="text-[#C7D2FE] mt-1 text-sm font-semibold">Resonance-pw library of standard {config.label} chapters & question banks.</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button 
@@ -316,21 +488,17 @@ const PracticePage: React.FC = () => {
               <div className="space-y-6">
                 
                 {/* Subject Selector Tabs */}
-                <div className="flex bg-white/[0.02] border border-white/[0.06] rounded-2xl p-1 max-w-md">
-                  {[
-                    { id: 'physics', label: 'Physics', chapters: physicsChapters },
-                    { id: 'chemistry', label: 'Chemistry', chapters: chemistryChapters },
-                    { id: 'maths', label: 'Mathematics', chapters: mathsChapters }
-                  ].map(sub => (
+                <div className="flex bg-white/[0.02] border border-white/[0.06] rounded-2xl p-1 max-w-md overflow-x-auto gap-1">
+                  {config.subjects.map(sub => (
                     <button
-                      key={sub.id}
+                      key={sub.key}
                       onClick={() => {
-                        setActiveSubject(sub.id as any);
+                        setActiveSubject(sub.key);
                         setExpandedChapterId(null);
                       }}
                       className={cn(
-                        "flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-colors",
-                        activeSubject === sub.id ? "bg-white text-black font-extrabold" : "text-[#94A3B8] hover:text-white"
+                        "flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-colors shrink-0",
+                        activeSubject === sub.key ? "bg-white text-black font-extrabold" : "text-[#94A3B8] hover:text-white"
                       )}
                     >
                       {sub.label}
@@ -340,7 +508,7 @@ const PracticePage: React.FC = () => {
 
                 {/* Chapter categories and Trees */}
                 {(() => {
-                  const chapters = activeSubject === 'physics' ? physicsChapters : activeSubject === 'chemistry' ? chemistryChapters : mathsChapters;
+                  const chapters = activeChapters;
                   
                   // Group chapters by Category (e.g. Mechanics, Electrodynamics)
                   const categories: Record<string, Chapter[]> = {};
@@ -542,7 +710,7 @@ const PracticePage: React.FC = () => {
               <div className="space-y-6 max-w-2xl mx-auto bg-card border border-white/[0.06] rounded-3xl p-6 sm:p-8">
                 <div className="text-center space-y-1 pb-5 border-b border-white/[0.06] mb-6">
                   <h3 className="text-xl font-black text-white">Syllabus PYQ Explorer</h3>
-                  <p className="text-xs text-[#94A3B8]">Browse and solve verified JEE questions from recent shifts.</p>
+                  <p className="text-xs text-[#94A3B8]">Browse and solve verified {config.label} questions from recent shifts.</p>
                 </div>
 
                 <div className="space-y-5">
@@ -575,15 +743,13 @@ const PracticePage: React.FC = () => {
                       onChange={(e) => setPyqChapterId(e.target.value)} 
                       className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-xs font-bold text-white focus:border-accent outline-none"
                     >
-                      <optgroup label="Physics Chapters">
-                        {physicsChapters.map(ch => <option key={ch.id} value={ch.id}>{ch.name}</option>)}
-                      </optgroup>
-                      <optgroup label="Chemistry Chapters">
-                        {chemistryChapters.map(ch => <option key={ch.id} value={ch.id}>{ch.name}</option>)}
-                      </optgroup>
-                      <optgroup label="Mathematics Chapters">
-                        {mathsChapters.map(ch => <option key={ch.id} value={ch.id}>{ch.name}</option>)}
-                      </optgroup>
+                      {config.subjects.map(sub => (
+                        <optgroup key={sub.key} label={`${sub.label} Chapters`}>
+                          {getChaptersForSubject(sub.key).map(ch => (
+                            <option key={ch.id} value={ch.id}>{ch.name}</option>
+                          ))}
+                        </optgroup>
+                      ))}
                     </select>
                   </div>
 
@@ -597,7 +763,8 @@ const PracticePage: React.FC = () => {
 
                   <Button 
                     onClick={() => {
-                      const matched = [...physicsChapters, ...chemistryChapters, ...mathsChapters].find(ch => ch.id === pyqChapterId);
+                      const allSubjectChapters = config.subjects.flatMap(sub => getChaptersForSubject(sub.key));
+                      const matched = allSubjectChapters.find(ch => ch.id === pyqChapterId);
                       const title = matched ? `${matched.name} ${pyqYear} PYQs` : `PYQ Explorer ${pyqYear}`;
                       const mockNode: LearningNode = { id: pyqChapterId, name: title, type: 'subtopic', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
                       
@@ -622,7 +789,7 @@ const PracticePage: React.FC = () => {
                 </div>
 
                 {(() => {
-                  const chapters = activeSubject === 'physics' ? physicsChapters : activeSubject === 'chemistry' ? chemistryChapters : mathsChapters;
+                  const chapters = activeChapters;
                   const weakTopics: Array<{ topic: string; chName: string; mastery: number; chId: string }> = [];
 
                   chapters.forEach(ch => {
@@ -750,81 +917,7 @@ const PracticePage: React.FC = () => {
           <DifficultySelector node={state.node!} onSelectDifficulty={handleDifficultySelect} onBack={() => setState({ step: 'select-mode' })} />
         )}
 
-        {state.step === 'quiz' && (
-          <>
-            {loading ? (
-            <div className="flex flex-col items-center justify-center py-32 animate-fade-in">
-              <div className="w-16 h-16 rounded-full border-4 border-accent/20 border-t-accent animate-spin mb-6" />
-              <h2 className="text-xl font-bold text-foreground mb-2">
-                {generationStatus === 'generating'
-                  ? 'Generating your personalized questions...'
-                  : generationStatus === 'polling'
-                  ? 'AI is hard at work — almost ready...'
-                  : state.adaptiveMode ? `Adapting Engine for ${state.adaptiveMode}...` : 'Loading Questions...'}
-              </h2>
-              <p className="text-muted-foreground text-sm max-w-xs text-center">
-                {generationStatus === 'polling'
-                  ? 'Questions are being compiled and quality-checked. This takes up to 30 seconds on first run.'
-                  : 'Selecting the perfect difficulty tier based on your accuracy.'}
-              </p>
-              {/* Premium Skeleton Loader */}
-              <div className="w-full max-w-3xl mt-8 space-y-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="h-4 bg-muted rounded-full w-32 animate-pulse" />
-                  <div className="h-4 bg-muted rounded-full w-24 animate-pulse" />
-                </div>
-                {[1,2,3].map(i => (
-                  <div key={i} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 animate-pulse relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                    <div className="h-5 bg-muted rounded-xl w-5/6 mb-4" />
-                    <div className="h-3 bg-muted rounded-xl w-1/2 mb-8" />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
-                      <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
-                      <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
-                      <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : error === 'generation_failed' ? (
-            <div className="text-center py-20 animate-fade-in">
-              <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-                <Brain className="w-8 h-8 text-destructive" />
-              </div>
-              <h2 className="text-xl font-bold text-foreground mb-2">Generation timed out</h2>
-              <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
-                AI question generation can take up to 60 seconds on cold start. Click retry to try again.
-              </p>
-              <Button
-                onClick={() => handleDifficultySelect(state.difficulty)}
-                className="bg-accent text-primary-foreground rounded-xl font-bold"
-              >
-                Retry Generation
-              </Button>
-            </div>
-          ) : error ? (
-            <div className="text-center py-20">
-              <p className="text-destructive mb-4">{error}</p>
-              <Button onClick={() => handleDifficultySelect(state.difficulty)} variant="outline">Try again</Button>
-            </div>
-          ) : questions.length > 0 ? (
-            <QuizInterface 
-              questions={questions} 
-              subchapterName={state.node?.name || 'Mixed Syllabus'} 
-              difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} 
-              onComplete={handleQuizComplete} 
-              onGetSimilar={handleGetSimilar} 
-              onRecordAttempt={(qId, sel, corr, time, conf) => recordAttempt(qId, sel, corr, time, conf, {
-                subject: state.node?.id === 'adaptive' ? 'Mixed' : undefined,
-                topic: state.node?.name,
-                batch_id: profile?.batch_id // Inject batch context
-              })} 
-            />
-          ) : null}
-          </>
-        )}
+        {state.step === 'quiz' && renderQuizContent()}
 
         {state.step === 'results' && (
           <QuizResults result={state.result} subchapterName={state.node?.name || 'Mixed Syllabus'} difficulty={state.difficulty === 'mixed' ? 'medium' : state.difficulty} onRetry={handleRetry} onChangeDifficulty={() => setState({ step: 'select-difficulty', node: state.node })} onGoHome={() => setState({ step: 'select-mode' })} />

@@ -10,6 +10,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { generateQuestions } from '@/services/questionGenerator';
+import { QuestionStatusWidget } from '@/components/practice/QuestionStatusWidget';
+import { checkAIAvailability } from '@/utils/aiAvailability';
 
 // ─── Types ────────────────────────────────────────────────────
 type Exam = 'JEE_MAINS' | 'JEE_ADVANCED' | 'NEET' | 'CUET';
@@ -169,8 +172,48 @@ export default function AdaptivePracticePage() {
   const [showExplanation, setShowExplanation] = useState(false);
   const [stats, setStats] = useState<SessionStats>({ total: 0, correct: 0, streak: 0, bestStreak: 0 });
   const [nextLoading, setNextLoading] = useState(false);
+  const [generationMode, setGenerationMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('idle');
+  const [aiAvailabilityMode, setAiAvailabilityMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('fetching');
+  const [weakChapters, setWeakChapters] = useState<string[]>([]);
+  const [errorQ, setErrorQ] = useState<string | null>(null);
 
   const questionStartTime = useRef<number>(Date.now());
+
+  useEffect(() => {
+    checkAIAvailability().then(res => {
+      setAiAvailabilityMode(res.mode);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('student_question_attempts' as any)
+      .select('topic, is_correct')
+      .eq('student_id', user.id)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const topicStats: Record<string, { total: number; correct: number }> = {};
+          data.forEach((att: any) => {
+            if (!topicStats[att.topic]) {
+              topicStats[att.topic] = { total: 0, correct: 0 };
+            }
+            topicStats[att.topic].total += 1;
+            if (att.is_correct) topicStats[att.topic].correct += 1;
+          });
+
+          const weak = Object.entries(topicStats)
+            .map(([topic, stats]) => ({
+              topic,
+              accuracy: stats.correct / stats.total
+            }))
+            .sort((a, b) => a.accuracy - b.accuracy)
+            .map(x => x.topic);
+
+          setWeakChapters(weak);
+        }
+      });
+  }, [user]);
 
   // ── Fetch curriculum when exam+subject selected ────────────
   useEffect(() => {
@@ -205,34 +248,62 @@ export default function AdaptivePracticePage() {
   const generateQuestion = useCallback(async (variantOf?: string) => {
     if (!selectedExam || !selectedSubject || !selectedTopic || !selectedSubtopic) return;
     setLoadingQ(true);
+    setErrorQ(null);
     setAnswerState('unanswered');
     setSelectedAnswer('');
     setShowExplanation(false);
     setQuestion(null);
+    setGenerationMode('fetching');
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-question', {
-        body: {
-          exam: selectedExam,
-          subject: selectedSubject,
-          topic: selectedTopic,
-          subtopic: selectedSubtopic,
-          difficulty,
-          variant_of_question_id: variantOf,
-        },
+      let targetTopic = selectedTopic;
+      if (!targetTopic && weakChapters.length > 0) {
+        targetTopic = weakChapters[0];
+      }
+
+      const result = await generateQuestions({
+        exam: selectedExam,
+        subject: selectedSubject,
+        chapter: targetTopic,
+        subchapter: selectedSubtopic,
+        difficulty: difficulty.toLowerCase() as 'easy' | 'medium' | 'hard',
+        count: 1,
+        variantOf
       });
 
-      if (error || !data?.success) throw new Error(error?.message || data?.error || 'Failed to generate');
-      setQuestion(data.question);
-      questionStartTime.current = Date.now();
+      if (result.questions && result.questions.length > 0) {
+        const unifiedQ = result.questions[0];
+        const mappedQ: Question = {
+          question_id: unifiedQ.question_id,
+          question_text: unifiedQ.question_text,
+          option_a: unifiedQ.option_a,
+          option_b: unifiedQ.option_b,
+          option_c: unifiedQ.option_c,
+          option_d: unifiedQ.option_d,
+          correct_answer: unifiedQ.correct_answer || (unifiedQ.answer as string),
+          explanation_text: unifiedQ.explanation_text || unifiedQ.explanation,
+          concept_tested: unifiedQ.concept_tested,
+          difficulty: (unifiedQ.difficulty.charAt(0).toUpperCase() + unifiedQ.difficulty.slice(1)) as Difficulty,
+          is_variant: unifiedQ.is_variant,
+          parent_question_id: unifiedQ.parent_question_id,
+          difficultyScore: unifiedQ.difficultyScore,
+          conceptCoverage: unifiedQ.conceptCoverage,
+          jeeRelevanceScore: unifiedQ.jeeRelevanceScore
+        };
+        setQuestion(mappedQ);
+        setGenerationMode(result.generationMode);
+        questionStartTime.current = Date.now();
+      } else {
+        throw new Error('No questions returned');
+      }
     } catch (err: any) {
-      toast.error('Failed to generate question. Retrying...');
-      // auto-retry once
-      setTimeout(() => generateQuestion(), 1500);
+      console.error('Error generating adaptive question:', err);
+      setErrorQ(err.message || 'Failed to generate question');
+      toast.error('Failed to generate question.');
     } finally {
       setLoadingQ(false);
     }
-  }, [selectedExam, selectedSubject, selectedTopic, selectedSubtopic, difficulty]);
+  }, [selectedExam, selectedSubject, selectedTopic, selectedSubtopic, difficulty, weakChapters]);
 
   // ── Handle answer selection ────────────────────────────────
   const handleAnswer = useCallback(async (letter: string) => {
@@ -303,12 +374,15 @@ export default function AdaptivePracticePage() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-2xl space-y-8">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent/10 mb-4">
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent/10">
               <Brain size={28} className="text-accent" />
             </div>
             <h1 className="text-4xl font-display font-black tracking-tight">Adaptive Practice</h1>
-            <p className="text-muted-foreground mt-2">Questions that adapt to you in real-time.</p>
+            <p className="text-muted-foreground">Questions that adapt to you in real-time.</p>
+            <div className="flex justify-center">
+              <QuestionStatusWidget mode={aiAvailabilityMode} />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -340,9 +414,12 @@ export default function AdaptivePracticePage() {
           <button onClick={() => setStep('select-exam')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm">
             <ArrowLeft size={14} /> Back
           </button>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-accent mb-1">{EXAM_LABELS[selectedExam]}</p>
-            <h2 className="text-3xl font-bold">Pick a Subject</h2>
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-accent mb-1">{EXAM_LABELS[selectedExam]}</p>
+              <h2 className="text-3xl font-bold">Pick a Subject</h2>
+            </div>
+            <QuestionStatusWidget mode={aiAvailabilityMode} className="scale-90" />
           </div>
           <div className="space-y-3">
             {EXAM_SUBJECTS[selectedExam].map(sub => (
@@ -370,9 +447,12 @@ export default function AdaptivePracticePage() {
           <button onClick={() => setStep('select-subject')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm">
             <ArrowLeft size={14} /> Back
           </button>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-accent mb-1">{EXAM_LABELS[selectedExam]} · {selectedSubject}</p>
-            <h2 className="text-3xl font-bold">Choose Topic</h2>
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-accent mb-1">{EXAM_LABELS[selectedExam]} · {selectedSubject}</p>
+              <h2 className="text-3xl font-bold">Choose Topic</h2>
+            </div>
+            <QuestionStatusWidget mode={aiAvailabilityMode} className="scale-90" />
           </div>
 
           {/* Topic dropdown */}
@@ -445,10 +525,13 @@ export default function AdaptivePracticePage() {
       {/* Top bar */}
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
-          <button onClick={() => setStep('select-topic')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm">
+          <button onClick={() => setStep('select-topic')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm shrink-0">
             <ArrowLeft size={14} />
             <span className="hidden sm:inline">{selectedSubtopic}</span>
           </button>
+
+          {/* Sticky Status Widget */}
+          <QuestionStatusWidget mode={generationMode} className="scale-90" />
 
           {/* Stats strip */}
           <div className="flex items-center gap-4 text-sm">
@@ -473,6 +556,51 @@ export default function AdaptivePracticePage() {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+
+        {/* Fallback Banner */}
+        {(generationMode === 'offline' || generationMode === 'recovery') && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={cn(
+              "p-4 rounded-2xl border text-sm font-medium flex items-center gap-3",
+              generationMode === 'offline'
+                ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                : "bg-red-500/10 border-red-500/20 text-red-300"
+            )}
+          >
+            <span className="text-lg">⚠️</span>
+            <div>
+              <p className="font-bold">
+                {generationMode === 'offline' 
+                  ? 'AI generation unavailable. Using PrepEntrance Smart Offline Generator.' 
+                  : 'Complete system offline. Operating in Recovery Mode.'}
+              </p>
+              <p className="text-xs opacity-80 mt-0.5">
+                We are serving offline questions tailored to your requested topic to keep your momentum going.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Error State */}
+        {errorQ && (
+          <div className="text-center py-20 bg-card border border-border rounded-3xl p-8 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto">
+              <Brain className="w-8 h-8 text-red-400" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground">Generation Error</h2>
+            <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+              {errorQ}
+            </p>
+            <Button
+              onClick={() => generateQuestion()}
+              className="bg-accent text-black font-bold"
+            >
+              Retry
+            </Button>
+          </div>
+        )}
 
         {/* Loading skeleton */}
         {loadingQ && (

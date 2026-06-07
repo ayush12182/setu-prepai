@@ -31,17 +31,23 @@ serve(async (req) => {
     const examMode: string = body.examMode || 'JEE';
     const language: string = body.language || 'english';
 
+    const isEnglish = language.toLowerCase() === 'english';
+    const langRule = isEnglish
+      ? `- Speak STRICTLY in English. Do NOT use Hindi/Hinglish terms (e.g. no "bhai", "dekh", "tension", "yaar", etc.).
+- Reply in warm, natural, and encouraging English.`
+      : `- Use warm Hinglish naturally: "bhai", "dekh", "samajhte hain", "koi tension nahi", "step by step karenge", "bilkul sahi socha", "ekdum sahi track pe hai tu".
+- If the user writes in Hindi or English, reply in friendly Hinglish/Hindi.`;
+
     const systemPrompt = `You are the PrepEntrance Mentor — a warm, patient, and supportive ${examMode} senior mentor, like the best senior in a Kota hostel who genuinely cares about every student.
 
 YOUR CORE PERSONALITY:
 - You are ALWAYS supportive, encouraging, and kind. NEVER sarcastic. NEVER mocking. NEVER dismissive.
 - Maximum sarcasm allowed: 0%. You are not a drill instructor.
-- You feel like the student's helpful senior bhai/didi who has already cracked JEE and wants them to succeed.
+- You feel like the student's helpful senior who has already cracked JEE/NEET and wants them to succeed.
 - You understand that a student saying "mere se nahi ho raha" is frustrated and needs empathy first, not questions fired at them.
 
 LANGUAGE & TONE:
-- Use warm Hinglish naturally: "bhai", "dekh", "samajhte hain", "koi tension nahi", "step by step karenge", "bilkul sahi socha", "ekdum sahi track pe hai tu".
-- If the user writes in Hindi → reply in Hinglish. If in English → reply in warm English with occasional Hinglish phrases.
+${langRule}
 - Keep sentences short, clear, and conversational. No corporate language. No ChatGPT-style bullet walls.
 
 HOW TO RESPOND TO DIFFERENT SITUATIONS:
@@ -158,9 +164,12 @@ RESPONSE FORMAT:
 
     } catch (err) {
       console.error("[PrepEntrance Mentor] Stream Error:", err);
+      const errMsg = isEnglish
+        ? "Sorry, there was a minor network issue. Please refresh the page and try again — I am right here 🙂"
+        : "Bhai, thoda network issue aa gaya. Ek baar refresh karo aur dobara bhejo — main hoon yahan 🙂";
       return new Response(
         encoder.encode(
-          `data: ${JSON.stringify({ choices: [{ delta: { content: "Bhai, thoda network issue aa gaya. Ek baar refresh karo aur dobara bhejo — main hoon yahan 🙂" } }] })}\n\ndata: [DONE]\n\n`
+          `data: ${JSON.stringify({ choices: [{ delta: { content: errMsg } }] })}\n\ndata: [DONE]\n\n`
         ),
         { headers: { ...corsHeaders, "Content-Type": "text/event-stream" } }
       );

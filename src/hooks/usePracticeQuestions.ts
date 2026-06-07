@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
 import { logStudentActivity } from '@/lib/studentActivity';
 import { JEE_PROMPT_CONSTRAINTS } from '@/lib/gemini';
+import { generateQuestions as getUnifiedQuestions } from '@/services/questionGenerator';
 
 // The interface expected by QuizInterface components
 export type QuestionType = 'MCQ' | 'AR' | 'NUMERICAL';
@@ -370,82 +371,48 @@ ${JEE_PROMPT_CONSTRAINTS}`
     concept_tested: q.concept_tested || topicName,
   }));
 }
-
 export const usePracticeQuestions = () => {
   const [questions, setQuestions]           = useState<Question[]>([]);
   const [loading, setLoading]               = useState(false);
   const [error, setError]                   = useState<string | null>(null);
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>('idle');
+  const [generationMode, setGenerationMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('idle');
 
   const generateQuestions = async (
     nodeId: string,
-    difficulty: 'easy' | 'medium' | 'hard',
+    difficulty: 'easy' | 'medium' | 'hard' | undefined,
     count: number = 10,
     exam: string = 'JEE',
     nodeName?: string
   ) => {
-    setLoading(true);
-    setError(null);
-    setGenerationStatus('generating');
-    setQuestions([]);
-
     const topicName = nodeName || nodeId;
     const effectiveDifficulty = difficulty || 'medium';
 
-    // PRIMARY: edge function (server-side Gemini, no client key needed)
+    setLoading(true);
+    setError(null);
+    setGenerationStatus('fetching');
+    setGenerationMode('fetching');
+
     try {
-      setGenerationStatus('fetching');
-      const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
-        body: {
-          examMode: exam,
-          subject: exam,
-          chapterName: topicName,
-          subchapterName: topicName,
-          difficulty: effectiveDifficulty,
-          count,
-        }
+      const result = await getUnifiedQuestions({
+        exam,
+        subject: exam,
+        chapter: topicName,
+        difficulty: effectiveDifficulty,
+        count
       });
 
-      if (fnError) throw fnError;
-
-      const rawQs: Question[] = (data?.questions || []).map((q: any, i: number) => ({
-        id: q.id || `fn-${Date.now()}-${i}`,
-        node_id: nodeId,
-        type: 'MCQ' as QuestionType,
-        exam_type: exam,
-        difficulty: (q.difficulty || effectiveDifficulty).toLowerCase() as 'easy' | 'medium' | 'hard',
-        question_text: q.question_text,
-        options: { A: q.option_a || '', B: q.option_b || '', C: q.option_c || '', D: q.option_d || '' },
-        answer: q.correct_option,
-        explanation: q.explanation || '',
-        concept_tested: q.concept_tested || topicName,
-        option_a: q.option_a || '',
-        option_b: q.option_b || '',
-        option_c: q.option_c || '',
-        option_d: q.option_d || '',
-        correct_option: q.correct_option,
-      }));
-
-      if (rawQs.length === 0) throw new Error('No questions returned');
-
-      setQuestions(rawQs);
+      setQuestions(result.questions);
       setGenerationStatus('completed');
-      return rawQs;
-    } catch (err) {
-      // FALLBACK 1: direct Gemini from frontend (requires VITE_GEMINI_API_KEY)
-      try {
-        const qs = await geminiGenerateQuestions(topicName, exam, effectiveDifficulty, count);
-        setQuestions(qs);
-        setGenerationStatus('completed');
-        return qs;
-      } catch (fallbackErr) {
-        console.warn('AI generation failed, launching high-fidelity offline simulator:', fallbackErr);
-        toast.info('API keys offline. Launching high-fidelity local simulator.');
-        const mockQs = generateOfflineMockQuestions(topicName, exam, effectiveDifficulty, count);
-        setQuestions(mockQs);
-        setGenerationStatus('completed');
-        return mockQs;
-      }
+      setGenerationMode(result.generationMode);
+      return result.questions;
+    } catch (err: any) {
+      console.error('Unified question generation failed:', err);
+      setError(err.message || 'Failed to generate questions');
+      setGenerationStatus('failed');
+      setGenerationMode('recovery');
+      toast.error('Failed to retrieve questions. Loading emergency pack.');
+      return [];
     } finally {
       setLoading(false);
     }
@@ -570,6 +537,7 @@ export const usePracticeQuestions = () => {
     loading,
     error,
     generationStatus,
+    generationMode,
     generateQuestions,
     generateQuestionsForNode,
     submitPracticeReport,
