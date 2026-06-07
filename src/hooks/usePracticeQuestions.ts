@@ -5,6 +5,7 @@ import { shuffleQuestionOptions } from '@/utils/questionUtils';
 import { logStudentActivity } from '@/lib/studentActivity';
 import { JEE_PROMPT_CONSTRAINTS } from '@/lib/gemini';
 import { generateQuestions as getUnifiedQuestions } from '@/services/questionGenerator';
+import { getOfflineQuestions } from '@/data/offlineQuestionBank';
 
 // The interface expected by QuizInterface components
 export type QuestionType = 'MCQ' | 'AR' | 'NUMERICAL';
@@ -471,12 +472,30 @@ export const usePracticeQuestions = () => {
       });
 
       if (fnError) throw fnError;
-      if (data.error) { toast.error(data.error); return null; }
+      if (data.error) { throw new Error(data.error); }
 
       return (data.questions as SimilarQuestion[]).map(q =>
         shuffleQuestionOptions(q as any) as unknown as SimilarQuestion
       );
     } catch (err) {
+      console.warn('Failed to get remote similar questions, falling back to smart offline generator:', err);
+      try {
+        const offlineQs = getOfflineQuestions(subject, subchapterName || conceptTested, 'medium', 3);
+        if (offlineQs && offlineQs.length > 0) {
+          return offlineQs.map(q => ({
+            question_text: q.question_text,
+            option_a: q.option_a,
+            option_b: q.option_b,
+            option_c: q.option_c,
+            option_d: q.option_d,
+            correct_option: q.correct_option || (q.answer as string),
+            explanation: q.explanation || q.explanation_text || '',
+            difficulty_note: `Generated offline (Adaptive Relevance: ${q.jeeRelevanceScore || 9.0}/10)`
+          }));
+        }
+      } catch (fallbackErr) {
+        console.error('Offline similar question generator failed:', fallbackErr);
+      }
       toast.error('Failed to get similar questions');
       return null;
     }
