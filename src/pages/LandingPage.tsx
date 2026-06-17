@@ -60,7 +60,8 @@ const batches = [
     checkColor: '#60a5fa',
     price: '₹349',
     slug: 'aarambh-2028',
-    features: ['AI Mentor Included', 'Mock Tests Included', 'Performance Tracking', 'Doubt Support 24/7'],
+    btnText: 'Explore Aarambh →',
+    features: ['AI Mentor (24×7)', 'Unlimited Practice Questions', 'Full-Length Mock Tests', 'Personalized Study Plans', 'Performance Analytics'],
   },
   {
     name: 'AAROHAN 2027',
@@ -72,7 +73,8 @@ const batches = [
     checkColor: '#c084fc',
     price: '₹349',
     slug: 'aarohan-2027',
-    features: ['AI Mentor Included', 'Mock Tests Included', 'Performance Tracking', 'Doubt Support 24/7'],
+    btnText: 'Explore Aarohan →',
+    features: ['AI Mentor (24×7)', 'Unlimited Practice Questions', 'Full-Length Mock Tests', 'Personalized Study Plans', 'Performance Analytics'],
   },
   {
     name: 'SHIKHAR 2027',
@@ -84,7 +86,8 @@ const batches = [
     checkColor: '#fb923c',
     price: '₹349',
     slug: 'shikhar-2027',
-    features: ['AI Mentor Included', 'Mock Tests Included', 'Performance Tracking', 'Doubt Support 24/7'],
+    btnText: 'Explore Shikhar →',
+    features: ['AI Mentor (24×7)', 'Unlimited Practice Questions', 'Full-Length Mock Tests', 'Personalized Study Plans', 'Performance Analytics'],
   },
 ];
 
@@ -569,7 +572,7 @@ const LandingPage: React.FC = () => {
                     onClick={() => navigate(`/batches/${b.slug}`)}
                     className={`w-full py-3 rounded-xl text-white font-black text-sm transition-all active:scale-[0.98] shadow-xl ${b.btnBg}`}
                   >
-                    Explore Batch →
+                    {b.btnText}
                   </button>
                 </div>
               </div>

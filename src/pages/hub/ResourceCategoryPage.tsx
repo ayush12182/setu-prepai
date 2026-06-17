@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Loader2, ChevronLeft, SlidersHorizontal, X,
-  ArrowUpDown, Grid2x2, List,
+  ArrowUpDown, Grid2x2, List, Lock
 } from 'lucide-react';
 import { HubLayout } from '@/components/hub/HubLayout';
 import { ExamTabs } from '@/components/hub/ExamTabs';
@@ -259,7 +259,48 @@ const ResourceCategoryPage: React.FC = () => {
 
           {/* Resource grid */}
           <div className="flex-1 min-w-0">
-            {loading ? (
+            {!user ? (
+              <div 
+                className="relative overflow-hidden rounded-2xl p-8 text-center max-w-2xl mx-auto my-8 shadow-lg"
+                style={{ 
+                  background: 'rgba(255,255,255,0.02)', 
+                  border: '1px solid rgba(255,255,255,0.08)' 
+                }}
+              >
+                <div className="relative z-10 flex flex-col items-center">
+                  <div 
+                    className="w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-inner"
+                    style={{ 
+                      color: typeMeta.color, 
+                      backgroundColor: typeMeta.bg, 
+                      border: '1.5px solid rgba(255,255,255,0.1)' 
+                    }}
+                  >
+                    <Lock className="w-6 h-6 stroke-[2.5]" />
+                  </div>
+                  <h3 className="text-lg font-black text-white mb-2">Unlock All {typeMeta.label}</h3>
+                  <p className="text-xs font-semibold max-w-md mb-6 leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    Access our complete curated library of study guides, practice sets, worksheets, and quick-revision cheatsheets designed to optimize your prep.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <button 
+                      onClick={() => navigate('/signup')} 
+                      className="px-6 py-2.5 font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-[0.98] hover:opacity-90 cursor-pointer"
+                      style={{ backgroundColor: typeMeta.color, color: '#000' }}
+                    >
+                      Create Free Account
+                    </button>
+                    <button 
+                      onClick={() => navigate('/auth')} 
+                      className="px-6 py-2.5 bg-transparent border font-extrabold text-xs rounded-xl transition-all active:scale-[0.98] cursor-pointer"
+                      style={{ color: 'rgba(255,255,255,0.8)', borderColor: 'rgba(255,255,255,0.2)' }}
+                    >
+                      Log In
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : loading ? (
               <div className="flex items-center justify-center py-20">
                 <Loader2 className="w-8 h-8 animate-spin" style={{ color: typeMeta.color }} />
               </div>

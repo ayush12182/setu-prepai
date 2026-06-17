@@ -154,6 +154,263 @@ const BATCH_DATA: Record<string, BatchConfig> = {
       { name: 'Meera Joshi', exam: 'JEE Dropper 2023', text: 'I was skeptical about an AI platform. But the personalization is real — my plan genuinely changes every week based on my performance.', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80&q=80' },
     ],
   },
+
+  'aarambh-neet-2028': {
+    slug: 'aarambh-neet-2028',
+    name: 'AARAMBH NEET 2028',
+    tag: 'Class 11 NEET',
+    tagBg: 'bg-emerald-600',
+    accentColor: '#10b981',
+    accentLight: '#f0fdf4',
+    accentBorder: '#bbf7d0',
+    accentText: 'text-emerald-600',
+    btnBg: 'bg-emerald-600 hover:bg-emerald-700',
+    mountain: '/images/mountain_blue.png',
+    headline: 'Your Medical Journey Starts Here.',
+    subheadline: 'Built for Class 11 students starting their NEET UG preparation. Build concrete conceptual foundations in Biology, Physics and Chemistry.',
+    price: '₹349',
+    priceLabel: '/ month',
+    stats: [
+      { label: 'Duration', value: '2 Years', icon: <Clock className="w-4 h-4" /> },
+      { label: 'Target Exam', value: 'NEET UG 2028', icon: <Target className="w-4 h-4" /> },
+      { label: 'Language', value: 'Hinglish', icon: <Globe className="w-4 h-4" /> },
+      { label: 'Mode', value: 'AI Self Study', icon: <Bot className="w-4 h-4" /> },
+      { label: 'Access', value: 'Web + Mobile', icon: <Smartphone className="w-4 h-4" /> },
+    ],
+    whyHeadline: 'A weak foundation in Class 11 Biology & Physics is the #1 reason aspirants fail NEET.',
+    whyPoints: ['Complete NCERT Biology word-by-word mastery', 'Mechanics & Physical Chemistry base building', 'Interactive visual and diagram-based learning', 'Daily practice questions with AI feedback', 'AI Guided learning paths'],
+    syllabus: {
+      Physics: ['Physical World & Measurement', 'Kinematics', 'Laws of Motion', 'Work, Energy & Power', 'Rotational Motion', 'Gravitation'],
+      Chemistry: ['Some Basic Concepts of Chemistry', 'Structure of Atom', 'Classification of Elements', 'Chemical Bonding', 'Thermodynamics'],
+      Biology: ['The Living World', 'Biological Classification', 'Plant Kingdom', 'Animal Kingdom', 'Cell: The Unit of Life', 'Biomolecules'],
+    },
+    roadmap: [
+      { period: 'Month 1–4', phase: 'Foundation', desc: 'Focus heavily on basic NCERT concepts, basic math for physics, and cell biology.' },
+      { period: 'Month 5–8', phase: 'Core Topics', desc: 'Cover mechanics, chemical bonding, plant and animal diversity.' },
+      { period: 'Month 9–16', phase: 'Advanced NCERT & PYQs', desc: 'Attempt medium-to-hard NEET pattern questions and previous years questions.' },
+      { period: 'Month 17–24', phase: 'Full Practice & Mocks', desc: 'Run full-length mock tests and analyze weaknesses using AI mentor.' },
+    ],
+    faqs: [
+      { q: 'Is this batch suitable for NEET Class 11 students?', a: 'Yes. Aarambh NEET is designed precisely for Class 11 students starting from basics and covering NCERT thoroughly.' },
+      { q: 'How does PrepEntrance AI help medical students?', a: 'Visual graphics, 24/7 AI explanation of botanical/zoological terms, and adaptive physics numerical solver tailored for medical students.' },
+      { q: 'Do we get mock tests on official NEET pattern?', a: 'Yes. Get unlimited AI-generated mock tests simulating the official NEET UG pattern.' },
+    ],
+    testimonials: [
+      { name: 'Dr. Shruti Iyer', exam: 'NEET Qualified 2025', text: 'Visual diagrams explanation by the AI mentor made Zoology so easy. Highly recommend Aarambh NEET batch!', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80&q=80' },
+    ],
+  },
+
+  'aarohan-neet-2027': {
+    slug: 'aarohan-neet-2027',
+    name: 'AAROHAN NEET 2027',
+    tag: 'Class 12 NEET',
+    tagBg: 'bg-emerald-700',
+    accentColor: '#047857',
+    accentLight: '#f0fdf4',
+    accentBorder: '#a7f3d0',
+    accentText: 'text-emerald-700',
+    btnBg: 'bg-emerald-700 hover:bg-emerald-800',
+    mountain: '/images/mountain_purple.png',
+    headline: 'Master NEET UG & Boards in Parallel.',
+    subheadline: 'Balance Class 12 Boards syllabus while aggressively training on NEET UG high-weightage topics and full-length mocks.',
+    price: '₹349',
+    priceLabel: '/ month',
+    stats: [
+      { label: 'Duration', value: '1 Year', icon: <Clock className="w-4 h-4" /> },
+      { label: 'Target Exam', value: 'NEET UG 2027', icon: <Target className="w-4 h-4" /> },
+      { label: 'Language', value: 'Hinglish', icon: <Globe className="w-4 h-4" /> },
+      { label: 'Mode', value: 'AI Self Study', icon: <Bot className="w-4 h-4" /> },
+      { label: 'Access', value: 'Web + Mobile', icon: <Smartphone className="w-4 h-4" /> },
+    ],
+    whyHeadline: 'Aarohan NEET balances board preparations with high-intensity medical entrance practice.',
+    whyPoints: ['Boards + NEET balance planner', 'High weightage Human Physiology and Genetics focus', 'NCERT revision engine and summaries', 'Previous year papers mock simulation', 'Instant AI doubt support for botany & zoology'],
+    syllabus: {
+      Physics: ['Electrostatics', 'Current Electricity', 'Magnetic Effects of Current', 'Electromagnetic Induction & AC', 'Optics', 'Modern Physics'],
+      Chemistry: ['Solutions', 'Electrochemistry', 'Chemical Kinetics', 'd and f Block Elements', 'Coordination Compounds', 'Organic Chemistry'],
+      Biology: ['Reproduction', 'Genetics and Evolution', 'Biology in Human Welfare', 'Biotechnology and its Applications', 'Ecology and Environment'],
+    },
+    roadmap: [
+      { period: 'Month 1–3', phase: 'Class 12 Completion', desc: 'Finish Class 12 NCERT and board preparation chapters.' },
+      { period: 'Month 4–6', phase: 'Class 11 Revision', desc: 'Run revision schedules for crucial Class 11 NEET topics.' },
+      { period: 'Month 7–9', phase: 'Speed Sprints', desc: 'Focus on time management, diagram flashcards, and physics calculations.' },
+      { period: 'Month 10–12', phase: 'NEET Simulator Mocks', desc: 'Solve weekly official-pattern mocks with detailed AI tracking.' },
+    ],
+    faqs: [
+      { q: 'Will this help with my board exams?', a: 'Absolutely. The Board syllabus is completely nested within the NEET UG syllabus. Our AI schedules balance both.' },
+      { q: 'Is there a revision path for Class 11?', a: 'Yes. Quick revision guides and practice sets for Class 11 topics are fully included.' },
+    ],
+    testimonials: [
+      { name: 'Sameer Patel', exam: 'NEET UG 2025 Aspirant', text: 'Genetics and Biotechnology concepts were so tough, but the interactive AI explainers cleared my doubts instantly.', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80' },
+    ],
+  },
+
+  'shikhar-neet-2027': {
+    slug: 'shikhar-neet-2027',
+    name: 'SHIKHAR NEET 2027',
+    tag: 'Droppers NEET',
+    tagBg: 'bg-teal-600',
+    accentColor: '#0d9488',
+    accentLight: '#f0fdfa',
+    accentBorder: '#99f6e4',
+    accentText: 'text-teal-600',
+    btnBg: 'bg-teal-600 hover:bg-teal-700',
+    mountain: '/images/mountain_orange.png',
+    headline: 'Your Second Attempt. Your Dream Medical Seat.',
+    subheadline: 'Rigorous gap repair, weakness analytics, speed drills and high-intensity NEET UG coaching for droppers.',
+    price: '₹349',
+    priceLabel: '/ month',
+    stats: [
+      { label: 'Duration', value: '1 Year', icon: <Clock className="w-4 h-4" /> },
+      { label: 'Target Exam', value: 'NEET UG 2027', icon: <Target className="w-4 h-4" /> },
+      { label: 'Language', value: 'Hinglish', icon: <Globe className="w-4 h-4" /> },
+      { label: 'Mode', value: 'AI Self Study', icon: <Bot className="w-4 h-4" /> },
+      { label: 'Access', value: 'Web + Mobile', icon: <Smartphone className="w-4 h-4" /> },
+    ],
+    whyHeadline: 'Droppers need target gap mapping, not standard batch lectures.',
+    whyPoints: ['AI-driven weakness diagnosis and gap repair plan', 'NCERT word-by-word query bank', 'Physics calculations speed sprint', 'Teal-themed customized student dashboard', '24x7 instant AI doubts resolving'],
+    syllabus: {
+      Physics: ['Complete Physics NCERT Revision', 'High-Weightage Mechanics & Electromagnetism', 'Calculations Speed Drills'],
+      Chemistry: ['Physical, Organic and Inorganic Revision', 'Chemical Kinetics & Coordination deep dives', 'Formula Cheat Sheets'],
+      Biology: ['Human & Plant Physiology Deep Revision', 'Genetics, Ecology & Biotech Intensive', 'Diagram Labeling Worksheets'],
+    },
+    roadmap: [
+      { period: 'Phase 1', phase: 'Weakness Repair', desc: 'Identify syllabus gaps using diagnostic test and clear key topics first.' },
+      { period: 'Phase 2', phase: 'Speed & Accuracy', desc: 'Daily timed practice, NCERT-focused drills, and mock chapters.' },
+      { period: 'Phase 3', phase: 'NEET Mock Simulation', desc: 'Full length NEET mock tests, answer key evaluation and analytics.' },
+    ],
+    faqs: [
+      { q: 'Is this batch faster than normal?', a: 'Yes. Shikhar NEET is tailored for droppers, focusing on testing, analytics, and target conceptual gap repairs.' },
+    ],
+    testimonials: [
+      { name: 'Dr. Rahul Bose', exam: 'NEET UG Dropper', text: 'Improved from 480 to 655 marks. The AI analysis of weak chapters was extremely precise.', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&h=80&q=80' },
+    ],
+  },
+
+  'aarambh-cuet-2028': {
+    slug: 'aarambh-cuet-2028',
+    name: 'AARAMBH CUET 2028',
+    tag: 'Class 11 CUET',
+    tagBg: 'bg-purple-600',
+    accentColor: '#7c3aed',
+    accentLight: '#f5f3ff',
+    accentBorder: '#ddd6fe',
+    accentText: 'text-purple-600',
+    btnBg: 'bg-purple-600 hover:bg-purple-700',
+    mountain: '/images/mountain_blue.png',
+    headline: 'Your CUET Journey Starts Here.',
+    subheadline: 'Designed for Class 11 students targeting top Central Universities. Build domain and general aptitude base early.',
+    price: '₹349',
+    priceLabel: '/ month',
+    stats: [
+      { label: 'Duration', value: '2 Years', icon: <Clock className="w-4 h-4" /> },
+      { label: 'Target Exam', value: 'CUET UG 2028', icon: <Target className="w-4 h-4" /> },
+      { label: 'Language', value: 'English / Hindi', icon: <Globe className="w-4 h-4" /> },
+      { label: 'Mode', value: 'AI Self Study', icon: <Bot className="w-4 h-4" /> },
+      { label: 'Access', value: 'Web + Mobile', icon: <Smartphone className="w-4 h-4" /> },
+    ],
+    whyHeadline: 'Targeting top universities like DU, BHU or JNU requires strategic domain preparation early.',
+    whyPoints: ['Domain subjects core foundation building', 'General Test (Aptitude + GK) early building', 'Language paper practice engines', 'AI Study scheduling for high retention', '24x7 AI Mentor doubts resolver'],
+    syllabus: {
+      'Domain Subjects': ['Physics/Chemistry/Maths Core', 'Commerce (Accounts/BST) Core', 'Humanities Foundations'],
+      'General Test': ['Quantitative Aptitude Basics', 'Logical Reasoning', 'Current Affairs & GK'],
+      'Language': ['English Vocabulary', 'Reading Comprehension', 'Grammar Basics'],
+    },
+    roadmap: [
+      { period: 'Month 1–6', phase: 'Aptitude & Language', desc: 'Strengthen quantitative reasoning, analytical thinking and language vocab.' },
+      { period: 'Month 7–16', phase: 'Domain Building', desc: 'Synchronize Class 11 domain subjects with CUET pattern.' },
+      { period: 'Month 17–24', phase: 'CUET Mocks', desc: 'Simulated Domain tests and GT papers with AI analysis.' },
+    ],
+    faqs: [
+      { q: 'Why start CUET prep in Class 11?', a: 'Building General Aptitude and domain conceptual clarity early ensures you can handle boards and entrance tests seamlessly.' },
+    ],
+    testimonials: [
+      { name: 'Kunal Sen', exam: 'CUET 2025 JNU Admit', text: 'Started early. Got a perfect score in General Test and got into my dream language program.', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80' },
+    ],
+  },
+
+  'aarohan-cuet-2027': {
+    slug: 'aarohan-cuet-2027',
+    name: 'AAROHAN CUET 2027',
+    tag: 'Class 12 CUET',
+    tagBg: 'bg-indigo-600',
+    accentColor: '#4f46e5',
+    accentLight: '#eef2ff',
+    accentBorder: '#c7d2fe',
+    accentText: 'text-indigo-600',
+    btnBg: 'bg-indigo-600 hover:bg-indigo-700',
+    mountain: '/images/mountain_purple.png',
+    headline: 'Boards + CUET Workspace.',
+    subheadline: 'Optimized Class 12 Boards study schedule with parallel Domain Subjects prep, Language tests, and General Test mocks.',
+    price: '₹349',
+    priceLabel: '/ month',
+    stats: [
+      { label: 'Duration', value: '1 Year', icon: <Clock className="w-4 h-4" /> },
+      { label: 'Target Exam', value: 'CUET UG 2027', icon: <Target className="w-4 h-4" /> },
+      { label: 'Language', value: 'English / Hindi', icon: <Globe className="w-4 h-4" /> },
+      { label: 'Mode', value: 'AI Self Study', icon: <Bot className="w-4 h-4" /> },
+      { label: 'Access', value: 'Web + Mobile', icon: <Smartphone className="w-4 h-4" /> },
+    ],
+    whyHeadline: 'Aarohan CUET ensures you don\'t compromise Boards score while prepping for top central colleges.',
+    whyPoints: ['Class 12 NCERT board overlap maps', 'Domain mock exams mapping', 'General Test speed sprints', 'Revision schedules and formula cheatsheets', 'Instant AI mentor support'],
+    syllabus: {
+      'Domain Subjects': ['Class 12 Physics/Chem/Maths', 'Class 12 Accounts/BST/Economics', 'Class 12 History/PolScience/Geography'],
+      'General Test': ['Advanced Aptitude Questions', 'Data Interpretation', 'Analytical reasoning'],
+      'Language': ['Reading Comprehension level 2', 'Verbal Ability', 'Synonyms & Antonyms'],
+    },
+    roadmap: [
+      { period: 'Month 1–4', phase: 'Domain & Boards', desc: 'Finish Class 12 domain topics aligning with NCERT board syllabi.' },
+      { period: 'Month 5–8', phase: 'General Test focus', desc: 'Intensive practicing of quantitative and logical aptitude.' },
+      { period: 'Month 9–12', phase: 'CUET simulator phase', desc: 'Take full-length mock tests on official NTA testing interfaces.' },
+    ],
+    faqs: [
+      { q: 'Is Board syllabus same as CUET Domain syllabus?', a: 'Yes. CUET Domain syllabus matches Class 12 NCERT CBSE syllabus. We prepare you for both simultaneously.' },
+    ],
+    testimonials: [
+      { name: 'Aditi Roy', exam: 'SRCC Admit 2025', text: 'PrepEntrance mock tests are exactly like NTA portal. The board overlap plans saved my commerce papers!', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80&q=80' },
+    ],
+  },
+
+  'shikhar-cuet-2027': {
+    slug: 'shikhar-cuet-2027',
+    name: 'SHIKHAR CUET 2027',
+    tag: 'Droppers CUET',
+    tagBg: 'bg-violet-600',
+    accentColor: '#7c3aed',
+    accentLight: '#f5f3ff',
+    accentBorder: '#ddd6fe',
+    accentText: 'text-purple-600',
+    btnBg: 'bg-violet-600 hover:bg-violet-700',
+    mountain: '/images/mountain_orange.png',
+    headline: 'Your Dream Central University College Seat.',
+    subheadline: 'Full-syllabus domain acceleration, mock test drilling and customized study targets for CUET droppers and gap-year takers.',
+    price: '₹349',
+    priceLabel: '/ month',
+    stats: [
+      { label: 'Duration', value: '1 Year', icon: <Clock className="w-4 h-4" /> },
+      { label: 'Target Exam', value: 'CUET UG 2027', icon: <Target className="w-4 h-4" /> },
+      { label: 'Language', value: 'English / Hindi', icon: <Globe className="w-4 h-4" /> },
+      { label: 'Mode', value: 'AI Self Study', icon: <Bot className="w-4 h-4" /> },
+      { label: 'Access', value: 'Web + Mobile', icon: <Smartphone className="w-4 h-4" /> },
+    ],
+    whyHeadline: 'Droppers need precision revision, weak topic detection and mock simulator drilling.',
+    whyPoints: ['Intensive Domain revision guides', 'General Test mock schedules', 'Language verbal ability drills', 'AI daily accountability planning', '24x7 instant AI mentor support'],
+    syllabus: {
+      'Domain Subjects': ['Quick revision domain modules', 'High difficulty domain sheets', 'Chapter test archives'],
+      'General Test': ['Daily quantitative puzzles', 'GK database updates', 'Logical mock chapters'],
+      'Language': ['Speed reading drills', 'Vocabulary flash cards', 'Mock verbal sets'],
+    },
+    roadmap: [
+      { period: 'Phase 1', phase: 'Weakness Repair', desc: 'Find domain gaps and clear basic formulas/GK.' },
+      { period: 'Phase 2', phase: 'Speed Drills', desc: 'Timed General Test sets and language papers.' },
+      { period: 'Phase 3', phase: 'Official Simulators', desc: 'Full length mock tests on official NTA layout.' },
+    ],
+    faqs: [
+      { q: 'Is this suitable for CUET drop year?', a: 'Yes, it provides the exact structure and rigorous testing needed to secure a top college admission.' },
+    ],
+    testimonials: [
+      { name: 'Varun Das', exam: 'CUET Dropper', text: 'Secured Hindu College (DU) after taking a drop year. The AI study plans kept me completely disciplined.', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&h=80&q=80' },
+    ],
+  },
 };
 
 interface BatchConfig {
@@ -250,7 +507,9 @@ const BatchDetailPage: React.FC = () => {
             <div className="space-y-5">
               <div className="flex flex-wrap gap-2 items-center">
                 <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-white ${batch.tagBg}`}>{batch.tag}</span>
-                <span className="text-xs font-bold text-slate-400 border border-slate-200 px-3 py-1 rounded-full">JEE Preparation</span>
+                <span className="text-xs font-bold text-slate-400 border border-slate-200 px-3 py-1 rounded-full">
+                  {batch.slug.includes('neet') ? 'NEET Prep' : batch.slug.includes('cuet') ? 'CUET Prep' : 'JEE Prep'}
+                </span>
               </div>
               <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 leading-[1.15] tracking-tight">
                 {batch.name}<br />
@@ -328,7 +587,7 @@ const BatchDetailPage: React.FC = () => {
               <div className="text-xs font-black uppercase tracking-widest mb-3" style={accentStyle}>WHY {batch.name}?</div>
               <h2 className="text-2xl font-extrabold text-slate-900 leading-tight mb-6">{batch.whyHeadline}</h2>
               <p className="text-sm text-slate-500 mb-6">
-                {batch.name} focuses on building the exact skills that top JEE rankers have. Every session, every test, every plan is designed to move you closer to your target.
+                {batch.name} focuses on building the exact skills that top rankers have. Every session, every test, every plan is designed to move you closer to your target.
               </p>
               <ul className="space-y-3">
                 {batch.whyPoints.map((p) => (
@@ -370,7 +629,9 @@ const BatchDetailPage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-8">
             <div className="text-xs font-black uppercase tracking-widest mb-2" style={accentStyle}>WHAT YOU GET</div>
-            <h2 className="text-2xl font-extrabold text-slate-900">Everything You Need to Crack JEE</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900">
+              Everything You Need to Crack {batch.slug.includes('neet') ? 'NEET' : batch.slug.includes('cuet') ? 'CUET' : 'JEE'}
+            </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {FEATURES.map((f, i) => (
@@ -417,7 +678,9 @@ const BatchDetailPage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
             <div className="text-xs font-black uppercase tracking-widest mb-2" style={accentStyle}>SUCCESS ROADMAP</div>
-            <h2 className="text-2xl font-extrabold text-slate-900">Your Step-by-Step Path to JEE Success</h2>
+            <h2 className="text-2xl font-extrabold text-slate-900">
+              Your Step-by-Step Path to {batch.slug.includes('neet') ? 'NEET' : batch.slug.includes('cuet') ? 'CUET' : 'JEE'} Success
+            </h2>
           </div>
           <div className="relative">
             {/* Vertical line */}
@@ -549,7 +812,7 @@ const BatchDetailPage: React.FC = () => {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <div className="text-xs font-black uppercase tracking-widest mb-3" style={accentStyle}>ENROLL TODAY</div>
           <h2 className="text-3xl font-extrabold text-slate-900 mb-2">
-            Start Your {batch.tag === 'Droppers Batch' ? 'Final' : 'JEE'} Journey for Just {batch.price}
+            Start Your {batch.tag.includes('Droppers') ? 'Final' : batch.slug.includes('neet') ? 'NEET' : batch.slug.includes('cuet') ? 'CUET' : 'JEE'} Journey for Just {batch.price}
           </h2>
           <p className="text-slate-500 text-sm mb-6">No long-term commitment. Cancel anytime. Start with a free diagnostic test.</p>
 
@@ -572,7 +835,7 @@ const BatchDetailPage: React.FC = () => {
               className={`w-full py-3.5 rounded-xl text-white font-extrabold text-base transition-all shadow-lg active:scale-[0.98] ${batch.btnBg}`}
               style={{ boxShadow: `0 4px 16px ${batch.accentColor}50` }}
             >
-              Start Your IIT Journey Today
+              Start Your Prep Journey Today
             </button>
             <p className="text-center text-[11px] text-slate-400 mt-3 font-medium">🔒 Secure payment · Free 7-day trial · Cancel anytime</p>
           </div>

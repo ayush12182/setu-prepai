@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  ChevronRight, Check, ArrowRight, FileText, ClipboardList, Sparkles, Calendar, BookOpen, Loader2 
+  ChevronRight, Check, ArrowRight, FileText, ClipboardList, Sparkles, Calendar, BookOpen, Loader2, Lock 
 } from 'lucide-react';
 import LandingNav from '@/components/landing/LandingNav';
 import { useResources, useBookmarks } from '@/hooks/useResources';
@@ -22,13 +22,79 @@ function parseParams(exam?: string, cls?: string): { exam: Exam; cls: ClassLevel
   return { exam: validExam(exam), cls: parseClass(cls) };
 }
 
+// Helper to get cohort details dynamically
+function getCohortDetails(exam: Exam, cls: ClassLevel): { name: string; tag: string; slug: string } {
+  const isJee = exam === 'jee';
+  const isNeet = exam === 'neet';
+  
+  if (isJee) {
+    if (cls === '11') {
+      return {
+        name: 'AARAMBH 2028',
+        tag: 'Class 11 Students • JEE Main & Advanced',
+        slug: 'aarambh-2028'
+      };
+    } else if (cls === '12') {
+      return {
+        name: 'AAROHAN 2027',
+        tag: 'Class 12 Students • JEE Main & Advanced',
+        slug: 'aarohan-2027'
+      };
+    } else {
+      return {
+        name: 'SHIKHAR 2027',
+        tag: 'JEE Droppers • High-Intensity Prep',
+        slug: 'shikhar-2027'
+      };
+    }
+  } else if (isNeet) {
+    if (cls === '11') {
+      return {
+        name: 'AARAMBH NEET 2028',
+        tag: 'Class 11 NEET Aspirants • Fundamentals',
+        slug: 'aarambh-neet-2028'
+      };
+    } else if (cls === '12') {
+      return {
+        name: 'AAROHAN NEET 2027',
+        tag: 'Class 12 NEET Aspirants • Rank Booster',
+        slug: 'aarohan-neet-2027'
+      };
+    } else {
+      return {
+        name: 'SHIKHAR NEET 2027',
+        tag: 'NEET Droppers • Focus Batch',
+        slug: 'shikhar-neet-2027'
+      };
+    }
+  } else { // cuet
+    if (cls === '11') {
+      return {
+        name: 'AARAMBH CUET 2028',
+        tag: 'Class 11 CUET Aspirants • Foundation',
+        slug: 'aarambh-cuet-2028'
+      };
+    } else if (cls === '12') {
+      return {
+        name: 'AAROHAN CUET 2027',
+        tag: 'Class 12 CUET Aspirants • Domain + GT + English',
+        slug: 'aarohan-cuet-2027'
+      };
+    } else {
+      return {
+        name: 'SHIKHAR CUET 2027',
+        tag: 'CUET Droppers • High-Intensity Prep',
+        slug: 'shikhar-cuet-2027'
+      };
+    }
+  }
+}
+
 // Exam Details Copy mapping
 const EXAM_DETAILS = {
   jee: {
-    title: 'JEE Main & Advanced 2027 Online Coaching and Complete Preparation',
-    desc: 'Crack IIT JEE with India\'s complete AI-powered learning workspace. Get structured academic schedules, live doubt-solving sessions, comprehensive mock test series (AITS), detailed performance diagnostics, and 24x7 guidance from our AI Prep Mentor.',
-    cohortName: 'LAKSHYA JEE 2.0 2027',
-    cohortTag: 'Class 12 + JEE Prep • Ab Ek Saath',
+    title: 'IIT JEE Main & Advanced Complete AI-Powered Preparation Workspace',
+    desc: 'Crack IIT JEE with India\'s complete AI-powered learning workspace. Get structured academic schedules, personalized mock test series, detailed performance diagnostics, and 24x7 guidance from our AI Prep Mentor.',
     themeColor: '#2563eb',
     gradient: 'from-blue-600 to-indigo-700',
     hoverBorder: 'hover:border-blue-200',
@@ -37,10 +103,8 @@ const EXAM_DETAILS = {
     badgeBg: 'bg-blue-600'
   },
   neet: {
-    title: 'NEET UG 2027 Online Coaching and Complete Medical Entrance Prep',
-    desc: 'Prepare for NEET UG with interactive visual content, NCERT-focused learning schedules, chapter-wise daily practice sets (DPPs), mock tests on official pattern, and instant AI doubt clearing for Physics, Chemistry, Botany, and Zoology.',
-    cohortName: 'LAKSHYA NEET 2.0 2027',
-    cohortTag: 'Class 12 + NEET Prep • Ab Ek Saath',
+    title: 'NEET UG Complete AI-Powered Medical Entrance Prep Workspace',
+    desc: 'Prepare for NEET UG with interactive visual content, NCERT-focused learning schedules, chapter-wise practice sets, mock tests on official pattern, and instant 24/7 AI doubt clearing for Physics, Chemistry, Botany, and Zoology.',
     themeColor: '#10b981',
     gradient: 'from-emerald-600 to-teal-700',
     hoverBorder: 'hover:border-emerald-200',
@@ -49,10 +113,8 @@ const EXAM_DETAILS = {
     badgeBg: 'bg-emerald-600'
   },
   cuet: {
-    title: 'CUET 2027 Complete General Test, Domain Subjects & Languages Prep',
-    desc: 'Achieve admission to top Central Universities with customized study materials, domain-specific mock exams, general aptitude preparation kits, language papers revision schedules, and AI mentor accountability checklists.',
-    cohortName: 'AAROHAN CUET 2.0 2027',
-    cohortTag: 'Domain Subjects + GT + English Prep',
+    title: 'CUET Complete General Test, Domain Subjects & Languages Prep Workspace',
+    desc: 'Achieve admission to top Central Universities with customized study materials, domain-specific mock exams, general aptitude preparation kits, language papers revision schedules, and 24/7 AI mentor accountability.',
     themeColor: '#8b5cf6',
     gradient: 'from-purple-600 to-indigo-700',
     hoverBorder: 'hover:border-purple-200',
@@ -74,6 +136,7 @@ const ExamHubPage: React.FC = () => {
 
   const details = EXAM_DETAILS[exam];
   const meta = EXAM_META[exam];
+  const cohort = getCohortDetails(exam, cls);
 
   const [activeSubject, setActiveSubject] = useState('');
   const [search, setSearch] = useState('');
@@ -187,16 +250,17 @@ const ExamHubPage: React.FC = () => {
                   <span className={`inline-block text-[10px] font-black uppercase tracking-widest text-white px-2 py-0.5 rounded ${details.badgeBg}`}>
                     PrepEntrance Cohort
                   </span>
-                  <h3 className="text-2xl font-black mt-2 tracking-tight">{details.cohortName}</h3>
-                  <p className="text-xs font-bold text-white/80">{details.cohortTag}</p>
+                  <h3 className="text-2xl font-black mt-2 tracking-tight">{cohort.name}</h3>
+                  <p className="text-xs font-bold text-white/80">{cohort.tag}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
-                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> Live Lectures</div>
-                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> DPP Discussion</div>
-                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> Mock Tests & AITS</div>
-                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> AI Mentor Support</div>
-                  <div className="flex items-center gap-1.5 col-span-2"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> Digital Preparation Kit</div>
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> AI Mentor (24×7)</div>
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> Unlimited Practice</div>
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> Chapter Tests</div>
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> Full-Length Mocks</div>
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> Personalized Study Plans</div>
+                  <div className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-white stroke-[3]" /> Performance Analytics</div>
                 </div>
 
                 <div className="flex items-center gap-4 pt-2">
@@ -205,10 +269,10 @@ const ExamHubPage: React.FC = () => {
                     <span className="text-[10px] font-bold opacity-80 ml-0.5">/month</span>
                   </div>
                   <button 
-                    onClick={() => navigate('/signup')}
+                    onClick={() => navigate(`/batches/${cohort.slug}`)}
                     className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
                   >
-                    Enroll Now <ArrowRight className="w-4 h-4" />
+                    Explore Batch <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -368,7 +432,35 @@ const ExamHubPage: React.FC = () => {
           </div>
 
           {/* Resources listing */}
-          {loading ? (
+          {!user ? (
+            <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100/50 p-8 text-center max-w-2xl mx-auto my-8 shadow-sm">
+              <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 border border-blue-100 shadow-inner" style={{ color: details.themeColor, backgroundColor: details.themeColor + '10', borderColor: details.themeColor + '20' }}>
+                  <Lock className="w-6 h-6 stroke-[2.5]" />
+                </div>
+                <h3 className="text-lg font-black text-slate-950 mb-2">Unlock 10,000+ Free Study Resources</h3>
+                <p className="text-xs font-semibold text-slate-500 max-w-md mb-6 leading-relaxed">
+                  Access chapter-wise formula sheets, revision notes, previous year questions (PYQs), and expert-curated practice papers mapped to your target syllabus.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <button 
+                    onClick={() => navigate('/signup')} 
+                    className="px-6 py-2.5 text-white font-extrabold text-xs rounded-xl shadow-md transition-all active:scale-[0.98] hover:opacity-90"
+                    style={{ backgroundColor: details.themeColor }}
+                  >
+                    Create Free Account
+                  </button>
+                  <button 
+                    onClick={() => navigate('/auth')} 
+                    className="px-6 py-2.5 bg-white text-slate-700 border border-slate-200 font-extrabold text-xs rounded-xl hover:bg-slate-50 transition-all active:scale-[0.98]"
+                  >
+                    Log In
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin" style={{ color: details.themeColor }} />
             </div>
