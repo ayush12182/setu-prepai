@@ -75,7 +75,7 @@ const LandingNav: React.FC = () => {
           aria-label="PrepEntrance Home"
         >
           {/* Official PrepEntrance Logo Badge */}
-          <div className="brand-logo-container rounded-xl w-[52px] h-[52px]">
+          <div className="brand-logo-container rounded-xl w-[62px] h-[62px]">
             <img 
               src="/prepentrance-logo.png" 
               alt="PrepEntrance Logo" 
@@ -83,11 +83,11 @@ const LandingNav: React.FC = () => {
             />
           </div>
           {/* Logo Name & Tagline */}
-          <div className="flex flex-col items-start leading-none text-left">
-            <span className="font-sans font-bold text-[24px] text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors duration-200">
+          <div className="flex flex-col items-start leading-none text-left gap-0">
+            <span className="font-sans font-black text-[27px] text-slate-950 tracking-tight group-hover:text-blue-600 transition-colors duration-200">
               PrepEntrance
             </span>
-            <span className="text-[8.5px] text-slate-500 font-extrabold tracking-[0.2em] mt-1.5 uppercase">
+            <span className="text-[8.5px] text-slate-800 font-black tracking-[0.2em] mt-0.5 uppercase">
               Prepare. Perform. Succeed.
             </span>
           </div>
