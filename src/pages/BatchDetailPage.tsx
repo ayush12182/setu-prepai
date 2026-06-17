@@ -479,6 +479,13 @@ const BatchDetailPage: React.FC = () => {
   const navigate = useNavigate();
 
   const batch = slug ? BATCH_DATA[slug] : null;
+
+  React.useEffect(() => {
+    if (batch) {
+      document.title = `${batch.name} Batch | PrepEntrance — Prepare. Perform. Succeed.`;
+      window.scrollTo({ top: 0 });
+    }
+  }, [batch]);
   if (!batch) return <Navigate to="/batches" replace />;
 
   const accentStyle = { color: batch.accentColor };

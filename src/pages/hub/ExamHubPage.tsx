@@ -100,7 +100,8 @@ const EXAM_DETAILS = {
     hoverBorder: 'hover:border-blue-200',
     lightBg: 'bg-blue-50/50',
     bulletColor: 'text-blue-500',
-    badgeBg: 'bg-blue-600'
+    badgeBg: 'bg-blue-600',
+    illustration: '/images/card_jee.png'
   },
   neet: {
     title: 'NEET UG Complete AI-Powered Medical Entrance Prep Workspace',
@@ -110,7 +111,8 @@ const EXAM_DETAILS = {
     hoverBorder: 'hover:border-emerald-200',
     lightBg: 'bg-emerald-50/50',
     bulletColor: 'text-emerald-500',
-    badgeBg: 'bg-emerald-600'
+    badgeBg: 'bg-emerald-600',
+    illustration: '/images/card_neet.png'
   },
   cuet: {
     title: 'CUET Complete General Test, Domain Subjects & Languages Prep Workspace',
@@ -120,7 +122,8 @@ const EXAM_DETAILS = {
     hoverBorder: 'hover:border-purple-200',
     lightBg: 'bg-purple-50/50',
     bulletColor: 'text-purple-500',
-    badgeBg: 'bg-purple-600'
+    badgeBg: 'bg-purple-600',
+    illustration: '/images/card_cuet.png'
   }
 };
 
@@ -139,6 +142,12 @@ const ExamHubPage: React.FC = () => {
   const cohort = getCohortDetails(exam, cls);
 
   const [activeSubject, setActiveSubject] = useState('');
+
+  React.useEffect(() => {
+    const examLabel = exam === 'jee' ? 'IIT JEE' : exam === 'neet' ? 'NEET UG' : 'CUET';
+    const classLabel = cls === '11' ? 'Class 11' : cls === '12' ? 'Class 12' : 'Droppers';
+    document.title = `${examLabel} ${classLabel} Preparation Hub | PrepEntrance`;
+  }, [exam, cls]);
   const [search, setSearch] = useState('');
 
   const { resources, loading } = useResources({
@@ -277,12 +286,12 @@ const ExamHubPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Banner Right: Student Image */}
+              {/* Banner Right: Exam-Specific 3D Illustration */}
               <div className="w-36 h-36 shrink-0 relative flex items-center justify-center bg-white/10 rounded-full border border-white/20 p-2 overflow-hidden shadow-inner">
                 <img 
-                  src="/images/student_standing.png" 
-                  alt="Student Standing" 
-                  className="h-28 w-auto object-contain mt-3 hover:scale-105 transition-transform duration-300"
+                  src={details.illustration} 
+                  alt={`${exam.toUpperCase()} Illustration`} 
+                  className="h-28 w-auto object-contain hover:scale-105 transition-transform duration-300"
                 />
               </div>
 
@@ -521,8 +530,8 @@ const ExamHubPage: React.FC = () => {
               <h4 className="text-xs font-extrabold text-white uppercase tracking-widest mb-4">Resources</h4>
               <ul className="space-y-2.5 text-xs text-slate-400 font-semibold">
                 <li><a onClick={handleScrollToMaterials} className="hover:text-white transition-colors cursor-pointer">PDF Notes Bank</a></li>
-                <li><a onClick={() => navigate('/signup')} className="hover:text-white transition-colors cursor-pointer">Practice Sets</a></li>
-                <li><a onClick={() => navigate('/signup')} className="hover:text-white transition-colors cursor-pointer">Test Series</a></li>
+                <li><a onClick={() => navigate('/practice-tests')} className="hover:text-white transition-colors cursor-pointer">Practice Tests</a></li>
+                <li><a onClick={() => navigate('/blog')} className="hover:text-white transition-colors cursor-pointer">Blog & Strategy</a></li>
               </ul>
             </div>
 

@@ -8,10 +8,10 @@ const NAV_LINKS = [
   { label: 'JEE', href: '/jee' },
   { label: 'NEET', href: '/neet' },
   { label: 'CUET', href: '/cuet' },
-  { label: 'AI Tutor', href: '#ai-tutor' },
-  { label: 'Practice Tests', href: '#practice-tests' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'Blog', href: '#blog' },
+  { label: 'AI Tutor', href: '#features' },
+  { label: 'Practice Tests', href: '/practice-tests' },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Blog', href: '/blog' },
 ];
 
 const LandingNav: React.FC = () => {

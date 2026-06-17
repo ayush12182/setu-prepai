@@ -203,6 +203,10 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
 
+  React.useEffect(() => {
+    document.title = "PrepEntrance — Your Complete AI Exam Prep Partner";
+  }, []);
+
   return (
     <div className="min-h-screen bg-white text-slate-800 overflow-x-hidden" style={{ fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
       <LandingNav />
@@ -827,11 +831,15 @@ const LandingPage: React.FC = () => {
             <div className="space-y-3">
               <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Resources</h4>
               <ul className="space-y-2.5">
-                {['Blog', 'Study Material', 'Mock Tests'].map((e) => (
-                  <li key={e}>
-                    <button onClick={() => navigate('/login')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">{e}</button>
-                  </li>
-                ))}
+                <li>
+                  <button onClick={() => navigate('/blog')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Blog</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/login')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Study Material</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/practice-tests')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Mock Tests</button>
+                </li>
               </ul>
             </div>
 
@@ -839,11 +847,15 @@ const LandingPage: React.FC = () => {
             <div className="space-y-3">
               <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Company</h4>
               <ul className="space-y-2.5">
-                {['About', 'Contact', 'Careers'].map((e) => (
-                  <li key={e}>
-                    <button onClick={() => navigate('/login')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">{e}</button>
-                  </li>
-                ))}
+                <li>
+                  <button onClick={() => navigate('/blog')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">About</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/login')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Contact</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/login')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Careers</button>
+                </li>
               </ul>
             </div>
           </div>

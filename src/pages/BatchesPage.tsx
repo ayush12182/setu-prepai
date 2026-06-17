@@ -205,6 +205,11 @@ const BatchesPage: React.FC = () => {
   const [selectedExam, setSelectedExam] = React.useState<'all' | 'jee' | 'neet' | 'cuet'>('all');
   const [selectedClass, setSelectedClass] = React.useState<'all' | '11' | '12' | 'dropper'>('all');
 
+  React.useEffect(() => {
+    document.title = "Explore Batches | PrepEntrance";
+    window.scrollTo({ top: 0 });
+  }, []);
+
   const filteredBatches = React.useMemo(() => {
     return batches.filter((b) => {
       const examMatch = selectedExam === 'all' || b.exam === selectedExam;
