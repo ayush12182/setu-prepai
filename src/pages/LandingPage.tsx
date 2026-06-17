@@ -391,8 +391,8 @@ const LandingPage: React.FC = () => {
           <div className="grid md:grid-cols-3 gap-5">
             {/* JEE */}
             <div className="bg-white border-2 border-slate-100 rounded-xl p-6 hover:border-blue-200 hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
-              <div className="absolute right-0 bottom-0 w-36 h-28 pointer-events-none">
-                <JEEIllustration />
+              <div className="absolute right-1 bottom-1 w-32 h-32 pointer-events-none">
+                <img src="/images/card_jee.png" alt="JEE" className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
               </div>
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-12 h-12 rounded-xl bg-blue-50 border-2 border-blue-100 flex items-center justify-center text-blue-600">
@@ -421,8 +421,8 @@ const LandingPage: React.FC = () => {
 
             {/* NEET */}
             <div className="bg-white border-2 border-slate-100 rounded-xl p-6 hover:border-emerald-200 hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
-              <div className="absolute right-0 bottom-0 w-36 h-28 pointer-events-none">
-                <NEETIllustration />
+              <div className="absolute right-1 bottom-1 w-32 h-32 pointer-events-none">
+                <img src="/images/card_neet.png" alt="NEET" className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
               </div>
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-12 h-12 rounded-xl bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center text-emerald-600">
@@ -451,8 +451,8 @@ const LandingPage: React.FC = () => {
 
             {/* CUET */}
             <div className="bg-white border-2 border-slate-100 rounded-xl p-6 hover:border-purple-200 hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
-              <div className="absolute right-0 bottom-0 w-36 h-28 pointer-events-none">
-                <CUETIllustration />
+              <div className="absolute right-1 bottom-1 w-32 h-32 pointer-events-none">
+                <img src="/images/card_cuet.png" alt="CUET" className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
               </div>
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-12 h-12 rounded-xl bg-purple-50 border-2 border-purple-100 flex items-center justify-center text-purple-600">
