@@ -175,6 +175,16 @@ Return ONLY JSON, no markdown formatting blocks, no extra text.`;
   }
 }
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string = 'Operation timed out'): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(errorMessage)), timeoutMs);
+    promise.then(
+      res => { clearTimeout(timer); resolve(res); },
+      err => { clearTimeout(timer); reject(err); }
+    );
+  });
+}
+
 // Main generation function with fallbacks
 export async function generateQuestions(
   params: QuestionGeneratorParams
@@ -203,7 +213,7 @@ export async function generateQuestions(
     };
   }
 
-  // 2. LEVEL 1: QUERY SUPABASE DB
+  // 2. LEVEL 2: QUERY SUPABASE DB (with timeout)
   try {
     const examUpper = params.exam.toUpperCase();
     let examTypes = [examUpper];
@@ -211,12 +221,14 @@ export async function generateQuestions(
       examTypes = ['JEE_MAINS', 'JEE_ADVANCED'];
     }
 
-    const { data: dbData, error: dbError } = await supabase
+    const dbPromise = supabase
       .from('questions')
       .select('*')
       .eq('verification_status', 'APPROVED')
       .in('exam_type', examTypes)
       .or(`chapter_id.eq."${params.chapter}",subchapter_id.eq."${params.chapter}",concept_tested.eq."${params.chapter}"`);
+
+    const { data: dbData, error: dbError } = await withTimeout(dbPromise, 1500, 'DB query timed out');
 
     if (!dbError && dbData && dbData.length >= params.count) {
       console.log('[QuestionGenerator] Supabase DB Hit!');
@@ -240,17 +252,18 @@ export async function generateQuestions(
       };
     }
   } catch (dbErr) {
-    console.warn('[QuestionGenerator] Supabase DB query failed:', dbErr);
+    console.warn('[QuestionGenerator] Supabase DB query failed or timed out:', dbErr);
   }
 
-  // 3. LEVEL 2: CALL EDGE FUNCTION / GEMINI API WITH 12-SECOND TIMEOUT
-  const timeoutMs = 12000;
+  // 3. LEVEL 3: CALL EDGE FUNCTION / GEMINI API WITH REMAINING TIME (up to 3 seconds total)
+  const totalElapsed = Date.now() - startTime;
+  const remainingTime = Math.max(1000, 3000 - totalElapsed);
   const isAI = await checkAIAvailability();
 
   if (isAI.available) {
     // Try Edge Function first
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeoutMs);
+    const id = setTimeout(() => controller.abort(), remainingTime);
 
     try {
       // Choose appropriate function: generate-questions or generate-question
@@ -272,12 +285,11 @@ export async function generateQuestions(
         count: params.count
       };
 
-      const { data, error: fnError } = await supabase.functions.invoke(functionName, {
+      const fnPromise = supabase.functions.invoke(functionName, {
         body: requestBody,
-        headers: {
-          // Pass signal in options if possible, though supabase-js invokes usually don't support signal in options directly
-        }
       });
+
+      const { data, error: fnError } = await withTimeout(fnPromise, remainingTime, 'Edge function timed out');
 
       clearTimeout(id);
 
@@ -312,12 +324,12 @@ export async function generateQuestions(
       throw new Error(fnError?.message || 'Edge Function returned empty response');
     } catch (fnErr: any) {
       clearTimeout(id);
-      console.warn('[QuestionGenerator] Supabase Edge Function failed, falling back to direct Gemini call:', fnErr);
+      console.warn('[QuestionGenerator] Supabase Edge Function failed or timed out, falling back to direct Gemini call:', fnErr);
 
       // Try Direct Gemini Call (as backup AI tier)
       try {
-        const remainingTime = Math.max(3000, timeoutMs - (Date.now() - startTime));
-        const geminiQs = await directGeminiGenerate(params, remainingTime);
+        const remainingTimeGemini = Math.max(1000, 3000 - (Date.now() - startTime));
+        const geminiQs = await directGeminiGenerate(params, remainingTimeGemini);
         if (geminiQs.length >= params.count) {
           console.log('[QuestionGenerator] Direct Gemini API succeeded!');
           setCachedQuestions(cacheKey, geminiQs);
@@ -342,7 +354,7 @@ export async function generateQuestions(
     }
   }
 
-  // 4. LEVEL 3: SMART OFFLINE QUESTION BANK
+  // 4. LEVEL 4: SMART OFFLINE QUESTION BANK
   console.log('[QuestionGenerator] Remote services unavailable/timed out. Falling back to Smart Offline Question Bank.');
   try {
     const offlineQuestions = getOfflineQuestions(params.subject, params.chapter, params.difficulty, params.count);
@@ -365,7 +377,7 @@ export async function generateQuestions(
     console.error('[QuestionGenerator] Critical: Smart Offline Question Bank crashed:', offlineErr);
   }
 
-  // 5. LEVEL 4: EMERGENCY QUESTION PACK
+  // 5. LEVEL 5: EMERGENCY QUESTION PACK
   console.warn('[QuestionGenerator] Emergency! Service and Offline Bank failed. Returning static Emergency Question Pack.');
   const duration = Date.now() - startTime;
   logTelemetry({

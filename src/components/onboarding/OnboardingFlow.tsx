@@ -15,15 +15,14 @@ import { toast } from 'sonner';
 type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 type StreamType = 'jee' | 'neet' | 'cuet' | '';
 
-// Custom Glow Background for Immersive Linear-style depth
+// Custom Glow Background for Clean Light-style depth matching the landing theme
 const GlowBg: React.FC = () => (
-  <div className="pointer-events-none fixed inset-0 overflow-hidden bg-[#06080D]">
-    <div className="absolute top-[-20%] left-1/4 w-[750px] h-[750px] rounded-full bg-[#FF6B00]/[0.05] blur-[150px]" />
-    <div className="absolute bottom-[-10%] right-1/4 w-[600px] h-[600px] rounded-full bg-violet-600/[0.04] blur-[130px]" />
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-[#FF6B00]/[0.02] blur-[110px]" />
+  <div className="pointer-events-none fixed inset-0 overflow-hidden bg-gradient-to-tr from-slate-50 via-white to-blue-50/20">
+    <div className="absolute top-[-20%] left-1/4 w-[750px] h-[750px] rounded-full bg-blue-500/[0.03] blur-[150px]" />
+    <div className="absolute bottom-[-10%] right-1/4 w-[600px] h-[600px] rounded-full bg-indigo-500/[0.03] blur-[130px]" />
     {/* Clean subtle dot grid overlay */}
-    <div className="absolute inset-0 opacity-[0.02]" style={{
-      backgroundImage: `radial-gradient(circle, #FF6B00 1px, transparent 1px)`,
+    <div className="absolute inset-0 opacity-[0.4]" style={{
+      backgroundImage: `radial-gradient(circle, #e2e8f0 1px, transparent 1px)`,
       backgroundSize: '24px 24px',
     }} />
   </div>
@@ -205,18 +204,19 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
     if (step === 1) {
       return (
         <div className="space-y-7 text-center py-6">
-          <div className="w-20 h-20 rounded-3xl bg-[#FF6B00]/10 border border-[#FF6B00]/25 flex items-center justify-center mx-auto mb-6 shadow-md shadow-[#FF6B00]/5 animate-pulse-soft">
-            <Sparkles className="w-10 h-10 text-[#FF6B00]" />
+          {/* Logo Badge */}
+          <div className="w-20 h-20 rounded-3xl bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto mb-6 shadow-sm shadow-blue-500/5 animate-pulse-soft">
+            <Sparkles className="w-10 h-10 text-blue-600" />
           </div>
           
           <div className="space-y-3">
-            <span className="text-[#FF6B00] text-xs font-black uppercase tracking-[0.25em] block leading-none">
+            <span className="text-blue-600 text-xs font-black uppercase tracking-[0.25em] block leading-none">
               Welcome to PrepEntrance
             </span>
-            <h1 className="text-white text-3xl sm:text-[38px] font-black leading-tight tracking-tight font-display">
+            <h1 className="text-slate-900 text-3xl sm:text-[36px] font-black leading-tight tracking-tight font-display">
               Let's Personalize <br />Your Preparation.
             </h1>
-            <p className="text-slate-400 text-sm max-w-sm mx-auto leading-relaxed font-sans font-medium">
+            <p className="text-slate-500 text-sm max-w-sm mx-auto leading-relaxed font-sans font-medium">
               We construct your isolated academic tracker based strictly on your target exam, class, and study preferences.
             </p>
           </div>
@@ -224,12 +224,12 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
           <div className="pt-6 space-y-4">
             <button
               onClick={() => go(2)}
-              className="w-full h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-gradient-to-r from-[#FF6B00] to-[#E55A00] text-white shadow-lg shadow-[#FF6B00]/10 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer"
+              className="w-full h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer"
             >
               Get Started <ArrowRight className="w-5 h-5" />
             </button>
-            <span className="text-slate-500 text-[10px] font-sans font-bold block">
-              Press <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 font-mono font-bold">Enter</span> to begin
+            <span className="text-slate-400 text-[10px] font-sans font-bold block">
+              Press <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-500 font-mono font-bold">Enter</span> to begin
             </span>
           </div>
         </div>
@@ -247,15 +247,15 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
       return (
         <div className="space-y-6 py-2">
           <div className="text-center space-y-2">
-            <h2 className="text-white text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
+            <h2 className="text-slate-900 text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
               What is your target exam?
             </h2>
-            <p className="text-slate-400 text-xs sm:text-sm font-sans font-medium leading-relaxed">
+            <p className="text-slate-500 text-xs sm:text-sm font-sans font-medium leading-relaxed">
               Your syllabus timelines and mock tests will adapt directly to this goal.
             </p>
           </div>
 
-          <div className="space-y-3.5 pt-2">
+          <div className="space-y-3 pt-2">
             {streams.map((s) => {
               const isSelected = stream === s.key;
               return (
@@ -263,34 +263,34 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
                   key={s.key}
                   onClick={() => setStream(s.key)}
                   className={cn(
-                    'w-full p-4.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 cursor-pointer select-none group',
+                    'w-full p-4.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-205 cursor-pointer select-none group',
                     isSelected
-                      ? 'border-[#FF6B00]/40 bg-[#FF6B00]/[0.06] shadow-[0_8px_24px_rgba(255,107,0,0.04)]'
-                      : 'border-white/[0.05] bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
+                      ? 'border-blue-500 bg-blue-50/50 shadow-sm'
+                      : 'border-slate-100 bg-slate-50/60 hover:border-slate-200 hover:bg-slate-100/30'
                   )}
                 >
                   <div className="flex items-center gap-4">
                     <div className={cn(
-                      'w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors shadow-sm',
-                      isSelected ? 'bg-[#FF6B00]/10 border-[#FF6B00]/25 text-[#FF6B00]' : 'bg-white/[0.03] border-white/[0.06] text-slate-400 group-hover:text-slate-300'
+                      'w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors shadow-xs',
+                      isSelected ? 'bg-blue-100 border-blue-200 text-blue-600' : 'bg-slate-100 border-slate-200/60 text-slate-400 group-hover:text-slate-600'
                     )}>
                       <s.icon className="w-5.5 h-5.5" />
                     </div>
                     <div>
-                      <p className="text-white font-extrabold text-sm sm:text-base leading-snug">{s.title}</p>
-                      <p className="text-slate-500 text-xs mt-0.5 font-sans font-semibold">{s.desc}</p>
+                      <p className={cn('font-extrabold text-sm sm:text-base leading-snug', isSelected ? 'text-blue-900' : 'text-slate-800')}>{s.title}</p>
+                      <p className="text-slate-400 text-xs mt-0.5 font-sans font-semibold">{s.desc}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="hidden sm:inline-block text-[9px] bg-slate-900 border border-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
+                    <span className="hidden sm:inline-block text-[9px] bg-slate-100 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
                       Key {s.keybind}
                     </span>
                     <div className={cn(
                       'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200',
-                      isSelected ? 'bg-[#FF6B00] border-[#FF6B00] scale-105' : 'border-slate-700/60'
+                      isSelected ? 'bg-blue-600 border-blue-600 scale-105' : 'border-slate-300'
                     )}>
-                      {isSelected && <Check className="w-3 text-white stroke-[4]" />}
+                      {isSelected && <Check className="w-3 h-3 text-white stroke-[4]" />}
                     </div>
                   </div>
                 </button>
@@ -301,14 +301,14 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
           <div className="flex items-center gap-3 pt-4 shrink-0">
             <button
               onClick={() => go(1, -1)}
-              className="w-1/3 h-14 rounded-2xl border border-white/[0.08] bg-white/[0.02] text-slate-400 hover:text-white hover:bg-white/[0.04] text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              className="w-1/3 h-14 rounded-2xl border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
             <button
               disabled={!stream}
               onClick={() => go(3)}
-              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-[#E55A00] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md shadow-[#FF6B00]/10"
+              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/10"
             >
               Continue <ArrowRight className="w-5 h-5" />
             </button>
@@ -328,15 +328,15 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
       return (
         <div className="space-y-6 py-2">
           <div className="text-center space-y-2">
-            <h2 className="text-white text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
+            <h2 className="text-slate-900 text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
               What is your current class?
             </h2>
-            <p className="text-slate-400 text-xs sm:text-sm font-sans font-medium leading-relaxed">
+            <p className="text-slate-500 text-xs sm:text-sm font-sans font-medium leading-relaxed">
               We compile your mock tests and study milestones based on class.
             </p>
           </div>
 
-          <div className="space-y-3.5 pt-2">
+          <div className="space-y-3 pt-2">
             {classes.map((c) => {
               const isSelected = studentClass === c.key;
               return (
@@ -344,26 +344,26 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
                   key={c.key}
                   onClick={() => setStudentClass(c.key)}
                   className={cn(
-                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 cursor-pointer select-none group',
+                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-205 cursor-pointer select-none group',
                     isSelected
-                      ? 'border-[#FF6B00]/40 bg-[#FF6B00]/[0.06] shadow-[0_8px_24px_rgba(255,107,0,0.04)]'
-                      : 'border-white/[0.05] bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
+                      ? 'border-blue-500 bg-blue-50/50 shadow-sm'
+                      : 'border-slate-100 bg-slate-50/60 hover:border-slate-200 hover:bg-slate-100/30'
                   )}
                 >
                   <div>
-                    <p className="text-white font-extrabold text-sm sm:text-base leading-snug">{c.label}</p>
-                    <p className="text-slate-500 text-xs mt-0.5 font-sans font-semibold">{c.desc}</p>
+                    <p className={cn('font-extrabold text-sm sm:text-base leading-snug', isSelected ? 'text-blue-900' : 'text-slate-800')}>{c.label}</p>
+                    <p className="text-slate-400 text-xs mt-0.5 font-sans font-semibold">{c.desc}</p>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="hidden sm:inline-block text-[9px] bg-slate-900 border border-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
+                    <span className="hidden sm:inline-block text-[9px] bg-slate-100 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
                       Key {c.keybind}
                     </span>
                     <div className={cn(
                       'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200',
-                      isSelected ? 'bg-[#FF6B00] border-[#FF6B00] scale-105' : 'border-slate-700/60'
+                      isSelected ? 'bg-blue-600 border-blue-600 scale-105' : 'border-slate-300'
                     )}>
-                      {isSelected && <Check className="w-3 text-white stroke-[4]" />}
+                      {isSelected && <Check className="w-3 h-3 text-white stroke-[4]" />}
                     </div>
                   </div>
                 </button>
@@ -374,14 +374,14 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
           <div className="flex items-center gap-3 pt-4 shrink-0">
             <button
               onClick={() => go(2, -1)}
-              className="w-1/3 h-14 rounded-2xl border border-white/[0.08] bg-white/[0.02] text-slate-400 hover:text-white hover:bg-white/[0.04] text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              className="w-1/3 h-14 rounded-2xl border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
             <button
               disabled={!studentClass}
               onClick={() => go(4)}
-              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-[#E55A00] text-white disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md shadow-[#FF6B00]/10"
+              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/10"
             >
               Continue <ArrowRight className="w-5 h-5" />
             </button>
@@ -401,15 +401,15 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
       return (
         <div className="space-y-6 py-2">
           <div className="text-center space-y-2">
-            <h2 className="text-white text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
+            <h2 className="text-slate-900 text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
               Select your Language
             </h2>
-            <p className="text-slate-400 text-xs sm:text-sm font-sans font-medium leading-relaxed">
+            <p className="text-slate-550 text-xs sm:text-sm font-sans font-medium leading-relaxed">
               We sync your notes, lectures, and mock question sheets to this language.
             </p>
           </div>
 
-          <div className="space-y-3.5 pt-2">
+          <div className="space-y-3 pt-2">
             {languages.map((lang) => {
               const isSelected = prefLanguage === lang.key;
               return (
@@ -417,26 +417,26 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
                   key={lang.key}
                   onClick={() => setPrefLanguage(lang.key)}
                   className={cn(
-                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-200 cursor-pointer select-none group',
+                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-205 cursor-pointer select-none group',
                     isSelected
-                      ? 'border-[#FF6B00]/40 bg-[#FF6B00]/[0.06] shadow-[0_8px_24px_rgba(255,107,0,0.04)]'
-                      : 'border-white/[0.05] bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
+                      ? 'border-blue-500 bg-blue-50/50 shadow-sm'
+                      : 'border-slate-100 bg-slate-50/60 hover:border-slate-200 hover:bg-slate-100/30'
                   )}
                 >
                   <div>
-                    <p className="text-white font-extrabold text-sm sm:text-base leading-snug">{lang.label}</p>
-                    <p className="text-slate-500 text-xs mt-0.5 font-sans font-semibold">{lang.desc}</p>
+                    <p className={cn('font-extrabold text-sm sm:text-base leading-snug', isSelected ? 'text-blue-900' : 'text-slate-800')}>{lang.label}</p>
+                    <p className="text-slate-400 text-xs mt-0.5 font-sans font-semibold">{lang.desc}</p>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="hidden sm:inline-block text-[9px] bg-slate-900 border border-slate-800 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
+                    <span className="hidden sm:inline-block text-[9px] bg-slate-100 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
                       Key {lang.keybind}
                     </span>
                     <div className={cn(
                       'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200',
-                      isSelected ? 'bg-[#FF6B00] border-[#FF6B00] scale-105' : 'border-slate-700/60'
+                      isSelected ? 'bg-blue-600 border-blue-600 scale-105' : 'border-slate-300'
                     )}>
-                      {isSelected && <Check className="w-3 text-white stroke-[4]" />}
+                      {isSelected && <Check className="w-3 h-3 text-white stroke-[4]" />}
                     </div>
                   </div>
                 </button>
@@ -447,13 +447,13 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
           <div className="flex items-center gap-3 pt-4 shrink-0">
             <button
               onClick={() => go(3, -1)}
-              className="w-1/3 h-14 rounded-2xl border border-white/[0.08] bg-white/[0.02] text-slate-400 hover:text-white hover:bg-white/[0.04] text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              className="w-1/3 h-14 rounded-2xl border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </button>
             <button
               onClick={handleStartSynthesis}
-              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-[#FF6B00] hover:bg-[#E55A00] text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 cursor-pointer shadow-md shadow-[#FF6B00]/10"
+              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/10"
             >
               Launch Dashboard <ArrowRight className="w-5 h-5" />
             </button>
@@ -472,22 +472,22 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
       ];
 
       return (
-        <div className="space-y-8 py-8 text-center">
-          <div className="w-20 h-20 rounded-full bg-[#FF6B00]/10 border border-[#FF6B00]/25 flex items-center justify-center mx-auto shadow-md relative z-10 animate-spin">
-            <Loader2 className="w-10 h-10 text-[#FF6B00]" />
+        <div className="space-y-8 py-8 text-center animate-pulse-soft">
+          <div className="w-20 h-20 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto shadow-sm relative z-10">
+            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-white text-2xl font-black font-display tracking-tight leading-snug">
+            <h2 className="text-slate-900 text-2xl font-black font-display tracking-tight leading-snug">
               Creating Your Engine
             </h2>
-            <p className="text-slate-400 text-xs sm:text-sm font-sans font-medium max-w-xs mx-auto leading-relaxed">
+            <p className="text-slate-500 text-xs sm:text-sm font-sans font-medium max-w-xs mx-auto leading-relaxed">
               PrepEntrance is initializing your personalized dashboard modules.
             </p>
           </div>
 
           {/* Animated phase status blocks */}
-          <div className="space-y-3 max-w-sm mx-auto text-left bg-white/[0.02] border border-white/[0.05] rounded-3xl p-5 relative z-10">
+          <div className="space-y-3 max-w-sm mx-auto text-left bg-slate-50 border border-slate-100 rounded-3xl p-5 relative z-10">
             {phases.map((p, idx) => {
               const isActive = loadingPhase === idx;
               const isDone = loadingPhase > idx;
@@ -497,20 +497,20 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
                 <div
                   key={idx}
                   className={cn(
-                    'flex items-center gap-3 p-2.5 rounded-xl transition-all duration-300',
-                    isActive ? 'bg-[#FF6B00]/10 border border-[#FF6B00]/20' : 'opacity-40 border border-transparent'
+                    'flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300',
+                    isActive ? 'bg-blue-50 border-blue-100 shadow-xs' : 'opacity-40 border-transparent'
                   )}
                 >
                   <div className={cn(
                     'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border',
-                    isDone ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400' : 
-                    (isActive ? 'bg-[#FF6B00]/10 border-[#FF6B00]/25 text-[#FF6B00]' : 'bg-white/5 border-white/10 text-slate-500')
+                    isDone ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
+                    (isActive ? 'bg-blue-100 border-blue-200 text-blue-600' : 'bg-slate-100 border-slate-200/60 text-slate-400')
                   )}>
                     {isDone ? <Check className="w-4 h-4 stroke-[3.5]" /> : <Icon className={cn('w-4 h-4', isActive && 'animate-pulse')} />}
                   </div>
                   <span className={cn(
                     'text-[12.5px] font-sans font-bold leading-none tracking-normal',
-                    isDone ? 'text-slate-400 line-through' : (isActive ? 'text-white' : 'text-slate-500')
+                    isDone ? 'text-slate-400 line-through' : (isActive ? 'text-blue-900 font-extrabold' : 'text-slate-550')
                   )}>
                     {p.label}
                   </span>
@@ -530,19 +530,31 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
       
       <div className="w-full max-w-[480px] relative z-10 space-y-6 py-8">
         
-        {/* Dynamic horizontal progress bar indicator at top */}
+        {/* Dynamic progress bar indicator at top */}
         {step < 5 && (
-          <div className="w-full h-1.5 bg-slate-900 border border-slate-800 rounded-full overflow-hidden select-none shrink-0">
+          <div className="w-full h-1.5 bg-slate-100 border border-slate-200/60 rounded-full overflow-hidden select-none shrink-0">
             <motion.div
               animate={{ width: `${(step / 4) * 100}%` }}
               transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-              className="h-full bg-gradient-to-r from-[#FF6B00] to-[#E55A00] rounded-full"
+              className="h-full bg-blue-600 rounded-full"
             />
           </div>
         )}
 
-        {/* Premium glassmorphic card container */}
-        <div className="bg-white/[0.03] backdrop-blur-2xl rounded-3xl border border-white/[0.06] shadow-2xl shadow-black/40 p-7 sm:p-9">
+        {/* Premium light-themed glassmorphic card container */}
+        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-2xl shadow-slate-200/80 p-7 sm:p-9 relative">
+          
+          {/* Close button at top right */}
+          {step < 5 && (
+            <button 
+              onClick={() => navigate('/')} 
+              className="absolute right-6 top-6 p-1.5 rounded-full border border-slate-100 text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer z-20"
+              aria-label="Close onboarding"
+            >
+              ✕
+            </button>
+          )}
+
           <AnimatePresence mode="wait" custom={dir}>
             <motion.div
               key={step}

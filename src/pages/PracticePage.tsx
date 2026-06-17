@@ -6,8 +6,6 @@ import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from 
 import { getCuetChaptersBySubject } from '@/data/cuetSyllabus';
 import { Subchapter, getSubchapterById } from '@/data/subchapters';
 import { usePracticeQuestions } from '@/hooks/usePracticeQuestions';
-import { QuestionStatusWidget } from '@/components/practice/QuestionStatusWidget';
-import { checkAIAvailability } from '@/utils/aiAvailability';
 import SubchapterSelector from '@/components/practice/SubchapterSelector';
 import DifficultySelector from '@/components/practice/DifficultySelector';
 import QuizInterface, { QuizResult } from '@/components/practice/QuizInterface';
@@ -177,12 +175,7 @@ const PracticePage: React.FC = () => {
   const { questions, loading, error, generationStatus, generationMode, generateQuestions, submitPracticeReport, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
   const { markComplete: markCycleComplete } = useStudentCycle();
 
-  const [aiAvailabilityMode, setAiAvailabilityMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('fetching');
-  useEffect(() => {
-    checkAIAvailability().then(res => {
-      setAiAvailabilityMode(res.mode);
-    });
-  }, []);
+  // Sync activeSubject when examMode changes
 
   // Derive correct exam string from context
   const examParam = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE_MAINS';
@@ -309,7 +302,6 @@ const PracticePage: React.FC = () => {
     if (loading) {
       return (
         <div className="flex flex-col items-center justify-center py-32 animate-fade-in">
-          <QuestionStatusWidget mode={generationMode} className="mb-8" />
           <div className="w-16 h-16 rounded-full border-4 border-accent/20 border-t-accent animate-spin mb-6" />
           <h2 className="text-xl font-bold text-foreground mb-2">
             {generationStatus === 'generating'
@@ -347,31 +339,10 @@ const PracticePage: React.FC = () => {
       );
     }
 
-    if (error === 'generation_failed') {
-      return (
-        <div className="text-center py-20 animate-fade-in">
-          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-            <Brain className="w-8 h-8 text-destructive" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground mb-2">Generation timed out</h2>
-          <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
-            AI question generation can take up to 60 seconds on cold start. Click retry to try again.
-          </p>
-          <Button
-            onClick={() => handleDifficultySelect(state.difficulty)}
-            className="bg-accent text-primary-foreground rounded-xl font-bold"
-          >
-            Retry Generation
-          </Button>
-        </div>
-      );
-    }
-
     if (error) {
       return (
         <div className="text-center py-20">
-          <p className="text-destructive mb-4">{error}</p>
-          <Button onClick={() => handleDifficultySelect(state.difficulty)} variant="outline">Try again</Button>
+          <Button onClick={() => handleDifficultySelect(state.difficulty)} className="bg-accent text-primary-foreground font-bold">Try again</Button>
         </div>
       );
     }
@@ -379,10 +350,6 @@ const PracticePage: React.FC = () => {
     if (questions.length > 0) {
       return (
         <div className="space-y-4">
-          <div className="flex justify-between items-center bg-card border border-border/40 p-4 rounded-2xl">
-            <span className="text-sm font-bold text-muted-foreground">Active Quiz System Status:</span>
-            <QuestionStatusWidget mode={generationMode} />
-          </div>
           <QuizInterface 
             questions={questions} 
             subchapterName={state.node?.name || 'Mixed Syllabus'} 
@@ -425,7 +392,6 @@ const PracticePage: React.FC = () => {
               <div>
                 <div className="flex flex-wrap items-center gap-3">
                   <h1 className="text-3xl font-black text-white tracking-tight">{config.label} Training Center</h1>
-                  <QuestionStatusWidget mode={aiAvailabilityMode} />
                 </div>
                 <p className="text-[#C7D2FE] mt-1 text-sm font-semibold">Resonance-pw library of standard {config.label} chapters & question banks.</p>
               </div>
@@ -783,7 +749,6 @@ const PracticePage: React.FC = () => {
             {activePracticeTab === 'weakest-attack' && (
               <div className="space-y-6 max-w-xl mx-auto">
                 <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-6 text-center space-y-1.5 mb-2">
-                  <span className="text-[10px] text-red-400 uppercase font-black tracking-widest bg-red-500/10 px-2 py-0.5 border border-red-500/20 rounded">AI Warning Center</span>
                   <h3 className="text-xl font-black text-white">🔥 Weakest Topics Attack</h3>
                   <p className="text-xs text-[#94A3B8]">These topics have accuracy averages below 50% based on diagnostic sets.</p>
                 </div>

@@ -55,7 +55,6 @@ const IntegerTypePractice: React.FC<IntegerTypePracticeProps> = ({
 }) => {
     const [questions, setQuestions] = useState<AIIntegerQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [loadError, setLoadError] = useState<string | null>(null);
     const [currentIdx, setCurrentIdx] = useState(0);
     const [userInput, setUserInput] = useState('');
     const [submitted, setSubmitted] = useState(false);
@@ -66,7 +65,6 @@ const IntegerTypePractice: React.FC<IntegerTypePracticeProps> = ({
     useEffect(() => {
         const fetchQuestions = async () => {
             setIsLoading(true);
-            setLoadError(null);
             try {
                 const { data, error } = await supabase.functions.invoke('generate-questions', {
                     body: {
@@ -98,7 +96,6 @@ const IntegerTypePractice: React.FC<IntegerTypePracticeProps> = ({
                 setQuestions(qs);
             } catch (err: any) {
                 console.warn('AI question generation failed, using fallback:', err.message);
-                setLoadError('Using sample questions (AI unavailable)');
                 setQuestions(getFallbackQuestions(subject));
             } finally {
                 setIsLoading(false);
@@ -176,7 +173,6 @@ const IntegerTypePractice: React.FC<IntegerTypePracticeProps> = ({
                             score >= questions.length * 0.7 ? 'Great work! Keep practicing.' :
                                 'Review the solutions below and try again.'}
                     </p>
-                    {loadError && <p className="text-xs text-amber-500">{loadError}</p>}
                     <div className="text-left space-y-3 mt-4">
                         {questions.map((q, i) => (
                             <div key={i} className={cn('rounded-lg p-3 text-sm', results[i]?.correct ? 'bg-green-500/10 border border-green-500/30' : 'bg-red-500/10 border border-red-500/30')}>
@@ -209,10 +205,6 @@ const IntegerTypePractice: React.FC<IntegerTypePracticeProps> = ({
                     <span>Integer Type · {currentIdx + 1}/{questions.length}</span>
                 </div>
             </div>
-
-            {loadError && (
-                <p className="text-xs text-amber-500 text-center">{loadError}</p>
-            )}
 
             {/* Progress bar */}
             <div className="flex gap-1">

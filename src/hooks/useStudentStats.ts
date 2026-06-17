@@ -99,7 +99,7 @@ export const useStudentStats = () => {
         todayDone,
         weakTopic: undefined,
         lastActivityTopic: undefined,
-        loading: true
+        loading: false,
       });
 
       // 3. Fetch most recent report for weak topic / context

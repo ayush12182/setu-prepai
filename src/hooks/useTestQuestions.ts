@@ -5,27 +5,29 @@ import { Question } from './usePracticeQuestions';
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { generateQuestionsGemini } from '@/lib/gemini';
+import { generateQuestions as getUnifiedQuestions } from '@/services/questionGenerator';
+import { getOfflineQuestions } from '@/data/offlineQuestionBank';
 
 const mapDbQuestionToQuestion = (dbQ: any): Question => {
   return {
     id: dbQ.id,
-    node_id: dbQ.chapter_id || dbQ.topic_id || 'chapter',
-    type: (dbQ.question_type || 'MCQ') as any,
+    node_id: dbQ.node_id || dbQ.chapter_id || dbQ.topic_id || 'chapter',
+    type: (dbQ.question_type || dbQ.type || 'MCQ') as any,
     exam_type: dbQ.exam_type || 'JEE',
     difficulty: (dbQ.difficulty || 'medium').toLowerCase() as any,
     question_text: dbQ.content?.question || dbQ.question_text || '',
-    options: dbQ.content?.options || {
+    options: dbQ.content?.options || dbQ.options || {
       A: dbQ.option_a || '',
       B: dbQ.option_b || '',
       C: dbQ.option_c || '',
       D: dbQ.option_d || ''
     },
     answer: dbQ.answer || dbQ.correct_option || 'A',
-    explanation: dbQ.metadata?.explanation || dbQ.explanation || '',
+    explanation: dbQ.metadata?.explanation || dbQ.explanation || dbQ.explanation_text || '',
     concept_tested: dbQ.metadata?.concept || dbQ.concept_tested || 'General',
     common_mistake: dbQ.metadata?.common_mistake,
     is_verified: dbQ.is_verified,
-    generation_model: dbQ.metadata?.model,
+    generation_model: dbQ.metadata?.model || dbQ.generation_model,
   };
 };
 
@@ -293,10 +295,21 @@ export interface ChapterSelection {
   subchapterName?: string;
 }
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string = 'Operation timed out'): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(errorMessage)), timeoutMs);
+    promise.then(
+      res => { clearTimeout(timer); resolve(res); },
+      err => { clearTimeout(timer); reject(err); }
+    );
+  });
+}
+
 export const useTestQuestions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generationMode, setGenerationMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('idle');
   const { examMode, isCuet, isNeet } = useExamMode();
   const examModeUpper = examMode.toUpperCase() as 'JEE' | 'NEET' | 'CUET';
 
@@ -308,6 +321,7 @@ export const useTestQuestions = () => {
     setLoading(true);
     setError(null);
     setQuestions([]);
+    setGenerationMode('fetching');
 
     try {
       const allQuestions: Question[] = [];
@@ -326,11 +340,14 @@ export const useTestQuestions = () => {
           query = query.eq('subchapter_id', chapter.subchapterId);
         }
 
-        const { data: dbData, error: fetchError } = await query;
+        const { data: dbData, error: fetchError } = await withTimeout(
+          Promise.resolve(query),
+          2500,
+          'Database query timed out'
+        );
 
         if (fetchError) {
-          console.error('Error fetching questions for chapter:', chapter.chapterId, fetchError);
-          continue;
+          throw fetchError;
         }
 
         let chapterQuestions: any[] = [];
@@ -390,50 +407,59 @@ export const useTestQuestions = () => {
             return mapDbQuestionToQuestion(shuffledQ);
           });
           allQuestions.push(...mapped);
+          setGenerationMode('ai');
         } else {
-          // Generate questions if none exist
-          let generatedData = null;
-          let generatedError = null;
+          // Calculate the remaining count needed
+          const gap = questionsPerChapter - chapterQuestions.length;
+          
           try {
-            const { data, error: fnError } = await supabase.functions.invoke('generate-questions', {
-              body: {
-                subchapterId: chapter.subchapterId || chapter.chapterId,
-                subchapterName: chapter.subchapterName || chapter.chapterName,
-                chapterId: chapter.chapterId,
-                chapterName: chapter.chapterName,
+            const genResult = await withTimeout(
+              getUnifiedQuestions({
+                exam: examModeUpper,
                 subject: chapter.subject,
+                chapter: chapter.chapterName,
+                subchapter: chapter.subchapterName || chapter.chapterName,
                 difficulty: 'medium',
-                count: questionsPerChapter,
-                examMode: examModeUpper,
-              }
-            });
-            generatedData = data;
-            generatedError = fnError;
-          } catch (invokeErr) {
-            console.warn('Failed to invoke generate-questions edge function:', invokeErr);
-            generatedError = invokeErr;
-          }
-
-          if (!generatedError && generatedData?.questions) {
-            const mappedQuestions = generatedData.questions.map((q: any) => {
+                count: gap
+              }),
+              3000,
+              'Unified question generation timed out'
+            );
+            
+            if (genResult?.questions?.length > 0) {
+              const mapped = genResult.questions.map((q: any) => {
+                const shuffledQ = shuffleQuestionOptions(q);
+                return mapDbQuestionToQuestion(shuffledQ);
+              });
+              allQuestions.push(...mapped);
+              setGenerationMode(genResult.generationMode);
+            } else {
+              // Final fallback to getOfflineQuestions directly if result is empty
+              const offlineQs = getOfflineQuestions(chapter.subject, chapter.chapterName, 'medium', gap);
+              const mapped = offlineQs.map((q: any) => {
+                const shuffledQ = shuffleQuestionOptions(q);
+                return mapDbQuestionToQuestion(shuffledQ);
+              });
+              allQuestions.push(...mapped);
+              setGenerationMode('offline');
+            }
+          } catch (genErr) {
+            console.error('Unified generation failed for chapter:', chapter.chapterName, genErr);
+            
+            // Final fallback to getOfflineQuestions directly
+            const offlineQs = getOfflineQuestions(chapter.subject, chapter.chapterName, 'medium', gap);
+            const mapped = offlineQs.map((q: any) => {
               const shuffledQ = shuffleQuestionOptions(q);
               return mapDbQuestionToQuestion(shuffledQ);
             });
-            allQuestions.push(...mappedQuestions);
-          } else {
-            // Frontend Gemini fallback
-            try {
-              const geminiQs = await generateQuestionsGemini(
-                chapter.chapterName, examModeUpper, 'medium', questionsPerChapter
-              );
-              allQuestions.push(...(geminiQs as any[]));
-            } catch (geminiErr) {
-              console.warn('Test questions AI generation offline, launching simulator:', geminiErr);
-              const mockQs = generateOfflineMockQuestions(chapter.chapterName, examModeUpper, 'medium', questionsPerChapter);
-              allQuestions.push(...mockQs);
-            }
+            allQuestions.push(...mapped);
+            setGenerationMode('offline');
           }
         }
+      }
+
+      if (!allQuestions || allQuestions.length === 0) {
+        throw new Error('No questions fetched or generated');
       }
 
       // Shuffle all questions
@@ -441,10 +467,25 @@ export const useTestQuestions = () => {
       setQuestions(shuffledAll);
       return shuffledAll;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load questions';
-      setError(message);
-      toast.error(message);
-      return null;
+      console.warn('fetchMixedTestQuestions failed, silently falling back to offline generator:', err);
+      const fallbackQs: Question[] = [];
+      for (const chapter of chapters) {
+        try {
+          const offlineQs = getOfflineQuestions(chapter.subject, chapter.chapterName, 'medium', questionsPerChapter);
+          const mapped = offlineQs.map((q: any) => {
+            const shuffledQ = shuffleQuestionOptions(q);
+            return mapDbQuestionToQuestion(shuffledQ);
+          });
+          fallbackQs.push(...mapped);
+        } catch (offlineErr) {
+          console.error('Offline questions failed inside catch:', offlineErr);
+        }
+      }
+      const shuffledAll = fallbackQs.sort(() => Math.random() - 0.5);
+      setQuestions(shuffledAll);
+      setGenerationMode('offline');
+      setError(null);
+      return shuffledAll;
     } finally {
       setLoading(false);
     }
@@ -460,6 +501,7 @@ export const useTestQuestions = () => {
     setLoading(true);
     setError(null);
     setQuestions([]);
+    setGenerationMode('fetching');
 
     try {
       let query = supabase
@@ -482,7 +524,11 @@ export const useTestQuestions = () => {
         query = query.gte('pyq_year', yearRange.start).lte('pyq_year', yearRange.end);
       }
 
-      const { data: pyqQuestions, error: fetchError } = await query.limit(count);
+      const { data: pyqQuestions, error: fetchError } = await withTimeout(
+        Promise.resolve(query.limit(count)),
+        2500,
+        'Database query timed out'
+      );
 
       if (fetchError) {
         throw fetchError;
@@ -496,6 +542,7 @@ export const useTestQuestions = () => {
           return mapDbQuestionToQuestion(shuffledQ);
         });
         setQuestions(mapped);
+        setGenerationMode('ai');
         return mapped;
       }
 
@@ -509,7 +556,7 @@ export const useTestQuestions = () => {
       let generatedData = null;
       let generatedError = null;
       try {
-        const { data, error: fnError } = await supabase.functions.invoke('generate-pyq-questions', {
+        const invokePromise = supabase.functions.invoke('generate-pyq-questions', {
           body: {
             subject,
             chapterId,
@@ -518,6 +565,11 @@ export const useTestQuestions = () => {
             examMode: examModeUpper,
           }
         });
+        const { data, error: fnError } = await withTimeout(
+          invokePromise,
+          3000,
+          'Edge function invocation timed out'
+        );
         generatedData = data;
         generatedError = fnError;
       } catch (invokeErr) {
@@ -525,21 +577,43 @@ export const useTestQuestions = () => {
         generatedError = invokeErr;
       }
 
-      if (generatedError || generatedData?.error) {
-        // Frontend Gemini fallback for PYQ-style questions
+      // If edge function invocation failed, invoke unified generator or local simulator
+      if (generatedError || !generatedData?.questions?.length) {
         try {
-          const geminiQs = await generateQuestionsGemini(
-            subject || examModeUpper, examModeUpper, 'medium', count
+          const genPromise = getUnifiedQuestions({
+            exam: examModeUpper,
+            subject: subject || examModeUpper,
+            chapter: chapterId || 'General',
+            difficulty: 'medium',
+            count
+          });
+          const genResult = await withTimeout(
+            genPromise,
+            3000,
+            'Unified PYQ generation timed out'
           );
-          setQuestions(geminiQs as any[]);
-          return geminiQs as any[];
-        } catch (geminiErr) {
-          console.warn('PYQ AI generation offline, launching simulator:', geminiErr);
-          toast.info('API keys offline. Launching high-fidelity local simulator.');
-          const mockQs = generateOfflineMockQuestions(subject || examModeUpper, examModeUpper, 'medium', count);
-          setQuestions(mockQs);
-          return mockQs;
+          if (genResult?.questions?.length > 0) {
+            const mapped = genResult.questions.map((q: any) => {
+              const shuffledQ = shuffleQuestionOptions(q);
+              return mapDbQuestionToQuestion(shuffledQ);
+            });
+            setQuestions(mapped);
+            setGenerationMode(genResult.generationMode);
+            return mapped;
+          }
+        } catch (genErr) {
+          console.warn('Unified PYQ generation failed:', genErr);
         }
+
+        // Final fallback to getOfflineQuestions directly
+        const offlineQs = getOfflineQuestions(subject || examModeUpper, chapterId || 'General', 'medium', count);
+        const mapped = offlineQs.map((q: any) => {
+          const shuffledQ = shuffleQuestionOptions(q);
+          return mapDbQuestionToQuestion(shuffledQ);
+        });
+        setQuestions(mapped);
+        setGenerationMode('offline');
+        return mapped;
       }
 
       if (generatedData?.questions) {
@@ -548,16 +622,29 @@ export const useTestQuestions = () => {
           return mapDbQuestionToQuestion(shuffledQ);
         });
         setQuestions(mappedQuestions);
+        setGenerationMode('ai');
         return mappedQuestions;
       }
 
-      toast.info(`No PYQs found. Generating ${examMode}-style questions...`);
-      return [];
+      const offlineQs = getOfflineQuestions(subject || examModeUpper, chapterId || 'General', 'medium', count);
+      const mapped = offlineQs.map((q: any) => {
+        const shuffledQ = shuffleQuestionOptions(q);
+        return mapDbQuestionToQuestion(shuffledQ);
+      });
+      setQuestions(mapped);
+      setGenerationMode('offline');
+      return mapped;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load PYQ questions';
-      setError(message);
-      toast.error(message);
-      return null;
+      console.warn('fetchPYQQuestions failed, silently falling back to offline generator:', err);
+      const offlineQs = getOfflineQuestions(subject || examModeUpper, chapterId || 'General', 'medium', count);
+      const mapped = offlineQs.map((q: any) => {
+        const shuffledQ = shuffleQuestionOptions(q);
+        return mapDbQuestionToQuestion(shuffledQ);
+      });
+      setQuestions(mapped);
+      setGenerationMode('offline');
+      setError(null);
+      return mapped;
     } finally {
       setLoading(false);
     }
@@ -568,14 +655,20 @@ export const useTestQuestions = () => {
     setLoading(true);
     setError(null);
     setQuestions([]);
+    setGenerationMode('fetching');
 
     try {
       let generatedData = null;
       let generatedError = null;
       try {
-        const { data, error: fnError } = await supabase.functions.invoke('generate-adaptive-test', {
+        const invokePromise = supabase.functions.invoke('generate-adaptive-test', {
           body: { count }
         });
+        const { data, error: fnError } = await withTimeout(
+          invokePromise,
+          3000,
+          'Adaptive edge function timed out'
+        );
         generatedData = data;
         generatedError = fnError;
       } catch (invokeErr) {
@@ -584,20 +677,41 @@ export const useTestQuestions = () => {
       }
 
       if (generatedError || generatedData?.error || !generatedData?.questions?.length) {
-        // Frontend Gemini fallback for adaptive test
         try {
-          const geminiQs = await generateQuestionsGemini(
-            examModeUpper, examModeUpper, 'mixed', count
+          const genPromise = getUnifiedQuestions({
+            exam: examModeUpper,
+            subject: examModeUpper,
+            chapter: 'Adaptive Practice',
+            difficulty: 'medium',
+            count
+          });
+          const genResult = await withTimeout(
+            genPromise,
+            3000,
+            'Unified adaptive generation timed out'
           );
-          setQuestions(geminiQs as any[]);
-          return geminiQs as any[];
-        } catch (geminiErr) {
-          console.warn('Adaptive AI generation offline, launching simulator:', geminiErr);
-          toast.info('API keys offline. Launching high-fidelity local simulator.');
-          const mockQs = generateOfflineMockQuestions('Adaptive Practice', examModeUpper, 'medium', count);
-          setQuestions(mockQs);
-          return mockQs;
+          if (genResult?.questions?.length > 0) {
+            const mapped = genResult.questions.map((q: any) => {
+              const shuffledQ = shuffleQuestionOptions(q);
+              return mapDbQuestionToQuestion(shuffledQ);
+            });
+            setQuestions(mapped);
+            setGenerationMode(genResult.generationMode);
+            return mapped;
+          }
+        } catch (genErr) {
+          console.warn('Unified adaptive generation failed:', genErr);
         }
+
+        // Final fallback to getOfflineQuestions directly
+        const offlineQs = getOfflineQuestions(examModeUpper, 'Adaptive Practice', 'medium', count);
+        const mapped = offlineQs.map((q: any) => {
+          const shuffledQ = shuffleQuestionOptions(q);
+          return mapDbQuestionToQuestion(shuffledQ);
+        });
+        setQuestions(mapped);
+        setGenerationMode('offline');
+        return mapped;
       }
 
       const mappedQuestions = (generatedData.questions as any[]).map((q: any) => {
@@ -605,12 +719,19 @@ export const useTestQuestions = () => {
         return mapDbQuestionToQuestion(shuffledQ);
       });
       setQuestions(mappedQuestions);
+      setGenerationMode('ai');
       return mappedQuestions;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to generate adaptive test';
-      setError(message);
-      toast.error(message);
-      return null;
+      console.warn('fetchAdaptiveQuestions failed, silently falling back to offline generator:', err);
+      const offlineQs = getOfflineQuestions(examModeUpper, 'Adaptive Practice', 'medium', count);
+      const mapped = offlineQs.map((q: any) => {
+        const shuffledQ = shuffleQuestionOptions(q);
+        return mapDbQuestionToQuestion(shuffledQ);
+      });
+      setQuestions(mapped);
+      setGenerationMode('offline');
+      setError(null);
+      return mapped;
     } finally {
       setLoading(false);
     }
@@ -642,6 +763,7 @@ export const useTestQuestions = () => {
     questions,
     loading,
     error,
+    generationMode,
     fetchMixedTestQuestions,
     fetchPYQQuestions,
     fetchAdaptiveQuestions,

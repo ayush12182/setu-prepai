@@ -174,29 +174,28 @@ export const useTrialSystem = () => {
         }
     }, [refreshProfile]);
 
-    const upgradeToPro = useCallback(async () => {
-        setLocalLoading(true);
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('Not logged in');
+    /**
+   * SECURE: Refresh subscription status from server after a payment event.
+   * The actual subscription_status field is ONLY ever written by the server-side
+   * Cashfree webhook (cashfree-webhook edge function). This function just re-fetches.
+   * Do NOT add direct DB writes to subscription_status here.
+   */
+  const upgradeToPro = useCallback(async () => {
+    setLocalLoading(true);
+    try {
+      // Re-check subscription from the server — this reads what the webhook wrote
+      if (refreshProfile) {
+        await refreshProfile();
+      }
+      toast.success('🚀 Welcome to PrepEntrance Pro! Enjoy unlimited access.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to verify subscription';
+      toast.error(msg);
+    } finally {
+      setLocalLoading(false);
+    }
+  }, [refreshProfile]);
 
-            const { error } = await supabase
-                .from('profiles')
-                .update({ subscription_status: 'active' })
-                .eq('user_id', user.id);
-
-            if (error) throw error;
-            toast.success('🚀 Welcome to PrepEntrance Pro!');
-            if (refreshProfile) {
-                await refreshProfile();
-            }
-        } catch (err) {
-            const msg = err instanceof Error ? err.message : 'Failed to upgrade';
-            toast.error(msg);
-        } finally {
-            setLocalLoading(false);
-        }
-    }, [refreshProfile]);
 
     const extendTrial = useCallback(async (days: number) => {
         setLocalLoading(true);

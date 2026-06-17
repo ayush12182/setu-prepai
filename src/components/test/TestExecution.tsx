@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { JeeQuestion, JeeOption } from '@/lib/jeeMathRenderer';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TestConfig {
   type: 'chapter' | 'mixed' | 'pyq' | 'adaptive';
@@ -194,6 +195,9 @@ const TestExecution: React.FC<TestExecutionProps> = ({
   onComplete,
   onExit
 }) => {
+  const { profile } = useAuth();
+  const candidateName = profile?.full_name || 'Student';
+
   const [step, setStep] = useState<'loading' | 'details' | 'instructions' | 'quiz' | 'results'>('loading');
   const [testAnswers, setTestAnswers] = useState<TestAnswer[]>([]);
   const [totalTime, setTotalTime] = useState(0);
@@ -216,6 +220,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
   const [showScratchpad, setShowScratchpad] = useState(false);
   const [openAccordion, setOpenAccordion] = useState<'syllabus' | 'marking' | null>('syllabus');
   const [declarationChecked, setDeclarationChecked] = useState(false);
+
   const [syllabusModalText, setSyllabusModalText] = useState<string | null>(null);
 
   // Point Loss Analyzer specific triggers
@@ -225,6 +230,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
     questions,
     loading,
     error,
+    generationMode,
     fetchMixedTestQuestions,
     fetchPYQQuestions,
     fetchAdaptiveQuestions,
@@ -563,7 +569,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
               <ArrowLeft className="w-4 h-4" />
             </button>
             <div>
-              <h2 className="text-xl font-bold text-slate-850">{getTestTitle()}</h2>
+                <h2 className="text-xl font-bold text-slate-850">{getTestTitle()}</h2>
               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">
                 Release Date: 15 Apr, 9:00 am
               </span>
@@ -741,7 +747,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
               </svg>
             </div>
             <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider text-center mt-3 leading-relaxed">
-              Candidate<br/>Ayush Dixit
+              Candidate<br/>{candidateName}
             </span>
           </div>
         </div>
@@ -801,10 +807,12 @@ const TestExecution: React.FC<TestExecutionProps> = ({
         
         {/* Fixed Top Header bar */}
         <div className="bg-white border-b border-slate-200 px-6 py-2.5 shrink-0 flex items-center justify-between z-20">
-          <h2 className="text-sm font-black text-[#FF6B00] tracking-wider uppercase flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-ping" />
-            {getTestTitle().toUpperCase()}
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-sm font-black text-[#FF6B00] tracking-wider uppercase flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-ping" />
+              {getTestTitle().toUpperCase()}
+            </h2>
+          </div>
           
           <div className="flex items-center gap-3">
             {/* Drawers toggler buttons */}
@@ -974,7 +982,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
                 </div>
                 <div className="text-xs">
                   <div className="text-slate-404 font-bold uppercase tracking-widest text-[8px]">Candidate Name</div>
-                  <div className="font-bold text-slate-800 leading-tight">Ayush Dixit</div>
+                  <div className="font-bold text-slate-800 leading-tight">{candidateName}</div>
                 </div>
               </div>
 

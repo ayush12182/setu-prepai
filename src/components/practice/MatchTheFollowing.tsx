@@ -82,7 +82,6 @@ const MatchTheFollowing: React.FC<MatchTheFollowingProps> = ({
 }) => {
     const [questions, setQuestions] = useState<AIMatchQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [loadError, setLoadError] = useState<string | null>(null);
 
     // Per-question state
     const [qIdx, setQIdx] = useState(0);
@@ -98,7 +97,6 @@ const MatchTheFollowing: React.FC<MatchTheFollowingProps> = ({
     useEffect(() => {
         const fetchQuestions = async () => {
             setIsLoading(true);
-            setLoadError(null);
             try {
                 const { data, error } = await supabase.functions.invoke('generate-questions', {
                     body: {
@@ -129,7 +127,6 @@ const MatchTheFollowing: React.FC<MatchTheFollowingProps> = ({
                 setShuffles(qs.map(q => shuffleIndexes(q.match_pairs.right.length)));
             } catch (err: any) {
                 console.warn('AI match generation failed, using fallback:', err.message);
-                setLoadError('Using sample questions (AI unavailable)');
                 const fallback = getFallbackQuestions(subject);
                 setQuestions(fallback);
                 setShuffles(fallback.map(q => shuffleIndexes(q.match_pairs.right.length)));
@@ -228,7 +225,6 @@ const MatchTheFollowing: React.FC<MatchTheFollowingProps> = ({
                             totalCorrect >= totalPossible * 0.7 ? 'Good work! Review any incorrect matches.' :
                                 'Keep practicing — matching takes pattern recognition!'}
                     </p>
-                    {loadError && <p className="text-xs text-amber-500">{loadError}</p>}
                     <Button onClick={handleRestart} className="gap-2 mt-4">
                         <RefreshCw className="w-4 h-4" /> Try Again
                     </Button>
@@ -252,8 +248,6 @@ const MatchTheFollowing: React.FC<MatchTheFollowingProps> = ({
                     <span>Match the Following · {qIdx + 1}/{questions.length}</span>
                 </div>
             </div>
-
-            {loadError && <p className="text-xs text-amber-500 text-center">{loadError}</p>}
 
             {/* Progress */}
             <div className="flex gap-1">

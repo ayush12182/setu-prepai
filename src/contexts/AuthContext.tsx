@@ -43,7 +43,7 @@ interface Profile {
   class: string | null;
   target_exam: string | null;
   student_level: string | null;
-  user_type: 'student' | 'teacher' | 'admin' | null;
+  user_type: 'student' | 'teacher' | 'admin' | 'b2b_institution' | null;
   organization_id: string | null;
   institution_name: string | null;
   teacher_id: string | null;
@@ -51,7 +51,20 @@ interface Profile {
   subjects: string[] | null;
   mentor_name?: string | null;
   mentor_avatar?: string | null;
+  // Subscription & trial fields
+  subscription_status?: 'trial' | 'active' | 'expired' | 'cancelled' | null;
+  trial_started_at?: string | null;
+  trial_ends_at?: string | null;
+  // Profile metadata
+  created_at?: string | null;
+  updated_at?: string | null;
+  // Student personalisation
+  target_year?: string | null;
+  cohortName?: string | null;
+  diagnostic_completed?: boolean | null;
+  exam_goal?: string | null;
 }
+
 
 interface SubscriptionState {
   subscribed: boolean;

@@ -20,6 +20,16 @@ async function run() {
       console.log("Test count success. Exact count of rows in questions:", count);
     }
 
+    const { data: pdfData, error: pdfError } = await supabase
+      .from('questions')
+      .select('*, pdf_sources(*)')
+      .limit(1);
+    if (pdfError) {
+      console.error("pdf_sources query error (with relation):", pdfError);
+    } else {
+      console.log("pdf_sources query succeeded (with relation). Rows:", pdfData.length);
+    }
+
     const { data: bankData, error: bankError, count: bankCount } = await supabase
       .from('questions_bank')
       .select('*', { count: 'exact', head: true });

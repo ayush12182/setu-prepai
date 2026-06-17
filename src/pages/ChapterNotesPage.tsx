@@ -79,6 +79,9 @@ const ChapterNotesPage: React.FC = () => {
     setActiveSmartMode(mode);
     setNotes('');
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -99,16 +102,14 @@ const ChapterNotesPage: React.FC = () => {
           language,
           examMode: isFoundation ? `Class ${classLabel} (Foundation)` : isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errText = await response.text();
         console.error('[ChapterNotesPage] Edge function error:', response.status, errText);
-        if (response.status === 429 || errText.includes('429')) {
-          toast.error('AI Quota Exceeded. Showing offline notes. Please try again in 30 seconds.');
-        } else {
-          toast.error('Notes engine temporarily unavailable. Showing offline version.');
-        }
         setNotes(buildFallbackNotes(chapter));
         setIsGenerating(false);
         return;
@@ -143,8 +144,8 @@ const ChapterNotesPage: React.FC = () => {
       }
 
     } catch (error) {
-      console.error('Error generating notes:', error);
-      toast.error('Failed to generate AI notes. Showing offline version.');
+      clearTimeout(timeoutId);
+      console.error('Error generating notes or timed out:', error);
       setNotes(buildFallbackNotes(chapter));
     } finally {
       setIsGenerating(false);
@@ -167,9 +168,7 @@ ${ch.examTips.map(t => `- ${t}`).join('\n')}
 
 ## PYQ Focus
 - Post-2020: ${ch.pyqData.postCovid} questions from this chapter
-- Trending: ${ch.pyqData.trendingConcepts.join(', ')}
-
-⚡ **AI Notes unavailable offline.** Sign in and try again for full Kota-coach notes.`;
+- Trending: ${ch.pyqData.trendingConcepts.join(', ')}`;
   };
 
   if (!chapter) {

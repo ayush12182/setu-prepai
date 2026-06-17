@@ -69,11 +69,19 @@ export const NotesSection: React.FC<NotesSectionProps> = ({
   // Error state
   if (error) {
     return (
-      <div className="bg-card border border-destructive/30 rounded-xl p-8 text-center">
-        <p className="text-destructive mb-4">{error}</p>
-        <Button onClick={onGenerate} variant="outline">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Try Again
+      <div className="bg-card border border-border rounded-xl p-8 text-center">
+        <div className="w-16 h-16 rounded-full bg-prepentrance-saffron/10 flex items-center justify-center mx-auto mb-4">
+          <BookOpen className="w-8 h-8 text-prepentrance-saffron" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground mb-2">
+          1-Day Exam Revision Sheet
+        </h3>
+        <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+          Premium topper-style short notes with perfect visual hierarchy. Highly compressed, formula-first, and optimized for fast recall.
+        </p>
+        <Button onClick={onGenerate} className="bg-gradient-to-r from-prepentrance-saffron to-prepentrance-saffron/80 text-white">
+          <Sparkles className="w-4 h-4 mr-2" />
+          Generate Sheet
         </Button>
       </div>
     );

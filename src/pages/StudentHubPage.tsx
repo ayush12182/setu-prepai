@@ -160,13 +160,16 @@ export default function StudentHubPage() {
     }, 1200);
   };
 
+  // Derive first name from profile
+  const firstName = profile?.full_name?.split(' ')[0] || 'Student';
+
   // Get Dynamic Greeting based on selected Lifecycle stage and streaks
   const getContextualGreeting = () => {
     if (dashboardStage === 0) {
-      return "👋 Welcome to PrepEntrance, Ayush";
+      return `👋 Welcome to PrepEntrance, ${firstName}`;
     }
     if (dashboardStage === 1) {
-      return "Good Evening Ayush 👋 | We know very little about your preparation right now. Let's discover your strengths.";
+      return `Good Evening ${firstName} 👋 | We know very little about your preparation right now. Let's discover your strengths.`;
     }
     if (dashboardStage === 2) {
       return "🔥 Subject Analysis Underway | We are analyzing your study sessions to validate your strengths.";
@@ -174,7 +177,7 @@ export default function StudentHubPage() {
     if (dashboardStage === 3) {
       return "🚀 Starting Point Identified | First rank projection unlocked based on your diagnostic mock scores.";
     }
-    return "⚡ 43 Days Until JEE Main | Focus Areas: Electrostatics, Modern Physics, Functions.";
+    return `⚡ Focus Areas: Electrostatics, Modern Physics, Functions — Let's go, ${firstName}!`;
   };
 
   const examLabel = isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE';
@@ -188,38 +191,39 @@ export default function StudentHubPage() {
       <div className="min-h-screen pb-28 pt-6 bg-[#06080D] text-white">
         <div className="max-w-[1240px] mx-auto px-4 lg:px-8 space-y-8">
 
-          {/* ⚙️ TEST CONTROLLER HEADER: switch lifecycle stages */}
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">Developer Debug tools</span>
-              <h3 className="text-xs font-black text-white/60 mt-1">TEST 5-STAGE EVOLUTIONARY LIFECYCLE:</h3>
+          {/* ⚙️ DEV ONLY: Lifecycle stage switcher — hidden in production */}
+          {import.meta.env.VITE_DEV_BYPASS === 'true' && (
+            <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">Developer Debug tools</span>
+                <h3 className="text-xs font-black text-white/60 mt-1">TEST 5-STAGE EVOLUTIONARY LIFECYCLE:</h3>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { s: 0, label: "Day 0: Setup Form" },
+                  { s: 1, label: "Day 1: Diagnostic" },
+                  { s: 2, label: "Day 3: Momentum" },
+                  { s: 3, label: "Day 7: First AIR" },
+                  { s: 4, label: "Day 30: Command Center" }
+                ].map((stage) => (
+                  <button
+                    key={stage.s}
+                    onClick={() => {
+                      setDashboardStage(stage.s);
+                      setTasks(prev => prev.map(t => ({ ...t, done: false })));
+                    }}
+                    className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all ${
+                      dashboardStage === stage.s 
+                        ? 'bg-accent text-primary shadow-lg shadow-accent/20' 
+                        : 'bg-white/[0.03] text-white/60 hover:bg-white/[0.06]'
+                    }`}
+                  >
+                    {stage.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                { s: 0, label: "Day 0: Setup Form" },
-                { s: 1, label: "Day 1: Diagnostic" },
-                { s: 2, label: "Day 3: Momentum" },
-                { s: 3, label: "Day 7: First AIR" },
-                { s: 4, label: "Day 30: Command Center" }
-              ].map((stage) => (
-                <button
-                  key={stage.s}
-                  onClick={() => {
-                    setDashboardStage(stage.s);
-                    // reset checklist state for testing consistency
-                    setTasks(prev => prev.map(t => ({ ...t, done: false })));
-                  }}
-                  className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-all ${
-                    dashboardStage === stage.s 
-                      ? 'bg-accent text-primary shadow-lg shadow-accent/20' 
-                      : 'bg-white/[0.03] text-white/60 hover:bg-white/[0.06]'
-                  }`}
-                >
-                  {stage.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          )}
 
           {/* DYNAMIC CONTEXTUAL GREETING BANNER */}
           <div className="text-sm font-semibold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500 uppercase tracking-widest bg-white/[0.01] border border-white/[0.04] p-3 rounded-2xl text-center">
@@ -887,7 +891,7 @@ export default function StudentHubPage() {
                       <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
                         {(() => {
                           const hr = new Date().getHours();
-                          const name = profile?.fullName?.split(' ')[0] || 'Ayush';
+                          const name = profile?.full_name?.split(' ')[0] || 'Student';
                           if (hr < 12) return `Good Morning, ${name} 👋`;
                           if (hr < 17) return `Good Afternoon, ${name} 👋`;
                           return `Good Evening, ${name} 👋`;
@@ -992,7 +996,7 @@ export default function StudentHubPage() {
                       <div>
                         <h4 className="text-xs font-bold uppercase tracking-wider text-orange-400">PrepEntrance Coach</h4>
                         <p className="text-xs text-slate-300 mt-0.5 leading-relaxed font-medium">
-                          "{profile?.fullName?.split(' ')[0] || 'Ayush'}, Functions is currently your highest ROI chapter. Finish the PYQ test today to unlock an expected gain of <strong className="text-white">+3 to +5 marks</strong> in your next mock."
+                          "{firstName}, practice your weak chapters today to unlock your highest score gains in your next mock."
                         </p>
                       </div>
                     </div>

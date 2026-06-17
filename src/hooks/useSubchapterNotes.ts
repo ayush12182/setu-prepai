@@ -223,6 +223,9 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
       return;
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token || SUPABASE_ANON_KEY;
@@ -245,7 +248,10 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
           examMode,
           jeeSubMode: isNeet ? undefined : jeeSubMode,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`Failed to generate notes: ${response.status}`);
@@ -253,7 +259,6 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
 
       const rawJsonString = await response.text();
       try {
-        // Strip out any potential markdown block backticks just in case the LLM ignored instructions
         const cleanJsonString = rawJsonString.replace(/^```json\n?/, '').replace(/\n?```$/, '');
         const data = JSON.parse(cleanJsonString);
         setNotes(data as StructuredNotes);
@@ -263,9 +268,15 @@ export const useSubchapterNotes = (): UseSubchapterNotesResult => {
       }
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error generating notes';
-      setError(errorMessage);
-      console.error('Notes generation error:', err);
+      clearTimeout(timeoutId);
+      console.warn('AI notes generation failed or timed out, silently falling back to mock notes:', err);
+      try {
+        const mockData = getMockNotes(subchapter.name, chapterName, subject, examMode);
+        setNotes(mockData);
+      } catch (fallbackErr) {
+        console.error('Mock notes fallback failed:', fallbackErr);
+      }
+      setError(null);
     } finally {
       setIsLoading(false);
     }

@@ -11,8 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { generateQuestions } from '@/services/questionGenerator';
-import { QuestionStatusWidget } from '@/components/practice/QuestionStatusWidget';
-import { checkAIAvailability } from '@/utils/aiAvailability';
+import { getOfflineQuestions, EMERGENCY_QUESTIONS } from '@/data/offlineQuestionBank';
 
 // ─── Types ────────────────────────────────────────────────────
 type Exam = 'JEE_MAINS' | 'JEE_ADVANCED' | 'NEET' | 'CUET';
@@ -173,17 +172,10 @@ export default function AdaptivePracticePage() {
   const [stats, setStats] = useState<SessionStats>({ total: 0, correct: 0, streak: 0, bestStreak: 0 });
   const [nextLoading, setNextLoading] = useState(false);
   const [generationMode, setGenerationMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('idle');
-  const [aiAvailabilityMode, setAiAvailabilityMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('fetching');
   const [weakChapters, setWeakChapters] = useState<string[]>([]);
   const [errorQ, setErrorQ] = useState<string | null>(null);
 
   const questionStartTime = useRef<number>(Date.now());
-
-  useEffect(() => {
-    checkAIAvailability().then(res => {
-      setAiAvailabilityMode(res.mode);
-    });
-  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -297,9 +289,58 @@ export default function AdaptivePracticePage() {
         throw new Error('No questions returned');
       }
     } catch (err: any) {
-      console.error('Error generating adaptive question:', err);
-      setErrorQ(err.message || 'Failed to generate question');
-      toast.error('Failed to generate question.');
+      console.warn('AI question generation failed, silently falling back to offline/emergency questions:', err);
+      try {
+        const offlineQs = getOfflineQuestions(selectedSubject, selectedTopic, difficulty.toLowerCase() as any, 1);
+        if (offlineQs && offlineQs.length > 0) {
+          const unifiedQ = offlineQs[0];
+          const mappedQ: Question = {
+            question_id: unifiedQ.question_id,
+            question_text: unifiedQ.question_text,
+            option_a: unifiedQ.option_a,
+            option_b: unifiedQ.option_b,
+            option_c: unifiedQ.option_c,
+            option_d: unifiedQ.option_d,
+            correct_answer: unifiedQ.correct_answer || (unifiedQ.answer as string),
+            explanation_text: unifiedQ.explanation_text || unifiedQ.explanation,
+            concept_tested: unifiedQ.concept_tested,
+            difficulty: (unifiedQ.difficulty.charAt(0).toUpperCase() + unifiedQ.difficulty.slice(1)) as Difficulty,
+            is_variant: false,
+            parent_question_id: null,
+            difficultyScore: 5.0,
+            conceptCoverage: 0.8,
+            jeeRelevanceScore: 9.0
+          };
+          setQuestion(mappedQ);
+          setGenerationMode('offline');
+          questionStartTime.current = Date.now();
+        } else {
+          throw new Error('Offline bank returned empty');
+        }
+      } catch (fallbackErr) {
+        console.error('Offline generator fallback failed:', fallbackErr);
+        const eq = EMERGENCY_QUESTIONS[0];
+        const mappedQ: Question = {
+          question_id: eq.question_id,
+          question_text: eq.question_text,
+          option_a: eq.option_a,
+          option_b: eq.option_b,
+          option_c: eq.option_c,
+          option_d: eq.option_d,
+          correct_answer: eq.correct_answer || (eq.answer as string),
+          explanation_text: eq.explanation_text || eq.explanation,
+          concept_tested: eq.concept_tested,
+          difficulty: 'Medium',
+          is_variant: false,
+          parent_question_id: null,
+          difficultyScore: 5.0,
+          conceptCoverage: 0.8,
+          jeeRelevanceScore: 9.0
+        };
+        setQuestion(mappedQ);
+        setGenerationMode('recovery');
+        questionStartTime.current = Date.now();
+      }
     } finally {
       setLoadingQ(false);
     }
@@ -380,9 +421,6 @@ export default function AdaptivePracticePage() {
             </div>
             <h1 className="text-4xl font-display font-black tracking-tight">Adaptive Practice</h1>
             <p className="text-muted-foreground">Questions that adapt to you in real-time.</p>
-            <div className="flex justify-center">
-              <QuestionStatusWidget mode={aiAvailabilityMode} />
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -414,13 +452,10 @@ export default function AdaptivePracticePage() {
           <button onClick={() => setStep('select-exam')} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm">
             <ArrowLeft size={14} /> Back
           </button>
-          <div className="flex justify-between items-start">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-accent mb-1">{EXAM_LABELS[selectedExam]}</p>
               <h2 className="text-3xl font-bold">Pick a Subject</h2>
             </div>
-            <QuestionStatusWidget mode={aiAvailabilityMode} className="scale-90" />
-          </div>
           <div className="space-y-3">
             {EXAM_SUBJECTS[selectedExam].map(sub => (
               <motion.button
@@ -452,7 +487,6 @@ export default function AdaptivePracticePage() {
               <p className="text-xs font-bold uppercase tracking-widest text-accent mb-1">{EXAM_LABELS[selectedExam]} · {selectedSubject}</p>
               <h2 className="text-3xl font-bold">Choose Topic</h2>
             </div>
-            <QuestionStatusWidget mode={aiAvailabilityMode} className="scale-90" />
           </div>
 
           {/* Topic dropdown */}
@@ -529,9 +563,6 @@ export default function AdaptivePracticePage() {
             <ArrowLeft size={14} />
             <span className="hidden sm:inline">{selectedSubtopic}</span>
           </button>
-
-          {/* Sticky Status Widget */}
-          <QuestionStatusWidget mode={generationMode} className="scale-90" />
 
           {/* Stats strip */}
           <div className="flex items-center gap-4 text-sm">

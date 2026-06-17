@@ -22,72 +22,48 @@ export const usePrepEntranceChat = () => {
   ) => {
     setIsLoading(true);
     setError(null);
+    const lastMsg = messages[messages.length - 1];
+    const history = messages.slice(0, -1);
+    const messageText = typeof lastMsg?.content === 'string'
+      ? lastMsg.content
+      : JSON.stringify(lastMsg?.content ?? '');
 
     try {
-      // Edge function expects {message, history} — split from messages array
-      const lastMsg = messages[messages.length - 1];
-      const history = messages.slice(0, -1);
-      const messageText = typeof lastMsg?.content === 'string'
-        ? lastMsg.content
-        : JSON.stringify(lastMsg?.content ?? '');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       let resp: Response | null = null;
-      let retries = 0;
-      const maxRetries = 3;
-      let success = false;
 
-      while (retries < maxRetries && !success) {
-        try {
-          if (retries > 0) {
-            setError(`⚠️ Mentor is reconnecting... Retrying (${retries}/${maxRetries})`);
-          }
-          resp = await fetch(CHAT_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-            },
-            body: JSON.stringify({
-              message: messageText,
-              history,
-              examMode: aiContext.learning_mode === 'foundation' ? 'foundation' : examMode,
-              language,
-              classContext: {
-                ...aiContext,
-                strict_class_only: true,
-                strict_stage_control: true,
-                teaching_style: aiContext.teaching_tone,
-              }
-            }),
-          });
-          
-          if (resp.ok) {
-            success = true;
-          } else {
-            retries++;
-            if (retries < maxRetries) {
-              await new Promise((resolve) => setTimeout(resolve, 1500));
+      try {
+        resp = await fetch(CHAT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            message: messageText,
+            history,
+            examMode: aiContext.learning_mode === 'foundation' ? 'foundation' : examMode,
+            language,
+            classContext: {
+              ...aiContext,
+              strict_class_only: true,
+              strict_stage_control: true,
+              teaching_style: aiContext.teaching_tone,
             }
-          }
-        } catch (e) {
-          retries++;
-          if (retries < maxRetries) {
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-          }
-        }
+          }),
+          signal: controller.signal
+        });
+      } catch (fetchErr) {
+        clearTimeout(timeoutId);
+        throw fetchErr;
       }
 
-      if (!success || !resp) {
-        setError("Working offline... Generating response locally...");
-        const localResp = getResponseForQuery(messageText);
-        const words = localResp.message.split(' ');
-        for (let i = 0; i < words.length; i++) {
-          onDelta((i === 0 ? "" : " ") + words[i]);
-          await new Promise((resolve) => setTimeout(resolve, 55));
-        }
-        setIsLoading(false);
-        onDone();
-        return;
+      clearTimeout(timeoutId);
+
+      if (!resp || !resp.ok) {
+        throw new Error(resp ? `Response status ${resp.status}` : 'No response from server');
       }
 
       if (!resp.body) {
@@ -149,8 +125,8 @@ export const usePrepEntranceChat = () => {
 
       onDone();
     } catch (e) {
-      console.error("Chat error:", e);
-      setError("⚠️ Mentor server temporarily unavailable.\n\nYou can:\n• Retry\n• Upload image again\n• Continue in offline doubt mode");
+      console.warn("AI mentor chat failed or timed out, silently falling back to local generator:", e);
+      setError(null);
       
       // Fallback to local offline response
       const localResp = getResponseForQuery(messageText);
