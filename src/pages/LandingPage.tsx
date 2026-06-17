@@ -405,7 +405,7 @@ const LandingPage: React.FC = () => {
                 </li>
               </ul>
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/jee')}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 border-blue-200 text-blue-600 font-bold text-sm hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all duration-200"
               >
                 Explore JEE <ArrowRight className="w-4 h-4" />
@@ -435,7 +435,7 @@ const LandingPage: React.FC = () => {
                 </li>
               </ul>
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/neet')}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 border-emerald-200 text-emerald-600 font-bold text-sm hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-200"
               >
                 Explore NEET <ArrowRight className="w-4 h-4" />
@@ -465,7 +465,7 @@ const LandingPage: React.FC = () => {
                 </li>
               </ul>
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/cuet')}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 border-purple-200 text-purple-600 font-bold text-sm hover:bg-purple-600 hover:text-white hover:border-purple-600 transition-all duration-200"
               >
                 Explore CUET <ArrowRight className="w-4 h-4" />

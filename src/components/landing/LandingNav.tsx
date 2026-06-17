@@ -4,10 +4,10 @@ import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_LINKS = [
-  { label: 'Home', href: '#home' },
-  { label: 'JEE', href: '#jee' },
-  { label: 'NEET', href: '#neet' },
-  { label: 'CUET', href: '#cuet' },
+  { label: 'Home', href: '/' },
+  { label: 'JEE', href: '/jee' },
+  { label: 'NEET', href: '/neet' },
+  { label: 'CUET', href: '/cuet' },
   { label: 'AI Tutor', href: '#ai-tutor' },
   { label: 'Practice Tests', href: '#practice-tests' },
   { label: 'Pricing', href: '#pricing' },
@@ -51,8 +51,10 @@ const LandingNav: React.FC = () => {
         element.scrollIntoView({ behavior: 'smooth' });
         return;
       }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate(href);
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
