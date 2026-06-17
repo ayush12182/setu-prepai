@@ -88,8 +88,24 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, title = 'PrepEntran
             <Menu className="w-5 h-5" />
           </Button>
 
-          <Link to="/dashboard" className="flex items-center">
-            <img src="/prepentrance-logo.png" alt="PrepEntrance" className="h-12 w-auto rounded-lg shadow-sm hover:opacity-80 transition-opacity" />
+          <Link to="/dashboard" className="flex items-center gap-3 group focus:outline-none">
+            {/* Official PrepEntrance Logo Badge */}
+            <div className="brand-logo-container rounded-xl w-11 h-11 shrink-0">
+              <img 
+                src="/prepentrance-logo.png" 
+                alt="PrepEntrance Logo" 
+                className="brand-logo-img" 
+              />
+            </div>
+            {/* Logo Name & Tagline */}
+            <div className="hidden sm:flex flex-col items-start leading-none text-left">
+              <span className="font-sans font-bold text-lg text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors duration-200">
+                PrepEntrance
+              </span>
+              <span className="text-[7.5px] text-slate-500 font-extrabold tracking-[0.25em] mt-1 uppercase">
+                Prepare. Perform. Succeed.
+              </span>
+            </div>
           </Link>
         </div>
 

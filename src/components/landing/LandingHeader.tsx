@@ -28,8 +28,20 @@ export const LandingHeader: React.FC = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-12 flex items-center justify-between">
-        <div className="flex items-center hover:scale-[1.02] transition-transform">
-          <img src={setuLogo} alt="PrepEntrance" className="h-10 sm:h-12 w-auto rounded-lg" />
+        <div className="flex items-center gap-3 hover:scale-[1.02] transition-transform cursor-pointer" onClick={() => navigate('/')}>
+          {/* Official PrepEntrance Logo Badge */}
+          <div className="brand-logo-container rounded-xl w-11 h-11 shrink-0">
+            <img src={setuLogo} alt="PrepEntrance Logo" className="brand-logo-img" />
+          </div>
+          {/* Logo Name & Tagline */}
+          <div className="flex flex-col items-start leading-none text-left">
+            <span className="font-sans font-bold text-[20px] text-white tracking-tight">
+              PrepEntrance
+            </span>
+            <span className="text-[7.5px] text-white/60 font-extrabold tracking-[0.2em] mt-1.5 uppercase">
+              Prepare. Perform. Succeed.
+            </span>
+          </div>
         </div>
         
         {/* Nav Links - Desktop */}

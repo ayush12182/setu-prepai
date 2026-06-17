@@ -495,12 +495,12 @@ const ExamHubPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="bg-slate-950 p-2 rounded-xl border border-slate-800 flex items-center justify-center h-12">
-                  <img src="/prepentrance-logo.png" alt="PrepEntrance Logo" className="h-8 w-auto object-contain" />
+                <div className="brand-logo-container rounded-xl w-12 h-12">
+                  <img src="/prepentrance-logo.png" alt="PrepEntrance Logo" className="brand-logo-img" />
                 </div>
                 <div>
                   <span className="font-sans font-bold text-lg text-white tracking-tight">PrepEntrance</span>
-                  <p className="text-[8px] font-extrabold text-slate-500 uppercase tracking-widest leading-none mt-1">Practice. Analyze. Improve.</p>
+                  <p className="text-[8px] font-extrabold text-slate-400 uppercase tracking-widest leading-none mt-1">Prepare. Perform. Succeed.</p>
                 </div>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed max-w-xs">

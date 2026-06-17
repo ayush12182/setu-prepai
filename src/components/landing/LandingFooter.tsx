@@ -29,16 +29,24 @@ const LandingFooter: React.FC = () => {
           {/* Col 1 — Brand */}
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-3">
-              <img 
-                src="/prepentrance-logo.png" 
-                alt="PrepEntrance" 
-                className="h-9 w-9 object-contain brightness-0 invert" 
-              />
-              <span className="font-display font-black text-xl tracking-wide text-white">
-                PrepEntrance
-              </span>
+              {/* Official PrepEntrance Logo Badge */}
+              <div className="brand-logo-container rounded-lg w-9 h-9 shrink-0">
+                <img 
+                  src="/prepentrance-logo.png" 
+                  alt="PrepEntrance Logo" 
+                  className="brand-logo-img" 
+                />
+              </div>
+              <div className="flex flex-col leading-none">
+                <span className="font-display font-black text-xl tracking-wide text-white">
+                  PrepEntrance
+                </span>
+                <span className="text-[8px] text-slate-400 font-extrabold tracking-[0.2em] mt-1 uppercase">
+                  Prepare. Perform. Succeed.
+                </span>
+              </div>
             </div>
-            <p className="font-sans font-normal text-sm text-[#9CA3AF] mt-[8px]">
+            <p className="font-sans font-normal text-xs text-[#9CA3AF] mt-[10px]">
               Your Complete Exam Prep Partner
             </p>
             <div className="flex items-center gap-4 mt-[16px]">

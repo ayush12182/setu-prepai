@@ -778,16 +778,16 @@ const LandingPage: React.FC = () => {
             <div className="col-span-2 sm:col-span-4 lg:col-span-2 space-y-4">
               <div className="flex items-center gap-3">
                 {/* Official PrepEntrance Logo Badge */}
-                <div className="bg-slate-950 p-2 rounded-xl shadow-md border border-slate-800/80 flex items-center justify-center h-12">
+                <div className="brand-logo-container rounded-xl w-12 h-12">
                   <img 
                     src="/prepentrance-logo.png" 
                     alt="PrepEntrance Logo" 
-                    className="h-8 w-auto object-contain" 
+                    className="brand-logo-img" 
                   />
                 </div>
                 <div className="flex flex-col leading-none">
                   <span className="font-black text-[20px] text-white tracking-tight">PrepEntrance</span>
-                  <span className="text-[9px] font-bold text-slate-500 tracking-[0.18em] uppercase mt-0.5">Practice. Analyze. Improve.</span>
+                  <span className="text-[9px] font-bold text-slate-400 tracking-[0.18em] uppercase mt-0.5">Prepare. Perform. Succeed.</span>
                 </div>
               </div>
               <p className="text-[13px] text-slate-400 font-medium leading-relaxed max-w-xs">

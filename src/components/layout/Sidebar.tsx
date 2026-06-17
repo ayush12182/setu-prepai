@@ -170,15 +170,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="p-6 pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  "w-11 h-11 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
-                  isCuet
-                    ? "from-[hsl(260_50%_55%)] to-[hsl(260_60%_40%)] shadow-[hsl(260_50%_55%)/0.3]"
-                    : isNeet
-                    ? "from-[hsl(145_50%_45%)] to-[hsl(145_60%_35%)] shadow-[hsl(145_50%_45%)/0.3]"
-                    : "from-[hsl(32_80%_55%)] to-[hsl(32_90%_45%)] shadow-[hsl(32_80%_55%)/0.3]"
-                )}>
-                  <span className="text-slate-950 font-black text-lg">P</span>
+                {/* Official PrepEntrance Logo Badge */}
+                <div className="brand-logo-container rounded-xl w-11 h-11 shrink-0">
+                  <img 
+                    src="/prepentrance-logo.png" 
+                    alt="PrepEntrance Logo" 
+                    className="brand-logo-img" 
+                  />
                 </div>
                 <div>
                   <h1 className="font-display font-bold text-xl text-white tracking-wide">PrepEntrance</h1>

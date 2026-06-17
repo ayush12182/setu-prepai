@@ -71,24 +71,24 @@ const LandingNav: React.FC = () => {
         {/* Left: Brand Logo Lockup */}
         <button
           onClick={handleLogoClick}
-          className="flex items-center gap-3 group focus:outline-none"
+          className="flex items-center gap-3.5 group focus:outline-none"
           aria-label="PrepEntrance Home"
         >
           {/* Official PrepEntrance Logo Badge */}
-          <div className="bg-slate-950 p-2 rounded-xl shadow-md border border-slate-800/80 flex items-center justify-center h-12 transition-all duration-200 group-hover:scale-[1.03]">
+          <div className="brand-logo-container rounded-xl w-[52px] h-[52px]">
             <img 
               src="/prepentrance-logo.png" 
               alt="PrepEntrance Logo" 
-              className="h-8 w-auto object-contain" 
+              className="brand-logo-img" 
             />
           </div>
           {/* Logo Name & Tagline */}
           <div className="flex flex-col items-start leading-none text-left">
-            <span className="font-sans font-bold text-[22px] text-[#1e3a8a] tracking-tight">
+            <span className="font-sans font-bold text-[24px] text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors duration-200">
               PrepEntrance
             </span>
-            <span className="text-[7px] text-[#64748b] font-extrabold tracking-[0.18em] mt-1 uppercase">
-              Practice. Analyze. Improve.
+            <span className="text-[8.5px] text-slate-500 font-extrabold tracking-[0.2em] mt-1.5 uppercase">
+              Prepare. Perform. Succeed.
             </span>
           </div>
         </button>

@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
   ArrowRight, ArrowLeft, Check, Loader2, 
-  Sparkles, Rocket, Brain, Zap, GraduationCap, Award
+  Rocket, Brain, Zap, GraduationCap, Award
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -205,8 +205,12 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
       return (
         <div className="space-y-7 text-center py-6">
           {/* Logo Badge */}
-          <div className="w-20 h-20 rounded-3xl bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto mb-6 shadow-sm shadow-blue-500/5 animate-pulse-soft">
-            <Sparkles className="w-10 h-10 text-blue-600" />
+          <div className="brand-logo-container rounded-3xl w-20 h-20 mx-auto mb-6 flex items-center justify-center animate-pulse-soft">
+            <img 
+              src="/prepentrance-logo.png" 
+              alt="PrepEntrance Logo" 
+              className="brand-logo-img" 
+            />
           </div>
           
           <div className="space-y-3">

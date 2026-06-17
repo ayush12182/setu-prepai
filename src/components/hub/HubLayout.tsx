@@ -23,13 +23,19 @@ export const HubLayout: React.FC<HubLayoutProps> = ({ children }) => {
           {/* Logo */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 shrink-0"
+            className="flex items-center gap-2 shrink-0 group focus:outline-none"
           >
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-white font-black text-sm"
-              style={{ background: 'linear-gradient(135deg,#F97316,#EF4444)' }}
-            >S</div>
-            <span className="font-bold text-white text-[15px] hidden sm:block">PrepEntrance</span>
+            {/* Official PrepEntrance Logo Badge */}
+            <div className="brand-logo-container rounded-lg w-8 h-8 shrink-0">
+              <img 
+                src="/prepentrance-logo.png" 
+                alt="PrepEntrance Logo" 
+                className="brand-logo-img" 
+              />
+            </div>
+            <span className="font-bold text-white text-[15px] hidden sm:block group-hover:text-blue-400 transition-colors duration-200">
+              PrepEntrance
+            </span>
           </button>
 
           {/* Nav links */}

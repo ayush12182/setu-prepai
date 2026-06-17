@@ -821,3 +821,30 @@ select:disabled,
   background-color: rgba(251,146,60,0.02) !important;
   box-shadow: 0 4px 20px rgba(0,0,0,0.12);
 }
+
+/* PrepEntrance Premium Brand Logo Crop and Container Styles */
+.brand-logo-container {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 1.5px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brand-logo-container:hover {
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 6px 16px -2px rgba(37, 99, 235, 0.1), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+}
+
+.brand-logo-img {
+  width: 100%;
+  height: 140%;
+  object-fit: cover;
+  object-position: center 6%;
+  will-change: transform;
+}
