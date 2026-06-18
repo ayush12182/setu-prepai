@@ -196,12 +196,37 @@ const FloatingStars = () => (
   </>
 );
 
+const collegesData = {
+  engineering: [
+    { name: 'IIT Bombay', tag: 'Engineering Excellence', img: '/images/colleges/iit_bombay.jpg' },
+    { name: 'IIT Delhi', tag: 'Engineering Excellence', img: '/images/colleges/iit_delhi.jpg' },
+    { name: 'IIT Madras', tag: 'Engineering Excellence', img: '/images/colleges/iit_madras.jpg' },
+    { name: 'IIT Kanpur', tag: 'Engineering Excellence', img: '/images/colleges/iit_kanpur.jpg' },
+    { name: 'IIT Kharagpur', tag: 'Engineering Excellence', img: '/images/colleges/iit_kharagpur.jpg' },
+  ],
+  medical: [
+    { name: 'AIIMS Delhi', tag: 'Medical Excellence', img: '/images/colleges/aiims_delhi.jpg' },
+    { name: 'AIIMS Bhopal', tag: 'Medical Excellence', img: '/images/colleges/aiims_bhopal.jpg' },
+    { name: 'AIIMS Jodhpur', tag: 'Medical Excellence', img: '/images/colleges/aiims_jodhpur.jpg' },
+    { name: 'AIIMS Rishikesh', tag: 'Medical Excellence', img: '/images/colleges/aiims_rishikesh.jpg' },
+    { name: 'AIIMS Bhubaneswar', tag: 'Medical Excellence', img: '/images/colleges/aiims_bhubaneswar.jpg' },
+  ],
+  universities: [
+    { name: 'Delhi University', tag: 'Academic Excellence', img: '/images/colleges/delhi_university.jpg' },
+    { name: 'BHU', tag: 'Academic Excellence', img: '/images/colleges/bhu.jpg' },
+    { name: 'JNU', tag: 'Academic Excellence', img: '/images/colleges/jnu.jpg' },
+    { name: 'University of Hyderabad', tag: 'Academic Excellence', img: '/images/colleges/hyderabad_university.jpg' },
+    { name: 'Jamia Millia Islamia', tag: 'Academic Excellence', img: '/images/colleges/jamia_millia.jpg' },
+  ]
+};
+
 /* ─────────────────────────────────────────────
    MAIN COMPONENT
 ───────────────────────────────────────────── */
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [activeCollegesTab, setActiveCollegesTab] = useState<'engineering' | 'medical' | 'universities'>('engineering');
 
   React.useEffect(() => {
     document.title = "PrepEntrance — Your Complete AI Exam Prep Partner";
@@ -822,33 +847,68 @@ const LandingPage: React.FC = () => {
               </div>
 
               {/* Right Column: College Grid Wall */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-center gap-2">
+              <div className="space-y-5">
+                {/* Aspirational Header */}
+                <div className="flex flex-col items-center gap-1">
                   <span className="text-[10px] text-amber-400/80 font-black tracking-[0.25em] uppercase">‹ Dream. Prepare. Achieve. ›</span>
                 </div>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+
+                {/* Category Tabs */}
+                <div className="flex justify-center p-1 rounded-2xl bg-white/5 border border-white/10 w-fit mx-auto">
                   {[
-                    { name: 'IIT Bombay', tag: 'Engineering Excellence', img: '/images/iit_bombay.png' },
-                    { name: 'IIT Delhi', tag: 'Innovation Leadership', img: '/images/iit_delhi.png' },
-                    { name: 'AIIMS Delhi', tag: 'Healing Lives', img: '/images/aiims_delhi.png' },
-                    { name: 'Delhi University', tag: 'Legacy of Excellence', img: '/images/delhi_university.png' },
-                    { name: 'BHU', tag: 'Knowledge Tradition', img: '/images/bhu.png' },
-                    { name: 'JNU', tag: 'Empowering Thinkers', img: '/images/jnu.png' },
-                  ].map((col) => (
-                    <div key={col.name} className="relative h-28 sm:h-32 rounded-2xl overflow-hidden group/college border border-white/5 shadow-inner">
-                      <img 
-                        src={col.img} 
-                        alt={col.name} 
-                        className="absolute inset-0 w-full h-full object-cover group-hover/college:scale-110 transition-transform duration-500 ease-out" 
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/45 to-transparent z-10" />
-                      <div className="absolute bottom-2.5 left-3.5 z-20 text-left">
-                        <h4 className="text-[12px] sm:text-[13px] font-black text-white tracking-tight leading-none mb-1">{col.name}</h4>
-                        <p className="text-[8px] font-black text-amber-300 uppercase tracking-wider leading-none">{col.tag}</p>
-                      </div>
-                    </div>
+                    { key: 'engineering', label: 'Engineering' },
+                    { key: 'medical', label: 'Medical' },
+                    { key: 'universities', label: 'Universities' }
+                  ].map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveCollegesTab(tab.key as any)}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 ${
+                        activeCollegesTab === tab.key
+                          ? 'bg-amber-400 text-slate-900 shadow-md'
+                          : 'text-blue-200 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
                   ))}
+                </div>
+                
+                {/* Dynamically Filtered Grid of 5 Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
+                  {collegesData[activeCollegesTab].map((col, index) => {
+                    const colSpanClass = index < 3 
+                      ? 'col-span-1 sm:col-span-2' 
+                      : index === 3 
+                        ? 'col-span-1 sm:col-span-3' 
+                        : 'col-span-2 sm:col-span-3';
+
+                    return (
+                      <div 
+                        key={col.name} 
+                        className={`relative h-28 sm:h-32 rounded-2xl overflow-hidden group border border-white/5 ${colSpanClass} hover:scale-[1.05] hover:z-20 transition-all duration-300 ease-out shadow-inner cursor-pointer ${
+                          activeCollegesTab === 'engineering' 
+                            ? 'hover:border-blue-500/40 hover:shadow-[0_0_20px_rgba(59,130,246,0.25)]' 
+                            : activeCollegesTab === 'medical'
+                              ? 'hover:border-emerald-500/40 hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]'
+                              : 'hover:border-purple-500/40 hover:shadow-[0_0_20px_rgba(168,85,247,0.25)]'
+                        }`}
+                      >
+                        <img 
+                          src={col.img} 
+                          alt={col.name} 
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
+                        />
+                        {/* Consistent dark overlay for text readability (40-60%) */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-slate-950/30 z-10" />
+                        
+                        <div className="absolute bottom-2.5 left-3.5 z-20 text-left">
+                          <h4 className="text-[12px] sm:text-[13px] font-black text-white tracking-tight leading-none mb-1">{col.name}</h4>
+                          <p className="text-[8px] font-black text-amber-300 uppercase tracking-wider leading-none">{col.tag}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
