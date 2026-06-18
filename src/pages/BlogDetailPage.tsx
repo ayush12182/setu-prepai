@@ -331,9 +331,80 @@ export const BlogDetailPage: React.FC = () => {
       </main>
 
       {/* 5. FOOTER */}
-      <footer className="bg-slate-900 text-slate-300 pt-12 pb-8 border-t border-slate-800 mt-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] font-semibold text-slate-500">
+      <footer className="bg-slate-900 text-slate-300 pt-16 pb-8 border-t border-slate-800 mt-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-8 mb-10 text-left">
+
+            {/* Brand */}
+            <div className="col-span-2 sm:col-span-4 lg:col-span-2 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="brand-logo-container rounded-xl w-12 h-12 bg-white flex items-center justify-center">
+                  <img 
+                    src="/prepentrance-logo.png" 
+                    alt="PrepEntrance Logo" 
+                    className="brand-logo-img" 
+                  />
+                </div>
+                <div className="flex flex-col leading-none">
+                  <span className="font-black text-[20px] text-white tracking-tight">PrepEntrance</span>
+                  <span className="text-[9px] font-bold text-slate-400 tracking-[0.18em] uppercase mt-0.5">Prepare. Perform. Succeed.</span>
+                </div>
+              </div>
+              <p className="text-[13px] text-slate-400 font-medium leading-relaxed max-w-xs">
+                AI-first personalized practice workspace built to help students crack JEE, NEET and CUET.
+              </p>
+            </div>
+
+            {/* Exams */}
+            <div className="space-y-3">
+              <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Exams</h4>
+              <ul className="space-y-2.5">
+                {['JEE', 'NEET', 'CUET'].map((e) => (
+                  <li key={e}>
+                    <button onClick={() => navigate(`/${e.toLowerCase()}`)} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">{e}</button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div className="space-y-3">
+              <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Resources</h4>
+              <ul className="space-y-2.5">
+                <li>
+                  <button onClick={() => navigate('/blog')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Blog</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/login')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Study Material</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/practice-tests')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Mock Tests</button>
+                </li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div className="space-y-3">
+              <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Company</h4>
+              <ul className="space-y-2.5">
+                <li>
+                  <button onClick={() => navigate('/blog')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">About Us</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/blog')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Blog</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/contact')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Contact Us</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/login')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Careers</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom row */}
+          <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] font-semibold text-slate-500">
             <span>© {new Date().getFullYear()} PrepEntrance. All rights reserved.</span>
             <div className="flex gap-5">
               <button onClick={() => navigate('/privacy')} className="hover:text-slate-300 transition-colors">Privacy Policy</button>

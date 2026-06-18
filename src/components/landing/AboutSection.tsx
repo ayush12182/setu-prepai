@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Target, Bot, BarChart3, Trophy, Phone, Mail, Globe, Sparkles } from 'lucide-react';
+import { Target, Bot, BarChart3, Trophy, Phone, Mail, Globe, Sparkles, MapPin, ShieldCheck } from 'lucide-react';
 
 const FEATURE_CARDS = [
   {
@@ -29,8 +29,8 @@ const CONTACT_CARDS = [
   {
     Icon: Phone,
     label: 'Phone',
-    value: '7022030404',
-    link: 'tel:7022030404',
+    value: '+91 7022030404',
+    link: 'tel:+917022030404',
   },
   {
     Icon: Mail,
@@ -39,10 +39,16 @@ const CONTACT_CARDS = [
     link: 'mailto:contact.prepentrance@gmail.com',
   },
   {
-    Icon: Globe,
-    label: 'Platform',
-    value: 'PrepEntrance',
-    link: 'https://prepentrance.com',
+    Icon: MapPin,
+    label: 'Headquarters',
+    value: 'Bengaluru, Karnataka, India',
+    link: '#',
+  },
+  {
+    Icon: ShieldCheck,
+    label: 'Company Status',
+    value: 'Incorporated Firm',
+    link: '#',
   },
 ];
 
@@ -178,27 +184,36 @@ const AboutSection: React.FC = () => {
             </p>
           </div>
 
-          {/* Contact Right Column (3 Columns of Channels) */}
-          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4 reveal">
-            {CONTACT_CARDS.map((channel, idx) => (
-              <a
-                href={channel.link}
-                key={idx}
-                target={channel.label === 'Platform' ? '_blank' : undefined}
-                rel={channel.label === 'Platform' ? 'noopener noreferrer' : undefined}
-                className="flex flex-col items-center text-center p-6 rounded-[20px] bg-[#FAFAF7] border border-[#F0EDE6] hover:border-[#FF6B00]/30 hover:bg-white hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all duration-300 group"
-              >
-                <div className="w-10 h-10 rounded-full bg-[#FFF0E6] text-[#FF6B00] flex items-center justify-center mb-3 shrink-0 shadow-sm">
-                  <channel.Icon className="w-4.5 h-4.5 stroke-[1.8]" />
+          {/* Contact Right Column (2x2 Grid of Channels) */}
+          <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 reveal">
+            {CONTACT_CARDS.map((channel, idx) => {
+              const isLink = channel.link !== '#';
+              const cardClass = "flex flex-col items-center text-center p-6 rounded-[20px] bg-[#FAFAF7] border border-[#F0EDE6] hover:border-[#FF6B00]/30 hover:bg-white hover:translate-y-[-4px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-all duration-300 group";
+              
+              const innerContent = (
+                <>
+                  <div className="w-10 h-10 rounded-full bg-[#FFF0E6] text-[#FF6B00] flex items-center justify-center mb-3 shrink-0 shadow-sm">
+                    <channel.Icon className="w-4.5 h-4.5 stroke-[1.8]" />
+                  </div>
+                  <span className="font-sans font-extrabold text-[12px] text-[#475569] uppercase tracking-wide">
+                    {channel.label}
+                  </span>
+                  <span className="font-sans font-bold text-sm text-[#0D1117] mt-1 break-all select-all">
+                    {channel.value}
+                  </span>
+                </>
+              );
+
+              return isLink ? (
+                <a href={channel.link} key={idx} className={cardClass}>
+                  {innerContent}
+                </a>
+              ) : (
+                <div key={idx} className={cardClass}>
+                  {innerContent}
                 </div>
-                <span className="font-sans font-extrabold text-[12px] text-[#475569] uppercase tracking-wide">
-                  {channel.label}
-                </span>
-                <span className="font-sans font-bold text-sm text-[#0D1117] mt-1 break-all select-all">
-                  {channel.value}
-                </span>
-              </a>
-            ))}
+              );
+            })}
           </div>
 
         </div>

@@ -79,7 +79,7 @@ const PrivacyPage: React.FC = () => {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">9. Contact</h2>
-            <p>For any privacy-related questions or data requests, reach out to us at <a href="mailto:prepentrance.edu.1925@gmail.com" className="text-accent font-medium hover:underline">prepentrance.edu.1925@gmail.com</a>.</p>
+            <p>For any privacy-related questions or data requests, reach out to us at <a href="mailto:contact.prepentrance@gmail.com" className="text-accent font-medium hover:underline">contact.prepentrance@gmail.com</a>.</p>
           </section>
         </div>
       </div>

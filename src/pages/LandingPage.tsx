@@ -1013,10 +1013,13 @@ const LandingPage: React.FC = () => {
               <h4 className="text-[11px] font-black text-white uppercase tracking-widest">Company</h4>
               <ul className="space-y-2.5">
                 <li>
-                  <button onClick={() => navigate('/blog')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">About</button>
+                  <button onClick={() => navigate('/blog')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">About Us</button>
                 </li>
                 <li>
-                  <button onClick={() => navigate('/login')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Contact</button>
+                  <button onClick={() => navigate('/blog')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Blog</button>
+                </li>
+                <li>
+                  <button onClick={() => navigate('/contact')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Contact Us</button>
                 </li>
                 <li>
                   <button onClick={() => navigate('/login')} className="text-[13px] text-slate-400 font-semibold hover:text-white transition-colors">Careers</button>
