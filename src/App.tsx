@@ -26,6 +26,7 @@ import BatchDetailPage from "./pages/BatchDetailPage";
 const StudentHubPage = lazy(() => import("./pages/StudentHubPage"));
 const PracticeTestsPage = lazy(() => import("./pages/PracticeTestsPage"));
 const BlogPage = lazy(() => import("./pages/BlogPage"));
+const BlogDetailPage = lazy(() => import("./pages/BlogDetailPage"));
 const AITeachingRoomPage = lazy(() => import("./pages/AITeachingRoomPage"));
 const AITeachersDirectoryPage = lazy(() => import("./pages/AITeachersDirectoryPage"));
 const TestPage = lazy(() => import("./pages/TestPage"));
@@ -170,6 +171,7 @@ const App = () => (
                         <Route path="/premium" element={<PricingPage />} />
                         <Route path="/practice-tests" element={<PracticeTestsPage />} />
                         <Route path="/blog" element={<BlogPage />} />
+                        <Route path="/blog/:slug" element={<BlogDetailPage />} />
 
                         {/* ─── PrepEntrance v2 — Public Exam Prep Hub ──────────────── */}
                         {/* /hub → default to JEE Class 11 */}

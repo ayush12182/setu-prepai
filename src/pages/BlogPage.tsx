@@ -4,18 +4,7 @@ import LandingNav from '@/components/landing/LandingNav';
 import {
   ArrowRight, BookOpen, Clock, Heart, Share2, Filter, Award, Target, Eye
 } from 'lucide-react';
-
-interface Article {
-  id: string;
-  title: string;
-  category: 'jee' | 'neet' | 'cuet' | 'study-skills' | 'ai-learning';
-  categoryLabel: string;
-  readTime: string;
-  excerpt: string;
-  publishDate: string;
-  image: string;
-  author: string;
-}
+import { blogArticles, BlogArticle } from '@/data/blogArticles';
 
 export const BlogPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,67 +24,9 @@ export const BlogPage: React.FC = () => {
     { value: 'ai-learning', label: 'AI & Learning' },
   ];
 
-  const articles: Article[] = [
-    {
-      id: 'jee-2027',
-      title: 'How to Crack JEE in 2027: Syllabus Strategy & Roadmap',
-      category: 'jee',
-      categoryLabel: 'JEE Prep',
-      readTime: '6 min read',
-      excerpt: 'Struggling to manage Class 11 chapters with class schedules? Here is a breakdown of physics, math, and chemistry preparation tactics.',
-      publishDate: 'June 15, 2026',
-      image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600&q=80',
-      author: 'Academic Operations Team'
-    },
-    {
-      id: 'neet-strategy',
-      title: 'NEET Preparation Strategy: Biology Diagrams & Chemistry Formula Mastery',
-      category: 'neet',
-      categoryLabel: 'NEET Prep',
-      readTime: '8 min read',
-      excerpt: 'Achieve 340+ in biology by mastering diagrams and structural classifications. We outline the high-yield sections you need to memorize.',
-      publishDate: 'June 10, 2026',
-      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=600&q=80',
-      author: 'Biology Subject Head'
-    },
-    {
-      id: 'cuet-guide',
-      title: 'CUET Preparation Guide: Cracking Language & General Tests',
-      category: 'cuet',
-      categoryLabel: 'CUET Prep',
-      readTime: '5 min read',
-      excerpt: 'How to balance Domain subjects alongside the General Aptitude modules. Key speed techniques for numerical and logic questions.',
-      publishDate: 'June 08, 2026',
-      image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=600&q=80',
-      author: 'CUET Strategy Planner'
-    },
-    {
-      id: 'study-skills-hacks',
-      title: 'Top 5 Study Skills & Productivity Hacks for Long-Duration Retention',
-      category: 'study-skills',
-      categoryLabel: 'Study Skills',
-      readTime: '4 min read',
-      excerpt: 'Why passive reading fails. Discover the scientifically-proven advantages of active recall, spacing, and memory visual mapping.',
-      publishDate: 'June 04, 2026',
-      image: 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=600&q=80',
-      author: 'Cognitive Science Expert'
-    },
-    {
-      id: 'ai-learning-future',
-      title: 'AI Learning & Study Planning: Why One-Size-Fits-All Classrooms are Obsolete',
-      category: 'ai-learning',
-      categoryLabel: 'AI & Learning',
-      readTime: '7 min read',
-      excerpt: 'Discover how machine learning dynamically tracks student preparation metrics to target conceptual weak points in real-time.',
-      publishDate: 'May 28, 2026',
-      image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-      author: 'PrepEntrance AI Team'
-    }
-  ];
-
   const filteredArticles = selectedCategory === 'all'
-    ? articles
-    : articles.filter(a => a.category === selectedCategory);
+    ? blogArticles
+    : blogArticles.filter(a => a.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 overflow-x-hidden font-sans">
@@ -139,8 +70,8 @@ export const BlogPage: React.FC = () => {
         {/* Articles list grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredArticles.map((art) => (
-            <article key={art.id} className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden hover:shadow-lg hover:border-blue-500/20 hover:translate-y-[-2px] transition-all duration-300 flex flex-col justify-between">
-              <div>
+            <article key={art.slug} className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden hover:shadow-lg hover:border-blue-500/20 hover:translate-y-[-2px] transition-all duration-300 flex flex-col justify-between">
+              <div className="cursor-pointer" onClick={() => navigate(`/blog/${art.slug}`)}>
                 <div className="relative h-48 bg-slate-100 overflow-hidden">
                   <img src={art.image} alt={art.title} className="w-full h-full object-cover" />
                   <span className="absolute top-4 left-4 bg-slate-900/90 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-md backdrop-blur-xs">
@@ -154,7 +85,7 @@ export const BlogPage: React.FC = () => {
                     <span>•</span>
                     <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {art.readTime}</span>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 leading-snug hover:text-blue-600 cursor-pointer">
+                  <h3 className="text-lg font-bold text-slate-900 leading-snug hover:text-blue-600">
                     {art.title}
                   </h3>
                   <p className="text-slate-500 text-sm leading-relaxed font-medium">
