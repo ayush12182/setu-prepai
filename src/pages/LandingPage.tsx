@@ -380,279 +380,161 @@ const LandingPage: React.FC = () => {
       {/* ══════════════════════════════════
           2. OUR EXAMS
       ══════════════════════════════════ */}
-      <section id="exams" className="py-20 bg-white border-b border-slate-100">
+      <section id="exams" className="py-12 bg-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Our Exams</span>
-            <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight tracking-tight">
-              Three Major Exams. <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Infinite Opportunities.</span>
-            </h2>
-            <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">
-              Purpose-built preparation for India's most competitive exams with AI-powered intelligence at the core.
-            </p>
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <span className="h-px w-12 bg-slate-200" />
+            <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest text-center">Our Exams</h2>
+            <span className="h-px w-12 bg-slate-200" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-            
-            {/* JEE CARD */}
-            <div className="bg-white border-2 border-slate-100 rounded-3xl p-8 hover:border-blue-200 hover:shadow-[0_20px_40px_rgba(37,99,235,0.06)] transition-all duration-300 group relative flex flex-col justify-between min-h-[560px]">
-              
-              {/* Radial gradient background accent */}
-              <div className="absolute -right-12 -bottom-12 w-48 h-48 rounded-full bg-blue-500/5 blur-3xl pointer-events-none" />
-              
-              {/* Breakout 3D Illustration */}
-              <div className="absolute right-0 bottom-0 w-[170px] h-[170px] pointer-events-none z-0 transition-all duration-350 ease-out group-hover:scale-108 group-hover:-translate-y-2 group-hover:translate-x-1">
-                <img src="/images/card_jee.png" alt="JEE Outcomes" className="w-full h-full object-contain" />
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* JEE */}
+            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6.5 hover:border-blue-200 hover:shadow-xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between min-h-[310px]">
+              {/* Subtle watermark background */}
+              <div className="absolute right-3 bottom-3 w-20 h-20 pointer-events-none z-0">
+                <img 
+                  src="/images/card_jee.png" 
+                  alt="JEE Watermark" 
+                  className="w-full h-full object-contain opacity-15 group-hover:opacity-25 transition-all duration-300 group-hover:scale-105" 
+                  style={{ filter: 'grayscale(100%) sepia(100%) hue-rotate(195deg) saturate(350%) brightness(95%)' }}
+                />
               </div>
-
-              <div className="relative z-10 space-y-6">
+              
+              <div className="relative z-10 space-y-3.5 text-left">
+                {/* Top: Icon + Category */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                    <Settings className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-black text-blue-600 uppercase tracking-wider">Engineering</span>
+                </div>
                 
-                {/* Header Lockup */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
-                    <Settings className="w-5.5 h-5.5" />
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest block">Engineering</span>
-                    <h3 className="text-2xl font-black text-slate-900 leading-none">JEE</h3>
-                  </div>
-                </div>
-
-                {/* Subheadline / Aspirational Badge */}
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-800 leading-relaxed">
-                    Gateway to IITs, NITs, IIITs &amp; India's Top Engineering Institutes
-                  </p>
-                  <p className="text-[11px] font-medium text-slate-400">
-                    Secure your rank at the nation's premier technology nodes.
+                {/* Middle: Exam Name */}
+                <h3 className="text-2xl font-black text-slate-900 leading-none">JEE</h3>
+                
+                {/* Description */}
+                <p className="text-xs font-bold text-slate-600 leading-relaxed">
+                  Gateway to IITs, NITs & Top Engineering Colleges
+                </p>
+                
+                {/* Career Paths */}
+                <div className="pt-1">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Career Paths</span>
+                  <p className="text-[11px] font-bold text-slate-500">
+                    Software Engineering • AI • Core Engineering
                   </p>
                 </div>
-
-                {/* Focus Subjects */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black text-slate-450 uppercase tracking-wider block">Focus Areas</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Physics', 'Chemistry', 'Mathematics'].map((s) => (
-                      <span key={s} className="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-blue-50 border border-blue-100 text-blue-700">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Career Outcomes */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black text-slate-450 uppercase tracking-wider block">Future Career Outcomes</span>
-                  <ul className="space-y-2">
-                    {[
-                      'Software Engineering',
-                      'AI &amp; Data Science',
-                      'Mechanical Engineering',
-                      'Electrical Engineering',
-                      'Aerospace Engineering'
-                    ].map((outcome) => (
-                      <li key={outcome} className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                        <Check className="w-3.5 h-3.5 text-blue-500 stroke-[3]" />
-                        <span dangerouslySetInnerHTML={{ __html: outcome }} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
               </div>
-
-              {/* Action Buttons footer */}
-              <div className="flex gap-2.5 mt-8 pt-4 border-t border-slate-50 relative z-10">
+              
+              {/* Bottom: Explore Button */}
+              <div className="relative z-10 pt-4">
                 <button
                   onClick={() => navigate('/jee')}
-                  className="flex-1 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition-all flex items-center justify-center gap-1 hover:shadow-lg hover:shadow-blue-500/20 active:scale-98"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-blue-200 text-blue-600 font-bold text-sm hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all duration-200 active:scale-98"
                 >
-                  Explore JEE <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => navigate('/signup')}
-                  className="py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 active:scale-98"
-                >
-                  <FileText className="w-3.5 h-3.5 text-slate-400" />
-                  Sample Test
+                  Explore JEE <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-
             </div>
 
-            {/* NEET CARD */}
-            <div className="bg-white border-2 border-slate-100 rounded-3xl p-8 hover:border-emerald-200 hover:shadow-[0_20px_40px_rgba(16,185,129,0.06)] transition-all duration-300 group relative flex flex-col justify-between min-h-[560px]">
-              
-              {/* Radial gradient background accent */}
-              <div className="absolute -right-12 -bottom-12 w-48 h-48 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
-              
-              {/* Breakout 3D Illustration */}
-              <div className="absolute right-0 bottom-0 w-[170px] h-[170px] pointer-events-none z-0 transition-all duration-350 ease-out group-hover:scale-108 group-hover:-translate-y-2 group-hover:translate-x-1">
-                <img src="/images/card_neet.png" alt="NEET Outcomes" className="w-full h-full object-contain" />
+            {/* NEET */}
+            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6.5 hover:border-emerald-200 hover:shadow-xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between min-h-[310px]">
+              {/* Subtle watermark background */}
+              <div className="absolute right-3 bottom-3 w-20 h-20 pointer-events-none z-0">
+                <img 
+                  src="/images/card_neet.png" 
+                  alt="NEET Watermark" 
+                  className="w-full h-full object-contain opacity-15 group-hover:opacity-25 transition-all duration-300 group-hover:scale-105" 
+                  style={{ filter: 'grayscale(100%) sepia(100%) hue-rotate(90deg) saturate(350%) brightness(95%)' }}
+                />
               </div>
-
-              <div className="relative z-10 space-y-6">
+              
+              <div className="relative z-10 space-y-3.5 text-left">
+                {/* Top: Icon + Category */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+                    <Plus className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wider">Medical</span>
+                </div>
                 
-                {/* Header Lockup */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-inner">
-                    <Plus className="w-5.5 h-5.5" />
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest block">Medical</span>
-                    <h3 className="text-2xl font-black text-slate-900 leading-none">NEET</h3>
-                  </div>
-                </div>
-
-                {/* Subheadline / Aspirational Badge */}
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-800 leading-relaxed">
-                    Your Path to Becoming a Doctor
-                  </p>
-                  <p className="text-[11px] font-medium text-slate-400">
-                    Access elite medical colleges and clinical study pathways.
+                {/* Middle: Exam Name */}
+                <h3 className="text-2xl font-black text-slate-900 leading-none">NEET</h3>
+                
+                {/* Description */}
+                <p className="text-xs font-bold text-slate-600 leading-relaxed">
+                  Gateway to AIIMS, JIPMER & Premier Medical Colleges
+                </p>
+                
+                {/* Career Paths */}
+                <div className="pt-1">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Career Paths</span>
+                  <p className="text-[11px] font-bold text-slate-500">
+                    Medicine (MBBS) • Dental (BDS) • Healthcare Science
                   </p>
                 </div>
-
-                {/* Focus Subjects */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black text-slate-450 uppercase tracking-wider block">Focus Areas</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Physics', 'Chemistry', 'Botany', 'Zoology'].map((s) => (
-                      <span key={s} className="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Career Outcomes */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black text-slate-450 uppercase tracking-wider block">Future Career Outcomes</span>
-                  <ul className="space-y-2">
-                    {[
-                      'MBBS (Medicine &amp; Surgery)',
-                      'BDS (Dental Surgery)',
-                      'BAMS (Ayurvedic Medicine)',
-                      'BHMS (Homeopathic Medicine)',
-                      'Allied Medical Sciences'
-                    ].map((outcome) => (
-                      <li key={outcome} className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                        <Check className="w-3.5 h-3.5 text-emerald-500 stroke-[3]" />
-                        <span dangerouslySetInnerHTML={{ __html: outcome }} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
               </div>
-
-              {/* Action Buttons footer */}
-              <div className="flex gap-2.5 mt-8 pt-4 border-t border-slate-50 relative z-10">
+              
+              {/* Bottom: Explore Button */}
+              <div className="relative z-10 pt-4">
                 <button
                   onClick={() => navigate('/neet')}
-                  className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition-all flex items-center justify-center gap-1 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-98"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-emerald-200 text-emerald-600 font-bold text-sm hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-200 active:scale-98"
                 >
-                  Explore NEET <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => navigate('/signup')}
-                  className="py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 active:scale-98"
-                >
-                  <FileText className="w-3.5 h-3.5 text-slate-400" />
-                  Sample Test
+                  Explore NEET <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-
             </div>
 
-            {/* CUET CARD */}
-            <div className="bg-white border-2 border-slate-100 rounded-3xl p-8 hover:border-purple-200 hover:shadow-[0_20px_40px_rgba(139,92,246,0.06)] transition-all duration-300 group relative flex flex-col justify-between min-h-[560px]">
-              
-              {/* Radial gradient background accent */}
-              <div className="absolute -right-12 -bottom-12 w-48 h-48 rounded-full bg-purple-500/5 blur-3xl pointer-events-none" />
-              
-              {/* Breakout 3D Illustration */}
-              <div className="absolute right-0 bottom-0 w-[170px] h-[170px] pointer-events-none z-0 transition-all duration-350 ease-out group-hover:scale-108 group-hover:-translate-y-2 group-hover:translate-x-1">
-                <img src="/images/card_cuet.png" alt="CUET Outcomes" className="w-full h-full object-contain" />
+            {/* CUET */}
+            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6.5 hover:border-purple-200 hover:shadow-xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between min-h-[310px]">
+              {/* Subtle watermark background */}
+              <div className="absolute right-3 bottom-3 w-20 h-20 pointer-events-none z-0">
+                <img 
+                  src="/images/card_cuet.png" 
+                  alt="CUET Watermark" 
+                  className="w-full h-full object-contain opacity-15 group-hover:opacity-25 transition-all duration-300 group-hover:scale-105" 
+                  style={{ filter: 'grayscale(100%) sepia(100%) hue-rotate(240deg) saturate(350%) brightness(95%)' }}
+                />
               </div>
-
-              <div className="relative z-10 space-y-6">
+              
+              <div className="relative z-10 space-y-3.5 text-left">
+                {/* Top: Icon + Category */}
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600">
+                    <Building className="w-4 h-4" />
+                  </div>
+                  <span className="text-[10px] font-black text-purple-600 uppercase tracking-wider">University Entrance</span>
+                </div>
                 
-                {/* Header Lockup */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shadow-inner">
-                    <Building className="w-5.5 h-5.5" />
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-black text-purple-600 uppercase tracking-widest block">University Entrance</span>
-                    <h3 className="text-2xl font-black text-slate-900 leading-none">CUET</h3>
-                  </div>
-                </div>
-
-                {/* Subheadline / Aspirational Badge */}
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-800 leading-relaxed">
-                    One Exam. Hundreds of University Opportunities.
-                  </p>
-                  <p className="text-[11px] font-medium text-slate-400">
-                    Get admitted to India's top colleges and central academic hubs.
+                {/* Middle: Exam Name */}
+                <h3 className="text-2xl font-black text-slate-900 leading-none">CUET</h3>
+                
+                {/* Description */}
+                <p className="text-xs font-bold text-slate-600 leading-relaxed">
+                  One Exam. Access to Hundreds of Top Central Universities.
+                </p>
+                
+                {/* Career Paths */}
+                <div className="pt-1">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Career Paths</span>
+                  <p className="text-[11px] font-bold text-slate-500">
+                    Liberal Arts • Science & Technology • Business & Commerce
                   </p>
                 </div>
-
-                {/* Focus Subjects */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black text-slate-450 uppercase tracking-wider block">Focus Areas</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {['Domain Subjects', 'Language Tests', 'General Test'].map((s) => (
-                      <span key={s} className="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-purple-50 border border-purple-100 text-purple-700">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Career Outcomes */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black text-slate-450 uppercase tracking-wider block">Top College Admissions</span>
-                  <ul className="space-y-2">
-                    {[
-                      'Delhi University (DU)',
-                      'Banaras Hindu University (BHU)',
-                      'Jawaharlal Nehru University (JNU)',
-                      'Top Tier Central Universities',
-                      'Premier Government Institutes'
-                    ].map((outcome) => (
-                      <li key={outcome} className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                        <Check className="w-3.5 h-3.5 text-purple-500 stroke-[3]" />
-                        <span>{outcome}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
               </div>
-
-              {/* Action Buttons footer */}
-              <div className="flex gap-2.5 mt-8 pt-4 border-t border-slate-50 relative z-10">
+              
+              {/* Bottom: Explore Button */}
+              <div className="relative z-10 pt-4">
                 <button
                   onClick={() => navigate('/cuet')}
-                  className="flex-1 py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs transition-all flex items-center justify-center gap-1 hover:shadow-lg hover:shadow-purple-500/20 active:scale-98"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-purple-200 text-purple-600 font-bold text-sm hover:bg-purple-600 hover:text-white hover:border-purple-600 transition-all duration-200 active:scale-98"
                 >
-                  Explore CUET <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => navigate('/signup')}
-                  className="py-3 px-4 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 font-extrabold text-xs transition-all flex items-center justify-center gap-1.5 active:scale-98"
-                >
-                  <FileText className="w-3.5 h-3.5 text-slate-400" />
-                  Sample Test
+                  Explore CUET <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
-
             </div>
-
           </div>
         </div>
       </section>
@@ -878,70 +760,118 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* ══════════════════════════════════
-          7. SOCIAL PROOF STRIP
+          7. DREAM COLLEGES FINAL CTA
       ══════════════════════════════════ */}
-      <section className="py-10 bg-gradient-to-r from-[#1e3a8a] to-[#312e81] border-b border-blue-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-            {socialProofStats.map((s, i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-2.5">
-                <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-blue-300">
-                  {s.icon}
-                </div>
-                <div className="text-2xl font-black text-white">{s.num}</div>
-                <div className="text-xs font-bold text-blue-300 uppercase tracking-wider">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════
-          8. FINAL CTA BANNER
-      ══════════════════════════════════ */}
-      <section className="py-8 bg-white">
+      <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
-            className="rounded-2xl overflow-hidden relative"
-            style={{ background: 'linear-gradient(120deg, #1e3a8a 0%, #312e81 100%)' }}
+            className="rounded-3xl p-8 sm:p-12 lg:p-14 relative overflow-hidden shadow-2xl border border-blue-950"
+            style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #1e3a8a 100%)' }}
           >
-            <div className="grid lg:grid-cols-[1fr_auto] items-center">
-              {/* Left content */}
-              <div className="p-8 sm:p-10 lg:p-12 space-y-4">
-                <h2 className="text-2xl sm:text-[32px] font-black text-white leading-tight">
-                  Your Competition Is Practicing.<br />Are You?
+            {/* Absolute decorative gradient highlights */}
+            <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+
+            <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center relative z-10">
+              
+              {/* Left Column: Heading and CTAs */}
+              <div className="space-y-6 text-left">
+                <h2 className="text-3xl sm:text-[40px] font-black text-white leading-tight">
+                  Your Dream College Won't Wait.<br />
+                  <span className="text-amber-400">Start Preparing Today.</span>
                 </h2>
-                <p className="text-sm text-blue-200 font-semibold max-w-md">
-                  Join thousands of students preparing smarter with AI-powered learning.
+                <p className="text-base text-blue-200 font-semibold max-w-xl leading-relaxed">
+                  Prepare with India's most advanced AI-powered learning platform.
                 </p>
-                <div className="flex flex-wrap gap-3 pt-2">
+                
+                <div className="flex flex-wrap gap-4 pt-2">
                   <button
                     onClick={() => navigate('/signup')}
-                    id="cta-banner-primary"
-                    className="px-7 py-3.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-sm transition-all active:scale-[0.98] shadow-xl shadow-amber-500/30"
+                    className="px-8 py-4 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-900 font-black text-sm transition-all active:scale-[0.98] shadow-lg shadow-amber-500/20 flex items-center gap-2"
                   >
-                    Start Free Practice Test
+                    Start Free Practice Test <ArrowRight className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => navigate('/signup')}
-                    id="cta-banner-secondary"
-                    className="px-7 py-3.5 rounded-lg border-2 border-white/30 text-white font-bold text-sm hover:bg-white/10 transition-all active:scale-[0.98]"
+                    onClick={() => {
+                      const featuresSec = document.getElementById('features');
+                      if (featuresSec) {
+                        featuresSec.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="px-8 py-4 rounded-xl border border-white/20 hover:border-white/40 text-white font-black text-sm hover:bg-white/5 transition-all active:scale-[0.98]"
                   >
                     Explore AI Tutor
                   </button>
                 </div>
+
+                {/* Trust Badges */}
+                <div className="flex flex-wrap items-center gap-y-2.5 gap-x-5 text-[11px] font-bold text-blue-200/90 pt-4 border-t border-white/5">
+                  <div className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />
+                    <span>No Credit Card Required</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />
+                    <span>Instant Access</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[3]" />
+                    <span>Cancel Anytime</span>
+                  </div>
+                </div>
               </div>
 
-              {/* Right: student image */}
-              <div className="hidden lg:block relative h-full min-h-[260px] w-[300px]">
-                <img
-                  src="/images/student_standing.png"
-                  alt="Student"
-                  className="absolute bottom-0 right-0 h-full w-full object-contain object-bottom"
-                  style={{ filter: 'brightness(0.9)' }}
-                />
+              {/* Right Column: College Grid Wall */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-[10px] text-amber-400/80 font-black tracking-[0.25em] uppercase">‹ Dream. Prepare. Achieve. ›</span>
+                </div>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    { name: 'IIT Bombay', tag: 'Engineering Excellence', img: '/images/iit_bombay.png' },
+                    { name: 'IIT Delhi', tag: 'Innovation Leadership', img: '/images/iit_delhi.png' },
+                    { name: 'AIIMS Delhi', tag: 'Healing Lives', img: '/images/aiims_delhi.png' },
+                    { name: 'Delhi University', tag: 'Legacy of Excellence', img: '/images/delhi_university.png' },
+                    { name: 'BHU', tag: 'Knowledge Tradition', img: '/images/bhu.png' },
+                    { name: 'JNU', tag: 'Empowering Thinkers', img: '/images/jnu.png' },
+                  ].map((col) => (
+                    <div key={col.name} className="relative h-28 sm:h-32 rounded-2xl overflow-hidden group/college border border-white/5 shadow-inner">
+                      <img 
+                        src={col.img} 
+                        alt={col.name} 
+                        className="absolute inset-0 w-full h-full object-cover group-hover/college:scale-110 transition-transform duration-500 ease-out" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/45 to-transparent z-10" />
+                      <div className="absolute bottom-2.5 left-3.5 z-20 text-left">
+                        <h4 className="text-[12px] sm:text-[13px] font-black text-white tracking-tight leading-none mb-1">{col.name}</h4>
+                        <p className="text-[8px] font-black text-amber-300 uppercase tracking-wider leading-none">{col.tag}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
+
+            {/* Bottom: Statistics strip */}
+            <div className="border-t border-white/10 mt-12 pt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              {[
+                { val: '25L+', desc: 'Students Trust Us', icon: '👥' },
+                { val: '10,000+', desc: 'Practice Questions', icon: '📝' },
+                { val: '500+', desc: 'Chapter Tests', icon: '📖' },
+                { val: '24×7', desc: 'AI Mentor Support', icon: '🤖' },
+                { val: 'Top Results', desc: 'Every Year', icon: '🏆' }
+              ].map((stat, idx) => (
+                <div key={idx} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 shadow-inner text-left">
+                  <span className="text-xl">{stat.icon}</span>
+                  <div>
+                    <div className="text-base font-black text-white leading-tight">{stat.val}</div>
+                    <div className="text-[9px] font-bold text-blue-200 uppercase tracking-widest mt-0.5">{stat.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
           </div>
         </div>
       </section>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User, Check, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_LINKS = [
@@ -75,7 +75,7 @@ const LandingNav: React.FC = () => {
           aria-label="PrepEntrance Home"
         >
           {/* Official PrepEntrance Logo Badge */}
-          <div className="brand-logo-container rounded-xl w-[62px] h-[62px]">
+          <div className="brand-logo-container rounded-xl w-[52px] h-[52px]">
             <img 
               src="/prepentrance-logo.png" 
               alt="PrepEntrance Logo" 
@@ -83,11 +83,11 @@ const LandingNav: React.FC = () => {
             />
           </div>
           {/* Logo Name & Tagline */}
-          <div className="flex flex-col items-start leading-none text-left gap-0">
-            <span className="font-sans font-black text-[27px] text-slate-950 tracking-tight group-hover:text-blue-600 transition-colors duration-200">
+          <div className="flex flex-col items-start leading-none text-left">
+            <span className="font-sans font-bold text-[24px] text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors duration-200">
               PrepEntrance
             </span>
-            <span className="text-[8.5px] text-slate-800 font-black tracking-[0.2em] mt-0.5 uppercase">
+            <span className="text-[8.5px] text-slate-500 font-extrabold tracking-[0.2em] mt-1.5 uppercase">
               Prepare. Perform. Succeed.
             </span>
           </div>
@@ -107,20 +107,28 @@ const LandingNav: React.FC = () => {
         </div>
 
         {/* Right: Auth Action Buttons */}
-        <div className="hidden md:flex items-center gap-3.5">
+        <div className="hidden md:flex items-center gap-4">
           <button
             onClick={() => navigate('/login')}
-            className="text-[14px] font-bold px-4.5 py-2 rounded-lg border border-slate-200 text-[#1e293b] hover:bg-slate-50 transition-colors focus:outline-none"
+            className="text-[14px] font-bold px-4.5 py-2.5 rounded-xl border border-slate-200 text-slate-800 hover:bg-slate-50 transition-all flex items-center gap-1.5 focus:outline-none shadow-sm"
           >
-            Login
+            <User className="w-4 h-4 text-slate-500" />
+            Sign In
           </button>
           
-          <button
-            onClick={() => navigate('/signup')}
-            className="text-[14px] font-bold px-5 py-2 rounded-lg bg-[#2563eb] hover:bg-[#1d4ed8] text-white transition-colors shadow-sm focus:outline-none"
-          >
-            Sign Up Free
-          </button>
+          <div className="relative flex flex-col items-center">
+            <button
+              onClick={() => navigate('/signup')}
+              className="text-[14px] font-bold px-5.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all duration-200 flex items-center gap-1.5 shadow-sm hover:shadow-md hover:shadow-indigo-500/10 focus:outline-none"
+            >
+              Join PrepEntrance
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+            <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+              <Check className="w-2.5 h-2.5 stroke-[3] text-emerald-600" />
+              <span>No Credit Card Required</span>
+            </div>
+          </div>
         </div>
 
         {/* Mobile menu button */}
@@ -177,16 +185,24 @@ const LandingNav: React.FC = () => {
               <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-slate-100">
                 <button
                   onClick={() => { navigate('/login'); setMobileOpen(false); }}
-                  className="w-full py-2.5 rounded-lg border border-slate-200 text-[#1e293b] font-bold text-center hover:bg-slate-50"
+                  className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-800 font-bold text-center hover:bg-slate-50 flex items-center justify-center gap-2"
                 >
-                  Login
+                  <User className="w-4 h-4 text-slate-500" />
+                  Sign In
                 </button>
                 <button
                   onClick={() => { navigate('/signup'); setMobileOpen(false); }}
-                  className="w-full py-2.5 rounded-lg bg-[#2563eb] text-white font-bold text-center hover:bg-[#1d4ed8]"
+                  className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-center hover:bg-indigo-700 flex items-center justify-center gap-1.5"
                 >
-                  Sign Up Free
+                  Join PrepEntrance
+                  <ArrowRight className="w-4 h-4" />
                 </button>
+                <div className="flex justify-center mt-1">
+                  <div className="flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                    <Check className="w-2.5 h-2.5 stroke-[3] text-emerald-600" />
+                    <span>No Credit Card Required</span>
+                  </div>
+                </div>
               </div>
             </motion.div>
           </>
