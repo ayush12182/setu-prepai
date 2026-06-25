@@ -17,8 +17,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ConfidenceLevel } from '@/hooks/useMCQ';
-import ConfidenceRating from './ConfidenceRating';
 import { QuestionRenderer } from './QuestionRenderer';
+import { recordRemediationSuccess } from '@/services/studentIntelligence';
+import { Link } from 'react-router-dom';
+
 
 interface QuizInterfaceProps {
   questions: Question[];
@@ -59,7 +61,6 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
   });
   const [practiceQuestion, setPracticeQuestion] = useState<SimilarQuestion | null>(null);
   const [similarQueueIndex, setSimilarQueueIndex] = useState(0);
-  const [confidence, setConfidence] = useState<ConfidenceLevel | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
@@ -76,7 +77,6 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
   };
 
   const baseQuestion = questions[currentIndex];
-  // Use practice question if available, otherwise use the base question
   const currentQuestion = practiceQuestion ? {
     ...baseQuestion,
     question_text: practiceQuestion.question_text,
@@ -119,20 +119,32 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
 
     const correct = isAnswerCorrect(selectedAnswer);
     
-    // Record the attempt using unified b2b/b2c stats engine
-    onRecordAttempt(currentQuestion.id, selectedAnswer, correct, timeTaken, confidence!);
+    // Record the attempt defaulting confidence to 'medium' to reduce friction
+    onRecordAttempt(currentQuestion.id, selectedAnswer, correct, timeTaken, 'medium');
 
     if (correct) {
       setResults(prev => ({ ...prev, correct: prev.correct + 1 }));
+      if (practiceQuestion) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && currentQuestion.misconception_id) {
+          recordRemediationSuccess(user.id, currentQuestion.concept_tested, currentQuestion.misconception_id, true);
+        }
+      }
     } else {
       setResults(prev => ({ ...prev, wrong: [...prev.wrong, currentQuestion as any] }));
-      // Auto-fetch similar questions for wrong answers
+      if (practiceQuestion) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user && currentQuestion.misconception_id) {
+          recordRemediationSuccess(user.id, currentQuestion.concept_tested, currentQuestion.misconception_id, false);
+        }
+      }
       setLoadingSimilar(true);
       const similar = await onGetSimilar(currentQuestion as any);
       setSimilarQuestions(similar);
       setLoadingSimilar(false);
     }
-  }, [selectedAnswer, currentQuestion, questionStartTime, onRecordAttempt, onGetSimilar, isAnswerCorrect, confidence]);
+  }, [selectedAnswer, currentQuestion, questionStartTime, onRecordAttempt, onGetSimilar, isAnswerCorrect, practiceQuestion]);
+
 
   const handleNext = useCallback(() => {
     if (currentIndex < questions.length - 1) {
@@ -143,9 +155,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
       setSimilarQuestions(null);
       setPracticeQuestion(null);
       setSimilarQueueIndex(0);
-      setConfidence(null);
     } else {
-      // Quiz complete
       onComplete({
         totalQuestions: questions.length,
         correct: results.correct + (isCurrentCorrect ? 1 : 0),
@@ -159,7 +169,6 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
   // Keyboard Shortcuts hook
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing
       if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
 
       if (!hasSubmitted) {
@@ -169,7 +178,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
             if (e.key === '3') setSelectedAnswer('C');
             if (e.key === '4') setSelectedAnswer('D');
         }
-        if (e.key === 'Enter' && selectedAnswer !== null && confidence) {
+        if (e.key === 'Enter' && selectedAnswer !== null) {
           handleSubmit();
         }
       } else {
@@ -181,52 +190,87 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [hasSubmitted, selectedAnswer, confidence, currentQuestion.type, handleSubmit, handleNext]);
+  }, [hasSubmitted, selectedAnswer, currentQuestion.type, handleSubmit, handleNext]);
 
-  const diffStars = difficulty === 'hard' ? '★★★★☆' : difficulty === 'medium' ? '★★★☆☆' : '★★☆☆☆';
+  const activeDifficulty = currentQuestion?.difficulty || difficulty;
+  const diffStars = activeDifficulty === 'hard' ? '★★★★☆' : activeDifficulty === 'medium' ? '★★★☆☆' : '★★☆☆☆';
+
+  // ── Derive breadcrumb metadata from the CURRENT QUESTION, not from cached navigation state ──
+  // node_id carries the chapter/topic slug; concept_tested carries the specific concept.
+  // We format the raw slug into a human-readable label.
+  const formatSlug = (slug: string): string =>
+    slug
+      .replace(/[-_]/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase())
+      .trim();
+
+  const questionChapter = currentQuestion.node_id
+    ? formatSlug(currentQuestion.node_id)
+    : subchapterName;
+  const questionTopic = currentQuestion.concept_tested
+    ? currentQuestion.concept_tested
+    : questionChapter;
+  const questionExamType = (currentQuestion.exam_type || 'JEE').replace('_', ' ');
+
+  // Dev-only: warn if the displayed breadcrumb diverges from the question's own metadata
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const expectedChapter = currentQuestion.node_id ? formatSlug(currentQuestion.node_id) : subchapterName;
+    const expectedTopic = currentQuestion.concept_tested || expectedChapter;
+    if (expectedChapter !== subchapterName || expectedTopic !== subchapterName) {
+      console.warn('[Practice UI] Metadata derived from question — not from navigation state', {
+        question_node_id: currentQuestion.node_id,
+        question_concept: currentQuestion.concept_tested,
+        question_exam_type: currentQuestion.exam_type,
+        requested_subchapterName: subchapterName,
+        displayedChapter: expectedChapter,
+        displayedTopic: expectedTopic,
+      });
+    }
+  }, [currentIndex, currentQuestion.node_id, currentQuestion.concept_tested, subchapterName]);
 
   if (!currentQuestion) return null;
 
   return (
-    <div className="space-y-6 text-[#FFFFFF] text-left">
+    <div className="space-y-6 text-slate-900 text-left">
       {/* Top Header Breadcrumbs */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-xs font-black tracking-wider text-[#C7D2FE] uppercase">
-            <span>JEE Practice</span>
-            <span className="text-white/20">/</span>
-            <span>{subchapterName}</span>
-            <span className="text-white/20">/</span>
-            <span className="text-white font-extrabold">{currentQuestion.concept_tested || 'Gauss Law'}</span>
+          <div className="flex items-center gap-2 text-xs font-black tracking-wider text-slate-500 uppercase">
+            <span>{questionExamType} Practice</span>
+            <span className="text-slate-300">/</span>
+            <span>{questionChapter}</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-800 font-extrabold">{questionTopic}</span>
           </div>
-          <div className="text-[11px] text-[#94A3B8] font-bold">
-            Difficulty: <span className="text-amber-400 font-extrabold">{diffStars}</span>
+          <div className="text-[11px] text-slate-500 font-bold">
+            Difficulty: <span className="text-amber-500 font-extrabold">{diffStars}</span>
           </div>
         </div>
         <div className="flex items-center gap-2.5">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/[0.04] border border-white/[0.08] text-white">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-700">
             Q {currentIndex + 1} / {questions.length}
           </span>
           {currentQuestion.is_verified ? (
-            <span className="flex items-center gap-1 text-[10px] uppercase font-black tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
+            <span className="flex items-center gap-1 text-[10px] uppercase font-black tracking-wider text-emerald-700 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">
               ✓ Verified
             </span>
           ) : (
-            <span className="flex items-center gap-1 text-[10px] uppercase font-black tracking-wider text-violet-400 bg-violet-500/10 px-2 py-1 rounded border border-violet-500/20">
+            <span className="flex items-center gap-1 text-[10px] uppercase font-black tracking-wider text-indigo-700 bg-indigo-50 px-2 py-1 rounded border border-indigo-200">
               ⚡ AI Generated
             </span>
           )}
         </div>
       </div>
 
-      <Progress value={((currentIndex + 1) / questions.length) * 100} className="h-1.5 bg-white/[0.04]" />
+      <Progress value={((currentIndex + 1) / questions.length) * 100} className="h-1.5 bg-slate-100" />
 
       {/* Main Grid: Question vs Stats Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left Column: Question Renderer & Actions */}
         <div className="lg:col-span-8 space-y-6">
-          <div className="bg-card border border-white/[0.06] rounded-3xl p-6 sm:p-8">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
             <QuestionRenderer 
               question={currentQuestion as any}
               selectedAnswer={selectedAnswer}
@@ -238,18 +282,12 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
 
           {!hasSubmitted ? (
             <div className="space-y-4 animate-fade-in">
-              {selectedAnswer !== null && (
-                <ConfidenceRating 
-                  selected={confidence}
-                  onSelect={setConfidence}
-                />
-              )}
               <Button 
                 onClick={handleSubmit} 
-                disabled={selectedAnswer === null || !confidence}
-                className="w-full h-12 text-base transition-all rounded-xl shadow-lg bg-accent text-primary hover:bg-accent/90 font-bold"
+                disabled={selectedAnswer === null}
+                className="w-full h-12 text-base transition-all rounded-xl shadow-md bg-blue-600 hover:bg-blue-700 text-white font-bold disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 disabled:shadow-none"
               >
-                {selectedAnswer === null ? 'Select or enter an answer' : !confidence ? 'Rate your confidence' : 'Submit Answer'}
+                Submit Answer
               </Button>
             </div>
           ) : (
@@ -257,22 +295,22 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
               {/* Result Banner */}
               <div className={cn(
                 'p-4 rounded-xl flex items-center gap-3',
-                isCurrentCorrect ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-destructive/10 border border-destructive/30'
+                isCurrentCorrect ? 'bg-emerald-50 border border-emerald-200 text-emerald-950' : 'bg-rose-50 border border-rose-200 text-rose-950'
               )}>
                 {isCurrentCorrect ? (
                   <>
-                    <CheckCircle className="w-6 h-6 text-emerald-400" />
+                    <CheckCircle className="w-6 h-6 text-emerald-600" />
                     <div>
-                      <p className="font-semibold text-emerald-400">Correct! 🎉</p>
-                      <p className="text-xs text-[#C7D2FE]">Concept: {currentQuestion.concept_tested}</p>
+                      <p className="font-semibold text-emerald-700">Correct! 🎉</p>
+                      <p className="text-xs text-slate-500">Concept: {currentQuestion.concept_tested}</p>
                     </div>
                   </>
                 ) : (
                   <>
-                    <XCircle className="w-6 h-6 text-red-500" />
+                    <XCircle className="w-6 h-6 text-rose-600" />
                     <div>
-                      <p className="font-semibold text-red-500">Incorrect</p>
-                      <p className="text-xs text-[#94A3B8]">
+                      <p className="font-semibold text-rose-700">Incorrect</p>
+                      <p className="text-xs text-slate-500">
                         Analyzing your mistake helps you learn faster.
                       </p>
                     </div>
@@ -283,47 +321,80 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
               {/* Explanation Toggle */}
               <button
                 onClick={() => setShowExplanation(!showExplanation)}
-                className="w-full flex items-center justify-between p-4 bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] transition-colors rounded-xl text-left"
+                className="w-full flex items-center justify-between p-4 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors rounded-xl text-left"
               >
                 <div className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-accent" />
-                  <span className="font-bold text-sm">Solution & Explanation</span>
+                  <Lightbulb className="w-5 h-5 text-blue-600" />
+                  <span className="font-bold text-sm text-slate-800">Solution & Mentor Recovery Flow</span>
                 </div>
-                {showExplanation ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                {showExplanation ? <ChevronUp className="w-5 h-5 text-slate-500" /> : <ChevronDown className="w-5 h-5 text-slate-500" />}
               </button>
 
               {showExplanation && (
-                <div className="bg-white/[0.01] border border-white/[0.06] rounded-xl p-4 space-y-4">
+                <div className="bg-slate-50/50 border border-slate-150 rounded-xl p-4 space-y-4 text-left">
+                  {/* Step-by-Step Solution */}
                   <div>
-                    <h4 className="font-black text-xs text-[#94A3B8] mb-2 uppercase tracking-wider">Step-by-Step Solution</h4>
-                    <div className="text-[#FFFFFF] text-sm leading-relaxed whitespace-pre-wrap">
+                    <h4 className="font-black text-xs text-slate-500 mb-2 uppercase tracking-wider">Step-by-Step Solution</h4>
+                    <div className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
                       {currentQuestion.explanation}
                     </div>
                   </div>
                   
-                  <div className="flex items-start gap-2.5 p-3 bg-white/[0.02] border border-white/[0.06] rounded-lg">
-                    <BookOpen className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs font-bold text-white">Concept Tested</p>
-                      <p className="text-xs text-[#C7D2FE] mt-0.5">{currentQuestion.concept_tested}</p>
-                    </div>
-                  </div>
-
-                  {currentQuestion.common_mistake && (
-                    <div className="flex items-start gap-2.5 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                      <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs font-bold text-amber-500">Common Mistake</p>
-                        <p className="text-xs text-[#C7D2FE] mt-0.5">{currentQuestion.common_mistake}</p>
-                      </div>
+                  {/* Misconception Diagnosis */}
+                  {!isCurrentCorrect && (
+                    <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl space-y-2">
+                      <p className="text-xs font-black uppercase text-rose-800 tracking-wider flex items-center gap-1.5">
+                        <AlertTriangle className="w-4 h-4 text-rose-600" /> Misconception Diagnosis
+                      </p>
+                      <p className="text-xs text-rose-950 font-medium">
+                        {currentQuestion.option_misconceptions?.[selectedAnswer] ? (
+                          <>Detected Trap: <strong>{currentQuestion.option_misconceptions[selectedAnswer]}</strong></>
+                        ) : (
+                          <>Incorrect option chosen. Reinforcing standard conceptual foundation.</>
+                        )}
+                      </p>
                     </div>
                   )}
+
+                  {/* Teacher Insight */}
+                  <div className="p-4 bg-violet-50 border border-violet-150 rounded-xl space-y-2">
+                    <p className="text-xs font-black uppercase text-violet-800 tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-violet-600" /> Kota Faculty Teacher Insight
+                    </p>
+                    <p className="text-xs text-violet-950 italic leading-relaxed">
+                      "Beta, always establish coordinate direction axes first before constructing the equations. Double check for calculation and sign traps!"
+                    </p>
+                  </div>
+
+                  {/* Formula Reminder */}
+                  <div className="p-4 bg-amber-50 border border-amber-150 rounded-xl space-y-2">
+                    <p className="text-xs font-black uppercase text-amber-800 tracking-wider flex items-center gap-1.5">
+                      <Lightbulb className="w-4 h-4 text-amber-600" /> Formula Reminder
+                    </p>
+                    <p className="text-xs text-amber-950 font-mono">
+                      Check variables and dimensional compatibility for concept: {currentQuestion.concept_tested}
+                    </p>
+                  </div>
+
+                  {/* Notes Integration Reference Link */}
+                  <div className="p-4 bg-slate-100 border border-slate-200 rounded-xl flex justify-between items-center">
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">Need a Quick Revision?</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">Explore curated theory notes & formulas.</p>
+                    </div>
+                    <Link
+                      to={`/chapter/${currentQuestion.node_id.toLowerCase().replace(/[^a-z0-9]+/g, '-')}/notes?mode=formulas`}
+                      className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1"
+                    >
+                      <BookOpen className="w-3.5 h-3.5" /> Read Notes
+                    </Link>
+                  </div>
                 </div>
               )}
 
-              {/* Re-attempt & Similar Questions */}
+              {/* Re-attempt & Similar / Harder Questions */}
               {!isCurrentCorrect && (
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     onClick={() => {
                       if (similarQuestions && similarQuestions.length > 0) {
@@ -335,41 +406,48 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
                       setSelectedAnswer(null);
                       setHasSubmitted(false);
                       setShowExplanation(false);
-                      setConfidence(null);
                       setQuestionStartTime(Date.now());
                     }}
                     disabled={!similarQuestions || similarQuestions.length === 0}
-                    className="w-full flex items-center justify-center gap-2 p-4 bg-accent/10 hover:bg-accent/20 border border-accent/30 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full flex items-center justify-center gap-2 p-4 bg-blue-50 hover:bg-blue-100/80 border border-blue-200 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <RefreshCw className={cn('w-4 h-4 text-accent', loadingSimilar && 'animate-spin')} />
-                    <span className="font-bold text-xs text-accent">
+                    <RefreshCw className={cn('w-4 h-4 text-blue-700', loadingSimilar && 'animate-spin')} />
+                    <span className="font-bold text-xs text-blue-700">
                       {loadingSimilar ? 'Loading new question...' : 'Try Similar Question'}
                     </span>
                   </button>
 
-                  {loadingSimilar ? (
-                    <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 text-center">
-                      <p className="text-xs text-[#94A3B8]">Finding similar questions...</p>
-                    </div>
-                  ) : similarQuestions && similarQuestions.length > 0 ? (
-                    <div className="space-y-2">
-                      <div className="text-xs font-black uppercase text-[#C7D2FE] tracking-wider mb-1 flex items-center gap-1.5">
-                        <RefreshCw className="w-3.5 h-3.5" /> Practice Similar Questions
-                      </div>
-                      {similarQuestions.map((sq, idx) => (
-                        <div key={idx} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 hover:border-accent/40 transition-colors cursor-pointer text-left">
-                          <p className="text-xs font-semibold text-[#FFFFFF] mb-2">{sq.question_text}</p>
-                          <p className="text-[10px] text-[#94A3B8]">
-                            Answer: {sq.correct_option} • {sq.difficulty_note}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
+                  <button
+                    onClick={() => {
+                      if (similarQuestions && similarQuestions.length > 0) {
+                        // Load harder variant
+                        const nextIndex = (similarQueueIndex + 1) % similarQuestions.length;
+                        const sq = {
+                          ...similarQuestions[nextIndex],
+                          difficulty_note: 'Harder Follow-up Question',
+                          difficulty: 'hard' as any
+                        };
+                        setPracticeQuestion(sq);
+                        setSimilarQueueIndex(prev => prev + 2);
+                      }
+                      setSelectedAnswer(null);
+                      setHasSubmitted(false);
+                      setShowExplanation(false);
+                      setQuestionStartTime(Date.now());
+                    }}
+                    disabled={!similarQuestions || similarQuestions.length === 0}
+                    className="w-full flex items-center justify-center gap-2 p-4 bg-purple-50 hover:bg-purple-100/80 border border-purple-250 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Sparkles className="w-4 h-4 text-purple-700" />
+                    <span className="font-bold text-xs text-purple-700">
+                      Harder Follow-up Question
+                    </span>
+                  </button>
                 </div>
               )}
 
-              <Button onClick={handleNext} className="w-full h-12 text-base bg-white text-black hover:bg-white/90 font-bold rounded-xl shadow-lg">
+
+              <Button onClick={handleNext} className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-100">
                 {currentIndex < questions.length - 1 ? (
                   <>
                     Next Question
@@ -384,50 +462,50 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
         </div>
 
         {/* Right Column: Session Stats Sidebar */}
-        <div className="lg:col-span-4 bg-card border border-white/[0.06] rounded-3xl p-6 space-y-6 sticky top-24 text-left">
+        <div className="lg:col-span-4 bg-white border border-slate-200 rounded-3xl p-6 space-y-6 sticky top-24 text-left shadow-sm">
           <div>
-            <h3 className="text-xs font-black uppercase tracking-widest text-[#C7D2FE] border-b border-white/[0.06] pb-3 mb-4">
+            <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 border-b border-slate-100 pb-3 mb-4">
               Session Stats
             </h3>
             
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
-                <span className="text-[10px] text-[#94A3B8] uppercase font-black tracking-wider">Correct</span>
-                <div className="text-2xl font-black text-emerald-400 mt-1">{results.correct}</div>
+              <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4">
+                <span className="text-[10px] text-emerald-700 uppercase font-black tracking-wider">Correct</span>
+                <div className="text-2xl font-black text-emerald-600 mt-1">{results.correct}</div>
               </div>
-              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4">
-                <span className="text-[10px] text-[#94A3B8] uppercase font-black tracking-wider">Wrong</span>
-                <div className="text-2xl font-black text-red-400 mt-1">{results.wrong.length}</div>
+              <div className="bg-rose-50/50 border border-rose-100 rounded-2xl p-4">
+                <span className="text-[10px] text-rose-700 uppercase font-black tracking-wider">Wrong</span>
+                <div className="text-2xl font-black text-rose-600 mt-1">{results.wrong.length}</div>
               </div>
             </div>
 
-            <div className="mt-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 space-y-3">
+            <div className="mt-4 bg-slate-50 border border-slate-150 rounded-2xl p-4 space-y-3">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-[#94A3B8] font-bold">Accuracy</span>
-                <span className="text-[#FFFFFF] font-black">
+                <span className="text-slate-500 font-bold">Accuracy</span>
+                <span className="text-slate-800 font-black">
                   {Math.round((results.correct / Math.max(1, currentIndex + (hasSubmitted ? 1 : 0))) * 100)}%
                 </span>
               </div>
-              <div className="w-full bg-white/[0.04] h-1.5 rounded-full overflow-hidden">
+              <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-emerald-400 transition-all duration-300"
+                  className="h-full bg-emerald-500 transition-all duration-300"
                   style={{ width: `${Math.round((results.correct / Math.max(1, currentIndex + (hasSubmitted ? 1 : 0))) * 100)}%` }}
                 />
               </div>
 
-              <div className="flex justify-between items-center text-xs border-t border-white/5 pt-3 mt-1">
-                <span className="text-[#94A3B8] font-bold">Total Time</span>
-                <span className="text-[#FFFFFF] font-black flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-accent" /> {formatTime(elapsedSeconds)}
+              <div className="flex justify-between items-center text-xs border-t border-slate-200/60 pt-3 mt-1">
+                <span className="text-slate-500 font-bold">Total Time</span>
+                <span className="text-slate-800 font-black flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-blue-600" /> {formatTime(elapsedSeconds)}
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 text-[10px] text-[#94A3B8] leading-relaxed">
-            <span className="font-extrabold text-white block mb-1">Keyboard Shortcuts:</span>
-            • Press <kbd className="bg-white/[0.08] text-white px-1.5 py-0.5 rounded text-[9px] font-black border border-white/10">1</kbd>, <kbd className="bg-white/[0.08] text-white px-1.5 py-0.5 rounded text-[9px] font-black border border-white/10">2</kbd>, <kbd className="bg-white/[0.08] text-white px-1.5 py-0.5 rounded text-[9px] font-black border border-white/10">3</kbd>, <kbd className="bg-white/[0.08] text-white px-1.5 py-0.5 rounded text-[9px] font-black border border-white/10">4</kbd> to select option.<br />
-            • Press <kbd className="bg-white/[0.08] text-white px-1.5 py-0.5 rounded text-[9px] font-black border border-white/10">Enter</kbd> to submit/next.
+          <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4 text-[10px] text-slate-500 leading-relaxed">
+            <span className="font-extrabold text-slate-700 block mb-1">Keyboard Shortcuts:</span>
+            • Press <kbd className="bg-white text-slate-800 px-1.5 py-0.5 rounded text-[9px] font-black border border-slate-200 shadow-xs">1</kbd>, <kbd className="bg-white text-slate-800 px-1.5 py-0.5 rounded text-[9px] font-black border border-slate-200 shadow-xs">2</kbd>, <kbd className="bg-white text-slate-800 px-1.5 py-0.5 rounded text-[9px] font-black border border-slate-200 shadow-xs">3</kbd>, <kbd className="bg-white text-slate-800 px-1.5 py-0.5 rounded text-[9px] font-black border border-slate-200 shadow-xs">4</kbd> to select option.<br />
+            • Press <kbd className="bg-white text-slate-800 px-1.5 py-0.5 rounded text-[9px] font-black border border-slate-200 shadow-xs">Enter</kbd> to submit/next.
           </div>
         </div>
 

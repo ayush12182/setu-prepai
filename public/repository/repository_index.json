@@ -1,0 +1,1797 @@
+{
+  "generated": "2026-06-25T10:45:58.450Z",
+  "total_topics": 214,
+  "total_questions": 6000,
+  "subjects": {
+    "physics": {
+      "Kinematics": {
+        "Motion in 1D": {
+          "file": "physics/kinematics/motion_in_1d.json",
+          "questions": 300,
+          "quality_score": 8.5,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Motion in 2D": {
+          "file": "physics/kinematics/motion_in_2d.json",
+          "questions": 300,
+          "quality_score": 8.54,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Projectile Motion": {
+          "file": "physics/kinematics/projectile_motion.json",
+          "questions": 300,
+          "quality_score": 8.43,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Relative Motion": {
+          "file": "physics/kinematics/relative_motion.json",
+          "questions": 300,
+          "quality_score": 8.52,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Graphs of Motion": {
+          "file": "physics/kinematics/graphs_of_motion.json",
+          "questions": 300,
+          "quality_score": 8.53,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        }
+      },
+      "Laws of Motion": {
+        "Newton's Laws": {
+          "file": "physics/laws_of_motion/newtons_laws.json",
+          "questions": 300,
+          "quality_score": 8.52,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Free Body Diagrams": {
+          "file": "physics/laws_of_motion/free_body_diagrams.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Friction (Static & Kinetic)": {
+          "file": "physics/laws_of_motion/friction_static_kinetic.json",
+          "questions": 300,
+          "quality_score": 8.53,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Circular Motion Dynamics": {
+          "file": "physics/laws_of_motion/circular_motion_dynamics.json",
+          "questions": 300,
+          "quality_score": 8.54,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Pseudo Forces": {
+          "file": "physics/laws_of_motion/pseudo_forces.json",
+          "questions": 300,
+          "quality_score": 8.55,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Constraint Relations": {
+          "file": "physics/laws_of_motion/constraint_relations.json",
+          "questions": 300,
+          "quality_score": 8.51,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        }
+      },
+      "Work, Energy & Power": {
+        "Work by constant/variable force": {
+          "file": "physics/work_energy_power/work_by_constantvariable_force.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Work-Energy Theorem": {
+          "file": "physics/work_energy_power/workenergy_theorem.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Conservation of Energy": {
+          "file": "physics/work_energy_power/conservation_of_energy.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Potential Energy curves": {
+          "file": "physics/work_energy_power/potential_energy_curves.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Collisions (1D & 2D)": {
+          "file": "physics/work_energy_power/collisions_1d_2d.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Power": {
+          "file": "physics/work_energy_power/power.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Rotational Motion": {
+        "Moment of Inertia": {
+          "file": "physics/rotational_motion/moment_of_inertia.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Parallel & Perpendicular Axis Theorems": {
+          "file": "physics/rotational_motion/parallel_perpendicular_axis_theorems.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Torque & Angular Momentum": {
+          "file": "physics/rotational_motion/torque_angular_momentum.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Rotational Kinematics": {
+          "file": "physics/rotational_motion/rotational_kinematics.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Rolling Motion": {
+          "file": "physics/rotational_motion/rolling_motion.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Angular Impulse": {
+          "file": "physics/rotational_motion/angular_impulse.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Toppling vs Sliding": {
+          "file": "physics/rotational_motion/toppling_vs_sliding.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Gravitation": {
+        "Newton's Law of Gravitation": {
+          "file": "physics/gravitation/newtons_law_of_gravitation.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Gravitational Field & Potential": {
+          "file": "physics/gravitation/gravitational_field_potential.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Orbital Motion": {
+          "file": "physics/gravitation/orbital_motion.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Escape & Orbital Velocity": {
+          "file": "physics/gravitation/escape_orbital_velocity.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Kepler's Laws": {
+          "file": "physics/gravitation/keplers_laws.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Satellites": {
+          "file": "physics/gravitation/satellites.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "SHM & Waves": {
+        "Simple Harmonic Motion": {
+          "file": "physics/shm_waves/simple_harmonic_motion.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Spring-Mass System": {
+          "file": "physics/shm_waves/springmass_system.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Simple Pendulum": {
+          "file": "physics/shm_waves/simple_pendulum.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Wave Equation": {
+          "file": "physics/shm_waves/wave_equation.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Superposition": {
+          "file": "physics/shm_waves/superposition.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Standing Waves": {
+          "file": "physics/shm_waves/standing_waves.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Beats & Doppler Effect": {
+          "file": "physics/shm_waves/beats_doppler_effect.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Thermodynamics": {
+        "First Law of Thermodynamics": {
+          "file": "physics/thermodynamics/first_law_of_thermodynamics.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Thermodynamic Processes": {
+          "file": "physics/thermodynamics/thermodynamic_processes.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Heat Engines": {
+          "file": "physics/thermodynamics/heat_engines.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Carnot Cycle": {
+          "file": "physics/thermodynamics/carnot_cycle.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Entropy": {
+          "file": "physics/thermodynamics/entropy.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Kinetic Theory of Gases": {
+          "file": "physics/thermodynamics/kinetic_theory_of_gases.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Electrostatics": {
+        "Coulomb's Law": {
+          "file": "physics/electrostatics/coulombs_law.json",
+          "questions": 300,
+          "quality_score": 8.52,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Electric Field": {
+          "file": "physics/electrostatics/electric_field.json",
+          "questions": 300,
+          "quality_score": 8.55,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Gauss's Law": {
+          "file": "physics/electrostatics/gausss_law.json",
+          "questions": 300,
+          "quality_score": 8.53,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Electric Potential": {
+          "file": "physics/electrostatics/electric_potential.json",
+          "questions": 300,
+          "quality_score": 8.51,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Capacitors": {
+          "file": "physics/electrostatics/capacitors.json",
+          "questions": 300,
+          "quality_score": 8.53,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Dielectrics": {
+          "file": "physics/electrostatics/dielectrics.json",
+          "questions": 300,
+          "quality_score": 8.51,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        }
+      },
+      "Current Electricity": {
+        "Ohm's Law": {
+          "file": "physics/current_electricity/ohms_law.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Resistance & Resistivity": {
+          "file": "physics/current_electricity/resistance_resistivity.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Kirchhoff's Laws": {
+          "file": "physics/current_electricity/kirchhoffs_laws.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "RC Circuits": {
+          "file": "physics/current_electricity/rc_circuits.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Electrical Instruments": {
+          "file": "physics/current_electricity/electrical_instruments.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Heating Effect": {
+          "file": "physics/current_electricity/heating_effect.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Magnetism & EMI": {
+        "Biot-Savart Law": {
+          "file": "physics/magnetism_emi/biotsavart_law.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Ampere's Law": {
+          "file": "physics/magnetism_emi/amperes_law.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Magnetic Force on Current": {
+          "file": "physics/magnetism_emi/magnetic_force_on_current.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Faraday's Law": {
+          "file": "physics/magnetism_emi/faradays_law.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Lenz's Law": {
+          "file": "physics/magnetism_emi/lenzs_law.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Inductance": {
+          "file": "physics/magnetism_emi/inductance.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "AC Circuits": {
+          "file": "physics/magnetism_emi/ac_circuits.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Optics": {
+        "Reflection & Mirrors": {
+          "file": "physics/optics/reflection_mirrors.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Refraction & Lenses": {
+          "file": "physics/optics/refraction_lenses.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Prism & Dispersion": {
+          "file": "physics/optics/prism_dispersion.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Interference": {
+          "file": "physics/optics/interference.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Diffraction": {
+          "file": "physics/optics/diffraction.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Polarization": {
+          "file": "physics/optics/polarization.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Modern Physics": {
+        "Photoelectric Effect": {
+          "file": "physics/modern_physics/photoelectric_effect.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Bohr Model": {
+          "file": "physics/modern_physics/bohr_model.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "X-rays": {
+          "file": "physics/modern_physics/xrays.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Nuclear Physics": {
+          "file": "physics/modern_physics/nuclear_physics.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Radioactivity": {
+          "file": "physics/modern_physics/radioactivity.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Semiconductors": {
+          "file": "physics/modern_physics/semiconductors.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      }
+    },
+    "chemistry": {
+      "Mole Concept & Stoichiometry": {
+        "Mole Concept": {
+          "file": "chemistry/mole_concept_stoichiometry/mole_concept.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Atomic & Molecular Mass": {
+          "file": "chemistry/mole_concept_stoichiometry/atomic_molecular_mass.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Percentage Composition": {
+          "file": "chemistry/mole_concept_stoichiometry/percentage_composition.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Empirical & Molecular Formula": {
+          "file": "chemistry/mole_concept_stoichiometry/empirical_molecular_formula.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Limiting Reagent": {
+          "file": "chemistry/mole_concept_stoichiometry/limiting_reagent.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Reactions in Solutions": {
+          "file": "chemistry/mole_concept_stoichiometry/reactions_in_solutions.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Atomic Structure": {
+        "Bohr Model": {
+          "file": "chemistry/atomic_structure/bohr_model.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Quantum Numbers": {
+          "file": "chemistry/atomic_structure/quantum_numbers.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Electronic Configuration": {
+          "file": "chemistry/atomic_structure/electronic_configuration.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Photoelectric Effect": {
+          "file": "chemistry/atomic_structure/photoelectric_effect.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "de Broglie Wavelength": {
+          "file": "chemistry/atomic_structure/de_broglie_wavelength.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Heisenberg Uncertainty": {
+          "file": "chemistry/atomic_structure/heisenberg_uncertainty.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Chemical Bonding": {
+        "Lewis Structures": {
+          "file": "chemistry/chemical_bonding/lewis_structures.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "VSEPR Theory": {
+          "file": "chemistry/chemical_bonding/vsepr_theory.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Hybridization": {
+          "file": "chemistry/chemical_bonding/hybridization.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Molecular Orbital Theory": {
+          "file": "chemistry/chemical_bonding/molecular_orbital_theory.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Hydrogen Bonding": {
+          "file": "chemistry/chemical_bonding/hydrogen_bonding.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Dipole Moment": {
+          "file": "chemistry/chemical_bonding/dipole_moment.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Thermodynamics & Thermochemistry": {
+        "First Law": {
+          "file": "chemistry/thermodynamics_thermochemistry/first_law.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Enthalpy": {
+          "file": "chemistry/thermodynamics_thermochemistry/enthalpy.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Hess's Law": {
+          "file": "chemistry/thermodynamics_thermochemistry/hesss_law.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Bond Enthalpy": {
+          "file": "chemistry/thermodynamics_thermochemistry/bond_enthalpy.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Entropy": {
+          "file": "chemistry/thermodynamics_thermochemistry/entropy.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Gibbs Free Energy": {
+          "file": "chemistry/thermodynamics_thermochemistry/gibbs_free_energy.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Chemical Equilibrium": {
+        "Law of Mass Action": {
+          "file": "chemistry/chemical_equilibrium/law_of_mass_action.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Equilibrium Constant": {
+          "file": "chemistry/chemical_equilibrium/equilibrium_constant.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Le Chatelier's Principle": {
+          "file": "chemistry/chemical_equilibrium/le_chateliers_principle.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Ionic Equilibrium": {
+          "file": "chemistry/chemical_equilibrium/ionic_equilibrium.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Buffer Solutions": {
+          "file": "chemistry/chemical_equilibrium/buffer_solutions.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Solubility Product": {
+          "file": "chemistry/chemical_equilibrium/solubility_product.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Electrochemistry": {
+        "Conductance": {
+          "file": "chemistry/electrochemistry/conductance.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Galvanic Cells": {
+          "file": "chemistry/electrochemistry/galvanic_cells.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Nernst Equation": {
+          "file": "chemistry/electrochemistry/nernst_equation.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Electrolysis": {
+          "file": "chemistry/electrochemistry/electrolysis.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Faraday's Laws": {
+          "file": "chemistry/electrochemistry/faradays_laws.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Batteries & Corrosion": {
+          "file": "chemistry/electrochemistry/batteries_corrosion.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Chemical Kinetics": {
+        "Rate of Reaction": {
+          "file": "chemistry/chemical_kinetics/rate_of_reaction.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Order & Molecularity": {
+          "file": "chemistry/chemical_kinetics/order_molecularity.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Integrated Rate Laws": {
+          "file": "chemistry/chemical_kinetics/integrated_rate_laws.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Half-Life": {
+          "file": "chemistry/chemical_kinetics/halflife.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Arrhenius Equation": {
+          "file": "chemistry/chemical_kinetics/arrhenius_equation.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Mechanism & RDS": {
+          "file": "chemistry/chemical_kinetics/mechanism_rds.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "GOC & Isomerism": {
+        "Inductive Effect": {
+          "file": "chemistry/goc_isomerism/inductive_effect.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Resonance": {
+          "file": "chemistry/goc_isomerism/resonance.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Hyperconjugation": {
+          "file": "chemistry/goc_isomerism/hyperconjugation.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Carbocation/Carbanion Stability": {
+          "file": "chemistry/goc_isomerism/carbocationcarbanion_stability.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Structural Isomerism": {
+          "file": "chemistry/goc_isomerism/structural_isomerism.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Stereoisomerism (E/Z, R/S)": {
+          "file": "chemistry/goc_isomerism/stereoisomerism_ez_rs.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Hydrocarbons": {
+        "Alkanes": {
+          "file": "chemistry/hydrocarbons/alkanes.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Alkenes": {
+          "file": "chemistry/hydrocarbons/alkenes.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Alkynes": {
+          "file": "chemistry/hydrocarbons/alkynes.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Aromatic Compounds": {
+          "file": "chemistry/hydrocarbons/aromatic_compounds.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Reactions & Mechanisms": {
+          "file": "chemistry/hydrocarbons/reactions_mechanisms.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Organic Reactions & Named Reactions": {
+        "Substitution (SN1, SN2)": {
+          "file": "chemistry/organic_reactions_named_reactions/substitution_sn1_sn2.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Elimination (E1, E2)": {
+          "file": "chemistry/organic_reactions_named_reactions/elimination_e1_e2.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Addition Reactions": {
+          "file": "chemistry/organic_reactions_named_reactions/addition_reactions.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Named Reactions": {
+          "file": "chemistry/organic_reactions_named_reactions/named_reactions.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Oxidation & Reduction": {
+          "file": "chemistry/organic_reactions_named_reactions/oxidation_reduction.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Rearrangements": {
+          "file": "chemistry/organic_reactions_named_reactions/rearrangements.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Periodic Table & Trends": {
+        "Periodic Classification": {
+          "file": "chemistry/periodic_table_trends/periodic_classification.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Atomic & Ionic Radii": {
+          "file": "chemistry/periodic_table_trends/atomic_ionic_radii.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Ionization Energy": {
+          "file": "chemistry/periodic_table_trends/ionization_energy.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Electron Affinity": {
+          "file": "chemistry/periodic_table_trends/electron_affinity.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Electronegativity": {
+          "file": "chemistry/periodic_table_trends/electronegativity.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Oxidation States": {
+          "file": "chemistry/periodic_table_trends/oxidation_states.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Coordination Chemistry": {
+        "Werner Theory": {
+          "file": "chemistry/coordination_chemistry/werner_theory.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "IUPAC Nomenclature": {
+          "file": "chemistry/coordination_chemistry/iupac_nomenclature.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Isomerism": {
+          "file": "chemistry/coordination_chemistry/isomerism.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Crystal Field Theory": {
+          "file": "chemistry/coordination_chemistry/crystal_field_theory.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Color & Magnetism": {
+          "file": "chemistry/coordination_chemistry/color_magnetism.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Stability of Complexes": {
+          "file": "chemistry/coordination_chemistry/stability_of_complexes.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      }
+    },
+    "mathematics": {
+      "Quadratic Equations & Expressions": {
+        "Roots & Nature of Roots": {
+          "file": "mathematics/quadratic_equations_expressions/roots_nature_of_roots.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Relation between Roots & Coefficients": {
+          "file": "mathematics/quadratic_equations_expressions/relation_between_roots_coefficients.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Quadratic Expression": {
+          "file": "mathematics/quadratic_equations_expressions/quadratic_expression.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Common Roots": {
+          "file": "mathematics/quadratic_equations_expressions/common_roots.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Graph of Quadratic": {
+          "file": "mathematics/quadratic_equations_expressions/graph_of_quadratic.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Maximum & Minimum": {
+          "file": "mathematics/quadratic_equations_expressions/maximum_minimum.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Complex Numbers": {
+        "Algebra of Complex Numbers": {
+          "file": "mathematics/complex_numbers/algebra_of_complex_numbers.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Modulus & Argument": {
+          "file": "mathematics/complex_numbers/modulus_argument.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Argand Plane": {
+          "file": "mathematics/complex_numbers/argand_plane.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "De Moivre's Theorem": {
+          "file": "mathematics/complex_numbers/de_moivres_theorem.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Roots of Unity": {
+          "file": "mathematics/complex_numbers/roots_of_unity.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Rotation": {
+          "file": "mathematics/complex_numbers/rotation.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Matrices & Determinants": {
+        "Matrix Operations": {
+          "file": "mathematics/matrices_determinants/matrix_operations.json",
+          "questions": 300,
+          "quality_score": 8.54,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Transpose & Types": {
+          "file": "mathematics/matrices_determinants/transpose_types.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Determinants": {
+          "file": "mathematics/matrices_determinants/determinants.json",
+          "questions": 300,
+          "quality_score": 8.5,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Properties of Determinants": {
+          "file": "mathematics/matrices_determinants/properties_of_determinants.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Inverse of Matrix": {
+          "file": "mathematics/matrices_determinants/inverse_of_matrix.json",
+          "questions": 300,
+          "quality_score": 8.51,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        },
+        "Cramer's Rule": {
+          "file": "mathematics/matrices_determinants/cramers_rule.json",
+          "questions": 300,
+          "quality_score": 8.5,
+          "duplicate_rate": 0,
+          "eds": 1,
+          "status": "LIVE"
+        }
+      },
+      "Permutations & Combinations": {
+        "Fundamental Principle": {
+          "file": "mathematics/permutations_combinations/fundamental_principle.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Permutations": {
+          "file": "mathematics/permutations_combinations/permutations.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Combinations": {
+          "file": "mathematics/permutations_combinations/combinations.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Circular Arrangements": {
+          "file": "mathematics/permutations_combinations/circular_arrangements.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Distribution": {
+          "file": "mathematics/permutations_combinations/distribution.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Derangements": {
+          "file": "mathematics/permutations_combinations/derangements.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Probability": {
+        "Basic Probability": {
+          "file": "mathematics/probability/basic_probability.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Conditional Probability": {
+          "file": "mathematics/probability/conditional_probability.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Bayes' Theorem": {
+          "file": "mathematics/probability/bayes_theorem.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Random Variables": {
+          "file": "mathematics/probability/random_variables.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Binomial Distribution": {
+          "file": "mathematics/probability/binomial_distribution.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Mean & Variance": {
+          "file": "mathematics/probability/mean_variance.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Limits, Continuity & Differentiability": {
+        "Limits (Standard Forms)": {
+          "file": "mathematics/limits_continuity_differentiability/limits_standard_forms.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "L'Hôpital's Rule": {
+          "file": "mathematics/limits_continuity_differentiability/lhpitals_rule.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Continuity": {
+          "file": "mathematics/limits_continuity_differentiability/continuity.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Types of Discontinuity": {
+          "file": "mathematics/limits_continuity_differentiability/types_of_discontinuity.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Differentiability": {
+          "file": "mathematics/limits_continuity_differentiability/differentiability.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Differentiation": {
+        "First Principles": {
+          "file": "mathematics/differentiation/first_principles.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Standard Derivatives": {
+          "file": "mathematics/differentiation/standard_derivatives.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Chain Rule": {
+          "file": "mathematics/differentiation/chain_rule.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Implicit Differentiation": {
+          "file": "mathematics/differentiation/implicit_differentiation.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Parametric Differentiation": {
+          "file": "mathematics/differentiation/parametric_differentiation.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Higher Order Derivatives": {
+          "file": "mathematics/differentiation/higher_order_derivatives.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Application of Derivatives": {
+        "Tangent & Normal": {
+          "file": "mathematics/application_of_derivatives/tangent_normal.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Rate of Change": {
+          "file": "mathematics/application_of_derivatives/rate_of_change.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Maxima & Minima": {
+          "file": "mathematics/application_of_derivatives/maxima_minima.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Increasing/Decreasing": {
+          "file": "mathematics/application_of_derivatives/increasingdecreasing.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Curve Sketching": {
+          "file": "mathematics/application_of_derivatives/curve_sketching.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Rolle's & LMVT": {
+          "file": "mathematics/application_of_derivatives/rolles_lmvt.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Integration": {
+        "Indefinite Integrals": {
+          "file": "mathematics/integration/indefinite_integrals.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Integration Techniques": {
+          "file": "mathematics/integration/integration_techniques.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Definite Integrals": {
+          "file": "mathematics/integration/definite_integrals.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Properties of Definite Integrals": {
+          "file": "mathematics/integration/properties_of_definite_integrals.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Area Under Curves": {
+          "file": "mathematics/integration/area_under_curves.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Differential Equations": {
+          "file": "mathematics/integration/differential_equations.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Coordinate Geometry": {
+        "Straight Lines": {
+          "file": "mathematics/coordinate_geometry/straight_lines.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Circles": {
+          "file": "mathematics/coordinate_geometry/circles.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Parabola": {
+          "file": "mathematics/coordinate_geometry/parabola.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Ellipse": {
+          "file": "mathematics/coordinate_geometry/ellipse.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Hyperbola": {
+          "file": "mathematics/coordinate_geometry/hyperbola.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Vectors & 3D Geometry": {
+        "Vector Algebra": {
+          "file": "mathematics/vectors_3d_geometry/vector_algebra.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Scalar & Vector Product": {
+          "file": "mathematics/vectors_3d_geometry/scalar_vector_product.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Triple Products": {
+          "file": "mathematics/vectors_3d_geometry/triple_products.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Lines in 3D": {
+          "file": "mathematics/vectors_3d_geometry/lines_in_3d.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Planes": {
+          "file": "mathematics/vectors_3d_geometry/planes.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Sphere": {
+          "file": "mathematics/vectors_3d_geometry/sphere.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      },
+      "Trigonometry": {
+        "Trigonometric Identities": {
+          "file": "mathematics/trigonometry/trigonometric_identities.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Trigonometric Equations": {
+          "file": "mathematics/trigonometry/trigonometric_equations.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Inverse Trigonometry": {
+          "file": "mathematics/trigonometry/inverse_trigonometry.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Properties of Triangles": {
+          "file": "mathematics/trigonometry/properties_of_triangles.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        },
+        "Heights & Distances": {
+          "file": "mathematics/trigonometry/heights_distances.json",
+          "questions": 0,
+          "quality_score": 0,
+          "duplicate_rate": 0,
+          "eds": 0,
+          "status": "NOT_STARTED"
+        }
+      }
+    }
+  }
+}

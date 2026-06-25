@@ -78,7 +78,7 @@ export const FormulaCard: React.FC<FormulaCardProps> = ({ name, formula, variabl
           <span>📄</span> Notes
         </button>
         <button className="flex items-center justify-center gap-1 text-[10px] font-bold text-white/60 hover:text-white bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.05] py-2 rounded-lg transition-colors">
-          <span>🎥</span> Lecture
+          <span>🧠</span> Knowledge Engine
         </button>
         <button className="flex items-center justify-center gap-1 text-[10px] font-bold text-white/60 hover:text-white bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.05] py-2 rounded-lg transition-colors">
           <span>📝</span> PYQs

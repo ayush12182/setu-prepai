@@ -266,7 +266,7 @@ const BATCH_DATA: Record<string, BatchConfig> = {
       { label: 'Mode', value: 'AI Self Study', icon: <Bot className="w-4 h-4" /> },
       { label: 'Access', value: 'Web + Mobile', icon: <Smartphone className="w-4 h-4" /> },
     ],
-    whyHeadline: 'Droppers need target gap mapping, not standard batch lectures.',
+    whyHeadline: 'Droppers need target gap mapping, not standard batch teaching.',
     whyPoints: ['AI-driven weakness diagnosis and gap repair plan', 'NCERT word-by-word query bank', 'Physics calculations speed sprint', 'Teal-themed customized student dashboard', '24x7 instant AI doubts resolving'],
     syllabus: {
       Physics: ['Complete Physics NCERT Revision', 'High-Weightage Mechanics & Electromagnetism', 'Calculations Speed Drills'],
@@ -492,7 +492,7 @@ const BatchDetailPage: React.FC = () => {
   const accentBgStyle = { backgroundColor: batch.accentLight, borderColor: batch.accentBorder };
 
   return (
-    <div className="min-h-screen bg-white text-slate-800" style={{ fontFamily: "'Inter','Segoe UI',sans-serif" }}>
+    <div className="min-h-screen bg-white text-slate-800" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <LandingNav />
 
       {/* Breadcrumb */}
@@ -552,7 +552,7 @@ const BatchDetailPage: React.FC = () => {
               <img src={batch.mountain} alt={batch.name} className="w-full h-full object-cover absolute inset-0" style={{ minHeight: '340px' }} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6">
-                <h2 className="text-2xl font-black text-white mb-1">{batch.name}</h2>
+                <h2 className="sr-only">{batch.name}</h2>
                 <span className={`inline-block px-2.5 py-0.5 rounded text-xs font-bold text-white ${batch.tagBg} mb-4`}>{batch.tag}</span>
                 {/* Stats grid in card */}
                 <div className="grid grid-cols-2 gap-2">

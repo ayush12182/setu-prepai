@@ -158,7 +158,7 @@ const HandwrittenNotesAnalysis: React.FC<HandwrittenNotesAnalysisProps> = ({ onB
         </Button>
         <div>
           <h2 className="text-xl font-bold">Handwritten Notes Analysis</h2>
-          <p className="text-sm text-muted-foreground">Upload your notes and get Kota-style teaching</p>
+          <p className="text-sm text-muted-foreground">Upload your notes and get NCERT-aligned revision tips</p>
         </div>
       </div>
 

@@ -29,7 +29,7 @@ const ChallengeSection: React.FC = () => {
     {
       id: 'material',
       category: 'Study Material',
-      title: 'Scattered Notes & Incomplete Lectures',
+      title: 'Scattered Study Notes & Material',
       howItHelps: 'Centralize your textbooks, checklists, sync logs, and syllabus progress into one single, organized study path.',
       bgClass: 'bg-[#FAFFFE]',
       accentBg: 'bg-[#0EA5E9]',

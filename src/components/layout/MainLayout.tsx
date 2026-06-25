@@ -14,18 +14,18 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, title, fullHei
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background flex w-full">
+    <div className="min-h-screen flex w-full" style={{ background: '#F8FAFC' }}>
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
+
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} title={title} />
         <TrialStatusBar />
-        
-        <main className={cn("flex-1", fullHeight ? "overflow-hidden" : "overflow-auto")}>
+
+        <main className={cn('flex-1', fullHeight ? 'overflow-hidden' : 'overflow-auto')}>
           {fullHeight ? (
             <div className="h-full">{children}</div>
           ) : (
-            <div className="container py-6 px-4 lg:px-6">{children}</div>
+            <div className="px-4 lg:px-6 py-6">{children}</div>
           )}
         </main>
       </div>

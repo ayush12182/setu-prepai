@@ -233,7 +233,7 @@ const BatchesPage: React.FC = () => {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: "'Inter','Segoe UI',sans-serif" }}>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <LandingNav />
 
       {/* Page Header */}
@@ -300,7 +300,7 @@ const BatchesPage: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/20" />
                   <div className="absolute bottom-4 left-4 right-4">
                     <span className={`inline-block px-2.5 py-0.5 rounded text-[11px] font-bold text-white ${b.tagBg} mb-1.5`}>{b.tag}</span>
-                    <h2 className="text-xl font-black text-white drop-shadow">{b.name}</h2>
+                    <h2 className="sr-only">{b.name}</h2>
                   </div>
                 </div>
 

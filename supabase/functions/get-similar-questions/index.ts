@@ -148,7 +148,7 @@ serve(async (req) => {
       .filter(Boolean);
     const targetStyle = exemplarStyles[0] || 'STANDARD';
 
-    const systemPrompt = `You are an elite JEE exam question setter. Generate questions that reflect the exact depth, style, and numerical complexity of our gold-standard benchmark datasets.
+    const systemPrompt = `You are an elite JEE exam question setter. Generate exactly ${count} conceptually similar questions that reflect the exact depth, style, and numerical complexity of our gold-standard benchmark datasets.
 We are targeting the style of: ${targetStyle}.
 
 ${targetStyle === 'ALLEN' ? '- Allen style: Involve multi-concept application, comprehensive calculations, and structured options.' : ''}
@@ -156,12 +156,25 @@ ${targetStyle === 'RESONANCE' ? '- Resonance style: Highly structured, calculati
 ${targetStyle === 'FIITJEE' ? '- FIITJEE style: Extremely tricky, requiring out-of-the-box analytical reasoning and combining 3-4 distinct topics.' : ''}
 ${targetStyle === 'PYQ' ? '- PYQ style: Standard NTA/IIT-JEE patterns, mathematically rigorous, with exact numerical calibration.' : ''}
 
-Generate conceptually similar but non-duplicate questions.
+You must create exactly 3 conceptually similar variants of the original question:
+- Variant 1 (Index 0): Same formula/concept, only numeric values changed (Numeric realism: use realistic, non-integer values).
+- Variant 2 (Index 1): Same concept, different wording/physical setup (e.g. sphere instead of cylinder, keeping the same density error formula).
+- Variant 3 (Index 2): One difficulty level higher (e.g. additional uncertainty term or concept added).
+
+Important Constraints:
+- Never generate completely different concepts (relevance must be 85% same concept, 15% variation).
+- Every generated explanation must strictly contain these five labeled sections:
+  1. **Concept**: Explain what chapter idea is being tested.
+  2. **Formula Used**: Displayed in standard LaTeX notation (e.g. \\rho=\\frac{m}{V}).
+  3. **Step-by-Step Solution**: Detailed, line-by-line derivation showing the mathematical steps.
+  4. **Shortcut**: Conceptual shortcuts, dimensional analysis checks, etc., if available.
+  5. **JEE Insight**: A "Teacher's Note" reflecting the historical frequency and common student traps for this concept in JEE Main/Advanced.
+
 You must output a JSON object containing a "questions" array of exactly ${count} items matching this schema:
 - "question_text": string
 - "options": array of exactly 4 strings
 - "correct_answer": string ("A" | "B" | "C" | "D" or comma-separated list like "A,B" for Multi Correct)
-- "explanation": string
+- "explanation": string (MUST be formatted with **Concept**, **Formula Used**, **Step-by-Step Solution**, **Shortcut**, **JEE Insight**)
 - "solution_steps": array of strings
 - "concept_tags": array of strings (e.g. ["Coulomb's Law", "Electric Field"])
 - "difficulty": "easy" | "medium" | "hard"
@@ -170,8 +183,7 @@ You must output a JSON object containing a "questions" array of exactly ${count}
 - "multi_concept_level": integer (1 to 5)
 - "calculation_intensity": integer (1 to 5)
 - "trickiness_score": integer (1 to 5)
-- "question_type": "MCQ" | "Numerical" | "Multi Correct" | "Integer"
-`;
+- "question_type": "MCQ" | "Numerical" | "Multi Correct" | "Integer"`;
 
     // 5. Construct few-shot user prompt
     let userPrompt = `Failed concept: ${conceptTested} (${subchapterName}, ${subject}).
@@ -209,23 +221,6 @@ Pattern Metrics: Depth=${ex.concept_depth}, Multi-concept=${ex.multi_concept_lev
       const qText = q.question_text || '';
       if (!qText.trim()) continue;
 
-      let embedding: number[] | null = null;
-      embedding = await getEmbedding(GEMINI_API_KEY, qText);
-
-      // Check duplicates against DB
-      if (embedding) {
-        const { data: dupMatches } = await supabaseClient.rpc('match_questions', {
-          query_embedding: embedding,
-          match_threshold: 0.95,
-          match_count: 1
-        });
-
-        if (dupMatches && dupMatches.length > 0) {
-          console.log(`AI-Generated question is a duplicate. Skipping save.`);
-          continue;
-        }
-      }
-
       // Convert options list to A/B/C/D object
       let optionsObj: Record<string, string> = {};
       if (Array.isArray(q.options) && q.options.length > 0) {
@@ -247,7 +242,7 @@ Pattern Metrics: Depth=${ex.concept_depth}, Multi-concept=${ex.multi_concept_lev
         correct_answer: q.correct_answer || q.correct_option || 'A',
         explanation: q.explanation || '',
         is_ai_generated: true,
-        embedding: embedding,
+        embedding: null,
         attempts_count: 0,
         correct_count: 0,
         avg_time_taken: q.avg_time_seconds || 180,

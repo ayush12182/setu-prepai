@@ -1,0 +1,3512 @@
+[
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 1D",
+    "subtopic": "Uniform Motion Analysis",
+    "concept": "Uniform Motion",
+    "difficulty": "easy",
+    "question_text": "[Question #1] Evaluate the physical and mathematical scenario for Uniform Motion in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_1?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_1",
+      "B": "Incorrect evaluation due to Calculation error in Uniform Motion",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nUniform Motion\n\n### Approach\nUse the relation: y = f(x)_1\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_1."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_001_CON",
+      "M_KIN_C_PHY_KIN_001_SGN",
+      "M_KIN_C_PHY_KIN_001_UNT",
+      "M_KIN_C_PHY_KIN_001_GRPH",
+      "M_KIN_C_PHY_KIN_001_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 1D",
+    "subtopic": "Variable Acceleration Analysis",
+    "concept": "Variable Acceleration",
+    "difficulty": "easy",
+    "question_text": "[Question #4] Evaluate the physical and mathematical scenario for Variable Acceleration in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_4?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_4",
+      "B": "Incorrect evaluation due to Calculation error in Variable Acceleration",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nVariable Acceleration\n\n### Approach\nUse the relation: y = f(x)_4\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_4."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_004_CON",
+      "M_KIN_C_PHY_KIN_004_SGN",
+      "M_KIN_C_PHY_KIN_004_UNT",
+      "M_KIN_C_PHY_KIN_004_GRPH",
+      "M_KIN_C_PHY_KIN_004_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 2D",
+    "subtopic": "Average and Instantaneous Velocity Vector Analysis",
+    "concept": "Average and Instantaneous Velocity Vector",
+    "difficulty": "easy",
+    "question_text": "[Question #7] Evaluate the physical and mathematical scenario for Average and Instantaneous Velocity Vector in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_7?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_7",
+      "B": "Incorrect evaluation due to Calculation error in Average and Instantaneous Velocity Vector",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nAverage and Instantaneous Velocity Vector\n\n### Approach\nUse the relation: y = f(x)_7\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_7."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_007_CON",
+      "M_KIN_C_PHY_KIN_007_SGN",
+      "M_KIN_C_PHY_KIN_007_UNT",
+      "M_KIN_C_PHY_KIN_007_GRPH",
+      "M_KIN_C_PHY_KIN_007_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.1,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 2D",
+    "subtopic": "Trajectory Equations Analysis",
+    "concept": "Trajectory Equations",
+    "difficulty": "easy",
+    "question_text": "[Question #10] Evaluate the physical and mathematical scenario for Trajectory Equations in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_10?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_10",
+      "B": "Incorrect evaluation due to Calculation error in Trajectory Equations",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nTrajectory Equations\n\n### Approach\nUse the relation: y = f(x)_10\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_10."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_010_CON",
+      "M_KIN_C_PHY_KIN_010_SGN",
+      "M_KIN_C_PHY_KIN_010_UNT",
+      "M_KIN_C_PHY_KIN_010_GRPH",
+      "M_KIN_C_PHY_KIN_010_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.4,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Relative Motion",
+    "subtopic": "River Crossing Shortest Path Analysis",
+    "concept": "River Crossing Shortest Path",
+    "difficulty": "easy",
+    "question_text": "[Question #13] Evaluate the physical and mathematical scenario for River Crossing Shortest Path in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_13?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_13",
+      "B": "Incorrect evaluation due to Calculation error in River Crossing Shortest Path",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nRiver Crossing Shortest Path\n\n### Approach\nUse the relation: y = f(x)_13\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_13."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_013_CON",
+      "M_KIN_C_PHY_KIN_013_SGN",
+      "M_KIN_C_PHY_KIN_013_UNT",
+      "M_KIN_C_PHY_KIN_013_GRPH",
+      "M_KIN_C_PHY_KIN_013_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.7,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Projectile Motion",
+    "subtopic": "Ground-to-Ground Time of Flight Analysis",
+    "concept": "Ground-to-Ground Time of Flight",
+    "difficulty": "easy",
+    "question_text": "[Question #16] Evaluate the physical and mathematical scenario for Ground-to-Ground Time of Flight in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_16?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_16",
+      "B": "Incorrect evaluation due to Calculation error in Ground-to-Ground Time of Flight",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nGround-to-Ground Time of Flight\n\n### Approach\nUse the relation: y = f(x)_16\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_16."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_016_CON",
+      "M_KIN_C_PHY_KIN_016_SGN",
+      "M_KIN_C_PHY_KIN_016_UNT",
+      "M_KIN_C_PHY_KIN_016_GRPH",
+      "M_KIN_C_PHY_KIN_016_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 1D",
+    "subtopic": "Constant Acceleration Equations Analysis",
+    "concept": "Constant Acceleration Equations",
+    "difficulty": "medium",
+    "question_text": "[Question #2] Evaluate the physical and mathematical scenario for Constant Acceleration Equations in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_2?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_2",
+      "B": "Incorrect evaluation due to Calculation error in Constant Acceleration Equations",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nConstant Acceleration Equations\n\n### Approach\nUse the relation: y = f(x)_2\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_2."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_002_CON",
+      "M_KIN_C_PHY_KIN_002_SGN",
+      "M_KIN_C_PHY_KIN_002_UNT",
+      "M_KIN_C_PHY_KIN_002_GRPH",
+      "M_KIN_C_PHY_KIN_002_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 1D",
+    "subtopic": "Average vs Instantaneous Speed Analysis",
+    "concept": "Average vs Instantaneous Speed",
+    "difficulty": "medium",
+    "question_text": "[Question #5] Evaluate the physical and mathematical scenario for Average vs Instantaneous Speed in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_5?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_5",
+      "B": "Incorrect evaluation due to Calculation error in Average vs Instantaneous Speed",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nAverage vs Instantaneous Speed\n\n### Approach\nUse the relation: y = f(x)_5\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_5."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_005_CON",
+      "M_KIN_C_PHY_KIN_005_SGN",
+      "M_KIN_C_PHY_KIN_005_UNT",
+      "M_KIN_C_PHY_KIN_005_GRPH",
+      "M_KIN_C_PHY_KIN_005_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 2D",
+    "subtopic": "Acceleration Vector Components Analysis",
+    "concept": "Acceleration Vector Components",
+    "difficulty": "medium",
+    "question_text": "[Question #8] Evaluate the physical and mathematical scenario for Acceleration Vector Components in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_8?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_8",
+      "B": "Incorrect evaluation due to Calculation error in Acceleration Vector Components",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nAcceleration Vector Components\n\n### Approach\nUse the relation: y = f(x)_8\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_8."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_008_CON",
+      "M_KIN_C_PHY_KIN_008_SGN",
+      "M_KIN_C_PHY_KIN_008_UNT",
+      "M_KIN_C_PHY_KIN_008_GRPH",
+      "M_KIN_C_PHY_KIN_008_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Relative Motion",
+    "subtopic": "Relative Velocity in 1D Analysis",
+    "concept": "Relative Velocity in 1D",
+    "difficulty": "medium",
+    "question_text": "[Question #11] Evaluate the physical and mathematical scenario for Relative Velocity in 1D in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_11?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_11",
+      "B": "Incorrect evaluation due to Calculation error in Relative Velocity in 1D",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nRelative Velocity in 1D\n\n### Approach\nUse the relation: y = f(x)_11\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_11."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_011_CON",
+      "M_KIN_C_PHY_KIN_011_SGN",
+      "M_KIN_C_PHY_KIN_011_UNT",
+      "M_KIN_C_PHY_KIN_011_GRPH",
+      "M_KIN_C_PHY_KIN_011_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Relative Motion",
+    "subtopic": "Rain Man Umbrella Resolution Analysis",
+    "concept": "Rain Man Umbrella Resolution",
+    "difficulty": "medium",
+    "question_text": "[Question #14] Evaluate the physical and mathematical scenario for Rain Man Umbrella Resolution in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_14?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_14",
+      "B": "Incorrect evaluation due to Calculation error in Rain Man Umbrella Resolution",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nRain Man Umbrella Resolution\n\n### Approach\nUse the relation: y = f(x)_14\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_14."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_014_CON",
+      "M_KIN_C_PHY_KIN_014_SGN",
+      "M_KIN_C_PHY_KIN_014_UNT",
+      "M_KIN_C_PHY_KIN_014_GRPH",
+      "M_KIN_C_PHY_KIN_014_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Projectile Motion",
+    "subtopic": "Maximum Height of Projectile Analysis",
+    "concept": "Maximum Height of Projectile",
+    "difficulty": "medium",
+    "question_text": "[Question #17] Evaluate the physical and mathematical scenario for Maximum Height of Projectile in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_17?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_17",
+      "B": "Incorrect evaluation due to Calculation error in Maximum Height of Projectile",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nMaximum Height of Projectile\n\n### Approach\nUse the relation: y = f(x)_17\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_17."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_017_CON",
+      "M_KIN_C_PHY_KIN_017_SGN",
+      "M_KIN_C_PHY_KIN_017_UNT",
+      "M_KIN_C_PHY_KIN_017_GRPH",
+      "M_KIN_C_PHY_KIN_017_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Projectile Motion",
+    "subtopic": "Projectile on an Inclined Plane Analysis",
+    "concept": "Projectile on an Inclined Plane",
+    "difficulty": "medium",
+    "question_text": "[Question #20] Evaluate the physical and mathematical scenario for Projectile on an Inclined Plane in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_20?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_20",
+      "B": "Incorrect evaluation due to Calculation error in Projectile on an Inclined Plane",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nProjectile on an Inclined Plane\n\n### Approach\nUse the relation: y = f(x)_20\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_20."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_020_CON",
+      "M_KIN_C_PHY_KIN_020_SGN",
+      "M_KIN_C_PHY_KIN_020_UNT",
+      "M_KIN_C_PHY_KIN_020_GRPH",
+      "M_KIN_C_PHY_KIN_020_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Graphs of Motion",
+    "subtopic": "Area under Velocity-Time Graph Analysis",
+    "concept": "Area under Velocity-Time Graph",
+    "difficulty": "medium",
+    "question_text": "[Question #23] Evaluate the physical and mathematical scenario for Area under Velocity-Time Graph in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_23?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_23",
+      "B": "Incorrect evaluation due to Calculation error in Area under Velocity-Time Graph",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nArea under Velocity-Time Graph\n\n### Approach\nUse the relation: y = f(x)_23\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_23."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_023_CON",
+      "M_KIN_C_PHY_KIN_023_SGN",
+      "M_KIN_C_PHY_KIN_023_UNT",
+      "M_KIN_C_PHY_KIN_023_GRPH",
+      "M_KIN_C_PHY_KIN_023_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 1D",
+    "subtopic": "Uniform Motion Analysis",
+    "concept": "Uniform Motion",
+    "difficulty": "medium",
+    "question_text": "[Question #26] Evaluate the physical and mathematical scenario for Uniform Motion in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_1?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_1",
+      "B": "Incorrect evaluation due to Calculation error in Uniform Motion",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nUniform Motion\n\n### Approach\nUse the relation: y = f(x)_1\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_1."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_001_CON",
+      "M_KIN_C_PHY_KIN_001_SGN",
+      "M_KIN_C_PHY_KIN_001_UNT",
+      "M_KIN_C_PHY_KIN_001_GRPH",
+      "M_KIN_C_PHY_KIN_001_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 1D",
+    "subtopic": "Variable Acceleration Analysis",
+    "concept": "Variable Acceleration",
+    "difficulty": "medium",
+    "question_text": "[Question #29] Evaluate the physical and mathematical scenario for Variable Acceleration in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_4?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_4",
+      "B": "Incorrect evaluation due to Calculation error in Variable Acceleration",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nVariable Acceleration\n\n### Approach\nUse the relation: y = f(x)_4\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_4."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_004_CON",
+      "M_KIN_C_PHY_KIN_004_SGN",
+      "M_KIN_C_PHY_KIN_004_UNT",
+      "M_KIN_C_PHY_KIN_004_GRPH",
+      "M_KIN_C_PHY_KIN_004_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 2D",
+    "subtopic": "Average and Instantaneous Velocity Vector Analysis",
+    "concept": "Average and Instantaneous Velocity Vector",
+    "difficulty": "medium",
+    "question_text": "[Question #32] Evaluate the physical and mathematical scenario for Average and Instantaneous Velocity Vector in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_7?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_7",
+      "B": "Incorrect evaluation due to Calculation error in Average and Instantaneous Velocity Vector",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nAverage and Instantaneous Velocity Vector\n\n### Approach\nUse the relation: y = f(x)_7\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_7."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_007_CON",
+      "M_KIN_C_PHY_KIN_007_SGN",
+      "M_KIN_C_PHY_KIN_007_UNT",
+      "M_KIN_C_PHY_KIN_007_GRPH",
+      "M_KIN_C_PHY_KIN_007_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 2D",
+    "subtopic": "Trajectory Equations Analysis",
+    "concept": "Trajectory Equations",
+    "difficulty": "medium",
+    "question_text": "[Question #35] Evaluate the physical and mathematical scenario for Trajectory Equations in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_10?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_10",
+      "B": "Incorrect evaluation due to Calculation error in Trajectory Equations",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nTrajectory Equations\n\n### Approach\nUse the relation: y = f(x)_10\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_10."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_010_CON",
+      "M_KIN_C_PHY_KIN_010_SGN",
+      "M_KIN_C_PHY_KIN_010_UNT",
+      "M_KIN_C_PHY_KIN_010_GRPH",
+      "M_KIN_C_PHY_KIN_010_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Relative Motion",
+    "subtopic": "River Crossing Shortest Path Analysis",
+    "concept": "River Crossing Shortest Path",
+    "difficulty": "medium",
+    "question_text": "[Question #38] Evaluate the physical and mathematical scenario for River Crossing Shortest Path in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_13?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_13",
+      "B": "Incorrect evaluation due to Calculation error in River Crossing Shortest Path",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nRiver Crossing Shortest Path\n\n### Approach\nUse the relation: y = f(x)_13\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_13."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_013_CON",
+      "M_KIN_C_PHY_KIN_013_SGN",
+      "M_KIN_C_PHY_KIN_013_UNT",
+      "M_KIN_C_PHY_KIN_013_GRPH",
+      "M_KIN_C_PHY_KIN_013_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Projectile Motion",
+    "subtopic": "Ground-to-Ground Time of Flight Analysis",
+    "concept": "Ground-to-Ground Time of Flight",
+    "difficulty": "medium",
+    "question_text": "[Question #41] Evaluate the physical and mathematical scenario for Ground-to-Ground Time of Flight in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_16?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_16",
+      "B": "Incorrect evaluation due to Calculation error in Ground-to-Ground Time of Flight",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nGround-to-Ground Time of Flight\n\n### Approach\nUse the relation: y = f(x)_16\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_16."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_016_CON",
+      "M_KIN_C_PHY_KIN_016_SGN",
+      "M_KIN_C_PHY_KIN_016_UNT",
+      "M_KIN_C_PHY_KIN_016_GRPH",
+      "M_KIN_C_PHY_KIN_016_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Projectile Motion",
+    "subtopic": "Trajectory Equation of Projectile Analysis",
+    "concept": "Trajectory Equation of Projectile",
+    "difficulty": "medium",
+    "question_text": "[Question #44] Evaluate the physical and mathematical scenario for Trajectory Equation of Projectile in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_19?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_19",
+      "B": "Incorrect evaluation due to Calculation error in Trajectory Equation of Projectile",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nTrajectory Equation of Projectile\n\n### Approach\nUse the relation: y = f(x)_19\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_19."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_019_CON",
+      "M_KIN_C_PHY_KIN_019_SGN",
+      "M_KIN_C_PHY_KIN_019_UNT",
+      "M_KIN_C_PHY_KIN_019_GRPH",
+      "M_KIN_C_PHY_KIN_019_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Graphs of Motion",
+    "subtopic": "Slope of Velocity-Time Graph Analysis",
+    "concept": "Slope of Velocity-Time Graph",
+    "difficulty": "medium",
+    "question_text": "[Question #47] Evaluate the physical and mathematical scenario for Slope of Velocity-Time Graph in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_22?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_22",
+      "B": "Incorrect evaluation due to Calculation error in Slope of Velocity-Time Graph",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nSlope of Velocity-Time Graph\n\n### Approach\nUse the relation: y = f(x)_22\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_22."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_022_CON",
+      "M_KIN_C_PHY_KIN_022_SGN",
+      "M_KIN_C_PHY_KIN_022_UNT",
+      "M_KIN_C_PHY_KIN_022_GRPH",
+      "M_KIN_C_PHY_KIN_022_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Graphs of Motion",
+    "subtopic": "Non-linear Graph Tangent Resolution Analysis",
+    "concept": "Non-linear Graph Tangent Resolution",
+    "difficulty": "medium",
+    "question_text": "[Question #50] Evaluate the physical and mathematical scenario for Non-linear Graph Tangent Resolution in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_25?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_25",
+      "B": "Incorrect evaluation due to Calculation error in Non-linear Graph Tangent Resolution",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nNon-linear Graph Tangent Resolution\n\n### Approach\nUse the relation: y = f(x)_25\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_25."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_025_CON",
+      "M_KIN_C_PHY_KIN_025_SGN",
+      "M_KIN_C_PHY_KIN_025_UNT",
+      "M_KIN_C_PHY_KIN_025_GRPH",
+      "M_KIN_C_PHY_KIN_025_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 1D",
+    "subtopic": "Motion Under Gravity Analysis",
+    "concept": "Motion Under Gravity",
+    "difficulty": "medium",
+    "question_text": "[Question #53] Evaluate the physical and mathematical scenario for Motion Under Gravity in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_3?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_3",
+      "B": "Incorrect evaluation due to Calculation error in Motion Under Gravity",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nMotion Under Gravity\n\n### Approach\nUse the relation: y = f(x)_3\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_3."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_003_CON",
+      "M_KIN_C_PHY_KIN_003_SGN",
+      "M_KIN_C_PHY_KIN_003_UNT",
+      "M_KIN_C_PHY_KIN_003_GRPH",
+      "M_KIN_C_PHY_KIN_003_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 1D",
+    "subtopic": "Motion Under Gravity Analysis",
+    "concept": "Motion Under Gravity",
+    "difficulty": "hard",
+    "question_text": "[Question #3] Evaluate the physical and mathematical scenario for Motion Under Gravity in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_3?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_3",
+      "B": "Incorrect evaluation due to Calculation error in Motion Under Gravity",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nMotion Under Gravity\n\n### Approach\nUse the relation: y = f(x)_3\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_3."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_003_CON",
+      "M_KIN_C_PHY_KIN_003_SGN",
+      "M_KIN_C_PHY_KIN_003_UNT",
+      "M_KIN_C_PHY_KIN_003_GRPH",
+      "M_KIN_C_PHY_KIN_003_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.7,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 2D",
+    "subtopic": "Vector Position and Displacement Analysis",
+    "concept": "Vector Position and Displacement",
+    "difficulty": "hard",
+    "question_text": "[Question #6] Evaluate the physical and mathematical scenario for Vector Position and Displacement in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_6?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_6",
+      "B": "Incorrect evaluation due to Calculation error in Vector Position and Displacement",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nVector Position and Displacement\n\n### Approach\nUse the relation: y = f(x)_6\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_6."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_006_CON",
+      "M_KIN_C_PHY_KIN_006_SGN",
+      "M_KIN_C_PHY_KIN_006_UNT",
+      "M_KIN_C_PHY_KIN_006_GRPH",
+      "M_KIN_C_PHY_KIN_006_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Motion in 2D",
+    "subtopic": "Circular Dynamics Components Analysis",
+    "concept": "Circular Dynamics Components",
+    "difficulty": "hard",
+    "question_text": "[Question #9] Evaluate the physical and mathematical scenario for Circular Dynamics Components in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_9?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_9",
+      "B": "Incorrect evaluation due to Calculation error in Circular Dynamics Components",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nCircular Dynamics Components\n\n### Approach\nUse the relation: y = f(x)_9\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_9."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_009_CON",
+      "M_KIN_C_PHY_KIN_009_SGN",
+      "M_KIN_C_PHY_KIN_009_UNT",
+      "M_KIN_C_PHY_KIN_009_GRPH",
+      "M_KIN_C_PHY_KIN_009_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.3,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Relative Motion",
+    "subtopic": "Relative Velocity in 2D Analysis",
+    "concept": "Relative Velocity in 2D",
+    "difficulty": "hard",
+    "question_text": "[Question #12] Evaluate the physical and mathematical scenario for Relative Velocity in 2D in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_12?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_12",
+      "B": "Incorrect evaluation due to Calculation error in Relative Velocity in 2D",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nRelative Velocity in 2D\n\n### Approach\nUse the relation: y = f(x)_12\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_12."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_012_CON",
+      "M_KIN_C_PHY_KIN_012_SGN",
+      "M_KIN_C_PHY_KIN_012_UNT",
+      "M_KIN_C_PHY_KIN_012_GRPH",
+      "M_KIN_C_PHY_KIN_012_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "easy",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Relative Motion",
+    "subtopic": "Aircraft Wind Drift Optimization Analysis",
+    "concept": "Aircraft Wind Drift Optimization",
+    "difficulty": "hard",
+    "question_text": "[Question #15] Evaluate the physical and mathematical scenario for Aircraft Wind Drift Optimization in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_15?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_15",
+      "B": "Incorrect evaluation due to Calculation error in Aircraft Wind Drift Optimization",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nAircraft Wind Drift Optimization\n\n### Approach\nUse the relation: y = f(x)_15\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_15."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_015_CON",
+      "M_KIN_C_PHY_KIN_015_SGN",
+      "M_KIN_C_PHY_KIN_015_UNT",
+      "M_KIN_C_PHY_KIN_015_GRPH",
+      "M_KIN_C_PHY_KIN_015_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "physics",
+    "chapter": "Kinematics",
+    "topic": "Projectile Motion",
+    "subtopic": "Horizontal Range and Complementary Angles Analysis",
+    "concept": "Horizontal Range and Complementary Angles",
+    "difficulty": "hard",
+    "question_text": "[Question #18] Evaluate the physical and mathematical scenario for Horizontal Range and Complementary Angles in the chapter Kinematics. Under standard JEE parameters with variables mapped to {\"x\":\"Independent parameter\",\"y\":\"Dependent parameter\"}, what is the correct value matching the formula y = f(x)_18?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_18",
+      "B": "Incorrect evaluation due to Calculation error in Horizontal Range and Complementary Angles",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nHorizontal Range and Complementary Angles\n\n### Approach\nUse the relation: y = f(x)_18\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_18."
+    ],
+    "misconceptions": [
+      "M_KIN_C_PHY_KIN_018_CON",
+      "M_KIN_C_PHY_KIN_018_SGN",
+      "M_KIN_C_PHY_KIN_018_UNT",
+      "M_KIN_C_PHY_KIN_018_GRPH",
+      "M_KIN_C_PHY_KIN_018_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.7,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Lewis Structures",
+    "subtopic": "Lewis Structures Representation Analysis",
+    "concept": "Lewis Structures Representation",
+    "difficulty": "easy",
+    "question_text": "[Question #1] Evaluate the physical and mathematical scenario for Lewis Structures Representation in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_129?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_129",
+      "B": "Incorrect evaluation due to Calculation error in Lewis Structures Representation",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nLewis Structures Representation\n\n### Approach\nUse the relation: y = f(x)_129\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_129."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_073_CON",
+      "M_BOND_C_CHM_BOND_073_SGN",
+      "M_BOND_C_CHM_BOND_073_UNT",
+      "M_BOND_C_CHM_BOND_073_GRPH",
+      "M_BOND_C_CHM_BOND_073_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Lewis Structures",
+    "subtopic": "Coordinate Covalent Bond Analysis",
+    "concept": "Coordinate Covalent Bond",
+    "difficulty": "easy",
+    "question_text": "[Question #4] Evaluate the physical and mathematical scenario for Coordinate Covalent Bond in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_132?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_132",
+      "B": "Incorrect evaluation due to Calculation error in Coordinate Covalent Bond",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nCoordinate Covalent Bond\n\n### Approach\nUse the relation: y = f(x)_132\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_132."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_076_CON",
+      "M_BOND_C_CHM_BOND_076_SGN",
+      "M_BOND_C_CHM_BOND_076_UNT",
+      "M_BOND_C_CHM_BOND_076_GRPH",
+      "M_BOND_C_CHM_BOND_076_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "VSEPR Theory",
+    "subtopic": "Bond Pair Repulsions Analysis",
+    "concept": "Bond Pair Repulsions",
+    "difficulty": "easy",
+    "question_text": "[Question #7] Evaluate the physical and mathematical scenario for Bond Pair Repulsions in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_135?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_135",
+      "B": "Incorrect evaluation due to Calculation error in Bond Pair Repulsions",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nBond Pair Repulsions\n\n### Approach\nUse the relation: y = f(x)_135\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_135."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_079_CON",
+      "M_BOND_C_CHM_BOND_079_SGN",
+      "M_BOND_C_CHM_BOND_079_UNT",
+      "M_BOND_C_CHM_BOND_079_GRPH",
+      "M_BOND_C_CHM_BOND_079_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.1,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "VSEPR Theory",
+    "subtopic": "T-shape Geometry Analysis",
+    "concept": "T-shape Geometry",
+    "difficulty": "easy",
+    "question_text": "[Question #10] Evaluate the physical and mathematical scenario for T-shape Geometry in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_138?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_138",
+      "B": "Incorrect evaluation due to Calculation error in T-shape Geometry",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nT-shape Geometry\n\n### Approach\nUse the relation: y = f(x)_138\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_138."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_082_CON",
+      "M_BOND_C_CHM_BOND_082_SGN",
+      "M_BOND_C_CHM_BOND_082_UNT",
+      "M_BOND_C_CHM_BOND_082_GRPH",
+      "M_BOND_C_CHM_BOND_082_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.4,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hybridization",
+    "subtopic": "sp Hybridization Linear Analysis",
+    "concept": "sp Hybridization Linear",
+    "difficulty": "easy",
+    "question_text": "[Question #13] Evaluate the physical and mathematical scenario for sp Hybridization Linear in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_141?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_141",
+      "B": "Incorrect evaluation due to Calculation error in sp Hybridization Linear",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nsp Hybridization Linear\n\n### Approach\nUse the relation: y = f(x)_141\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_141."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_085_CON",
+      "M_BOND_C_CHM_BOND_085_SGN",
+      "M_BOND_C_CHM_BOND_085_UNT",
+      "M_BOND_C_CHM_BOND_085_GRPH",
+      "M_BOND_C_CHM_BOND_085_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.7,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hybridization",
+    "subtopic": "sp3d Hybridization Trigonal Bipyramidal Analysis",
+    "concept": "sp3d Hybridization Trigonal Bipyramidal",
+    "difficulty": "easy",
+    "question_text": "[Question #16] Evaluate the physical and mathematical scenario for sp3d Hybridization Trigonal Bipyramidal in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_144?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_144",
+      "B": "Incorrect evaluation due to Calculation error in sp3d Hybridization Trigonal Bipyramidal",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nsp3d Hybridization Trigonal Bipyramidal\n\n### Approach\nUse the relation: y = f(x)_144\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_144."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_088_CON",
+      "M_BOND_C_CHM_BOND_088_SGN",
+      "M_BOND_C_CHM_BOND_088_UNT",
+      "M_BOND_C_CHM_BOND_088_GRPH",
+      "M_BOND_C_CHM_BOND_088_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Lewis Structures",
+    "subtopic": "Formal Charge Calculations Analysis",
+    "concept": "Formal Charge Calculations",
+    "difficulty": "medium",
+    "question_text": "[Question #2] Evaluate the physical and mathematical scenario for Formal Charge Calculations in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_130?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_130",
+      "B": "Incorrect evaluation due to Calculation error in Formal Charge Calculations",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nFormal Charge Calculations\n\n### Approach\nUse the relation: y = f(x)_130\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_130."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_074_CON",
+      "M_BOND_C_CHM_BOND_074_SGN",
+      "M_BOND_C_CHM_BOND_074_UNT",
+      "M_BOND_C_CHM_BOND_074_GRPH",
+      "M_BOND_C_CHM_BOND_074_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Lewis Structures",
+    "subtopic": "Lattice Energy Born Haber Analysis",
+    "concept": "Lattice Energy Born Haber",
+    "difficulty": "medium",
+    "question_text": "[Question #5] Evaluate the physical and mathematical scenario for Lattice Energy Born Haber in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_133?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_133",
+      "B": "Incorrect evaluation due to Calculation error in Lattice Energy Born Haber",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nLattice Energy Born Haber\n\n### Approach\nUse the relation: y = f(x)_133\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_133."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_077_CON",
+      "M_BOND_C_CHM_BOND_077_SGN",
+      "M_BOND_C_CHM_BOND_077_UNT",
+      "M_BOND_C_CHM_BOND_077_GRPH",
+      "M_BOND_C_CHM_BOND_077_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "VSEPR Theory",
+    "subtopic": "Lone Pair Repulsion Geometry Analysis",
+    "concept": "Lone Pair Repulsion Geometry",
+    "difficulty": "medium",
+    "question_text": "[Question #8] Evaluate the physical and mathematical scenario for Lone Pair Repulsion Geometry in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_136?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_136",
+      "B": "Incorrect evaluation due to Calculation error in Lone Pair Repulsion Geometry",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nLone Pair Repulsion Geometry\n\n### Approach\nUse the relation: y = f(x)_136\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_136."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_080_CON",
+      "M_BOND_C_CHM_BOND_080_SGN",
+      "M_BOND_C_CHM_BOND_080_UNT",
+      "M_BOND_C_CHM_BOND_080_GRPH",
+      "M_BOND_C_CHM_BOND_080_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "VSEPR Theory",
+    "subtopic": "Seesaw Geometry Analysis",
+    "concept": "Seesaw Geometry",
+    "difficulty": "medium",
+    "question_text": "[Question #11] Evaluate the physical and mathematical scenario for Seesaw Geometry in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_139?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_139",
+      "B": "Incorrect evaluation due to Calculation error in Seesaw Geometry",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nSeesaw Geometry\n\n### Approach\nUse the relation: y = f(x)_139\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_139."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_083_CON",
+      "M_BOND_C_CHM_BOND_083_SGN",
+      "M_BOND_C_CHM_BOND_083_UNT",
+      "M_BOND_C_CHM_BOND_083_GRPH",
+      "M_BOND_C_CHM_BOND_083_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hybridization",
+    "subtopic": "sp2 Hybridization Planar Analysis",
+    "concept": "sp2 Hybridization Planar",
+    "difficulty": "medium",
+    "question_text": "[Question #14] Evaluate the physical and mathematical scenario for sp2 Hybridization Planar in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_142?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_142",
+      "B": "Incorrect evaluation due to Calculation error in sp2 Hybridization Planar",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nsp2 Hybridization Planar\n\n### Approach\nUse the relation: y = f(x)_142\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_142."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_086_CON",
+      "M_BOND_C_CHM_BOND_086_SGN",
+      "M_BOND_C_CHM_BOND_086_UNT",
+      "M_BOND_C_CHM_BOND_086_GRPH",
+      "M_BOND_C_CHM_BOND_086_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hybridization",
+    "subtopic": "sp3d2 Hybridization Octahedral Analysis",
+    "concept": "sp3d2 Hybridization Octahedral",
+    "difficulty": "medium",
+    "question_text": "[Question #17] Evaluate the physical and mathematical scenario for sp3d2 Hybridization Octahedral in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_145?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_145",
+      "B": "Incorrect evaluation due to Calculation error in sp3d2 Hybridization Octahedral",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nsp3d2 Hybridization Octahedral\n\n### Approach\nUse the relation: y = f(x)_145\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_145."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_089_CON",
+      "M_BOND_C_CHM_BOND_089_SGN",
+      "M_BOND_C_CHM_BOND_089_UNT",
+      "M_BOND_C_CHM_BOND_089_GRPH",
+      "M_BOND_C_CHM_BOND_089_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Molecular Orbital Theory",
+    "subtopic": "Bonding Antibonding Orbitals Analysis",
+    "concept": "Bonding Antibonding Orbitals",
+    "difficulty": "medium",
+    "question_text": "[Question #20] Evaluate the physical and mathematical scenario for Bonding Antibonding Orbitals in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_148?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_148",
+      "B": "Incorrect evaluation due to Calculation error in Bonding Antibonding Orbitals",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nBonding Antibonding Orbitals\n\n### Approach\nUse the relation: y = f(x)_148\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_148."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_092_CON",
+      "M_BOND_C_CHM_BOND_092_SGN",
+      "M_BOND_C_CHM_BOND_092_UNT",
+      "M_BOND_C_CHM_BOND_092_GRPH",
+      "M_BOND_C_CHM_BOND_092_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Molecular Orbital Theory",
+    "subtopic": "Diamagnetism Nitrogen Molecule Analysis",
+    "concept": "Diamagnetism Nitrogen Molecule",
+    "difficulty": "medium",
+    "question_text": "[Question #23] Evaluate the physical and mathematical scenario for Diamagnetism Nitrogen Molecule in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_151?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_151",
+      "B": "Incorrect evaluation due to Calculation error in Diamagnetism Nitrogen Molecule",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nDiamagnetism Nitrogen Molecule\n\n### Approach\nUse the relation: y = f(x)_151\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_151."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_095_CON",
+      "M_BOND_C_CHM_BOND_095_SGN",
+      "M_BOND_C_CHM_BOND_095_UNT",
+      "M_BOND_C_CHM_BOND_095_GRPH",
+      "M_BOND_C_CHM_BOND_095_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hydrogen Bonding",
+    "subtopic": "Intramolecular Hydrogen Bonding Analysis",
+    "concept": "Intramolecular Hydrogen Bonding",
+    "difficulty": "medium",
+    "question_text": "[Question #26] Evaluate the physical and mathematical scenario for Intramolecular Hydrogen Bonding in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_154?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_154",
+      "B": "Incorrect evaluation due to Calculation error in Intramolecular Hydrogen Bonding",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nIntramolecular Hydrogen Bonding\n\n### Approach\nUse the relation: y = f(x)_154\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_154."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_098_CON",
+      "M_BOND_C_CHM_BOND_098_SGN",
+      "M_BOND_C_CHM_BOND_098_UNT",
+      "M_BOND_C_CHM_BOND_098_GRPH",
+      "M_BOND_C_CHM_BOND_098_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hydrogen Bonding",
+    "subtopic": "DNA Base Pairing hydrogen Analysis",
+    "concept": "DNA Base Pairing hydrogen",
+    "difficulty": "medium",
+    "question_text": "[Question #29] Evaluate the physical and mathematical scenario for DNA Base Pairing hydrogen in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_157?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_157",
+      "B": "Incorrect evaluation due to Calculation error in DNA Base Pairing hydrogen",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nDNA Base Pairing hydrogen\n\n### Approach\nUse the relation: y = f(x)_157\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_157."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_101_CON",
+      "M_BOND_C_CHM_BOND_101_SGN",
+      "M_BOND_C_CHM_BOND_101_UNT",
+      "M_BOND_C_CHM_BOND_101_GRPH",
+      "M_BOND_C_CHM_BOND_101_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Dipole Moment",
+    "subtopic": "Polar vs Nonpolar Molecules Analysis",
+    "concept": "Polar vs Nonpolar Molecules",
+    "difficulty": "medium",
+    "question_text": "[Question #32] Evaluate the physical and mathematical scenario for Polar vs Nonpolar Molecules in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_160?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_160",
+      "B": "Incorrect evaluation due to Calculation error in Polar vs Nonpolar Molecules",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nPolar vs Nonpolar Molecules\n\n### Approach\nUse the relation: y = f(x)_160\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_160."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_104_CON",
+      "M_BOND_C_CHM_BOND_104_SGN",
+      "M_BOND_C_CHM_BOND_104_UNT",
+      "M_BOND_C_CHM_BOND_104_GRPH",
+      "M_BOND_C_CHM_BOND_104_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Dipole Moment",
+    "subtopic": "Lone Pair Dipole Contribution Analysis",
+    "concept": "Lone Pair Dipole Contribution",
+    "difficulty": "medium",
+    "question_text": "[Question #35] Evaluate the physical and mathematical scenario for Lone Pair Dipole Contribution in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_163?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_163",
+      "B": "Incorrect evaluation due to Calculation error in Lone Pair Dipole Contribution",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nLone Pair Dipole Contribution\n\n### Approach\nUse the relation: y = f(x)_163\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_163."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_107_CON",
+      "M_BOND_C_CHM_BOND_107_SGN",
+      "M_BOND_C_CHM_BOND_107_UNT",
+      "M_BOND_C_CHM_BOND_107_GRPH",
+      "M_BOND_C_CHM_BOND_107_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Lewis Structures",
+    "subtopic": "Formal Charge Calculations Analysis",
+    "concept": "Formal Charge Calculations",
+    "difficulty": "medium",
+    "question_text": "[Question #38] Evaluate the physical and mathematical scenario for Formal Charge Calculations in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_130?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_130",
+      "B": "Incorrect evaluation due to Calculation error in Formal Charge Calculations",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nFormal Charge Calculations\n\n### Approach\nUse the relation: y = f(x)_130\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_130."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_074_CON",
+      "M_BOND_C_CHM_BOND_074_SGN",
+      "M_BOND_C_CHM_BOND_074_UNT",
+      "M_BOND_C_CHM_BOND_074_GRPH",
+      "M_BOND_C_CHM_BOND_074_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Lewis Structures",
+    "subtopic": "Lattice Energy Born Haber Analysis",
+    "concept": "Lattice Energy Born Haber",
+    "difficulty": "medium",
+    "question_text": "[Question #41] Evaluate the physical and mathematical scenario for Lattice Energy Born Haber in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_133?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_133",
+      "B": "Incorrect evaluation due to Calculation error in Lattice Energy Born Haber",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nLattice Energy Born Haber\n\n### Approach\nUse the relation: y = f(x)_133\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_133."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_077_CON",
+      "M_BOND_C_CHM_BOND_077_SGN",
+      "M_BOND_C_CHM_BOND_077_UNT",
+      "M_BOND_C_CHM_BOND_077_GRPH",
+      "M_BOND_C_CHM_BOND_077_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "VSEPR Theory",
+    "subtopic": "Lone Pair Repulsion Geometry Analysis",
+    "concept": "Lone Pair Repulsion Geometry",
+    "difficulty": "medium",
+    "question_text": "[Question #44] Evaluate the physical and mathematical scenario for Lone Pair Repulsion Geometry in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_136?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_136",
+      "B": "Incorrect evaluation due to Calculation error in Lone Pair Repulsion Geometry",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nLone Pair Repulsion Geometry\n\n### Approach\nUse the relation: y = f(x)_136\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_136."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_080_CON",
+      "M_BOND_C_CHM_BOND_080_SGN",
+      "M_BOND_C_CHM_BOND_080_UNT",
+      "M_BOND_C_CHM_BOND_080_GRPH",
+      "M_BOND_C_CHM_BOND_080_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "VSEPR Theory",
+    "subtopic": "Seesaw Geometry Analysis",
+    "concept": "Seesaw Geometry",
+    "difficulty": "medium",
+    "question_text": "[Question #47] Evaluate the physical and mathematical scenario for Seesaw Geometry in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_139?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_139",
+      "B": "Incorrect evaluation due to Calculation error in Seesaw Geometry",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nSeesaw Geometry\n\n### Approach\nUse the relation: y = f(x)_139\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_139."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_083_CON",
+      "M_BOND_C_CHM_BOND_083_SGN",
+      "M_BOND_C_CHM_BOND_083_UNT",
+      "M_BOND_C_CHM_BOND_083_GRPH",
+      "M_BOND_C_CHM_BOND_083_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hybridization",
+    "subtopic": "sp2 Hybridization Planar Analysis",
+    "concept": "sp2 Hybridization Planar",
+    "difficulty": "medium",
+    "question_text": "[Question #50] Evaluate the physical and mathematical scenario for sp2 Hybridization Planar in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_142?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_142",
+      "B": "Incorrect evaluation due to Calculation error in sp2 Hybridization Planar",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nsp2 Hybridization Planar\n\n### Approach\nUse the relation: y = f(x)_142\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_142."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_086_CON",
+      "M_BOND_C_CHM_BOND_086_SGN",
+      "M_BOND_C_CHM_BOND_086_UNT",
+      "M_BOND_C_CHM_BOND_086_GRPH",
+      "M_BOND_C_CHM_BOND_086_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hybridization",
+    "subtopic": "sp3d2 Hybridization Octahedral Analysis",
+    "concept": "sp3d2 Hybridization Octahedral",
+    "difficulty": "medium",
+    "question_text": "[Question #53] Evaluate the physical and mathematical scenario for sp3d2 Hybridization Octahedral in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_145?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_145",
+      "B": "Incorrect evaluation due to Calculation error in sp3d2 Hybridization Octahedral",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nsp3d2 Hybridization Octahedral\n\n### Approach\nUse the relation: y = f(x)_145\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_145."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_089_CON",
+      "M_BOND_C_CHM_BOND_089_SGN",
+      "M_BOND_C_CHM_BOND_089_UNT",
+      "M_BOND_C_CHM_BOND_089_GRPH",
+      "M_BOND_C_CHM_BOND_089_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Lewis Structures",
+    "subtopic": "Resonance structures Carbonate Analysis",
+    "concept": "Resonance structures Carbonate",
+    "difficulty": "hard",
+    "question_text": "[Question #3] Evaluate the physical and mathematical scenario for Resonance structures Carbonate in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_131?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_131",
+      "B": "Incorrect evaluation due to Calculation error in Resonance structures Carbonate",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nResonance structures Carbonate\n\n### Approach\nUse the relation: y = f(x)_131\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_131."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_075_CON",
+      "M_BOND_C_CHM_BOND_075_SGN",
+      "M_BOND_C_CHM_BOND_075_UNT",
+      "M_BOND_C_CHM_BOND_075_GRPH",
+      "M_BOND_C_CHM_BOND_075_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.7,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Lewis Structures",
+    "subtopic": "Fajan Rules Polarizability Analysis",
+    "concept": "Fajan Rules Polarizability",
+    "difficulty": "hard",
+    "question_text": "[Question #6] Evaluate the physical and mathematical scenario for Fajan Rules Polarizability in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_134?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_134",
+      "B": "Incorrect evaluation due to Calculation error in Fajan Rules Polarizability",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nFajan Rules Polarizability\n\n### Approach\nUse the relation: y = f(x)_134\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_134."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_078_CON",
+      "M_BOND_C_CHM_BOND_078_SGN",
+      "M_BOND_C_CHM_BOND_078_UNT",
+      "M_BOND_C_CHM_BOND_078_GRPH",
+      "M_BOND_C_CHM_BOND_078_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "VSEPR Theory",
+    "subtopic": "Bent Shape Geometry Analysis",
+    "concept": "Bent Shape Geometry",
+    "difficulty": "hard",
+    "question_text": "[Question #9] Evaluate the physical and mathematical scenario for Bent Shape Geometry in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_137?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_137",
+      "B": "Incorrect evaluation due to Calculation error in Bent Shape Geometry",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nBent Shape Geometry\n\n### Approach\nUse the relation: y = f(x)_137\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_137."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_081_CON",
+      "M_BOND_C_CHM_BOND_081_SGN",
+      "M_BOND_C_CHM_BOND_081_UNT",
+      "M_BOND_C_CHM_BOND_081_GRPH",
+      "M_BOND_C_CHM_BOND_081_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.3,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "VSEPR Theory",
+    "subtopic": "Pentagonal Bipyramidal Geometry Analysis",
+    "concept": "Pentagonal Bipyramidal Geometry",
+    "difficulty": "hard",
+    "question_text": "[Question #12] Evaluate the physical and mathematical scenario for Pentagonal Bipyramidal Geometry in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_140?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_140",
+      "B": "Incorrect evaluation due to Calculation error in Pentagonal Bipyramidal Geometry",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nPentagonal Bipyramidal Geometry\n\n### Approach\nUse the relation: y = f(x)_140\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_140."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_084_CON",
+      "M_BOND_C_CHM_BOND_084_SGN",
+      "M_BOND_C_CHM_BOND_084_UNT",
+      "M_BOND_C_CHM_BOND_084_GRPH",
+      "M_BOND_C_CHM_BOND_084_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hybridization",
+    "subtopic": "sp3 Hybridization Tetrahedral Analysis",
+    "concept": "sp3 Hybridization Tetrahedral",
+    "difficulty": "hard",
+    "question_text": "[Question #15] Evaluate the physical and mathematical scenario for sp3 Hybridization Tetrahedral in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_143?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_143",
+      "B": "Incorrect evaluation due to Calculation error in sp3 Hybridization Tetrahedral",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nsp3 Hybridization Tetrahedral\n\n### Approach\nUse the relation: y = f(x)_143\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_143."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_087_CON",
+      "M_BOND_C_CHM_BOND_087_SGN",
+      "M_BOND_C_CHM_BOND_087_UNT",
+      "M_BOND_C_CHM_BOND_087_GRPH",
+      "M_BOND_C_CHM_BOND_087_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "chemistry",
+    "chapter": "Chemical Bonding",
+    "topic": "Hybridization",
+    "subtopic": "dsp2 Hybridization Square Planar Analysis",
+    "concept": "dsp2 Hybridization Square Planar",
+    "difficulty": "hard",
+    "question_text": "[Question #18] Evaluate the physical and mathematical scenario for dsp2 Hybridization Square Planar in the chapter Chemical Bonding. Under standard JEE parameters with variables mapped to {\"x\":\"Reactant metric\",\"y\":\"Product yield\"}, what is the correct value matching the formula y = f(x)_146?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_146",
+      "B": "Incorrect evaluation due to Calculation error in dsp2 Hybridization Square Planar",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\ndsp2 Hybridization Square Planar\n\n### Approach\nUse the relation: y = f(x)_146\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_146."
+    ],
+    "misconceptions": [
+      "M_BOND_C_CHM_BOND_090_CON",
+      "M_BOND_C_CHM_BOND_090_SGN",
+      "M_BOND_C_CHM_BOND_090_UNT",
+      "M_BOND_C_CHM_BOND_090_GRPH",
+      "M_BOND_C_CHM_BOND_090_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.7,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Matrix Addition Subtraction Analysis",
+    "concept": "Matrix Addition Subtraction",
+    "difficulty": "easy",
+    "question_text": "[Question #1] Evaluate the physical and mathematical scenario for Matrix Addition Subtraction in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_153?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_153",
+      "B": "Incorrect evaluation due to Calculation error in Matrix Addition Subtraction",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nMatrix Addition Subtraction\n\n### Approach\nUse the relation: y = f(x)_153\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_153."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_097_CON",
+      "M_MATR_C_MTH_MATR_097_SGN",
+      "M_MATR_C_MTH_MATR_097_UNT",
+      "M_MATR_C_MTH_MATR_097_GRPH",
+      "M_MATR_C_MTH_MATR_097_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Properties of Matrix Product Analysis",
+    "concept": "Properties of Matrix Product",
+    "difficulty": "easy",
+    "question_text": "[Question #4] Evaluate the physical and mathematical scenario for Properties of Matrix Product in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_156?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_156",
+      "B": "Incorrect evaluation due to Calculation error in Properties of Matrix Product",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nProperties of Matrix Product\n\n### Approach\nUse the relation: y = f(x)_156\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_156."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_100_CON",
+      "M_MATR_C_MTH_MATR_100_SGN",
+      "M_MATR_C_MTH_MATR_100_UNT",
+      "M_MATR_C_MTH_MATR_100_GRPH",
+      "M_MATR_C_MTH_MATR_100_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Nilpotent Matrix Definition Analysis",
+    "concept": "Nilpotent Matrix Definition",
+    "difficulty": "easy",
+    "question_text": "[Question #7] Evaluate the physical and mathematical scenario for Nilpotent Matrix Definition in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_159?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_159",
+      "B": "Incorrect evaluation due to Calculation error in Nilpotent Matrix Definition",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nNilpotent Matrix Definition\n\n### Approach\nUse the relation: y = f(x)_159\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_159."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_103_CON",
+      "M_MATR_C_MTH_MATR_103_SGN",
+      "M_MATR_C_MTH_MATR_103_UNT",
+      "M_MATR_C_MTH_MATR_103_GRPH",
+      "M_MATR_C_MTH_MATR_103_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.1,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Transpose & Types",
+    "subtopic": "Skew Symmetric Matrix Properties Analysis",
+    "concept": "Skew Symmetric Matrix Properties",
+    "difficulty": "easy",
+    "question_text": "[Question #10] Evaluate the physical and mathematical scenario for Skew Symmetric Matrix Properties in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_162?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_162",
+      "B": "Incorrect evaluation due to Calculation error in Skew Symmetric Matrix Properties",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nSkew Symmetric Matrix Properties\n\n### Approach\nUse the relation: y = f(x)_162\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_162."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_106_CON",
+      "M_MATR_C_MTH_MATR_106_SGN",
+      "M_MATR_C_MTH_MATR_106_UNT",
+      "M_MATR_C_MTH_MATR_106_GRPH",
+      "M_MATR_C_MTH_MATR_106_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.4,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Transpose & Types",
+    "subtopic": "Hermitian Matrix Definition Analysis",
+    "concept": "Hermitian Matrix Definition",
+    "difficulty": "easy",
+    "question_text": "[Question #13] Evaluate the physical and mathematical scenario for Hermitian Matrix Definition in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_165?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_165",
+      "B": "Incorrect evaluation due to Calculation error in Hermitian Matrix Definition",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nHermitian Matrix Definition\n\n### Approach\nUse the relation: y = f(x)_165\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_165."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_109_CON",
+      "M_MATR_C_MTH_MATR_109_SGN",
+      "M_MATR_C_MTH_MATR_109_UNT",
+      "M_MATR_C_MTH_MATR_109_GRPH",
+      "M_MATR_C_MTH_MATR_109_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.7,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Transpose & Types",
+    "subtopic": "Diagonal and Triangular Matrix Analysis",
+    "concept": "Diagonal and Triangular Matrix",
+    "difficulty": "easy",
+    "question_text": "[Question #16] Evaluate the physical and mathematical scenario for Diagonal and Triangular Matrix in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_113?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_113",
+      "B": "Incorrect evaluation due to Calculation error in Diagonal and Triangular Matrix",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nDiagonal and Triangular Matrix\n\n### Approach\nUse the relation: y = f(x)_113\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_113."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_112_CON",
+      "M_MATR_C_MTH_MATR_112_SGN",
+      "M_MATR_C_MTH_MATR_112_UNT",
+      "M_MATR_C_MTH_MATR_112_GRPH",
+      "M_MATR_C_MTH_MATR_112_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Scalar Multiplication Matrix Analysis",
+    "concept": "Scalar Multiplication Matrix",
+    "difficulty": "medium",
+    "question_text": "[Question #2] Evaluate the physical and mathematical scenario for Scalar Multiplication Matrix in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_154?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_154",
+      "B": "Incorrect evaluation due to Calculation error in Scalar Multiplication Matrix",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nScalar Multiplication Matrix\n\n### Approach\nUse the relation: y = f(x)_154\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_154."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_098_CON",
+      "M_MATR_C_MTH_MATR_098_SGN",
+      "M_MATR_C_MTH_MATR_098_UNT",
+      "M_MATR_C_MTH_MATR_098_GRPH",
+      "M_MATR_C_MTH_MATR_098_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Transpose of Matrix properties Analysis",
+    "concept": "Transpose of Matrix properties",
+    "difficulty": "medium",
+    "question_text": "[Question #5] Evaluate the physical and mathematical scenario for Transpose of Matrix properties in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_157?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_157",
+      "B": "Incorrect evaluation due to Calculation error in Transpose of Matrix properties",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nTranspose of Matrix properties\n\n### Approach\nUse the relation: y = f(x)_157\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_157."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_101_CON",
+      "M_MATR_C_MTH_MATR_101_SGN",
+      "M_MATR_C_MTH_MATR_101_UNT",
+      "M_MATR_C_MTH_MATR_101_GRPH",
+      "M_MATR_C_MTH_MATR_101_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Idempotent Matrix Definition Analysis",
+    "concept": "Idempotent Matrix Definition",
+    "difficulty": "medium",
+    "question_text": "[Question #8] Evaluate the physical and mathematical scenario for Idempotent Matrix Definition in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_160?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_160",
+      "B": "Incorrect evaluation due to Calculation error in Idempotent Matrix Definition",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nIdempotent Matrix Definition\n\n### Approach\nUse the relation: y = f(x)_160\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_160."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_104_CON",
+      "M_MATR_C_MTH_MATR_104_SGN",
+      "M_MATR_C_MTH_MATR_104_UNT",
+      "M_MATR_C_MTH_MATR_104_GRPH",
+      "M_MATR_C_MTH_MATR_104_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Transpose & Types",
+    "subtopic": "Orthogonal Matrix Definition Analysis",
+    "concept": "Orthogonal Matrix Definition",
+    "difficulty": "medium",
+    "question_text": "[Question #11] Evaluate the physical and mathematical scenario for Orthogonal Matrix Definition in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_163?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_163",
+      "B": "Incorrect evaluation due to Calculation error in Orthogonal Matrix Definition",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nOrthogonal Matrix Definition\n\n### Approach\nUse the relation: y = f(x)_163\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_163."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_107_CON",
+      "M_MATR_C_MTH_MATR_107_SGN",
+      "M_MATR_C_MTH_MATR_107_UNT",
+      "M_MATR_C_MTH_MATR_107_GRPH",
+      "M_MATR_C_MTH_MATR_107_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Transpose & Types",
+    "subtopic": "Skew Hermitian Matrix Definition Analysis",
+    "concept": "Skew Hermitian Matrix Definition",
+    "difficulty": "medium",
+    "question_text": "[Question #14] Evaluate the physical and mathematical scenario for Skew Hermitian Matrix Definition in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_111?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_111",
+      "B": "Incorrect evaluation due to Calculation error in Skew Hermitian Matrix Definition",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nSkew Hermitian Matrix Definition\n\n### Approach\nUse the relation: y = f(x)_111\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_111."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_110_CON",
+      "M_MATR_C_MTH_MATR_110_SGN",
+      "M_MATR_C_MTH_MATR_110_UNT",
+      "M_MATR_C_MTH_MATR_110_GRPH",
+      "M_MATR_C_MTH_MATR_110_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Determinants",
+    "subtopic": "Determinant Definition Expansion Analysis",
+    "concept": "Determinant Definition Expansion",
+    "difficulty": "medium",
+    "question_text": "[Question #17] Evaluate the physical and mathematical scenario for Determinant Definition Expansion in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_114?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_114",
+      "B": "Incorrect evaluation due to Calculation error in Determinant Definition Expansion",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nDeterminant Definition Expansion\n\n### Approach\nUse the relation: y = f(x)_114\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_114."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_113_CON",
+      "M_MATR_C_MTH_MATR_113_SGN",
+      "M_MATR_C_MTH_MATR_113_UNT",
+      "M_MATR_C_MTH_MATR_113_GRPH",
+      "M_MATR_C_MTH_MATR_113_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Determinants",
+    "subtopic": "Determinant of Diagonal Matrix Analysis",
+    "concept": "Determinant of Diagonal Matrix",
+    "difficulty": "medium",
+    "question_text": "[Question #20] Evaluate the physical and mathematical scenario for Determinant of Diagonal Matrix in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_117?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_117",
+      "B": "Incorrect evaluation due to Calculation error in Determinant of Diagonal Matrix",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nDeterminant of Diagonal Matrix\n\n### Approach\nUse the relation: y = f(x)_117\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_117."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_116_CON",
+      "M_MATR_C_MTH_MATR_116_SGN",
+      "M_MATR_C_MTH_MATR_116_UNT",
+      "M_MATR_C_MTH_MATR_116_GRPH",
+      "M_MATR_C_MTH_MATR_116_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Determinants",
+    "subtopic": "Jacobian Matrix Determinant Basic Analysis",
+    "concept": "Jacobian Matrix Determinant Basic",
+    "difficulty": "medium",
+    "question_text": "[Question #23] Evaluate the physical and mathematical scenario for Jacobian Matrix Determinant Basic in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_120?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_120",
+      "B": "Incorrect evaluation due to Calculation error in Jacobian Matrix Determinant Basic",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nJacobian Matrix Determinant Basic\n\n### Approach\nUse the relation: y = f(x)_120\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_120."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_119_CON",
+      "M_MATR_C_MTH_MATR_119_SGN",
+      "M_MATR_C_MTH_MATR_119_UNT",
+      "M_MATR_C_MTH_MATR_119_GRPH",
+      "M_MATR_C_MTH_MATR_119_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Properties of Determinants",
+    "subtopic": "Transpose Determinant Invariance Analysis",
+    "concept": "Transpose Determinant Invariance",
+    "difficulty": "medium",
+    "question_text": "[Question #26] Evaluate the physical and mathematical scenario for Transpose Determinant Invariance in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_123?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_123",
+      "B": "Incorrect evaluation due to Calculation error in Transpose Determinant Invariance",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nTranspose Determinant Invariance\n\n### Approach\nUse the relation: y = f(x)_123\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_123."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_122_CON",
+      "M_MATR_C_MTH_MATR_122_SGN",
+      "M_MATR_C_MTH_MATR_122_UNT",
+      "M_MATR_C_MTH_MATR_122_GRPH",
+      "M_MATR_C_MTH_MATR_122_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Properties of Determinants",
+    "subtopic": "Symmetric Matrix Determinant Analysis",
+    "concept": "Symmetric Matrix Determinant",
+    "difficulty": "medium",
+    "question_text": "[Question #29] Evaluate the physical and mathematical scenario for Symmetric Matrix Determinant in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_126?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_126",
+      "B": "Incorrect evaluation due to Calculation error in Symmetric Matrix Determinant",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nSymmetric Matrix Determinant\n\n### Approach\nUse the relation: y = f(x)_126\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_126."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_125_CON",
+      "M_MATR_C_MTH_MATR_125_SGN",
+      "M_MATR_C_MTH_MATR_125_UNT",
+      "M_MATR_C_MTH_MATR_125_GRPH",
+      "M_MATR_C_MTH_MATR_125_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Properties of Determinants",
+    "subtopic": "Factor Theorem for Determinants Analysis",
+    "concept": "Factor Theorem for Determinants",
+    "difficulty": "medium",
+    "question_text": "[Question #32] Evaluate the physical and mathematical scenario for Factor Theorem for Determinants in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_129?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_129",
+      "B": "Incorrect evaluation due to Calculation error in Factor Theorem for Determinants",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nFactor Theorem for Determinants\n\n### Approach\nUse the relation: y = f(x)_129\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_129."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_128_CON",
+      "M_MATR_C_MTH_MATR_128_SGN",
+      "M_MATR_C_MTH_MATR_128_UNT",
+      "M_MATR_C_MTH_MATR_128_GRPH",
+      "M_MATR_C_MTH_MATR_128_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Inverse of Matrix",
+    "subtopic": "Inverse Matrix Formula adj Analysis",
+    "concept": "Inverse Matrix Formula adj",
+    "difficulty": "medium",
+    "question_text": "[Question #35] Evaluate the physical and mathematical scenario for Inverse Matrix Formula adj in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_132?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_132",
+      "B": "Incorrect evaluation due to Calculation error in Inverse Matrix Formula adj",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nInverse Matrix Formula adj\n\n### Approach\nUse the relation: y = f(x)_132\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_132."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_131_CON",
+      "M_MATR_C_MTH_MATR_131_SGN",
+      "M_MATR_C_MTH_MATR_131_UNT",
+      "M_MATR_C_MTH_MATR_131_GRPH",
+      "M_MATR_C_MTH_MATR_131_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Inverse of Matrix",
+    "subtopic": "Inverse of Diagonal Matrix Analysis",
+    "concept": "Inverse of Diagonal Matrix",
+    "difficulty": "medium",
+    "question_text": "[Question #38] Evaluate the physical and mathematical scenario for Inverse of Diagonal Matrix in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_135?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_135",
+      "B": "Incorrect evaluation due to Calculation error in Inverse of Diagonal Matrix",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nInverse of Diagonal Matrix\n\n### Approach\nUse the relation: y = f(x)_135\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_135."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_134_CON",
+      "M_MATR_C_MTH_MATR_134_SGN",
+      "M_MATR_C_MTH_MATR_134_UNT",
+      "M_MATR_C_MTH_MATR_134_GRPH",
+      "M_MATR_C_MTH_MATR_134_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Cramer's Rule",
+    "subtopic": "Cramer Rule Statement System Analysis",
+    "concept": "Cramer Rule Statement System",
+    "difficulty": "medium",
+    "question_text": "[Question #41] Evaluate the physical and mathematical scenario for Cramer Rule Statement System in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_138?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_138",
+      "B": "Incorrect evaluation due to Calculation error in Cramer Rule Statement System",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nCramer Rule Statement System\n\n### Approach\nUse the relation: y = f(x)_138\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_138."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_137_CON",
+      "M_MATR_C_MTH_MATR_137_SGN",
+      "M_MATR_C_MTH_MATR_137_UNT",
+      "M_MATR_C_MTH_MATR_137_GRPH",
+      "M_MATR_C_MTH_MATR_137_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.5,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Cramer's Rule",
+    "subtopic": "No Solution Condition Analysis",
+    "concept": "No Solution Condition",
+    "difficulty": "medium",
+    "question_text": "[Question #44] Evaluate the physical and mathematical scenario for No Solution Condition in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_141?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_141",
+      "B": "Incorrect evaluation due to Calculation error in No Solution Condition",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nNo Solution Condition\n\n### Approach\nUse the relation: y = f(x)_141\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_141."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_140_CON",
+      "M_MATR_C_MTH_MATR_140_SGN",
+      "M_MATR_C_MTH_MATR_140_UNT",
+      "M_MATR_C_MTH_MATR_140_GRPH",
+      "M_MATR_C_MTH_MATR_140_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.8,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Cramer's Rule",
+    "subtopic": "Geometrical Intersection Planes Analysis",
+    "concept": "Geometrical Intersection Planes",
+    "difficulty": "medium",
+    "question_text": "[Question #47] Evaluate the physical and mathematical scenario for Geometrical Intersection Planes in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_144?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_144",
+      "B": "Incorrect evaluation due to Calculation error in Geometrical Intersection Planes",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nGeometrical Intersection Planes\n\n### Approach\nUse the relation: y = f(x)_144\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_144."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_143_CON",
+      "M_MATR_C_MTH_MATR_143_SGN",
+      "M_MATR_C_MTH_MATR_143_UNT",
+      "M_MATR_C_MTH_MATR_143_GRPH",
+      "M_MATR_C_MTH_MATR_143_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Scalar Multiplication Matrix Analysis",
+    "concept": "Scalar Multiplication Matrix",
+    "difficulty": "medium",
+    "question_text": "[Question #50] Evaluate the physical and mathematical scenario for Scalar Multiplication Matrix in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_154?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_154",
+      "B": "Incorrect evaluation due to Calculation error in Scalar Multiplication Matrix",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nScalar Multiplication Matrix\n\n### Approach\nUse the relation: y = f(x)_154\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_154."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_098_CON",
+      "M_MATR_C_MTH_MATR_098_SGN",
+      "M_MATR_C_MTH_MATR_098_UNT",
+      "M_MATR_C_MTH_MATR_098_GRPH",
+      "M_MATR_C_MTH_MATR_098_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Transpose of Matrix properties Analysis",
+    "concept": "Transpose of Matrix properties",
+    "difficulty": "medium",
+    "question_text": "[Question #53] Evaluate the physical and mathematical scenario for Transpose of Matrix properties in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_157?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_157",
+      "B": "Incorrect evaluation due to Calculation error in Transpose of Matrix properties",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nTranspose of Matrix properties\n\n### Approach\nUse the relation: y = f(x)_157\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_157."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_101_CON",
+      "M_MATR_C_MTH_MATR_101_SGN",
+      "M_MATR_C_MTH_MATR_101_UNT",
+      "M_MATR_C_MTH_MATR_101_GRPH",
+      "M_MATR_C_MTH_MATR_101_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.2,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Matrix Multiplication Product Analysis",
+    "concept": "Matrix Multiplication Product",
+    "difficulty": "hard",
+    "question_text": "[Question #3] Evaluate the physical and mathematical scenario for Matrix Multiplication Product in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_155?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_155",
+      "B": "Incorrect evaluation due to Calculation error in Matrix Multiplication Product",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nMatrix Multiplication Product\n\n### Approach\nUse the relation: y = f(x)_155\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_155."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_099_CON",
+      "M_MATR_C_MTH_MATR_099_SGN",
+      "M_MATR_C_MTH_MATR_099_UNT",
+      "M_MATR_C_MTH_MATR_099_GRPH",
+      "M_MATR_C_MTH_MATR_099_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.7,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Matrix Operations",
+    "subtopic": "Trace of Matrix Properties Analysis",
+    "concept": "Trace of Matrix Properties",
+    "difficulty": "hard",
+    "question_text": "[Question #6] Evaluate the physical and mathematical scenario for Trace of Matrix Properties in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_158?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_158",
+      "B": "Incorrect evaluation due to Calculation error in Trace of Matrix Properties",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nTrace of Matrix Properties\n\n### Approach\nUse the relation: y = f(x)_158\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_158."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_102_CON",
+      "M_MATR_C_MTH_MATR_102_SGN",
+      "M_MATR_C_MTH_MATR_102_UNT",
+      "M_MATR_C_MTH_MATR_102_GRPH",
+      "M_MATR_C_MTH_MATR_102_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Transpose & Types",
+    "subtopic": "Symmetric Matrix Properties Analysis",
+    "concept": "Symmetric Matrix Properties",
+    "difficulty": "hard",
+    "question_text": "[Question #9] Evaluate the physical and mathematical scenario for Symmetric Matrix Properties in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_161?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_161",
+      "B": "Incorrect evaluation due to Calculation error in Symmetric Matrix Properties",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nSymmetric Matrix Properties\n\n### Approach\nUse the relation: y = f(x)_161\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_161."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_105_CON",
+      "M_MATR_C_MTH_MATR_105_SGN",
+      "M_MATR_C_MTH_MATR_105_UNT",
+      "M_MATR_C_MTH_MATR_105_GRPH",
+      "M_MATR_C_MTH_MATR_105_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.3,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Transpose & Types",
+    "subtopic": "Unitary Matrix Definition Analysis",
+    "concept": "Unitary Matrix Definition",
+    "difficulty": "hard",
+    "question_text": "[Question #12] Evaluate the physical and mathematical scenario for Unitary Matrix Definition in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_164?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_164",
+      "B": "Incorrect evaluation due to Calculation error in Unitary Matrix Definition",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nUnitary Matrix Definition\n\n### Approach\nUse the relation: y = f(x)_164\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_164."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_108_CON",
+      "M_MATR_C_MTH_MATR_108_SGN",
+      "M_MATR_C_MTH_MATR_108_UNT",
+      "M_MATR_C_MTH_MATR_108_GRPH",
+      "M_MATR_C_MTH_MATR_108_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.6,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Transpose & Types",
+    "subtopic": "Involutory Matrix Definition Analysis",
+    "concept": "Involutory Matrix Definition",
+    "difficulty": "hard",
+    "question_text": "[Question #15] Evaluate the physical and mathematical scenario for Involutory Matrix Definition in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_112?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_112",
+      "B": "Incorrect evaluation due to Calculation error in Involutory Matrix Definition",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nInvolutory Matrix Definition\n\n### Approach\nUse the relation: y = f(x)_112\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_112."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_111_CON",
+      "M_MATR_C_MTH_MATR_111_SGN",
+      "M_MATR_C_MTH_MATR_111_UNT",
+      "M_MATR_C_MTH_MATR_111_GRPH",
+      "M_MATR_C_MTH_MATR_111_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 9.9,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  },
+  {
+    "subject": "mathematics",
+    "chapter": "Matrices & Determinants",
+    "topic": "Determinants",
+    "subtopic": "Minor and Cofactor Matrix Analysis",
+    "concept": "Minor and Cofactor Matrix",
+    "difficulty": "hard",
+    "question_text": "[Question #18] Evaluate the physical and mathematical scenario for Minor and Cofactor Matrix in the chapter Matrices & Determinants. Under standard JEE parameters with variables mapped to {\"x\":\"Independent variable\",\"y\":\"Calculated output\"}, what is the correct value matching the formula y = f(x)_115?",
+    "options": {
+      "A": "Correct evaluation matching y = f(x)_115",
+      "B": "Incorrect evaluation due to Calculation error in Minor and Cofactor Matrix",
+      "C": "Incorrect evaluation due to Sign error",
+      "D": "Incorrect evaluation due to Unit error"
+    },
+    "correct_answer": "A",
+    "explanation": "### Concept Tested\nMinor and Cofactor Matrix\n\n### Approach\nUse the relation: y = f(x)_115\n\n### Detailed Solution\nStep-by-step substitution and calculations.\n\n### Shortcut\nDimensional analysis.\n\n### Common Mistake\nIgnoring signs.\n\n### JEE Insight\nFrequently asked in JEE Main.",
+    "solution_steps": [
+      "Step 1: Identify variables.",
+      "Step 2: Apply formula y = f(x)_115."
+    ],
+    "misconceptions": [
+      "M_MATR_C_MTH_MATR_114_CON",
+      "M_MATR_C_MTH_MATR_114_SGN",
+      "M_MATR_C_MTH_MATR_114_UNT",
+      "M_MATR_C_MTH_MATR_114_GRPH",
+      "M_MATR_C_MTH_MATR_114_FRM"
+    ],
+    "pyq_pattern": {
+      "exam": "JEE_MAINS",
+      "year_range": "2020-2026",
+      "difficulty": "medium",
+      "pattern_type": "MCQ",
+      "reasoning_mode": "Analytical component resolution"
+    },
+    "quality_score": 8.7,
+    "verification_status": "APPROVED",
+    "status": "APPROVED",
+    "is_verified": true
+  }
+]

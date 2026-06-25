@@ -242,29 +242,39 @@ const TestExecution: React.FC<TestExecutionProps> = ({
     let result;
     const count = config.questionCount || 25;
 
-    switch (config.type) {
-      case 'chapter':
-        if (config.chapters && config.chapters.length > 0) {
-          result = await fetchMixedTestQuestions(config.chapters, 15);
-        }
-        break;
-      case 'mixed':
-        if (config.chapters && config.chapters.length > 0) {
-          result = await fetchMixedTestQuestions(config.chapters, 5);
-        }
-        break;
-      case 'pyq':
-        result = await fetchPYQQuestions(
-          config.subject,
-          config.chapters?.[0]?.chapterId,
-          config.yearRange,
-          count
-        );
-        break;
-      case 'adaptive':
-        result = await fetchAdaptiveQuestions(count);
-        break;
-    }
+    // Wrap the entire load in an 8-second safety timeout so the loading screen
+    // can never hang indefinitely if a network/Supabase call stalls.
+    const timeoutFallback = new Promise<void>((resolve) =>
+      setTimeout(resolve, 8000)
+    );
+
+    const fetchPromise = (async () => {
+      switch (config.type) {
+        case 'chapter':
+          if (config.chapters && config.chapters.length > 0) {
+            result = await fetchMixedTestQuestions(config.chapters, 15);
+          }
+          break;
+        case 'mixed':
+          if (config.chapters && config.chapters.length > 0) {
+            result = await fetchMixedTestQuestions(config.chapters, 5);
+          }
+          break;
+        case 'pyq':
+          result = await fetchPYQQuestions(
+            config.subject,
+            config.chapters?.[0]?.chapterId,
+            config.yearRange,
+            count
+          );
+          break;
+        case 'adaptive':
+          result = await fetchAdaptiveQuestions(count);
+          break;
+      }
+    })();
+
+    await Promise.race([fetchPromise, timeoutFallback]);
 
     if (result && result.length > 0) {
       const initialStatuses = new Map<number, 'answered' | 'not_answered' | 'not_visited' | 'marked' | 'answered_marked'>();

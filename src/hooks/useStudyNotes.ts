@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-export interface LectureNote {
+export interface StudyNote {
   id: string;
   video_url: string;
   video_title: string | null;
@@ -19,13 +19,13 @@ export interface LectureNote {
   created_at: string;
 }
 
-export function useLectureNotes() {
+export function useStudyNotes() {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [currentNote, setCurrentNote] = useState<LectureNote | null>(null);
-  const [notes, setNotes] = useState<LectureNote[]>([]);
+  const [currentNote, setCurrentNote] = useState<StudyNote | null>(null);
+  const [notes, setNotes] = useState<StudyNote[]>([]);
   const { toast } = useToast();
 
-  const processLecture = async (videoUrl: string, language: string = 'english'): Promise<LectureNote | null> => {
+  const processLecture = async (videoUrl: string, language: string = 'english'): Promise<StudyNote | null> => {
     setIsProcessing(true);
     setCurrentNote(null);
 
@@ -35,7 +35,7 @@ export function useLectureNotes() {
       if (!user) {
         toast({
           title: "Authentication Required",
-          description: "Please sign in to process lectures",
+          description: "Please sign in to analyze videos",
           variant: "destructive",
         });
         return null;
@@ -57,27 +57,27 @@ export function useLectureNotes() {
 
       if (!result.success) {
         toast({
-          title: "Processing Failed",
-          description: result.error || "Failed to process lecture",
+          title: "Analysis Failed",
+          description: result.error || "Failed to analyze video",
           variant: "destructive",
         });
         return null;
       }
 
-      const lectureNote = result.data as LectureNote;
-      setCurrentNote(lectureNote);
+      const studyNote = result.data as StudyNote;
+      setCurrentNote(studyNote);
       
       toast({
-        title: "Lecture Processed!",
+        title: "Video Analyzed!",
         description: "Your study materials are ready",
       });
 
-      return lectureNote;
+      return studyNote;
     } catch (error) {
-      console.error('Error processing lecture:', error);
+      console.error('Error processing video:', error);
       toast({
         title: "Error",
-        description: "Failed to process lecture. Please try again.",
+        description: "Failed to analyze video. Please try again.",
         variant: "destructive",
       });
       return null;
@@ -91,7 +91,7 @@ export function useLectureNotes() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Using any type to handle dynamic table access
+      // Using legacy 'lecture_notes' database table internally
       const { data, error } = await (supabase as any)
         .from('lecture_notes')
         .select('*')
@@ -101,7 +101,7 @@ export function useLectureNotes() {
       if (error) throw error;
       setNotes(data || []);
     } catch (error) {
-      console.error('Error fetching notes:', error);
+      console.error('Error fetching study notes:', error);
     }
   };
 

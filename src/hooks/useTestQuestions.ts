@@ -256,12 +256,12 @@ Step 5: Final answer - [Fe(H2O)6]3+ has the highest magnetic moment of ≈ 5.92 
       shuffledOptions.push(shuffledOptions.shift()!);
     }
     
-    const newOptions: Record<string, string> = {};
+    const newOptions: { A: string; B: string; C: string; D: string } = { A: '', B: '', C: '', D: '' };
     let correctKey = 'A';
     
     ['A', 'B', 'C', 'D'].forEach((key, index) => {
       const originalOpt = shuffledOptions[index];
-      newOptions[key] = originalOpt.text;
+      newOptions[key as keyof typeof newOptions] = originalOpt.text;
       if (originalOpt.key === item.ans) {
         correctKey = key;
       }
@@ -332,7 +332,7 @@ export const useTestQuestions = () => {
         // Select pdf_sources relation to verify style
         let query = supabase
           .from('questions')
-          .select('*, pdf_sources(*)')
+          .select('*')
           .eq('verification_status', 'APPROVED')
           .eq('chapter_id', chapter.chapterId);
 
@@ -357,29 +357,19 @@ export const useTestQuestions = () => {
           const realQs = dbData.filter(q => !q.is_ai_generated);
           const aiQs = dbData.filter(q => q.is_ai_generated);
 
-          // Helper to sort questions by style matching and quality
-          const sortPool = (pool: any[], style?: string) => {
-            return pool.sort((a, b) => {
-              // 1. Prioritize style match
-              if (style && style !== 'MIXED') {
-                const styleA = a.pdf_sources?.source_style === style ? 1 : 0;
-                const styleB = b.pdf_sources?.source_style === style ? 1 : 0;
-                if (styleA !== styleB) return styleB - styleA;
-              }
-              // 2. Prioritize quality score (ELITE > GOOD > AVERAGE > REJECTED)
+          // Sort by quality score, then randomly
+          const sortPool = (pool: any[]) =>
+            pool.sort((a, b) => {
               const qualityOrder: Record<string, number> = { 'ELITE': 3, 'GOOD': 2, 'AVERAGE': 1, 'REJECTED': 0 };
               const qA = qualityOrder[a.question_quality_score || 'AVERAGE'] || 1;
               const qB = qualityOrder[b.question_quality_score || 'AVERAGE'] || 1;
               if (qA !== qB) return qB - qA;
-
-              // 3. Random shuffle as fallback
               return Math.random() - 0.5;
             });
-          };
 
           // Sort both pools
-          const sortedReal = sortPool([...realQs], chapter.selectedStyle);
-          const sortedAI = sortPool([...aiQs], chapter.selectedStyle);
+          const sortedReal = sortPool([...realQs]);
+          const sortedAI = sortPool([...aiQs]);
 
           // Calculate 70/30 distribution
           const targetRealCount = Math.max(1, Math.round(questionsPerChapter * 0.7));

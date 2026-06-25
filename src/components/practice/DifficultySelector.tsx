@@ -103,31 +103,31 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto text-[#FFFFFF] text-left">
+    <div className="space-y-6 max-w-3xl mx-auto text-slate-900 text-left">
       
       {/* Back to library */}
-      <Button variant="ghost" onClick={onBack} className="text-[#C7D2FE] hover:text-white font-bold hover:bg-white/[0.04]">
+      <Button variant="ghost" onClick={onBack} className="text-slate-600 hover:text-slate-900 font-bold hover:bg-slate-100 border border-slate-200 bg-white rounded-xl shadow-xs">
         <ArrowLeft className="w-4 h-4 mr-2" /> Back to Library
       </Button>
 
       {/* Chapter Cockpit Overview Header */}
-      <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-6 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl opacity-10 pointer-events-none" />
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 relative overflow-hidden shadow-sm">
+        <div className="absolute right-0 top-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl opacity-10 pointer-events-none" />
         
         <div className="flex flex-col md:flex-row justify-between items-start gap-4">
           <div className="space-y-1">
-            <span className="text-[10px] text-accent uppercase font-black tracking-widest bg-accent/15 border border-accent/20 px-2 py-0.5 rounded">
+            <span className="text-[10px] text-blue-600 uppercase font-black tracking-widest bg-blue-50 border border-blue-100 px-2 py-0.5 rounded">
               {node.type} Setup Cockpit
             </span>
-            <h2 className="text-3xl font-black text-white mt-1.5">{node.name}</h2>
-            <p className="text-xs text-[#94A3B8]">Configure your specialized JEE practice bank parameters below.</p>
+            <h2 className="text-3xl font-black text-slate-900 mt-1.5">{node.name}</h2>
+            <p className="text-xs text-slate-500">Configure your specialized JEE practice bank parameters below.</p>
           </div>
 
-          <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 text-[10px] text-[#94A3B8] grid grid-cols-2 gap-x-6 gap-y-1.5 min-w-[220px]">
-            <div>Total Available: <strong className="text-white block text-xs mt-0.5">{counts.total.toLocaleString()} Qs</strong></div>
-            <div>Question Bank: <strong className="text-white block text-xs mt-0.5">{counts.bank} Qs</strong></div>
-            <div>JEE Main PYQs: <strong className="text-[#C7D2FE] block text-xs mt-0.5">{counts.main} Qs</strong></div>
-            <div>JEE Advanced PYQs: <strong className="text-amber-400 block text-xs mt-0.5">{counts.adv} Qs</strong></div>
+          <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-[10px] text-slate-500 grid grid-cols-2 gap-x-6 gap-y-1.5 min-w-[220px]">
+            <div>Total Available: <strong className="text-slate-800 block text-xs mt-0.5">{counts.total.toLocaleString()} Qs</strong></div>
+            <div>Question Bank: <strong className="text-slate-800 block text-xs mt-0.5">{counts.bank} Qs</strong></div>
+            <div>JEE Main PYQs: <strong className="text-blue-600 block text-xs mt-0.5">{counts.main} Qs</strong></div>
+            <div>JEE Advanced PYQs: <strong className="text-indigo-600 block text-xs mt-0.5">{counts.adv} Qs</strong></div>
           </div>
         </div>
       </div>
@@ -137,7 +137,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
 
         {/* 1. DIFFICULTY SELECTION */}
         <div className="space-y-3">
-          <h3 className="text-xs font-black uppercase text-[#C7D2FE] tracking-widest pl-1 border-l-2 border-accent">
+          <h3 className="text-xs font-black uppercase text-slate-700 tracking-widest pl-2 border-l-2 border-blue-600">
             Step 1: Select Difficulty Challenge Tier
           </h3>
           
@@ -151,22 +151,22 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               className={cn(
                 "p-5 rounded-2xl border-2 transition-all text-left space-y-3 flex flex-col justify-between",
                 selectedDifficulty === 'easy' 
-                  ? "border-emerald-500 bg-emerald-500/20 text-white shadow-[0_0_15px_rgba(16,185,129,0.15)]" 
-                  : "bg-emerald-950/10 border-emerald-500/30 text-emerald-100 hover:border-emerald-500/60"
+                  ? "border-emerald-500 bg-emerald-50/50 text-slate-950 shadow-sm" 
+                  : "bg-white border-slate-200 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/10"
               )}
             >
               <div className="flex justify-between items-start w-full">
-                <span className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <span className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center">
                   <Zap className="w-4 h-4" />
                 </span>
-                <span className="text-[9px] font-black uppercase tracking-widest text-[#94A3B8]">NCERT level</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">NCERT level</span>
               </div>
               <div>
-                <h4 className="font-extrabold text-sm text-white">Easy (NCERT Foundation)</h4>
-                <p className="text-[10px] text-slate-300 mt-1 leading-relaxed">
+                <h4 className="font-extrabold text-sm text-slate-900">Easy (NCERT Foundation)</h4>
+                <p className="text-[10px] text-slate-600 mt-1 leading-relaxed">
                   Focus: Concept clarity & formula definitions.
                 </p>
-                <div className="text-[10px] text-emerald-400 font-bold mt-2.5">
+                <div className="text-[10px] text-emerald-600 font-bold mt-2.5">
                   20 Questions | 15-20 mins
                 </div>
               </div>
@@ -181,22 +181,22 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               className={cn(
                 "p-5 rounded-2xl border-2 transition-all text-left space-y-3 flex flex-col justify-between",
                 selectedDifficulty === 'medium' 
-                  ? "border-amber-500 bg-amber-500/20 text-white shadow-[0_0_15px_rgba(245,158,11,0.15)]" 
-                  : "bg-amber-950/10 border-amber-500/30 text-amber-100 hover:border-amber-500/60"
+                  ? "border-amber-500 bg-amber-50/50 text-slate-950 shadow-sm" 
+                  : "bg-white border-slate-200 text-slate-700 hover:border-amber-300 hover:bg-amber-50/10"
               )}
             >
               <div className="flex justify-between items-start w-full">
-                <span className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                <span className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center">
                   <Target className="w-4 h-4" />
                 </span>
-                <span className="text-[9px] font-black uppercase tracking-widest text-[#94A3B8]">JEE Main level</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">JEE Main level</span>
               </div>
               <div>
-                <h4 className="font-extrabold text-sm text-white">Medium (JEE Main)</h4>
-                <p className="text-[10px] text-slate-300 mt-1 leading-relaxed">
+                <h4 className="font-extrabold text-sm text-slate-900">Medium (JEE Main)</h4>
+                <p className="text-[10px] text-slate-600 mt-1 leading-relaxed">
                   Focus: Relative motion, graph analysis, multi-concepts.
                 </p>
-                <div className="text-[10px] text-amber-400 font-bold mt-2.5">
+                <div className="text-[10px] text-amber-600 font-bold mt-2.5">
                   25 Questions | 35-45 mins
                 </div>
               </div>
@@ -211,22 +211,22 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
               className={cn(
                 "p-5 rounded-2xl border-2 transition-all text-left space-y-3 flex flex-col justify-between",
                 selectedDifficulty === 'hard' 
-                  ? "border-red-500 bg-red-500/20 text-white shadow-[0_0_15px_rgba(239,68,68,0.15)]" 
-                  : "bg-red-950/10 border-red-500/30 text-red-100 hover:border-red-500/60"
+                  ? "border-red-500 bg-red-50/50 text-slate-950 shadow-sm" 
+                  : "bg-white border-slate-200 text-slate-700 hover:border-red-300 hover:bg-red-50/10"
               )}
             >
               <div className="flex justify-between items-start w-full">
-                <span className="w-8 h-8 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center">
+                <span className="w-8 h-8 rounded-xl bg-red-50 border border-red-100 text-red-600 flex items-center justify-center">
                   <Flame className="w-4 h-4" />
                 </span>
-                <span className="text-[9px] font-black uppercase tracking-widest text-[#94A3B8]">Advanced level</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Advanced level</span>
               </div>
               <div>
-                <h4 className="font-extrabold text-sm text-white">Hard (JEE Advanced)</h4>
-                <p className="text-[10px] text-[#94A3B8] mt-1 leading-relaxed">
+                <h4 className="font-extrabold text-sm text-slate-900">Hard (JEE Advanced)</h4>
+                <p className="text-[10px] text-slate-600 mt-1 leading-relaxed">
                   Focus: Advanced graphs, conceptual edge traps, multi-steps.
                 </p>
-                <div className="text-[10px] text-red-400 font-bold mt-2.5">
+                <div className="text-[10px] text-red-600 font-bold mt-2.5">
                   30 Questions | 60-90 mins
                 </div>
               </div>
@@ -236,7 +236,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
 
         {/* 2. QUESTION COUNT */}
         <div className="space-y-3">
-          <h3 className="text-xs font-black uppercase text-[#C7D2FE] tracking-widest pl-1 border-l-2 border-accent">
+          <h3 className="text-xs font-black uppercase text-slate-700 tracking-widest pl-2 border-l-2 border-blue-600">
             Step 2: Choose Question Volume
           </h3>
           
@@ -246,10 +246,10 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
                 key={opt}
                 onClick={() => setQuestionCountOption(opt as any)}
                 className={cn(
-                  "px-6 py-3 text-xs font-black uppercase tracking-wider rounded-xl border transition-all",
+                  "px-6 py-3 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all shadow-xs",
                   questionCountOption === opt 
-                    ? "bg-white text-black font-extrabold border-white" 
-                    : "bg-white/[0.02] border-white/[0.06] text-[#94A3B8] hover:text-white"
+                    ? "bg-blue-600 text-white font-extrabold border-blue-600" 
+                    : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800"
                 )}
               >
                 {opt} Questions
@@ -258,10 +258,10 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
             <button
               onClick={() => setQuestionCountOption('custom')}
               className={cn(
-                "px-6 py-3 text-xs font-black uppercase tracking-wider rounded-xl border transition-all",
+                "px-6 py-3 text-xs font-bold uppercase tracking-wider rounded-xl border transition-all shadow-xs",
                 questionCountOption === 'custom' 
-                  ? "bg-white text-black font-extrabold border-white" 
-                  : "bg-white/[0.02] border-white/[0.06] text-[#94A3B8] hover:text-white"
+                  ? "bg-blue-600 text-white font-extrabold border-blue-600" 
+                  : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-800"
               )}
             >
               Custom
@@ -274,7 +274,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
                 onChange={(e) => setCustomCount(e.target.value)}
                 min="10"
                 max="100"
-                className="w-24 bg-black/40 border border-white/10 rounded-xl p-2.5 text-xs font-black text-white focus:border-accent outline-none ml-2"
+                className="w-24 bg-white border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:border-blue-500 outline-none ml-2 shadow-xs"
                 placeholder="Qs count"
               />
             )}
@@ -283,7 +283,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
 
         {/* 3. QUESTION SOURCE SELECTION */}
         <div className="space-y-3">
-          <h3 className="text-xs font-black uppercase text-[#C7D2FE] tracking-widest pl-1 border-l-2 border-accent">
+          <h3 className="text-xs font-black uppercase text-slate-700 tracking-widest pl-2 border-l-2 border-blue-600">
             Step 3: Select Question Database Sources
           </h3>
 
@@ -295,20 +295,20 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
                   key={src.id}
                   onClick={() => handleSourceToggle(src.id)}
                   className={cn(
-                    "flex items-center justify-between p-4 rounded-xl border cursor-pointer hover:bg-white/[0.01] transition-all",
-                    active ? "border-accent/40 bg-accent/[0.02]" : "bg-white/[0.01] border-white/[0.06]"
+                    "flex items-center justify-between p-4 rounded-xl border cursor-pointer hover:bg-slate-50 transition-all shadow-xs",
+                    active ? "border-blue-500 bg-blue-50/30 text-slate-900" : "bg-white border-slate-200 text-slate-700"
                   )}
                 >
                   <div className="flex items-center gap-3">
                     <div className={cn(
                       "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all",
-                      active ? "bg-accent border-accent text-primary" : "border-white/20"
+                      active ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white"
                     )}>
                       {active && <Check className="w-3 h-3 stroke-[3]" />}
                     </div>
-                    <span className="text-xs font-semibold text-white">{src.name}</span>
+                    <span className="text-xs font-semibold text-slate-800">{src.name}</span>
                   </div>
-                  <span className="text-[10px] text-[#94A3B8] font-bold">
+                  <span className="text-[10px] text-slate-500 font-bold">
                     {src.count} Qs
                   </span>
                 </div>
@@ -318,33 +318,33 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
         </div>
 
         {/* 4. QUICK PRESETS */}
-        <div className="space-y-3 border-t border-white/[0.04] pt-5">
-          <h3 className="text-xs font-black uppercase text-[#C7D2FE] tracking-widest pl-1 border-l-2 border-accent">
+        <div className="space-y-3 border-t border-slate-150 pt-5">
+          <h3 className="text-xs font-black uppercase text-slate-700 tracking-widest pl-2 border-l-2 border-blue-600">
             Or Choose A Preset Challenge
           </h3>
 
           <div className="flex flex-wrap gap-2.5">
             <button
               onClick={() => applyPreset('marathon')}
-              className="px-4 py-2.5 bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] rounded-xl text-xs font-extrabold flex items-center gap-2 hover:border-accent/30 transition-all text-[#C7D2FE] hover:text-white"
+              className="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-blue-400 rounded-xl text-xs font-bold flex items-center gap-2 transition-all text-slate-600 hover:text-blue-600 shadow-xs"
             >
               🔥 Marathon Mode (100 Qs)
             </button>
             <button
               onClick={() => applyPreset('sprint')}
-              className="px-4 py-2.5 bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] rounded-xl text-xs font-extrabold flex items-center gap-2 hover:border-accent/30 transition-all text-[#C7D2FE] hover:text-white"
+              className="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-blue-400 rounded-xl text-xs font-bold flex items-center gap-2 transition-all text-slate-600 hover:text-blue-600 shadow-xs"
             >
               ⚡ Revision Sprint (20 Qs)
             </button>
             <button
               onClick={() => applyPreset('challenge')}
-              className="px-4 py-2.5 bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] rounded-xl text-xs font-extrabold flex items-center gap-2 hover:border-accent/30 transition-all text-[#C7D2FE] hover:text-white"
+              className="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-blue-400 rounded-xl text-xs font-bold flex items-center gap-2 transition-all text-slate-600 hover:text-blue-600 shadow-xs"
             >
               🎯 PYQ Challenge (Last 5 Yrs)
             </button>
             <button
               onClick={() => applyPreset('survival')}
-              className="px-4 py-2.5 bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.04] rounded-xl text-xs font-extrabold flex items-center gap-2 hover:border-accent/30 transition-all text-[#C7D2FE] hover:text-white"
+              className="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-blue-400 rounded-xl text-xs font-bold flex items-center gap-2 transition-all text-slate-600 hover:text-blue-600 shadow-xs"
             >
               💀 Advanced Survival (50 Qs)
             </button>
@@ -354,7 +354,7 @@ const DifficultySelector: React.FC<DifficultySelectorProps> = ({
         {/* Launch Button */}
         <Button 
           onClick={handleLaunch} 
-          className="w-full h-14 bg-accent text-primary hover:bg-accent/90 rounded-2xl text-lg font-black shadow-lg hover:shadow-accent/10 mt-6"
+          className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-base font-black shadow-md shadow-blue-100 mt-6"
         >
           🚀 Launch Practice Session ({getFinalCount()} Questions)
         </Button>

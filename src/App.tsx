@@ -37,7 +37,7 @@ const AdaptivePracticePage = lazy(() => import("./pages/AdaptivePracticePage"));
 const AskPrepEntrancePage = lazy(() => import("./pages/AskPrepEntrancePage"));
 const RevisionPage = lazy(() => import("./pages/RevisionPage"));
 const RevisionTopicPage = lazy(() => import("./pages/RevisionTopicPage"));
-const LecturePrepEntrance = lazy(() => import("./pages/LecturePrepEntrance"));
+const StudyPrepEntrance = lazy(() => import("./pages/StudyPrepEntrance"));
 const MajorTestPage = lazy(() => import("./pages/MajorTestPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
@@ -53,6 +53,8 @@ const LearningRoadmapPage = lazy(() => import("./pages/LearningRoadmapPage"));
 const PrepEntranceCirclesPage = lazy(() => import("./pages/PrepEntranceCirclesPage"));
 const CircleFocusRoomPage = lazy(() => import("./pages/CircleFocusRoomPage"));
 const ExamHubPage = lazy(() => import("./pages/hub/ExamHubPage"));
+const SubjectPage = lazy(() => import("./pages/SubjectPage"));
+const ChapterDetailPage = lazy(() => import("./pages/ChapterDetailPage"));
 const ResourceCategoryPage = lazy(() => import("./pages/hub/ResourceCategoryPage"));
 const TutorialSessionsPage = lazy(() => import("./pages/TutorialSessionsPage"));
 
@@ -114,8 +116,11 @@ const App = () => (
                         <Route path="/select-exam" element={<Navigate to="/auth" replace />} />
                         <Route path="/dashboard" element={<Navigate to="/student-hub" replace />} />
                         <Route path="/platform-updated" element={<Navigate to="/student-hub" replace />} />
-                        <Route path="/learn" element={<PreparationPage />} />
-                        <Route path="/preparation" element={<PreparationPage />} />
+                        <Route path="/learn" element={<Navigate to="/student-hub" replace />} />
+                        <Route path="/preparation" element={<Navigate to="/student-hub" replace />} />
+                        {/* ─── New PW-style learning IA ─────────────────────────── */}
+                        <Route path="/learn/:subject" element={<StudentHubRoute><SubjectPage /></StudentHubRoute>} />
+                        <Route path="/learn/:subject/:chapterId" element={<StudentHubRoute><ChapterDetailPage /></StudentHubRoute>} />
                         <Route path="/tutorial-sessions" element={<TutorialSessionsPage />} />
                         <Route path="/chapter/:chapterId" element={<ChapterPage />} />
                         <Route path="/chapter/:chapterId/notes" element={<ChapterNotesPage />} />
@@ -125,7 +130,8 @@ const App = () => (
                         <Route path="/major-test" element={<TrialGate><MajorTestPage /></TrialGate>} />
                         <Route path="/revision" element={<TrialGate><RevisionPage /></TrialGate>} />
                         <Route path="/revision/:subject/:topic" element={<TrialGate><RevisionTopicPage /></TrialGate>} />
-                        <Route path="/lecture-prepentrance" element={<LecturePrepEntrance />} />
+                        <Route path="/study-ai" element={<StudyPrepEntrance />} />
+                        <Route path="/lecture-prepentrance" element={<Navigate to="/study-ai" replace />} />
                         <Route path="/ask-prepentrance" element={<TrialGate><AskPrepEntrancePage /></TrialGate>} />
                         <Route path="/my-batch" element={<Navigate to="/student-hub" replace />} />
                         <Route path="/analytics" element={<TrialGate><AnalyticsPage /></TrialGate>} />

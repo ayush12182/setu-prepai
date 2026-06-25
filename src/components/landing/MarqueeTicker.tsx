@@ -4,7 +4,7 @@ import { Star, GraduationCap, Users, Zap, BookOpen, Trophy, Brain } from 'lucide
 const BG = 'hsl(222,25%,9%)';
 
 const TICKER_ITEMS = [
-    { icon: GraduationCap, text: "Approved by Kota's Best Faculties" },
+    { icon: GraduationCap, text: "NCERT Aligned & PYQ Verified" },
     { icon: Users, text: 'Made by Students, for Students' },
     { icon: Star, text: 'Trusted by 10,000+ Learners' },
     { icon: Brain, text: 'AI-Powered Adaptive Learning' },
@@ -12,7 +12,7 @@ const TICKER_ITEMS = [
     { icon: BookOpen, text: 'Full JEE · NEET · CUET Coverage' },
     { icon: Zap, text: '24×7 AI Mentor Access' },
     // duplicate set so the loop is seamless
-    { icon: GraduationCap, text: "Approved by Kota's Best Faculties" },
+    { icon: GraduationCap, text: "NCERT Aligned & PYQ Verified" },
     { icon: Users, text: 'Made by Students, for Students' },
     { icon: Star, text: 'Trusted by 10,000+ Learners' },
     { icon: Brain, text: 'AI-Powered Adaptive Learning' },

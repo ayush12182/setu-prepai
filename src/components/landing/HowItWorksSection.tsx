@@ -13,7 +13,7 @@ const steps = [
     number: '02',
     icon: Brain,
     title: 'Learn with PrepEntrance Mentor',
-    description: 'Get concept notes, formulas, and teacher-style explanations — like sitting in a Kota classroom.',
+    description: 'Get concept notes, formulas, and teacher-style explanations — exam-focused & NCERT-aligned.',
   },
   {
     number: '03',

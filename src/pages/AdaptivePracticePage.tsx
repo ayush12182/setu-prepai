@@ -69,9 +69,9 @@ const EXAM_COLORS: Record<Exam, string> = {
 };
 
 const DIFFICULTY_COLORS: Record<Difficulty, string> = {
-  Easy:   'text-emerald-400 bg-emerald-500/10',
-  Medium: 'text-amber-400 bg-amber-500/10',
-  Hard:   'text-red-400 bg-red-500/10',
+  Easy:   'text-emerald-700 bg-emerald-50 border border-emerald-250',
+  Medium: 'text-amber-800 bg-amber-50 border border-amber-250',
+  Hard:   'text-rose-700 bg-rose-50 border border-rose-250',
 };
 
 // ─── Helper: log attempt ──────────────────────────────────────
@@ -115,10 +115,10 @@ const OptionButton = ({
   onClick: () => void;
 }) => {
   const base = "w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-200 font-medium text-sm";
-  const unanswered = "border-border hover:border-accent/50 hover:bg-accent/5 cursor-pointer";
-  const isCorrect   = "border-emerald-500 bg-emerald-500/10 text-emerald-300 cursor-default";
-  const isWrong     = "border-red-500 bg-red-500/10 text-red-300 cursor-default";
-  const neutral     = "border-border/30 text-muted-foreground/40 cursor-default";
+  const unanswered = "border-slate-200 hover:border-blue-400 hover:bg-blue-50/20 cursor-pointer text-slate-800 bg-white shadow-xs";
+  const isCorrect   = "border-emerald-500 bg-emerald-50 text-emerald-950 cursor-default";
+  const isWrong     = "border-rose-500 bg-rose-50 text-rose-950 cursor-default";
+  const neutral     = "border-slate-100 text-slate-400 cursor-default opacity-60 bg-slate-50/50";
 
   let cls = unanswered;
   if (state !== 'unanswered') {
@@ -136,7 +136,7 @@ const OptionButton = ({
     >
       <span className={cn(
         "w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 border-2",
-        state === 'unanswered' ? "border-border" : correct ? "border-emerald-500 bg-emerald-500/20" : selected ? "border-red-500 bg-red-500/20" : "border-border/20"
+        state === 'unanswered' ? "border-slate-200 bg-slate-50 text-slate-600" : correct ? "border-emerald-500 bg-emerald-100 text-emerald-800" : selected ? "border-rose-500 bg-rose-100 text-rose-800" : "border-slate-100 text-slate-400"
       )}>
         {state !== 'unanswered' && correct ? <CheckCircle2 size={14} /> : state !== 'unanswered' && selected ? <XCircle size={14} /> : letter}
       </span>
@@ -491,11 +491,11 @@ export default function AdaptivePracticePage() {
 
           {/* Topic dropdown */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground block mb-2">Topic</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 block mb-2">Topic</label>
             <select
               value={selectedTopic}
               onChange={e => setSelectedTopic(e.target.value)}
-              className="w-full bg-card border-2 border-border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent"
+              className="w-full bg-white border-2 border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 text-slate-800"
             >
               {topics.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
@@ -503,7 +503,7 @@ export default function AdaptivePracticePage() {
 
           {/* Subtopic */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground block mb-2">Subtopic</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 block mb-2">Subtopic</label>
             <div className="grid grid-cols-1 gap-2">
               {subtopics.map(st => (
                 <button
@@ -512,8 +512,8 @@ export default function AdaptivePracticePage() {
                   className={cn(
                     "p-3.5 rounded-xl border-2 text-left text-sm font-medium transition-all",
                     selectedSubtopic === st
-                      ? "border-accent bg-accent/5 text-foreground"
-                      : "border-border text-muted-foreground hover:border-border/80"
+                      ? "border-blue-500 bg-blue-50/30 text-blue-900 font-bold"
+                      : "border-slate-200 text-slate-650 hover:border-slate-350 hover:text-slate-800 bg-white"
                   )}
                 >
                   {st}
@@ -524,7 +524,7 @@ export default function AdaptivePracticePage() {
 
           {/* Difficulty */}
           <div>
-            <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground block mb-2">Difficulty</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-500 block mb-2">Difficulty</label>
             <div className="grid grid-cols-3 gap-2">
               {(['Easy', 'Medium', 'Hard'] as Difficulty[]).map(d => (
                 <button
@@ -532,7 +532,7 @@ export default function AdaptivePracticePage() {
                   onClick={() => setDifficulty(d)}
                   className={cn(
                     "py-2.5 rounded-xl border-2 text-sm font-bold transition-all",
-                    difficulty === d ? "border-accent bg-accent text-black" : "border-border text-muted-foreground"
+                    difficulty === d ? "border-blue-600 bg-blue-600 text-white font-extrabold" : "border-slate-200 text-slate-600 hover:border-slate-350 bg-white"
                   )}
                 >
                   {d}
@@ -544,7 +544,7 @@ export default function AdaptivePracticePage() {
           <Button
             onClick={startPractice}
             disabled={!selectedSubtopic}
-            className="w-full h-14 bg-accent text-black font-bold text-base rounded-xl"
+            className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-bold text-base rounded-xl shadow-md shadow-blue-100"
           >
             Start Practice <Zap size={18} className="ml-2" />
           </Button>
@@ -596,8 +596,8 @@ export default function AdaptivePracticePage() {
             className={cn(
               "p-4 rounded-2xl border text-sm font-medium flex items-center gap-3",
               generationMode === 'offline'
-                ? "bg-amber-500/10 border-amber-500/20 text-amber-300"
-                : "bg-red-500/10 border-red-500/20 text-red-300"
+                ? "bg-amber-50 border-amber-200 text-amber-900"
+                : "bg-rose-50 border-rose-200 text-rose-955"
             )}
           >
             <span className="text-lg">⚠️</span>
@@ -720,23 +720,23 @@ export default function AdaptivePracticePage() {
                     <div className={cn(
                       "rounded-2xl p-5 border",
                       answerState === 'correct'
-                        ? "border-emerald-500/30 bg-emerald-500/5"
-                        : "border-red-500/30 bg-red-500/5"
+                        ? "border-emerald-250 bg-emerald-50 text-emerald-955"
+                        : "border-rose-250 bg-rose-50 text-rose-955"
                     )}>
                       <div className="flex items-center gap-2 mb-2">
                         {answerState === 'correct'
-                          ? <CheckCircle2 size={16} className="text-emerald-400" />
-                          : <XCircle size={16} className="text-red-400" />
+                          ? <CheckCircle2 size={16} className="text-emerald-600" />
+                          : <XCircle size={16} className="text-rose-600" />
                         }
-                        <span className={cn("text-sm font-bold", answerState === 'correct' ? 'text-emerald-400' : 'text-red-400')}>
+                        <span className={cn("text-sm font-bold", answerState === 'correct' ? 'text-emerald-700' : 'text-rose-700')}>
                           {answerState === 'correct' ? 'Correct!' : `Wrong — Correct answer: ${question.correct_answer}`}
                         </span>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-sm text-slate-600 leading-relaxed">
                         {question.explanation_text}
                       </p>
                       {answerState === 'wrong' && (
-                        <p className="text-xs text-amber-400/80 mt-3 flex items-center gap-1">
+                        <p className="text-xs text-amber-700 mt-3 flex items-center gap-1 font-medium">
                           <RotateCcw size={11} /> A variant question is loading to reinforce this concept...
                         </p>
                       )}
@@ -745,7 +745,7 @@ export default function AdaptivePracticePage() {
                     <Button
                       onClick={handleNext}
                       disabled={nextLoading}
-                      className="w-full h-12 mt-4 bg-accent text-black font-bold rounded-xl gap-2"
+                      className="w-full h-12 mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl gap-2 shadow-md shadow-blue-100"
                     >
                       {nextLoading ? (
                         <><Loader2 size={16} className="animate-spin" /> Preparing next...</>

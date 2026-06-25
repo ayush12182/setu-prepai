@@ -503,7 +503,7 @@ function EraseOverlay({ visible }: { visible: boolean }) {
         >
           <div className="flex items-center gap-3 text-emerald-100/60">
             <Eraser size={20} />
-            <span className="text-sm font-medium" style={{ fontFamily: "'Caveat', cursive", fontSize: '18px' }}>Erasing board...</span>
+            <span className="text-sm font-medium" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '18px' }}>Erasing board...</span>
           </div>
         </motion.div>
       )}
@@ -1144,7 +1144,7 @@ const AITeachingRoomPage: React.FC = () => {
               {/* Chalk font styling */}
               <div
                 style={{
-                  fontFamily: "'Caveat', cursive",
+                  fontFamily: "'Plus Jakarta Sans', sans-serif",
                   fontSize: 'clamp(17px, 2vw, 21px)',
                   lineHeight: 2.05,
                   color: '#f8f8ee',
@@ -1170,7 +1170,7 @@ const AITeachingRoomPage: React.FC = () => {
               {isStreaming && !streamingContent && (
                 <div className="flex items-center gap-2 mt-4" style={{ color: 'rgba(180,255,180,0.4)' }}>
                   <Loader2 size={14} className="animate-spin" />
-                  <span style={{ fontFamily: "'Caveat', cursive", fontSize: '18px', letterSpacing: '0.02em' }}>
+                  <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '18px', letterSpacing: '0.02em' }}>
                     {teacher.name} is writing on the board...
                   </span>
                 </div>

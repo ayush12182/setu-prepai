@@ -1,0 +1,387 @@
+{
+  "timestamp": "2026-06-23T06:04:40.532Z",
+  "metrics": {
+    "physicsCoverage": "125.0%",
+    "chemistryCoverage": "106.5%",
+    "mathsCoverage": "110.4%",
+    "formulaCoverage": "100.0%",
+    "global": {
+      "totalChapters": 36,
+      "totalTopics": 214,
+      "totalConcepts": 1353,
+      "totalFormulas": 1885,
+      "totalMisconceptions": 6615,
+      "totalPyqDna": 1807
+    }
+  },
+  "conceptsWithoutFormulas": [],
+  "chaptersWithoutFormulas": [],
+  "auditReport": {
+    "physics": [
+      {
+        "name": "Kinematics",
+        "topicsCount": 5,
+        "conceptsCount": 25,
+        "formulaCount": 25,
+        "misconceptionsCount": 125,
+        "pyqCount": 45,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Laws of Motion",
+        "topicsCount": 6,
+        "conceptsCount": 35,
+        "formulaCount": 40,
+        "misconceptionsCount": 175,
+        "pyqCount": 52,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Work, Energy & Power",
+        "topicsCount": 6,
+        "conceptsCount": 30,
+        "formulaCount": 35,
+        "misconceptionsCount": 150,
+        "pyqCount": 48,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Rotational Motion",
+        "topicsCount": 7,
+        "conceptsCount": 35,
+        "formulaCount": 35,
+        "misconceptionsCount": 175,
+        "pyqCount": 55,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Gravitation",
+        "topicsCount": 6,
+        "conceptsCount": 30,
+        "formulaCount": 35,
+        "misconceptionsCount": 150,
+        "pyqCount": 35,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "SHM & Waves",
+        "topicsCount": 7,
+        "conceptsCount": 35,
+        "formulaCount": 35,
+        "misconceptionsCount": 175,
+        "pyqCount": 50,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Thermodynamics",
+        "topicsCount": 6,
+        "conceptsCount": 30,
+        "formulaCount": 60,
+        "misconceptionsCount": 150,
+        "pyqCount": 42,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Electrostatics",
+        "topicsCount": 6,
+        "conceptsCount": 30,
+        "formulaCount": 60,
+        "misconceptionsCount": 150,
+        "pyqCount": 58,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Current Electricity",
+        "topicsCount": 6,
+        "conceptsCount": 30,
+        "formulaCount": 60,
+        "misconceptionsCount": 150,
+        "pyqCount": 55,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Magnetism & EMI",
+        "topicsCount": 7,
+        "conceptsCount": 35,
+        "formulaCount": 60,
+        "misconceptionsCount": 175,
+        "pyqCount": 52,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Optics",
+        "topicsCount": 6,
+        "conceptsCount": 30,
+        "formulaCount": 60,
+        "misconceptionsCount": 150,
+        "pyqCount": 48,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Modern Physics",
+        "topicsCount": 6,
+        "conceptsCount": 30,
+        "formulaCount": 60,
+        "misconceptionsCount": 150,
+        "pyqCount": 52,
+        "status": "FOUND",
+        "missingTopics": []
+      }
+    ],
+    "chemistry": [
+      {
+        "name": "Mole Concept & Stoichiometry",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 45,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Atomic Structure",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 42,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Chemical Bonding",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 55,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Thermodynamics & Thermochemistry",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 45,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Chemical Equilibrium",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 52,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Electrochemistry",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 48,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Chemical Kinetics",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 45,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "GOC & Isomerism",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 55,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Hydrocarbons",
+        "topicsCount": 5,
+        "conceptsCount": 30,
+        "formulaCount": 55,
+        "misconceptionsCount": 150,
+        "pyqCount": 38,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Organic Reactions & Named Reactions",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 58,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Periodic Table & Trends",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 42,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Coordination Chemistry",
+        "topicsCount": 6,
+        "conceptsCount": 36,
+        "formulaCount": 55,
+        "misconceptionsCount": 180,
+        "pyqCount": 52,
+        "status": "FOUND",
+        "missingTopics": []
+      }
+    ],
+    "maths": [
+      {
+        "name": "Quadratic Equations & Expressions",
+        "topicsCount": 6,
+        "conceptsCount": 48,
+        "formulaCount": 55,
+        "misconceptionsCount": 240,
+        "pyqCount": 48,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Complex Numbers",
+        "topicsCount": 6,
+        "conceptsCount": 48,
+        "formulaCount": 55,
+        "misconceptionsCount": 240,
+        "pyqCount": 45,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Matrices & Determinants",
+        "topicsCount": 6,
+        "conceptsCount": 48,
+        "formulaCount": 55,
+        "misconceptionsCount": 240,
+        "pyqCount": 52,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Permutations & Combinations",
+        "topicsCount": 6,
+        "conceptsCount": 48,
+        "formulaCount": 55,
+        "misconceptionsCount": 240,
+        "pyqCount": 48,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Probability",
+        "topicsCount": 6,
+        "conceptsCount": 48,
+        "formulaCount": 55,
+        "misconceptionsCount": 240,
+        "pyqCount": 55,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Limits, Continuity & Differentiability",
+        "topicsCount": 5,
+        "conceptsCount": 40,
+        "formulaCount": 55,
+        "misconceptionsCount": 200,
+        "pyqCount": 52,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Differentiation",
+        "topicsCount": 6,
+        "conceptsCount": 48,
+        "formulaCount": 55,
+        "misconceptionsCount": 240,
+        "pyqCount": 48,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Application of Derivatives",
+        "topicsCount": 6,
+        "conceptsCount": 48,
+        "formulaCount": 55,
+        "misconceptionsCount": 240,
+        "pyqCount": 55,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Integration",
+        "topicsCount": 6,
+        "conceptsCount": 48,
+        "formulaCount": 55,
+        "misconceptionsCount": 240,
+        "pyqCount": 62,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Coordinate Geometry",
+        "topicsCount": 5,
+        "conceptsCount": 40,
+        "formulaCount": 55,
+        "misconceptionsCount": 200,
+        "pyqCount": 65,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Vectors & 3D Geometry",
+        "topicsCount": 6,
+        "conceptsCount": 48,
+        "formulaCount": 55,
+        "misconceptionsCount": 240,
+        "pyqCount": 58,
+        "status": "FOUND",
+        "missingTopics": []
+      },
+      {
+        "name": "Trigonometry",
+        "topicsCount": 5,
+        "conceptsCount": 40,
+        "formulaCount": 55,
+        "misconceptionsCount": 200,
+        "pyqCount": 50,
+        "status": "FOUND",
+        "missingTopics": []
+      }
+    ]
+  }
+}

@@ -22,8 +22,8 @@ const PrivacyPage: React.FC = () => {
             <ul className="list-disc list-inside space-y-2">
               <li><strong className="text-white/90">Account Information:</strong> Name, email address, phone number, class (11th/12th), and target exam (JEE Main/Advanced) when you sign up.</li>
               <li><strong className="text-white/90">Study Data:</strong> Chapters studied, practice question attempts, quiz scores, time spent per topic, and revision history — used to build your personalized 21-day study plan.</li>
-              <li><strong className="text-white/90">Uploaded Content:</strong> Handwritten notes or lecture videos you upload for AI-powered analysis via Lecture PrepEntrance.</li>
-              <li><strong className="text-white/90">Chat Data:</strong> Conversations with PrepEntrance Mentor AI teacher to provide contextual academic guidance.</li>
+              <li><strong className="text-white/90">Uploaded Content:</strong> Handwritten notes or video links you upload for AI-powered analysis via Knowledge Engine.</li>
+              <li><strong className="text-white/90">Chat Data:</strong> Conversations with Ask PrepEntrance AI teacher to provide contextual academic guidance.</li>
               <li><strong className="text-white/90">Device & Usage Info:</strong> Browser type, device info, and session duration for platform optimization.</li>
             </ul>
           </section>
@@ -36,7 +36,7 @@ const PrivacyPage: React.FC = () => {
               <li>Track syllabus progress across Physics, Chemistry, and Mathematics.</li>
               <li>Provide AI-generated notes, formula sheets, difference tables, and one-page summaries.</li>
               <li>Analyze your Major Test performance with subject-wise and chapter-wise breakdowns.</li>
-              <li>Enable PrepEntrance Mentor AI to give you motivational and strategic exam guidance.</li>
+              <li>Enable Ask PrepEntrance AI to give you motivational and strategic exam guidance.</li>
             </ul>
             <p className="mt-3">We <strong className="text-white/90">never sell</strong> your personal information to third parties.</p>
           </section>

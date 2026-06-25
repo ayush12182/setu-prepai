@@ -156,7 +156,8 @@ export const physicsChapters: Chapter[] = [
       'Torque & Angular Momentum',
       'Rotational Kinematics',
       'Rolling Motion',
-      'Angular Impulse'
+      'Angular Impulse',
+      'Toppling vs Sliding'
     ],
     keyFormulas: [
       'τ = r × F = Iα',

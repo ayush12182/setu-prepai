@@ -95,7 +95,7 @@ const MotivationBubble: React.FC<MotivationBubbleProps> = ({ message, onClose })
         {/* Small Mentor Avatar with pulsing indicator */}
         <div className="relative flex-shrink-0 mt-0.5">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center border border-[#111827] shadow-sm">
-            <span className="text-white font-bold text-xs">JM</span>
+            <span className="text-white font-bold text-caption">JM</span>
           </div>
           <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#111827] bg-prepentrance-success animate-pulse"></span>
         </div>
@@ -429,11 +429,11 @@ Main solution ke saath approach bhi samjhaunga.`;
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-prepentrance-saffron to-prepentrance-saffron-light flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">SM</span>
+                    <span className="text-white font-bold text-body-sm">SM</span>
                   </div>
                   <div>
                     <h3 className="text-white font-semibold">PrepEntrance Mentor</h3>
-                    <p className="text-white/70 text-sm">Welcome Message</p>
+                    <p className="text-white/70 text-body-sm">Welcome Message</p>
                   </div>
                 </div>
 
@@ -472,16 +472,20 @@ Main solution ke saath approach bhi samjhaunga.`;
             <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-110 duration-300" />
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
-                <Flame className="w-5 h-5 fill-current" />
+                <Flame className="w-5 h-5 fill-current animate-pulse" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Streak</p>
-                <h4 className="text-xl font-extrabold text-foreground">{streak || 0} Days Study Streak</h4>
+                <p className="text-caption text-muted-foreground font-semibold uppercase tracking-wider">Streak</p>
+                <h4 className="text-title-md font-extrabold text-foreground">{streak || 0} Days Study Streak</h4>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {streak > 0 ? "You're doing great! Keep the momentum alive." : "Start practicing today to build your streak!"}
+            <p className="text-caption text-muted-foreground leading-relaxed">
+              Consistently study to level up your streak.
             </p>
+            <div className="flex justify-between items-center text-caption text-muted-foreground pt-1.5 border-t border-slate-100 dark:border-slate-800">
+              <span>Next reward: 5 Days</span>
+              <span className="text-orange-500 font-bold">1/5 Days</span>
+            </div>
           </div>
 
           {/* Current Chapter Card */}
@@ -491,14 +495,14 @@ Main solution ke saath approach bhi samjhaunga.`;
                 <BookOpen className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Current Chapter</p>
-                <h4 className="text-sm font-bold text-foreground truncate max-w-[160px]">
-                  {lastActivityTopic || (isNeet ? 'Human Physiology' : isFoundation ? 'Motion & Forces' : 'Kinematics')}
+                <p className="text-caption text-muted-foreground font-semibold uppercase tracking-wider">Current Chapter</p>
+                <h4 className="text-body-sm font-bold text-foreground truncate max-w-[160px]">
+                  {currentChapterName}
                 </h4>
               </div>
             </div>
             <div className="space-y-1.5 pt-1">
-              <p className="text-[11px] text-muted-foreground">Target Score: <span className="font-bold text-foreground">99%ile</span></p>
+              <p className="text-caption text-muted-foreground">Target Score: <span className="font-bold text-foreground">99%ile</span></p>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
                 <div className="bg-blue-500 h-full rounded-full" style={{ width: '65%' }} />
               </div>
@@ -512,15 +516,15 @@ Main solution ke saath approach bhi samjhaunga.`;
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Weak Areas</p>
-                <h4 className="text-xs font-bold text-foreground">Need Attention</h4>
+                <p className="text-caption text-muted-foreground font-semibold uppercase tracking-wider">Weak Areas</p>
+                <h4 className="text-caption font-bold text-foreground">Need Attention</h4>
               </div>
             </div>
             <div className="space-y-1 pt-1">
-              <div className="text-[11px] text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-950/30 px-2.5 py-1.5 rounded-lg font-medium leading-relaxed">
+              <div className="text-caption text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-950/30 px-2.5 py-1.5 rounded-lg font-medium leading-relaxed">
                 ⚠️ {weakTopic || (isNeet ? 'Cell Division Phases, Plant Hormones' : 'Friction Constraints, Limits Indeterminate Forms')}
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1">Ask mentor doubts on these topics to strengthen concepts.</p>
+              <p className="text-caption text-muted-foreground mt-1">Ask mentor doubts on these topics to strengthen concepts.</p>
             </div>
           </div>
 
@@ -531,11 +535,11 @@ Main solution ke saath approach bhi samjhaunga.`;
                 <BarChart2 className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Recent Tests</p>
-                <h4 className="text-sm font-bold text-foreground">Practice Stats</h4>
+                <p className="text-caption text-muted-foreground font-semibold uppercase tracking-wider">Recent Tests</p>
+                <h4 className="text-body-sm font-bold text-foreground">Practice Stats</h4>
               </div>
             </div>
-            <div className="space-y-2 pt-1 text-xs">
+            <div className="space-y-2 pt-1 text-caption">
               <div className="flex justify-between border-b border-border/40 pb-1.5">
                 <span className="text-muted-foreground">Accuracy</span>
                 <span className="font-semibold text-emerald-600">{accuracy || 68}%</span>
@@ -558,20 +562,20 @@ Main solution ke saath approach bhi samjhaunga.`;
           <div className="bg-[#111827]/90 backdrop-blur-md border-b border-[#1e293b] p-4 flex items-center gap-4">
             <div className="relative">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-md border border-[#1e293b]">
-                <span className="text-white font-bold text-lg">JM</span>
+                <span className="text-white font-bold text-body-lg">JM</span>
               </div>
               <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-[#111827] bg-prepentrance-success animate-pulse"></span>
             </div>
             <div className="flex-1">
-              <h2 className="font-display font-extrabold text-base text-white tracking-tight">
+              <h2 className="font-display font-extrabold text-body-md text-white tracking-tight">
                 PrepEntrance Mentor
               </h2>
-              <p className="text-xs text-emerald-400 flex items-center gap-1.5 font-semibold">
+              <p className="text-caption text-emerald-400 flex items-center gap-1.5 font-semibold">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
                 Online • Your {isFoundation ? 'School' : isNeet ? 'NEET' : 'JEE'} Mentor
               </p>
             </div>
-            <div className="text-[10px] text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full font-bold">
+            <div className="text-caption text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full font-bold">
               🟢 Responds in ~5 sec
             </div>
           </div>
@@ -590,14 +594,14 @@ Main solution ke saath approach bhi samjhaunga.`;
                   >
                     {message.role === 'assistant' && (
                       <div className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
-                        <span className="text-[#F59E0B] font-bold text-xs">JM</span>
+                        <span className="text-[#F59E0B] font-bold text-caption">JM</span>
                       </div>
                     )}
                     <div
                       className={cn(
                         message.role === 'user'
-                          ? 'bg-[#D97706] text-white rounded-2xl rounded-tr-none px-5 py-3.5 max-w-[75%] shadow-sm font-medium text-[14px]'
-                          : 'bg-[#111827] border border-[#1e293b] rounded-2xl rounded-bl-none px-5 py-4 max-w-[85%] shadow-md text-[14px]'
+                          ? 'bg-[#D97706] text-white rounded-2xl rounded-tr-none px-5 py-3.5 max-w-[75%] shadow-sm font-medium text-body-sm'
+                          : 'bg-[#111827] border border-[#1e293b] rounded-2xl rounded-bl-none px-5 py-4 max-w-[85%] shadow-md text-body-sm'
                       )}
                     >
                       {message.image && (
@@ -623,10 +627,10 @@ Main solution ke saath approach bhi samjhaunga.`;
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
               <div className="flex justify-start animate-fade-in items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-[#F59E0B] font-bold text-xs">JM</span>
+                  <span className="text-[#F59E0B] font-bold text-caption">JM</span>
                 </div>
                 <div className="bg-[#111827] border border-[#1e293b] rounded-2xl rounded-bl-none px-4 py-3 shadow-md flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-400 animate-pulse">{thinkingState}</span>
+                  <span className="text-caption font-semibold text-slate-400 animate-pulse">{thinkingState}</span>
                   <span className="flex gap-1">
                     <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                     <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -638,7 +642,7 @@ Main solution ke saath approach bhi samjhaunga.`;
 
             {messages.length === 1 && !isLoading && (
               <div className="space-y-3 pt-2">
-                <p className="text-xs text-muted-foreground font-semibold flex items-center gap-1">
+                <p className="text-caption text-muted-foreground font-semibold flex items-center gap-1">
                   <span>💡</span> Quick doubts to get started:
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -647,7 +651,7 @@ Main solution ke saath approach bhi samjhaunga.`;
                       key={i}
                       onClick={() => handleQuickQuestion(q)}
                       className={cn(
-                        'text-xs bg-slate-900/60 border border-slate-800/80 text-slate-300 rounded-xl px-3.5 py-2 text-left font-medium transition-all',
+                        'text-body-sm bg-slate-900/60 border border-slate-800/80 text-slate-300 rounded-xl px-3.5 py-2 text-left font-semibold transition-all',
                         'hover:border-[#F59E0B]/30 hover:bg-[#F59E0B]/5 hover:text-white duration-200 shadow-sm'
                       )}
                     >
@@ -777,7 +781,7 @@ Main solution ke saath approach bhi samjhaunga.`;
               </Button>
             </div>
 
-            <p className="text-xs text-muted-foreground mt-2 text-center">
+            <p className="text-caption text-muted-foreground mt-2 text-center">
               🖼️ Media • 📷 Camera • ⌨️ Type your doubt
             </p>
           </div>

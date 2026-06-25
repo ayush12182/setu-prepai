@@ -243,9 +243,9 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       if (i % 3 === 0) {
         svg = `<svg viewBox="0 0 120 60" width="100%" height="100%"><line x1="10" y1="30" x2="110" y2="30" stroke="#1a1a2e" stroke-width="1.5"/><line x1="10" y1="5" x2="10" y2="55" stroke="#1a1a2e" stroke-width="1.5"/><path d="M10,30 C35,0 35,0 60,30 C85,60 85,60 110,30" stroke="#FF6B00" stroke-width="2" fill="none"/></svg>`;
       } else if (i % 3 === 1) {
-        svg = `<svg viewBox="0 0 120 60" width="100%" height="100%"><circle cx="60" cy="30" r="20" stroke="#1a1a2e" stroke-width="1.5" fill="none"/><line x1="60" y1="30" x2="80" y2="30" stroke="#FF6B00" stroke-width="2"/><text x="65" y="25" font-size="8" font-family="DM Sans" fill="#FF6B00">r</text></svg>`;
+        svg = `<svg viewBox="0 0 120 60" width="100%" height="100%"><circle cx="60" cy="30" r="20" stroke="#1a1a2e" stroke-width="1.5" fill="none"/><line x1="60" y1="30" x2="80" y2="30" stroke="#FF6B00" stroke-width="2"/><text x="65" y="25" font-size="8" font-family="Plus Jakarta Sans" fill="#FF6B00">r</text></svg>`;
       } else {
-        svg = `<svg viewBox="0 0 120 60" width="100%" height="100%"><line x1="20" y1="50" x2="90" y2="50" stroke="#1a1a2e" stroke-width="1.5"/><line x1="90" y1="50" x2="90" y2="10" stroke="#1a1a2e" stroke-width="1.5"/><line x1="20" y1="50" x2="90" y2="10" stroke="#FF6B00" stroke-width="2"/><text x="50" y="58" font-size="8" font-family="DM Sans" fill="#1a1a2e">R</text><text x="94" y="32" font-size="8" font-family="DM Sans" fill="#1a1a2e">X</text></svg>`;
+        svg = `<svg viewBox="0 0 120 60" width="100%" height="100%"><line x1="20" y1="50" x2="90" y2="50" stroke="#1a1a2e" stroke-width="1.5"/><line x1="90" y1="50" x2="90" y2="10" stroke="#1a1a2e" stroke-width="1.5"/><line x1="20" y1="50" x2="90" y2="10" stroke="#FF6B00" stroke-width="2"/><text x="50" y="58" font-size="8" font-family="Plus Jakarta Sans" fill="#1a1a2e">R</text><text x="94" y="32" font-size="8" font-family="Plus Jakarta Sans" fill="#1a1a2e">X</text></svg>`;
       }
 
       return `
@@ -272,7 +272,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-color: #FDFAF4;
@@ -285,7 +285,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
     body {
       background-color: var(--bg-color);
       color: var(--text-color);
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       padding: 24px;
       line-height: 1.5;
     }
@@ -298,13 +298,13 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       margin-bottom: 32px;
     }
     .logo {
-      font-family: 'Kalam', cursive;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
       font-size: 28px;
       color: var(--accent-color);
     }
     .title-area h1 {
-      font-family: 'Kalam', cursive;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 24px;
       color: var(--text-color);
     }
@@ -344,7 +344,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       justify-content: center;
       background-color: var(--accent-color);
       color: #FFFFFF;
-      font-family: 'Kalam', cursive;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
       font-size: 16px;
       width: 28px;
@@ -352,7 +352,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       border-radius: 50%;
     }
     .formula-name {
-      font-family: 'Kalam', cursive;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 18px;
       font-weight: 700;
     }
@@ -384,7 +384,7 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       margin-top: 48px;
       padding-top: 16px;
       border-top: 2px dashed var(--border-color);
-      font-family: 'Kalam', cursive;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 14px;
       color: var(--muted-text);
     }
@@ -520,7 +520,7 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
             {isGeneratingNotes && notes === '' ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
-                <span className="text-sm text-muted-foreground">Generating comprehensive Kota-style notes...</span>
+                <span className="text-sm text-muted-foreground">Generating comprehensive NCERT-aligned notes...</span>
               </div>
             ) : (
               <div className="prose prose-sm dark:prose-invert max-w-none">

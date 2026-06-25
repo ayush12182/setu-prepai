@@ -27,7 +27,9 @@ function katexToHtml(tex: string, displayMode: boolean): string {
 
 /** Convert every AI LaTeX delimiter style → unified $$ / $ */
 export function normalizeMathDelimiters(text: string): string {
-  return text
+  // Fix Form Feed characters caused by JavaScript single backslash conversion of \f (in \frac etc.)
+  const cleanText = text.replace(/\x0c/g, '\\f');
+  return cleanText
     .replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => `$$${inner.trim()}$$`)
     .replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => `$${inner.trim()}$`)
     .replace(/\*\*([^*\n]+)\*\*/g, '$1'); // strip markdown bold
@@ -110,7 +112,7 @@ export const DisplayMath: React.FC<{ tex: string }> = ({ tex }) => (
  *  3. Passes text segments line-by-line to `lineRenderer`
  *  4. Renders display blocks with KaTeX (displayMode: true)
  *
- * Used by: OnePageNotes, ChapterNotesPage, LecturePrepEntrance, AskPrepEntrance, AITeachingRoom
+ * Used by: OnePageNotes, ChapterNotesPage, StudyPrepEntrance, AskPrepEntrance, AITeachingRoom
  */
 export function processNotesContent(
   content: string,
@@ -148,7 +150,7 @@ export function processNotesContent(
 /**
  * renderProseNotes — lightweight renderer for chat/AI responses.
  * Handles headings, bullets, bold, and all LaTeX styles.
- * Use this for AskPrepEntrance, AITeachingRoom, LecturePrepEntrance notes, etc.
+ * Use this for AskPrepEntrance, AITeachingRoom, StudyPrepEntrance notes, etc.
  */
 export function renderProseNotes(content: string): React.ReactNode[] {
   return processNotesContent(content, (line, key) => {

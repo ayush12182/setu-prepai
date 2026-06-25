@@ -124,7 +124,7 @@ const TutorialSessionsPage: React.FC = () => {
               </h1>
             </div>
             <p className="text-text-secondary max-w-2xl">
-              Premium Kota-style notes curated from Allen, Resonance & PW. Each PDF is crafted 
+              Premium NCERT-aligned notes curated by top faculties. Each PDF is crafted 
               like a senior teacher wrote it before your exam.
             </p>
           </div>
@@ -225,7 +225,7 @@ const TutorialSessionsPage: React.FC = () => {
             </h3>
             <p className="text-text-secondary mb-4 max-w-md mx-auto">
               Share your current notes with us and we'll analyze the structure, 
-              identify improvements, and create an enhanced Kota-style version.
+              identify improvements, and create an enhanced exam-focused version.
             </p>
             <p className="text-sm text-text-muted italic">
               "Bhai, apna PDF bhejo - hum usko coaching level ka bana denge"

@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { shuffleQuestionOptions } from '@/utils/questionUtils';
 import { logStudentActivity } from '@/lib/studentActivity';
+import { recordStudentAttempt } from '@/services/studentIntelligence';
+
 import { JEE_PROMPT_CONSTRAINTS } from '@/lib/gemini';
 import { generateQuestions as getUnifiedQuestions } from '@/services/questionGenerator';
 import { getOfflineQuestions } from '@/data/offlineQuestionBank';
@@ -29,6 +31,8 @@ export interface Question {
   common_mistake?: string;
   is_verified?: boolean;
   generation_model?: string;
+  option_misconceptions?: Record<string, string>;
+  misconception_id?: string;
 }
 
 export interface SimilarQuestion {
@@ -61,10 +65,13 @@ const mapQuestionBankToInterface = (qbItem: any): Question => {
     explanation: qbItem.metadata?.explanation || qbItem.explanation || '',
     concept_tested: qbItem.metadata?.concept || qbItem.concept_tested || 'General',
     common_mistake: qbItem.metadata?.common_mistake,
+    option_misconceptions: qbItem.option_misconceptions || qbItem.metadata?.option_misconceptions,
+    misconception_id: qbItem.misconception_id || qbItem.metadata?.misconception_id,
     is_verified: qbItem.is_verified,
     generation_model: qbItem.metadata?.model,
   };
 };
+
 
 export type GenerationStatus = 'idle' | 'fetching' | 'generating' | 'polling' | 'completed' | 'failed';
 
@@ -378,6 +385,7 @@ export const usePracticeQuestions = () => {
   const [error, setError]                   = useState<string | null>(null);
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>('idle');
   const [generationMode, setGenerationMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('idle');
+  const [sessionDiagnostics, setSessionDiagnostics] = useState<any | null>(null);
 
   const generateQuestions = async (
     nodeId: string,
@@ -395,47 +403,129 @@ export const usePracticeQuestions = () => {
     setGenerationMode('fetching');
 
     try {
+      // Fetch attempt history from localStorage cache
+      let excludeQuestionIds: string[] = [];
+      try {
+        const cachedAttemptsStr = localStorage.getItem('prepentrance_student_attempts');
+        if (cachedAttemptsStr) {
+          const cachedAttempts = JSON.parse(cachedAttemptsStr);
+          excludeQuestionIds = cachedAttempts.map((a: any) => a.questionId || a.question_id).filter(Boolean);
+        }
+      } catch (e) {
+        console.warn('Failed to load attempts for question generator:', e);
+      }
+
       const result = await getUnifiedQuestions({
         exam,
         subject: exam,
         chapter: topicName,
         difficulty: effectiveDifficulty,
-        count
+        count,
+        excludeQuestionIds
       });
 
       setQuestions(result.questions);
+      setSessionDiagnostics(result.diagnostics || null);
       setGenerationStatus('completed');
       setGenerationMode(result.generationMode);
       return result.questions;
     } catch (err: any) {
       console.warn('Unified question generation failed, silently falling back to offline bank:', err);
       try {
-        const offlineQs = getOfflineQuestions(exam, topicName, effectiveDifficulty, count);
+        // Fetch attempts again for fallback filtering
+        let excludeQuestionIds: string[] = [];
+        try {
+          const cachedAttemptsStr = localStorage.getItem('prepentrance_student_attempts');
+          if (cachedAttemptsStr) {
+            const cachedAttempts = JSON.parse(cachedAttemptsStr);
+            excludeQuestionIds = cachedAttempts.map((a: any) => a.questionId || a.question_id).filter(Boolean);
+          }
+        } catch (e) {}
+
+        const offlineQs = getOfflineQuestions(exam, topicName, effectiveDifficulty, count * 3);
         const mapped = offlineQs.map((q: any) => {
           const shuffledQ = shuffleQuestionOptions(q);
           return mapQuestionBankToInterface(shuffledQ);
         });
-        setQuestions(mapped);
+
+        let filteredMapped = mapped.filter(q => !excludeQuestionIds.includes(q.id));
+        if (filteredMapped.length < count) {
+          filteredMapped = [...filteredMapped, ...mapped.filter(q => excludeQuestionIds.includes(q.id))];
+        }
+
+        const { buildDeterministicSession } = await import('../services/sessionBuilder');
+        const sessionRes = buildDeterministicSession(filteredMapped, {
+          chapter: topicName,
+          difficulty: effectiveDifficulty,
+          count
+        });
+        setQuestions(sessionRes.questions);
+        setSessionDiagnostics(sessionRes.diagnostics || null);
         setGenerationStatus('completed');
         setGenerationMode('offline');
-        return mapped;
+        return sessionRes.questions;
       } catch (fallbackErr) {
         console.error('Offline bank fallback failed, loading emergency questions:', fallbackErr);
         // Fall back to EMERGENCY_QUESTIONS
         try {
-          const emergencyQs = getOfflineQuestions(exam, 'General', 'medium', count);
+          let excludeQuestionIds: string[] = [];
+          try {
+            const cachedAttemptsStr = localStorage.getItem('prepentrance_student_attempts');
+            if (cachedAttemptsStr) {
+              const cachedAttempts = JSON.parse(cachedAttemptsStr);
+              excludeQuestionIds = cachedAttempts.map((a: any) => a.questionId || a.question_id).filter(Boolean);
+            }
+          } catch (e) {}
+
+          const emergencyQs = getOfflineQuestions(exam, 'General', 'medium', count * 3);
           const mapped = emergencyQs.map((q: any) => {
             const shuffledQ = shuffleQuestionOptions(q);
             return mapQuestionBankToInterface(shuffledQ);
           });
-          setQuestions(mapped);
+
+          let filteredMapped = mapped.filter(q => !excludeQuestionIds.includes(q.id));
+          if (filteredMapped.length < count) {
+            filteredMapped = [...filteredMapped, ...mapped.filter(q => excludeQuestionIds.includes(q.id))];
+          }
+
+          const { buildDeterministicSession } = await import('../services/sessionBuilder');
+          const sessionRes = buildDeterministicSession(filteredMapped, {
+            chapter: topicName,
+            difficulty: effectiveDifficulty,
+            count
+          });
+          setQuestions(sessionRes.questions);
+          setSessionDiagnostics(sessionRes.diagnostics || null);
           setGenerationStatus('completed');
           setGenerationMode('recovery');
-          return mapped;
-        } catch (eqErr) {
+
+          return sessionRes.questions;
+        } catch (eqErr: any) {
           console.error('Ultimate emergency pack fetch failed:', eqErr);
+
+          // Last resort: generate offline mock questions so the session is never blocked
+          try {
+            const mockQs = generateOfflineMockQuestions(topicName, exam, effectiveDifficulty, count);
+            if (mockQs.length > 0) {
+              setQuestions(mockQs);
+              setGenerationStatus('completed');
+              setGenerationMode('recovery');
+              if (import.meta.env.DEV) {
+                console.warn(
+                  `[Repository] Only returned 0/${count} verified questions. ` +
+                  `Filled all ${count} using offline fallback strategy. Session continues uninterrupted.`
+                );
+              }
+              return mockQs;
+            }
+          } catch (mockErr) {
+            console.error('Offline mock generation also failed:', mockErr);
+          }
+
+          // If even mocks fail, report the error but don't block indefinitely
+          setError(eqErr.message || 'Unable to load questions. Please try again.');
           setQuestions([]);
-          setGenerationStatus('completed');
+          setGenerationStatus('failed');
           setGenerationMode('recovery');
           return [];
         }
@@ -574,6 +664,21 @@ export const usePracticeQuestions = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const qObj = questions.find(q => q.id === questionId);
+      const correctOpt = qObj ? (qObj.answer as string) : 'A';
+      const concept = qObj ? qObj.concept_tested : (context?.topic || 'General');
+      const miscId = qObj ? qObj.misconception_id : undefined;
+
+      await recordStudentAttempt(user.id, {
+        questionId,
+        concept,
+        isCorrect,
+        selectedOption,
+        correctOption: correctOpt,
+        misconceptionId: miscId,
+        timeSpentSeconds: timeTakenSeconds
+      });
+
       await supabase.from('user_mcq_attempts' as any).insert({
         user_id: user.id,
         question_id: questionId,
@@ -583,6 +688,7 @@ export const usePracticeQuestions = () => {
         user_selected_mistake: 'none',
         ai_predicted_mistake: 'none'
       });
+
 
       if (context?.subject && context?.topic) {
         logStudentActivity({
@@ -610,6 +716,7 @@ export const usePracticeQuestions = () => {
     error,
     generationStatus,
     generationMode,
+    sessionDiagnostics,
     generateQuestions,
     generateQuestionsForNode,
     submitPracticeReport,

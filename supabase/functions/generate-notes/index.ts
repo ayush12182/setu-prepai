@@ -5,13 +5,12 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-function buildPrompt(chapterName: string, subject: string, topics: string[], examMode: string, mode: "notes" | "visual" = "notes", language = "english"): string {
+};function buildPrompt(chapterName: string, subject: string, topics: string[], examMode: string, mode: "notes" | "visual" = "notes", language = "english"): string {
   const topicList = topics.length > 0 ? topics.join(", ") : chapterName;
   const exam = examMode.toUpperCase().includes("NEET") ? "NEET" : examMode.toUpperCase().includes("CUET") ? "CUET" : "JEE Main + Advanced";
 
@@ -22,167 +21,158 @@ function buildPrompt(chapterName: string, subject: string, topics: string[], exa
 LANGUAGE RULES — STRICT
 ═══════════════════════════════
 - Write ALL content in pure English only.
-- No Hinglish, no Hindi words, no "samjho", no "yaad rakho".
-- Tone: sharp coaching English — like Allen/Aakash/PW study material.
-- Example: "Remember:" not "Yaad rakho:".`;
-  } else if (langLower === "hindi") {
+- Tone: elite Kota coaching faculty, lecturing senior students at Allen/Resonance/PW.
+- Do not use Hinglish or casual Hindi words.`;
+  } else if (langLower === "hindi" || langLower === "hinglish") {
     languagePrompt = `═══════════════════════════════
-LANGUAGE RULES — STRICT
+LANGUAGE RULES — Hinglish
 ═══════════════════════════════
-- Write in Hinglish (Hindi + English mix).
-- Formulas always in English.
-- Explanation text in casual Hindi/Hinglish.
-- Jeetu Bhaiya / Alakh Sir tone: warm, motivating, student-friendly.
-- Example: "Yaad rakho — yeh formula direct use hota hai".`;
-  } else if (langLower === "hinglish") {
-    languagePrompt = `═══════════════════════════════
-LANGUAGE RULES — STRICT
-═══════════════════════════════
-- Mix freely — English structure, Hindi warmth.
-- Formulas in English always.
-- Labels and explanations can be Hinglish.`;
+- Mix freely — English structure, casual Hinglish explaining sentences (e.g., "Yaad rakho, coordinate system pehle establish karna hai").
+- Formulas and equations must always be in English.`;
   } else {
     languagePrompt = `═══════════════════════════════
 LANGUAGE RULES — STRICT
 ═══════════════════════════════
-- Write ALL content in pure English only.
-- No Hinglish, no Hindi words, no "samjho", no "yaad rakho".
-- Tone: sharp coaching English — like Allen/Aakash/PW study material.`;
+- Write ALL content in pure English only.`;
   }
 
   if (mode === "notes") {
-    return `SYSTEM PROMPT — PREMIUM AI NOTES FOR JEE + NEET + CUET
+    return `SYSTEM PROMPT — PREPENTRANCE NOTES ENGINE V7 (ELITE KOTA CLASSROOM TEACHING NOTES SPECIFICATION)
 
-You are PrepEntrance's AI Notes Engine — an expert revision note creator for JEE Main, JEE Advanced, NEET, and CUET, using the exact pedagogy and high-density content distribution of premium coaching modules like Allen, Resonance, Aakash, and Physics Wallah (PW).
+You are NOT an AI note generator.
+You are a senior Kota faculty with 15+ years of experience teaching JEE Main, JEE Advanced, NEET and CUET students at top institutes like Allen, Resonance, PW, and Competishun.
+Your job is NOT to write summaries or fill out templates. Your job is to write extremely comprehensive, textbook-equivalent, classroom-oriented teaching material (4500–8500 words) with a target of 15–25 high-quality teaching sections per chapter that a student can study directly as their sole preparation resource.
 
-Generate PREMIUM AI-generated revision notes for the chapter provided. The notes must feel like premium coaching modules, high-density revision sheets, and PW/Allen master modules.
-
-Avoid school notes, basic NCERT summaries, or basic explanations.
+Every chapter generated must look as if it was personally prepared by a top Kota teacher after analyzing 10+ years of PYQs.
 
 ═══════════════════════════════
-OUTPUT STYLE
+REQUIRED METADATA BLOCK — MUST BE FIRST
 ═══════════════════════════════
-- Concise but information-dense
-- Visually structured
-- Easy to revise in 5-10 minutes
-- Tone: elite mentor, coaching faculty, sharp, concise
-- No filler text, no "basic concept samjho" storytelling, no motivational paragraphs
-- Prefer compact explanations, direct insights, advanced observations, PYQ patterns
+At the absolute beginning of your response, before any other text, you MUST output the following exact metadata block:
+[METADATA]
+chapter_slug: ${chapterName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}
+chapter_name: ${chapterName}
+subject: ${subject}
+topic_tree: ${topicList}
+[/METADATA]
+
+═══════════════════════════════
+CRITICAL: GOLDEN RULES (VIOLATING THESE BREAKS THE PLATFORM)
+═══════════════════════════════
+1. ABSOLUTELY NO PLACEHOLDERS OR GENERIC TEXT.
+   - Do NOT write things like "Placeholder...", "Details...", "[Derivation here]", "Insert formula", or "Definition...".
+   - Every single concept, definition, derivation, solved example, and insight MUST be written out fully, word-for-word, in complete detail.
+2. CLASSROOM NOTES DEPTH.
+   - The notes must answer: "If a student never attended coaching and only studied these notes, would they still understand the chapter?" If the answer is no, the notes are insufficient.
+   - Prioritize depth, physical/mathematical intuition, and exam relevance over brevity.
+3. KOTA STAR BATCH STRUCTURE.
+   - Generate a minimum of 15–25 high-quality teaching sections/subsections per chapter.
+   - Do NOT compress chapters into brief summaries.
+
+═══════════════════════════════
+REQUIRED CONTENT STRUCTURE FOR EVERY TOPIC/CONCEPT
+═══════════════════════════════
+Every topic/concept in the chapter must be generated systematically, containing exactly the following 16 elements in order:
+
+1. **Topic Introduction**: Explain the topic in simple language, why it exists, why students study it, and where it is used.
+2. **Why JEE Asks This**: Why this concept is important in exams, typical weight, and what other concepts it connects to.
+3. **Teacher Insight**: Mentor-style classroom advice/warnings wrapped in [TEACHER_SAYS] tags. (e.g. explaining why certain definitions are commonly misunderstood).
+4. **Theory**: Deep physical/mathematical theory, detailed paragraphs, no placeholders.
+5. **Visual Concept**: How to draw diagrams, resolve forces/components, establish coordinate systems, or interpret visual representations (use inline LaTeX vector notations like $$\\vec{F}$$).
+6. **NCERT Insight**: NCERT line references, definitions, or experiments wrapped in [NCERT_INSIGHT] tags.
+7. **JEE Main Pattern**: Commonly asked question styles in JEE Main.
+8. **JEE Advanced Pattern**: Multi-concept, highly analytical problem styles in JEE Advanced.
+9. **Common Mistakes**: Conceptual traps and examiner traps wrapped in [COMMON_MISTAKE] tags.
+10. **Solved Example 1**: Formula application/conceptual problem with Given, To find, Concept, Solution, Answer.
+11. **Solved Example 2**: Real numerical calculation problem with Given, To find, Concept, Solution, Answer.
+12. **PYQ Intelligence**: Detailed years asked (2020-2025) and difficulty breakdown. Wrap in [JEE_INSIGHT] tags.
+13. **Revision Sheet**: Bullet points of key points for last minute revision.
+14. **Formula Vault**: Topic's key equations wrapped in [FORMULA title="..."] ... [/FORMULA] tags.
+15. **30 Second Revision**: High-yield super-quick takeaway. Wrap in [JEE_TRICK] or [CALLOUT] tags.
+16. **What To Do Next**: Strategic direction on what to practice or read next.
 
 ${languagePrompt}
 
 ═══════════════════════════════
-FORMULA STYLE
+MATH & FORMULA FORMATTING
 ═══════════════════════════════
-Use SIMPLE INLINE FORMULAS ONLY.
-Examples:
-  v = u + at
-  s = ut + ½at²
-  v² = u² + 2as
-  R = u²sin2θ/g
-  H = u²sin²θ/2g
-  T = 2usinθ/g
-
-DO NOT use latex blocks, rendered equations, or display math syntax ($$ or \\[ blocks).
-Formulas should feel like "premium coaching short notes".
+- Use standard LaTeX for equations:
+  - Block equations: $$ ... $$ (e.g., $$\\vec{F} = \\frac{k q_1 q_2}{r^2} \\hat{r}$$)
+  - Inline expressions: $ ... $ (e.g., $x = a$)
+- DO NOT use \\[ \\] or \\( \\) delimiters.
+- Inside [FORMULA] tags, write the raw TeX code without any $ or $$ wrappers.
 
 ═══════════════════════════════
-REQUIRED STRUCTURE (13 SECTIONS — MUST FOLLOW EXACTLY)
+SPECIAL BLOCK TAGS
 ═══════════════════════════════
-
-# ${chapterName}
-
----
-
-# 1. Chapter Overview
-Explain:
-- what chapter studies
-- why important
-- difficulty level
-- scoring potential
-- interconnection with other chapters
-Also mention JEE, NEET, and CUET levels.
-
-# 2. Exam-Wise Weightage Analysis
-Provide details and tag as HIGH / MEDIUM / LOW priority:
-### JEE Main
-- question trend, important topics, PYQ frequency
-### JEE Advanced
-- conceptual depth, multi-concept problems, graph-based questions
-### NEET
-- NCERT-focused areas, formula-based numericals, direct conceptual questions
-### CUET
-- theory-heavy portions, direct formula applications
-
-# 3. Syllabus Breakdown (Exam-Oriented)
-Subtopics with tags (e.g. VERY HIGH, HIGH, ADVANCED, EXTREMELY IMPORTANT).
-For each subtopic, list:
-- what exam asks
-- difficulty level
-- common traps
-
-# 4. Core Concepts That Actually Matter
-Write premium, useful insights (no basic concept samjho filler). Every single line must feel high-yield and directly useful.
-
-# 5. Formula Master Sheet
-Include ALL major formulas. Group by sub-topic. Clean, scannable, no prose.
-Include assumptions, conditions, and shortcut usage.
-
-# 6. Graph Interpretation & Visual Learning
-This section must feel PREMIUM. Explain:
-- slope meaning
-- area meaning
-- graph behavior
-- discontinuities
-- curve interpretation
-- Mention examiner traps explicitly.
-
-# 7. PYQ Pattern Analysis
-Specify 2020-2025 trends, post-COVID priority patterns, and what exams prefer.
-Tag as HIGH / MEDIUM / LOW priority.
-
-# 8. Topper Mistake Zone
-Include REAL common mistakes students make. Format:
-⚠ Mistake: [Common student mistake]
-✓ Correction: [Correct approach / explanation]
-(Minimum 10 mistakes required)
-
-# 9. Advanced Shortcuts & Rank Boosters
-High-level topper revision observations, complementary cases, reference frame tricks, shortcut bounds, named trends/exceptions.
-
-# 10. Trigger Recognition (MOST IMPORTANT)
-Format:
-"If question says [X] → immediately think [Y]"
-(Minimum 15 triggers required)
-
-# 11. Exam-Specific Preparation Strategy
-Custom, actionable strategies:
-- For JEE Main
-- For JEE Advanced
-- For NEET
-- For CUET
-
-# 12. Last 24-Hour Revision Plan
-Actual realistic schedule and steps (not generic advice).
-
-# 13. 30-Second Final Revision Box
-━━━━━━━━━━━━━━━━━━━━
-5-8 ultra-short bullets of absolute last-minute facts.
-━━━━━━━━━━━━━━━━━━━━
+Wrap specific learning blocks in these custom tags so the UI renders them beautifully:
+1. [CONCEPT] ... [/CONCEPT]
+   For formal concept definitions or physical postulates.
+2. [JEE_TRICK] ... [/JEE_TRICK]
+   For shortcuts, time-saving tricks, and pattern recognition rules.
+3. [COMMON_MISTAKE] ... [/COMMON_MISTAKE]
+   For conceptual traps, sign errors, unit conversion slips, and examiner traps.
+4. [NCERT_INSIGHT] ... [/NCERT_INSIGHT]
+   For specific comments, side notes, or experiments from NCERT.
+5. [TEACHER_SAYS] ... [/TEACHER_SAYS]
+   For mentor warning boxes and core classroom reminders.
+6. [FORMULA title="Equation Name"] equation [/FORMULA]
+   For crucial formulas. Do not include $ or $$ inside.
+7. [DERIVATION] ... [/DERIVATION]
+   For complete, step-by-step mathematical proofs.
 
 ═══════════════════════════════
-SUBJECT-SPECIFIC RULES
+REQUIRED PAGE STRUCTURE & SECTIONS
 ═══════════════════════════════
-- PHYSICS: Emphasize units, vector vs scalar, sign conventions, limiting cases (r→0, r→∞, θ=0°, θ=90°).
-- CHEMISTRY: Highlight exceptions in bold, periodic trends with direction arrows, name reactions marked as ★ NAME REACTION.
-- MATHEMATICS: Domain/range limits, substitutions, standard identities.
+Your output MUST contain the following 8 main sections in order, using these EXACT markdown headings so the frontend scroll-spy outline works:
+
+# \${chapterName}
+Classroom notes curated by senior Kota faculty.
+
+[TEACHER_SAYS]
+A warm introductory note welcoming the student, analyzing the chapter's weightage and difficulty, and outlining a strategic roadmap for mastering it.
+[/TEACHER_SAYS]
+
+## Chapter Overview
+- 2-3 detailed paragraphs giving a comprehensive overview.
+- Detail what the chapter studies, why it matters, and its weightage in exams.
+- Highlight the topics: \${topicList}.
+
+## Core Theory
+- The complete detailed teaching notes covering all topics in \${topicList}.
+- Follow the "REQUIRED CONTENT STRUCTURE FOR EVERY TOPIC/CONCEPT" (16 elements) for every single topic.
+- Write actual physics/chemistry/math theory. Be exhaustive. Include proofs using [DERIVATION] and formulas using [FORMULA].
+
+## Formula Sheet
+- Curated vault of all major equations in this chapter.
+- Use at least 8-12 [FORMULA title="..."] ... [/FORMULA] cards.
+- Under/around the formula tags, write concise context, limitations/conditions of the formula, and SI units.
+
+## Important Concepts
+- Focus on high-frequency exam models, mathematical configurations, and conceptual corner cases.
+
+## Solved Examples
+- Provide at least 3 detailed, multi-step solved examples testing varying concepts and difficulty levels.
+- Format each example with clear: **Problem**, **Concept**, **Step-by-step Solution**, and **Answer** tags.
+
+## PYQ Intelligence Section
+- Detailed analysis of questions asked in exams from 2020-2025.
+- Identify trends, difficulty distributions, and weightage of subtopics.
+
+## JEE Insights
+- Highlight mistakes students commonly make (using multiple [COMMON_MISTAKE] blocks).
+- Share time-saving approaches, shortcuts, and pattern recognition methods (using 1-2 [JEE_TRICK] blocks).
+
+## Chapter Summary
+- Deep, genuine revision summary of the entire chapter (not generic bullet points).
+- A student should be able to revise the entire chapter from this section before the exam.
 
 ═══════════════════════════════
 INPUT DETAILS
 ═══════════════════════════════
-  Chapter: ${chapterName}
-  Subject: ${subject}
-  Level: ${exam}
+  Chapter: \${chapterName}
+  Subject: \${subject}
+  Target Exam: \${exam}
 `;
   } else {
     return `SYSTEM PROMPT — PrepEntrance VISUAL FORMULA SHEET GENERATOR (UNIVERSAL)
@@ -598,13 +588,87 @@ serve(async (req) => {
       examMode = "JEE",
       mode = "notes",
       language = "english",
+      forceRegenerate = false,
+      action,
+      chapterId: clearChapterId,
     } = body;
+
+    // --- Cache Clear Action ---
+    // Called by client validation layer when it detects bad/wrong cached content
+    if (action === 'clearCache' && clearChapterId) {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabaseSvc = createClient(supabaseUrl, supabaseServiceKey);
+      const { error: delError } = await supabaseSvc
+        .from('chapter_standardized_notes')
+        .delete()
+        .eq('chapter_id', clearChapterId);
+      if (delError) {
+        console.error('[GenerateNotes] Cache clear failed:', delError);
+        return new Response(JSON.stringify({ success: false, error: delError.message }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      console.log('[GenerateNotes] Cache cleared for:', clearChapterId);
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (!chapterName) {
       return new Response(JSON.stringify({ error: "chapterName is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    const chapterId = chapterName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const lang = (language || "english").toLowerCase();
+
+    // Initialize Supabase Client
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Only cache for standard notes mode
+    if (mode === "notes" && !forceRegenerate) {
+      const { data: cachedNote } = await supabase
+        .from("chapter_standardized_notes")
+        .select("content")
+        .eq("chapter_id", chapterId)
+        .eq("language", lang)
+        .maybeSingle();
+
+      if (cachedNote?.content) {
+        console.log(`[GenerateNotes] Cache HIT for Chapter: ${chapterName} (${chapterId}) | Language: ${lang}`);
+        const content = cachedNote.content;
+        return new Response(
+          new ReadableStream({
+            async start(controller) {
+              const chunkSize = 256;
+              for (let i = 0; i < content.length; i += chunkSize) {
+                const chunk = content.substring(i, i + chunkSize);
+                controller.enqueue(
+                  encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: chunk } }] })}\n\n`)
+                );
+                await new Promise((r) => setTimeout(r, 10)); // simulated small streaming latency
+              }
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              controller.close();
+            }
+          }),
+          {
+            headers: {
+              ...corsHeaders,
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache",
+            },
+          }
+        );
+      }
+      console.log(`[GenerateNotes] Cache MISS for Chapter: ${chapterName} (${chapterId}) | Language: ${lang}`);
     }
 
     const prompt = buildPrompt(chapterName, subject, topics, examMode, mode, language);
@@ -624,7 +688,7 @@ serve(async (req) => {
             temperature: 0.3,
             topK: 40,
             topP: 0.95,
-            maxOutputTokens: 4000,
+            maxOutputTokens: 8192,
           },
           safetySettings: [
             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -644,6 +708,8 @@ serve(async (req) => {
 
     if (!response.body) throw new Error("No response body from Gemini");
 
+    let generatedContent = "";
+
     return new Response(
       response.body.pipeThrough(new TransformStream({
         transform(chunk, controller) {
@@ -654,6 +720,7 @@ serve(async (req) => {
                 const data = JSON.parse(line.slice(6));
                 const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (content) {
+                  generatedContent += content;
                   controller.enqueue(
                     encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`)
                   );
@@ -662,8 +729,25 @@ serve(async (req) => {
             }
           }
         },
-        flush(controller) {
+        async flush(controller) {
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          if (mode === "notes" && generatedContent.trim()) {
+            console.log(`[GenerateNotes] Saving/Updating generated notes to database for chapter ${chapterName} (${chapterId})`);
+            const { error: upsertError } = await supabase
+              .from("chapter_standardized_notes")
+              .upsert({
+                chapter_id: chapterId,
+                chapter_name: chapterName,
+                subject: subject,
+                language: lang,
+                content: generatedContent,
+              }, {
+                onConflict: "chapter_id,language"
+              });
+            if (upsertError) {
+              console.error("[GenerateNotes] Cache write/upsert failed:", upsertError);
+            }
+          }
         },
       })),
       {

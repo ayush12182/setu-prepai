@@ -76,25 +76,25 @@ const QuizResults: React.FC<QuizResultsProps> = ({
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-card border border-border rounded-2xl p-5 text-center shadow-sm">
-          <Target className="w-6 h-6 mx-auto mb-2 text-primary" />
-          <p className="text-3xl font-bold text-foreground">{accuracy}%</p>
-          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-1">Accuracy</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+          <Target className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+          <p className="text-3xl font-bold text-slate-800">{accuracy}%</p>
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Accuracy</p>
         </div>
-        <div className="bg-card border border-border rounded-2xl p-5 text-center shadow-sm">
-          <CheckCircle className="w-6 h-6 mx-auto mb-2 text-emerald-500" />
-          <p className="text-3xl font-bold text-emerald-500">{result.correct}</p>
-          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-1">Correct</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+          <CheckCircle className="w-6 h-6 mx-auto mb-2 text-emerald-600" />
+          <p className="text-3xl font-bold text-emerald-600">{result.correct}</p>
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Correct</p>
         </div>
-        <div className="bg-card border border-border rounded-2xl p-5 text-center shadow-sm">
-          <XCircle className="w-6 h-6 mx-auto mb-2 text-red-500" />
-          <p className="text-3xl font-bold text-red-500">{result.incorrect}</p>
-          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-1">Incorrect</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
+          <XCircle className="w-6 h-6 mx-auto mb-2 text-rose-600" />
+          <p className="text-3xl font-bold text-rose-600">{result.incorrect}</p>
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Incorrect</p>
         </div>
-        <div className="bg-card border border-border rounded-2xl p-5 text-center shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-sm">
           <Clock className="w-6 h-6 mx-auto mb-2 text-amber-500" />
           <p className="text-3xl font-bold text-amber-500">{avgTimePerQuestion}s</p>
-          <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mt-1">Avg Time</p>
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mt-1">Avg Time</p>
         </div>
       </div>
 
@@ -108,11 +108,11 @@ const QuizResults: React.FC<QuizResultsProps> = ({
       </div>
 
       {/* ─── AI SESSION SUMMARY ─── */}
-      <div className="bg-gradient-to-r from-accent/10 via-amber-500/5 to-transparent border border-accent/30 rounded-3xl p-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-2xl -mr-10 -mt-10" />
+      <div className="bg-gradient-to-r from-blue-50/50 via-slate-50/30 to-transparent border border-slate-200 rounded-3xl p-6 relative overflow-hidden shadow-xs">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 rounded-full blur-2xl -mr-10 -mt-10" />
         
-        <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-          <BrainCircuit className="w-5 h-5 text-accent" />
+        <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <BrainCircuit className="w-5 h-5 text-blue-600" />
           Session Intelligence
         </h3>
 
@@ -120,24 +120,24 @@ const QuizResults: React.FC<QuizResultsProps> = ({
           
           {/* Weakness Detector */}
           {weakestCount > 0 && (
-            <div className="flex items-start gap-3 bg-card border border-border p-4 rounded-2xl shadow-sm">
-              <AlertTriangle className="w-6 h-6 text-red-500 mt-1 flex-shrink-0" />
+            <div className="flex items-start gap-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+              <AlertTriangle className="w-6 h-6 text-rose-600 mt-1 flex-shrink-0" />
               <div>
-                <p className="font-bold text-foreground">You are weak in: <span className="text-red-500">{weakestConcept}</span></p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="font-bold text-slate-800">You are weak in: <span className="text-rose-600">{weakestConcept}</span></p>
+                <p className="text-sm text-slate-500 mt-1">
                   You missed {weakestCount} questions here. Estimated accuracy for this concept dropped to {estAccuracy}%.
                 </p>
               </div>
             </div>
           )}
 
-          <div className="flex items-start gap-3 mt-4 pt-4 border-t border-border">
+          <div className="flex items-start gap-3 mt-4 pt-4 border-t border-slate-150">
             <Zap className="w-5 h-5 text-amber-500 mt-0.5" />
             <div className="flex-1">
-              <p className="font-semibold text-foreground">Recommended Next Action</p>
-              <p className="text-sm text-muted-foreground">Focus exclusively on your weak spots to immediately improve overall accuracy.</p>
+              <p className="font-semibold text-slate-800">Recommended Next Action</p>
+              <p className="text-sm text-slate-500">Focus exclusively on your weak spots to immediately improve overall accuracy.</p>
             </div>
-            <Button onClick={onRetry} className="bg-accent text-primary-foreground font-bold shrink-0 shadow-lg shadow-accent/20 hover:scale-105 transition-transform">
+            <Button onClick={onRetry} className="bg-blue-600 hover:bg-blue-700 text-white font-bold shrink-0 shadow-md shadow-blue-100 hover:scale-105 transition-transform">
               Target {weakestConcept} <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
@@ -146,27 +146,27 @@ const QuizResults: React.FC<QuizResultsProps> = ({
 
       {/* Wrong Questions Review */}
       {result.wrongQuestions.length > 0 && (
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-          <h3 className="font-semibold mb-4 flex items-center gap-2 text-foreground">
+        <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+          <h3 className="font-semibold mb-4 flex items-center gap-2 text-slate-800">
             <AlertTriangle className="w-5 h-5 text-amber-500" />
             Mistake Analysis ({result.wrongQuestions.length})
           </h3>
           <div className="space-y-4">
             {result.wrongQuestions.map((q, idx) => (
-              <div key={q.id} className="p-5 bg-secondary/50 border border-border rounded-xl">
+              <div key={q.id} className="p-5 bg-slate-50 border border-slate-200 rounded-xl">
                 <div className="flex items-start gap-4">
-                  <span className="w-8 h-8 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 font-bold flex items-center justify-center flex-shrink-0">
+                  <span className="w-8 h-8 rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-bold flex items-center justify-center flex-shrink-0">
                     {idx + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground mb-3 leading-relaxed">
+                    <p className="text-sm font-medium text-slate-800 mb-3 leading-relaxed">
                       {q.question_text}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      <span className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full font-semibold border border-emerald-500/20">
+                      <span className="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-semibold border border-emerald-250">
                         Correct: {q.correct_option}
                       </span>
-                      <span className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-semibold border border-primary/20">
+                      <span className="text-xs bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-semibold border border-blue-200">
                         Concept: {q.concept_tested}
                       </span>
                     </div>
@@ -179,14 +179,14 @@ const QuizResults: React.FC<QuizResultsProps> = ({
       )}
 
       {/* PrepEntrance Mentor Tip */}
-      <div className="bg-gradient-to-r from-slate-950 to-slate-900 border border-border rounded-2xl p-5 shadow-xl relative overflow-hidden">
-        <div className="absolute -right-4 -bottom-4 text-7xl opacity-5">👨‍🏫</div>
+      <div className="bg-gradient-to-r from-blue-50/70 to-indigo-50/70 border border-blue-100/80 rounded-2xl p-5 shadow-sm relative overflow-hidden">
+        <div className="absolute -right-4 -bottom-4 text-7xl opacity-10">👨‍🏫</div>
         <div className="flex items-start gap-4 relative z-10">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center flex-shrink-0 border-2 border-slate-950 shadow-lg shadow-accent/20">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-amber-600 flex items-center justify-center flex-shrink-0 border-2 border-white shadow-md shadow-blue-100">
             <span className="text-white font-display font-bold text-lg">JB</span>
           </div>
           <div>
-            <p className="text-sm text-white/90 leading-relaxed font-medium mt-1">
+            <p className="text-sm text-slate-800 leading-relaxed font-medium mt-1">
               {accuracy >= 80 
                 ? "Bahut badhiya beta! Ab ek level upar try karo. Easy questions se rank nahi aati."
                 : accuracy >= 50
@@ -200,14 +200,14 @@ const QuizResults: React.FC<QuizResultsProps> = ({
 
       {/* Action Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
-        <Button variant="outline" onClick={onGoHome} className="h-14 font-bold rounded-xl bg-card hover:bg-secondary border-border text-foreground transition-all">
+        <Button variant="outline" onClick={onGoHome} className="h-14 font-bold rounded-xl bg-white hover:bg-slate-50 border-slate-200 text-slate-700 transition-all">
           <Home className="w-4 h-4 mr-2" />
           End Session
         </Button>
-        <Button variant="outline" onClick={onChangeDifficulty} className="h-14 font-bold rounded-xl bg-card hover:bg-secondary border-border text-foreground transition-all">
+        <Button variant="outline" onClick={onChangeDifficulty} className="h-14 font-bold rounded-xl bg-white hover:bg-slate-50 border-slate-200 text-slate-700 transition-all">
           Change Level
         </Button>
-        <Button onClick={onRetry} className="h-14 font-bold rounded-xl shadow-lg shadow-primary/20 transition-all">
+        <Button onClick={onRetry} className="h-14 font-bold rounded-xl shadow-md bg-blue-600 hover:bg-blue-700 text-white transition-all">
           <RotateCcw className="w-4 h-4 mr-2" />
           Retry Mistakes
         </Button>

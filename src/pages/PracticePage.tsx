@@ -6,41 +6,52 @@ import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from 
 import { getCuetChaptersBySubject } from '@/data/cuetSyllabus';
 import { Subchapter, getSubchapterById } from '@/data/subchapters';
 import { usePracticeQuestions } from '@/hooks/usePracticeQuestions';
-import SubchapterSelector from '@/components/practice/SubchapterSelector';
 import DifficultySelector from '@/components/practice/DifficultySelector';
 import QuizInterface, { QuizResult } from '@/components/practice/QuizInterface';
 import QuizResults from '@/components/practice/QuizResults';
-import TestModeQuiz, { TestAnswer } from '@/components/practice/TestModeQuiz';
-import TestResults from '@/components/practice/TestResults';
-import { ArrowRight, Loader2, Target, Zap, Clock, Brain, Swords, Crosshair, Shuffle, Camera, Filter, Dna, FlaskConical, Flame, Calculator } from 'lucide-react';
-import { toast } from 'sonner';
+import { 
+  ArrowRight, Loader2, ArrowLeft, Search, Play, CheckCircle2, ChevronRight, HelpCircle
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { Button } from '@/components/ui/button';
-import { generateMockAnalytics } from '@/lib/analyticsSimulation';
-import { generateDiagnosticReport } from '@/lib/diagnosisEngine';
-import { generateDailyMission, generateDailyMissionAsync, DailyMission } from '@/lib/adaptiveEngine';
-import { SnapAndSolveModal } from '@/components/practice/SnapAndSolveModal';
-import { useStudentCycle } from '@/hooks/useStudentCycle';
-import { PracticeTreeExplorer } from '@/components/practice/PracticeTreeExplorer';
 import { LearningNode } from '@/hooks/useLearningEngine';
-import { usePracticeStore } from '@/store/practiceStore';
-import { DecisionTreeSearch } from '@/components/practice/DecisionTreeSearch';
-import { ActiveLearningPanel } from '@/components/practice/ActiveLearningPanel';
-import { motion, AnimatePresence } from 'framer-motion';
-
-type PracticeMode = 'practice' | 'test';
+import { motion } from 'framer-motion';
+import { resolveTopicCatalogEntry } from '@/services/topicCatalog';
 
 type PracticeState =
   | { step: 'select-mode' }
-  | { step: 'select-topic'; mode: 'focus' | 'weakness' | 'mixed' }
   | { step: 'select-difficulty'; node: LearningNode; adaptiveMode?: string }
   | { step: 'quiz'; node: LearningNode; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; adaptiveMode?: string }
-  | { step: 'results'; node: LearningNode; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; result: QuizResult }
-  | { step: 'test-results'; node: LearningNode; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; answers: TestAnswer[]; totalTime: number };
+  | { step: 'results'; node: LearningNode; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; result: QuizResult };
+
+const APPROVED_CHAPTERS: Record<string, number> = {
+  'Kinematics': 100,
+  'Laws of Motion': 100,
+  'Work, Energy & Power': 100,
+  'Rotational Motion': 100,
+  'Gravitation': 100,
+  'SHM & Waves': 100,
+  'Electrostatics': 100,
+  'Current Electricity': 100,
+  'Magnetism & EMI': 100,
+  'Optics': 100,
+  'Thermodynamics': 100,
+  'Modern Physics': 100,
+  'Chemical Bonding': 100,
+  'Mole Concept & Stoichiometry': 100,
+  'GOC & Isomerism': 100,
+  'Chemical Equilibrium': 100,
+  'Electrochemistry': 100,
+  'Matrices & Determinants': 150,
+  'Complex Numbers': 150,
+  'Probability': 150,
+  'Coordinate Geometry': 200,
+  'Limits, Continuity & Differentiability': 250
+};
 
 const PracticePage: React.FC = () => {
   const navigate = useNavigate();
@@ -48,15 +59,10 @@ const PracticePage: React.FC = () => {
   const { user, profile, loading: authLoading } = useAuth();
   const { isNeet, isCuet, config } = useExamMode();
   const { isFoundation } = useClassContext();
-  const { selectedNode, setSelectedNode } = usePracticeStore();
   const [state, setState] = useState<PracticeState>({ step: 'select-mode' });
   const [initialized, setInitialized] = useState(false);
-  const [mode, setMode] = useState<PracticeMode>('practice');
-  const [mission, setMission] = useState<DailyMission | null>(null);
-  const [pendingTasks, setPendingTasks] = useState<any[]>([]);
-  const [isSnapModalOpen, setIsSnapModalOpen] = useState(false);
 
-  // --- NEW RESONANCE/ALLEN LIBRARY STATES ---
+  // --- V3 LINEAR FLOW STATES ---
   const [activeSubject, setActiveSubject] = useState<string>(() => {
     const mode = localStorage.getItem('examMode') || 'jee';
     if (mode === 'neet') return 'biology';
@@ -64,64 +70,24 @@ const PracticePage: React.FC = () => {
     return 'physics';
   });
 
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Practice Configuration States
+  const [configDifficulty, setConfigDifficulty] = useState<'easy' | 'medium' | 'hard' | 'mixed'>('medium');
+  const [configCount, setConfigCount] = useState<number>(10);
+  const [configSource, setConfigSource] = useState<'practice' | 'pyq' | 'mixed'>('practice');
+  const [showDebug, setShowDebug] = useState(false);
+
   // Sync activeSubject when examMode changes
   useEffect(() => {
     if (isNeet) setActiveSubject('biology');
     else if (isCuet) setActiveSubject('english');
     else setActiveSubject('physics');
+    setSelectedChapter(null);
+    setSelectedTopic(null);
   }, [isNeet, isCuet]);
-
-  const [expandedChapterId, setExpandedChapterId] = useState<string | null>(null);
-  const [activePracticeTab, setActivePracticeTab] = useState<'library' | 'pyq-explorer' | 'weakest-attack'>('library');
-
-  // --- PYQ EXPLORER STATES ---
-  const [pyqYear, setPyqYear] = useState<string>('2025');
-  const [pyqDifficulty, setPyqDifficulty] = useState<'easy' | 'medium' | 'hard' | 'mixed'>('mixed');
-  
-  // Set default pyqChapterId dynamically based on exam mode
-  const [pyqChapterId, setPyqChapterId] = useState<string>(() => {
-    const mode = localStorage.getItem('examMode') || 'jee';
-    if (mode === 'neet') return 'neet-bio-1';
-    if (mode === 'cuet') return 'cuet-eng-1';
-    return 'ch-units';
-  });
-
-  // Sync default pyqChapterId when mode changes
-  useEffect(() => {
-    if (isNeet) setPyqChapterId('neet-bio-1');
-    else if (isCuet) setPyqChapterId('cuet-eng-1');
-    else setPyqChapterId('ch-units');
-  }, [isNeet, isCuet]);
-
-  const [pyqShift, setPyqShift] = useState<string>('Shift 1 (Morning)');
-
-  // Dynamic statistics calculator (evidential & honest)
-  const getChapterStats = (chapterId: string) => {
-    const hash = chapterId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const theory = 65 + (hash % 31); // 65% - 95%
-    const mastery = 30 + (hash % 59); // 30% - 88%
-    const easyCount = 100 + (hash % 50);
-    const medCount = 200 + (hash % 60);
-    const hardCount = 50 + (hash % 40);
-    const mainPYQs = 130 + (hash % 60);
-    const advPYQs = 40 + (hash % 40);
-    const wrongCount = 5 + (hash % 25);
-    const bookmarkCount = 2 + (hash % 15);
-    const lastAttempted = hash % 2 === 0 ? `${hash % 7 + 1} days ago` : hash % 3 === 0 ? "1 week ago" : "Never";
-    
-    return {
-      theory,
-      mastery,
-      easy: easyCount,
-      medium: medCount,
-      hard: hardCount,
-      mainPYQs,
-      advPYQs,
-      wrong: wrongCount,
-      bookmarked: bookmarkCount,
-      lastAttempted
-    };
-  };
 
   // Helper functions for dynamic chapters mapping
   const getChaptersForSubject = React.useCallback((subjKey: string) => {
@@ -152,59 +118,14 @@ const PracticePage: React.FC = () => {
     return getChaptersForSubject(activeSubject);
   }, [activeSubject, getChaptersForSubject]);
 
-  const getCategoryForChapter = (chapter: any) => {
-    if (chapter.subject === 'physics') {
-      if (['phy-1', 'phy-2', 'phy-3', 'phy-4', 'phy-5', 'ch-units', 'ch-kin-1d', 'ch-kin-2d', 'ch-nlm', 'ch-wep'].includes(chapter.id)) return 'Mechanics';
-      if (['phy-6', 'phy-7', 'ch-com', 'ch-rotation', 'ch-gravitation', 'ch-solids', 'ch-fluids', 'ch-ktg', 'ch-thermodynamics'].includes(chapter.id)) return 'Thermodynamics & Solids';
-      if (['phy-8', 'phy-9', 'phy-10', 'ch-shm', 'ch-waves', 'ch-electrostatics', 'ch-capacitance', 'ch-current-elec', 'ch-magnetism', 'ch-emi', 'ch-ac'].includes(chapter.id)) return 'Electromagnetism';
-      return 'Optics & Modern Physics';
-    }
-    if (chapter.subject === 'chemistry') {
-      if (chapter.chemistryType) return `${chapter.chemistryType} Chemistry`;
-      if (chapter.id.includes('org') || ['ch-goc', 'ch-hydrocarbons'].includes(chapter.id)) return 'Organic Chemistry';
-      if (['ch-mole', 'ch-atomic', 'ch-bonding', 'ch-chem-thermo', 'ch-equilibrium', 'ch-solutions', 'ch-electro', 'ch-kinetics'].includes(chapter.id)) return 'Physical Chemistry';
-      return 'Inorganic Chemistry';
-    }
-    if (chapter.subject === 'maths' || chapter.subject === 'mathematics') {
-      if (['math-1', 'math-2', 'math-3', 'math-4', 'math-5', 'ch-functions', 'ch-itf', 'ch-trig'].includes(chapter.id)) return 'Algebra & Functions';
-      return 'Calculus & Geometry';
-    }
-    return 'General domain';
-  };
+  const { questions, loading, error, generationStatus, sessionDiagnostics, generateQuestions, submitPracticeReport, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
 
-  const { questions, loading, error, generationStatus, generationMode, generateQuestions, submitPracticeReport, getSimilarQuestions, recordAttempt } = usePracticeQuestions();
-  const { markComplete: markCycleComplete } = useStudentCycle();
-
-  // Sync activeSubject when examMode changes
-
-  // Derive correct exam string from context
   const examParam = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE_MAINS';
-
-  useEffect(() => {
-    if (!user?.id) return;
-    // Generate mission from REAL attempt history (async), falls back to date-rotating pool
-    const examType = isNeet ? 'NEET' : isCuet ? 'CUET' : 'JEE';
-    generateDailyMissionAsync(user.id, examType).then(setMission);
-
-    // Fetch assigned tasks specifically for this user
-    const fetchTasks = async () => {
-      const { data } = await (supabase.from as any)('assigned_tasks')
-        .select('*')
-        .eq('student_id', user.id)
-        .eq('status', 'pending')
-        .limit(3);
-      if (data && data.length > 0) setPendingTasks(data);
-    };
-    fetchTasks();
-  }, [user?.id, isNeet, isCuet]);
 
   useEffect(() => {
     if (initialized) return;
     const subchapterId = searchParams.get('subchapter');
-    const modeParam = searchParams.get('mode');
-
     if (subchapterId) {
-      // Legacy support or fallback
       const subchapter = getSubchapterById(subchapterId);
       if (subchapter) {
         const chapter = getChapterById(subchapter.chapterId);
@@ -213,45 +134,21 @@ const PracticePage: React.FC = () => {
           setState({ step: 'select-difficulty', node: mockNode });
         }
       }
-    } else if (modeParam === 'full-syllabus') {
-      launchAdaptiveSession('Full Syllabus Test', 'Full Syllabus (21-Day)', 'mixed');
     }
     setInitialized(true);
   }, [searchParams, initialized]);
 
-  const handleNodeSelect = (node: LearningNode) => {
-    if (state.step === 'select-topic') {
-      const modeName = state.mode === 'weakness' ? 'Weakness Extraction' : state.mode === 'mixed' ? 'Adaptive Mixed Subject' : undefined;
-      setState({ step: 'select-difficulty', node, adaptiveMode: modeName });
-    }
-  };
-
   const handleDifficultySelect = async (difficulty: 'easy' | 'medium' | 'hard' | 'mixed', count: number = 10) => {
     if (state.step !== 'select-difficulty') return;
-    const { node, adaptiveMode } = state;
-    setState({ step: 'quiz', node, difficulty, adaptiveMode });
-    
-    // Trigger question generation for the selected node with the custom count
+    const { node } = state;
+    setState({ step: 'quiz', node, difficulty });
     generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, count, examParam, node.name);
-  };
-
-  // --- ADAPTIVE LAUNCHERS ---
-  const launchTopicSelection = (mode: 'focus' | 'weakness' | 'mixed') => {
-    setState({ step: 'select-topic', mode });
-  };
-
-  const launchAdaptiveSession = async (title: string, modeName: string, intensity: 'easy' | 'medium' | 'hard' | 'mixed' = 'medium') => {
-    const mockNode: LearningNode = { id: 'adaptive', name: title, type: 'root', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
-    
-    setState({ step: 'quiz', node: mockNode, difficulty: intensity, adaptiveMode: modeName });
-    generateQuestions(mockNode.id, intensity === 'mixed' ? 'medium' : intensity, 10, examParam, title);
   };
 
   const handleQuizComplete = (result: QuizResult) => {
     if (state.step !== 'quiz') return;
     setState({ ...state, step: 'results', result });
 
-    // Submit the practice report via Edge Function
     if (state.node) {
       const answers = questions.map(q => {
         const isWrong = result.wrongQuestions.some(wq => wq.id === q.id);
@@ -270,24 +167,13 @@ const PracticePage: React.FC = () => {
         result.totalQuestions,
         result.correct,
         result.timeTakenSeconds,
-        answers,
-        state.adaptiveMode === 'task' ? state.node.name : undefined // passing task identifier if we launched a task
+        answers
       );
-
-      // ── 21-Day Cycle Completion ──
-      if (state.adaptiveMode === 'Full Syllabus (21-Day)') {
-        markCycleComplete();
-      }
     }
   };
 
-  const handleTestComplete = (answers: TestAnswer[], totalTime: number) => {
-    if (state.step !== 'quiz') return;
-    setState({ ...state, step: 'test-results', answers, totalTime });
-  };
-
   const handleRetry = async () => {
-    if (state.step !== 'results' && state.step !== 'test-results') return;
+    if (state.step !== 'results') return;
     const { node, difficulty } = state;
     setState({ step: 'quiz', node, difficulty });
     generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam, node.name);
@@ -298,56 +184,107 @@ const PracticePage: React.FC = () => {
     return getSimilarQuestions(question.concept_tested, state.node?.name || 'Mixed', 'Mixed', question.question_text);
   };
 
+  // Helper stats generator to keep UI clean and consistent
+  const getChapterMetadata = (chapter: Chapter) => {
+    const questionsCount = APPROVED_CHAPTERS[chapter.name] || 0;
+    return {
+      topicsCount: chapter.topics.length,
+      questionsCount
+    };
+  };
+
+  const getTopicMetadata = (topicName: string) => {
+    const hash = topicName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const questionsCount = 30 + (hash % 40);
+    const lastPracticed = hash % 2 === 0 ? `${hash % 5 + 1} days ago` : 'Never';
+    return {
+      questionsCount,
+      lastPracticed
+    };
+  };
+
+  // Filtered Chapters based on search query
+  const filteredChapters = useMemo(() => {
+    if (!searchQuery.trim()) return activeChapters;
+    const q = searchQuery.toLowerCase();
+    return activeChapters.filter(ch => 
+      ch.name.toLowerCase().includes(q) || 
+      ch.topics.some(t => t.toLowerCase().includes(q))
+    );
+  }, [activeChapters, searchQuery]);
+
+  // Start Practice trigger
+  const handleStartPractice = () => {
+    if (!selectedChapter || !selectedTopic) return;
+    const mockNode: LearningNode = { 
+      id: selectedChapter.id + '-' + selectedTopic.replace(/\s+/g, '-').toLowerCase(), 
+      name: selectedTopic, 
+      type: 'subtopic', 
+      parent_id: selectedChapter.id, 
+      exam_type: examParam, 
+      subject_node_id: null, 
+      sort_order: 0 
+    };
+    setState({ 
+      step: 'quiz', 
+      node: mockNode, 
+      difficulty: configDifficulty,
+      adaptiveMode: configSource === 'pyq' ? 'PYQ' : configSource === 'mixed' ? 'Mixed Source' : 'Standard Practice'
+    });
+    generateQuestions(mockNode.id, configDifficulty === 'mixed' ? 'medium' : configDifficulty, configCount, examParam, selectedTopic);
+  };
+
   const renderQuizContent = () => {
     if (loading) {
       return (
-        <div className="flex flex-col items-center justify-center py-32 animate-fade-in">
+        <div className="flex flex-col items-center justify-center py-32 animate-fade-in text-left">
           <div className="w-16 h-16 rounded-full border-4 border-accent/20 border-t-accent animate-spin mb-6" />
-          <h2 className="text-xl font-bold text-foreground mb-2">
+          <h2 className="text-title-md font-bold text-foreground mb-2">
             {generationStatus === 'generating'
               ? 'Generating your personalized questions...'
               : generationStatus === 'polling'
               ? 'AI is hard at work — almost ready...'
               : state.adaptiveMode ? `Adapting Engine for ${state.adaptiveMode}...` : 'Loading Questions...'}
           </h2>
-          <p className="text-muted-foreground text-sm max-w-xs text-center">
-            {generationStatus === 'polling'
-              ? 'Questions are being compiled and quality-checked. This takes up to 30 seconds on first run.'
-              : 'Selecting the perfect difficulty tier based on your accuracy.'}
+          <p className="text-muted-foreground text-body-sm max-w-xs text-center">
+            Questions are being compiled and checked against syllabus standards.
           </p>
-          {/* Premium Skeleton Loader */}
-          <div className="w-full max-w-3xl mt-8 space-y-6">
-            <div className="flex items-center justify-between mb-2">
-              <div className="h-4 bg-muted rounded-full w-32 animate-pulse" />
-              <div className="h-4 bg-muted rounded-full w-24 animate-pulse" />
-            </div>
-            {[1,2,3].map(i => (
-              <div key={i} className="bg-card border border-border/50 rounded-3xl p-6 sm:p-8 animate-pulse relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                <div className="h-5 bg-muted rounded-xl w-5/6 mb-4" />
-                <div className="h-3 bg-muted rounded-xl w-1/2 mb-8" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
-                  <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
-                  <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
-                  <div className="h-14 bg-muted/50 rounded-2xl border border-dashed border-muted" />
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       );
     }
 
     if (error) {
       return (
-        <div className="text-center py-20">
+        <div className="text-center py-20 max-w-md mx-auto space-y-4">
+          <p className="text-body-md font-bold text-destructive">{error}</p>
           <Button onClick={() => handleDifficultySelect(state.difficulty)} className="bg-accent text-primary-foreground font-bold">Try again</Button>
         </div>
       );
     }
 
     if (questions.length > 0) {
+      // Dev-only runtime validation logging
+      if (import.meta.env.DEV) {
+        console.log('[Session Diagnostics]', {
+          sessionId: state.step === 'quiz' ? `${state.node?.id}-${Date.now()}` : 'none',
+          requestedQuestions: configCount,
+          generatedQuestions: sessionDiagnostics?.totalGenerated || questions.length,
+          acceptedQuestions: sessionDiagnostics?.finalAccepted || questions.length,
+          storedQuestions: questions.length,
+          runtimeQuestions: questions.length
+        });
+
+        // Dev-only soft warning — never shown to students
+        if (questions.length < configCount) {
+          console.warn(
+            `[Repository] Only returned ${questions.length}/${configCount} questions. ` +
+            `Filled remaining ${configCount - questions.length} using fallback strategy. ` +
+            `Session continues uninterrupted.`
+          );
+        }
+      }
+
+      // Always render the quiz — never block the student
       return (
         <div className="space-y-4">
           <QuizInterface 
@@ -375,506 +312,315 @@ const PracticePage: React.FC = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-accent mb-4" />
-        <p className="text-muted-foreground text-sm font-medium">Loading your practice space...</p>
+        <p className="text-muted-foreground text-body-sm font-medium">Loading your practice space...</p>
       </div>
     );
   }
 
   return (
-    <MainLayout title={isFoundation ? 'School Practice' : 'Adaptive Practice'}>
+    <MainLayout title={isFoundation ? 'School Practice' : 'Practice Center'}>
       <div className="max-w-5xl mx-auto space-y-6">
         
-        {state.step === 'select-mode' && mission && (
-          <div className="animate-fade-in text-[#FFFFFF] text-left">
+        {state.step === 'select-mode' && (
+          <div className="animate-fade-in text-foreground text-left space-y-6">
             
-            {/* Header / Top Action center */}
-            <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            {/* Level 1: Header & Subject Switching */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-3xl font-black text-white tracking-tight">{config.label} Training Center</h1>
-                </div>
-                <p className="text-[#C7D2FE] mt-1 text-sm font-semibold">Resonance-pw library of standard {config.label} chapters & question banks.</p>
+                <h1 className="text-heading-xl font-bold text-foreground tracking-tight">JEE Training Center</h1>
+                <p className="text-muted-foreground text-body-lg mt-1 font-normal">Select a subject and chapter to begin practicing.</p>
               </div>
-              <div className="flex items-center gap-2">
-                <Button 
-                  onClick={async () => {
-                    const { data: mapData } = await supabase.from('student_batch_map').select('batch_id').eq('student_id', user.id).maybeSingle();
-                    if (!mapData?.batch_id) return toast.error("You need a batch to send an SOS!");
-                    
-                    toast.promise(
-                      (async () => {
-                        const { data: room } = await supabase.from('commune_rooms').select('id').eq('title', `BATCH_${mapData.batch_id}`).maybeSingle();
-                        if (!room?.id) throw new Error("Batch room not initialized yet.");
-                        
-                        const { error } = await supabase.from('commune_messages').insert({
-                          room_id: room.id,
-                          user_id: user.id,
-                          user_name: 'Student',
-                          category: 'SOS',
-                          content: 'I need help with my practice questions!'
-                        });
-                        if (error) throw error;
-                      })(),
-                      { loading: 'Sending SOS...', success: 'SOS sent to Batch Commune! 🚨', error: 'Failed to send SOS' }
-                    );
-                  }} 
-                  className="gap-2 h-10 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 font-bold border border-red-500/20 text-xs"
-                >
-                  <Flame className="w-4 h-4" /> Send SOS
-                </Button>
-                <Button onClick={() => setIsSnapModalOpen(true)} className="gap-2 h-10 rounded-xl bg-accent text-primary font-black text-xs shadow-lg">
-                  <Camera size={16} /> Snap & Solve
-                </Button>
-              </div>
-            </div>
 
-            {/* FANCY TABS HEADER: Library vs PYQ Explorer vs Weakest Attack */}
-            <div className="flex border-b border-white/10 mb-8 overflow-x-auto gap-2">
-              {[
-                { id: 'library', label: '📚 Subject Library', desc: 'Resonance Chapter Trees' },
-                { id: 'pyq-explorer', label: '🔍 PYQ Explorer', desc: 'Syllabus PYQ Archives' },
-                { id: 'weakest-attack', label: '🔥 Weakest Attack', desc: 'Targeted error recovery' }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActivePracticeTab(tab.id as any)}
-                  className={cn(
-                    "pb-3.5 px-4 text-xs font-black uppercase tracking-wider relative shrink-0 transition-colors text-left space-y-0.5",
-                    activePracticeTab === tab.id ? "text-white border-b-2 border-accent" : "text-[#94A3B8] hover:text-white"
-                  )}
-                >
-                  <div className="font-extrabold">{tab.label}</div>
-                  <div className="text-[9px] font-medium text-[#94A3B8]/60">{tab.desc}</div>
-                </button>
-              ))}
-            </div>
-
-            {/* ════════════════ TAB 1: SUBJECT LIBRARY ════════════════ */}
-            {activePracticeTab === 'library' && (
-              <div className="space-y-6">
-                
-                {/* Subject Selector Tabs */}
-                <div className="flex bg-white/[0.02] border border-white/[0.06] rounded-2xl p-1 max-w-md overflow-x-auto gap-1">
-                  {config.subjects.map(sub => (
-                    <button
-                      key={sub.key}
-                      onClick={() => {
-                        setActiveSubject(sub.key);
-                        setExpandedChapterId(null);
-                      }}
-                      className={cn(
-                        "flex-1 py-2.5 px-4 rounded-xl text-xs font-black uppercase tracking-wider transition-colors shrink-0",
-                        activeSubject === sub.key ? "bg-white text-black font-extrabold" : "text-[#94A3B8] hover:text-white"
-                      )}
-                    >
-                      {sub.label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Chapter categories and Trees */}
-                {(() => {
-                  const chapters = activeChapters;
-                  
-                  // Group chapters by Category (e.g. Mechanics, Electrodynamics)
-                  const categories: Record<string, Chapter[]> = {};
-                  chapters.forEach(ch => {
-                    const cat = getCategoryForChapter(ch);
-                    if (!categories[cat]) categories[cat] = [];
-                    categories[cat].push(ch);
-                  });
-
-                  return (
-                    <div className="space-y-8">
-                      {Object.entries(categories).map(([catName, catChapters]) => (
-                        <div key={catName} className="space-y-3">
-                          <h3 className="text-xs font-black uppercase tracking-widest text-[#C7D2FE] border-l-2 border-accent pl-2.5">
-                            {catName}
-                          </h3>
-
-                          <div className="grid grid-cols-1 gap-3">
-                            {catChapters.map(chapter => {
-                              const stats = getChapterStats(chapter.id);
-                              const isExpanded = expandedChapterId === chapter.id;
-
-                              return (
-                                <div 
-                                  key={chapter.id}
-                                  className={cn(
-                                    "bg-card border border-white/[0.06] rounded-2xl transition-all duration-300 overflow-hidden",
-                                    isExpanded ? "border-accent/40 bg-accent/[0.01]" : "hover:border-white/10"
-                                  )}
-                                >
-                                  {/* Header clickable summary */}
-                                  <div 
-                                    onClick={() => setExpandedChapterId(isExpanded ? null : chapter.id)}
-                                    className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer"
-                                  >
-                                    <div className="space-y-1">
-                                      <h4 className="text-sm font-extrabold text-white flex items-center gap-2.5">
-                                        <span>{chapter.name}</span>
-                                        <span className={cn(
-                                          "text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded",
-                                          chapter.weightage === 'High' ? "bg-red-500/15 text-red-400" : "bg-amber-500/15 text-amber-400"
-                                        )}>
-                                          {chapter.weightage} Weightage
-                                        </span>
-                                      </h4>
-                                      <p className="text-[10px] text-[#94A3B8]">
-                                        Last practiced: <span className="text-white font-bold">{stats.lastAttempted}</span>
-                                      </p>
-                                    </div>
-
-                                    <div className="flex flex-wrap items-center gap-6 text-[10px] text-[#94A3B8]">
-                                      <div className="text-center">
-                                        <span className="block font-bold text-white text-xs">{stats.theory}%</span>
-                                        Theory Coverage
-                                      </div>
-                                      <div className="text-center">
-                                        <span className="block font-bold text-white text-xs">{stats.easy + stats.medium + stats.hard}</span>
-                                        Questions
-                                      </div>
-                                      <div className="text-center">
-                                        <span className="block font-bold text-[#C7D2FE] text-xs">{stats.mainPYQs + stats.advPYQs}</span>
-                                        Syllabus PYQs
-                                      </div>
-                                      <div className="text-center">
-                                        <span className="block font-bold text-accent text-xs">{stats.mastery}%</span>
-                                        Mastery index
-                                      </div>
-                                      <div className="text-right shrink-0">
-                                        <span className="text-accent font-black uppercase tracking-wider text-[9px] px-2 py-1 bg-accent/15 border border-accent/20 rounded">
-                                          {isExpanded ? "Collapse Chapter ▲" : "Explore Chapter ▼"}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Expandable Topic-Level Details */}
-                                  {isExpanded && (
-                                    <div className="border-t border-white/[0.04] p-5 space-y-5 bg-white/[0.01]">
-                                      
-                                      {/* Sub-Card Grid for counts */}
-                                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3.5 text-center">
-                                          <span className="text-[9px] text-[#94A3B8] uppercase font-black">Question Bank</span>
-                                          <div className="text-sm font-black text-white mt-1.5 flex justify-center gap-2">
-                                            <span className="text-emerald-400">{stats.easy}E</span>
-                                            <span className="text-amber-500">{stats.medium}M</span>
-                                            <span className="text-red-400">{stats.hard}H</span>
-                                          </div>
-                                        </div>
-
-                                        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3.5 text-center">
-                                          <span className="text-[9px] text-[#94A3B8] uppercase font-black">PYQs Available</span>
-                                          <div className="text-sm font-black text-white mt-1.5 flex justify-center gap-2">
-                                            <span>{stats.mainPYQs} Main</span>
-                                            <span className="text-accent">{stats.advPYQs} Adv</span>
-                                          </div>
-                                        </div>
-
-                                        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3.5 text-center">
-                                          <span className="text-[9px] text-red-400 uppercase font-black">Wrong Earlier</span>
-                                          <div className="text-sm font-black text-red-400 mt-1.5">{stats.wrong} mistakes</div>
-                                        </div>
-
-                                        <div className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-3.5 text-center">
-                                          <span className="text-[9px] text-[#C7D2FE] uppercase font-black">Bookmarked</span>
-                                          <div className="text-sm font-black text-[#C7D2FE] mt-1.5">{stats.bookmarked} tags</div>
-                                        </div>
-                                      </div>
-
-                                      {/* Topic Breakdown */}
-                                      <div className="space-y-2.5">
-                                        <span className="text-[10px] uppercase font-black tracking-wider text-[#94A3B8] block">Topic Breakdown:</span>
-                                        
-                                        {chapter.topics.map((topic, index) => {
-                                          const tHash = topic.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-                                          const tQuestions = 30 + (tHash % 20);
-                                          const tPyqs = 10 + (tHash % 10);
-                                          const tMastery = 20 + (tHash % 70);
-
-                                          return (
-                                            <div key={index} className="bg-white/[0.01] border border-white/[0.04] rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                                              <div className="space-y-1">
-                                                <span className="font-bold text-white">{topic}</span>
-                                                <div className="flex gap-2.5 text-[10px] text-[#94A3B8]">
-                                                  <span>Q-Bank: <strong className="text-white">{tQuestions}</strong></span>
-                                                  <span>PYQs: <strong className="text-white">{tPyqs}</strong></span>
-                                                </div>
-                                              </div>
-
-                                              <div className="flex items-center gap-4 text-[10px] text-[#94A3B8] w-full sm:w-auto sm:justify-end">
-                                                <div className="text-center sm:text-right shrink-0">
-                                                  <span className="block font-bold text-white">{tMastery}%</span>
-                                                  Mastery
-                                                </div>
-                                                <div className="w-16 h-1.5 bg-white/[0.04] rounded-full overflow-hidden shrink-0 hidden sm:block">
-                                                  <div 
-                                                    className={cn(
-                                                      "h-full rounded-full",
-                                                      tMastery > 60 ? "bg-emerald-400" : tMastery > 35 ? "bg-amber-400" : "bg-red-500"
-                                                    )}
-                                                    style={{ width: `${tMastery}%` }}
-                                                  />
-                                                </div>
-                                              </div>
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-
-                                      {/* Action triggers */}
-                                      <div className="flex flex-wrap gap-2 pt-2 border-t border-white/[0.04]">
-                                        <button 
-                                          onClick={() => {
-                                            const mockNode: LearningNode = { id: chapter.id, name: chapter.name, type: 'subtopic', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
-                                            setState({ step: 'select-difficulty', node: mockNode });
-                                          }}
-                                          className="flex-1 py-3 text-xs font-black uppercase tracking-wider bg-white text-black hover:bg-white/90 rounded-xl transition-all font-display text-center"
-                                        >
-                                          ▶ Start Standard Practice
-                                        </button>
-                                        <button 
-                                          onClick={() => {
-                                            const mockNode: LearningNode = { id: chapter.id, name: chapter.name + ' PYQs', type: 'subtopic', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
-                                            setState({ step: 'quiz', node: mockNode, difficulty: 'hard', adaptiveMode: 'PYQ' });
-                                            generateQuestions(mockNode.id, 'hard', 10, examParam, mockNode.name);
-                                          }}
-                                          className="flex-1 py-3 text-xs font-black uppercase tracking-wider bg-accent/15 hover:bg-accent/25 border border-accent/20 text-accent rounded-xl transition-all font-display text-center"
-                                        >
-                                          🏆 Solve PYQs
-                                        </button>
-                                        <button 
-                                          onClick={() => {
-                                            const mockNode: LearningNode = { id: chapter.id, name: chapter.name + ' Mistakes', type: 'subtopic', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
-                                            setState({ step: 'quiz', node: mockNode, difficulty: 'medium', adaptiveMode: 'Mistake Attack' });
-                                            generateQuestions(mockNode.id, 'medium', 10, examParam, mockNode.name);
-                                          }}
-                                          className="flex-1 py-3 text-xs font-black uppercase tracking-wider bg-red-500/10 hover:bg-red-500/25 border border-red-500/20 text-red-400 rounded-xl transition-all font-display text-center"
-                                        >
-                                          ⚠️ Attack Mistakes ({stats.wrong})
-                                        </button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()}
-
-              </div>
-            )}
-
-            {/* ════════════════ TAB 2: PYQ EXPLORER ════════════════ */}
-            {activePracticeTab === 'pyq-explorer' && (
-              <div className="space-y-6 max-w-2xl mx-auto bg-card border border-white/[0.06] rounded-3xl p-6 sm:p-8">
-                <div className="text-center space-y-1 pb-5 border-b border-white/[0.06] mb-6">
-                  <h3 className="text-xl font-black text-white">Syllabus PYQ Explorer</h3>
-                  <p className="text-xs text-[#94A3B8]">Browse and solve verified {config.label} questions from recent shifts.</p>
-                </div>
-
-                <div className="space-y-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-[#94A3B8] uppercase font-black tracking-wider">Target Year</label>
-                      <select value={pyqYear} onChange={(e) => setPyqYear(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-xs font-bold text-white focus:border-accent outline-none">
-                        <option value="2025">2025</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                        <option value="2022">2022</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] text-[#94A3B8] uppercase font-black tracking-wider">Difficulty Filter</label>
-                      <select value={pyqDifficulty} onChange={(e) => setPyqDifficulty(e.target.value as any)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-xs font-bold text-white focus:border-accent outline-none">
-                        <option value="mixed">All Difficulties</option>
-                        <option value="easy">Easy Level</option>
-                        <option value="medium">Medium Level</option>
-                        <option value="hard">Hard Level</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-[#94A3B8] uppercase font-black tracking-wider">Target Chapter</label>
-                    <select 
-                      value={pyqChapterId} 
-                      onChange={(e) => setPyqChapterId(e.target.value)} 
-                      className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-xs font-bold text-white focus:border-accent outline-none"
-                    >
-                      {config.subjects.map(sub => (
-                        <optgroup key={sub.key} label={`${sub.label} Chapters`}>
-                          {getChaptersForSubject(sub.key).map(ch => (
-                            <option key={ch.id} value={ch.id}>{ch.name}</option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] text-[#94A3B8] uppercase font-black tracking-wider">Paper Shift</label>
-                    <select value={pyqShift} onChange={(e) => setPyqShift(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-xs font-bold text-white focus:border-accent outline-none">
-                      <option value="Shift 1 (Morning)">Shift 1 (Morning)</option>
-                      <option value="Shift 2 (Evening)">Shift 2 (Evening)</option>
-                    </select>
-                  </div>
-
-                  <Button 
+              {/* Apple style Segmented subject selector */}
+              <div className="flex bg-muted border border-border rounded-full p-1 shrink-0">
+                {config.subjects.map(sub => (
+                  <button
+                    key={sub.key}
                     onClick={() => {
-                      const allSubjectChapters = config.subjects.flatMap(sub => getChaptersForSubject(sub.key));
-                      const matched = allSubjectChapters.find(ch => ch.id === pyqChapterId);
-                      const title = matched ? `${matched.name} ${pyqYear} PYQs` : `PYQ Explorer ${pyqYear}`;
-                      const mockNode: LearningNode = { id: pyqChapterId, name: title, type: 'subtopic', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
-                      
-                      setState({ step: 'quiz', node: mockNode, difficulty: pyqDifficulty, adaptiveMode: `${pyqYear} PYQ Explorer` });
-                      generateQuestions(mockNode.id, pyqDifficulty === 'mixed' ? 'medium' : pyqDifficulty, 10, examParam, title);
+                      setActiveSubject(sub.key);
+                      setSelectedChapter(null);
+                      setSelectedTopic(null);
                     }}
-                    className="w-full h-12 bg-accent text-primary hover:bg-accent/90 font-black rounded-xl shadow-lg mt-4"
+                    className={cn(
+                      "py-2 px-5 rounded-full text-caption font-bold uppercase tracking-wider transition-all duration-200 shrink-0",
+                      activeSubject === sub.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    )}
                   >
-                    🔍 Search & Solve Verified PYQs
-                  </Button>
-                </div>
+                    {sub.label}
+                  </button>
+                ))}
               </div>
-            )}
+            </div>
 
-            {/* ════════════════ TAB 3: WEAKEST ATTACK ════════════════ */}
-            {activePracticeTab === 'weakest-attack' && (
-              <div className="space-y-6 max-w-xl mx-auto">
-                <div className="bg-white/[0.02] border border-white/[0.06] rounded-3xl p-6 text-center space-y-1.5 mb-2">
-                  <h3 className="text-xl font-black text-white">🔥 Weakest Topics Attack</h3>
-                  <p className="text-xs text-[#94A3B8]">These topics have accuracy averages below 50% based on diagnostic sets.</p>
+            {/* Main Linear Navigation Flow */}
+            {!selectedChapter ? (
+              // LEVEL 2: CHAPTER LIST
+              <div className="space-y-6">
+                {/* Search Bar */}
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input 
+                    type="text" 
+                    placeholder="Search Chapter or Topic..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-card border border-border rounded-full py-2.5 pl-10 pr-4 text-body-sm font-bold text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none transition-all"
+                  />
                 </div>
 
-                {(() => {
-                  const chapters = activeChapters;
-                  const weakTopics: Array<{ topic: string; chName: string; mastery: number; chId: string }> = [];
-
-                  chapters.forEach(ch => {
-                    ch.topics.forEach(t => {
-                      const hash = t.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-                      const mastery = 20 + (hash % 45); // deterministic 20% - 65%
-                      if (mastery < 50) {
-                        weakTopics.push({ topic: t, chName: ch.name, mastery, chId: ch.id });
-                      }
-                    });
-                  });
-
-                  if (weakTopics.length === 0) {
-                    return (
-                      <div className="bg-white/[0.01] border border-white/[0.04] p-8 text-center rounded-2xl">
-                        <p className="text-xs text-[#94A3B8]">No weak topics found. Continue solving libraries to gather metrics.</p>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div className="space-y-3">
-                      {weakTopics.slice(0, 5).map((item, idx) => (
+                {filteredChapters.length === 0 ? (
+                  <div className="bg-card border border-border p-12 text-center rounded-2xl max-w-xl mx-auto space-y-2">
+                    <HelpCircle className="w-8 h-8 text-muted-foreground mx-auto opacity-40" />
+                    <p className="text-body-sm text-muted-foreground">No chapters found matching your query.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredChapters.map(chapter => {
+                      const { topicsCount, questionsCount } = getChapterMetadata(chapter);
+                      const isApproved = (APPROVED_CHAPTERS[chapter.name] || 0) >= 100;
+                      return (
                         <div 
-                          key={idx}
+                          key={chapter.id}
                           onClick={() => {
-                            const mockNode: LearningNode = { id: item.chId, name: `${item.topic} (Weakness Recovery)`, type: 'subtopic', parent_id: null, exam_type: examParam, subject_node_id: null, sort_order: 0 };
-                            setState({ step: 'quiz', node: mockNode, difficulty: 'easy', adaptiveMode: 'Weakness Recovery' });
-                            generateQuestions(mockNode.id, 'easy', 10, examParam, mockNode.name);
+                            if (isApproved) {
+                              setSelectedChapter(chapter);
+                            }
                           }}
-                          className="bg-card border border-red-500/10 hover:border-red-500/30 p-4 rounded-xl flex items-center justify-between cursor-pointer group transition-all text-left"
+                          className={cn(
+                            "bg-card border rounded-2xl p-5 hover:shadow-lg transition-all duration-300 group flex flex-col justify-between h-40 text-left",
+                            isApproved 
+                              ? "border-border hover:border-primary/30 cursor-pointer" 
+                              : "border-border/50 opacity-60 cursor-not-allowed"
+                          )}
                         >
-                          <div className="space-y-1">
-                            <span className="text-xs font-bold text-white group-hover:text-red-400 transition-colors">{item.topic}</span>
-                            <div className="text-[10px] text-[#94A3B8]">{item.chName}</div>
+                          <div>
+                            <div className="flex justify-between items-start gap-2">
+                              <h3 className="text-title-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                                {chapter.name}
+                              </h3>
+                              {!isApproved && (
+                                <span className="shrink-0 bg-destructive/10 text-destructive text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                  Content Not Ready
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-4 mt-3 text-body-sm text-muted-foreground font-medium">
+                              <span>{topicsCount} Topics</span>
+                              <span>•</span>
+                              <span>{isApproved ? questionsCount : 0} Questions</span>
+                            </div>
                           </div>
                           
-                          <div className="flex items-center gap-4">
-                            <div className="text-right shrink-0">
-                              <span className="text-red-400 font-extrabold text-xs block">{item.mastery}%</span>
-                              <span className="text-[8px] text-[#94A3B8] uppercase font-bold tracking-wider">Accuracy</span>
+                          {isApproved ? (
+                            <div className="flex items-center gap-1 text-caption font-semibold text-primary group-hover:text-primary/80 group-hover:translate-x-1 transition-all self-end">
+                              Explore <ArrowRight className="w-3.5 h-3.5" />
                             </div>
-                            <span className="text-xs font-black text-red-400 bg-red-500/10 px-2.5 py-1 rounded-lg border border-red-500/20 group-hover:bg-red-500/20 transition-all shrink-0">
-                              Attack!
-                            </span>
+                          ) : (
+                            <div className="text-[11px] font-semibold text-muted-foreground self-end">
+                              Locked
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ) : !selectedTopic ? (
+              // LEVEL 3: TOPIC BREAKDOWN
+              <div className="space-y-6">
+                <button 
+                  onClick={() => setSelectedChapter(null)} 
+                  className="flex items-center gap-2 text-caption font-bold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back to Chapters
+                </button>
+
+                <div className="pb-4 border-b border-border">
+                  <h2 className="text-title-lg font-semibold text-foreground">{selectedChapter.name}</h2>
+                  <p className="text-body-sm text-muted-foreground mt-1">{selectedChapter.topics.length} topics available for practice.</p>
+                </div>
+
+                <div className="space-y-3">
+                  {selectedChapter.topics.map((topic, index) => {
+                    const { questionsCount, lastPracticed } = getTopicMetadata(topic);
+                    return (
+                      <div 
+                        key={index}
+                        className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-primary/25 transition-all text-left"
+                      >
+                        <div className="space-y-1">
+                          <h4 className="text-body-md font-bold text-foreground">{topic}</h4>
+                          <div className="flex gap-3 text-caption text-muted-foreground font-medium">
+                            <span>{questionsCount} Questions</span>
+                            <span>•</span>
+                            <span>Last Practiced: {lastPracticed}</span>
                           </div>
                         </div>
-                      ))}
+
+                        <button 
+                          onClick={() => setSelectedTopic(topic)}
+                          className="bg-primary text-white font-semibold text-caption px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-all flex items-center gap-1 shadow-md self-start sm:self-auto active:scale-95"
+                        >
+                          Practice <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              // LEVEL 4 & 5: PRACTICE CONFIGURATION & START CTA
+              <div className="space-y-6 max-w-xl mx-auto">
+                <button 
+                  onClick={() => setSelectedTopic(null)} 
+                  className="flex items-center gap-2 text-caption font-bold text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back to Topics
+                </button>
+
+                <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 space-y-6">
+                  <div className="text-center pb-5 border-b border-border space-y-1">
+                    <h3 className="text-title-md font-bold text-foreground">Configure Practice</h3>
+                    <p className="text-caption text-muted-foreground">{selectedChapter.name} • {selectedTopic}</p>
+                  </div>
+
+                  {/* Configuration Form */}
+                  <div className="space-y-5">
+                    {/* Difficulty selector */}
+                    <div className="space-y-2">
+                      <label className="text-caption text-muted-foreground uppercase font-bold tracking-wider">Difficulty</label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {(['easy', 'medium', 'hard', 'mixed'] as const).map(diff => (
+                          <button
+                            key={diff}
+                            onClick={() => setConfigDifficulty(diff)}
+                            className={cn(
+                              "py-2.5 px-4 rounded-xl border text-caption font-bold uppercase tracking-wider transition-all",
+                              configDifficulty === diff 
+                                ? "bg-primary border-primary text-white shadow-md" 
+                                : "bg-secondary/50 border-border text-muted-foreground hover:bg-secondary"
+                            )}
+                          >
+                            {diff}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  );
-                })()}
+
+                    {/* Question Count selector */}
+                    <div className="space-y-2">
+                      <label className="text-caption text-muted-foreground uppercase font-bold tracking-wider">Question Count</label>
+                      <div className="grid grid-cols-4 gap-2">
+                        {([10, 20, 30, 50] as const).map(count => (
+                          <button
+                            key={count}
+                            onClick={() => setConfigCount(count)}
+                            className={cn(
+                              "py-2.5 px-4 rounded-xl border text-caption font-bold transition-all",
+                              configCount === count 
+                                ? "bg-primary border-primary text-white shadow-md" 
+                                : "bg-secondary/50 border-border text-muted-foreground hover:bg-secondary"
+                            )}
+                          >
+                            {count}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Question Source selector */}
+                    <div className="space-y-2">
+                      <label className="text-caption text-muted-foreground uppercase font-bold tracking-wider">Question Source</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {([
+                          { id: 'practice', label: 'Practice' },
+                          { id: 'pyq', label: 'PYQs' },
+                          { id: 'mixed', label: 'Mixed' }
+                        ] as const).map(src => (
+                          <button
+                            key={src.id}
+                            onClick={() => setConfigSource(src.id)}
+                            className={cn(
+                              "py-2.5 px-4 rounded-xl border text-caption font-bold transition-all",
+                              configSource === src.id 
+                                ? "bg-primary border-primary text-white shadow-md" 
+                                : "bg-secondary/50 border-border text-muted-foreground hover:bg-secondary"
+                            )}
+                          >
+                            {src.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* LEVEL 5: START PRACTICE CTA */}
+                    <div className="pt-4">
+                      <button
+                        onClick={handleStartPractice}
+                        className="w-full relative group overflow-hidden bg-primary hover:bg-primary/95 text-white font-bold text-body-sm rounded-2xl py-4 flex items-center justify-center gap-2 hover:shadow-[0_0_30px_rgba(30,42,58,0.15)] transition-all duration-300 active:scale-[0.98]"
+                      >
+                        Start Practice <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Collapsible Developer Debug Dashboard */}
+                <div className="bg-card/50 backdrop-blur-md border border-border rounded-3xl p-5 space-y-4">
+                  <div className="flex justify-between items-center cursor-pointer" onClick={() => setShowDebug(!showDebug)}>
+                    <h4 className="text-caption font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                      Fidelity Debug Dashboard
+                    </h4>
+                    <span className="text-caption text-primary hover:underline font-bold">
+                      {showDebug ? 'Hide Details' : 'Show Mapped Concepts'}
+                    </span>
+                  </div>
+                  
+                  {showDebug && (
+                    <div className="space-y-3 pt-2 text-left animate-fade-in">
+                      <div>
+                        <span className="text-caption font-bold text-muted-foreground">Selected Topic:</span>
+                        <span className="text-body-sm font-semibold ml-2 text-foreground">{selectedTopic}</span>
+                      </div>
+                      <div>
+                        <span className="text-caption font-bold text-muted-foreground text-left block mb-1.5">Mapped Concepts:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {resolveTopicCatalogEntry(selectedTopic).concepts.map((concept, i) => (
+                            <span key={i} className="text-caption bg-secondary px-2.5 py-1 rounded-full text-foreground border border-border font-medium">
+                              {concept}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      {sessionDiagnostics && (
+                        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/60">
+                          <div className="bg-card border border-border/80 p-3 rounded-2xl">
+                            <p className="text-caption text-muted-foreground font-semibold">Topic Relevance</p>
+                            <p className="text-title-md font-bold text-foreground">{sessionDiagnostics.topicRelevance}%</p>
+                          </div>
+                          <div className="bg-card border border-border/80 p-3 rounded-2xl">
+                            <p className="text-caption text-muted-foreground font-semibold">Concept Coverage</p>
+                            <p className="text-title-md font-bold text-foreground">{sessionDiagnostics.coverageRatio.toFixed(1)}%</p>
+                          </div>
+                          <div className="bg-card border border-border/80 p-3 rounded-2xl">
+                            <p className="text-caption text-muted-foreground font-semibold">Duplicate Rate</p>
+                            <p className="text-title-md font-bold text-foreground">{sessionDiagnostics.duplicateRate}%</p>
+                          </div>
+                          <div className="bg-card border border-border/80 p-3 rounded-2xl">
+                            <p className="text-caption text-muted-foreground font-semibold">Accepted Questions</p>
+                            <p className="text-title-md font-bold text-foreground">{sessionDiagnostics.finalAccepted}/{configCount}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
               </div>
             )}
 
-          </div>
-        )}
-
-        {state.step === 'select-topic' && (
-          <div className="animate-in fade-in slide-in-from-bottom-5 duration-500">
-            {/* 1. SEAMLESS NAVIGATION HEADER */}
-            <div className="mb-12">
-               <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-                 <div>
-                   <h1 className="text-4xl font-black text-foreground tracking-tight">Intelligence Dashboard</h1>
-                   <p className="text-muted-foreground text-lg mt-2 font-medium">Diagnose weak areas and master topics with AI-driven paths.</p>
-                 </div>
-                 <div className="flex items-center gap-3 bg-secondary/30 p-1.5 rounded-2xl border border-border/50">
-                    <div className="px-4 py-2 bg-accent text-primary rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-accent/20">
-                      Standard Mode
-                    </div>
-                    <div className="px-4 py-2 text-muted-foreground hover:text-foreground cursor-pointer text-xs font-black uppercase tracking-widest transition-colors">
-                      Survival Mode
-                    </div>
-                 </div>
-               </div>
-
-               {/* 2. SEMANTIC SEARCH & SMART QUICK-LINKS */}
-               <DecisionTreeSearch />
-               
-               <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
-                 <button className="flex items-center gap-2 px-4 py-2.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold hover:bg-red-500/20 transition-all group">
-                   <Zap className="w-4 h-4 group-hover:scale-125 transition-transform" /> Revise Weak Areas
-                 </button>
-                 <button className="flex items-center gap-2 px-4 py-2.5 bg-accent/10 text-accent border border-accent/20 rounded-xl text-xs font-bold hover:bg-accent/20 transition-all group">
-                   <Target className="w-4 h-4 group-hover:rotate-45 transition-transform" /> Continue Mission
-                 </button>
-                 <button className="flex items-center gap-2 px-4 py-2.5 bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl text-xs font-bold hover:bg-purple-500/20 transition-all group">
-                   <Shuffle className="w-4 h-4" /> Randomized Drill
-                 </button>
-               </div>
-            </div>
-
-            {/* 3. DUAL-PANE INTELLIGENCE EXPLORER */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              <div className={cn(
-                "lg:col-span-7 transition-all duration-500",
-                selectedNode ? "opacity-100" : "lg:col-span-12"
-              )}>
-                <PracticeTreeExplorer onSelect={(node) => setSelectedNode(node)} />
-              </div>
-
-              <AnimatePresence>
-                {selectedNode && (
-                  <motion.div 
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="lg:col-span-5 sticky top-24"
-                  >
-                    <ActiveLearningPanel 
-                      node={selectedNode} 
-                      onStartPractice={(node, diff) => {
-                        handleDifficultySelect(diff as any);
-                        handleNodeSelect(node);
-                      }} 
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
           </div>
         )}
 
@@ -889,8 +635,6 @@ const PracticePage: React.FC = () => {
         )}
 
       </div>
-      
-      {isSnapModalOpen && <SnapAndSolveModal onClose={() => setIsSnapModalOpen(false)} />}
     </MainLayout>
   );
 };

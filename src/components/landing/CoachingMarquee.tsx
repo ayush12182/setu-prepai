@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Target, ClipboardCheck, Sparkles, GraduationCap } from 'lucide-react';
 
 const HIGHLIGHTS = [
-  { icon: Target, title: 'Syllabus Aligned', desc: 'Kota methodology standard' },
+  { icon: Target, title: 'Syllabus Aligned', desc: 'NCERT & PYQ standard' },
   { icon: ClipboardCheck, title: 'Rigorous Testing', desc: 'All India mocks & part tests' },
   { icon: Sparkles, title: 'Personalized Planners', desc: 'Built for systematic progress' },
   { icon: GraduationCap, title: 'Target Universities', desc: 'IITs, AIIMS, NITs, IISERs' }

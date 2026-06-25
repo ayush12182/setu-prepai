@@ -1,26 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight, ArrowLeft, Check, Loader2, 
-  Rocket, Brain, Zap, GraduationCap, Award
+import {
+  ArrowRight, ArrowLeft, Check, Loader2,
+  Rocket, Brain, Zap, GraduationCap, Award, Sparkles,
+  BookOpen, Users, Star, ChevronRight, Trophy
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
-import { useLanguage, LanguageMode } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 type StreamType = 'jee' | 'neet' | 'cuet' | '';
 
-// Custom Glow Background for Clean Light-style depth matching the landing theme
+// ─── Batch Mapping ───────────────────────────────────────────────────────────
+const BATCH_MAP: Record<string, Record<string, { id: string; name: string }>> = {
+  jee: {
+    '11':      { id: 'aarambh_2028',      name: 'Aarambh 2028' },
+    '12':      { id: 'aarohan_2027',      name: 'Aarohan 2027' },
+    dropper:   { id: 'shikhar_2027',      name: 'Shikhar 2027' },
+  },
+  neet: {
+    '11':      { id: 'aarambh_neet_2028', name: 'Aarambh NEET 2028' },
+    '12':      { id: 'aarohan_neet_2027', name: 'Aarohan NEET 2027' },
+    dropper:   { id: 'shikhar_neet_2027', name: 'Shikhar NEET 2027' },
+  },
+  cuet: {
+    '11':      { id: 'aarambh_cuet_2028', name: 'Aarambh CUET 2028' },
+    '12':      { id: 'aarohan_cuet_2027', name: 'Aarohan CUET 2027' },
+  },
+};
+
+const getBatch = (stream: string, cls: string) =>
+  BATCH_MAP[stream]?.[cls] ?? { id: 'aarambh_2028', name: 'Aarambh 2028' };
+
+// ─── Exam display helpers ─────────────────────────────────────────────────────
+const EXAM_LABELS: Record<string, string> = {
+  jee: 'JEE Main & Advanced',
+  neet: 'NEET',
+  cuet: 'CUET',
+};
+
+const CLASS_LABELS: Record<string, string> = {
+  '11': 'Class 11',
+  '12': 'Class 12',
+  dropper: 'Dropper / Repeater',
+};
+
+// ─── Glow Background ─────────────────────────────────────────────────────────
 const GlowBg: React.FC = () => (
   <div className="pointer-events-none fixed inset-0 overflow-hidden bg-gradient-to-tr from-slate-50 via-white to-blue-50/20">
     <div className="absolute top-[-20%] left-1/4 w-[750px] h-[750px] rounded-full bg-blue-500/[0.03] blur-[150px]" />
     <div className="absolute bottom-[-10%] right-1/4 w-[600px] h-[600px] rounded-full bg-indigo-500/[0.03] blur-[130px]" />
-    {/* Clean subtle dot grid overlay */}
     <div className="absolute inset-0 opacity-[0.4]" style={{
       backgroundImage: `radial-gradient(circle, #e2e8f0 1px, transparent 1px)`,
       backgroundSize: '24px 24px',
@@ -28,7 +61,7 @@ const GlowBg: React.FC = () => (
   </div>
 );
 
-// Slide animation variants
+// ─── Slide variants ───────────────────────────────────────────────────────────
 const slide = {
   enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
   center: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 25 } },
@@ -45,41 +78,38 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
   const navigate = useNavigate();
   const { user, updateProfile, refreshProfile } = useAuth();
   const { setExamMode } = useExamMode();
-  const { setLanguage } = useLanguage();
 
   const [step, setStep] = useState<OnboardingStep>(1);
   const [dir, setDir] = useState(1);
-  
-  // Selections State
+
   const [stream, setStream] = useState<StreamType>('');
   const [studentClass, setStudentClass] = useState('');
-  const [prefLanguage, setPrefLanguage] = useState<LanguageMode>('english');
 
-  // Loading Synthesis State
+  // Loading synthesis state
   const [loadingPhase, setLoadingPhase] = useState(0);
   const [isCompiling, setIsCompiling] = useState(false);
+
+  // Welcome screen state (after batch assignment)
+  const [assignedBatch, setAssignedBatch] = useState<{ id: string; name: string } | null>(null);
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
 
   const go = (newStep: OnboardingStep, direction = 1) => {
     setDir(direction);
     setStep(newStep);
   };
 
-  // Keyboard navigation listener
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // If we are in the compiling loading screen, ignore keypresses
-      if (isCompiling) return;
+      if (isCompiling || showWelcomeScreen) return;
 
       if (e.key === 'Enter') {
         e.preventDefault();
-        // Continue actions
         if (step === 1) go(2);
         else if (step === 2 && stream) go(3);
-        else if (step === 3 && studentClass) go(4);
-        else if (step === 4) handleStartSynthesis();
+        else if (step === 3 && studentClass) handleStartSynthesis();
       }
 
-      // Handle card selections via number keys (1, 2, 3)
       if (e.key === '1' || e.key === '2' || e.key === '3') {
         const index = parseInt(e.key) - 1;
         if (step === 2) {
@@ -88,53 +118,45 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
         } else if (step === 3) {
           const classes = ['11', '12', 'dropper'];
           setStudentClass(classes[index]);
-        } else if (step === 4) {
-          const langs: LanguageMode[] = ['english', 'hinglish', 'hindi'];
-          setPrefLanguage(langs[index]);
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [step, stream, studentClass, prefLanguage, isCompiling]);
+  }, [step, stream, studentClass, isCompiling, showWelcomeScreen]);
 
-  // AI Classroom Synthesis phases
+  // ─── Main synthesis handler ───────────────────────────────────────────────
   const handleStartSynthesis = async () => {
     if (!user) return;
     setIsCompiling(true);
-    go(5);
+    go(4); // loading screen
 
-    // Cycle through visual database synthesis phases
-    const phaseDelays = [1000, 1000, 1000, 800];
+    const batch = getBatch(stream, studentClass);
+    setAssignedBatch(batch);
+
+    // Visual phase animations
+    const phaseDelays = [900, 900, 900, 700];
     for (let i = 0; i < phaseDelays.length; i++) {
       await new Promise((r) => setTimeout(r, phaseDelays[i]));
       setLoadingPhase((prev) => prev + 1);
     }
 
-    // Upsert into Supabase profile tables
     try {
       let examGoal = 'JEE Main';
       let dbExam = 'JEE';
-      if (stream === 'neet') {
-        examGoal = 'NEET';
-        dbExam = 'NEET';
-      } else if (stream === 'cuet') {
-        examGoal = 'CUET';
-        dbExam = 'CUET';
-      }
+      if (stream === 'neet') { examGoal = 'NEET'; dbExam = 'NEET'; }
+      else if (stream === 'cuet') { examGoal = 'CUET'; dbExam = 'CUET'; }
 
       const cls = studentClass || '11';
-      const targetYearInt = cls === '11' ? 2028 : (cls === '12' ? 2027 : 2027);
+      const targetYearInt = cls === '11' ? 2028 : 2027;
 
-      // Set exam mode and language
+      // Set global exam mode
       if (stream === 'jee') setExamMode('jee');
       else if (stream === 'neet') setExamMode('neet');
       else if (stream === 'cuet') setExamMode('cuet');
 
-      setLanguage(prefLanguage);
-      localStorage.setItem('preferredLanguage', prefLanguage);
-
+      // Persist to cohorts table
       const { data: cohortData } = await supabase
         .from('cohorts')
         .select('id')
@@ -145,16 +167,17 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
 
       const cohortId = cohortData?.id || null;
 
-      // Update auth profile
+      // Update profile
       await updateProfile({
         target_exam: examGoal,
         class: cls,
         student_level: 'Intermediate',
         user_type: 'student',
+        // Store batch assignment in metadata if field exists
       });
 
-      // Synchronize in student_profiles
-      await supabase.from('student_profiles').upsert({
+      // Upsert student_profiles (try with extended batch columns, fallback to base)
+      const baseProfile = {
         student_id: user.id,
         name: user.user_metadata?.full_name || null,
         target_exam: examGoal,
@@ -164,14 +187,31 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
         cohort_id: cohortId,
         physics_level: 'Intermediate',
         chemistry_level: 'Intermediate',
-        maths_level: stream === 'neet' ? 'Intermediate' : 'Intermediate',
-        biology_level: stream === 'neet' ? 'Intermediate' : 'Intermediate',
+        maths_level: 'Intermediate',
+        biology_level: 'Intermediate',
         last_active: new Date().toISOString(),
-      });
+      };
+      try {
+        await supabase.from('student_profiles').upsert({
+          ...baseProfile,
+          batch_id: batch.id,
+          batch_name: batch.name,
+          exam_type: dbExam,
+          academic_stage: cls,
+        });
+      } catch {
+        // Fallback: upsert without extended batch columns if schema not yet migrated
+        await supabase.from('student_profiles').upsert(baseProfile);
+      }
+      // Store batch assignment in localStorage for immediate UI use
+      localStorage.setItem('batch_id', batch.id);
+      localStorage.setItem('batch_name', batch.name);
+      localStorage.setItem('exam_type', dbExam);
+      localStorage.setItem('academic_stage', cls);
 
       await refreshProfile();
-      
-      // Inject Mock Task for first-time B2C students
+
+      // Seed first task
       try {
         await supabase.from('assigned_tasks').insert({
           student_id: user.id,
@@ -181,38 +221,176 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
           status: 'pending',
           initial_accuracy: 50.0,
         });
-      } catch (e) {
-        console.warn('First task creation skipped');
+      } catch {
+        console.warn('First task creation skipped (non-fatal)');
       }
 
-      toast.success("Workspace synced! Opening classroom door...");
-      
-      // Load student hub
-      setTimeout(() => {
-        window.location.href = '/student-hub';
-      }, 500);
+      // Show the batch welcome screen
+      setShowWelcomeScreen(true);
 
     } catch (e: any) {
       toast.error(e.message || 'Something went wrong during setup.');
       setIsCompiling(false);
-      go(4, -1);
+      go(3, -1);
     }
   };
 
+  // ─── BATCH WELCOME SCREEN ────────────────────────────────────────────────
+  if (showWelcomeScreen && assignedBatch) {
+    const examLabel = EXAM_LABELS[stream] ?? stream.toUpperCase();
+    const classLabel = CLASS_LABELS[studentClass] ?? studentClass;
+
+    const examColors: Record<string, { accent: string; glow: string; badge: string; icon: string }> = {
+      jee:  { accent: '#3b82f6', glow: 'rgba(59,130,246,0.15)', badge: 'bg-blue-500/10 border-blue-500/30 text-blue-400',   icon: '🚀' },
+      neet: { accent: '#10b981', glow: 'rgba(16,185,129,0.15)', badge: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400', icon: '🧬' },
+      cuet: { accent: '#8b5cf6', glow: 'rgba(139,92,246,0.15)', badge: 'bg-violet-500/10 border-violet-500/30 text-violet-400',  icon: '🎓' },
+    };
+    const colors = examColors[stream] ?? examColors.jee;
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-4 overflow-hidden">
+        {/* Ambient glow */}
+        <div className="pointer-events-none fixed inset-0">
+          <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] rounded-full blur-[150px]"
+            style={{ background: colors.glow }} />
+          <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full blur-[120px]"
+            style={{ background: 'rgba(16,185,129,0.05)' }} />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 w-full max-w-md space-y-4"
+        >
+          {/* ── Header card ── */}
+          <div className="bg-white/[0.05] backdrop-blur-2xl rounded-3xl p-8 border border-white/[0.08] shadow-2xl text-center space-y-5">
+            {/* Animated success ring */}
+            <motion.div
+              initial={{ scale: 0, rotate: -30 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.2 }}
+              className="w-24 h-24 rounded-full border-2 flex items-center justify-center mx-auto text-5xl"
+              style={{ borderColor: colors.accent, background: colors.glow }}
+            >
+              {colors.icon}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="space-y-2"
+            >
+              <p className="text-xs font-black uppercase tracking-[0.25em]" style={{ color: colors.accent }}>
+                Batch Assigned ✓
+              </p>
+              <h1 className="text-white text-2xl sm:text-3xl font-black leading-tight">
+                You're all set,<br />
+                <span style={{ color: colors.accent }}>{user?.user_metadata?.full_name?.split(' ')[0] ?? 'Scholar'}!</span>
+              </h1>
+              <p className="text-white/50 text-sm font-medium leading-relaxed max-w-xs mx-auto">
+                Your personalized PrepEntrance dashboard is ready with content tailored to your exam and stage.
+              </p>
+            </motion.div>
+          </div>
+
+          {/* ── Batch detail card ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="bg-white/[0.05] backdrop-blur-2xl rounded-3xl p-6 border border-white/[0.08] shadow-xl space-y-4"
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <Trophy className="w-4 h-4 text-amber-400" />
+              <span className="text-white/50 text-xs font-bold uppercase tracking-wider">Your PrepEntrance Batch</span>
+            </div>
+
+            {/* Batch name */}
+            <div className="flex items-center justify-between p-4 rounded-2xl border" style={{ borderColor: `${colors.accent}33`, background: colors.glow }}>
+              <div>
+                <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Batch</p>
+                <p className="text-white font-black text-xl leading-tight">{assignedBatch.name}</p>
+              </div>
+              <div className="text-3xl">🏅</div>
+            </div>
+
+            {/* Chips */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className={cn('rounded-2xl border px-4 py-3 text-center', colors.badge)}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-60">Exam</p>
+                <p className="font-extrabold text-sm">{examLabel}</p>
+              </div>
+              <div className={cn('rounded-2xl border px-4 py-3 text-center', colors.badge)}>
+                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-60">Stage</p>
+                <p className="font-extrabold text-sm">{classLabel}</p>
+              </div>
+            </div>
+
+            {/* What you'll get */}
+            <div className="space-y-2 pt-1">
+              {[
+                { icon: BookOpen, text: 'Batch-specific syllabus & study plan' },
+                { icon: Zap, text: 'Targeted mock tests & adaptive practice' },
+                { icon: Brain, text: 'AI Mentor tuned to your exam & stage' },
+                { icon: Users, text: 'PDFs, notes & resources for your batch' },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.55 + i * 0.07 }}
+                  className="flex items-center gap-3 text-white/60 text-sm"
+                >
+                  <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 bg-white/[0.06] border border-white/[0.08]">
+                    <item.icon className="w-3.5 h-3.5" style={{ color: colors.accent }} />
+                  </div>
+                  <span className="font-medium">{item.text}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* ── CTA ── */}
+          <motion.button
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            onClick={async () => {
+              await refreshProfile();
+              window.location.href = '/student-hub';
+            }}
+            className="w-full h-16 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-white"
+            style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)`, boxShadow: `0 8px 32px ${colors.glow}` }}
+          >
+            <Sparkles className="w-5 h-5" />
+            Enter Dashboard
+            <ChevronRight className="w-5 h-5" />
+          </motion.button>
+
+          <p className="text-center text-white/20 text-xs font-medium">
+            Your batch assignment is permanent and can be updated from profile settings.
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // ─── Step rendering ───────────────────────────────────────────────────────
   const renderStep = () => {
-    // ════════════════ STEP 1: WELCOME & BEGIN ════════════════
+    // ════════════════ STEP 1: WELCOME ════════════════
     if (step === 1) {
       return (
         <div className="space-y-7 text-center py-6">
-          {/* Logo Badge */}
           <div className="brand-logo-container rounded-3xl w-20 h-20 mx-auto mb-6 flex items-center justify-center animate-pulse-soft">
-            <img 
-              src="/prepentrance-logo.png" 
-              alt="PrepEntrance Logo" 
-              className="brand-logo-img" 
+            <img
+              src="/prepentrance-logo.png"
+              alt="PrepEntrance Logo"
+              className="brand-logo-img"
             />
           </div>
-          
+
           <div className="space-y-3">
             <span className="text-blue-600 text-xs font-black uppercase tracking-[0.25em] block leading-none">
               Welcome to PrepEntrance
@@ -221,11 +399,23 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
               Let's Personalize <br />Your Preparation.
             </h1>
             <p className="text-slate-500 text-sm max-w-sm mx-auto leading-relaxed font-sans font-medium">
-              We construct your isolated academic tracker based strictly on your target exam, class, and study preferences.
+              Tell us your target exam and academic stage — we'll assign your dedicated batch instantly.
             </p>
           </div>
 
-          <div className="pt-6 space-y-4">
+          {/* Step preview pills */}
+          <div className="flex items-center justify-center gap-2 pt-1">
+            {['Select Exam', 'Select Stage', 'Get Assigned'].map((label, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-slate-400 bg-slate-50 border border-slate-100 rounded-full px-3 py-1">
+                  {label}
+                </span>
+                {i < 2 && <ChevronRight className="w-3 h-3 text-slate-300" />}
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-4 space-y-4">
             <button
               onClick={() => go(2)}
               className="w-full h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer"
@@ -244,18 +434,18 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
     if (step === 2) {
       const streams = [
         { key: 'jee' as StreamType, title: 'JEE Main & Advanced', desc: 'Physics · Chemistry · Mathematics', icon: Rocket, keybind: '1' },
-        { key: 'neet' as StreamType, title: 'NEET Core', desc: 'Physics · Chemistry · Biology', icon: Zap, keybind: '2' },
-        { key: 'cuet' as StreamType, title: 'CUET Domain Prep', desc: 'Domain Subjects · General Test', icon: GraduationCap, keybind: '3' },
+        { key: 'neet' as StreamType, title: 'NEET', desc: 'Physics · Chemistry · Biology', icon: Zap, keybind: '2' },
+        { key: 'cuet' as StreamType, title: 'CUET', desc: 'Domain Subjects · General Test', icon: GraduationCap, keybind: '3' },
       ];
 
       return (
         <div className="space-y-6 py-2">
           <div className="text-center space-y-2">
             <h2 className="text-slate-900 text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
-              What is your target exam?
+              Which exam are you targeting?
             </h2>
             <p className="text-slate-500 text-xs sm:text-sm font-sans font-medium leading-relaxed">
-              Your syllabus timelines and mock tests will adapt directly to this goal.
+              Your batch, syllabus and mock tests will be built around this exam.
             </p>
           </div>
 
@@ -278,7 +468,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
                       'w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors shadow-xs',
                       isSelected ? 'bg-blue-100 border-blue-200 text-blue-600' : 'bg-slate-100 border-slate-200/60 text-slate-400 group-hover:text-slate-600'
                     )}>
-                      <s.icon className="w-5.5 h-5.5" />
+                      <s.icon className="w-5 h-5" />
                     </div>
                     <div>
                       <p className={cn('font-extrabold text-sm sm:text-base leading-snug', isSelected ? 'text-blue-900' : 'text-slate-800')}>{s.title}</p>
@@ -321,28 +511,34 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
       );
     }
 
-    // ════════════════ STEP 3: SELECT CLASS ════════════════
+    // ════════════════ STEP 3: SELECT ACADEMIC STAGE ════════════════
     if (step === 3) {
+      // CUET doesn't have dropper
+      const showDropper = stream !== 'cuet';
       const classes = [
-        { key: '11', label: 'Class 11', desc: 'Foundation Core Prep', keybind: '1' },
-        { key: '12', label: 'Class 12', desc: 'Board + Targeted Mock Prep', keybind: '2' },
-        { key: 'dropper', label: 'Dropper / Repeater', desc: 'Full Spaced Revision', keybind: '3' },
+        { key: '11', label: 'Class 11', desc: 'Two-year foundation preparation', keybind: '1' },
+        { key: '12', label: 'Class 12', desc: 'Board + final exam targeted prep', keybind: '2' },
+        ...(showDropper ? [{ key: 'dropper', label: 'Dropper / Repeater', desc: 'Full revision & intensive practice', keybind: '3' }] : []),
       ];
+
+      // Preview batch assignment
+      const previewBatch = studentClass ? getBatch(stream, studentClass) : null;
 
       return (
         <div className="space-y-6 py-2">
           <div className="text-center space-y-2">
             <h2 className="text-slate-900 text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
-              What is your current class?
+              What is your academic stage?
             </h2>
             <p className="text-slate-500 text-xs sm:text-sm font-sans font-medium leading-relaxed">
-              We compile your mock tests and study milestones based on class.
+              We'll assign your batch automatically based on your selection.
             </p>
           </div>
 
           <div className="space-y-3 pt-2">
             {classes.map((c) => {
               const isSelected = studentClass === c.key;
+              const preview = getBatch(stream, c.key);
               return (
                 <button
                   key={c.key}
@@ -357,9 +553,12 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
                   <div>
                     <p className={cn('font-extrabold text-sm sm:text-base leading-snug', isSelected ? 'text-blue-900' : 'text-slate-800')}>{c.label}</p>
                     <p className="text-slate-400 text-xs mt-0.5 font-sans font-semibold">{c.desc}</p>
+                    <p className={cn('text-xs mt-1.5 font-bold', isSelected ? 'text-blue-600' : 'text-slate-300')}>
+                      → {preview.name}
+                    </p>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 shrink-0">
                     <span className="hidden sm:inline-block text-[9px] bg-slate-100 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
                       Key {c.keybind}
                     </span>
@@ -375,7 +574,22 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
             })}
           </div>
 
-          <div className="flex items-center gap-3 pt-4 shrink-0">
+          {/* Live batch preview */}
+          {previewBatch && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-50 border border-blue-100"
+            >
+              <Award className="w-4 h-4 text-blue-600 shrink-0" />
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-400">Your Batch</p>
+                <p className="text-blue-900 font-extrabold text-sm">{previewBatch.name}</p>
+              </div>
+            </motion.div>
+          )}
+
+          <div className="flex items-center gap-3 pt-2 shrink-0">
             <button
               onClick={() => go(2, -1)}
               className="w-1/3 h-14 rounded-2xl border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
@@ -384,95 +598,24 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
             </button>
             <button
               disabled={!studentClass}
-              onClick={() => go(4)}
+              onClick={handleStartSynthesis}
               className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/10"
             >
-              Continue <ArrowRight className="w-5 h-5" />
+              Assign My Batch <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         </div>
       );
     }
 
-    // ════════════════ STEP 4: STUDY LANGUAGE ════════════════
+    // ════════════════ STEP 4: SYNTHESIS LOADING ════════════════
     if (step === 4) {
-      const languages: { key: LanguageMode; label: string; desc: string; keybind: string }[] = [
-        { key: 'english', label: 'English medium', desc: 'Pure English theory, revision sheets & practice', keybind: '1' },
-        { key: 'hinglish', label: 'Hinglish medium', desc: 'Hybrid Hindi explanation + English keynotes', keybind: '2' },
-        { key: 'hindi', label: 'Hindi medium', desc: 'complete हिंदी माध्यम curriculum', keybind: '3' },
-      ];
-
-      return (
-        <div className="space-y-6 py-2">
-          <div className="text-center space-y-2">
-            <h2 className="text-slate-900 text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
-              Select your Language
-            </h2>
-            <p className="text-slate-550 text-xs sm:text-sm font-sans font-medium leading-relaxed">
-              We sync your notes, lectures, and mock question sheets to this language.
-            </p>
-          </div>
-
-          <div className="space-y-3 pt-2">
-            {languages.map((lang) => {
-              const isSelected = prefLanguage === lang.key;
-              return (
-                <button
-                  key={lang.key}
-                  onClick={() => setPrefLanguage(lang.key)}
-                  className={cn(
-                    'w-full p-5 rounded-2xl border text-left flex items-center justify-between transition-all duration-205 cursor-pointer select-none group',
-                    isSelected
-                      ? 'border-blue-500 bg-blue-50/50 shadow-sm'
-                      : 'border-slate-100 bg-slate-50/60 hover:border-slate-200 hover:bg-slate-100/30'
-                  )}
-                >
-                  <div>
-                    <p className={cn('font-extrabold text-sm sm:text-base leading-snug', isSelected ? 'text-blue-900' : 'text-slate-800')}>{lang.label}</p>
-                    <p className="text-slate-400 text-xs mt-0.5 font-sans font-semibold">{lang.desc}</p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className="hidden sm:inline-block text-[9px] bg-slate-100 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
-                      Key {lang.keybind}
-                    </span>
-                    <div className={cn(
-                      'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200',
-                      isSelected ? 'bg-blue-600 border-blue-600 scale-105' : 'border-slate-300'
-                    )}>
-                      {isSelected && <Check className="w-3 h-3 text-white stroke-[4]" />}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex items-center gap-3 pt-4 shrink-0">
-            <button
-              onClick={() => go(3, -1)}
-              className="w-1/3 h-14 rounded-2xl border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" /> Back
-            </button>
-            <button
-              onClick={handleStartSynthesis}
-              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/10"
-            >
-              Launch Dashboard <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      );
-    }
-
-    // ════════════════ STEP 5: PREMIUM DYNAMIC SYNTHESIS LOADING ════════════════
-    if (step === 5) {
+      const batchName = assignedBatch?.name ?? 'Your Batch';
       const phases = [
-        { icon: Brain, label: 'Securing your isolated prep classroom...' },
-        { icon: Rocket, label: 'Synthesizing adaptive JEE/NEET study roadmaps...' },
-        { icon: Zap, label: 'Configuring your 24/7 AI Mentor index...' },
-        { icon: Award, label: 'Workspace synced! Opening classroom door...' },
+        { icon: Brain, label: 'Verifying your exam profile...' },
+        { icon: Award, label: `Assigning batch: ${batchName}...` },
+        { icon: Rocket, label: 'Building your personalized dashboard...' },
+        { icon: Star, label: 'All set! Opening your classroom...' },
       ];
 
       return (
@@ -483,14 +626,13 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
 
           <div className="space-y-3">
             <h2 className="text-slate-900 text-2xl font-black font-display tracking-tight leading-snug">
-              Creating Your Engine
+              Setting Up Your Batch
             </h2>
             <p className="text-slate-500 text-xs sm:text-sm font-sans font-medium max-w-xs mx-auto leading-relaxed">
-              PrepEntrance is initializing your personalized dashboard modules.
+              Configuring your personalized PrepEntrance workspace. This takes just a moment.
             </p>
           </div>
 
-          {/* Animated phase status blocks */}
           <div className="space-y-3 max-w-sm mx-auto text-left bg-slate-50 border border-slate-100 rounded-3xl p-5 relative z-10">
             {phases.map((p, idx) => {
               const isActive = loadingPhase === idx;
@@ -507,8 +649,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
                 >
                   <div className={cn(
                     'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border',
-                    isDone ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
-                    (isActive ? 'bg-blue-100 border-blue-200 text-blue-600' : 'bg-slate-100 border-slate-200/60 text-slate-400')
+                    isDone ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                      (isActive ? 'bg-blue-100 border-blue-200 text-blue-600' : 'bg-slate-100 border-slate-200/60 text-slate-400')
                   )}>
                     {isDone ? <Check className="w-4 h-4 stroke-[3.5]" /> : <Icon className={cn('w-4 h-4', isActive && 'animate-pulse')} />}
                   </div>
@@ -529,29 +671,42 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden">
-      {/* Visual background overlays */}
       <GlowBg />
-      
+
       <div className="w-full max-w-[480px] relative z-10 space-y-6 py-8">
-        
-        {/* Dynamic progress bar indicator at top */}
-        {step < 5 && (
+
+        {/* Progress bar: 3 real steps */}
+        {step < 4 && (
           <div className="w-full h-1.5 bg-slate-100 border border-slate-200/60 rounded-full overflow-hidden select-none shrink-0">
             <motion.div
-              animate={{ width: `${(step / 4) * 100}%` }}
+              animate={{ width: `${((step - 1) / 3) * 100}%` }}
               transition={{ type: 'spring', stiffness: 200, damping: 25 }}
               className="h-full bg-blue-600 rounded-full"
             />
           </div>
         )}
 
-        {/* Premium light-themed glassmorphic card container */}
+        {/* Step counter */}
+        {step < 4 && (
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs text-slate-400 font-bold">
+              Step {step} of 3
+            </span>
+            <div className="flex gap-1.5">
+              {[1, 2, 3].map((s) => (
+                <div key={s} className={cn('w-1.5 h-1.5 rounded-full transition-all', step >= s ? 'bg-blue-600' : 'bg-slate-200')} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Card */}
         <div className="bg-white rounded-[2rem] border border-slate-100 shadow-2xl shadow-slate-200/80 p-7 sm:p-9 relative">
-          
-          {/* Close button at top right */}
-          {step < 5 && (
-            <button 
-              onClick={() => navigate('/')} 
+
+          {/* Close button */}
+          {step < 4 && (
+            <button
+              onClick={() => navigate('/')}
               className="absolute right-6 top-6 p-1.5 rounded-full border border-slate-100 text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer z-20"
               aria-label="Close onboarding"
             >

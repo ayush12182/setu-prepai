@@ -9,7 +9,7 @@ import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/da
 import { getAllSubchapters } from '@/data/subchapters';
 import {
   Calendar, Target, ChevronRight, Clock,
-  Flame, CheckCircle2, Zap, Brain, Video, ArrowRight, Quote, RotateCcw, TrendingDown, TrendingUp
+  Flame, CheckCircle2, Zap, Brain, Video, ArrowRight, Quote, RotateCcw, TrendingDown, TrendingUp, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useExamMode, ExamMode } from '@/contexts/ExamModeContext';
@@ -535,20 +535,20 @@ export const TwentyOneDayPlan: React.FC = () => {
         </div>
       </div>
 
-      {/* Lecture PrepEntrance Highlight */}
+      {/* AI Study Hub Highlight */}
       <div
         className="flex items-center gap-4 p-4 rounded-xl bg-accent/10 border border-accent/25 cursor-pointer group hover:bg-accent/15 transition-colors"
-        onClick={() => navigate('/lecture-prepentrance')}
+        onClick={() => navigate('/study-ai')}
       >
         <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
-          <Video className="w-5 h-5 text-accent" />
+          <Sparkles className="w-5 h-5 text-accent" />
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-bold text-foreground">
-            Don't waste time watching full lectures
+            Stop wasting hours writing study notes
           </h4>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Use <span className="font-semibold text-accent">Lecture PrepEntrance</span> — paste any YouTube link, get crisp notes in seconds. Study smarter, not longer.
+            Use <span className="font-semibold text-accent">Knowledge Engine</span> — paste any YouTube video link, get structured revision notes, flashcards &amp; practice questions in seconds.
           </p>
         </div>
         <ArrowRight className="w-4 h-4 text-accent shrink-0 group-hover:translate-x-1 transition-transform" />

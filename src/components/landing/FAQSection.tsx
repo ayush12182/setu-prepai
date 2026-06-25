@@ -13,7 +13,7 @@ const FAQ_ITEMS = [
   },
   {
     question: 'How is PrepEntrance different from YouTube or PDF notes?',
-    answer: 'PrepEntrance combines AI-personalized practice (questions that adapt to your weak spots), live AI Teachers (voice + HeyGen avatar — like a real Kota classroom), and real-time analytics that tell you exactly what to study next. Passive consumption is not learning.',
+    answer: 'PrepEntrance combines AI-personalized practice (questions that adapt to your weak spots), live AI Teachers (voice + HeyGen avatar — like an interactive, exam-focused classroom), and real-time analytics that tell you exactly what to study next. Passive consumption is not learning.',
   },
   {
     question: 'What happens after my 3-day trial ends?',
@@ -21,7 +21,7 @@ const FAQ_ITEMS = [
   },
   {
     question: 'How does the AI Teacher work?',
-    answer: 'Each AI Teacher (P.K. Sir for Physics, V.K. Sir for Chemistry, A.K. Sir for Maths) has a unique personality and teaching style. You can talk to them by voice or text, ask doubts at any time, and they explain concepts like a real Kota teacher — with analogies, real examples, and step-by-step JEE solutions.',
+    answer: 'Each AI Teacher (P.K. Sir for Physics, V.K. Sir for Chemistry, A.K. Sir for Maths) has a unique personality and teaching style. You can talk to them by voice or text, ask doubts at any time, and they explain concepts like a highly-experienced teacher (NCERT + PYQ aligned) — with analogies, real examples, and step-by-step JEE solutions.',
   },
   {
     question: 'Can I use PrepEntrance on mobile?',

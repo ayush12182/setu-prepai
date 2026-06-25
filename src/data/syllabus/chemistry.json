@@ -1,0 +1,490 @@
+[
+  {
+    "id": "chem-1",
+    "name": "Mole Concept & Stoichiometry",
+    "subject": "chemistry",
+    "chemistryType": "Physical",
+    "weightage": "High",
+    "difficulty": "Medium",
+    "prerequisites": [],
+    "topics": [
+      "Mole Concept",
+      "Atomic & Molecular Mass",
+      "Percentage Composition",
+      "Empirical & Molecular Formula",
+      "Limiting Reagent",
+      "Reactions in Solutions"
+    ],
+    "keyFormulas": [
+      "n = mass/M = N/NA",
+      "NA = 6.022 × 10²³",
+      "M = molarity × volume(L)",
+      "Molality = moles/kg solvent",
+      "% yield = (actual/theoretical) × 100"
+    ],
+    "pyqData": {
+      "total": 45,
+      "postCovid": 19,
+      "preCovid": 19,
+      "legacy": 7,
+      "trendingConcepts": [
+        "Limiting reagent",
+        "Solution stoichiometry",
+        "Equivalent concept"
+      ]
+    },
+    "examTips": [
+      "Always balance equation first",
+      "Identify limiting reagent for yield problems",
+      "Molarity changes with temperature, molality does not"
+    ]
+  },
+  {
+    "id": "chem-2",
+    "name": "Atomic Structure",
+    "subject": "chemistry",
+    "chemistryType": "Physical",
+    "weightage": "High",
+    "difficulty": "Medium",
+    "prerequisites": [],
+    "topics": [
+      "Bohr Model",
+      "Quantum Numbers",
+      "Electronic Configuration",
+      "Photoelectric Effect",
+      "de Broglie Wavelength",
+      "Heisenberg Uncertainty"
+    ],
+    "keyFormulas": [
+      "E = -13.6Z²/n² eV",
+      "r = 0.529n²/Z Å",
+      "λ = h/mv",
+      "Δx·Δp ≥ h/4π",
+      "n + l rule for filling"
+    ],
+    "pyqData": {
+      "total": 42,
+      "postCovid": 18,
+      "preCovid": 17,
+      "legacy": 7,
+      "trendingConcepts": [
+        "Quantum number sets",
+        "Electronic configuration exceptions",
+        "Orbital shapes"
+      ]
+    },
+    "examTips": [
+      "Maximum electrons in shell = 2n²",
+      "Half-filled and fully-filled are extra stable",
+      "Aufbau exceptions: Cr, Cu configurations"
+    ]
+  },
+  {
+    "id": "chem-3",
+    "name": "Chemical Bonding",
+    "subject": "chemistry",
+    "chemistryType": "Physical",
+    "weightage": "High",
+    "difficulty": "Hard",
+    "prerequisites": [
+      "chem-2"
+    ],
+    "topics": [
+      "Lewis Structures",
+      "VSEPR Theory",
+      "Hybridization",
+      "Molecular Orbital Theory",
+      "Hydrogen Bonding",
+      "Dipole Moment"
+    ],
+    "keyFormulas": [
+      "Bond Order = (Nb - Na)/2",
+      "Hybridization = ½(V + M - C + A)",
+      "μ = q × d (dipole moment)"
+    ],
+    "pyqData": {
+      "total": 55,
+      "postCovid": 24,
+      "preCovid": 23,
+      "legacy": 8,
+      "trendingConcepts": [
+        "MOT of O2, N2",
+        "Geometry prediction",
+        "Bond angle comparison"
+      ]
+    },
+    "examTips": [
+      "Lone pairs reduce bond angle",
+      "MOT: paramagnetic if unpaired electrons",
+      "Back bonding shortens bond length"
+    ]
+  },
+  {
+    "id": "chem-4",
+    "name": "Thermodynamics & Thermochemistry",
+    "subject": "chemistry",
+    "chemistryType": "Physical",
+    "weightage": "High",
+    "difficulty": "Medium",
+    "prerequisites": [
+      "chem-1"
+    ],
+    "topics": [
+      "First Law",
+      "Enthalpy",
+      "Hess's Law",
+      "Bond Enthalpy",
+      "Entropy",
+      "Gibbs Free Energy"
+    ],
+    "keyFormulas": [
+      "ΔU = q + w",
+      "ΔH = ΔU + ΔngRT",
+      "ΔG = ΔH - TΔS",
+      "ΔG° = -RT ln K",
+      "Cp - Cv = R"
+    ],
+    "pyqData": {
+      "total": 45,
+      "postCovid": 19,
+      "preCovid": 19,
+      "legacy": 7,
+      "trendingConcepts": [
+        "Hess's law applications",
+        "Spontaneity criteria",
+        "Entropy changes"
+      ]
+    },
+    "examTips": [
+      "ΔG < 0 for spontaneous",
+      "At equilibrium: ΔG = 0",
+      "Standard state: 1 bar, 298 K"
+    ]
+  },
+  {
+    "id": "chem-5",
+    "name": "Chemical Equilibrium",
+    "subject": "chemistry",
+    "chemistryType": "Physical",
+    "weightage": "High",
+    "difficulty": "Hard",
+    "prerequisites": [
+      "chem-4"
+    ],
+    "topics": [
+      "Law of Mass Action",
+      "Equilibrium Constant",
+      "Le Chatelier's Principle",
+      "Ionic Equilibrium",
+      "Buffer Solutions",
+      "Solubility Product"
+    ],
+    "keyFormulas": [
+      "Kp = Kc(RT)^Δn",
+      "Ka × Kb = Kw = 10^-14",
+      "pH = -log[H+]",
+      "Henderson: pH = pKa + log([A-]/[HA])",
+      "Ksp = [ions]^n"
+    ],
+    "pyqData": {
+      "total": 52,
+      "postCovid": 22,
+      "preCovid": 22,
+      "legacy": 8,
+      "trendingConcepts": [
+        "Buffer pH calculations",
+        "Common ion effect",
+        "Degree of dissociation"
+      ]
+    },
+    "examTips": [
+      "Q < K: forward reaction",
+      "Buffer capacity highest when [acid] = [salt]",
+      "Precipitation if Q > Ksp"
+    ]
+  },
+  {
+    "id": "chem-6",
+    "name": "Electrochemistry",
+    "subject": "chemistry",
+    "chemistryType": "Physical",
+    "weightage": "High",
+    "difficulty": "Hard",
+    "prerequisites": [
+      "chem-5"
+    ],
+    "topics": [
+      "Conductance",
+      "Galvanic Cells",
+      "Nernst Equation",
+      "Electrolysis",
+      "Faraday's Laws",
+      "Batteries & Corrosion"
+    ],
+    "keyFormulas": [
+      "E = E° - (RT/nF)ln Q",
+      "ΔG° = -nFE°",
+      "m = ZIt = (M × I × t)/(n × F)",
+      "Λm = κ/c",
+      "Λm° = λ°+ + λ°-"
+    ],
+    "pyqData": {
+      "total": 48,
+      "postCovid": 20,
+      "preCovid": 20,
+      "legacy": 8,
+      "trendingConcepts": [
+        "Nernst equation applications",
+        "Electrolysis calculations",
+        "Cell representation"
+      ]
+    },
+    "examTips": [
+      "Anode: oxidation (electrons leave)",
+      "At standard conditions, E = E°",
+      "Kohlrausch law for weak electrolytes"
+    ]
+  },
+  {
+    "id": "chem-7",
+    "name": "Chemical Kinetics",
+    "subject": "chemistry",
+    "chemistryType": "Physical",
+    "weightage": "High",
+    "difficulty": "Medium",
+    "prerequisites": [],
+    "topics": [
+      "Rate of Reaction",
+      "Order & Molecularity",
+      "Integrated Rate Laws",
+      "Half-Life",
+      "Arrhenius Equation",
+      "Mechanism & RDS"
+    ],
+    "keyFormulas": [
+      "Rate = k[A]^n[B]^m",
+      "k = Ae^(-Ea/RT)",
+      "t½ = 0.693/k (first order)",
+      "t½ = 1/(k[A]0) (second order)",
+      "ln(k2/k1) = (Ea/R)(1/T1 - 1/T2)"
+    ],
+    "pyqData": {
+      "total": 45,
+      "postCovid": 19,
+      "preCovid": 19,
+      "legacy": 7,
+      "trendingConcepts": [
+        "Order determination",
+        "Arrhenius graph",
+        "Parallel reactions"
+      ]
+    },
+    "examTips": [
+      "Order from experimental data, not equation",
+      "RDS determines overall rate",
+      "Catalyst lowers Ea, not ΔH"
+    ]
+  },
+  {
+    "id": "chem-8",
+    "name": "GOC & Isomerism",
+    "subject": "chemistry",
+    "chemistryType": "Organic",
+    "weightage": "High",
+    "difficulty": "Hard",
+    "prerequisites": [
+      "chem-3"
+    ],
+    "topics": [
+      "Inductive Effect",
+      "Resonance",
+      "Hyperconjugation",
+      "Carbocation/Carbanion Stability",
+      "Structural Isomerism",
+      "Stereoisomerism (E/Z, R/S)"
+    ],
+    "keyFormulas": [
+      "Stability: 3° > 2° > 1° (carbocation)",
+      "+I groups: alkyl",
+      "-I groups: halogens, -NO2, -CN"
+    ],
+    "pyqData": {
+      "total": 55,
+      "postCovid": 24,
+      "preCovid": 23,
+      "legacy": 8,
+      "trendingConcepts": [
+        "Stability order",
+        "Optical isomerism",
+        "Resonance structures"
+      ]
+    },
+    "examTips": [
+      "More resonance = more stable",
+      "Chiral center = 4 different groups",
+      "+M groups donate electrons to ring"
+    ]
+  },
+  {
+    "id": "chem-9",
+    "name": "Hydrocarbons",
+    "subject": "chemistry",
+    "chemistryType": "Organic",
+    "weightage": "Medium",
+    "difficulty": "Medium",
+    "prerequisites": [
+      "chem-8"
+    ],
+    "topics": [
+      "Alkanes",
+      "Alkenes",
+      "Alkynes",
+      "Aromatic Compounds",
+      "Reactions & Mechanisms"
+    ],
+    "keyFormulas": [
+      "Alkane: CnH2n+2",
+      "Alkene: CnH2n",
+      "Alkyne: CnH2n-2",
+      "Benzene: C6H6"
+    ],
+    "pyqData": {
+      "total": 38,
+      "postCovid": 16,
+      "preCovid": 16,
+      "legacy": 6,
+      "trendingConcepts": [
+        "Electrophilic addition",
+        "Markovnikov rule",
+        "Aromatic substitution"
+      ]
+    },
+    "examTips": [
+      "Markovnikov: H to C with more H",
+      "Anti-Markovnikov with peroxide (alkenes)",
+      "Benzene prefers substitution over addition"
+    ]
+  },
+  {
+    "id": "chem-10",
+    "name": "Organic Reactions & Named Reactions",
+    "subject": "chemistry",
+    "chemistryType": "Organic",
+    "weightage": "High",
+    "difficulty": "Hard",
+    "prerequisites": [
+      "chem-8",
+      "chem-9"
+    ],
+    "topics": [
+      "Substitution (SN1, SN2)",
+      "Elimination (E1, E2)",
+      "Addition Reactions",
+      "Named Reactions",
+      "Oxidation & Reduction",
+      "Rearrangements"
+    ],
+    "keyFormulas": [
+      "SN2: rate = k[substrate][nucleophile]",
+      "SN1: rate = k[substrate]",
+      "E2: anti-periplanar required"
+    ],
+    "pyqData": {
+      "total": 58,
+      "postCovid": 25,
+      "preCovid": 25,
+      "legacy": 8,
+      "trendingConcepts": [
+        "SN1 vs SN2",
+        "Named reaction products",
+        "Mechanism writing"
+      ]
+    },
+    "examTips": [
+      "Strong nucleophile + 1° substrate = SN2",
+      "Weak nucleophile + 3° substrate = SN1",
+      "Heat favors elimination"
+    ]
+  },
+  {
+    "id": "chem-11",
+    "name": "Periodic Table & Trends",
+    "subject": "chemistry",
+    "chemistryType": "Inorganic",
+    "weightage": "High",
+    "difficulty": "Easy",
+    "prerequisites": [
+      "chem-2"
+    ],
+    "topics": [
+      "Periodic Classification",
+      "Atomic & Ionic Radii",
+      "Ionization Energy",
+      "Electron Affinity",
+      "Electronegativity",
+      "Oxidation States"
+    ],
+    "keyFormulas": [
+      "IE: increases across period, decreases down group",
+      "Radius: decreases across, increases down",
+      "EN (Pauling scale): F = 4.0 highest"
+    ],
+    "pyqData": {
+      "total": 42,
+      "postCovid": 18,
+      "preCovid": 17,
+      "legacy": 7,
+      "trendingConcepts": [
+        "Anomalous trends",
+        "Diagonal relationship",
+        "Lanthanoid contraction"
+      ]
+    },
+    "examTips": [
+      "IE2 > IE1 always",
+      "Exceptions: N > O in IE, S > Cl in EA",
+      "d-block shows variable oxidation states"
+    ]
+  },
+  {
+    "id": "chem-12",
+    "name": "Coordination Chemistry",
+    "subject": "chemistry",
+    "chemistryType": "Inorganic",
+    "weightage": "High",
+    "difficulty": "Hard",
+    "prerequisites": [
+      "chem-3",
+      "chem-11"
+    ],
+    "topics": [
+      "Werner Theory",
+      "IUPAC Nomenclature",
+      "Isomerism",
+      "Crystal Field Theory",
+      "Color & Magnetism",
+      "Stability of Complexes"
+    ],
+    "keyFormulas": [
+      "CFSE = -0.4Δo × t2g + 0.6Δo × eg",
+      "μ = √(n(n+2)) BM",
+      "Spectrochemical series: I- < Br- < Cl- < F- < OH- < H2O < NH3 < en < NO2- < CN- < CO"
+    ],
+    "pyqData": {
+      "total": 52,
+      "postCovid": 22,
+      "preCovid": 22,
+      "legacy": 8,
+      "trendingConcepts": [
+        "CFT splitting",
+        "Isomer counting",
+        "Nomenclature"
+      ]
+    },
+    "examTips": [
+      "Strong field ligand = low spin",
+      "Tetrahedral: always high spin",
+      "d4-d7: check spin state carefully"
+    ]
+  }
+]

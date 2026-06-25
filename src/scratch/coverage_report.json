@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-06-23T05:19:43.031Z",
+  "metrics": {
+    "totalSubjects": 4,
+    "totalChapters": 6,
+    "totalConcepts": 10,
+    "mappedCatalogCount": 10,
+    "fullyMappedConcepts": 9,
+    "coveragePercentage": 90
+  },
+  "missingBlueprints": [],
+  "unresolvedConcepts": [
+    "physics -> laws of motion -> Friction Coefficients (Missing Formula or Misconception reference)"
+  ],
+  "reportFile": "/Users/ayushdixit12/setu-prepai/src/scratch/coverage_report.json"
+}

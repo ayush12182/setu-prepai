@@ -39,12 +39,12 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           const isSelected = selectedAnswer === opt;
           const isCorrect = question.answer === opt;
 
-          let optionStyle = 'border-border hover:border-muted-foreground/30';
-          if (isSelected) optionStyle = 'border-accent bg-accent/5';
+          let optionStyle = 'border-slate-200 bg-white text-slate-800 hover:border-blue-400 hover:bg-slate-50/50';
+          if (isSelected) optionStyle = 'border-blue-600 bg-blue-50/40 text-blue-900 shadow-sm';
           if (showResult) {
-            if (isCorrect) optionStyle = 'border-emerald-500 bg-emerald-500/10';
-            else if (isSelected) optionStyle = 'border-destructive bg-destructive/10';
-            else optionStyle = 'border-border opacity-50';
+            if (isCorrect) optionStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950';
+            else if (isSelected) optionStyle = 'border-red-500 bg-red-50 text-red-950';
+            else optionStyle = 'border-slate-200 opacity-50 bg-white text-slate-400';
           }
 
           return (
@@ -53,18 +53,18 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               onClick={() => !disabled && onAnswerSelect(opt)}
               disabled={disabled}
               className={cn(
-                'w-full p-4 rounded-xl border-2 text-left transition-all flex items-start gap-3',
+                'w-full p-4 rounded-xl border-2 text-left transition-all flex items-start gap-3 group',
                 optionStyle,
                 !disabled && 'cursor-pointer'
               )}
             >
               <span className={cn(
                 'w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 transition-colors',
-                isSelected ? 'bg-accent text-primary' : 'bg-secondary text-muted-foreground'
+                isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
               )}>
                 {opt}
               </span>
-              <div className="flex-1 pt-0.5">
+              <div className="flex-1 pt-0.5 font-medium text-slate-850">
                 <JeeOption option={optionText} />
               </div>
               {showResult && isCorrect && <CheckCircle className="w-5 h-5 text-emerald-500 ml-auto shrink-0" />}
@@ -91,12 +91,12 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
           const isSelected = selectedAnswer === opt;
           const isCorrect = question.answer === opt;
 
-          let optionStyle = 'border-border hover:border-muted-foreground/30';
-          if (isSelected) optionStyle = 'border-accent bg-accent/5';
+          let optionStyle = 'border-slate-200 bg-white text-slate-800 hover:border-blue-400 hover:bg-slate-50/50';
+          if (isSelected) optionStyle = 'border-blue-600 bg-blue-50/40 text-blue-900 shadow-sm';
           if (showResult) {
-            if (isCorrect) optionStyle = 'border-emerald-500 bg-emerald-500/10';
-            else if (isSelected) optionStyle = 'border-destructive bg-destructive/10';
-            else optionStyle = 'border-border opacity-50';
+            if (isCorrect) optionStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950';
+            else if (isSelected) optionStyle = 'border-red-500 bg-red-50 text-red-950';
+            else optionStyle = 'border-slate-200 opacity-50 bg-white text-slate-400';
           }
 
           return (
@@ -105,18 +105,18 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               onClick={() => !disabled && onAnswerSelect(opt)}
               disabled={disabled}
               className={cn(
-                'w-full p-4 rounded-xl border-2 text-left transition-all flex items-start gap-3',
+                'w-full p-4 rounded-xl border-2 text-left transition-all flex items-start gap-3 group',
                 optionStyle,
                 !disabled && 'cursor-pointer'
               )}
             >
               <span className={cn(
-                'w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0',
-                isSelected ? 'bg-accent text-primary' : 'bg-secondary'
+                'w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0 transition-colors',
+                isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
               )}>
                 {opt}
               </span>
-              <p className="text-sm font-medium pt-1 text-foreground/80">{arOptions[opt]}</p>
+              <p className="text-sm font-medium pt-1 text-slate-800">{arOptions[opt]}</p>
               {showResult && isCorrect && <CheckCircle className="w-5 h-5 text-emerald-500 ml-auto shrink-0" />}
               {showResult && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-destructive ml-auto shrink-0" />}
             </button>
@@ -148,13 +148,13 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
             onChange={(e) => setNumericalInput(e.target.value)}
             disabled={disabled}
             className={cn(
-              "h-14 text-lg font-bold text-center rounded-xl border-2 transition-all",
-              showResult && (isCorrect(parseFloat(numericalInput)) ? "border-emerald-500 bg-emerald-500/5" : "border-destructive bg-destructive/5")
+              "h-14 text-lg font-bold text-center rounded-xl border-2 transition-all bg-white text-slate-900 border-slate-200 focus:border-blue-500",
+              showResult && (isCorrect(parseFloat(numericalInput)) ? "border-emerald-500 bg-emerald-50 text-emerald-900" : "border-red-500 bg-red-50 text-red-900")
             )}
           />
           {showResult && (
             <div className="mt-3 text-center">
-              <p className={cn("text-sm font-bold", isCorrect(parseFloat(numericalInput)) ? "text-emerald-500" : "text-destructive")}>
+              <p className={cn("text-sm font-bold", isCorrect(parseFloat(numericalInput)) ? "text-emerald-600" : "text-red-600")}>
                 {isCorrect(parseFloat(numericalInput)) ? "Correct Answer!" : `Incorrect. Correct Answer: ${typeof question.answer === 'object' ? `${(question.answer as any).min} - ${(question.answer as any).max}` : question.answer}`}
               </p>
             </div>
@@ -163,7 +163,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
         {!disabled && (
           <Button 
             onClick={handleNumericalSubmit} 
-            className="w-full h-12 rounded-xl bg-accent text-primary font-bold shadow-lg shadow-accent/20"
+            className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md shadow-blue-100"
           >
             Save Answer
           </Button>
@@ -174,8 +174,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="bg-card border border-border rounded-2xl p-6 sm:p-8">
-        <JeeQuestion question={question.question_text} className="text-lg sm:text-xl font-medium leading-relaxed" />
+      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8">
+        <JeeQuestion question={question.question_text} className="text-lg sm:text-xl font-medium leading-relaxed text-slate-800" />
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -186,3 +186,5 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
     </div>
   );
 };
+
+export default QuestionRenderer;

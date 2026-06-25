@@ -132,7 +132,7 @@ const MOCK_BATCHES: Batch[] = [
     badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     accentColor: 'neet',
     benefits: [
-      'Comprehensive Core Lectures',
+      'Comprehensive Study Notes',
       'Exhaustive NCERT Review',
       'Daily Formula Worksheets',
       'AI Doubt Solver Support'

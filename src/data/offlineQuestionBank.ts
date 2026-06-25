@@ -1,4 +1,5 @@
 import { Question } from '@/hooks/usePracticeQuestions';
+import { UNIVERSAL_TOPIC_CATALOG } from '../services/topicCatalog';
 
 export interface UnifiedQuestion extends Question {
   question_id: string;
@@ -14,6 +15,26 @@ export interface UnifiedQuestion extends Question {
   difficultyScore: number;
   conceptCoverage: number;
   jeeRelevanceScore: number;
+  option_misconceptions?: Record<string, string>;
+  source_pattern?: {
+    pyq_pattern: string;
+    concept: string;
+    difficulty: string;
+    year_similarity: string;
+  };
+  target_quantity?: string;
+  target_quantity_units?: string;
+  recomputed_numerical_value?: string;
+  faculty_review?: {
+    question_clarity: number;
+    data_sufficiency: number;
+    jee_authenticity: number;
+    distractor_quality: number;
+    solution_quality: number;
+    overall_score: number;
+  };
+  validation_reason?: string;
+  is_valid_pipeline?: boolean;
 }
 
 // Helper: pick random element
@@ -1255,77 +1276,178 @@ export function getOfflineQuestions(
     const subjectDB = SUBJECT_TEMPLATES[subjectKey] || SUBJECT_TEMPLATES.physics;
     const chaptersInSubject = Object.keys(subjectDB);
 
-    // Try to find matching chapter
-    let matchedChapterKey = chaptersInSubject.find(
-      key => chapClean.includes(key) || key.includes(chapClean)
-    );
+    // Strict subtopic to parent chapter mapping
+    const topicToChapterMap: Record<string, string> = {
+      "relative motion": "kinematics",
+      "graphs": "kinematics",
+      "velocity": "kinematics",
+      "acceleration": "kinematics",
+      "average velocity": "kinematics",
+      "variable acceleration": "kinematics",
+      "units & dimensions": "units & dimensions",
+      "units & measurements": "units & dimensions",
+      "laws of motion": "laws of motion",
+      "newton's laws": "laws of motion",
+      "wpe": "wpe",
+      "work, power": "wpe",
+      "electrostatics": "electrostatics",
+      "coulomb's law": "electrostatics",
+      "electric field": "electrostatics",
+      "electric potential": "electrostatics",
+      "capacitance": "electrostatics",
+      "gauss law": "electrostatics",
+      "chemical bonding": "chemical bonding",
+      "functions": "functions",
+      "calculus": "calculus",
+      "limits": "calculus",
+      "coordinate geometry": "coordinate geometry",
+      "mole concept": "mole concept",
+      "moment of inertia": "rotational motion"
+    };
 
-    // Fallback if no match
+    // Resolve parent chapter key
+    let matchedChapterKey = topicToChapterMap[chapClean];
+    
+    // Check Universal Topic Catalog as high-fidelity source of truth
+    if (!matchedChapterKey && UNIVERSAL_TOPIC_CATALOG[chapClean]) {
+      matchedChapterKey = UNIVERSAL_TOPIC_CATALOG[chapClean].parentChapter;
+    }
+    
     if (!matchedChapterKey) {
-      // Pick first chapter key of the subject
-      matchedChapterKey = chaptersInSubject[0];
+      const catalogEntry = Object.entries(UNIVERSAL_TOPIC_CATALOG).find(
+        ([k]) => chapClean.includes(k) || k.includes(chapClean)
+      );
+      if (catalogEntry) {
+        matchedChapterKey = catalogEntry[1].parentChapter;
+      }
     }
 
-    const templates = subjectDB[matchedChapterKey] || subjectDB[chaptersInSubject[0]];
-    const generatedQuestions: UnifiedQuestion[] = [];
+    if (!matchedChapterKey) {
+      matchedChapterKey = chaptersInSubject.find(
+        key => chapClean.includes(key) || key.includes(chapClean)
+      );
+    }
 
-    for (let i = 0; i < count; i++) {
-      // Pick template (cyclically or randomly)
-      const template = templates[i % templates.length];
-      const result = template(difficulty);
+    // Default fallback (strictly within chapters of the subject)
+    if (!matchedChapterKey) {
+      matchedChapterKey = chaptersInSubject.find(k => k.includes('electrostatics')) || chaptersInSubject[0];
+    }
 
-      // Randomize option order so it's not always option_a
-      const originalOptions = [
-        { key: 'A', val: result.option_a },
-        { key: 'B', val: result.option_b },
-        { key: 'C', val: result.option_c },
-        { key: 'D', val: result.option_d }
-      ];
 
-      // Shuffle using a seeded/random method
-      const shuffled = [...originalOptions].sort(() => Math.random() - 0.5);
-      
-      const optionsObj = {
-        A: shuffled[0].val,
-        B: shuffled[1].val,
-        C: shuffled[2].val,
-        D: shuffled[3].val
-      };
+    const runGeneration = (strict: boolean, chapterKey: string): UnifiedQuestion[] => {
+      const list: UnifiedQuestion[] = [];
+      const seen = new Set<string>();
+      const currentTemplates = subjectDB[chapterKey] || [];
 
-      const correctOptIndex = shuffled.findIndex(item => item.key === result.correct_option);
-      const newCorrectKey = ['A', 'B', 'C', 'D'][correctOptIndex] as 'A' | 'B' | 'C' | 'D';
+      for (let i = 0; i < currentTemplates.length; i++) {
+        const template = currentTemplates[i];
+        const result = template(difficulty);
 
-      generatedQuestions.push({
-        id: `offline-${matchedChapterKey}-${Date.now()}-${i}`,
-        question_id: `offline-${matchedChapterKey}-${Date.now()}-${i}`,
+        const text = result.question_text.toLowerCase();
+        const concept = (result.concept_tested || '').toLowerCase();
+        const explanation = (result.explanation || '').toLowerCase();
+        
+        const cleanTopic = chapClean;
+        let topicMatches = false;
+
+        const mapped = UNIVERSAL_TOPIC_CATALOG[cleanTopic] || Object.entries(UNIVERSAL_TOPIC_CATALOG).find(([k]) => cleanTopic.includes(k) || k.includes(cleanTopic))?.[1];
+
+        if (mapped) {
+          const matchesConcept = mapped.concepts.some((c: string) => concept.includes(c.toLowerCase()) || c.toLowerCase().includes(concept));
+          const matchesKeyword = mapped.keywords.some((kw: string) => text.includes(kw) || concept.includes(kw) || explanation.includes(kw));
+          topicMatches = matchesConcept || matchesKeyword;
+        } else {
+          const topicWords = cleanTopic.split(/\s+/).filter(w => w.length > 2);
+          topicMatches = topicWords.some(w => text.includes(w) || concept.includes(w));
+        }
+
+        if (strict && !topicMatches) {
+          continue;
+        }
+
+        const rawText = result.question_text;
+        const optionHash = [result.option_a, result.option_b, result.option_c, result.option_d].sort().join('|');
+        const uniqueKey = `${rawText}-${optionHash}`;
+
+        if (seen.has(uniqueKey)) {
+          continue;
+        }
+        seen.add(uniqueKey);
+
+        const originalOptions = [
+          { key: 'A', val: result.option_a },
+          { key: 'B', val: result.option_b },
+          { key: 'C', val: result.option_c },
+          { key: 'D', val: result.option_d }
+        ];
+
+        const shuffled = [...originalOptions].sort(() => Math.random() - 0.5);
+        
+        const optionsObj = {
+          A: shuffled[0].val,
+          B: shuffled[1].val,
+          C: shuffled[2].val,
+          D: shuffled[3].val
+        };
+
+        const correctOptIndex = shuffled.findIndex(item => item.key === result.correct_option);
+        const newCorrectKey = ['A', 'B', 'C', 'D'][correctOptIndex] as 'A' | 'B' | 'C' | 'D';
+
+        list.push({
+          id: `offline-${chapterKey}-${Date.now()}-${i}-${Math.floor(Math.random() * 1000)}`,
+          question_id: `offline-${chapterKey}-${Date.now()}-${i}-${Math.floor(Math.random() * 1000)}`,
+          node_id: chapter,
+          type: "MCQ",
+          exam_type: "JEE",
+          difficulty: difficulty,
+          question_text: result.question_text,
+          options: optionsObj,
+          option_a: optionsObj.A,
+          option_b: optionsObj.B,
+          option_c: optionsObj.C,
+          option_d: optionsObj.D,
+          answer: newCorrectKey,
+          correct_option: newCorrectKey,
+          correct_answer: newCorrectKey,
+          explanation: result.explanation,
+          explanation_text: result.explanation,
+          concept_tested: result.concept_tested || chapter,
+          is_variant: false,
+          parent_question_id: null,
+          difficultyScore: result.difficultyScore,
+          conceptCoverage: result.conceptCoverage,
+          jeeRelevanceScore: result.jeeRelevanceScore
+        });
+
+        if (list.length >= count) {
+          break;
+        }
+      }
+      return list;
+    };
+
+    let generatedQuestions = runGeneration(true, matchedChapterKey);
+    
+    // Fallback Tier 4: Relax topic relevance filter to load any questions from the chapter
+    if (generatedQuestions.length === 0) {
+      console.warn(`[Offline Bank] No strict matches found for "${chapter}" in "${matchedChapterKey}". Loading chapter-level questions.`);
+      generatedQuestions = runGeneration(false, matchedChapterKey);
+    }
+
+    // Fallback Tier 5: Pull from the first available chapter in the subject
+    if (generatedQuestions.length === 0) {
+      console.warn(`[Offline Bank] Matched chapter was empty. Rejecting cross-topic fallback to ensure 100% topic match rate.`);
+      return EMERGENCY_QUESTIONS.filter(eq => eq.exam_type === 'JEE').map((eq, i) => ({
+        ...eq,
         node_id: chapter,
-        type: "MCQ",
-        exam_type: "JEE",
-        difficulty: difficulty,
-        question_text: result.question_text,
-        options: optionsObj,
-        option_a: optionsObj.A,
-        option_b: optionsObj.B,
-        option_c: optionsObj.C,
-        option_d: optionsObj.D,
-        answer: newCorrectKey,
-        correct_option: newCorrectKey,
-        correct_answer: newCorrectKey,
-        explanation: result.explanation,
-        explanation_text: result.explanation,
-        concept_tested: result.concept_tested || chapter,
-        is_variant: i > 0, // Mark subsequents as variant
-        parent_question_id: i > 0 ? generatedQuestions[0].question_id : null,
-        difficultyScore: result.difficultyScore,
-        conceptCoverage: result.conceptCoverage,
-        jeeRelevanceScore: result.jeeRelevanceScore
-      });
+        concept_tested: `${chapter} Concept Backup`
+      }));
     }
+
 
     return generatedQuestions;
   } catch (error) {
     console.error("Error generating offline questions from templates, using emergency pack:", error);
-    // Return copies of EMERGENCY_QUESTIONS
     return EMERGENCY_QUESTIONS.map((eq, i) => ({
       ...eq,
       id: `${eq.id}-${Date.now()}-${i}`,

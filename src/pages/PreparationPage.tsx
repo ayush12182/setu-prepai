@@ -403,7 +403,7 @@ const PreparationPage: React.FC = () => {
                   {isCuet ? 'CUET Study Sessions' : isNeet ? 'NEET Tutorial Sessions' : 'JEE Tutorial Sessions'}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  {isCuet ? 'NCERT-concise notes designed for CUET speed preparation' : isNeet ? 'NCERT-focused notes curated by top NEET educators' : 'Premium Kota-style notes curated by toppers and teachers'}
+                  {isCuet ? 'NCERT-concise notes designed for CUET speed preparation' : isNeet ? 'NCERT-focused notes curated by top NEET educators' : 'Premium NCERT-aligned notes curated by toppers and teachers'}
                 </p>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-accent/10 text-accent border-0 text-xs">Premium Notes</Badge>

@@ -29,57 +29,43 @@ export async function callGemini<T = any>(
 }
 
 export const JEE_PROMPT_CONSTRAINTS = `
-=== JEE ASPIRANT 99TH PERCENTILE GENERATION RULES ===
+=== PrepEntrance JEE V3 EXAM ENGINE RULES ===
 Target Student: JEE Main & Advanced Aspirants aiming for a 99+ Percentile.
-Source Pattern Hierarchy (MUST strictly resemble or draw inspiration from):
-1. JEE Main PYQs (2019-2026)
-2. JEE Advanced PYQs
-3. Allen Exercises (Multi-concept, Sheet Exercises)
-4. Resonance Sheets
-5. FIITJEE GMP (Grand Masters Package)
-6. Mathongo Pattern Analysis
-7. NTA Abhyas Mock Papers
-8. NCERT Exemplar
+Inspiration Sources: JEE Main PYQs (2019-2026), JEE Advanced PYQs, Allen/Resonance Module Sheet Exercises, FIITJEE GMP.
 
-NEVER GENERATE:
-- Direct Formula Substitution questions (e.g., given speed and time, find distance).
-- Simple one-step textbook/NCERT examples.
-- ChatGPT-generated generic/verbose/vague questions.
-- Banned AI terminology: "zero-state outcome", "practical run", "open-loop process", "dynamic state prediction", "academic simulation language".
-- School-level theoretical questions (e.g., "Which of the following is true?", "Who discovered benzene?").
+MANDATORY QUESTION QUALITY CRITERIA:
+1. CONCEPT-DRIVEN OVER MEMORY:
+   - Generate questions checking deep conceptual understanding, multi-step derivation, and multi-concept integration.
+   - Absolutely NO direct formula substitution or simple theoretical recognition.
 
-SUBJECT SPECIFIC ENGINES:
-1. PHYSICS ENGINE:
-   - Kinematics: Must involve Relative Velocity (River Boat, Rain-Man, short-distance approach), Projectile (on inclined plane, oblique projectile), Velocity-Time & Position-Time Graphs (slope, area, non-uniform acceleration), Piecewise/Multi-particle motion.
-   - NLM: Must involve Pulleys (massless/movable, constraint relations), Inclined planes with friction, Pseudo forces (accelerating frames), Friction (limiting friction, multi-block systems).
-   - WPE: Must involve Energy Conservation, Variable forces (integral-based work), Spring-Block systems (max compression, extensions), Power optimization.
-   - Electrostatics: Must involve Field Mapping, Potential, Conductors (earthing, charge distribution on concentric shells), Capacitors (dielectric insertion, RC circuits, charge sharing), Mixed concepts.
+2. NUMERIC REALISM:
+   - Use realistic experimental values, non-integer parameters, and authentic JEE-style numbers.
+   - Bad: m = 10 kg, r = 2 m, v = 5 m/s.
+   - Good: m = 3.5 kg, r = 0.75 m, v = 4.2 m/s, or expressions using variables (g, L, theta).
 
-2. MATHS ENGINE:
-   - Functions: Questions must feel like compositions f(g(x)), finding Domain/Range of complex algebraic/transcendental functions, Injective/Surjective/Bijective checks. Never simple definitions.
-   - Calculus: Must cover Limits (L'Hopital, series expansion, 1^infinity form), Continuity & Differentiability (piecewise functions, checking differentiability at points), AOD (maxima-minima, tangent & normal, rate measure), Integration (definite integral properties, Leibniz rule, area bounded by curves).
-   - Coordinate Geometry: Must cover Tangent, Normal, Chord of contact, Director circle, combined conics geometry (intersection of parabola and ellipse/hyperbola).
+3. DIFFICULTY BUCKETS:
+   - Easy: Single-stage direct application of a core concept in an unfamiliar scenario.
+   - Medium: Integration of 2 distinct concepts (e.g., Conservation of Momentum + Spring Potential Energy).
+   - Hard: Multi-concept integration with subtle physical or mathematical traps (typical JEE Advanced or top 10% JEE Main).
 
-3. CHEMISTRY ENGINE:
-   - Physical Chemistry: Must be calculation-heavy (Mole Concept with limiting reagents, Thermodynamics with path integrals/state functions, chemical/ionic Equilibrium, Electrochemistry Nernst equation).
-   - Organic Chemistry: Reaction-based. Major product prediction, detailed stereochemistry, reaction mechanisms (SN1, SN2, E1, E2, electrophilic addition, named rearrangements). No history trivia.
-   - Inorganic Chemistry: PYQ style. Assertion-Reason questions, coordination chemistry (CFT, isomerism, magnetic moments), exceptions in chemical bonding, periodic trends.
+4. CHAPTER-AWARE SPECIFIC TOPICS:
+   - Kinematics: Must target Relative motion (river-boat, short-distance approach), Graph interpretation (v-t, a-x slopes/areas), Projectile motion on an incline, or Variable acceleration (differentiation/integration).
+   - Laws of Motion: Must involve Free Body Diagrams (FBD), limiting/static friction, constraint relations (pulley constraints), or pseudo-forces in accelerating frames.
+   - Electrostatics: Must involve Field/Potential mapping, conductor behavior (earthing concentric conducting shells), dielectric insertion in capacitors, or RC circuits.
 
-DIFFICULTY CALIBRATION:
-- "easy" -> Foundation (NCERT Level / JEE Main 2024 Easy Shift)
-- "medium" -> JEE Main Standard (Typical JEE Main PYQ)
-- "hard" -> JEE Main Hard (Top 10-15% hardest questions from JEE Main or typical JEE Advanced/Olympiad style multi-step thinking).
+5. AUTHENTIC JEE MAIN FORMAT PATTERNS:
+   - Generate standard single-correct MCQs, numeric integer type, concept matching matrices, or Assertion-Reasoning (Statement 1 and Statement 2) depending on the chapter.
 
 MANDATORY EXPLANATION FORMAT:
-Every solution/explanation must contain exactly these five steps labeled:
-Step 1: Concept used - Explain the underlying concept.
-Step 2: Formula used - Show the formula(s).
-Step 3: Mathematical substitution - Substitute the actual values.
-Step 4: Simplification - Show step-by-step simplification.
-Step 5: Final answer - State the final numerical/conceptual answer.
+Every generated solution MUST contain exactly the following five sections:
+- **Concept**: Explain what chapter idea and theory is being tested.
+- **Formula Used**: Displayed in standard LaTeX notation (e.g. \\rho=\\frac{m}{V} or E=\\frac{\\sigma}{2\\epsilon_0}).
+- **Step-by-Step Solution**: Detailed, line-by-line derivation showing the mathematical transitions.
+- **Shortcut**: A conceptual trick or dimensional analysis shortcut, if available.
+- **JEE Insight**: A "Teacher's Note" reflecting the historical frequency and traps associated with this concept in recent JEE exams.
 
-MOST IMPORTANT TEST:
-Before emitting the question, pass it through this test: "Could this realistically appear in JEE Main or JEE Advanced? Reject any question that can be solved instantly without conceptual reasoning." If the answer is NO, discard the question and generate a new one. All questions must feel authentic, mathematical, numerical, and challenging.
+MOST IMPORTANT VALIDATION TEST:
+"Could this question realistically appear in an actual JEE Main or Advanced paper?" If the answer is NO, discard it and generate a new one.
 `;
 
 export async function generateQuestionsGemini(
@@ -91,9 +77,9 @@ export async function generateQuestionsGemini(
 ) {
   const isJee = exam.toUpperCase().includes('JEE');
   const systemPrompt = isJee
-    ? `You are an expert JEE exam question setter. Generate questions indistinguishable from authentic JEE Main and JEE Advanced questions. Avoid school-level, textbook-level, and direct formula-substitution questions. Reject any question that can be solved instantly without conceptual reasoning. Return ONLY a JSON object with a "questions" array. No markdown.
-
-${JEE_PROMPT_CONSTRAINTS}`
+    ? `You are an expert JEE exam question setter. Generate questions indistinguishable from authentic JEE Main and JEE Advanced questions. Return ONLY a JSON object with a "questions" array. No markdown.
+    
+    ${JEE_PROMPT_CONSTRAINTS}`
     : `You are an expert ${exam} exam question setter. Return ONLY a JSON object with a "questions" array. No markdown.`;
 
   const userPrompt = `Generate exactly ${count} MCQs on "${topic}" for ${exam}. Difficulty: ${difficulty}. Each question must have: question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), explanation, concept_tested.`;
@@ -121,4 +107,3 @@ ${JEE_PROMPT_CONSTRAINTS}`
     correct_option: q.correct_option,
   }));
 }
-

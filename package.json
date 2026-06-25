@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "bin": {
+    "prepentrance-factory": "./scripts/prepentrance-factory.js"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -15,7 +18,9 @@
     "seed:pyqs:jee": "node scripts/seed-pyqs.js --exam JEE --batch-size 50 --concurrency 3",
     "seed:pyqs:neet": "node scripts/seed-pyqs.js --exam NEET --batch-size 50 --concurrency 3",
     "seed:pyqs:cuet": "node scripts/seed-pyqs.js --exam CUET --batch-size 50 --concurrency 3",
-    "seed:pyqs:dry": "node scripts/seed-pyqs.js --dry-run"
+    "seed:pyqs:dry": "node scripts/seed-pyqs.js --dry-run",
+    "seed:factory": "node scripts/prepentrance-factory.js",
+    "seed:factory:dry": "node scripts/prepentrance-factory.js --dry-run"
   },
   "dependencies": {
     "@cashfreepayments/cashfree-js": "^1.0.6",

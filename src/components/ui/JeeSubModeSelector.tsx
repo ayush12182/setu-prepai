@@ -13,7 +13,7 @@ const options: { mode: JeeSubMode; label: string; short: string; description: st
         mode: 'advanced',
         label: 'JEE Advanced',
         short: 'Advanced',
-        description: 'Integer-type, paragraph-based, Kota-level depth',
+        description: 'Integer-type, paragraph-based, PYQ-verified depth',
     },
     {
         mode: 'both',
