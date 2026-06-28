@@ -405,7 +405,7 @@ const LandingPage: React.FC = () => {
               />
 
               {/* Analytics card — overlaps the student (left) */}
-              <div className="absolute left-0 top-[8%] z-20 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl w-[195px]" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+              <div className="hidden md:block absolute left-0 top-[8%] z-20 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl w-[195px]" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
                 <div className="flex items-center justify-between mb-2.5">
                   <span className="text-caption font-bold text-slate-700 tracking-wide">JEE Main Mock Test</span>
                   <BarChart2 className="w-3.5 h-3.5 text-blue-500" />
@@ -434,7 +434,7 @@ const LandingPage: React.FC = () => {
               </div>
 
               {/* AI Mentor card — overlaps on right side */}
-              <div className="absolute right-0 top-[12%] z-20 bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xl w-[215px]" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
+              <div className="hidden md:block absolute right-0 top-[12%] z-20 bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xl w-[215px]" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
                 <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -476,7 +476,7 @@ const LandingPage: React.FC = () => {
               </div>
 
               {/* Achievement badge floating */}
-              <div className="absolute bottom-[12%] left-[5%] z-20 bg-white border border-amber-200 rounded-xl px-3 py-2 shadow-lg flex items-center gap-2">
+              <div className="hidden sm:flex absolute bottom-[12%] left-[5%] z-20 bg-white border border-amber-200 rounded-xl px-3 py-2 shadow-lg items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-body-md">🏆</div>
                 <div>
                   <div className="text-caption font-bold text-slate-800">Top 5%</div>
