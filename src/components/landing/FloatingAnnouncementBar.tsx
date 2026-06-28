@@ -21,7 +21,7 @@ const FloatingAnnouncementBar: React.FC = () => {
 
       {/* Center Text (Clean English Only) */}
       <div className="flex-1 text-center font-sans font-medium text-sm text-white px-2 truncate">
-        🎯 Early Access is LIVE — AI Prep for JEE, NEET & CUET at just <span className="font-extrabold font-display">₹249/month</span>
+        🎯 Early Access is LIVE — AI Prep for JEE, NEET & CUET at just <span className="font-extrabold font-display">₹349/month</span>
       </div>
 
       {/* Right side: [Claim Now →] button (white bg, saffron text, rounded) */}

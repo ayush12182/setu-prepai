@@ -76,7 +76,7 @@ const PricingSection: React.FC = () => {
 
               {/* Price */}
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl sm:text-[52px] font-display font-black text-[#0D1117] tracking-tight leading-none">₹249</span>
+                <span className="text-5xl sm:text-[52px] font-display font-black text-[#0D1117] tracking-tight leading-none">₹349</span>
                 <span className="text-base font-bold text-[#475569] font-sans">/month</span>
               </div>
               <p className="text-[11.5px] text-[#6B7280] font-sans font-bold pl-0.5">

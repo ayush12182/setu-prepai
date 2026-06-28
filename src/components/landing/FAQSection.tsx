@@ -17,7 +17,7 @@ const FAQ_ITEMS = [
   },
   {
     question: 'What happens after my 3-day trial ends?',
-    answer: 'After the trial, you can upgrade to PrepEntrance Pro for ₹249/month. You can also earn bonus trial days by referring friends — each successful referral adds 1 extra day.',
+    answer: 'After the trial, you can upgrade to PrepEntrance Pro for ₹349/month. You can also earn bonus trial days by referring friends — each successful referral adds 1 extra day.',
   },
   {
     question: 'How does the AI Teacher work?',

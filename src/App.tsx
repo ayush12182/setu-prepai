@@ -130,11 +130,13 @@ const App = () => (
                         <Route path="/major-test" element={<TrialGate><MajorTestPage /></TrialGate>} />
                         <Route path="/revision" element={<TrialGate><RevisionPage /></TrialGate>} />
                         <Route path="/revision/:subject/:topic" element={<TrialGate><RevisionTopicPage /></TrialGate>} />
-                        <Route path="/study-ai" element={<StudyPrepEntrance />} />
-                        <Route path="/lecture-prepentrance" element={<Navigate to="/study-ai" replace />} />
-                        <Route path="/ask-prepentrance" element={<TrialGate><AskPrepEntrancePage /></TrialGate>} />
+                        <Route path="/study-ai" element={<Navigate to="/student-hub?comingSoon=knowledge-engine" replace />} />
+                        <Route path="/knowledge-engine" element={<Navigate to="/student-hub?comingSoon=knowledge-engine" replace />} />
+                        <Route path="/lecture-prepentrance" element={<Navigate to="/student-hub?comingSoon=knowledge-engine" replace />} />
+                        <Route path="/ask-prepentrance" element={<Navigate to="/student-hub?comingSoon=knowledge-engine" replace />} />
                         <Route path="/my-batch" element={<Navigate to="/student-hub" replace />} />
-                        <Route path="/analytics" element={<TrialGate><AnalyticsPage /></TrialGate>} />
+                        <Route path="/analytics" element={<Navigate to="/student-hub?comingSoon=performance" replace />} />
+                        <Route path="/performance" element={<Navigate to="/student-hub?comingSoon=performance" replace />} />
                         <Route path="/profile" element={<ProfilePage />} />
                         <Route path="/settings" element={<SettingsPage />} />
                         <Route path="/privacy" element={<PrivacyPage />} />

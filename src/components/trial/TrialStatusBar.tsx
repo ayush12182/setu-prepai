@@ -31,7 +31,7 @@ export const TrialStatusBar: React.FC = () => {
         setIsProcessing(true);
         toast.info('Connecting securely to Cashfree Payments...');
         try {
-            await startSubscriptionCheckout(249.00, user);
+            await startSubscriptionCheckout(349.00, user);
         } catch (err: unknown) {
             toast.error(err instanceof Error ? err.message : 'Failed to initialize checkout');
         } finally {
@@ -100,7 +100,7 @@ export const TrialStatusBar: React.FC = () => {
                         ) : (
                             <Sparkles className="w-3 h-3 mr-1" />
                         )}
-                        Upgrade ₹249/mo
+                        Upgrade ₹349/mo
                     </Button>
 
                     <button 

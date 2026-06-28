@@ -2,7 +2,7 @@
 // Premium EdTech design: clean, academic, distraction-free
 
 import React, { useState } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import {
   Home, BookOpen, PenTool, ClipboardCheck, RotateCcw,
   MessageCircle, BarChart3, User, X, Sparkles, Activity,
@@ -18,6 +18,7 @@ import { useTrialSystem } from '@/hooks/useTrialSystem';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
+import { ComingSoonModal } from '@/components/shared/ComingSoonModal';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -31,9 +32,9 @@ const getNavItems = () => [
   { path: '/practice',          icon: PenTool,      label: 'Practice',    badge: undefined, isLearn: false },
   { path: '/test',              icon: ClipboardCheck,label: 'Tests',      badge: undefined, isLearn: false },
   { path: '/revision',          icon: RotateCcw,    label: 'Revision',    badge: undefined, isLearn: false },
-  { path: '/study-ai',          icon: Sparkles,     label: 'Knowledge Engine',badge: 'NEW',     isLearn: false },
-  { path: '/analytics',         icon: BarChart3,    label: 'Performance', badge: undefined, isLearn: false },
-  { path: '/ask-prepentrance',  icon: MessageCircle,label: 'Ask PrepEntrance',   badge: undefined, isLearn: false },
+  { path: '/study-ai',          icon: Sparkles,     label: 'Knowledge Engine',badge: 'Coming Soon',     isLearn: false },
+  { path: '/analytics',         icon: BarChart3,    label: 'Performance', badge: 'Coming Soon', isLearn: false },
+  { path: '/ask-prepentrance',  icon: MessageCircle,label: 'Ask PrepEntrance',   badge: 'Coming Soon', isLearn: false },
   { path: '/profile',           icon: User,         label: 'Profile',     badge: undefined, isLearn: false },
 ];
 
@@ -53,6 +54,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const navItems = getNavItems();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Coming Soon Modal State
+  const [comingSoon, setComingSoon] = useState<{isOpen: boolean; title: string; description: string}>({
+    isOpen: false, title: '', description: ''
+  });
+
+  const openComingSoon = (type: 'knowledge-engine' | 'performance') => {
+    if (type === 'performance') {
+      setComingSoon({
+        isOpen: true,
+        title: '🚀 Performance Dashboard Coming Soon',
+        description: "We're building a powerful analytics dashboard to help you track your preparation, strengths, weaknesses, AIR prediction, progress trends, and personalized performance insights."
+      });
+    } else {
+      setComingSoon({
+        isOpen: true,
+        title: '🚀 Coming Soon',
+        description: "The PrepEntrance Knowledge Engine is currently under development and will launch soon. It will provide AI-powered personalized insights, smart revision recommendations, chapter connections, and advanced learning assistance."
+      });
+    }
+  };
+
+  React.useEffect(() => {
+    const feature = searchParams.get('comingSoon');
+    if (feature === 'knowledge-engine' || feature === 'performance') {
+      openComingSoon(feature);
+      searchParams.delete('comingSoon');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // YouTube Lecture Analyzer
   const [isAnalyzerOpen, setIsAnalyzerOpen] = useState(false);
@@ -197,6 +229,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 to={item.path}
                 end={!isLearnItem}
                 onClick={(e) => {
+                  const isLockedKE = item.path === '/study-ai' || item.path === '/ask-prepentrance';
+                  const isLockedPerf = item.path === '/analytics';
+                  
+                  if (isLockedKE) {
+                    e.preventDefault();
+                    openComingSoon('knowledge-engine');
+                    return;
+                  }
+                  if (isLockedPerf) {
+                    e.preventDefault();
+                    openComingSoon('performance');
+                    return;
+                  }
+
                   if (isAnalyzer) {
                     e.preventDefault();
                     setIsAnalyzerOpen(true);
@@ -403,6 +449,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           )}
         </DialogContent>
       </Dialog>
+
+      <ComingSoonModal 
+        isOpen={comingSoon.isOpen}
+        onClose={() => setComingSoon(prev => ({ ...prev, isOpen: false }))}
+        title={comingSoon.title}
+        description={comingSoon.description}
+      />
     </>
   );
 };

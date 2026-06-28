@@ -46,7 +46,7 @@ export const TrialExpiredScreen: React.FC = () => {
         setIsProcessing(true);
         toast.info('Connecting securely to Cashfree Payments...');
         try {
-            await startSubscriptionCheckout(249.00, user);
+            await startSubscriptionCheckout(349.00, user);
         } catch (err: unknown) {
             toast.error(err instanceof Error ? err.message : 'Failed to initialize checkout');
         } finally {
@@ -84,7 +84,7 @@ export const TrialExpiredScreen: React.FC = () => {
                     <div className="bg-white/[0.04] rounded-2xl p-5 border border-white/[0.06] mb-6">
                         <div className="flex items-baseline justify-center gap-2 mb-3">
                             <span className="text-lg text-white/30 line-through">₹999</span>
-                            <span className="text-4xl font-bold text-accent">₹249</span>
+                            <span className="text-4xl font-bold text-accent">₹349</span>
                             <span className="text-white/40 text-sm">/ month</span>
                         </div>
                         <p className="text-center text-white/30 text-xs mb-4">
@@ -113,7 +113,7 @@ export const TrialExpiredScreen: React.FC = () => {
                         ) : (
                             <Sparkles className="h-4 w-4 mr-2" />
                         )}
-                        Upgrade to PrepEntrance Pro — ₹249/month
+                        Upgrade to PrepEntrance Pro — ₹349/month
                     </Button>
 
                     {/* View Plans secondary button */}

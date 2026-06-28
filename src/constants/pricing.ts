@@ -5,7 +5,7 @@
 
 export const PRICING = {
   /** Monthly subscription price in INR */
-  PRO_MONTHLY: 249,
+  PRO_MONTHLY: 349,
 
   /** Free trial duration in days */
   TRIAL_DAYS: 3,
@@ -17,8 +17,8 @@ export const PRICING = {
   CURRENCY_CODE: 'INR',
 
   /** Formatted monthly price string */
-  PRO_MONTHLY_DISPLAY: '₹249/month',
+  PRO_MONTHLY_DISPLAY: '₹349/month',
 
   /** Formatted price for button labels */
-  PRO_CTA_LABEL: 'Upgrade to Pro — ₹249/month',
+  PRO_CTA_LABEL: 'Upgrade to Pro — ₹349/month',
 } as const;
