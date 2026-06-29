@@ -41,7 +41,7 @@ export default async function handler(req: Request) {
   // Anon key as last resort (works only if RLS allows public read on batches)
   const anonKey =
     (process.env.VITE_SUPABASE_PUBLISHABLE_KEY as string) ||
-    (process.env.VITE_SUPABASE_ANON_KEY as string) ||
+    (process.env.VITE_SUPABASE_PUBLISHABLE_KEY as string) ||
     '';
 
   if (!supabaseUrl) {

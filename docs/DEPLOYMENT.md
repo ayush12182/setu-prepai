@@ -16,7 +16,7 @@ When deploying to Vercel, ensure the following environment variables are securel
 
 ```
 VITE_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY
+VITE_SUPABASE_PUBLISHABLE_KEY
 VITE_CASHFREE_APP_ID
 VITE_CASHFREE_SECRET_KEY
 VITE_OPENAI_API_KEY
