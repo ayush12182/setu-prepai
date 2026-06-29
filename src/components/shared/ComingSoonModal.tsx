@@ -15,13 +15,13 @@ export function ComingSoonModal({ isOpen, onClose, title, description }: ComingS
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-white border border-slate-200 text-slate-900 rounded-2xl shadow-xl p-6">
         <DialogHeader className="space-y-3 text-center flex flex-col items-center">
-          <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-1">
-            <Sparkles className="w-6 h-6 text-blue-600" />
+          <div className="brand-logo-container rounded-xl w-12 h-12 shrink-0 mb-2">
+            <img src="/prepentrance-logo.png" alt="PrepEntrance" className="brand-logo-img" />
           </div>
-          <DialogTitle className="text-xl font-bold text-slate-900 tracking-tight">
+          <DialogTitle className="text-[18px] font-bold text-slate-900 tracking-tight leading-none">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-sm text-slate-500 font-medium leading-relaxed max-w-sm mx-auto">
+          <DialogDescription className="text-sm text-slate-500 font-medium leading-relaxed max-w-sm mx-auto mt-2">
             {description}
           </DialogDescription>
         </DialogHeader>
