@@ -573,7 +573,7 @@ const AITeachingRoomPage: React.FC = () => {
   const lowAttentionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastAdaptationRef = useRef<number>(0);
   // callAIRef allows the engagement effect to reference callAI without a declaration-order issue
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const callAIRef = useRef<(msg: string) => Promise<void>>(async () => { });
 
   // Monitor engagement score and trigger AI adaptation when student is distracted
@@ -1014,7 +1014,7 @@ const AITeachingRoomPage: React.FC = () => {
   }, [language, teacher, speakText, stopAll, avatarMode]);
 
   // Sync callAIRef so the engagement effect can call it without stale-closure issues
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   useEffect(() => { callAIRef.current = callAI; }, [callAI]);
 
   // Voice input (mic)

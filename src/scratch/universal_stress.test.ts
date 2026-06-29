@@ -38,7 +38,7 @@ test('Universal Syllabus Stress Test and Coverage Crawler', async () => {
 
   let sessionsAttempted = 0;
   let sessionsSucceeded = 0;
-  let duplicateDetections = 0;
+  const duplicateDetections = 0;
   const startTime = Date.now();
 
   // Sweep all predefined topics across different counts

@@ -177,7 +177,7 @@ function buildProductionSession(chapter: ChapterDef, topicFilter?: string): {
   diagnostics: any;
   fidelityReport: any;
 } {
-  let rawPool = getProductionQuestionsForChapter(chapter.subject, chapter.name) as any[];
+  const rawPool = getProductionQuestionsForChapter(chapter.subject, chapter.name) as any[];
   const rawPoolSize = rawPool.length;
 
   // Map production questions to UnifiedQuestion format
@@ -642,9 +642,9 @@ function detectSubjectFromContent(q: any): string {
     'torque', 'amplitude',
   ];
 
-  let mathScore = mathsSignals.filter(s => scanText.includes(s)).length;
-  let chemScore = chemSignals.filter(s => scanText.includes(s)).length;
-  let physScore = physicsSignals.filter(s => scanText.includes(s)).length;
+  const mathScore = mathsSignals.filter(s => scanText.includes(s)).length;
+  const chemScore = chemSignals.filter(s => scanText.includes(s)).length;
+  const physScore = physicsSignals.filter(s => scanText.includes(s)).length;
 
   if (mathScore > chemScore && mathScore > physScore) return 'mathematics';
   if (chemScore > physScore && chemScore > mathScore) return 'chemistry';

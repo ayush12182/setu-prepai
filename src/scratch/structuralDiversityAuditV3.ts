@@ -160,7 +160,7 @@ export function runStructuralDiversityAuditV3(): void {
   console.log(`Loaded ${allQuestions.length} questions.\n`);
 
   const topicMetrics: TopicMetrics[] = [];
-  let globalFingerprintCounts = new Map<string, number>();
+  const globalFingerprintCounts = new Map<string, number>();
 
   for (const topic of ACTIVE_TOPICS) {
     const questions = allQuestions.filter(q => q.topic === topic);

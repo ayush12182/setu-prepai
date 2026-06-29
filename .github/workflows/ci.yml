@@ -1,0 +1,36 @@
+name: CI Validation Workflow
+
+on:
+  pull_request:
+    branches:
+      - testing
+      - main
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: TypeScript Validation
+        run: npx tsc --noEmit
+
+      - name: Run Linter
+        run: npm run lint
+
+      # If there are tests in the future, it will run npm run test
+      # - name: Run Tests
+      #   run: npm run test
+
+      - name: Build Project
+        run: npm run build

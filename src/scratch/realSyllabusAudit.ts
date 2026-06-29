@@ -54,8 +54,8 @@ export function runSyllabusAudit() {
   let totalChemConcepts = 0;
   let totalMathsConcepts = 0;
 
-  let totalFormulas = formulasPhys.length + formulasChem.length + formulasMath.length;
-  let totalMisconceptions = Object.keys(misconceptionsExpanded).length;
+  const totalFormulas = formulasPhys.length + formulasChem.length + formulasMath.length;
+  const totalMisconceptions = Object.keys(misconceptionsExpanded).length;
   let totalPyqs = 0;
   let conceptsWithFormulasCount = 0;
   let totalConceptsCount = 0;

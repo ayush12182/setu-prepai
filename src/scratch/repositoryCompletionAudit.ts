@@ -10,11 +10,12 @@ export function runCompletionAudit() {
   if (!fs.existsSync(INDEX_PATH)) {
     console.error('repository_index.json missing!');
     return;
+  }
   
   if (!fs.existsSync(MANIFEST_PATH)) {
     console.error('repository_manifest.json missing!');
     return;
-  
+  }
 
   const index = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf8'));
   const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
@@ -35,10 +36,10 @@ export function runCompletionAudit() {
           totalQuestions += topic.questions || 0;
           qualitySum += topic.quality_score || 0;
           if (topic.duplicate_rate > 0) hasDuplicates = true;
-        
-      
-    
-  
+        }
+      }
+    }
+  }
 
   const avgQuality = liveTopics > 0 ? (qualitySum / liveTopics) : 0;
 
@@ -51,8 +52,8 @@ export function runCompletionAudit() {
   console.log('--- Success Criteria Validation ---');
   
   const validate = (name: string, actual: any, target: any, passed: boolean) => {
-    console.log(`${passed ? '✅' : '❌' ${name.padEnd(25) | Actual: ${String(actual).padEnd(8) | Target: ${target`);
-  ;
+    console.log(`${passed ? '✅' : '❌'} ${name.padEnd(25)} | Actual: ${String(actual).padEnd(8)} | Target: ${target}`);
+  };
 
   validate('Topics Covered', totalTopics, '212', totalTopics === 212 || totalTopics === 214);
   validate('LIVE Topics', liveTopics, '212', liveTopics >= 212 || liveTopics > 0); // Allow partial for now
@@ -60,8 +61,8 @@ export function runCompletionAudit() {
   validate('Questions per Topic', '300', '300', totalQuestions > 0 && (totalQuestions/liveTopics) >= 300);
   validate('Average Quality', avgQuality.toFixed(2), '≥ 8.5', avgQuality >= 8.5);
   validate('Duplicate Rate', duplicateRate, '0%', duplicateRate === '0%');
-  validate('Topic Fidelity', `${topicFidelity%`, '100%', topicFidelity === 100);
-  validate('Repository Retrieval', `${repositoryRetrieval%`, '100%', repositoryRetrieval === 100);
+  validate('Topic Fidelity', `${topicFidelity}%`, '100%', topicFidelity === 100);
+  validate('Repository Retrieval', `${repositoryRetrieval}%`, '100%', repositoryRetrieval === 100);
   validate('Runtime AI Generation', runtimeAiGeneration, 'Disabled', runtimeAiGeneration === 'Disabled');
 
   console.log('\n--- Manifest Integrity ---');

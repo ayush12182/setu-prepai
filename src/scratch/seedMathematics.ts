@@ -10,8 +10,8 @@ export function seedMathematics() {
   const conceptsMathPath = path.join(expandedDir, 'mathematics_expanded.json');
   const misconceptionsPath = path.join(expandedDir, 'misconceptions_expanded.json');
 
-  let formulas = [];
-  let concepts = [];
+  const formulas = [];
+  const concepts = [];
 
   const mathsSyllabus = [
     {

@@ -346,7 +346,7 @@ const ChapterNotesPage: React.FC = () => {
         }
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [notes, isGenerating]);
 
   const generateNotes = async (mode: SmartMode, attempt = 1, forceRegenerate = false) => {

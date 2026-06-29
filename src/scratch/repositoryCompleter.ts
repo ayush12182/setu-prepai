@@ -62,7 +62,7 @@ export async function runCompleter() {
   console.log('Options:', options);
 
   const index = getIndex();
-  let topicsToProcess: any[] = [];
+  const topicsToProcess: any[] = [];
 
   // Filter topics
   for (const subjectKey of Object.keys(index.subjects)) {

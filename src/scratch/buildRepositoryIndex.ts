@@ -80,7 +80,7 @@ async function run() {
       let questionsCount = 0;
       let avgQuality = 0;
       let eds = 0;
-      let duplicateRate = 0;
+      const duplicateRate = 0;
       let status = 'NOT_STARTED';
       let scenarioMax = 0;
       let pathMax = 0;

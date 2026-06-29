@@ -439,7 +439,7 @@ export async function generateQuestions(
   if (dbData.length === 0) {
     try {
       const isBrowser = typeof window !== 'undefined' || typeof document !== 'undefined';
-      let filesToLoad: string[] = [];
+      const filesToLoad: string[] = [];
       let index: any = null;
 
       // Tier 1: Try reading from master repository index
@@ -519,7 +519,7 @@ export async function generateQuestions(
 
       // Load questions from the matched files
       if (filesToLoad.length > 0) {
-        let combinedQuestions: any[] = [];
+        const combinedQuestions: any[] = [];
         for (const file of filesToLoad) {
           const relativePath = `/repository/${file}`;
           let fileData: any = null;

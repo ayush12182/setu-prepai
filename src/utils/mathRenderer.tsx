@@ -28,7 +28,7 @@ function katexToHtml(tex: string, displayMode: boolean): string {
 /** Convert every AI LaTeX delimiter style → unified $$ / $ */
 export function normalizeMathDelimiters(text: string): string {
   // Fix Form Feed characters caused by JavaScript single backslash conversion of \f (in \frac etc.)
-  const cleanText = text.replace(/\x0c/g, '\\f');
+  const cleanText = text.replace(/\\f/g, '\\f');
   return cleanText
     .replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => `$$${inner.trim()}$$`)
     .replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => `$${inner.trim()}$`)

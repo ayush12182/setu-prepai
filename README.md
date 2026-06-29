@@ -1,146 +1,165 @@
-# BP AI Portal - Blood Pressure & Glucose Monitoring
+# PrepEntrance — Your Complete AI Exam Prep Partner
 
-A modern web application for monitoring blood pressure and glucose levels with AI-powered analysis. Features meal and activity context integration for personalized health insights.
+PrepEntrance is a next-generation EdTech platform designed specifically for students preparing for highly competitive Indian entrance examinations: **JEE (Main & Advanced)**, **NEET**, and **CUET**. Powered by AI, it delivers personalized study materials, dynamic practice sessions, and intelligent performance tracking.
+
+## Vision & Mission
+
+**Vision:** To democratize top-tier competitive exam preparation by providing every student with a personalized AI mentor that adapts to their learning pace, strengths, and weaknesses.
+
+**Mission:** To build an all-in-one ecosystem that eliminates the need for fragmented study resources, replacing them with a highly structured, data-driven, and engaging learning experience.
+
+---
 
 ## Features
 
-- 🔬 **AI-Powered Glucose Analysis** - ChatGPT analyzes glucose patterns with meal and activity context
-- 💓 **Blood Pressure Monitoring** - Track BP readings with automatic alerts for abnormal values
-- 📊 **Health Insights** - Get personalized recommendations based on your data
-- 🍽️ **Meal Tracking Integration** - AI considers recent meals when analyzing glucose patterns
-- 🏃 **Activity Context** - Physical activity data included in analysis
-- 🎨 **Modern UI** - Clean, responsive design built with React and Tailwind CSS
+- 🧠 **AI-Powered Learning:** The Knowledge Engine processes YouTube lecture videos and generates comprehensive, structured notes and flashcards on the fly.
+- 📝 **Practice Center:** Infinite, non-repeating practice questions categorized by subject, chapter, and difficulty level.
+- 📋 **Tests:** Full-length mock tests and chapter-wise assessments mimicking real exam environments.
+- 🔄 **Revision:** Auto-generated 1-Page Notes, Formula Sheets, and "Must-Do" topics tailored for rapid revision.
+- 🏠 **Student Hub:** A centralized dashboard displaying the 21-Day Master Plan, recent activity, and quick navigation.
+- 🔒 **Authentication:** Secure Google OAuth and Email/Password login powered by Supabase.
+- 🏫 **Batch Management:** Cohort-based learning allowing students to join specific batches (e.g., Aarambh 2028).
+
+---
+
+## Screenshots
+
+*(Placeholders - Add actual screenshots here before final release)*
+- `![Student Hub](/public/screenshots/hub.png)`
+- `![Practice Center](/public/screenshots/practice.png)`
+- `![1-Page Notes](/public/screenshots/notes.png)`
+
+---
+
+## Architecture Diagram
+
+```mermaid
+graph TD
+    Client[Client Browser] -->|HTTPS| Vercel[Vercel Edge Network]
+    Vercel -->|Hosts| Frontend[React + Vite Frontend]
+    
+    Frontend <-->|REST / Realtime| Supabase[Supabase Platform]
+    Frontend <-->|Payment Intents| Cashfree[Cashfree Gateway]
+    Frontend <-->|AI Prompts| OpenAI[OpenAI API]
+```
+
+## Database Schema Overview
+
+```mermaid
+erDiagram
+    student_profiles ||--o{ attempts : "makes"
+    batches ||--o{ student_profiles : "contains"
+    tests ||--o{ questions : "contains"
+```
+*(For a detailed diagram, see `docs/DATABASE.md`)*
+
+---
 
 ## Tech Stack
 
-- **Frontend**: React 18, Vite
-- **Styling**: Tailwind CSS (inline styles for minimal setup)
-- **Icons**: Lucide React
-- **AI**: OpenAI ChatGPT API (GPT-3.5-turbo)
-- **Deployment**: Vercel-ready
+- **Frontend:** React 18, Vite, TypeScript
+- **Styling:** Tailwind CSS, Shadcn UI
+- **Backend/Database:** Supabase (PostgreSQL, GoTrue Auth)
+- **AI Integrations:** OpenAI (GPT-4)
+- **Payments:** Cashfree Payments SDK
+- **Icons:** Lucide React
 
-## Quick Start
+---
 
-### Prerequisites
+## Folder Structure
 
-- Node.js 18+ installed
-- OpenAI API key (get one at [platform.openai.com](https://platform.openai.com/api-keys))
+```text
+PrepEntrance/
+├── .github/                  # CI/CD Workflows
+├── docs/                     # Extensive Developer Documentation
+├── src/
+│   ├── components/           # Reusable UI components (layout, practice, landing)
+│   ├── contexts/             # React Contexts (Auth, ExamMode)
+│   ├── data/                 # JSON question banks, offline data
+│   ├── hooks/                # Custom React Hooks
+│   ├── pages/                # High-level route components
+│   └── services/             # API services and logic (Question generators, etc.)
+├── .env.example              # Environment variables template
+├── package.json
+└── README.md
+```
 
-### Installation
+---
 
-1. **Clone the repository**
+## Local Development Setup
+
+1. **Clone the repository:**
    ```bash
-   git clone <your-repo-url>
-   cd bp-ai-portal
+   git clone https://github.com/ayush12182/setu-prepai.git
+   cd setu-prepai
    ```
 
-2. **Install dependencies**
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. **Set up environment variables**
-   
-   Create a `.env.local` file in the root directory:
-   ```env
-   VITE_OPENAI_API_KEY=your-openai-api-key-here
+3. **Configure Environment Variables:**
+   ```bash
+   cp .env.example .env.local
    ```
+   Fill in your Supabase and OpenAI keys in `.env.local`.
 
-4. **Run development server**
+4. **Start the Development Server:**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser**
-   - Navigate to the URL shown in the terminal (usually `http://localhost:5173`)
+*(See `docs/ENVIRONMENT_SETUP.md` for full details.)*
 
-## Project Structure
+---
 
-```
-├── src/
-│   ├── App.jsx              # Main application component
-│   ├── main.jsx             # React entry point
-│   └── services/
-│       └── chatgptService.js # OpenAI API integration
-├── components/
-│   ├── BPReminder.jsx       # BP alert component
-│   └── PatientPortal.jsx    # Patient dashboard
-├── services/
-│   ├── bpMonitoringService.js # BP monitoring logic
-│   └── chatgptService.js    # AI service (duplicate for compatibility)
-├── index.html               # HTML entry point
-├── package.json             # Dependencies
-├── vite.config.js           # Vite configuration
-└── vercel.json              # Vercel deployment config
-```
+## Scripts
 
-## Deployment to Vercel
+- `npm run dev`: Starts the local Vite development server.
+- `npm run build`: Compiles TypeScript and builds the production bundle.
+- `npm run lint`: Runs ESLint over the codebase.
+- `npx tsc --noEmit`: Runs TypeScript type-checking without emitting files.
 
-See [DEPLOY_TO_VERCEL.md](./DEPLOY_TO_VERCEL.md) for detailed deployment instructions.
+---
 
-### Quick Deploy Steps
+## Deployment
 
-1. Push your code to GitHub
-2. Import project in Vercel
-3. Add environment variable: `VITE_OPENAI_API_KEY`
-4. Deploy!
+PrepEntrance uses **Vercel** for hosting the frontend and **Supabase** for the backend database. 
 
-## Environment Variables
+Our CI/CD pipeline enforces:
+- Pushes to the `testing` branch automatically deploy to a Preview environment.
+- Pushes to the `main` branch automatically deploy to the Production environment.
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `VITE_OPENAI_API_KEY` | Your OpenAI API key | Yes |
+*(See `docs/DEPLOYMENT.md` for full details.)*
 
-See [ENV_VARS.txt](./ENV_VARS.txt) for setup instructions.
+---
 
-## Usage
+## Testing Workflow
 
-### AI Glucose Analysis
+We strictly separate production data from QA data.
+All new features must be developed on `feature/*` branches and merged into the `testing` branch first. After passing QA in the sandbox environment, changes are merged into `main`.
 
-The app includes example glucose readings with meal and activity context. Click "Analyze Patterns" to see AI-powered insights that consider:
+*(See `docs/TESTING.md` for full details.)*
 
-- Glucose reading trends
-- Recent meals and carbohydrate intake
-- Physical activity timing and intensity
-- Personalized recommendations
+---
 
-### Blood Pressure Monitoring
+## Known Limitations
 
-The BP monitoring feature includes:
+- **Knowledge Engine Video Length:** Currently struggles to process YouTube videos longer than 3 hours due to token limitations.
+- **Offline Question Bank:** If the AI backend is unreachable, the fallback question bank is limited in size for niche topics.
 
-- Automatic status detection (normal, elevated, high, low, critical)
-- Immediate alerts for abnormal readings
-- Reading history tracking
-- Doctor contact integration
+---
 
-## Documentation
+## Roadmap
 
-- [TECH_STACK.md](./TECH_STACK.md) - Complete technology breakdown
-- [BP_MONITORING_README.md](./BP_MONITORING_README.md) - BP feature documentation
-- [IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md) - Feature overview
-- [CHATGPT_SETUP.md](./CHATGPT_SETUP.md) - ChatGPT API setup guide
-- [DEPLOY_TO_VERCEL.md](./DEPLOY_TO_VERCEL.md) - Deployment guide
+- [ ] Launch full Performance Analytics Dashboard.
+- [ ] Implement AI Doubt Solver (Ask PrepEntrance).
+- [ ] Add mobile application wrap (React Native/Capacitor).
+- [ ] Support regional languages for state-level exams.
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+---
 
 ## License
 
-This project is private and proprietary.
-
-## Support
-
-For issues or questions:
-- Check the documentation files
-- Review the troubleshooting section in DEPLOY_TO_VERCEL.md
-- Ensure your OpenAI API key is correctly configured
-
-## Disclaimer
-
-This application is for informational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers for medical concerns.
-
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

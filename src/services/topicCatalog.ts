@@ -235,12 +235,12 @@ export function getChapterBlueprint(topicName: string): ChapterBlueprint {
     "analyzing dynamic parameter progression and variable values",
     "evaluating geometric alignment and system configurations"
   ];
-  let reasoningModes = [
+  const reasoningModes = [
     "direct algebraic deduction and formula application",
     "multi-concept mapping and relational inference",
     "reverse verification from output results back to input states"
   ];
-  let pyqs = [
+  const pyqs = [
     "JEE Main Standard single-correct MCQ pattern",
     "JEE Advanced multiple-correct selection structure",
     "Numerical/Integer decimal bounded response"

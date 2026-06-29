@@ -221,7 +221,7 @@ test('Red Team Validation Audit', () => {
   let jeeMainLevel = 0;
   let boardLevel = 0;
   let formulaSub = 0;
-  let olympiadLevel = 0;
+  const olympiadLevel = 0;
 
   sampled50.forEach(q => {
     const text = q.question_text.toLowerCase();

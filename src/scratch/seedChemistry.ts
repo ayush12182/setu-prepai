@@ -10,8 +10,8 @@ export function seedChemistry() {
   const conceptsChemPath = path.join(expandedDir, 'chemistry_expanded.json');
   const misconceptionsPath = path.join(expandedDir, 'misconceptions_expanded.json');
 
-  let formulas = [];
-  let concepts = [];
+  const formulas = [];
+  const concepts = [];
 
   // Define Chemistry chapters and topics
   const chemistrySyllabus = [

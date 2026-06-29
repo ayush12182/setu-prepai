@@ -9,9 +9,9 @@ test('Verify Curriculum Graph Reference Integrity', () => {
   
   let chaptersMappedCount = 0;
   let conceptsMappedCount = 0;
-  let formulasIndexedCount = Object.keys(FORMULA_REGISTRY).length;
-  let misconceptionsIndexedCount = Object.keys(UNIVERSAL_MISCONCEPTION_REGISTRY).length;
-  let pyqDnaIndexedCount = Object.keys(PYQ_DNA_REGISTRY).length;
+  const formulasIndexedCount = Object.keys(FORMULA_REGISTRY).length;
+  const misconceptionsIndexedCount = Object.keys(UNIVERSAL_MISCONCEPTION_REGISTRY).length;
+  const pyqDnaIndexedCount = Object.keys(PYQ_DNA_REGISTRY).length;
 
   Object.entries(UNIVERSAL_CURRICULUM_GRAPH).forEach(([subj, chapters]) => {
     console.log(`Auditing Subject: ${subj}`);
