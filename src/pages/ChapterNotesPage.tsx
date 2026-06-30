@@ -738,7 +738,7 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
     );
 
     if (trimmed.startsWith('\u2022 ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) return (
-      <li key={key} className="ml-6 my-3 text-muted-foreground list-disc marker:text-accent font-normal leading-relaxed text-body-md">
+      <li key={key} className="ml-6 my-3 text-foreground font-bold list-disc marker:text-accent leading-relaxed text-body-md">
         <MathLine>{trimmed.slice(2)}</MathLine>
       </li>
     );
@@ -759,7 +759,7 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
     );
 
     return (
-      <p key={key} className="my-6 text-muted-foreground leading-relaxed text-body-md overflow-x-auto">
+      <p key={key} className="my-6 text-foreground font-bold leading-relaxed text-body-md overflow-x-auto">
         <MathLine>{trimmed}</MathLine>
       </p>
     );
