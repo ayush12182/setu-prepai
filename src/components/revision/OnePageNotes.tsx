@@ -568,7 +568,7 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
             className={cn(
               "rounded-full transition-all duration-300 font-medium px-5",
               activeFilter === tab.key 
-                ? "bg-gradient-to-r from-[#FF6B00] to-orange-500 text-white shadow-lg shadow-orange-500/20 border-transparent hover:shadow-xl hover:shadow-orange-500/30 hover:scale-105" 
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 border-transparent hover:shadow-xl hover:shadow-primary/30 hover:scale-105" 
                 : "bg-muted/50 hover:bg-muted text-muted-foreground border-transparent hover:text-foreground"
             )}
           >
@@ -595,13 +595,13 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
                 <button
                   key={chapter.id}
                   onClick={() => generateNotes(chapter)}
-                  className="group relative flex flex-col text-left bg-card border border-border/50 rounded-2xl p-5 hover:border-[#FF6B00]/40 hover:shadow-xl hover:shadow-[#FF6B00]/5 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                  className="group relative flex flex-col text-left bg-card border border-border/50 rounded-2xl p-5 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                   
                   <div className="relative flex-1 w-full">
                     <div className="flex items-start justify-between gap-3 mb-2">
-                      <h4 className="font-bold text-[15px] text-foreground leading-tight group-hover:text-[#FF6B00] transition-colors pr-2">
+                      <h4 className="font-semibold text-[15px] text-foreground leading-tight group-hover:text-primary transition-colors pr-2">
                         {chapter.name}
                       </h4>
                       <span className={cn(
@@ -625,7 +625,7 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
                       {chapter.pyqData.postCovid} PYQs
                     </span>
                     
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#FF6B00] opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 bg-[#FF6B00]/10 px-3 py-1.5 rounded-full">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-primary opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 bg-primary/10 px-3 py-1.5 rounded-full">
                       <Sparkles className="w-3.5 h-3.5" />
                       Generate Notes
                       <ArrowRight className="w-3 h-3 ml-0.5" />
