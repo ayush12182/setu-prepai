@@ -737,6 +737,16 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
       </h3>
     );
 
+    if (trimmed.startsWith('####')) {
+      const text = trimmed.replace(/^#+\s*/, '');
+      if (!text) return <br key={key} />;
+      return (
+        <h4 key={key} className="text-title-md font-bold mt-6 mb-3 text-slate-700 dark:text-slate-300">
+          <MathLine>{text}</MathLine>
+        </h4>
+      );
+    }
+
     if (trimmed.startsWith('\u2022 ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) return (
       <li key={key} className="ml-6 my-3 text-foreground font-bold list-disc marker:text-accent leading-relaxed text-body-md">
         <MathLine>{trimmed.slice(2)}</MathLine>
