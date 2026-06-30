@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   ArrowLeft, Download, Copy, CheckCircle2,
-  BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, Calculator, Sparkles,
+  BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, AlertCircle, Calculator, Sparkles,
   GraduationCap, RotateCcw, Lightbulb, Star,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -855,11 +855,11 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
         );
       } else if (blockType === 'COMMON_MISTAKE') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-red-50/50 dark:bg-red-950/20 border-l-4 border-red-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-red-700 dark:text-red-400 text-caption font-bold tracking-wider flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0" /> COMMON MISTAKE
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-rose-50/80 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 border-l-4 border-l-rose-500 rounded-2xl shadow-sm">
+            <h4 className="text-rose-700 dark:text-rose-400 text-caption font-bold tracking-wider flex items-center gap-2">
+              <AlertCircle className="w-5 h-5 shrink-0" /> Common Student Pitfall
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed">
+            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-3">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `mistake-${keyIdx}-${i}`))}
             </div>
           </div>
