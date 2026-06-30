@@ -184,7 +184,8 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
           pyqData: chapter.pyqData,
           language,
           examMode: isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
-          mode
+          mode,
+          forceRegenerate: true
         }),
       });
 
