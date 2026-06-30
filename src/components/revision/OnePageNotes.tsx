@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Loader2, Sparkles } from 'lucide-react';
+import { ChevronLeft, Loader2, Sparkles, Clock, ArrowRight } from 'lucide-react';
 import { physicsChapters, chemistryChapters, mathsChapters, Chapter } from '@/data/syllabus';
 import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
 import { getAllCuetChapters, CUET_SUBJECTS } from '@/data/cuetSyllabus';
@@ -559,16 +559,17 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
         <h2 className="text-xl font-bold">1-Page Notes</h2>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2.5 flex-wrap">
         {getFilterTabs().map((tab) => (
           <Button
             key={tab.key}
             size="sm"
             onClick={() => setActiveFilter(tab.key)}
             className={cn(
+              "rounded-full transition-all duration-300 font-medium px-5",
               activeFilter === tab.key 
-                ? "bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-[#FF6B00]" 
-                : "bg-[rgba(251,146,60,0.08)] border-[rgba(251,146,60,0.25)] text-white hover:bg-[rgba(251,146,60,0.15)] hover:border-[rgba(251,146,60,0.4)] hover:text-white"
+                ? "bg-gradient-to-r from-[#FF6B00] to-orange-500 text-white shadow-lg shadow-orange-500/20 border-transparent hover:shadow-xl hover:shadow-orange-500/30 hover:scale-105" 
+                : "bg-muted/50 hover:bg-muted text-muted-foreground border-transparent hover:text-foreground"
             )}
           >
             {tab.label}
@@ -576,39 +577,58 @@ Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
         ))}
       </div>
 
-      <div className="space-y-8 max-h-[60vh] overflow-y-auto pr-2">
-        {getFilteredChapters().map((group) => (
-          <div key={group.subject}>
-            <h3 className={cn('font-semibold text-lg mb-4 pb-2 border-b-2', group.color)}>
-              {group.subject} ({group.chapters.length} chapters)
-            </h3>
-            <div className="grid gap-3">
+      <div className="space-y-10 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar pb-10">
+        {getFilteredChapters().map((group, groupIdx) => (
+          <div key={group.subject} className="animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${groupIdx * 100}ms` }}>
+            <div className="flex items-center gap-3 mb-5">
+              <h3 className="font-bold text-xl text-foreground">
+                {group.subject}
+              </h3>
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground">
+                {group.chapters.length} chapters
+              </span>
+              <div className={cn('h-px flex-1 bg-gradient-to-r to-transparent', group.color.replace('border-', 'from-'))} />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {group.chapters.map((chapter) => (
                 <button
                   key={chapter.id}
                   onClick={() => generateNotes(chapter)}
-                  className="bg-card border border-border rounded-xl p-4 text-left card-clickable group"
+                  className="group relative flex flex-col text-left bg-card border border-border/50 rounded-2xl p-5 hover:border-[#FF6B00]/40 hover:shadow-xl hover:shadow-[#FF6B00]/5 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{chapter.name}</h4>
-                        <span className={cn(
-                          'text-xs px-2 py-0.5 rounded-full',
-                          chapter.weightage === 'High' ? 'bg-red-500/10 text-red-500' :
-                            chapter.weightage === 'Medium' ? 'bg-yellow-500/10 text-yellow-500' :
-                              'bg-green-500/10 text-green-500'
-                        )}>
-                          {chapter.weightage}
-                        </span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {chapter.topics.length} topics • {chapter.keyFormulas.length} formulas • {chapter.pyqData.postCovid} recent PYQs
-                      </p>
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                  
+                  <div className="relative flex-1 w-full">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <h4 className="font-bold text-[15px] text-foreground leading-tight group-hover:text-[#FF6B00] transition-colors pr-2">
+                        {chapter.name}
+                      </h4>
+                      <span className={cn(
+                        'text-[10px] uppercase tracking-widest font-bold px-2.5 py-0.5 rounded-full shrink-0',
+                        chapter.weightage === 'High' ? 'bg-red-500/10 text-red-600 dark:text-red-400' :
+                          chapter.weightage === 'Medium' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
+                            'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                      )}>
+                        {chapter.weightage}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs font-semibold text-[#FB923C] opacity-60 group-hover:opacity-100 transition-opacity ml-4">
-                      <Sparkles className="w-4 h-4" />
-                      Generate
+                    
+                    <p className="text-[13px] text-muted-foreground mb-4">
+                      {chapter.topics.length} topics • {chapter.keyFormulas.length} formulas
+                    </p>
+                  </div>
+                  
+                  <div className="relative flex items-center justify-between w-full mt-auto pt-3 border-t border-border/40">
+                    <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 opacity-70" />
+                      {chapter.pyqData.postCovid} PYQs
+                    </span>
+                    
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-[#FF6B00] opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 bg-[#FF6B00]/10 px-3 py-1.5 rounded-full">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Generate Notes
+                      <ArrowRight className="w-3 h-3 ml-0.5" />
                     </div>
                   </div>
                 </button>
