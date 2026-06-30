@@ -131,13 +131,39 @@ const SubjectPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6"
           >
-            <button
-              onClick={() => navigate('/student-hub')}
-              className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm font-bold mb-4 transition-colors group"
-            >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-              My Batch
-            </button>
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => navigate('/student-hub')}
+                className="flex items-center gap-2 text-slate-500 hover:text-slate-900 text-sm font-bold transition-colors group"
+              >
+                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                My Batch
+              </button>
+            </div>
+
+            {/* ── Subject Switcher ────────────────────────────────────────────── */}
+            <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+              {(['physics', 'chemistry', 'maths'] as SubjectKey[]).map(tabKey => {
+                const isActive = subject === tabKey;
+                const tabConfig = SUBJECT_CONFIG[tabKey];
+                const TabIcon = tabConfig.icon;
+                return (
+                  <button
+                    key={tabKey}
+                    onClick={() => navigate(`/learn/${tabKey}`)}
+                    className={cn(
+                      'px-5 py-2.5 rounded-xl text-sm font-bold border transition-all whitespace-nowrap flex items-center gap-2 shrink-0',
+                      isActive
+                        ? `${tabConfig.bg} ${tabConfig.color} ${tabConfig.border} shadow-sm`
+                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                    )}
+                  >
+                    <TabIcon className="w-4 h-4" />
+                    {tabConfig.label}
+                  </button>
+                );
+              })}
+            </div>
 
             <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
               <div className="flex items-start justify-between gap-4">
