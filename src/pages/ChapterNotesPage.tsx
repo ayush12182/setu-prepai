@@ -871,8 +871,16 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
             <h4 className="text-amber-800 dark:text-amber-400 text-caption font-bold tracking-wider flex items-center gap-2">
               <GraduationCap className="w-5 h-5 shrink-0" /> Teacher Says / Teacher Insight
             </h4>
-            <div className="text-slate-950 dark:text-slate-100 font-sans italic font-bold leading-relaxed mt-3">
-              {processNotesContent(blockContent, (line, i) => renderLine(line, `teacher-${keyIdx}-${i}`))}
+            <div className="text-amber-950 dark:text-amber-100 font-sans italic font-bold leading-relaxed mt-3 text-body-md">
+              {processNotesContent(blockContent, (line, i) => {
+                const trimmed = line.trim();
+                if (!trimmed) return <br key={`t-${keyIdx}-${i}`} />;
+                return (
+                  <p key={`t-${keyIdx}-${i}`} className="my-4">
+                    <MathLine>{trimmed}</MathLine>
+                  </p>
+                );
+              })}
             </div>
           </div>
         );
