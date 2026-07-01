@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import LandingNav from '@/components/landing/LandingNav';
 import {
   Bot, LineChart, Brain, Clock, ChevronRight, Check, FileText, Users, Trophy,
@@ -279,7 +280,25 @@ const LandingPage: React.FC = () => {
   const [activeCollegesTab, setActiveCollegesTab] = useState<'engineering' | 'medical' | 'universities'>('engineering');
 
   // ── Embla carousel ────────────────────────────────────────────
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: 'start', slidesToScroll: 1 });
+  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+    loop: true,
+    align: 'start',
+    slidesToScroll: 1,
+    breakpoints: {
+      '(min-width: 768px)': { slidesToScroll: 1 },
+      '(min-width: 1024px)': { slidesToScroll: 1 }
+    }
+  });
+
+  const { user, profile, loading: authLoading } = useAuth();
+  
+  useEffect(() => {
+    // If auth is loaded, user is logged in, and profile is complete -> Redirect
+    if (!authLoading && user && profile?.class) {
+      navigate('/student-hub', { replace: true });
+    }
+  }, [user, profile, authLoading, navigate]);
+
   const [activeSlide, setActiveSlide] = useState(0);
   const isHoveredRef = useRef(false);
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -996,7 +1015,7 @@ const LandingPage: React.FC = () => {
 
           {/* Embla Viewport — pause on hover */}
           <div
-            className="overflow-hidden"
+            className="overflow-hidden py-4 -my-4"
             ref={emblaRef}
             onMouseEnter={() => { isHoveredRef.current = true; }}
             onMouseLeave={() => { isHoveredRef.current = false; }}

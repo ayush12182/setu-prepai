@@ -220,7 +220,6 @@ const RevisionPage: React.FC = () => {
     switch (activeMode) {
       case 'notes': return <OnePageNotes onBack={() => setActiveMode('home')} />;
       case 'handwritten': return <HandwrittenNotesAnalysis onBack={() => setActiveMode('home')} />;
-      case 'formulas': return <FormulaSheet onBack={() => setActiveMode('home')} />;
       case 'tables': return <DifferenceTables onBack={() => setActiveMode('home')} />;
       case 'quiz': return <QuickQuiz onBack={() => setActiveMode('home')} />;
       default: return null;
@@ -288,13 +287,19 @@ const RevisionPage: React.FC = () => {
             <Brain className="w-5 h-5 text-accent" />
             Choose Your Revision Tool
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {revisionModes.map((mode, i) => (
-              <div
+              <button
                 key={mode.id}
-                onClick={() => setActiveMode(mode.id)}
+                onClick={() => {
+                  if (mode.id === 'formulas') {
+                    navigate('/revision/formulas');
+                  } else {
+                    setActiveMode(mode.id);
+                  }
+                }}
                 className={cn(
-                  "relative group bg-card border border-border rounded-2xl p-6 cursor-pointer transition-all duration-300",
+                  "group relative flex flex-col text-left bg-card border border-border rounded-2xl p-6 transition-all duration-300",
                   "hover:shadow-lg hover:-translate-y-1 hover:border-accent/30 overflow-hidden",
                   i === 0 && "sm:col-span-2 lg:col-span-1"
                 )}
@@ -328,7 +333,7 @@ const RevisionPage: React.FC = () => {
                     <ArrowRight className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-0.5 transition-transform" />
                   </Button>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

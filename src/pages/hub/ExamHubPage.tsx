@@ -403,7 +403,7 @@ const ExamHubPage: React.FC = () => {
           <div className="flex flex-wrap gap-2 mb-6">
             <button
               onClick={() => setActiveSubject('')}
-              className={`px-4.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+              className={`px-5 py-2.5 h-10 flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                 activeSubject === ''
                   ? `bg-slate-900 text-white border-slate-900`
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -415,7 +415,7 @@ const ExamHubPage: React.FC = () => {
               <button
                 key={sub.key}
                 onClick={() => setActiveSubject(sub.key)}
-                className={`px-4.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                className={`px-5 py-2.5 h-10 flex items-center justify-center whitespace-nowrap rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                   activeSubject === sub.key
                     ? `bg-slate-900 text-white border-slate-900`
                     : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'

@@ -37,6 +37,8 @@ const AdaptivePracticePage = lazy(() => import("./pages/AdaptivePracticePage"));
 const AskPrepEntrancePage = lazy(() => import("./pages/AskPrepEntrancePage"));
 const RevisionPage = lazy(() => import("./pages/RevisionPage"));
 const RevisionTopicPage = lazy(() => import("./pages/RevisionTopicPage"));
+const FormulaLibraryPage = lazy(() => import("./pages/FormulaLibraryPage"));
+const PremiumFormulaDetailPage = lazy(() => import("./pages/PremiumFormulaDetailPage"));
 const StudyPrepEntrance = lazy(() => import("./pages/StudyPrepEntrance"));
 const MajorTestPage = lazy(() => import("./pages/MajorTestPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
@@ -129,6 +131,8 @@ const App = () => (
                         <Route path="/test" element={<TrialGate><TestPage /></TrialGate>} />
                         <Route path="/major-test" element={<TrialGate><MajorTestPage /></TrialGate>} />
                         <Route path="/revision" element={<TrialGate><RevisionPage /></TrialGate>} />
+                        <Route path="/revision/formulas" element={<TrialGate><FormulaLibraryPage /></TrialGate>} />
+                        <Route path="/revision/formulas/:subject/:chapter" element={<TrialGate><PremiumFormulaDetailPage /></TrialGate>} />
                         <Route path="/revision/:subject/:topic" element={<TrialGate><RevisionTopicPage /></TrialGate>} />
                         <Route path="/study-ai" element={<Navigate to="/student-hub?comingSoon=knowledge-engine" replace />} />
                         <Route path="/knowledge-engine" element={<Navigate to="/student-hub?comingSoon=knowledge-engine" replace />} />

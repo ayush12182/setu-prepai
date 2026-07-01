@@ -1,0 +1,192 @@
+{
+  "physics_Kinematics": {
+    "chapter": "Kinematics",
+    "status": "completed",
+    "completed_at": "2026-06-30T09:23:38.833Z"
+  },
+  "physics_Laws of Motion": {
+    "chapter": "Laws of Motion",
+    "status": "completed",
+    "completed_at": "2026-06-30T09:24:34.382Z"
+  },
+  "physics_Work, Energy & Power": {
+    "chapter": "Work, Energy & Power",
+    "status": "completed",
+    "completed_at": "2026-06-30T09:25:34.858Z"
+  },
+  "physics_Rotational Motion": {
+    "chapter": "Rotational Motion",
+    "status": "completed",
+    "completed_at": "2026-06-30T09:26:29.942Z"
+  },
+  "physics_Gravitation": {
+    "chapter": "Gravitation",
+    "status": "completed",
+    "completed_at": "2026-06-30T09:27:33.911Z"
+  },
+  "physics_SHM & Waves": {
+    "chapter": "SHM & Waves",
+    "status": "completed",
+    "completed_at": "2026-06-30T09:28:15.100Z"
+  },
+  "physics_Thermodynamics": {
+    "chapter": "Thermodynamics",
+    "status": "completed",
+    "completed_at": "2026-06-30T09:29:14.820Z"
+  },
+  "physics_Electrostatics": {
+    "chapter": "Electrostatics",
+    "status": "completed",
+    "completed_at": "2026-06-30T09:30:03.827Z"
+  },
+  "physics_Current Electricity": {
+    "chapter": "Current Electricity",
+    "status": "completed",
+    "completed_at": "2026-06-30T09:30:53.185Z"
+  },
+  "physics_Magnetism & EMI": {
+    "chapter": "Magnetism & EMI",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:46:29.264Z"
+  },
+  "physics_Optics": {
+    "chapter": "Optics",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:49:51.186Z"
+  },
+  "physics_Modern Physics": {
+    "chapter": "Modern Physics",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:50:28.577Z"
+  },
+  "chemistry_Mole Concept & Stoichiometry": {
+    "chapter": "Mole Concept & Stoichiometry",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:51:24.067Z"
+  },
+  "chemistry_Atomic Structure": {
+    "chapter": "Atomic Structure",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:52:09.803Z"
+  },
+  "chemistry_Chemical Bonding": {
+    "chapter": "Chemical Bonding",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:53:11.645Z"
+  },
+  "chemistry_Thermodynamics & Thermochemistry": {
+    "chapter": "Thermodynamics & Thermochemistry",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:54:25.715Z"
+  },
+  "chemistry_Chemical Equilibrium": {
+    "chapter": "Chemical Equilibrium",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:55:05.801Z"
+  },
+  "chemistry_Electrochemistry": {
+    "chapter": "Electrochemistry",
+    "status": "completed",
+    "completed_at": "2026-06-30T12:33:48.707Z"
+  },
+  "chemistry_Chemical Kinetics": {
+    "chapter": "Chemical Kinetics",
+    "status": "completed",
+    "completed_at": "2026-06-30T12:49:47.756Z"
+  },
+  "chemistry_GOC & Isomerism": {
+    "chapter": "GOC & Isomerism",
+    "status": "completed",
+    "completed_at": "2026-06-30T12:52:37.830Z"
+  },
+  "chemistry_Hydrocarbons": {
+    "chapter": "Hydrocarbons",
+    "status": "completed",
+    "completed_at": "2026-06-30T13:09:50.514Z"
+  },
+  "chemistry_Organic Reactions & Named Reactions": {
+    "chapter": "Organic Reactions & Named Reactions",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:56:18.613Z"
+  },
+  "chemistry_Periodic Table & Trends": {
+    "chapter": "Periodic Table & Trends",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:57:20.425Z"
+  },
+  "chemistry_Coordination Chemistry": {
+    "chapter": "Coordination Chemistry",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:58:19.743Z"
+  },
+  "maths_Quadratic Equations & Expressions": {
+    "chapter": "Quadratic Equations & Expressions",
+    "status": "completed",
+    "completed_at": "2026-07-01T12:59:09.595Z"
+  },
+  "maths_Complex Numbers": {
+    "chapter": "Complex Numbers",
+    "status": "completed",
+    "completed_at": "2026-07-01T13:00:16.929Z"
+  },
+  "maths_Matrices & Determinants": {
+    "chapter": "Matrices & Determinants",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 503\"}",
+    "completed_at": "2026-07-01T13:03:47.827Z"
+  },
+  "maths_Permutations & Combinations": {
+    "chapter": "Permutations & Combinations",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 429\"}",
+    "completed_at": "2026-07-01T13:06:01.209Z"
+  },
+  "maths_Probability": {
+    "chapter": "Probability",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 429\"}",
+    "completed_at": "2026-07-01T13:08:14.524Z"
+  },
+  "maths_Limits, Continuity & Differentiability": {
+    "chapter": "Limits, Continuity & Differentiability",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 429\"}",
+    "completed_at": "2026-07-01T13:10:28.097Z"
+  },
+  "maths_Differentiation": {
+    "chapter": "Differentiation",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 429\"}",
+    "completed_at": "2026-07-01T13:12:41.395Z"
+  },
+  "maths_Application of Derivatives": {
+    "chapter": "Application of Derivatives",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 429\"}",
+    "completed_at": "2026-07-01T13:14:55.022Z"
+  },
+  "maths_Integration": {
+    "chapter": "Integration",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 429\"}",
+    "completed_at": "2026-07-01T13:17:08.323Z"
+  },
+  "maths_Coordinate Geometry": {
+    "chapter": "Coordinate Geometry",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 429\"}",
+    "completed_at": "2026-07-01T13:19:22.192Z"
+  },
+  "maths_Vectors & 3D Geometry": {
+    "chapter": "Vectors & 3D Geometry",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 429\"}",
+    "completed_at": "2026-07-01T13:21:35.958Z"
+  },
+  "maths_Trigonometry": {
+    "chapter": "Trigonometry",
+    "status": "failed",
+    "error": "Edge Function Error 500: {\"error\":\"Gemini API error: 429\"}",
+    "completed_at": "2026-07-01T13:23:49.768Z"
+  }
+}

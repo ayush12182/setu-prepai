@@ -1,82 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, Copy, Check, Loader2, RefreshCw } from 'lucide-react';
-import { getFormulasBySubject } from '@/data/cleanFormulas';
+import { ChevronLeft, RefreshCw, Loader2, BookOpen, Search, Filter, Book, Flame, Zap, CircleCheck, Star, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { renderFormula } from '@/lib/formulaRenderer';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { getChaptersBySubject, Chapter } from '@/data/syllabus';
+import { neetPhysicsChapters, neetChemistryChapters, neetBiologyChapters } from '@/data/neetSyllabus';
+import { getAllCuetChapters } from '@/data/cuetSyllabus';
+import { PremiumChapterCard } from './PremiumChapterCard';
+import { useNavigate } from 'react-router-dom';
+import { Input } from '@/components/ui/input';
 
 interface FormulaSheetProps {
   onBack: () => void;
 }
 
-interface FormulaEntry {
-  formula: string;
-  explanation: string;
-  examTip: string;
-}
-
-interface ChapterFormulaGroup {
-  chapter: string;
-  formulas: FormulaEntry[];
-}
-
-// Static fallbacks for CUET
-const cuetFallbackFormulas: Record<string, ChapterFormulaGroup[]> = {
-  economics: [
-    { chapter: 'Microeconomics', formulas: [
-      { formula: 'Ed = %ΔQd / %ΔP', explanation: 'Price Elasticity of Demand', examTip: 'Ed > 1 = elastic, Ed < 1 = inelastic' },
-      { formula: 'TC = TFC + TVC', explanation: 'Total Cost = Fixed + Variable', examTip: 'TFC remains constant at all output levels' },
-    ]},
-    { chapter: 'Macroeconomics', formulas: [
-      { formula: 'GDP = C + I + G + (X - M)', explanation: 'Expenditure method of national income', examTip: 'Most common formula in CUET economics' },
-      { formula: 'Money Multiplier = 1 / CRR', explanation: 'Credit creation by banks', examTip: 'Higher CRR = lower multiplier' },
-    ]},
-  ],
-  accountancy: [
-    { chapter: 'Partnership Accounts', formulas: [
-      { formula: 'Goodwill = Average Profit × No. of Years Purchase', explanation: 'Average profits method', examTip: 'Super Profit Method also asked' },
-      { formula: 'New Ratio = Old Ratio - Sacrificing Ratio', explanation: 'On admission of partner', examTip: 'Gaining ratio = New ratio - Old ratio' },
-    ]},
-  ],
-  general_test: [
-    { chapter: 'Quantitative Aptitude', formulas: [
-      { formula: 'SI = P × R × T / 100', explanation: 'Simple Interest', examTip: 'Compare with CI for 2 years' },
-      { formula: 'Speed = Distance / Time', explanation: 'Basic speed formula', examTip: 'Avg speed = 2S₁S₂/(S₁+S₂)' },
-    ]},
-  ],
-  english: [
-    { chapter: 'Grammar Rules', formulas: [
-      { formula: 'Subject-Verb Agreement: Singular subject → singular verb', explanation: 'Basic grammar rule', examTip: '"Each of" takes singular verb' },
-      { formula: 'Active → Passive: Object + be + V3 + by + Subject', explanation: 'Voice change', examTip: 'Tense of "be" matches original' },
-    ]},
-  ],
-  business_studies: [
-    { chapter: 'Financial Management', formulas: [
-      { formula: 'Working Capital = Current Assets - Current Liabilities', explanation: 'Short-term financial health', examTip: 'Positive WC = good liquidity' },
-    ]},
-  ],
-};
-
-const neetBiologyFallback: ChapterFormulaGroup[] = [
-  { chapter: 'Cell Biology', formulas: [
-    { formula: 'Cell Theory: All living things = cells', explanation: 'Schleiden, Schwann & Virchow', examTip: 'Virchow added "cells from cells"' },
-    { formula: 'DNA → RNA → Protein (Central Dogma)', explanation: 'Flow of genetic information', examTip: 'Exception: reverse transcriptase' },
-  ]},
-  { chapter: 'Genetics', formulas: [
-    { formula: 'Genotypic ratio (monohybrid): 1:2:1', explanation: 'AA : Aa : aa', examTip: 'Phenotypic = 3:1' },
-    { formula: 'Hardy-Weinberg: p² + 2pq + q² = 1', explanation: 'Allele frequencies', examTip: 'Calculate genotype frequencies' },
-  ]},
-  { chapter: 'Human Physiology', formulas: [
-    { formula: 'Cardiac Output = HR × SV', explanation: 'Heart Rate × Stroke Volume', examTip: 'Normal CO ≈ 5 L/min' },
-  ]},
-];
-
 const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
-  const { isNeet, isCuet, examMode } = useExamMode();
+  const { isNeet, isCuet } = useExamMode();
   const { language } = useLanguage();
+  const { session } = useAuth();
+  const navigate = useNavigate();
+  
+  const isAdmin = !!session?.user; 
 
   const getSubjects = (): { key: string; label: string }[] => {
     if (isCuet) return [
@@ -94,20 +42,57 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
 
   const subjects = getSubjects();
   const [activeSubject, setActiveSubject] = useState<string>(subjects[0].key);
-  const [copiedFormula, setCopiedFormula] = useState<string | null>(null);
-  const [expandedChapter, setExpandedChapter] = useState<string | null>(null);
-  const [aiChapters, setAiChapters] = useState<ChapterFormulaGroup[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasGenerated, setHasGenerated] = useState<Record<string, boolean>>({});
+  
+  // State
+  const [dbMetadata, setDbMetadata] = useState<Record<string, any>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState<string | null>(null);
+  
+  // Filters & Search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
 
-  const getFallbackChapters = (): ChapterFormulaGroup[] => {
-    if (isCuet) return cuetFallbackFormulas[activeSubject] || [];
-    if (activeSubject === 'biology') return neetBiologyFallback;
-    return getFormulasBySubject(activeSubject as 'physics' | 'chemistry' | 'maths');
+  const getSyllabusChapters = (): Chapter[] => {
+    if (isCuet) return getAllCuetChapters().filter(c => c.subject === activeSubject) as Chapter[];
+    if (isNeet) {
+       if (activeSubject === 'physics') return neetPhysicsChapters as Chapter[];
+       if (activeSubject === 'chemistry') return neetChemistryChapters as Chapter[];
+       if (activeSubject === 'biology') return neetBiologyChapters as Chapter[];
+    }
+    return getChaptersBySubject(activeSubject as any);
   };
 
-  const generateAIFormulas = async (subject: string) => {
+  const syllabusChapters = getSyllabusChapters();
+
+  const fetchChapterMetadata = async (subject: string) => {
     setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('revision_chapter_metadata')
+        .select('*')
+        .eq('subject', subject);
+
+      if (error) throw error;
+      
+      const metadataMap: Record<string, any> = {};
+      data?.forEach(row => {
+        metadataMap[row.chapter_name.toLowerCase()] = row;
+      });
+      setDbMetadata(metadataMap);
+    } catch (err) {
+      console.error("Failed to fetch chapter metadata:", err);
+      toast.error("Could not load formula library.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchChapterMetadata(activeSubject);
+  }, [activeSubject]);
+
+  const generateAIFormulas = async (subject: string, chapter: string) => {
+    setIsGenerating(chapter);
     try {
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-revision-content`, {
         method: 'POST',
@@ -118,139 +103,196 @@ const FormulaSheet: React.FC<FormulaSheetProps> = ({ onBack }) => {
         body: JSON.stringify({
           type: 'formulas',
           subject,
+          chapter,
           examMode: isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
           language,
         }),
       });
 
       if (!response.ok) throw new Error('Failed to generate');
-      const result = await response.json();
-      if (result.data && Array.isArray(result.data)) {
-        setAiChapters(result.data);
-        setHasGenerated(prev => ({ ...prev, [subject]: true }));
-      }
+      
+      toast.success(`Knowledge base updated for ${chapter}!`);
+      await fetchChapterMetadata(activeSubject);
+      
     } catch (error) {
       console.error('AI generation failed:', error);
-      toast.error('Could not generate fresh content. Showing saved formulas.');
+      toast.error(`Could not generate formulas for ${chapter}.`);
     } finally {
-      setIsLoading(false);
+      setIsGenerating(null);
     }
   };
 
-  const chapters = (hasGenerated[activeSubject] && aiChapters) ? aiChapters : getFallbackChapters();
+  // Memoized Global Statistics
+  const globalStats = useMemo(() => {
+    let totalFormulas = 0;
+    let mustKnow = 0;
+    let totalTime = 0;
+    let generatedCount = 0;
 
-  const subjectColors: Record<string, string> = {
-    physics: 'bg-physics text-white', chemistry: 'bg-chemistry text-white', maths: 'bg-maths text-white',
-    biology: 'bg-green-600 text-white', economics: 'bg-amber-500 text-white', accountancy: 'bg-teal-500 text-white',
-    general_test: 'bg-purple-500 text-white', english: 'bg-indigo-500 text-white', business_studies: 'bg-orange-500 text-white',
-  };
+    Object.values(dbMetadata).forEach(meta => {
+      totalFormulas += meta.formula_count || 0;
+      mustKnow += meta.high_priority_formula_count || 0;
+      totalTime += meta.revision_time_mins || 0;
+      generatedCount += 1;
+    });
 
-  const subjectBorders: Record<string, string> = {
-    physics: 'border-physics', chemistry: 'border-chemistry', maths: 'border-maths',
-    biology: 'border-green-500', economics: 'border-amber-500', accountancy: 'border-teal-500',
-    general_test: 'border-purple-500', english: 'border-indigo-500', business_studies: 'border-orange-500',
-  };
+    const avgTime = generatedCount > 0 ? Math.round(totalTime / generatedCount) : 0;
 
-  const copyFormula = (formula: string) => {
-    navigator.clipboard.writeText(formula);
-    setCopiedFormula(formula);
-    toast.success('Formula copied!');
-    setTimeout(() => setCopiedFormula(null), 2000);
-  };
+    return { totalFormulas, mustKnow, avgTime, generatedCount };
+  }, [dbMetadata]);
 
-  const handleSubjectChange = (key: string) => {
-    setActiveSubject(key);
-    setExpandedChapter(null);
-    if (!hasGenerated[key]) setAiChapters(null);
-  };
+  // Memoized Filters
+  const filteredChapters = useMemo(() => {
+    return syllabusChapters.filter(chapter => {
+      const meta = dbMetadata[chapter.name.toLowerCase()];
+      
+      // Search
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        if (!chapter.name.toLowerCase().includes(q)) return false;
+      }
+
+      // Filter
+      if (activeFilter === 'All') return true;
+      if (activeFilter === 'Most Important') return chapter.weightage === 'High';
+      if (activeFilter === 'Quick Revision') return meta && meta.revision_time_mins < 10;
+      if (activeFilter === 'Needs Generation') return !meta;
+      if (activeFilter === 'Generated') return !!meta;
+      
+      return true;
+    });
+  }, [syllabusChapters, dbMetadata, searchQuery, activeFilter]);
+
+  const filterOptions = ['All', 'Most Important', 'Quick Revision', 'Generated', 'Needs Generation'];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 pb-20 animate-in fade-in duration-500">
+      
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={onBack}><ChevronLeft className="w-5 h-5" /></Button>
-          <h2 className="text-xl font-bold">{isCuet ? 'Key Concepts & Formulas' : 'Formula Sheets'}</h2>
+          <Button variant="ghost" size="icon" onClick={onBack} className="bg-white shadow-sm border border-gray-100 hover:bg-gray-50"><ChevronLeft className="w-5 h-5" /></Button>
+          <div>
+            <h2 className="text-3xl font-black text-gray-900 tracking-tight">{isCuet ? 'Key Concepts Library' : 'Formula Library'}</h2>
+            <p className="text-gray-500 font-medium mt-1 text-sm">Premium curated knowledge base for {subjects.find(s => s.key === activeSubject)?.label}</p>
+          </div>
         </div>
-        <Button
-          variant="outline" size="sm"
-          onClick={() => generateAIFormulas(activeSubject)}
-          disabled={isLoading}
-          className="gap-2"
-        >
-          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-          {hasGenerated[activeSubject] ? 'Refresh' : 'Generate Fresh'}
-        </Button>
       </div>
 
+      {/* Global Statistics Bar */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600"><Book className="w-5 h-5" /></div>
+          <div>
+            <div className="text-2xl font-black text-gray-900 leading-none">{globalStats.totalFormulas}</div>
+            <div className="text-xs font-bold text-gray-400 uppercase mt-1">Total Formulas</div>
+          </div>
+        </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500"><Star className="w-5 h-5" /></div>
+          <div>
+            <div className="text-2xl font-black text-gray-900 leading-none">{globalStats.mustKnow}</div>
+            <div className="text-xs font-bold text-gray-400 uppercase mt-1">Must Know</div>
+          </div>
+        </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500"><Clock className="w-5 h-5" /></div>
+          <div>
+            <div className="text-2xl font-black text-gray-900 leading-none">{globalStats.avgTime}m</div>
+            <div className="text-xs font-bold text-gray-400 uppercase mt-1">Avg Revision</div>
+          </div>
+        </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600"><CircleCheck className="w-5 h-5" /></div>
+          <div>
+            <div className="text-2xl font-black text-gray-900 leading-none">{globalStats.generatedCount}<span className="text-gray-300 text-lg">/{syllabusChapters.length}</span></div>
+            <div className="text-xs font-bold text-gray-400 uppercase mt-1">Chapters Ready</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs & Search */}
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+        <div className="flex gap-2 p-1 bg-gray-100/50 rounded-full border border-gray-200/50">
+          {subjects.map((subject) => (
+            <button
+              key={subject.key}
+              onClick={() => setActiveSubject(subject.key)}
+              className={cn(
+                "rounded-full transition-all duration-300 font-semibold px-6 py-2 text-sm",
+                activeSubject === subject.key 
+                  ? "bg-white text-gray-900 shadow-sm border border-gray-200/50" 
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              )}
+            >
+              {subject.label}
+            </button>
+          ))}
+        </div>
+        
+        <div className="relative w-full lg:w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Input 
+            placeholder="Search chapters..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 bg-white border-gray-200 shadow-sm rounded-full"
+          />
+        </div>
+      </div>
+
+      {/* Filters */}
       <div className="flex gap-2 flex-wrap">
-        {subjects.map((subject) => (
+        {filterOptions.map(opt => (
           <Button
-            key={subject.key}
-            onClick={() => handleSubjectChange(subject.key)}
+            key={opt}
+            size="sm"
+            variant="outline"
+            onClick={() => setActiveFilter(opt)}
             className={cn(
-              activeSubject === subject.key 
-                ? "bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-[#FF6B00]" 
-                : "bg-[rgba(251,146,60,0.08)] border-[rgba(251,146,60,0.25)] text-white hover:bg-[rgba(251,146,60,0.15)] hover:border-[rgba(251,146,60,0.4)] hover:text-white"
+              "rounded-full text-xs font-medium border-gray-200 transition-all shadow-sm",
+              activeFilter === opt 
+                ? "bg-gray-900 text-white border-transparent hover:bg-gray-800" 
+                : "bg-white text-gray-600 hover:bg-gray-50"
             )}
           >
-            {subject.label}
+            {opt}
           </Button>
         ))}
       </div>
 
+      {/* Grid */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <span className="ml-3 text-muted-foreground">Generating fresh {isCuet ? 'concepts' : 'formulas'}...</span>
-        </div>
-      ) : (
-        <div className="space-y-4 max-h-[65vh] overflow-y-auto pr-2">
-          {chapters.map((chapter) => (
-            <div key={chapter.chapter} className={cn('bg-card border-l-4 rounded-xl overflow-hidden', subjectBorders[activeSubject] || 'border-primary')}>
-              <button
-                onClick={() => setExpandedChapter(expandedChapter === chapter.chapter ? null : chapter.chapter)}
-                className="w-full p-4 flex items-center justify-between hover:bg-secondary/50 transition-colors"
-              >
-                <div className="text-left">
-                  <h3 className="font-semibold text-foreground">{chapter.chapter}</h3>
-                  <p className="text-sm text-muted-foreground">{chapter.formulas.length} {isCuet ? 'key concepts' : 'formulas'}</p>
-                </div>
-                <ChevronLeft className={cn('w-5 h-5 text-muted-foreground transition-transform', expandedChapter === chapter.chapter ? 'rotate-90' : '-rotate-90')} />
-              </button>
-
-              {expandedChapter === chapter.chapter && (
-                <div className="border-t border-border p-4 space-y-4">
-                  {chapter.formulas.map((item, i) => (
-                    <div key={i} className="bg-secondary/30 rounded-lg p-4 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <p className="text-xs text-muted-foreground mb-1">{isCuet ? 'Concept:' : 'Formula:'}</p>
-                          <code className="text-base font-mono text-foreground font-medium">{renderFormula(item.formula)}</code>
-                        </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0" onClick={() => copyFormula(item.formula)}>
-                          {copiedFormula === item.formula ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                        </Button>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">Explanation:</p>
-                        <p className="text-sm text-foreground">{item.explanation}</p>
-                      </div>
-                      <div className="bg-prepentrance-saffron/10 rounded-lg px-3 py-2">
-                        <p className="text-xs text-prepentrance-saffron font-medium mb-1">When to use in exam:</p>
-                        <p className="text-sm text-foreground">{item.examTip}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+             <div key={i} className="h-64 bg-white border border-gray-100 rounded-[18px] animate-pulse shadow-sm" />
           ))}
         </div>
-      )}
-
-      {chapters.length === 0 && !isLoading && (
-        <div className="text-center text-muted-foreground py-8">
-          No formulas available. Click "Generate Fresh" to create AI-powered content!
+      ) : filteredChapters.length === 0 ? (
+        <div className="py-24 text-center">
+          <p className="text-gray-500 font-medium">No chapters match your filters.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filteredChapters.map((chapter) => {
+            const meta = dbMetadata[chapter.name.toLowerCase()];
+            
+            return (
+              <PremiumChapterCard
+                key={chapter.id || chapter.name}
+                chapter={chapter}
+                meta={meta}
+                isAdmin={isAdmin}
+                isGenerating={isGenerating === chapter.name}
+                onGenerate={() => generateAIFormulas(activeSubject, chapter.name)}
+                onClick={() => {
+                  if (meta) {
+                    navigate(`/revision/formulas/${activeSubject}/${encodeURIComponent(chapter.name)}`);
+                  }
+                }}
+              />
+            );
+          })}
         </div>
       )}
     </div>

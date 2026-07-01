@@ -101,7 +101,7 @@ const AuthPage: React.FC = () => {
 
       if (profile) {
         if (profile.class) {
-          navigate('/student-hub');
+          navigate('/student-hub', { replace: true });
           return;
         } else {
           console.log("Incomplete student profile, staying in onboarding.");
@@ -446,6 +446,10 @@ const AuthPage: React.FC = () => {
   }
 
   // ─── LOGIN / SIGNUP MODAL PAGE ───
+  if (user && !authLoading && profile?.class) {
+    return null; // Skip rendering auth UI if redirecting
+  }
+
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden bg-slate-50/50">
       {/* Soft visual background glows matching the onboarding theme */}
