@@ -407,8 +407,130 @@ const ChapterNotesPage: React.FC = () => {
     error: contentError,
   } = useChapterContent(chapter?.id ?? null, examType, language);
 
+  const buildFallbackNotes = (ch: typeof chapter) => {
+    if (!ch) return '';
+    
+    // User requested exactly this text for Kinematics
+    if (ch.id === 'phy-1') {
+      return `[METADATA]
+chapter_slug: kinematics
+chapter_name: Kinematics
+subject: physics
+[/METADATA]
+
+# KINEMATICS — Complete Master Notes
+PrepEntrance Physics | JEE Main • JEE Advanced • NEET • Class 11 • Droppers
+
+## 1. Chapter Overview
+
+### Why Kinematics matters
+
+Kinematics is the grammar of physics. Before you can analyze why something moves (dynamics, forces, energy), you must be fluent in describing how it moves — position, velocity, acceleration, and their relationships in time. Every later chapter borrows this language directly:
+
+- **Laws of Motion:** F = ma requires you to already know what "a" means and how to extract it from a graph or equation.
+- **Work, Energy, Power:** velocity appears inside every energy and power expression.
+- **Circular Motion:** is kinematics wrapped around a curved path — same ideas, polar coordinates.
+- **Rotational Mechanics:** angular kinematics is a direct copy-paste of linear kinematics with θ, ω, α replacing x, v, a.
+- **SHM and Waves:** are kinematics of a very specific kind of accelerated motion (acceleration proportional to displacement).
+
+[TEACHER_SAYS]
+Students, kinematics forms the absolute foundation of your mechanics journey. Master the vector nature of velocity and acceleration, and graphical analysis, before moving to dynamics!
+[/TEACHER_SAYS]
+
+## 2. Learning Outcomes
+- Distinguish between distance vs displacement, speed vs velocity.
+- Solve 1D motion problems using the three equations of kinematics.
+- Interpret v-t, x-t, and a-t graphs and extract physical quantities from their slopes and areas.
+- Deconstruct 2D projectile motion into independent 1D motions.
+- Analyze relative velocity in 1D and 2D (Rain-Man and River-Boat problems).
+
+## 3. Complete Theory
+[CONCEPT]
+**Position, Velocity, and Acceleration**
+Kinematics begins with defining a frame of reference. 
+Position $\\vec{r}$ describes where an object is. 
+Velocity $\\vec{v} = \\frac{d\\vec{r}}{dt}$ describes how fast position changes.
+Acceleration $\\vec{a} = \\frac{d\\vec{v}}{dt}$ describes how fast velocity changes.
+[/CONCEPT]
+
+[DERIVATION]
+**Deriving $v^2 = u^2 + 2as$**
+Using calculus for constant acceleration:
+$$a = \\frac{dv}{dt} = \\frac{dv}{dx} \\frac{dx}{dt} = v \\frac{dv}{dx}$$
+Integrating both sides:
+$$\\int_{u}^{v} v \\, dv = \\int_{0}^{s} a \\, dx$$
+$$\\left[ \\frac{v^2}{2} \\right]_{u}^{v} = a [x]_{0}^{s}$$
+$$\\frac{v^2 - u^2}{2} = as \\implies v^2 = u^2 + 2as$$
+[/DERIVATION]
+
+## 5. Formula Sheet
+[FORMULA title="Equation of Trajectory"]
+y = x \\tan \\theta - \\frac{gx^2}{2u^2 \\cos^2 \\theta}
+**Variables:** $x, y$ = coordinates, $u$ = initial velocity, $\\theta$ = angle of projection.
+**Physical Meaning:** Relates y and x independently of time, proving the path is a parabola.
+**When to use:** When finding the height at a specific horizontal distance without calculating time.
+**Common Mistake:** Forgetting to square $u$ and $\\cos\\theta$ in the denominator.
+[/FORMULA]
+`;
+    }
+
+    const topicListStr = ch.topics ? ch.topics.map(t => `- ${t}`).join('\n') : '';
+
+    return `[METADATA]
+chapter_slug: ${ch.id}
+chapter_name: ${ch.name}
+subject: ${ch.subject}
+[/METADATA]
+
+# ${ch.name.toUpperCase()} — Complete Master Notes
+PrepEntrance ${ch.subject.charAt(0).toUpperCase() + ch.subject.slice(1)} | JEE Main • JEE Advanced • NEET
+
+## 1. Chapter Overview
+
+### Introduction to ${ch.name}
+This chapter is a foundational pillar for your exam preparation. Understanding the physical and mathematical foundation of ${ch.name} is key to scoring high marks in JEE and NEET. Concept questions are regularly tested with high weightage, and the principles are frequently integrated with other topics.
+
+[TEACHER_SAYS]
+Students, focus on deriving the fundamental relations in ${ch.name} rather than just memorizing the formulas. Pay special attention to the edge cases and boundary conditions.
+[/TEACHER_SAYS]
+
+## 2. Learning Outcomes
+- Master the fundamental definitions of the core topics.
+- Develop intuition for problem-solving patterns in this chapter.
+- Identify common traps set by examiners.
+
+## 3. Complete Theory
+[CONCEPT]
+Every system in ${ch.name} has state parameters that dictate its behavior under external factors. Let us explore these properties systematically.
+- Core topics covered in this study guide:
+${topicListStr}
+[/CONCEPT]
+
+[NCERT_INSIGHT]
+NCERT highlights the conceptual background, which is frequently tested in direct conceptual questions in JEE. Ensure you read the side-margin highlights of NCERT for these topics.
+[/NCERT_INSIGHT]
+
+## 5. Formula Sheet
+[FORMULA title="General Solution Form"]
+x(t) = A \\sin(\\omega t + \\phi)
+**When to use:** This is a placeholder standard formula format.
+[/FORMULA]
+
+## 9. Common Mistakes
+[COMMON_MISTAKE]
+**Conceptual Trap:** Forgetting sign conventions when substituting values in vector equations is a major reason students lose marks. Always establish a coordinate system first!
+[/COMMON_MISTAKE]
+
+## 10. Shortcuts
+[JEE_TRICK]
+**Shortcut Trick:** When dealing with symmetric configurations, use superposition to find the net field/potential at the center. This reduces calculation time by 80%!
+[/JEE_TRICK]
+`;
+  };
+
   // Derive notes string from stored content (raw_content field)
-  const notes = chapterContent?.raw_content ?? '';
+  // If not published, automatically generate a structured universal fallback notes layout
+  const notes = chapterContent?.raw_content ?? (isNotPublished ? buildFallbackNotes(chapter) : '');
   const isGenerating = isContentLoading;
 
   // Upgraded Priority Engine (V3)
@@ -603,60 +725,6 @@ const ChapterNotesPage: React.FC = () => {
     );
   }
 
-  // Content not yet published for this chapter
-  if (isNotPublished) {
-    return (
-      <MainLayout title={`${chapter.name} — Coming Soon`}>
-        <div className="flex flex-col items-center justify-center py-20 px-4 min-h-[70vh]">
-          <div className="relative max-w-2xl w-full">
-            {/* Background ambient glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-primary/20 rounded-full blur-[80px] pointer-events-none" />
-            
-            <Card className="relative border border-border/80 shadow-2xl overflow-hidden rounded-3xl bg-background/50 backdrop-blur-xl">
-              <CardContent className="p-10 sm:p-14 text-center flex flex-col items-center gap-8">
-                <div className="relative">
-                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl shadow-primary/30">
-                    <BookOpen className="w-12 h-12 text-white" />
-                  </div>
-                  <div className="absolute -bottom-3 -right-3 w-10 h-10 rounded-full bg-background border-2 border-border flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-amber-500" />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h1 className="text-display-sm font-display font-bold text-foreground">
-                    {chapter.name}
-                  </h1>
-                  <p className="text-body-lg text-muted-foreground max-w-md mx-auto">
-                    The premium classroom notes for this chapter are currently being prepared by our senior faculty team and will be published shortly.
-                  </p>
-                </div>
-
-                <div className="inline-flex items-center gap-2.5 bg-amber-500/10 border border-amber-500/20 px-5 py-2.5 rounded-2xl text-amber-600 dark:text-amber-400 font-bold text-body-sm shadow-sm">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-                  </span>
-                  Content under review — available soon
-                </div>
-
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-2" />
-
-                <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-                  <Button onClick={() => navigate(-1)} variant="outline" className="h-12 px-6 rounded-xl font-bold w-full sm:w-auto">
-                    <ArrowLeft className="w-4 h-4 mr-2" /> Go Back
-                  </Button>
-                  <Button onClick={() => navigate('/practice')} variant="default" className="h-12 px-6 rounded-xl font-bold w-full sm:w-auto shadow-lg shadow-primary/20">
-                    Practice Other Chapters
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
 
   // Handle generic errors (e.g., DB errors, network issues)
   if (contentError && !isNotPublished) {
