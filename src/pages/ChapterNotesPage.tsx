@@ -1693,7 +1693,11 @@ const ChapterNotesPage: React.FC = () => {
               ) : (
                 <motion.div
                   key="content"
-                  ini                  {/* Core Notes Content Box (Continuous, borderless textbook flow) */}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  {/* Core Notes Content Box (Continuous, borderless textbook flow) */}
                   <div className="bg-transparent relative">
                     <div className="prose prose-base sm:prose-lg dark:prose-invert max-w-[860px] mx-auto space-y-10 leading-[1.8]">
                       {renderNotes(notes)}
