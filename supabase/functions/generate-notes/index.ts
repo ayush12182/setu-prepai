@@ -339,14 +339,9 @@ serve(async (req) => {
     } catch { /* not a valid user JWT */ }
   }
 
+  // Admin auth gate moved lower down to support student-triggered initial generation
   if (!hasAdminKey && !isAdminUser) {
-    return new Response(
-      JSON.stringify({
-        error: "Forbidden",
-        message: "generate-notes is an admin-only endpoint. Students should use get-chapter-content instead.",
-      }),
-      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    console.log(`[GenerateNotes] Student triggered generation for ${req.url}`);
   }
 
   try {
@@ -401,47 +396,49 @@ serve(async (req) => {
     const nextVersion = latestPublished ? latestPublished.version + 1 : 1;
     const versionLabel = `${nextVersion}.0`;
 
-    // ── Cache lookup (skip for forceRegenerate) ───────────────
-    // First check new chapter_content table
+    // ── Security Check for Students ───────────────────────────
+    if (!hasAdminKey && !isAdminUser) {
+      forceRegenerate = false; // Students can NEVER force regenerate
+      if (latestPublished) {
+        return new Response(JSON.stringify({ error: "Chapter already exists" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
+    // ── Generation Lock (Version 0) ───────────────────────────
     if (!forceRegenerate) {
-      const { data: existingDraft } = await supabase
+      const { data: lock } = await supabase
         .from("chapter_content")
-        .select("id, chapter_name, version_label, status, raw_content, updated_at")
+        .select("version_label, updated_at")
         .eq("chapter_id", chapterId)
         .eq("exam_type", exam)
         .eq("language", lang)
-        .eq("status", "draft")
-        .order("version", { ascending: false })
-        .limit(1)
+        .eq("version", 0)
         .maybeSingle();
 
-      if (existingDraft?.raw_content) {
-        console.log(`[GenerateNotes] Draft exists for: ${chapterName} v${existingDraft.version_label}`);
-        return new Response(
-          JSON.stringify({
-            success: true,
-            data: existingDraft.raw_content,
-            meta: { status: "draft", version: existingDraft.version_label, cached: true },
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      if (lock) {
+        if (lock.version_label === "generating") {
+          // If the lock is older than 5 minutes, we assume it failed/timed out and override it
+          const lockAge = Date.now() - new Date(lock.updated_at).getTime();
+          if (lockAge < 5 * 60 * 1000) {
+            return new Response(JSON.stringify({ error: "Generation in progress", status: "generating" }), { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+          }
+        }
       }
 
-      // Also check legacy cache for backwards compat
-      const { data: legacyCache } = await supabase
-        .from("chapter_standardized_notes")
-        .select("content")
-        .eq("chapter_id", chapterSlug)
-        .eq("language", lang)
-        .maybeSingle();
-
-      if (legacyCache?.content) {
-        console.log(`[GenerateNotes] Legacy cache HIT for: ${chapterName}`);
-        return new Response(
-          JSON.stringify({ success: true, data: legacyCache.content, meta: { cached: true, source: "legacy" } }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      // Acquire Lock
+      await supabase.from("chapter_content").upsert({
+        chapter_id: chapterId,
+        chapter_slug: chapterSlug,
+        chapter_name: chapterName,
+        subject: subject.toLowerCase(),
+        exam_type: exam,
+        language: lang,
+        version: 0,
+        version_label: 'generating',
+        status: 'draft',
+        raw_content: 'AI Generation in Progress',
+        updated_at: new Date().toISOString()
+      }, { onConflict: "chapter_id,exam_type,language,version" });
     }
 
     // ── Generate with AI ──────────────────────────────────────
@@ -485,8 +482,13 @@ serve(async (req) => {
     }
 
     if (!finalContent) {
+      // Release lock on failure
+      await supabase.from("chapter_content").upsert({
+        chapter_id: chapterId, chapter_slug: chapterSlug, chapter_name: chapterName, subject: subject.toLowerCase(), exam_type: exam, language: lang, version: 0, version_label: 'failed', status: 'draft', raw_content: 'Generation Failed'
+      }, { onConflict: "chapter_id,exam_type,language,version" });
+      
       return new Response(
-        JSON.stringify({ error: "Failed to generate valid content after multiple attempts." }),
+        JSON.stringify({ error: "AI generation failed. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -495,7 +497,7 @@ serve(async (req) => {
     const structuredFields = parseStructuredFields(finalContent);
     const wordCount = finalContent.split(/\s+/).length;
 
-    // ── Save to chapter_content as DRAFT ─────────────────────
+    // ── Save to chapter_content as PUBLISHED ─────────────────────
     const { error: insertError } = await supabase
       .from("chapter_content")
       .upsert(
@@ -508,7 +510,7 @@ serve(async (req) => {
           language: lang,
           version: nextVersion,
           version_label: versionLabel,
-          status: "draft",
+          status: "published",
           raw_content: finalContent,
           word_count: wordCount,
           generation_model: model,
@@ -518,6 +520,9 @@ serve(async (req) => {
         },
         { onConflict: "chapter_id,exam_type,language,version" }
       );
+      
+    // Clear the lock
+    await supabase.from("chapter_content").delete().eq("chapter_id", chapterId).eq("exam_type", exam).eq("language", lang).eq("version", 0);
 
     if (insertError) {
       console.error("[GenerateNotes] Failed to save to chapter_content:", insertError);
@@ -535,18 +540,17 @@ serve(async (req) => {
       { onConflict: "chapter_id,language" }
     );
 
-    console.log(`[GenerateNotes] Saved: ${chapterName} v${versionLabel} as DRAFT`);
+    console.log(`[GenerateNotes] Saved: ${chapterName} v${versionLabel} as PUBLISHED`);
 
     return new Response(
       JSON.stringify({
         success: true,
         data: finalContent,
         meta: {
+          status: "published",
           version: versionLabel,
-          status: "draft",
           wordCount,
-          structuredFields: Object.keys(structuredFields),
-          message: "Content saved as DRAFT. Admin must publish before students can see it.",
+          model,
         },
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

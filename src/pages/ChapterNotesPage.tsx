@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useChapterContent } from '@/hooks/useChapterContent';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { getChapterById, allChapters } from '@/data/syllabus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -407,131 +409,104 @@ const ChapterNotesPage: React.FC = () => {
     error: contentError,
   } = useChapterContent(chapter?.id ?? null, examType, language);
 
-  const buildFallbackNotes = (ch: typeof chapter) => {
-    if (!ch) return '';
-    
-    // User requested exactly this text for Kinematics
-    if (ch.id === 'phy-1') {
-      return `[METADATA]
-chapter_slug: kinematics
-chapter_name: Kinematics
-subject: physics
-[/METADATA]
+  const queryClient = useQueryClient();
+  const [generationState, setGenerationState] = useState<'idle' | 'generating' | 'polling' | 'failed'>('idle');
+  const [loadingFactIndex, setLoadingFactIndex] = useState(0);
 
-# KINEMATICS — Complete Master Notes
-PrepEntrance Physics | JEE Main • JEE Advanced • NEET • Class 11 • Droppers
+  const loadingFacts = [
+    "Preparing Formula Sheet...",
+    "Building Solved Examples...",
+    "Analyzing PYQ Trends...",
+    "Generating Chapter Summary...",
+    "Structuring Core Theory...",
+  ];
 
-## 1. Chapter Overview
-
-### Why Kinematics matters
-
-Kinematics is the grammar of physics. Before you can analyze why something moves (dynamics, forces, energy), you must be fluent in describing how it moves — position, velocity, acceleration, and their relationships in time. Every later chapter borrows this language directly:
-
-- **Laws of Motion:** F = ma requires you to already know what "a" means and how to extract it from a graph or equation.
-- **Work, Energy, Power:** velocity appears inside every energy and power expression.
-- **Circular Motion:** is kinematics wrapped around a curved path — same ideas, polar coordinates.
-- **Rotational Mechanics:** angular kinematics is a direct copy-paste of linear kinematics with θ, ω, α replacing x, v, a.
-- **SHM and Waves:** are kinematics of a very specific kind of accelerated motion (acceleration proportional to displacement).
-
-[TEACHER_SAYS]
-Students, kinematics forms the absolute foundation of your mechanics journey. Master the vector nature of velocity and acceleration, and graphical analysis, before moving to dynamics!
-[/TEACHER_SAYS]
-
-## 2. Learning Outcomes
-- Distinguish between distance vs displacement, speed vs velocity.
-- Solve 1D motion problems using the three equations of kinematics.
-- Interpret v-t, x-t, and a-t graphs and extract physical quantities from their slopes and areas.
-- Deconstruct 2D projectile motion into independent 1D motions.
-- Analyze relative velocity in 1D and 2D (Rain-Man and River-Boat problems).
-
-## 3. Complete Theory
-[CONCEPT]
-**Position, Velocity, and Acceleration**
-Kinematics begins with defining a frame of reference. 
-Position $\\vec{r}$ describes where an object is. 
-Velocity $\\vec{v} = \\frac{d\\vec{r}}{dt}$ describes how fast position changes.
-Acceleration $\\vec{a} = \\frac{d\\vec{v}}{dt}$ describes how fast velocity changes.
-[/CONCEPT]
-
-[DERIVATION]
-**Deriving $v^2 = u^2 + 2as$**
-Using calculus for constant acceleration:
-$$a = \\frac{dv}{dt} = \\frac{dv}{dx} \\frac{dx}{dt} = v \\frac{dv}{dx}$$
-Integrating both sides:
-$$\\int_{u}^{v} v \\, dv = \\int_{0}^{s} a \\, dx$$
-$$\\left[ \\frac{v^2}{2} \\right]_{u}^{v} = a [x]_{0}^{s}$$
-$$\\frac{v^2 - u^2}{2} = as \\implies v^2 = u^2 + 2as$$
-[/DERIVATION]
-
-## 5. Formula Sheet
-[FORMULA title="Equation of Trajectory"]
-y = x \\tan \\theta - \\frac{gx^2}{2u^2 \\cos^2 \\theta}
-**Variables:** $x, y$ = coordinates, $u$ = initial velocity, $\\theta$ = angle of projection.
-**Physical Meaning:** Relates y and x independently of time, proving the path is a parabola.
-**When to use:** When finding the height at a specific horizontal distance without calculating time.
-**Common Mistake:** Forgetting to square $u$ and $\\cos\\theta$ in the denominator.
-[/FORMULA]
-`;
+  useEffect(() => {
+    let interval: any;
+    if (generationState === 'generating' || generationState === 'polling') {
+      interval = setInterval(() => {
+        setLoadingFactIndex(prev => (prev + 1) % loadingFacts.length);
+      }, 3000);
     }
+    return () => clearInterval(interval);
+  }, [generationState]);
 
-    const topicListStr = ch.topics ? ch.topics.map(t => `- ${t}`).join('\n') : '';
+  useEffect(() => {
+    if (isNotPublished && generationState === 'idle' && chapter) {
+      setGenerationState('generating');
+      
+      const triggerGeneration = async () => {
+        try {
+          const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-notes`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
+            },
+            body: JSON.stringify({
+               chapterId: chapter.id,
+               chapterName: chapter.name,
+               subject: chapter.subject,
+               topics: chapter.topics || [],
+               examType: examType,
+               language: language
+            })
+          });
 
-    return `[METADATA]
-chapter_slug: ${ch.id}
-chapter_name: ${ch.name}
-subject: ${ch.subject}
-[/METADATA]
+          if (res.status === 409) {
+            // Locked by another user
+            setGenerationState('polling');
+          } else if (res.status === 400) {
+            // Already published
+            queryClient.invalidateQueries({ queryKey: ["chapter-content-v3", chapter.id, examType, language] });
+            setGenerationState('idle');
+          } else if (!res.ok) {
+            setGenerationState('failed');
+          } else {
+            // Success! Invalidate cache to load newly published content
+            queryClient.invalidateQueries({ queryKey: ["chapter-content-v3", chapter.id, examType, language] });
+            setGenerationState('idle'); 
+          }
+        } catch (err) {
+          console.error("Failed to generate notes:", err);
+          setGenerationState('failed');
+        }
+      };
+      triggerGeneration();
+    }
+  }, [isNotPublished, generationState, chapter, examType, language, queryClient]);
 
-# ${ch.name.toUpperCase()} — Complete Master Notes
-PrepEntrance ${ch.subject.charAt(0).toUpperCase() + ch.subject.slice(1)} | JEE Main • JEE Advanced • NEET
+  // Polling Logic
+  useEffect(() => {
+    let pollInterval: any;
+    if (generationState === 'polling' && chapter) {
+      pollInterval = setInterval(async () => {
+        try {
+          const { data } = await supabase
+            .from('chapter_content')
+            .select('status, version_label')
+            .eq('chapter_id', chapter.id)
+            .eq('exam_type', examType)
+            .eq('language', language)
+            .eq('version', 0)
+            .maybeSingle();
 
-## 1. Chapter Overview
+          if (!data) {
+            // Lock is gone, invalidate to refetch actual content
+            queryClient.invalidateQueries({ queryKey: ["chapter-content-v3", chapter.id, examType, language] });
+          } else if (data.version_label === 'failed') {
+            setGenerationState('failed');
+            clearInterval(pollInterval);
+          }
+        } catch (e) { }
+      }, 5000);
+    }
+    return () => clearInterval(pollInterval);
+  }, [generationState, chapter, examType, language, queryClient]);
 
-### Introduction to ${ch.name}
-This chapter is a foundational pillar for your exam preparation. Understanding the physical and mathematical foundation of ${ch.name} is key to scoring high marks in JEE and NEET. Concept questions are regularly tested with high weightage, and the principles are frequently integrated with other topics.
-
-[TEACHER_SAYS]
-Students, focus on deriving the fundamental relations in ${ch.name} rather than just memorizing the formulas. Pay special attention to the edge cases and boundary conditions.
-[/TEACHER_SAYS]
-
-## 2. Learning Outcomes
-- Master the fundamental definitions of the core topics.
-- Develop intuition for problem-solving patterns in this chapter.
-- Identify common traps set by examiners.
-
-## 3. Complete Theory
-[CONCEPT]
-Every system in ${ch.name} has state parameters that dictate its behavior under external factors. Let us explore these properties systematically.
-- Core topics covered in this study guide:
-${topicListStr}
-[/CONCEPT]
-
-[NCERT_INSIGHT]
-NCERT highlights the conceptual background, which is frequently tested in direct conceptual questions in JEE. Ensure you read the side-margin highlights of NCERT for these topics.
-[/NCERT_INSIGHT]
-
-## 5. Formula Sheet
-[FORMULA title="General Solution Form"]
-x(t) = A \\sin(\\omega t + \\phi)
-**When to use:** This is a placeholder standard formula format.
-[/FORMULA]
-
-## 9. Common Mistakes
-[COMMON_MISTAKE]
-**Conceptual Trap:** Forgetting sign conventions when substituting values in vector equations is a major reason students lose marks. Always establish a coordinate system first!
-[/COMMON_MISTAKE]
-
-## 10. Shortcuts
-[JEE_TRICK]
-**Shortcut Trick:** When dealing with symmetric configurations, use superposition to find the net field/potential at the center. This reduces calculation time by 80%!
-[/JEE_TRICK]
-`;
-  };
-
-  // Derive notes string from stored content (raw_content field)
-  // If not published, automatically generate a structured universal fallback notes layout
-  const notes = chapterContent?.raw_content ?? (isNotPublished ? buildFallbackNotes(chapter) : '');
-  const isGenerating = isContentLoading;
+  const notes = chapterContent?.raw_content ?? '';
+  const isGenerating = isContentLoading || generationState === 'generating' || generationState === 'polling';
 
   // Upgraded Priority Engine (V3)
   // Score = pyqData.total + (weightage * 10) + (difficulty * 5) + advancedBonus
@@ -725,6 +700,81 @@ x(t) = A \\sin(\\omega t + \\phi)
     );
   }
 
+  // ── Generation UI States ──────────────────────────────────
+  if (generationState === 'generating' || generationState === 'polling') {
+    return (
+      <MainLayout title={`${chapter.name} — Preparing Notes`}>
+        <div className="flex flex-col items-center justify-center py-24 px-4 min-h-[70vh]">
+          <div className="relative max-w-md w-full">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-primary/20 rounded-full blur-[80px] pointer-events-none" />
+            
+            <Card className="relative border border-border/80 shadow-2xl overflow-hidden rounded-3xl bg-background/50 backdrop-blur-xl">
+              <CardContent className="p-10 text-center flex flex-col items-center gap-6">
+                <div className="relative">
+                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl shadow-primary/30 animate-pulse">
+                    <BookOpen className="w-10 h-10 text-white" />
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-background border-2 border-border flex items-center justify-center animate-spin">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h1 className="text-title-lg font-display font-bold text-foreground">
+                    📚 Preparing Premium Notes
+                  </h1>
+                  <p className="text-body-md text-muted-foreground">
+                    Our AI Academic Engine is preparing a comprehensive chapter for you. This usually happens only once for each chapter.
+                  </p>
+                </div>
+
+                <div className="w-full space-y-2 mt-4">
+                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden relative">
+                    <div className="absolute left-0 top-0 h-full bg-primary rounded-full transition-all duration-[15000ms] ease-out w-[95%]" />
+                  </div>
+                  <p className="text-caption text-primary font-medium animate-pulse mt-2">
+                    {loadingFacts[loadingFactIndex]}
+                  </p>
+                  <p className="text-caption text-muted-foreground mt-4">
+                    Estimated time: 10–20 seconds
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (generationState === 'failed') {
+    return (
+      <MainLayout title={`${chapter.name} — Try Again Later`}>
+        <div className="flex flex-col items-center justify-center py-24 px-4 min-h-[70vh]">
+          <div className="relative max-w-md w-full">
+            <Card className="relative border border-destructive/20 shadow-2xl overflow-hidden rounded-3xl bg-background/50 backdrop-blur-xl">
+              <CardContent className="p-10 text-center flex flex-col items-center gap-6">
+                <div className="w-20 h-20 rounded-3xl bg-destructive/10 flex items-center justify-center">
+                  <AlertTriangle className="w-10 h-10 text-destructive" />
+                </div>
+                <div className="space-y-3">
+                  <h1 className="text-title-lg font-display font-bold text-foreground">
+                    We're preparing this chapter
+                  </h1>
+                  <p className="text-body-md text-muted-foreground">
+                    Please try again in a few minutes.
+                  </p>
+                </div>
+                <Button onClick={() => setGenerationState('idle')} variant="outline" className="w-full rounded-xl mt-4 border-border">
+                  Retry Now
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   // Handle generic errors (e.g., DB errors, network issues)
   if (contentError && !isNotPublished) {
