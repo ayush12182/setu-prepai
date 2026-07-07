@@ -1301,10 +1301,10 @@ const ChapterNotesPage: React.FC = () => {
                     </div>
                   </div>
                   <h3 className="text-heading-md font-display font-bold text-foreground mb-3">
-                    {isRetrying ? "Validation Mismatch Detected" : "Distilling Study Content..."}
+                    Distilling Study Content...
                   </h3>
                   <p className="text-muted-foreground text-center max-w-sm text-body-lg">
-                    {statusText || `Preparing classroom notes for ${chapter.name} using senior faculty exam specifications...`}
+                    Preparing classroom notes for {chapter.name} using senior faculty exam specifications...
                   </p>
                 </motion.div>
               ) : (
