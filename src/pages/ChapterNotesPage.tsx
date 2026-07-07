@@ -91,8 +91,29 @@ const LEVEL_STYLES = {
   3: { wrapper: 'bg-red-500/10 text-red-600 dark:text-red-400',         dot: 'bg-red-500' },
 } as const;
 
-const FormulaCard: React.FC<{ equation: string; title: string; whenToUse?: string; commonMistake?: string; memoryTrick?: string }> = ({ equation, title, whenToUse, commonMistake, memoryTrick }) => {
+const FormulaCard: React.FC<{ 
+  equation: string; 
+  title: string; 
+  whenToUse?: string; 
+  commonMistake?: string; 
+  memoryTrick?: string;
+  variables?: string;
+  units?: string;
+  whenNotToUse?: string;
+  derivation?: string;
+}> = ({ 
+  equation, 
+  title, 
+  whenToUse, 
+  commonMistake, 
+  memoryTrick,
+  variables,
+  units,
+  whenNotToUse,
+  derivation
+}) => {
   const [copied, setCopied] = useState(false);
+  const [showDerivation, setShowDerivation] = useState(false);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(equation.trim());
@@ -102,11 +123,13 @@ const FormulaCard: React.FC<{ equation: string; title: string; whenToUse?: strin
   };
 
   return (
-    <div className="my-8 p-6 bg-card border border-border/80 hover:border-accent/40 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col gap-4">
+    <div className="my-8 p-6 bg-gradient-to-br from-indigo-50/10 via-background to-secondary/5 dark:from-slate-900/20 dark:via-background dark:to-secondary/5 border border-border/80 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col gap-5">
+      
+      {/* Header & Formula display */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1.5 flex-1">
-          <span className="text-caption font-bold text-muted-foreground">{title || 'Formula'}</span>
-          <div className="text-body-lg font-semibold py-1 text-foreground overflow-x-auto">
+        <div className="space-y-1.5 flex-1 text-left">
+          <span className="text-body-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">{title || 'Formula'}</span>
+          <div className="text-[22px] font-semibold py-2 text-foreground overflow-x-auto leading-relaxed">
             <MathLine>{`$$${equation.trim()}$$`}</MathLine>
           </div>
         </div>
@@ -114,39 +137,85 @@ const FormulaCard: React.FC<{ equation: string; title: string; whenToUse?: strin
           variant="outline" 
           size="sm" 
           onClick={handleCopy} 
-          className="h-10 px-4 rounded-xl border border-border hover:bg-secondary flex items-center gap-2 self-end md:self-center bg-background"
+          className="h-9 px-3 rounded-xl border border-border hover:bg-secondary flex items-center gap-1.5 bg-background shadow-sm self-start md:self-center"
         >
           {copied ? (
             <>
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              <span className="text-caption font-bold text-emerald-500">Copied!</span>
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <span className="text-body-xs font-bold text-emerald-500">Copied!</span>
             </>
           ) : (
             <>
-              <Copy className="w-4 h-4 text-muted-foreground" />
-              <span className="text-caption font-bold">Copy</span>
+              <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="text-body-xs font-bold">Copy</span>
             </>
           )}
         </Button>
       </div>
-      {(whenToUse || commonMistake || memoryTrick) && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-border/40">
+
+      {/* Variables & SI Units Grid */}
+      {(variables || units) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-secondary/20 dark:bg-slate-900/30 rounded-xl border border-border/40 text-body-sm text-left">
+          {variables && (
+            <div>
+              <span className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Variables:</span>
+              <p className="text-muted-foreground"><MathLine>{variables}</MathLine></p>
+            </div>
+          )}
+          {units && (
+            <div>
+              <span className="font-bold text-slate-700 dark:text-slate-300 block mb-1">SI Units:</span>
+              <p className="text-muted-foreground"><MathLine>{units}</MathLine></p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Contextual Usage Grid */}
+      {(whenToUse || whenNotToUse || commonMistake || memoryTrick) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pt-4 border-t border-border/40 text-body-sm text-left">
           {whenToUse && (
-            <div className="text-sm">
-              <span className="font-semibold text-emerald-600 block mb-1">When to use</span>
-              <span className="text-muted-foreground">{whenToUse}</span>
+            <div>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">When to use:</span>
+              <span className="text-muted-foreground"><MathLine>{whenToUse}</MathLine></span>
+            </div>
+          )}
+          {whenNotToUse && (
+            <div>
+              <span className="font-bold text-rose-600 dark:text-rose-400 block mb-1">When NOT to use:</span>
+              <span className="text-muted-foreground"><MathLine>{whenNotToUse}</MathLine></span>
             </div>
           )}
           {commonMistake && (
-            <div className="text-sm">
-              <span className="font-semibold text-rose-600 block mb-1">Common Mistake</span>
-              <span className="text-muted-foreground">{commonMistake}</span>
+            <div>
+              <span className="font-bold text-red-600 dark:text-red-400 block mb-1">Common Mistake:</span>
+              <span className="text-muted-foreground"><MathLine>{commonMistake}</MathLine></span>
             </div>
           )}
           {memoryTrick && (
-            <div className="text-sm">
-              <span className="font-semibold text-amber-600 block mb-1">Memory Trick</span>
-              <span className="text-muted-foreground">{memoryTrick}</span>
+            <div>
+              <span className="font-bold text-amber-600 dark:text-amber-400 block mb-1">Memory Trick:</span>
+              <span className="text-muted-foreground"><MathLine>{memoryTrick}</MathLine></span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Collapsible derivation */}
+      {derivation && (
+        <div className="border-t border-border/40 pt-4 text-left">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowDerivation(!showDerivation)}
+            className="text-body-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/5 px-2.5 h-8 rounded-lg flex items-center gap-1.5"
+          >
+            <ChevronDown className={cn("w-3.5 h-3.5 transition-transform duration-200", showDerivation ? "rotate-180" : "")} />
+            {showDerivation ? "Hide Derivation Proof" : "Show Step-by-Step Derivation"}
+          </Button>
+          {showDerivation && (
+            <div className="mt-3 p-4 bg-indigo-500/5 dark:bg-indigo-950/10 rounded-xl border border-indigo-500/10 text-body-sm leading-relaxed text-slate-800 dark:text-slate-200 space-y-2 animate-in fade-in duration-200">
+              <MathLine>{derivation}</MathLine>
             </div>
           )}
         </div>
@@ -252,6 +321,7 @@ const ChapterNotesPage: React.FC = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showFloatingBar, setShowFloatingBar] = useState(false);
   const [activeSection, setActiveSection] = useState('section-theory');
+  const [completedSections, setCompletedSections] = useState<Record<string, boolean>>({});
 
   const { language } = useLanguage();
   const { isNeet, isCuet } = useExamMode();
@@ -400,6 +470,25 @@ const ChapterNotesPage: React.FC = () => {
               }
             }
           }
+
+          // 4. Track Completed Sections
+          setCompletedSections(prev => {
+            const updated = { ...prev };
+            let changed = false;
+            sections.forEach(sec => {
+              const el = document.getElementById(sec.id);
+              if (el) {
+                const rect = el.getBoundingClientRect();
+                // If section top has scrolled past 40% height of screen, mark as read
+                if (rect.top < window.innerHeight * 0.4 && !updated[sec.id]) {
+                  updated[sec.id] = true;
+                  changed = true;
+                }
+              }
+            });
+            return changed ? updated : prev;
+          });
+
           ticking = false;
         });
         ticking = true;
@@ -607,7 +696,7 @@ const ChapterNotesPage: React.FC = () => {
     if (/^Step \d+:/i.test(trimmed)) return <p key={key} className="my-2 ml-4 text-muted-foreground text-body-sm"><MathLine>{trimmed}</MathLine></p>;
 
     if (trimmed.startsWith('# ')) return (
-      <h1 key={key} className="text-heading-xl font-bold tracking-tight mt-12 mb-8 text-slate-900 dark:text-slate-50 border-b border-border pb-3 leading-tight font-display">
+      <h1 key={key} className="text-[52px] font-bold tracking-tight mt-16 mb-8 text-slate-900 dark:text-slate-50 pb-3 leading-none font-display">
         <MathLine>{trimmed.slice(2)}</MathLine>
       </h1>
     );
@@ -647,16 +736,57 @@ const ChapterNotesPage: React.FC = () => {
         id = 'section-aiinsights';
       }
 
+      const SECTION_DESCRIPTIONS: Record<string, string> = {
+        'section-overview': 'A high-level conceptual map of the chapter, connections, and JEE/NEET relevance.',
+        'section-outcomes': 'Core concepts and problem-solving skills you must master in this chapter.',
+        'section-theory': 'Kota-standard complete theoretical explanations with derivations and intuitive proofs.',
+        'section-visualization': 'Real-world visual analogies and mental models to lock in the physics.',
+        'section-formulas': 'Key mathematical equations, variables, and constraints for instant recall.',
+        'section-graphs': 'Important physical relationships represented graphically with slider parameters.',
+        'section-examples': 'Faculty-guided worked illustrations demonstrating step-by-step analytical paths.',
+        'section-pyqs': 'Deep-dive analysis of actual questions from recent JEE Main, Advanced, & NEET.',
+        'section-mistakes': 'Common conceptual traps, calculation pitfalls, and how AIR students avoid them.',
+        'section-shortcuts': 'Rapid calculation tricks, dimension checking, and extreme-case elimination methods.',
+        'section-revision': 'Quick summary sheet for last-minute recall before entering the exam hall.',
+        'section-summary': 'A concise recap of the core principles and mathematical laws of the chapter.',
+        'section-mindmap': 'Hierarchical conceptual connection map for absolute structural clarity.',
+        'section-examtips': 'Strategic exam-day advice from India’s top coaching faculties.',
+        'section-aiinsights': 'Custom Gemini-curated study pathways and personal focus areas.',
+      };
+
+      const desc = id ? SECTION_DESCRIPTIONS[id] : '';
+      
+      const numMatch = headingText.match(/^(\d+)\.\s*(.*)/);
+      let displayNum = '';
+      let displayTitle = headingText;
+      if (numMatch) {
+        const parsedNum = parseInt(numMatch[1]);
+        displayNum = parsedNum < 10 ? `0${parsedNum}` : `${parsedNum}`;
+        displayTitle = numMatch[2];
+      }
+
       return (
-        <h2 id={id} key={key} className="text-heading-lg font-bold mt-12 mb-6 flex items-center gap-3 text-slate-900 dark:text-slate-100 bg-secondary/20 p-4 rounded-2xl border border-border/80 scroll-mt-28">
-          <Layers className="w-6 h-6 text-accent shrink-0" />
-          <MathLine>{headingText}</MathLine>
-        </h2>
+        <div key={key} id={id} className="pt-16 pb-6 border-b border-border/60 scroll-mt-28 group">
+          <div className="flex items-baseline gap-3 mb-2">
+            {displayNum && (
+              <span className="text-[20px] font-extrabold text-indigo-600 dark:text-indigo-400 font-display">
+                {displayNum}
+              </span>
+            )}
+            <h2 className="text-[34px] font-bold tracking-tight font-display text-slate-900 dark:text-slate-100 leading-tight">
+              <MathLine>{displayTitle}</MathLine>
+            </h2>
+          </div>
+          {desc && (
+            <p className="text-body-sm text-muted-foreground/80 font-medium leading-relaxed max-w-2xl mt-1">
+              {desc}
+            </p>
+          )}
+        </div>
       );
     }
     if (trimmed.startsWith('### ')) return (
-      <h3 key={key} className="text-title-lg font-semibold mt-8 mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-accent" />
+      <h3 key={key} className="text-[26px] font-bold mt-10 mb-4 text-slate-800 dark:text-slate-200 leading-snug">
         <MathLine>{trimmed.slice(4)}</MathLine>
       </h3>
     );
@@ -665,20 +795,20 @@ const ChapterNotesPage: React.FC = () => {
       const text = trimmed.replace(/^#+\s*/, '');
       if (!text) return <br key={key} />;
       return (
-        <h4 key={key} className="text-title-md font-bold mt-6 mb-3 text-slate-700 dark:text-slate-300">
+        <h4 key={key} className="text-title-md font-bold mt-8 mb-3 text-slate-700 dark:text-slate-300">
           <MathLine>{text}</MathLine>
         </h4>
       );
     }
 
     if (trimmed.startsWith('\u2022 ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) return (
-      <li key={key} className="ml-6 my-3 text-slate-800 dark:text-slate-200 font-medium list-disc marker:text-accent leading-relaxed text-body-md">
+      <li key={key} className="ml-6 my-4 text-slate-800 dark:text-slate-200 font-normal list-disc marker:text-indigo-500 dark:marker:text-indigo-400 leading-relaxed text-[18px]">
         <MathLine>{trimmed.slice(2)}</MathLine>
       </li>
     );
 
     if (trimmed.startsWith('\u26a1') || trimmed.startsWith('\ud83d\udca1')) return (
-      <p key={key} className="ml-0 my-6 text-accent font-semibold bg-accent/5 p-4 rounded-xl border border-accent/20 leading-relaxed shadow-sm flex items-start gap-3 text-body-md">
+      <p key={key} className="ml-0 my-6 text-accent font-semibold bg-accent/5 p-4 rounded-xl border border-accent/20 leading-relaxed shadow-sm flex items-start gap-3 text-[18px]">
         <span className="text-title-md shrink-0 mt-0.5">{trimmed.substring(0, 2)}</span>
         <span><MathLine>{trimmed.substring(2)}</MathLine></span>
       </p>
@@ -687,18 +817,6 @@ const ChapterNotesPage: React.FC = () => {
     if (trimmed.startsWith('---')) return <hr key={key} className="my-10 border-border/60" />;
 
     if (trimmed.match(/^\d+\./)) return (
-      <p key={key} className="ml-2 my-4 font-semibold text-slate-800 dark:text-slate-200 overflow-x-auto text-body-md">
-        <MathLine>{trimmed}</MathLine>
-      </p>
-    );
-
-    return (
-      <p key={key} className="my-6 text-slate-800 dark:text-slate-200 font-normal leading-relaxed text-body-md overflow-x-auto">
-        <MathLine>{trimmed}</MathLine>
-      </p>
-    );
-  };
-  const renderNotes = (content: string) => {
     const cleanedContent = content.replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/, '').trim();
     const blockRe = /\[(DERIVATION|SVG|CALLOUT|JEE_INSIGHT|CONCEPT|JEE_TRICK|COMMON_MISTAKE|NCERT_INSIGHT|TEACHER_SAYS|FORMULA|GRAPH|INTERACTIVE_GRAPH|DIAGRAM|INTERACTIVE_DIAGRAM|WORKED_EXAMPLE|INTERACTIVE_EXAMPLE|SIMULATION)(?:\s+title="([^"]+)")?\]([\s\S]*?)\[\/\1\]/g;
     const elements: React.ReactNode[] = [];
@@ -732,97 +850,106 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'CALLOUT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-blue-50/40 dark:bg-blue-950/10 border-l-4 border-blue-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-blue-800 dark:text-blue-400 text-body-md font-bold flex items-center gap-2">
-              <BookOpen className="w-4 h-4 shrink-0 text-blue-500" /> Structured Concept Callout
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-blue-500/5 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-900/40 border-l-4 border-l-blue-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-blue-800 dark:text-blue-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <BookOpen className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" /> Concept Callout
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
+            <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `call-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'JEE_INSIGHT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-amber-50/40 dark:bg-amber-950/10 border border-dashed border-amber-300 dark:border-amber-900/40 rounded-2xl shadow-sm">
-            <h4 className="text-amber-800 dark:text-amber-400 text-body-md font-bold flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500 shrink-0" /> Star Batch JEE Insight & Tricks
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-amber-500/5 dark:bg-amber-950/20 border border-dashed border-amber-300 dark:border-amber-900/40 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-amber-850 dark:text-amber-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse" /> Star Batch JEE Insight
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
+            <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `jee-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'CONCEPT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-50/40 dark:bg-sky-950/10 border-l-4 border-sky-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-sky-800 dark:text-sky-400 text-body-md font-bold flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 shrink-0 text-sky-500" /> CONCEPT
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-500/5 dark:bg-sky-950/20 border border-sky-200/60 dark:border-sky-900/40 border-l-4 border-l-sky-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-sky-850 dark:text-sky-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 shrink-0 text-sky-600 dark:text-sky-400" /> Core Concept
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
+            <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `concept-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'JEE_TRICK') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-purple-50/40 dark:bg-purple-950/10 border-l-4 border-purple-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-purple-800 dark:text-purple-400 text-body-md font-bold flex items-center gap-2">
-              <Zap className="w-4 h-4 shrink-0 text-purple-500" /> JEE TRICK
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-purple-500/5 dark:bg-purple-950/20 border border-purple-200/60 dark:border-purple-900/40 border-l-4 border-l-purple-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-purple-850 dark:text-purple-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <Zap className="w-4 h-4 shrink-0 text-purple-600 dark:text-purple-400" /> JEE Shortcut Trick
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
+            <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `trick-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'COMMON_MISTAKE') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-rose-50/30 dark:bg-rose-950/10 border border-rose-200 dark:border-rose-900/40 border-l-4 border-l-rose-500 rounded-2xl shadow-sm">
-            <h4 className="text-rose-800 dark:text-rose-400 text-body-md font-bold flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" /> Common Student Pitfall
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-rose-500/5 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/40 border-l-4 border-l-rose-600 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-rose-800 dark:text-rose-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" /> Common Pitfall to Avoid
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
+            <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `mistake-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'NCERT_INSIGHT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-emerald-50/40 dark:bg-emerald-950/10 border-l-4 border-emerald-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-emerald-800 dark:text-emerald-400 text-body-md font-bold flex items-center gap-2">
-              <BookOpen className="w-4 h-4 shrink-0 text-emerald-500" /> NCERT INSIGHT
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 border-l-4 border-l-emerald-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-emerald-800 dark:text-emerald-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <BookOpen className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" /> NCERT Line Insight
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
+            <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `ncert-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'TEACHER_SAYS') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-amber-50/40 dark:bg-amber-950/10 border border-amber-300 dark:border-amber-900/40 rounded-2xl shadow-md border-l-4 border-l-amber-500">
-            <h4 className="text-amber-800 dark:text-amber-400 text-body-md font-bold flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 shrink-0 text-amber-500" /> Teacher Says / Teacher Insight
-            </h4>
-            <div className="text-amber-950 dark:text-amber-100 font-sans italic font-bold leading-relaxed mt-3 text-body-md">
-              {processNotesContent(blockContent, (line, i) => {
-                const trimmed = line.trim();
-                if (!trimmed) return <br key={`t-${keyIdx}-${i}`} />;
-                return (
-                  <p key={`t-${keyIdx}-${i}`} className="my-4">
-                    <MathLine>{trimmed}</MathLine>
-                  </p>
-                );
-              })}
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-200/60 dark:border-indigo-900/40 rounded-2xl border-l-4 border-l-indigo-600 shadow-[0_2px_12px_rgba(79,70,229,0.02)] flex gap-4 text-left">
+            <div className="w-10 h-10 rounded-full bg-indigo-600/10 flex items-center justify-center text-[20px] shrink-0 border border-indigo-600/20">
+              👨‍🏫
+            </div>
+            <div className="space-y-2 flex-1">
+              <h4 className="text-indigo-600 dark:text-indigo-400 text-body-sm font-extrabold uppercase tracking-wider">
+                Teacher's Advice
+              </h4>
+              <div className="text-slate-800 dark:text-slate-200 italic font-medium leading-[1.8] text-[18px] border-l-2 border-indigo-600/20 pl-4 py-1">
+                {processNotesContent(blockContent, (line, i) => {
+                  const trimmed = line.trim();
+                  if (!trimmed) return <br key={`t-${keyIdx}-${i}`} />;
+                  return (
+                    <p key={`t-${keyIdx}-${i}`} className="my-3">
+                      <MathLine>{trimmed}</MathLine>
+                    </p>
+                  );
+                })}
+              </div>
             </div>
           </div>
         );
       } else if (blockType === 'FORMULA') {
+        const variablesMatch = blockContent.match(/\*\*Variables:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const unitsMatch = blockContent.match(/\*\*SI Units:\*\*\s*(.*?)(?=\*\*|$)/is);
         const whenToUseMatch = blockContent.match(/\*\*When to use:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const whenNotToUseMatch = blockContent.match(/\*\*When not to use:\*\*\s*(.*?)(?=\*\*|$)/is);
         const mistakeMatch = blockContent.match(/\*\*Common Mistake:\*\*\s*(.*?)(?=\*\*|$)/is);
         const trickMatch = blockContent.match(/\*\*Memory Trick:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const derivationMatch = blockContent.match(/\*\*Derivation:\*\*\s*(.*?)(?=\*\*|$)/is);
         
         let equation = blockContent;
-        if (whenToUseMatch || mistakeMatch || trickMatch || blockContent.includes('**Variables:**')) {
-          equation = blockContent.split(/\*\*Variables:\*\*|\*\*When to use:\*\*|\*\*Common Mistake:\*\*|\*\*Memory Trick:\*\*/)[0].trim();
+        if (whenToUseMatch || mistakeMatch || trickMatch || blockContent.includes('**Variables:**') || blockContent.includes('**SI Units:**') || blockContent.includes('**Derivation:**')) {
+          equation = blockContent.split(/\*\*Variables:\*\*|\*\*SI Units:\*\*|\*\*When to use:\*\*|\*\*When not to use:\*\*|\*\*Common Mistake:\*\*|\*\*Memory Trick:\*\*|\*\*Derivation:\*\*/)[0].trim();
         }
 
         elements.push(
@@ -830,9 +957,13 @@ const ChapterNotesPage: React.FC = () => {
             key={`block-${keyIdx}`} 
             equation={equation} 
             title={blockTitle} 
+            variables={variablesMatch?.[1]?.trim()}
+            units={unitsMatch?.[1]?.trim()}
             whenToUse={whenToUseMatch?.[1]?.trim()}
+            whenNotToUse={whenNotToUseMatch?.[1]?.trim()}
             commonMistake={mistakeMatch?.[1]?.trim()}
             memoryTrick={trickMatch?.[1]?.trim()}
+            derivation={derivationMatch?.[1]?.trim()}
           />
         );
       } else if (blockType === 'GRAPH' || blockType === 'INTERACTIVE_GRAPH') {
@@ -989,61 +1120,60 @@ const ChapterNotesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Hero Learning Header (V3) */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 text-white p-8 sm:p-12 shadow-2xl border border-slate-800">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
-          {/* Ambient glow centered to reduce gradient darkness directly behind the title area and ensure high contrast */}
-          <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[550px] h-[250px] bg-indigo-500/15 rounded-full blur-[100px] pointer-events-none" />
+        {/* Hero Learning Header (V4) */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-50/40 via-secondary/15 to-background dark:from-indigo-950/20 dark:via-secondary/5 dark:to-background text-foreground p-6 sm:p-8 shadow-sm border border-border/80">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 space-y-6">
-            {/* 1. Chapter Name (Dominates with Heading XL/48px/700, 100% white, and subtle text shadow) */}
-            <h1 
-              className="text-display-lg !text-white font-bold tracking-tight font-display opacity-100"
-              style={{ textShadow: '0 2px 12px rgba(0,0,0,0.25)' }}
-            >
-              {chapter.name.toUpperCase()}
-            </h1>
-
-            {/* 2. Chapter Description (NCERT subtitle & topics covered) */}
-            <div className="space-y-2">
-              <div className="text-slate-200 text-body-sm font-semibold">
+          <div className="relative z-10 space-y-4">
+            {/* Chapter Name */}
+            <div className="space-y-1">
+              <span className="text-caption font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
                 Based on NCERT + PYQ Analysis + Exam Trends
-              </div>
-              <div className="text-indigo-300 font-bold text-caption tracking-wider">
-                {chapter.topics.join(' • ')}
-              </div>
+              </span>
+              <h1 className="text-heading-xl font-bold tracking-tight font-display text-slate-900 dark:text-slate-100">
+                {chapter.name}
+              </h1>
             </div>
 
-            <div className="flex flex-wrap gap-3 items-center">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-body-sm font-bold shadow-sm">
-                <Star className="w-4 h-4 fill-indigo-400 stroke-indigo-400" />
-                <span>Chapter Priority: {priority.text}</span>
+            {/* Chapter Description */}
+            <p className="text-body-sm font-semibold text-muted-foreground max-w-2xl leading-relaxed">
+              Topics: {chapter.topics.join(' • ')}
+            </p>
+
+            <div className="flex flex-wrap gap-2.5 items-center">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-indigo-500/5 dark:bg-indigo-500/10 border border-indigo-500/10 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-body-xs font-bold shadow-sm">
+                <Star className="w-3.5 h-3.5 fill-indigo-500 dark:fill-indigo-400 stroke-indigo-500 dark:stroke-indigo-400" />
+                <span>Priority: {priority.text}</span>
               </div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-body-sm font-bold shadow-sm">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/10 dark:border-amber-500/20 text-amber-700 dark:text-amber-300 text-body-xs font-bold shadow-sm">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                 <span>🔥 Trend: {trendInsight}</span>
               </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/10 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-body-xs font-bold shadow-sm">
+                <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+                <span>Difficulty: {chapter.difficulty}</span>
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="flex flex-wrap gap-2 pt-2">
               <Button 
                 onClick={() => scrollToSection('section-theory')} 
-                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2 rounded-xl transition-all shadow-md shadow-indigo-600/10 text-body-sm h-10"
               >
                 Start Reading
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => scrollToSection('section-revision')} 
-                className="bg-transparent border-slate-700 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-xl transition-all"
+                className="bg-background hover:bg-secondary border-border text-foreground font-bold px-5 py-2 rounded-xl transition-all text-body-sm h-10"
               >
                 Quick Revision
               </Button>
               <Button 
                 variant="outline" 
                 onClick={() => scrollToSection('section-pyqs')} 
-                className="bg-transparent border-slate-700 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-xl transition-all"
+                className="bg-background hover:bg-secondary border-border text-foreground font-bold px-5 py-2 rounded-xl transition-all text-body-sm h-10"
               >
                 PYQ Analysis
               </Button>
@@ -1052,7 +1182,7 @@ const ChapterNotesPage: React.FC = () => {
         </div>
 
         {/* PYQ Intelligence Dashboard (V3) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           {!chapter.pyqData || chapter.pyqData.total === 0 ? (
             // Empty data handling fallback
             <>
@@ -1062,16 +1192,16 @@ const ChapterNotesPage: React.FC = () => {
                 { title: '📈 Most Tested Concept', icon: BookOpen },
                 { title: '🎯 Exam Strategy', icon: Sparkles }
               ].map((card, i) => (
-                <div key={i} className="p-6 rounded-2xl bg-card border border-border/80 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                <div key={i} className="h-full p-6 rounded-2xl bg-gradient-to-br from-indigo-50/10 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-indigo-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-indigo-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                   <div className="flex items-center gap-2.5 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
-                      <card.icon className="w-5 h-5" />
+                    <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground border border-border/40">
+                      <card.icon className="w-4 h-4" />
                     </div>
                     <h3 className="font-bold text-slate-800 dark:text-slate-200 text-caption tracking-wider">{card.title}</h3>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-title-md font-bold text-foreground">PYQ Analysis Available Soon</p>
-                    <p className="text-caption font-semibold text-muted-foreground tracking-wider">Data Status: Collecting Historical PYQs</p>
+                  <div className="space-y-1 mt-auto">
+                    <p className="text-body-sm font-bold text-foreground">PYQ Analysis Available Soon</p>
+                    <p className="text-caption font-semibold text-muted-foreground tracking-wider">Collecting Historical Data</p>
                   </div>
                 </div>
               ))}
@@ -1080,16 +1210,16 @@ const ChapterNotesPage: React.FC = () => {
             // NEET Ecosystem Dashboard
             <>
               {/* Card 1: NEET PYQ Coverage */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-50/50 to-indigo-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-indigo-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-indigo-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-indigo-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-indigo-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                    <GraduationCap className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-500/10">
+                    <GraduationCap className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">NEET PYQ Coverage</h3>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-heading-md font-bold text-slate-900 dark:text-slate-50">{chapter.pyqData.total} Questions</p>
-                  <div className="text-caption font-bold text-muted-foreground flex flex-col gap-1">
+                <div className="space-y-2 mt-auto">
+                  <p className="text-title-lg font-bold text-slate-900 dark:text-slate-50">{chapter.pyqData.total} Questions</p>
+                  <div className="text-caption font-semibold text-muted-foreground flex flex-col gap-0.5">
                     <div>Post-COVID: {chapter.pyqData.postCovid} Qs</div>
                     <div>Trend: High Yield Syllabus</div>
                   </div>
@@ -1097,16 +1227,16 @@ const ChapterNotesPage: React.FC = () => {
               </div>
 
               {/* Card 2: NCERT Coverage */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-50/50 to-emerald-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-emerald-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-emerald-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-emerald-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-emerald-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <BookOpen className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
+                    <BookOpen className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">NCERT Coverage</h3>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-heading-md font-bold text-emerald-600 dark:text-emerald-400">100% Mapped</p>
-                  <div className="text-caption font-bold text-muted-foreground flex flex-col gap-1">
+                <div className="space-y-2 mt-auto">
+                  <p className="text-title-lg font-bold text-emerald-600 dark:text-emerald-400">100% Mapped</p>
+                  <div className="text-caption font-semibold text-muted-foreground flex flex-col gap-0.5">
                     <div>Focus: Diagrams & Key Lines</div>
                     <div>Direct lines frequently tested</div>
                   </div>
@@ -1114,41 +1244,38 @@ const ChapterNotesPage: React.FC = () => {
               </div>
 
               {/* Card 3: Most Tested Concept */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-rose-50/50 to-rose-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-rose-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-rose-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-rose-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-rose-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400">
-                    <BrainCircuit className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400 border border-rose-500/10">
+                    <BrainCircuit className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">Most Tested Concept</h3>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-title-md font-bold text-slate-950 dark:text-slate-50 line-clamp-1">
+                <div className="space-y-2 mt-auto">
+                  <p className="text-body-sm font-bold text-slate-950 dark:text-slate-50 line-clamp-1">
                     {chapter.pyqData.trendingConcepts?.[0] || chapter.topics?.[0] || 'Core Concepts'}
                   </p>
-                  <div className="text-caption font-bold text-muted-foreground flex flex-col gap-1">
+                  <div className="text-caption font-semibold text-muted-foreground flex flex-col gap-0.5">
                     <div>{Math.round(25 + (chapter.pyqData.total % 10))}% of NEET PYQs</div>
-                    <div>Recent Appearance: 2026, 2025, 2024</div>
+                    <div>Recent: 2026, 2025, 2024</div>
                   </div>
                 </div>
               </div>
 
               {/* Card 4: Exam Strategy */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-50/50 to-amber-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-amber-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-amber-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-amber-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-amber-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                    <Sparkles className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 border border-amber-500/10">
+                    <Sparkles className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">Exam Strategy</h3>
                 </div>
-                <div className="space-y-2">
-                  <div className="text-caption font-bold text-slate-700 dark:text-slate-300">
-                    <div className="text-indigo-500 dark:text-indigo-400 font-bold mb-1 text-caption">Focus First:</div>
-                    <ul className="list-disc pl-4 space-y-0.5 font-semibold text-slate-600 dark:text-slate-400">
-                      <li>{chapter.topics?.[0] || 'Core Concepts'}</li>
-                      <li>NCERT Diagrams</li>
-                    </ul>
-                    <div className="text-red-500 dark:text-red-400 font-bold mt-1 text-caption">Avoid:</div>
-                    <div className="text-slate-500 text-caption font-medium">Ignoring NCERT side-notes</div>
+                <div className="space-y-1.5 mt-auto">
+                  <div className="text-caption font-semibold text-slate-700 dark:text-slate-300">
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold block">Focus First:</span>
+                    <span className="text-muted-foreground block truncate">{chapter.topics?.[0] || 'Core Concepts'}</span>
+                    <span className="text-red-500 dark:text-red-400 font-bold block mt-1">Avoid:</span>
+                    <span className="text-muted-foreground block truncate">Ignoring NCERT side-notes</span>
                   </div>
                 </div>
               </div>
@@ -1157,16 +1284,16 @@ const ChapterNotesPage: React.FC = () => {
             // CUET Ecosystem Dashboard
             <>
               {/* Card 1: CUET PYQ Coverage */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-50/50 to-indigo-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-indigo-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-indigo-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-indigo-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-indigo-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                    <GraduationCap className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-500/10">
+                    <GraduationCap className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">CUET PYQ Coverage</h3>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-heading-md font-bold text-slate-900 dark:text-slate-50">{chapter.pyqData.total} Questions</p>
-                  <div className="text-caption font-bold text-muted-foreground flex flex-col gap-1">
+                <div className="space-y-2 mt-auto">
+                  <p className="text-title-lg font-bold text-slate-900 dark:text-slate-50">{chapter.pyqData.total} Questions</p>
+                  <div className="text-caption font-semibold text-muted-foreground flex flex-col gap-0.5">
                     <div>Trend: High Recall Speed</div>
                     <div>Speed & Accuracy focus</div>
                   </div>
@@ -1174,16 +1301,16 @@ const ChapterNotesPage: React.FC = () => {
               </div>
 
               {/* Card 2: NCERT Focus & Theory */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-50/50 to-emerald-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-emerald-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-emerald-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-emerald-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-emerald-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <BookOpen className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
+                    <BookOpen className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">NCERT Focus</h3>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-title-md font-bold text-emerald-600 dark:text-emerald-400">Direct Theory</p>
-                  <div className="text-caption font-bold text-muted-foreground flex flex-col gap-1">
+                <div className="space-y-2 mt-auto">
+                  <p className="text-title-lg font-bold text-emerald-600 dark:text-emerald-400">Direct Theory</p>
+                  <div className="text-caption font-semibold text-muted-foreground flex flex-col gap-0.5">
                     <div>Status: 100% Core Syllabus</div>
                     <div>Definition & Fact-Based</div>
                   </div>
@@ -1191,18 +1318,18 @@ const ChapterNotesPage: React.FC = () => {
               </div>
 
               {/* Card 3: Most Tested Concept */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-rose-50/50 to-rose-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-rose-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-rose-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-rose-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-rose-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400">
-                    <BrainCircuit className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400 border border-rose-500/10">
+                    <BrainCircuit className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">Most Tested Concept</h3>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-title-md font-bold text-slate-950 dark:text-slate-50 line-clamp-1">
+                <div className="space-y-2 mt-auto">
+                  <p className="text-body-sm font-bold text-slate-950 dark:text-slate-50 line-clamp-1">
                     {chapter.pyqData.trendingConcepts?.[0] || chapter.topics?.[0] || 'Core Concepts'}
                   </p>
-                  <div className="text-caption font-bold text-muted-foreground flex flex-col gap-1">
+                  <div className="text-caption font-semibold text-muted-foreground flex flex-col gap-0.5">
                     <div>{Math.round(25 + (chapter.pyqData.total % 10))}% of CUET PYQs</div>
                     <div>Recent Appearance: 2026, 2025</div>
                   </div>
@@ -1210,22 +1337,19 @@ const ChapterNotesPage: React.FC = () => {
               </div>
 
               {/* Card 4: Exam Strategy */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-50/50 to-amber-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-amber-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-amber-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-amber-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-amber-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                    <Sparkles className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 border border-amber-500/10">
+                    <Sparkles className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">Exam Strategy</h3>
                 </div>
-                <div className="space-y-2">
-                  <div className="text-caption font-bold text-slate-700 dark:text-slate-300">
-                    <div className="text-indigo-500 dark:text-indigo-400 font-bold mb-1 text-caption">Focus First:</div>
-                    <ul className="list-disc pl-4 space-y-0.5 font-semibold text-slate-600 dark:text-slate-400">
-                      <li>{chapter.topics?.[0] || 'Core Concepts'}</li>
-                      <li>Conceptual Definitions</li>
-                    </ul>
-                    <div className="text-red-500 dark:text-red-400 font-bold mt-1 text-caption">Avoid:</div>
-                    <div className="text-slate-500 text-caption font-medium">Skipping basic definition theory</div>
+                <div className="space-y-1.5 mt-auto">
+                  <div className="text-caption font-semibold text-slate-700 dark:text-slate-300">
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold block">Focus First:</span>
+                    <span className="text-muted-foreground block truncate">{chapter.topics?.[0] || 'Core Concepts'}</span>
+                    <span className="text-red-500 dark:text-red-400 font-bold block mt-1">Avoid:</span>
+                    <span className="text-muted-foreground block truncate">Skipping basic definition theory</span>
                   </div>
                 </div>
               </div>
@@ -1234,16 +1358,16 @@ const ChapterNotesPage: React.FC = () => {
             // JEE Ecosystem Dashboard (isJee)
             <>
               {/* Card 1: JEE Main PYQ Coverage */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-50/50 to-indigo-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-indigo-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-indigo-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-indigo-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-indigo-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                    <GraduationCap className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-500/10">
+                    <GraduationCap className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">JEE Main</h3>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-heading-md font-bold text-slate-900 dark:text-slate-50">{Math.round(chapter.pyqData.total * 0.65)} Questions</p>
-                  <div className="text-caption font-bold text-muted-foreground flex flex-col gap-1">
+                <div className="space-y-2 mt-auto">
+                  <p className="text-title-lg font-bold text-slate-900 dark:text-slate-50">{Math.round(chapter.pyqData.total * 0.65)} Questions</p>
+                  <div className="text-caption font-semibold text-muted-foreground flex flex-col gap-0.5">
                     <div>Coverage: {Math.round(chapter.pyqData.total * 0.65)} PYQs</div>
                     <div>Confidence: {chapter.weightage} Weightage</div>
                   </div>
@@ -1251,58 +1375,55 @@ const ChapterNotesPage: React.FC = () => {
               </div>
 
               {/* Card 2: JEE Advanced Analysis */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-emerald-50/50 to-emerald-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-emerald-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-emerald-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-emerald-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-emerald-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                    <BrainCircuit className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-500/10">
+                    <BrainCircuit className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">JEE Advanced</h3>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-heading-md font-bold text-emerald-600 dark:text-emerald-400">{chapter.pyqData.total - Math.round(chapter.pyqData.total * 0.65)} Questions</p>
-                  <div className="text-caption font-bold text-muted-foreground flex flex-col gap-1">
-                    <div>Difficulty: {chapter.difficulty === 'Hard' ? 'Concept Intensive' : chapter.difficulty === 'Medium' ? 'Analytical' : 'Core Practice'}</div>
+                <div className="space-y-2 mt-auto">
+                  <p className="text-title-lg font-bold text-emerald-600 dark:text-emerald-400">{chapter.pyqData.total - Math.round(chapter.pyqData.total * 0.65)} Questions</p>
+                  <div className="text-caption font-semibold text-muted-foreground flex flex-col gap-0.5">
+                    <div>Difficulty: {chapter.difficulty === 'Hard' ? 'Concept Intensive' : 'Core Practice'}</div>
                     <div>Focus: Multi-Concept Problems</div>
                   </div>
                 </div>
               </div>
 
               {/* Card 3: Most Tested Concept */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-rose-50/50 to-rose-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-rose-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-rose-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-rose-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-rose-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400">
-                    <BookOpen className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400 border border-rose-500/10">
+                    <BookOpen className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">Most Tested Concept</h3>
                 </div>
-                <div className="space-y-2">
-                  <p className="text-title-md font-bold text-slate-950 dark:text-slate-50 line-clamp-1">
+                <div className="space-y-2 mt-auto">
+                  <p className="text-body-sm font-bold text-slate-950 dark:text-slate-50 line-clamp-1">
                     {chapter.pyqData.trendingConcepts?.[0] || chapter.topics?.[0] || 'Core Concepts'}
                   </p>
-                  <div className="text-caption font-bold text-muted-foreground flex flex-col gap-1">
+                  <div className="text-caption font-semibold text-muted-foreground flex flex-col gap-0.5">
                     <div>{Math.round(25 + (chapter.pyqData.total % 10))}% of chapter PYQs</div>
-                    <div>Recent Appearance: 2026, 2025, 2024</div>
+                    <div>Recent: 2026, 2025, 2024</div>
                   </div>
                 </div>
               </div>
 
               {/* Card 4: Exam Strategy */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-50/50 to-amber-100/10 dark:from-slate-900/40 dark:to-slate-900/10 border border-amber-200/60 dark:border-slate-800 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div className="h-full p-6 rounded-2xl bg-gradient-to-br from-amber-50/20 via-background to-secondary/10 dark:from-slate-900/30 dark:via-background dark:to-secondary/5 border border-border/80 hover:border-amber-500/30 shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-md hover:shadow-amber-500/5 transition-all duration-300 flex flex-col justify-between hover:-translate-y-0.5">
                 <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                    <Sparkles className="w-5 h-5" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 border border-amber-500/10">
+                    <Sparkles className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100 text-caption tracking-wider">Exam Strategy</h3>
                 </div>
-                <div className="space-y-2">
-                  <div className="text-caption font-bold text-slate-700 dark:text-slate-300">
-                    <div className="text-indigo-500 dark:text-indigo-400 font-bold mb-1 text-caption">Focus First:</div>
-                    <ul className="list-disc pl-4 space-y-0.5 font-semibold text-slate-600 dark:text-slate-400">
-                      <li>{chapter.topics?.[0] || 'Core Concepts'}</li>
-                      <li>{chapter.topics?.[1] || 'Important Derivations'}</li>
-                    </ul>
-                    <div className="text-red-500 dark:text-red-400 font-bold mt-1 text-caption">Avoid:</div>
-                    <div className="text-slate-500 text-caption font-medium">Blind Formula Memorization</div>
+                <div className="space-y-1.5 mt-auto">
+                  <div className="text-caption font-semibold text-slate-700 dark:text-slate-300">
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold block">Focus First:</span>
+                    <span className="text-muted-foreground block truncate">{chapter.topics?.[0] || 'Core Concepts'}</span>
+                    <span className="text-red-500 dark:text-red-400 font-bold block mt-1">Avoid:</span>
+                    <span className="text-muted-foreground block truncate">Blind Formula Memorization</span>
                   </div>
                 </div>
               </div>
@@ -1310,9 +1431,9 @@ const ChapterNotesPage: React.FC = () => {
           )}
         </div>
 
-        {/* Sticky Section Tabs Navigation */}
-        <div className="sticky top-20 z-40 bg-background/80 backdrop-blur-xl border-y border-border py-4 -mx-4 px-4 sm:mx-0 sm:rounded-2xl sm:border-x shadow-sm">
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 hide-scrollbar">
+        {/* Sticky Segmented Navigation Tabs */}
+        <div className="sticky top-20 z-40 bg-background/95 backdrop-blur-md border-b border-border/80 py-3 -mx-4 px-4 sm:mx-0">
+          <div className="max-w-[860px] mx-auto flex items-center gap-1 p-1 bg-secondary/40 dark:bg-secondary/10 rounded-2xl border border-border/60 overflow-x-auto hide-scrollbar">
             {smartModes.map(mode => {
               const Icon = mode.icon;
               let targetSection = 'section-theory';
@@ -1325,6 +1446,8 @@ const ChapterNotesPage: React.FC = () => {
               else if (mode.id === 'insights') targetSection = 'section-insights';
               else if (mode.id === 'summary') targetSection = 'section-summary';
 
+              const isActive = activeSmartMode === mode.id;
+
               return (
                 <button
                   key={mode.id}
@@ -1336,13 +1459,13 @@ const ChapterNotesPage: React.FC = () => {
                     }
                   }}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2.5 rounded-xl text-body-sm font-bold whitespace-nowrap transition-all flex-shrink-0",
-                    activeSmartMode === mode.id
-                      ? "bg-foreground text-background shadow-md scale-95"
-                      : "bg-secondary hover:bg-secondary/80 text-foreground border border-border"
+                    "flex items-center gap-2 px-4 py-2 rounded-xl text-body-sm font-bold whitespace-nowrap transition-all duration-200 flex-shrink-0 relative",
+                    isActive
+                      ? "bg-background dark:bg-slate-900 text-foreground shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-border/40"
+                      : "text-muted-foreground hover:text-foreground border border-transparent"
                   )}
                 >
-                  <Icon className={cn("w-4 h-4", activeSmartMode === mode.id ? "opacity-100" : mode.color)} />
+                  <Icon className={cn("w-3.5 h-3.5", isActive ? "text-indigo-600 dark:text-indigo-400" : mode.color)} />
                   {mode.label}
                 </button>
               );
@@ -1353,34 +1476,41 @@ const ChapterNotesPage: React.FC = () => {
         {/* Apple Notes + Notion + Allen Hybrid Layout Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Sticky Left Table of Contents Navigator (P1) */}
-          <div className="hidden lg:block lg:col-span-3 sticky top-36 self-start p-6 bg-card border border-border rounded-2xl shadow-sm space-y-4">
-            <h4 className="font-bold text-caption uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <Layers className="w-4 h-4 text-accent" /> Contents
+          {/* Sticky Left Table of Contents Navigator (P1 - Notion/Apple Books Hybrid) */}
+          <div className="hidden lg:block lg:col-span-3 sticky top-36 self-start p-2 bg-transparent space-y-5">
+            <h4 className="font-bold text-caption uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2 pl-3">
+              <Layers className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> ON THIS PAGE
             </h4>
-            <ul className="space-y-2.5">
+            <ul className="space-y-1 border-l border-border/60 ml-3.5 pl-3">
               {sections.map(sec => {
                 const isActive = activeSection === sec.id;
+                const isCompleted = completedSections[sec.id];
                 return (
                   <li key={sec.id}>
                     <button
                       onClick={() => scrollToSection(sec.id)}
                       className={cn(
-                        "w-full text-left text-body-sm py-1.5 px-3 rounded-lg font-bold transition-all flex items-center gap-2.5 border-l-2",
+                        "w-full text-left text-body-sm py-1 px-2 rounded-lg transition-all flex items-center justify-between group",
                         isActive 
-                          ? "text-accent bg-accent/5 font-extrabold border-accent" 
-                          : "text-muted-foreground border-transparent hover:text-foreground hover:bg-secondary/40"
+                          ? "text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-500/5 dark:bg-indigo-500/10" 
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/40 font-medium"
                       )}
                     >
-                      <span className="text-caption">{isActive ? '●' : '○'}</span>
-                      <span className="truncate">{sec.label}</span>
+                      <span className="truncate pr-2">{sec.label}</span>
+                      {isCompleted ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 opacity-100" />
+                      ) : isActive ? (
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 shrink-0" />
+                      ) : (
+                        <span className="w-1.5 h-1.5 rounded-full bg-transparent group-hover:bg-muted-foreground/30 shrink-0 transition-colors" />
+                      )}
                     </button>
                   </li>
                 );
               })}
             </ul>
-            <div className="pt-4 border-t border-border flex items-center justify-between text-caption text-muted-foreground font-semibold">
-              <span>Read progress:</span>
+            <div className="pt-3 border-t border-border/60 pl-3 flex items-center justify-between text-caption text-muted-foreground font-semibold">
+              <span>Reading progress:</span>
               <span className="text-foreground font-bold">{scrollProgress}%</span>
             </div>
           </div>
@@ -1414,99 +1544,118 @@ const ChapterNotesPage: React.FC = () => {
               ) : (
                 <motion.div
                   key="content"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="space-y-6"
-                >
-                  {/* Reading Status Widget at the top of content */}
-                  <Card className="border border-border/80 shadow-sm bg-gradient-to-r from-secondary/50 to-secondary/10 rounded-2xl overflow-hidden">
-                    <CardContent className="p-5 flex flex-wrap items-center justify-between gap-4 text-body-sm font-semibold">
-                      <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                          <Calculator className="w-4 h-4 text-sky-500" />
-                          <span>Difficulty: {chapter.difficulty}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                          <GraduationCap className="w-4 h-4 text-emerald-500" />
-                          <span>Reading Time: ~45 min</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                          <Sparkles className="w-4 h-4 text-amber-500" />
-                          <span>Importance: Critical</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">Retention Estimation:</span>
-                        <span className="text-accent font-bold">78%</span>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  ini                  {/* Core Notes Content Box (Continuous, borderless textbook flow) */}
+                  <div className="bg-transparent relative">
+                    <div className="prose prose-base sm:prose-lg dark:prose-invert max-w-[860px] mx-auto space-y-10 leading-[1.8]">
+                      {renderNotes(notes)}
+                      {isGenerating && <span className="inline-block w-3 h-5 bg-indigo-600 animate-pulse ml-2 align-middle rounded-sm" />}
+                    </div>
+                  </div>
 
-                  {/* Core Notes Content Box */}
-                  <Card className="border border-border/80 shadow-xl overflow-hidden rounded-3xl">
-                    <CardContent className="p-8 sm:p-14 relative bg-background">
-                      <div className="prose prose-base sm:prose-lg dark:prose-invert max-w-[850px] mx-auto space-y-8">
-                        {renderNotes(notes)}
-                        {isGenerating && <span className="inline-block w-3 h-5 bg-accent animate-pulse ml-2 align-middle rounded-sm" />}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Chapter Completion experience (P1) */}
+                  {/* Chapter Completion Milestone UX (Level Mastery Card) */}
                   {!isGenerating && notes !== '' && (
-                    <div className="p-8 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50/30 dark:from-emerald-950/20 dark:to-teal-950/5 border border-emerald-200 dark:border-emerald-900/50 shadow-md my-8">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="space-y-3">
-                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-caption font-bold uppercase tracking-wider">
-                            Chapter Completed Successfully
-                          </div>
-                          <h3 className="text-heading-md font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                            🎉 Congratulations, Beta!
-                          </h3>
-                          <p className="text-slate-600 dark:text-slate-300 max-w-xl text-body-md leading-relaxed">
-                            You've completed the star-batch classroom notes for <strong className="font-extrabold">{chapter.name}</strong>. Excellent persistence!
-                          </p>
-                          <div className="flex flex-wrap gap-6 pt-2 text-body-sm text-slate-500 dark:text-slate-400 font-semibold">
-                            <div>Topics Covered: <span className="text-slate-800 dark:text-slate-200 font-bold">{chapter.topics.length}/{chapter.topics.length}</span></div>
-                            <div>Estimated Retention: <span className="text-emerald-600 dark:text-emerald-400 font-bold">78%</span></div>
+                    <div className="p-6 sm:p-10 rounded-3xl bg-gradient-to-br from-emerald-500/5 via-background to-teal-500/5 dark:from-emerald-500/10 dark:via-background dark:to-teal-500/5 border border-emerald-500/20 dark:border-emerald-500/30 shadow-[0_4px_20px_rgba(16,185,129,0.03)] my-12 space-y-8 max-w-[860px] mx-auto text-left">
+                      <div className="space-y-2">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-caption font-bold tracking-wider uppercase">
+                          🎉 Chapter Completed
+                        </span>
+                        <h3 className="text-heading-lg font-bold text-slate-900 dark:text-slate-100 font-display">
+                          You have successfully completed {chapter.name}.
+                        </h3>
+                        <p className="text-muted-foreground text-body-sm">
+                          Excellent work! You have completed all visual illustrations, formula reviews, and faculty insights for this chapter.
+                        </p>
+                      </div>
+
+                      {/* Mastery Stats & Progress Grid */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        {/* Star-Based Mastery Ratings */}
+                        <div className="p-6 bg-secondary/30 dark:bg-slate-900/40 rounded-2xl border border-border/60 space-y-4">
+                          <h4 className="font-bold text-body-xs uppercase tracking-wider text-muted-foreground">Chapter Mastery</h4>
+                          <div className="space-y-3 font-semibold text-body-sm text-foreground">
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground font-medium">Theory & Proofs</span>
+                              <span className="text-amber-500 tracking-wider">★★★★★</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground font-medium">Formula Sheet</span>
+                              <span className="text-amber-500 tracking-wider">★★★★★</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground font-medium">Solved Examples</span>
+                              <span className="text-amber-500 tracking-wider">★★★★★</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground font-medium">Revision Sheet</span>
+                              <span className="text-amber-500 tracking-wider">★★★★☆</span>
+                            </div>
+                            <div className="pt-3 border-t border-border flex items-center justify-between">
+                              <span className="text-foreground font-bold">Overall Chapter Mastery</span>
+                              <span className="text-emerald-600 dark:text-emerald-400 font-black text-body-md">82%</span>
+                            </div>
                           </div>
                         </div>
-                        
-                        {nextChapter && (
-                          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 min-w-[280px]">
-                            <div className="space-y-1">
-                              <span className="text-caption font-bold uppercase tracking-widest text-muted-foreground">Up Next</span>
-                              <h4 className="font-extrabold text-slate-900 dark:text-slate-100">{nextChapter.name}</h4>
+
+                        {/* Progress checklist checkmarks */}
+                        <div className="p-6 bg-secondary/30 dark:bg-slate-900/40 rounded-2xl border border-border/60 flex flex-col justify-between">
+                          <h4 className="font-bold text-body-xs uppercase tracking-wider text-muted-foreground mb-3">Milestone Progress</h4>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2.5 text-body-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 className="w-4.5 h-4.5" />
+                              <span>Theory Covered</span>
                             </div>
-                            <Button 
-                              onClick={() => {
-                                navigate(`/chapter/${nextChapter.id}/notes`);
-                                window.scrollTo(0, 0);
-                              }} 
-                              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold h-11 rounded-xl transition-all"
-                            >
-                              Start Next Chapter →
-                            </Button>
+                            <div className="flex items-center gap-2.5 text-body-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 className="w-4.5 h-4.5" />
+                              <span>Formula Sheet Reviewed</span>
+                            </div>
+                            <div className="flex items-center gap-2.5 text-body-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 className="w-4.5 h-4.5" />
+                              <span>Examples Solved</span>
+                            </div>
+                            <div className="flex items-center gap-2.5 text-body-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 className="w-4.5 h-4.5" />
+                              <span>Revision Complete</span>
+                            </div>
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Level Mastery Strategic Action pathways */}
+                      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-emerald-500/10">
+                        {nextChapter ? (
+                          <Button 
+                            onClick={() => {
+                              navigate(`/chapter/${nextChapter.id}/notes`);
+                              window.scrollTo(0, 0);
+                            }}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 h-11 rounded-xl transition-all shadow-md shadow-emerald-600/10 flex-1 text-body-sm"
+                          >
+                            Continue to {nextChapter.name} →
+                          </Button>
+                        ) : (
+                          <Button 
+                            onClick={() => navigate('/dashboard')}
+                            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 h-11 rounded-xl transition-all shadow-md flex-1 text-body-sm"
+                          >
+                            Go to Dashboard
+                          </Button>
                         )}
+                        <Button 
+                          variant="outline" 
+                          onClick={() => navigate(`/practice?chapter=${chapter.id}`)}
+                          className="bg-background hover:bg-secondary border-border text-foreground font-bold px-6 h-11 rounded-xl transition-all flex-1 text-body-sm"
+                        >
+                          Start Practice
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => navigate(`/test?chapter=${chapter.id}`)}
+                          className="bg-background hover:bg-secondary border-border text-foreground font-bold px-6 h-11 rounded-xl transition-all flex-1 text-body-sm"
+                        >
+                          Start Test
+                        </Button>
                       </div>
                     </div>
-                  )}
-
-                  {/* Bottom Action CTAs */}
-                  {!isGenerating && notes !== '' && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-                      className="flex flex-col sm:flex-row justify-center gap-4 pt-4"
-                    >
-                      <Button variant="outline" size="lg" className="h-14 font-bold rounded-2xl border-border bg-card shadow-sm" onClick={() => navigate(`/practice?chapter=${chapter.id}`)}>
-                        Test Concepts in Practice
-                      </Button>
-                      <Button variant="default" size="lg" className="h-14 font-bold rounded-2xl shadow-lg shadow-primary/20" onClick={() => navigate(`/test?chapter=${chapter.id}`)}>
-                        Take Formal Chapter Test
-                      </Button>
-                    </motion.div>
                   )}
                 </motion.div>
               )}
