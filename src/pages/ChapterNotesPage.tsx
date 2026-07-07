@@ -1700,7 +1700,7 @@ const ChapterNotesPage: React.FC = () => {
                   {/* Core Notes Content Box (Continuous, borderless textbook flow) */}
                   <div className="bg-transparent relative">
                     <div className="prose prose-base sm:prose-lg dark:prose-invert max-w-[860px] mx-auto space-y-10 leading-[1.8]">
-                      {renderNotes(notes)}
+                      {parseBlocks(notes)}
                       {isGenerating && <span className="inline-block w-3 h-5 bg-indigo-600 animate-pulse ml-2 align-middle rounded-sm" />}
                     </div>
                   </div>
