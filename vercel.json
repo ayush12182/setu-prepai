@@ -15,7 +15,7 @@
           "value": "prepentrance-prepai\\.vercel\\.app"
         }
       ],
-      "destination": "https://setulearning.in/$1",
+      "destination": "https://prepentrance.com/$1",
       "permanent": true
     }
   ]

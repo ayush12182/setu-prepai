@@ -31,7 +31,7 @@ export const TrialExpiredScreen: React.FC = () => {
     const handleShare = () => {
         const text = `Join PrepEntrance — India's smartest learning platform! Use my code ${trialStatus.referralCode} to get started. 🚀`;
         if (navigator.share) {
-            navigator.share({ title: 'Join PrepEntrance', text, url: 'https://setulearning.in' });
+            navigator.share({ title: 'Join PrepEntrance', text, url: 'https://prepentrance.com' });
         } else {
             navigator.clipboard.writeText(text);
             toast.success('Share text copied to clipboard!');

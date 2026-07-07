@@ -77,7 +77,7 @@ export const startSubscriptionCheckout = async (
     
     // Fallbacks if user details are missing
     const phone = user?.phone || "9999999999";
-    const email = user?.email || "student@setulearning.in";
+    const email = user?.email || "student@prepentrance.com";
     const name = user?.user_metadata?.name || "Student";
     const customerId = user?.id || `cust_${Date.now()}`;
 

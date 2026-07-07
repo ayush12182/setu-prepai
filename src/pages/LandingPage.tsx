@@ -290,19 +290,19 @@ const LandingPage: React.FC = () => {
     }
   });
 
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, profileLoading } = useAuth();
   
   useEffect(() => {
-    // If auth is loaded and user is logged in
-    if (!authLoading && user) {
+    // Wait for both auth session and profile fetch to complete before redirecting
+    if (!authLoading && !profileLoading && user) {
       if (profile?.class) {
         navigate('/student-hub', { replace: true });
-      } else if (profile) {
-        // Incomplete profile (e.g. new Google Auth user) -> send to onboarding
+      } else {
+        // Logged in but no class set (new Google Auth user or incomplete profile) -> onboarding
         navigate('/auth', { replace: true });
       }
     }
-  }, [user, profile, authLoading, navigate]);
+  }, [user, profile, authLoading, profileLoading, navigate]);
 
   const [activeSlide, setActiveSlide] = useState(0);
   const isHoveredRef = useRef(false);

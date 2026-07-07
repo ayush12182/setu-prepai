@@ -42,7 +42,7 @@ const AuthPage: React.FC = () => {
   const { 
     user, profile, refreshProfile, signInWithEmail, signUpWithEmail, 
     signInWithGoogle, signInWithApple, signInWithPhone, verifyOTP, 
-    updateProfile, loading: authLoading 
+    updateProfile, loading: authLoading, profileLoading
   } = useAuth();
   const { setExamMode } = useExamMode();
 
@@ -96,7 +96,8 @@ const AuthPage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (user && !authLoading) {
+    // Wait for both auth and profile loading to complete before making routing decisions
+    if (user && !authLoading && !profileLoading) {
       if (showOnboarding || showWelcome) return;
 
       if (profile) {
@@ -109,13 +110,13 @@ const AuthPage: React.FC = () => {
           return;
         }
       } else {
-        // profile is null but user is logged in -> need onboarding
-        console.log("No profile found, staying in onboarding.");
+        // profile is null (not loading anymore) -> need onboarding
+        console.log("No profile found after load, showing onboarding.");
         setShowOnboarding(true);
         return;
       }
     }
-  }, [user, profile, authLoading, navigate, showOnboarding, showWelcome]);
+  }, [user, profile, authLoading, profileLoading, navigate, showOnboarding, showWelcome]);
 
   const validateEmail = (value: string) => {
     try { 

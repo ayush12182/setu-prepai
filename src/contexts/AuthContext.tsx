@@ -78,6 +78,8 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  /** True while the profile is being fetched from DB after sign-in */
+  profileLoading: boolean;
   subscription: SubscriptionState;
   /** Convenience getter — defaults to 'student' if not set */
   userType: Profile['user_type'];
@@ -114,6 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionState>({
     subscribed: false,
     productId: null,
@@ -123,6 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchProfile = async (userId: string) => {
     if (DEV_BYPASS) return;
+    setProfileLoading(true);
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) {
@@ -186,6 +190,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     } catch (error) {
       console.error('[AuthContext] Unexpected fatal error fetching profile:', error);
+    } finally {
+      setProfileLoading(false);
     }
   };
 
@@ -220,9 +226,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          // Use setTimeout to avoid Supabase deadlock on auth state change
           setTimeout(() => fetchProfile(session.user.id), 0);
         } else {
           setProfile(null);
+          setProfileLoading(false);
           setSubscription({ subscribed: false, productId: null, subscriptionEnd: null, loading: false });
         }
 
@@ -237,6 +245,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user.id);
+      } else {
+        setProfileLoading(false);
       }
       setLoading(false);
     });
@@ -377,6 +387,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           session: null,
           profile: MOCK_PROFILE as any,
           loading: false,
+          profileLoading: false,
           subscription: { subscribed: true, productId: null, subscriptionEnd: null, loading: false },
           userType: 'student',
           isMentor: false,
@@ -407,6 +418,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         profile,
         loading,
+        profileLoading,
         subscription,
         userType,
         isMentor,

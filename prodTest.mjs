@@ -16,7 +16,7 @@ import { chromium } from 'playwright';
     console.log('FAILED REQ:', request.url(), request.failure()?.errorText);
   });
   
-  await page.goto('https://setulearning.in/');
+  await page.goto('https://prepentrance.com/');
   await page.waitForTimeout(4000);
   
   await browser.close();
