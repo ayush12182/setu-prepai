@@ -405,19 +405,52 @@ const ChapterNotesPage: React.FC = () => {
   if (isNotPublished) {
     return (
       <MainLayout title={`${chapter.name} — Coming Soon`}>
-        <div className="flex flex-col items-center justify-center py-24 gap-6 text-center px-4">
-          <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center">
-            <BookOpen className="w-10 h-10 text-primary" />
+        <div className="flex flex-col items-center justify-center py-20 px-4 min-h-[70vh]">
+          <div className="relative max-w-2xl w-full">
+            {/* Background ambient glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-primary/20 rounded-full blur-[80px] pointer-events-none" />
+            
+            <Card className="relative border border-border/80 shadow-2xl overflow-hidden rounded-3xl bg-background/50 backdrop-blur-xl">
+              <CardContent className="p-10 sm:p-14 text-center flex flex-col items-center gap-8">
+                <div className="relative">
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl shadow-primary/30">
+                    <BookOpen className="w-12 h-12 text-white" />
+                  </div>
+                  <div className="absolute -bottom-3 -right-3 w-10 h-10 rounded-full bg-background border-2 border-border flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-amber-500" />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h1 className="text-display-sm font-display font-bold text-foreground">
+                    {chapter.name}
+                  </h1>
+                  <p className="text-body-lg text-muted-foreground max-w-md mx-auto">
+                    The premium classroom notes for this chapter are currently being prepared by our senior faculty team and will be published shortly.
+                  </p>
+                </div>
+
+                <div className="inline-flex items-center gap-2.5 bg-amber-500/10 border border-amber-500/20 px-5 py-2.5 rounded-2xl text-amber-600 dark:text-amber-400 font-bold text-body-sm shadow-sm">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                  </span>
+                  Content under review — available soon
+                </div>
+
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent my-2" />
+
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
+                  <Button onClick={() => navigate(-1)} variant="outline" className="h-12 px-6 rounded-xl font-bold w-full sm:w-auto">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Go Back
+                  </Button>
+                  <Button onClick={() => navigate('/practice')} variant="default" className="h-12 px-6 rounded-xl font-bold w-full sm:w-auto shadow-lg shadow-primary/20">
+                    Practice Other Chapters
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <h1 className="text-heading-lg font-bold text-foreground">{chapter.name}</h1>
-          <p className="text-body-lg text-muted-foreground max-w-md">
-            Premium notes for this chapter are being prepared by our faculty team and will be published soon.
-          </p>
-          <div className="flex items-center gap-2 text-amber-500 bg-amber-500/10 px-4 py-2 rounded-xl text-body-sm font-semibold">
-            <Sparkles className="w-4 h-4" />
-            Content under review — available soon
-          </div>
-          <Button onClick={() => navigate(-1)} variant="outline">← Go Back</Button>
         </div>
       </MainLayout>
     );
