@@ -277,17 +277,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signInWithGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth('google', {
-      redirect_uri: `${window.location.origin}/auth`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth`,
+      }
     });
-    if (result.error) throw result.error;
+    if (error) throw error;
   };
 
   const signInWithApple = async () => {
-    const result = await lovable.auth.signInWithOAuth('apple', {
-      redirect_uri: `${window.location.origin}/auth`,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: {
+        redirectTo: `${window.location.origin}/auth`,
+      }
     });
-    if (result.error) throw result.error;
+    if (error) throw error;
   };
 
   const signInWithPhone = async (phone: string) => {
