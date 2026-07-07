@@ -304,8 +304,8 @@ const PracticePage: React.FC = () => {
             {/* Level 1: Header & Subject Switching */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <h1 className="text-heading-xl font-black !text-black  tracking-tight">JEE Training Center</h1>
-                <p className="!text-slate-800  text-body-lg mt-1 font-bold">Select a subject and chapter to begin practicing.</p>
+                <h1 className="text-heading-xl font-black text-black dark:text-white tracking-tight">JEE Training Center</h1>
+                <p className="text-slate-800 dark:text-slate-300 text-body-lg mt-1 font-bold">Select a subject and chapter to begin practicing.</p>
               </div>
 
               {/* Apple style Segmented subject selector */}
@@ -320,7 +320,7 @@ const PracticePage: React.FC = () => {
                     }}
                     className={cn(
                       "py-2 px-5 rounded-full text-caption font-bold uppercase tracking-wider transition-all duration-200 shrink-0",
-                      activeSubject === sub.key ? "bg-slate-900 !text-white font-black shadow-sm" : "!text-slate-800 font-bold hover:!text-black dark:hover:text-white"
+                      activeSubject === sub.key ? "bg-background text-black font-black dark:text-white shadow-sm" : "text-slate-800 font-bold dark:text-slate-400 hover:text-black dark:hover:text-white"
                     )}
                   >
                     {sub.label}
@@ -372,7 +372,7 @@ const PracticePage: React.FC = () => {
                         >
                           <div>
                             <div className="flex justify-between items-start gap-2">
-                              <h3 className="text-title-lg font-black !text-black  group-hover:text-primary transition-colors line-clamp-2">
+                              <h3 className="text-title-lg font-black text-black dark:text-white group-hover:text-primary transition-colors line-clamp-2">
                                 {chapter.name}
                               </h3>
                               {!isApproved && (
@@ -381,7 +381,7 @@ const PracticePage: React.FC = () => {
                                 </span>
                               )}
                             </div>
-                            <div className="flex gap-4 mt-3 text-body-sm !text-slate-800 font-bold ">
+                            <div className="flex gap-4 mt-3 text-body-sm text-slate-800 font-bold dark:text-slate-300">
                               <span>{topicsCount} Topics</span>
                               <span>•</span>
                               <span>{isApproved ? questionsCount : 0} Questions</span>
@@ -408,14 +408,14 @@ const PracticePage: React.FC = () => {
               <div className="space-y-6">
                 <button 
                   onClick={() => setSelectedChapter(null)} 
-                  className="flex items-center gap-2 text-caption font-bold !text-slate-800 hover:!text-black transition-colors"
+                  className="flex items-center gap-2 text-caption font-bold text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back to Chapters
                 </button>
 
                 <div className="pb-4 border-b border-border">
-                  <h2 className="text-title-lg font-black !text-black">{selectedChapter.name}</h2>
-                  <p className="text-body-sm !text-slate-800 font-bold mt-1">{selectedChapter.topics.length} topics available for practice.</p>
+                  <h2 className="text-title-lg font-semibold text-foreground">{selectedChapter.name}</h2>
+                  <p className="text-body-sm text-muted-foreground mt-1">{selectedChapter.topics.length} topics available for practice.</p>
                 </div>
 
                 <div className="space-y-3">
@@ -427,8 +427,8 @@ const PracticePage: React.FC = () => {
                         className="bg-card border border-border rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-primary/25 transition-all text-left"
                       >
                         <div className="space-y-1">
-                          <h4 className="text-body-md font-black !text-black">{topic}</h4>
-                          <div className="flex gap-3 text-caption !text-slate-800 font-bold">
+                          <h4 className="text-body-md font-bold text-foreground">{topic}</h4>
+                          <div className="flex gap-3 text-caption text-muted-foreground font-medium">
                             <span>{questionsCount} Questions</span>
                             <span>•</span>
                             <span>Last Practiced: {lastPracticed}</span>
@@ -451,22 +451,22 @@ const PracticePage: React.FC = () => {
               <div className="space-y-6 max-w-xl mx-auto">
                 <button 
                   onClick={() => setSelectedTopic(null)} 
-                  className="flex items-center gap-2 text-caption font-bold !text-slate-800 hover:!text-black transition-colors"
+                  className="flex items-center gap-2 text-caption font-bold text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back to Topics
                 </button>
 
                 <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 space-y-6">
                   <div className="text-center pb-5 border-b border-border space-y-1">
-                    <h3 className="text-title-md font-black !text-black">Configure Practice</h3>
-                    <p className="text-caption !text-slate-800 font-bold">{selectedChapter.name} • {selectedTopic}</p>
+                    <h3 className="text-title-md font-bold text-foreground">Configure Practice</h3>
+                    <p className="text-caption text-muted-foreground">{selectedChapter.name} • {selectedTopic}</p>
                   </div>
 
                   {/* Configuration Form */}
                   <div className="space-y-5">
                     {/* Difficulty selector */}
                     <div className="space-y-2">
-                      <label className="text-caption !text-slate-800 uppercase font-bold tracking-wider">Difficulty</label>
+                      <label className="text-caption text-muted-foreground uppercase font-bold tracking-wider">Difficulty</label>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         {(['easy', 'medium', 'hard', 'mixed'] as const).map(diff => (
                           <button
@@ -475,8 +475,8 @@ const PracticePage: React.FC = () => {
                             className={cn(
                               "py-2.5 px-4 rounded-xl border text-caption font-bold uppercase tracking-wider transition-all",
                               configDifficulty === diff 
-                                ? "bg-slate-900 border-slate-900 !text-white shadow-md" 
-                                : "bg-secondary/50 border-border !text-slate-800 hover:bg-secondary"
+                                ? "bg-primary border-primary text-white shadow-md" 
+                                : "bg-secondary/50 border-border text-muted-foreground hover:bg-secondary"
                             )}
                           >
                             {diff}
@@ -487,7 +487,7 @@ const PracticePage: React.FC = () => {
 
                     {/* Question Count selector */}
                     <div className="space-y-2">
-                      <label className="text-caption !text-slate-800 uppercase font-bold tracking-wider">Question Count</label>
+                      <label className="text-caption text-muted-foreground uppercase font-bold tracking-wider">Question Count</label>
                       <div className="grid grid-cols-4 gap-2">
                         {([10, 20, 30, 50] as const).map(count => (
                           <button
@@ -496,8 +496,8 @@ const PracticePage: React.FC = () => {
                             className={cn(
                               "py-2.5 px-4 rounded-xl border text-caption font-bold transition-all",
                               configCount === count 
-                                ? "bg-slate-900 border-slate-900 !text-white shadow-md" 
-                                : "bg-secondary/50 border-border !text-slate-800 hover:bg-secondary"
+                                ? "bg-primary border-primary text-white shadow-md" 
+                                : "bg-secondary/50 border-border text-muted-foreground hover:bg-secondary"
                             )}
                           >
                             {count}
@@ -508,7 +508,7 @@ const PracticePage: React.FC = () => {
 
                     {/* Question Source selector */}
                     <div className="space-y-2">
-                      <label className="text-caption !text-slate-800 uppercase font-bold tracking-wider">Question Source</label>
+                      <label className="text-caption text-muted-foreground uppercase font-bold tracking-wider">Question Source</label>
                       <div className="grid grid-cols-3 gap-2">
                         {([
                           { id: 'practice', label: 'Practice' },
@@ -521,8 +521,8 @@ const PracticePage: React.FC = () => {
                             className={cn(
                               "py-2.5 px-4 rounded-xl border text-caption font-bold transition-all",
                               configSource === src.id 
-                                ? "bg-slate-900 border-slate-900 !text-white shadow-md" 
-                                : "bg-secondary/50 border-border !text-slate-800 hover:bg-secondary"
+                                ? "bg-primary border-primary text-white shadow-md" 
+                                : "bg-secondary/50 border-border text-muted-foreground hover:bg-secondary"
                             )}
                           >
                             {src.label}
