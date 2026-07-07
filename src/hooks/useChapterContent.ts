@@ -152,7 +152,7 @@ export function useChapterContent(
     : undefined;
 
   const query = useQuery<ChapterContentData, Error>({
-    queryKey: ["chapter-content", lookupKey, examType, language],
+    queryKey: ["chapter-content-v2", lookupKey, examType, language],
     queryFn: async () => {
       if (!lookupKey) throw new Error("chapterId is required");
       const data = await fetchChapterContent(lookupKey, examType, language);
