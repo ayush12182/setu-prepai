@@ -304,8 +304,8 @@ const PracticePage: React.FC = () => {
             {/* Level 1: Header & Subject Switching */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <h1 className="text-heading-xl font-black text-black dark:text-white tracking-tight">JEE Training Center</h1>
-                <p className="text-slate-800 dark:text-slate-300 text-body-lg mt-1 font-bold">Select a subject and chapter to begin practicing.</p>
+                <h1 className="text-heading-xl font-black !text-black  tracking-tight">JEE Training Center</h1>
+                <p className="!text-slate-800  text-body-lg mt-1 font-bold">Select a subject and chapter to begin practicing.</p>
               </div>
 
               {/* Apple style Segmented subject selector */}
@@ -320,7 +320,7 @@ const PracticePage: React.FC = () => {
                     }}
                     className={cn(
                       "py-2 px-5 rounded-full text-caption font-bold uppercase tracking-wider transition-all duration-200 shrink-0",
-                      activeSubject === sub.key ? "bg-background text-black font-black dark:text-white shadow-sm" : "text-slate-800 font-bold dark:text-slate-400 hover:text-black dark:hover:text-white"
+                      activeSubject === sub.key ? "bg-slate-900 !text-white font-black shadow-sm" : "!text-slate-800 font-bold hover:!text-black dark:hover:text-white"
                     )}
                   >
                     {sub.label}
@@ -372,7 +372,7 @@ const PracticePage: React.FC = () => {
                         >
                           <div>
                             <div className="flex justify-between items-start gap-2">
-                              <h3 className="text-title-lg font-black text-black dark:text-white group-hover:text-primary transition-colors line-clamp-2">
+                              <h3 className="text-title-lg font-black !text-black  group-hover:text-primary transition-colors line-clamp-2">
                                 {chapter.name}
                               </h3>
                               {!isApproved && (
@@ -381,7 +381,7 @@ const PracticePage: React.FC = () => {
                                 </span>
                               )}
                             </div>
-                            <div className="flex gap-4 mt-3 text-body-sm text-slate-800 font-bold dark:text-slate-300">
+                            <div className="flex gap-4 mt-3 text-body-sm !text-slate-800 font-bold ">
                               <span>{topicsCount} Topics</span>
                               <span>•</span>
                               <span>{isApproved ? questionsCount : 0} Questions</span>
