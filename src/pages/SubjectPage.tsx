@@ -12,7 +12,7 @@ import {
 import { MainLayout } from '@/components/layout/MainLayout';
 import {
   physicsChapters, chemistryChapters, mathsChapters,
-  getChaptersBySubject, Chapter
+  getChaptersBySubject, Chapter, APPROVED_CHAPTERS
 } from '@/data/syllabus';
 import { neetBiologyChapters } from '@/data/neetSyllabus';
 
@@ -317,6 +317,15 @@ const SubjectPage: React.FC = () => {
                                   <span className="text-slate-300">•</span>
                                   <span className="text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[9px] font-bold">
                                     High Weightage
+                                  </span>
+                                </>
+                              )}
+                              {APPROVED_CHAPTERS[chapter.name] > 0 && (
+                                <>
+                                  <span className="text-slate-300">•</span>
+                                  <span className="text-blue-600 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-1">
+                                    <CheckCircle2 className="w-2.5 h-2.5" />
+                                    Verified Bank
                                   </span>
                                 </>
                               )}

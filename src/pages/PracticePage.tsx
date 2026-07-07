@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Chapter, getChapterById, physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
+import { Chapter, getChapterById, physicsChapters, chemistryChapters, mathsChapters, APPROVED_CHAPTERS } from '@/data/syllabus';
 import { neetBiologyChapters, neetChemistryChapters, neetPhysicsChapters } from '@/data/neetSyllabus';
 import { getCuetChaptersBySubject } from '@/data/cuetSyllabus';
 import { Subchapter, getSubchapterById } from '@/data/subchapters';
@@ -28,30 +28,7 @@ type PracticeState =
   | { step: 'quiz'; node: LearningNode; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; adaptiveMode?: string }
   | { step: 'results'; node: LearningNode; difficulty: 'easy' | 'medium' | 'hard' | 'mixed'; result: QuizResult };
 
-const APPROVED_CHAPTERS: Record<string, number> = {
-  'Kinematics': 100,
-  'Laws of Motion': 100,
-  'Work, Energy & Power': 100,
-  'Rotational Motion': 100,
-  'Gravitation': 100,
-  'SHM & Waves': 100,
-  'Electrostatics': 100,
-  'Current Electricity': 100,
-  'Magnetism & EMI': 100,
-  'Optics': 100,
-  'Thermodynamics': 100,
-  'Modern Physics': 100,
-  'Chemical Bonding': 100,
-  'Mole Concept & Stoichiometry': 100,
-  'GOC & Isomerism': 100,
-  'Chemical Equilibrium': 100,
-  'Electrochemistry': 100,
-  'Matrices & Determinants': 150,
-  'Complex Numbers': 150,
-  'Probability': 150,
-  'Coordinate Geometry': 200,
-  'Limits, Continuity & Differentiability': 250
-};
+// Removed local APPROVED_CHAPTERS
 
 const PracticePage: React.FC = () => {
   const navigate = useNavigate();
@@ -142,7 +119,7 @@ const PracticePage: React.FC = () => {
     if (state.step !== 'select-difficulty') return;
     const { node } = state;
     setState({ step: 'quiz', node, difficulty });
-    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, count, examParam, node.name);
+    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, count, examParam, node.name, activeSubject);
   };
 
   const handleQuizComplete = (result: QuizResult) => {
@@ -176,7 +153,7 @@ const PracticePage: React.FC = () => {
     if (state.step !== 'results') return;
     const { node, difficulty } = state;
     setState({ step: 'quiz', node, difficulty });
-    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam, node.name);
+    generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam, node.name, activeSubject);
   };
 
   const handleGetSimilar = async (question: { concept_tested: string; question_text: string }) => {
@@ -231,7 +208,7 @@ const PracticePage: React.FC = () => {
       difficulty: configDifficulty,
       adaptiveMode: configSource === 'pyq' ? 'PYQ' : configSource === 'mixed' ? 'Mixed Source' : 'Standard Practice'
     });
-    generateQuestions(mockNode.id, configDifficulty === 'mixed' ? 'medium' : configDifficulty, configCount, examParam, selectedTopic);
+    generateQuestions(mockNode.id, configDifficulty === 'mixed' ? 'medium' : configDifficulty, configCount, examParam, selectedTopic, activeSubject);
   };
 
   const renderQuizContent = () => {

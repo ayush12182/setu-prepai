@@ -228,21 +228,21 @@ export function validateQuestion(q: UnifiedQuestion): { valid: boolean; reason?:
 // Deterministic difficulty mapping
 function getTargetDifficulty(configDifficulty: string, index: number, total: number): 'easy' | 'medium' | 'hard' {
   if (total === 30) {
-    if (index < 10) return 'easy';
-    if (index < 20) return 'medium';
+    if (index < 6) return 'easy';
+    if (index < 21) return 'medium';
     return 'hard';
   }
   if (total === 50) {
-    const percent = index / total;
-    if (percent < 0.40) return 'easy';
-    if (percent < 0.80) return 'medium';
+    if (index < 10) return 'easy';
+    if (index < 35) return 'medium';
     return 'hard';
   }
 
   const percent = index / total;
-  if (configDifficulty === 'medium') {
-    if (percent < 0.3) return 'easy';
-    if (percent < 0.8) return 'medium';
+  // 20% Easy, 50% Medium (up to 70%), 30% Hard
+  if (configDifficulty === 'medium' || configDifficulty === 'mixed') {
+    if (percent < 0.20) return 'easy';
+    if (percent < 0.70) return 'medium';
     return 'hard';
   }
   if (configDifficulty === 'hard') {

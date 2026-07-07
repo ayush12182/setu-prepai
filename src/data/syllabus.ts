@@ -12,6 +12,31 @@ import { getAllCuetChapters } from './cuetSyllabus';
 import { getSchoolChapterById } from './schoolSyllabus';
 
 
+export const APPROVED_CHAPTERS: Record<string, number> = {
+  'Kinematics': 100,
+  'Laws of Motion': 100,
+  'Work, Energy & Power': 100,
+  'Rotational Motion': 100,
+  'Gravitation': 100,
+  'SHM & Waves': 100,
+  'Electrostatics': 100,
+  'Current Electricity': 100,
+  'Magnetism & EMI': 100,
+  'Optics': 100,
+  'Thermodynamics': 100,
+  'Modern Physics': 100,
+  'Chemical Bonding': 100,
+  'Mole Concept & Stoichiometry': 100,
+  'GOC & Isomerism': 100,
+  'Chemical Equilibrium': 100,
+  'Electrochemistry': 100,
+  'Matrices & Determinants': 150,
+  'Complex Numbers': 150,
+  'Probability': 150,
+  'Coordinate Geometry': 200,
+  'Limits, Continuity & Differentiability': 250
+};
+
 export interface PYQData {
   total: number;
   postCovid: number; // 2020-2025 (HIGH PRIORITY)

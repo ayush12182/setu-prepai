@@ -108,6 +108,11 @@ const AuthPage: React.FC = () => {
           setShowOnboarding(true);
           return;
         }
+      } else {
+        // profile is null but user is logged in -> need onboarding
+        console.log("No profile found, staying in onboarding.");
+        setShowOnboarding(true);
+        return;
       }
     }
   }, [user, profile, authLoading, navigate, showOnboarding, showWelcome]);

@@ -16,92 +16,84 @@ function buildPrompt(chapterName: string, subject: string, topics: string[], exa
   const topicList = topics.length > 0 ? topics.join(", ") : chapterName;
   const exam = examMode.toUpperCase().includes("NEET") ? "NEET" : examMode.toUpperCase().includes("CUET") ? "CUET" : "JEE Main + Advanced";
 
-  return `SYSTEM PROMPT — PREPENTRANCE PREMIUM JSON REVISION ENGINE
+  return `SYSTEM PROMPT — PREPENTRANCE PREMIUM NOTES ENGINE
 
-You are an expert Kota faculty generating a highly structured JSON revision note for ${exam}.
-Your output MUST be valid JSON. No markdown wrappers around the JSON. No conversational text. Just raw JSON.
+You are an expert Kota faculty generating a highly structured revision note for ${exam}.
+CRITICAL LANGUAGE INSTRUCTION:
+- You must write in 100% professional, academic English.
+- DO NOT use Hinglish, Hindi words, or conversational slang (e.g., no "Beta", "Agar", "Samjho"). Keep terminology simple and student-friendly.
 
-CRITICAL INSTRUCTIONS:
-- NEVER define UI colors or presentation styles. Use semantic importance (e.g. importance: "high").
-- Always use the provided enums for graphs and diagrams. NEVER invent free-text diagram names.
-- Ensure KaTeX formulas use standard syntax.
+Your output MUST be a continuous text document using the following exact custom markdown block formats. Do NOT wrap the entire output in JSON or markdown code blocks (e.g., no \`\`\`markdown).
 
-=========================================
-REQUIRED JSON SCHEMA
-=========================================
-{
-  "schemaVersion": "1.0.0",
-  "generator": "gemini-2.5-flash",
-  "generatedAt": "<current_iso_timestamp>",
-  "chapter": "${chapterName}",
-  "metadata": {
-    "title": "...",
-    "weightage": "⭐⭐⭐⭐☆",
-    "expectedQuestions": "1-2",
-    "time": "10-12 min",
-    "difficulty": "Moderate"
-  },
-  "whyThisMatters": [
-    "Bullet 1", "Bullet 2", "Bullet 3"
-  ],
-  "conceptMap": {
-    "nodes": [
-      { "id": "1", "label": "Motion" }
-    ],
-    "edges": [
-      { "from": "1", "to": "2" }
-    ]
-  },
-  "highYieldTopics": [
-    { "topic": "Projectile Motion", "stars": 3 }
-  ],
-  "formulaCards": [
-    {
-      "id": "kin_001",
-      "name": "Final Velocity",
-      "latex": "v=u+at",
-      "variables": "v: Final velocity, u: Initial velocity...",
-      "whenToUse": "Constant acceleration only",
-      "commonMistake": "Using when acceleration is variable",
-      "pyqFrequency": "Very High"
-    }
-  ],
-  "graphs": [
-    {
-      "type": "<MUST BE ONE OF: position_time, velocity_time, acceleration_time, projectile, shm, waves, electric_field, magnetic_field, lens, mirror, circuits, functions, parabola, circle, ellipse, hyperbola, trigonometry>",
-      "variant": "uniform_acceleration",
-      "annotations": ["slope", "area"],
-      "interactive": true
-    }
-  ],
-  "diagrams": [
-    {
-      "type": "<MUST BE ONE OF: projectile_motion, river_boat, free_fall, circular_motion, reaction_mechanism, periodic_trends, energy_profile, orbitals, hybridization>",
-      "showVelocity": true,
-      "showGravity": true,
-      "showTrajectory": true,
-      "showAngle": true
-    }
-  ],
-  "memoryTricks": [
-    { "title": "...", "explanation": "..." }
-  ],
-  "commonMistakes": [
-    { "wrong": "...", "right": "...", "why": "..." }
-  ],
-  "pyqAnalysis": [
-    { "topic": "...", "frequency": "Very High", "stars": 5 }
-  ],
-  "quickRevision": {
-    "formulas": [
-      { "equation": "...", "name": "..." }
-    ]
-  },
-  "checklist": [
-    "Checklist item 1", "Checklist item 2"
-  ]
-}
-=========================================
+REQUIRED METADATA BLOCK (Must be the very first thing):
+[METADATA]
+chapter_slug: ${chapterName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}
+chapter_name: ${chapterName}
+subject: ${subject}
+topic_tree: ${topicList}
+[/METADATA]
+
+Then, generate the following sections in order, using standard Markdown headings (#, ##, ###) and the custom blocks below where appropriate.
+
+# ${chapterName}
+Classroom notes curated by senior Kota faculty.
+
+[TEACHER_SAYS]
+Students, this chapter is extremely critical for your ${exam} preparation. Focus on the core principles rather than just memorizing formulas.
+[/TEACHER_SAYS]
+
+## Chapter Overview
+Provide a bulleted list of core topics and why it matters for the exam.
+
+## Core Theory
+[CONCEPT]
+Define precise physical or mathematical concepts here.
+[/CONCEPT]
+
+[NCERT_INSIGHT]
+Highlight conceptual background frequently tested directly from NCERT.
+[/NCERT_INSIGHT]
+
+[DERIVATION]
+Show important derivations here using LaTeX inside standard $$ delimiters (e.g., $$F = ma$$).
+[/DERIVATION]
+
+## Formula Sheet
+For every critical formula, use the following block:
+[FORMULA title="Formula Name"]
+Equation here (e.g. F = ma)
+**Variables:** m = mass (kg), a = acceleration (m/s^2)
+**When to use:** Use when mass is constant.
+**Common Mistake:** Forgetting vector direction.
+**Memory Trick:** A short phrase to remember.
+[/FORMULA]
+
+## Important Concepts
+List high-frequency traps and symmetry principles.
+
+[JEE_TRICK]
+Shortcut Trick: Provide a time-saving mathematical or conceptual shortcut.
+[/JEE_TRICK]
+
+## Solved Examples
+Provide 1-2 examples formatted exactly like this:
+**Given:** ...
+**To find:** ...
+**Concept:** ...
+**Solution:** ...
+**Answer:** ...
+
+## PYQ Intelligence Section
+Provide past years trend analysis (Question frequency, Difficulty distribution, Key subtopics).
+
+## JEE Insights
+Provide multiple common student mistakes using this block:
+[COMMON_MISTAKE]
+Conceptual Trap: Describe the most frequent conceptual mistake, typical exam trap, or sign convention error here.
+[/COMMON_MISTAKE]
+
+## Chapter Summary
+Provide a brief bulleted summary.
 
 INPUT DETAILS:
   Chapter: ${chapterName}
@@ -196,7 +188,6 @@ serve(async (req) => {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
             generationConfig: {
               temperature: 0.3,
-              responseMimeType: "application/json",
             }
           }),
         }
@@ -212,34 +203,26 @@ serve(async (req) => {
       
       if (!content) continue;
 
-      try {
-        const parsed = JSON.parse(content);
-        
-        // Basic Validation Schema check
-        if (!parsed.schemaVersion || !parsed.metadata || !parsed.metadata.title) {
-          throw new Error("Missing required schema fields");
-        }
-        
-        // Validation passed
-        finalJsonData = parsed;
-        break;
-      } catch (err) {
-        console.error(`Attempt ${attempts} Validation Failed:`, err.message);
+      if (!content.includes("[METADATA]")) {
+        console.error(`Attempt ${attempts} Validation Failed: Missing [METADATA] block`);
+        continue;
       }
+
+      finalJsonData = content;
+      break;
     }
 
     if (!finalJsonData) {
-       return new Response(JSON.stringify({ error: "Failed to generate valid JSON content after multiple attempts." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+       return new Response(JSON.stringify({ error: "Failed to generate valid content after multiple attempts." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     // Save to Cache
-    const jsonString = JSON.stringify(finalJsonData);
     await supabase.from("chapter_standardized_notes").upsert({
         chapter_id: chapterId,
         chapter_name: chapterName,
         subject: subject,
         language: lang,
-        content: jsonString,
+        content: finalJsonData,
     }, { onConflict: "chapter_id,language" });
 
     // Return the response synchronously to the frontend

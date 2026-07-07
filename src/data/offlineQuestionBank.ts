@@ -1464,9 +1464,8 @@ export function getOfflineQuestions(
 
     // Default fallback (strictly within chapters of the subject)
     if (!matchedChapterKey) {
-      matchedChapterKey = chaptersInSubject.find(k => k.includes('electrostatics')) || chaptersInSubject[0];
+      console.warn(`[Offline Bank] Could not map "${chapClean}" to a template. Falling back to dynamic mock generation.`);
     }
-
 
     const runGeneration = (strict: boolean, chapterKey: string): UnifiedQuestion[] => {
       const list: UnifiedQuestion[] = [];

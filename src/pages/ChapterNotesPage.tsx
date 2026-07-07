@@ -39,7 +39,7 @@ const LEVEL_STYLES = {
   3: { wrapper: 'bg-red-500/10 text-red-600 dark:text-red-400',         dot: 'bg-red-500' },
 } as const;
 
-const FormulaCard: React.FC<{ equation: string; title: string }> = ({ equation, title }) => {
+const FormulaCard: React.FC<{ equation: string; title: string; whenToUse?: string; commonMistake?: string; memoryTrick?: string }> = ({ equation, title, whenToUse, commonMistake, memoryTrick }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -50,31 +50,55 @@ const FormulaCard: React.FC<{ equation: string; title: string }> = ({ equation, 
   };
 
   return (
-    <div className="my-8 p-6 bg-card border border-border/80 hover:border-accent/40 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div className="space-y-1.5 flex-1">
-        <span className="text-caption font-bold text-muted-foreground">{title || 'Formula'}</span>
-        <div className="text-body-lg font-semibold py-1 text-foreground overflow-x-auto">
-          <MathLine>{`$$${equation.trim()}$$`}</MathLine>
+    <div className="my-8 p-6 bg-card border border-border/80 hover:border-accent/40 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1.5 flex-1">
+          <span className="text-caption font-bold text-muted-foreground">{title || 'Formula'}</span>
+          <div className="text-body-lg font-semibold py-1 text-foreground overflow-x-auto">
+            <MathLine>{`$$${equation.trim()}$$`}</MathLine>
+          </div>
         </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleCopy} 
+          className="h-10 px-4 rounded-xl border border-border hover:bg-secondary flex items-center gap-2 self-end md:self-center bg-background"
+        >
+          {copied ? (
+            <>
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <span className="text-caption font-bold text-emerald-500">Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-4 h-4 text-muted-foreground" />
+              <span className="text-caption font-bold">Copy</span>
+            </>
+          )}
+        </Button>
       </div>
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={handleCopy} 
-        className="h-10 px-4 rounded-xl border border-border hover:bg-secondary flex items-center gap-2 self-end md:self-center bg-background"
-      >
-        {copied ? (
-          <>
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            <span className="text-caption font-bold text-emerald-500">Copied!</span>
-          </>
-        ) : (
-          <>
-            <Copy className="w-4 h-4 text-muted-foreground" />
-            <span className="text-caption font-bold">Copy</span>
-          </>
-        )}
-      </Button>
+      {(whenToUse || commonMistake || memoryTrick) && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-border/40">
+          {whenToUse && (
+            <div className="text-sm">
+              <span className="font-semibold text-emerald-600 block mb-1">When to use</span>
+              <span className="text-muted-foreground">{whenToUse}</span>
+            </div>
+          )}
+          {commonMistake && (
+            <div className="text-sm">
+              <span className="font-semibold text-rose-600 block mb-1">Common Mistake</span>
+              <span className="text-muted-foreground">{commonMistake}</span>
+            </div>
+          )}
+          {memoryTrick && (
+            <div className="text-sm">
+              <span className="font-semibold text-amber-600 block mb-1">Memory Trick</span>
+              <span className="text-muted-foreground">{memoryTrick}</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -265,46 +289,55 @@ const ChapterNotesPage: React.FC = () => {
   };
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      // 1. Reading Progress
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalHeight > 0) {
-        const progress = (window.pageYOffset / totalHeight) * 100;
-        setScrollProgress(Math.min(100, Math.max(0, Math.round(progress))));
-      }
-
-      // 2. Floating Bar Visibility
-      if (window.pageYOffset > 350) {
-        setShowFloatingBar(true);
-      } else {
-        setShowFloatingBar(false);
-      }
-
-      // 3. Active Outline Scroll Spy
-      const scrollPos = window.pageYOffset + 240;
-      for (const sec of sections) {
-        const el = document.getElementById(sec.id);
-        if (el) {
-          const top = el.getBoundingClientRect().top + window.pageYOffset;
-          const height = el.offsetHeight;
-          if (scrollPos >= top && scrollPos < top + height) {
-            setActiveSection(sec.id);
-            let matchedMode: SmartMode = 'default';
-            if (sec.id === 'section-overview') matchedMode = 'overview';
-            else if (sec.id === 'section-theory') matchedMode = 'theory';
-            else if (sec.id === 'section-formulas') matchedMode = 'formulas';
-            else if (sec.id === 'section-concepts') matchedMode = 'concepts';
-            else if (sec.id === 'section-examples') matchedMode = 'examples';
-            else if (sec.id === 'section-pyqs') matchedMode = 'pyqs';
-            else if (sec.id === 'section-insights') matchedMode = 'insights';
-            else if (sec.id === 'section-summary') matchedMode = 'summary';
-            setActiveSmartMode(matchedMode);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          // 1. Reading Progress
+          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+          if (totalHeight > 0) {
+            const progress = (window.pageYOffset / totalHeight) * 100;
+            setScrollProgress(Math.min(100, Math.max(0, Math.round(progress))));
           }
-        }
+
+          // 2. Floating Bar Visibility
+          if (window.pageYOffset > 350) {
+            setShowFloatingBar(true);
+          } else {
+            setShowFloatingBar(false);
+          }
+
+          // 3. Active Outline Scroll Spy
+          const scrollPos = window.pageYOffset + 240;
+          for (const sec of sections) {
+            const el = document.getElementById(sec.id);
+            if (el) {
+              const top = el.getBoundingClientRect().top + window.pageYOffset;
+              const height = el.offsetHeight;
+              if (scrollPos >= top && scrollPos < top + height) {
+                if (activeSection !== sec.id) {
+                  setActiveSection(sec.id);
+                  let matchedMode: SmartMode = 'default';
+                  if (sec.id === 'section-overview') matchedMode = 'overview';
+                  else if (sec.id === 'section-theory') matchedMode = 'theory';
+                  else if (sec.id === 'section-formulas') matchedMode = 'formulas';
+                  else if (sec.id === 'section-concepts') matchedMode = 'concepts';
+                  else if (sec.id === 'section-examples') matchedMode = 'examples';
+                  else if (sec.id === 'section-pyqs') matchedMode = 'pyqs';
+                  else if (sec.id === 'section-insights') matchedMode = 'insights';
+                  else if (sec.id === 'section-summary') matchedMode = 'summary';
+                  setActiveSmartMode(matchedMode);
+                }
+              }
+            }
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -397,31 +430,14 @@ const ChapterNotesPage: React.FC = () => {
         return;
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error('No readable stream');
-      const decoder = new TextDecoder();
+      const resJson = await response.json();
       let fullNotes = '';
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        for (const line of chunk.split('\n')) {
-          if (line.startsWith('data: ') && line !== 'data: [DONE]') {
-            try {
-              const json = JSON.parse(line.slice(6));
-              const content = json.choices?.[0]?.delta?.content;
-              if (content) {
-                fullNotes += content;
-                setNotes(fullNotes);
-              }
-            } catch { /* skip invalid JSON */ }
-          }
-        }
-      }
-
-      if (!fullNotes) {
-        console.warn('[ChapterNotesPage] Stream completed with no content, using fallback');
+      if (resJson.success && resJson.data) {
+        fullNotes = typeof resJson.data === 'string' ? resJson.data : JSON.stringify(resJson.data);
+        setNotes(fullNotes);
+      } else {
+        console.warn('[ChapterNotesPage] Failed to get valid notes data');
         setNotes(buildFallbackNotes(chapter));
         setIsGenerating(false);
         return;
@@ -504,7 +520,7 @@ const ChapterNotesPage: React.FC = () => {
 Classroom notes curated by senior Kota faculty.
 
 [TEACHER_SAYS]
-Beta, this chapter is extremely important for your JEE preparation. Focus on deriving the fundamental relations rather than just memorizing the formulas. Pay special attention to the edge cases and common traps we've highlighted below.
+Students, this chapter is extremely critical for your JEE preparation. Focus on deriving the fundamental relations rather than just memorizing the formulas. Pay special attention to the edge cases and common traps we've highlighted below.
 [/TEACHER_SAYS]
 
 ## Chapter Overview
@@ -895,8 +911,24 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
           </div>
         );
       } else if (blockType === 'FORMULA') {
+        const whenToUseMatch = blockContent.match(/\*\*When to use:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const mistakeMatch = blockContent.match(/\*\*Common Mistake:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const trickMatch = blockContent.match(/\*\*Memory Trick:\*\*\s*(.*?)(?=\*\*|$)/is);
+        
+        let equation = blockContent;
+        if (whenToUseMatch || mistakeMatch || trickMatch || blockContent.includes('**Variables:**')) {
+          equation = blockContent.split(/\*\*Variables:\*\*|\*\*When to use:\*\*|\*\*Common Mistake:\*\*|\*\*Memory Trick:\*\*/)[0].trim();
+        }
+
         elements.push(
-          <FormulaCard key={`block-${keyIdx}`} equation={blockContent} title={blockTitle} />
+          <FormulaCard 
+            key={`block-${keyIdx}`} 
+            equation={equation} 
+            title={blockTitle} 
+            whenToUse={whenToUseMatch?.[1]?.trim()}
+            commonMistake={mistakeMatch?.[1]?.trim()}
+            memoryTrick={trickMatch?.[1]?.trim()}
+          />
         );
       }
 

@@ -123,19 +123,19 @@ const LandingFooter: React.FC = () => {
                 Contact Us
               </a>
               <button 
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/privacy')}
                 className="hover:text-white text-left block transition-colors duration-200"
               >
                 Privacy Policy
               </button>
               <button 
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/terms')}
                 className="hover:text-white text-left block transition-colors duration-200"
               >
                 Terms of Service
               </button>
               <button 
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/terms')}
                 className="hover:text-white text-left block transition-colors duration-200"
               >
                 Refund Policy

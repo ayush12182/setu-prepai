@@ -119,6 +119,7 @@ CRITICAL DESIGN BLUEPRINT:
 STUDENT-FACING OUTPUT RULES:
 - Never include internal template labels, IDs (like (bl), (bv)), configuration tags, or generic placeholder text.
 - Generate actual premium multiple choice options (A, B, C, D) with distinct numbers/formulas and a clear correct answer.
+- DISTRACTOR QUALITY: Each incorrect option MUST represent a realistic student mistake (e.g. calculation error, missed sign convention, wrong unit, partial completion). Do not use trivial or highly predictable distractors.
 - Return a detailed step-by-step educational explanation following the 6-part format.
 
 Return ONLY a valid JSON object matching this TypeScript structure:

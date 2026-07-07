@@ -392,7 +392,8 @@ export const usePracticeQuestions = () => {
     difficulty: 'easy' | 'medium' | 'hard' | undefined,
     count: number = 10,
     exam: string = 'JEE',
-    nodeName?: string
+    nodeName?: string,
+    subject?: string
   ) => {
     const topicName = nodeName || nodeId;
     const effectiveDifficulty = difficulty || 'medium';
@@ -417,7 +418,7 @@ export const usePracticeQuestions = () => {
 
       const result = await getUnifiedQuestions({
         exam,
-        subject: exam,
+        subject: subject || exam,
         chapter: topicName,
         difficulty: effectiveDifficulty,
         count,
@@ -448,22 +449,28 @@ export const usePracticeQuestions = () => {
           return mapQuestionBankToInterface(shuffledQ);
         });
 
-        let filteredMapped = mapped.filter(q => !excludeQuestionIds.includes(q.id));
-        if (filteredMapped.length < count) {
-          filteredMapped = [...filteredMapped, ...mapped.filter(q => excludeQuestionIds.includes(q.id))];
+        const filteredMapped = mapped.filter((q: Question) => !excludeQuestionIds.includes(q.id)).slice(0, count);
+
+        if (filteredMapped.length > 0) {
+          const { buildDeterministicSession } = await import('../services/sessionBuilder');
+          const sessionRes = buildDeterministicSession(filteredMapped, {
+            chapter: topicName,
+            difficulty: effectiveDifficulty,
+            count
+          });
+          setQuestions(sessionRes.questions);
+          setSessionDiagnostics(sessionRes.diagnostics || null);
+          setGenerationStatus('completed');
+          setGenerationMode('offline');
+          return sessionRes.questions;
         }
 
-        const { buildDeterministicSession } = await import('../services/sessionBuilder');
-        const sessionRes = buildDeterministicSession(filteredMapped, {
-          chapter: topicName,
-          difficulty: effectiveDifficulty,
-          count
-        });
-        setQuestions(sessionRes.questions);
-        setSessionDiagnostics(sessionRes.diagnostics || null);
-        setGenerationStatus('completed');
-        setGenerationMode('offline');
-        return sessionRes.questions;
+        console.warn('[PracticeGenerator] Offline fallback also failed. Initiating auto-retry...');
+        setGenerationStatus('polling');
+        setTimeout(() => {
+          generateQuestions(nodeId, difficulty, count, exam, nodeName, subject);
+        }, 2000);
+        return [];
       } catch (fallbackErr) {
         console.error('Offline bank fallback failed, loading emergency questions:', fallbackErr);
         // Fall back to EMERGENCY_QUESTIONS
@@ -540,9 +547,10 @@ export const usePracticeQuestions = () => {
     difficulty: 'easy' | 'medium' | 'hard' | 'mixed',
     count: number = 10,
     exam: string = 'JEE',
-    nodeName?: string
+    nodeName?: string,
+    subject?: string
   ) => {
-    return generateQuestions(nodeId, difficulty === 'mixed' ? 'medium' : difficulty, count, exam, nodeName);
+    return generateQuestions(nodeId, difficulty === 'mixed' ? 'medium' : difficulty, count, exam, nodeName, subject);
   };
 
   const submitPracticeReport = async (

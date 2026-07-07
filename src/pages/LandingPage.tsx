@@ -293,9 +293,14 @@ const LandingPage: React.FC = () => {
   const { user, profile, loading: authLoading } = useAuth();
   
   useEffect(() => {
-    // If auth is loaded, user is logged in, and profile is complete -> Redirect
-    if (!authLoading && user && profile?.class) {
-      navigate('/student-hub', { replace: true });
+    // If auth is loaded and user is logged in
+    if (!authLoading && user) {
+      if (profile?.class) {
+        navigate('/student-hub', { replace: true });
+      } else if (profile) {
+        // Incomplete profile (e.g. new Google Auth user) -> send to onboarding
+        navigate('/auth', { replace: true });
+      }
     }
   }, [user, profile, authLoading, navigate]);
 
