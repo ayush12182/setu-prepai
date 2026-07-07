@@ -92,3 +92,15 @@ export const getChemistryChapterIdsByClass = (classLevel: ClassLevel): string[] 
 export const getMathsChapterIdsByClass = (classLevel: ClassLevel): string[] => {
   return mathsClassMapping.filter(m => m.class === classLevel).map(m => m.chapterId);
 };
+
+export const getFirstChapterId = (subjectKey: string, classLevel: string): string | null => {
+  if (classLevel === 'dropper' || classLevel === '11') {
+    return null; // Signals to use the very first chapter in the array
+  }
+  let mapping: ClassChapterMapping[] = [];
+  if (subjectKey === 'physics') mapping = physicsClassMapping;
+  if (subjectKey === 'chemistry') mapping = chemistryClassMapping;
+  if (subjectKey === 'maths') mapping = mathsClassMapping;
+  // If biology or unmapped, fallback to null
+  return mapping.find(m => m.class === '12')?.chapterId || null;
+};

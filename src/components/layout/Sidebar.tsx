@@ -308,29 +308,56 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <p className="text-white text-xs font-semibold mt-0.5">✓ Active Plan</p>
               </div>
             </div>
-          ) : (
-            <div className="bg-white border border-[#B6D4FE] rounded-xl p-3 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-amber-100 border border-amber-200 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+          ) : (() => {
+            const { daysLeft, hoursLeft } = trialStatus;
+            const isLastDay = daysLeft === 0;
+            const isWarning = daysLeft === 1;
+            const isAmber = daysLeft >= 2 && daysLeft <= 5;
+
+            const timeColor = isLastDay || isWarning 
+                ? 'text-red-700 bg-red-100 border-red-200' 
+                : isAmber 
+                ? 'text-amber-700 bg-amber-100 border-amber-200' 
+                : 'text-blue-700 bg-blue-100 border-blue-200';
+
+            const timeText = isLastDay || isWarning 
+                ? '⚠ Trial ends soon' 
+                : `${daysLeft} Days Remaining`;
+
+            return (
+              <div className="bg-white border border-[#B6D4FE] rounded-[14px] p-3 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                {/* Subtle top glow */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 to-blue-600 opacity-20" />
+                
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <Sparkles className="w-4 h-4 text-blue-600" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-[9px] font-black text-slate-400 tracking-wider uppercase">Free Trial</p>
-                    <p className="text-amber-600 text-[11px] font-bold truncate">
-                      🔥 {trialStatus.daysLeft} day{trialStatus.daysLeft !== 1 ? 's' : ''} left
-                    </p>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-xs font-extrabold text-slate-900 leading-none mb-1.5 flex items-center gap-1.5">
+                      Free Trial
+                    </h4>
+                    <span className={cn("inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold border", timeColor)}>
+                      {timeText}
+                    </span>
                   </div>
                 </div>
+
+                <div className="mt-3">
+                  <p className="text-[10px] font-medium text-slate-500 leading-snug">
+                    Unlock unlimited Notes, Practice, Mock Tests, AI Mentor & Analytics.
+                  </p>
+                </div>
+
                 <button
                   onClick={() => window.location.href = '/pricing'}
-                  className="text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
+                  className="w-full mt-3 flex items-center justify-center gap-1.5 text-[11px] font-bold text-white bg-blue-600 hover:bg-blue-700 py-2 rounded-lg transition-colors shadow-sm group-hover:shadow"
                 >
-                  Upgrade
+                  <Sparkles className="w-3 h-3" /> Upgrade to Premium
                 </button>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       </aside>
 

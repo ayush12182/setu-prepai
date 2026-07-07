@@ -113,8 +113,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
       if (e.key === '1' || e.key === '2' || e.key === '3') {
         const index = parseInt(e.key) - 1;
         if (step === 2) {
-          const streams: StreamType[] = ['jee', 'neet', 'cuet'];
-          setStream(streams[index]);
+          const streams: StreamType[] = ['jee', 'neet'];
+          if (index < streams.length) setStream(streams[index]);
         } else if (step === 3) {
           const classes = ['11', '12', 'dropper'];
           setStudentClass(classes[index]);
@@ -240,10 +240,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
     const examLabel = EXAM_LABELS[stream] ?? stream.toUpperCase();
     const classLabel = CLASS_LABELS[studentClass] ?? studentClass;
 
-    const examColors: Record<string, { accent: string; glow: string; badge: string; icon: string }> = {
-      jee:  { accent: '#3b82f6', glow: 'rgba(59,130,246,0.15)', badge: 'bg-blue-500/10 border-blue-500/30 text-blue-400',   icon: '🚀' },
-      neet: { accent: '#10b981', glow: 'rgba(16,185,129,0.15)', badge: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400', icon: '🧬' },
-      cuet: { accent: '#8b5cf6', glow: 'rgba(139,92,246,0.15)', badge: 'bg-violet-500/10 border-violet-500/30 text-violet-400',  icon: '🎓' },
+    const examColors: Record<string, { accent: string; glow: string; badge: string; badgeLabel: string; icon: string }> = {
+      jee:  { accent: '#60a5fa', glow: 'rgba(59,130,246,0.15)', badge: 'bg-blue-500/20 border-blue-400/50 text-white', badgeLabel: 'text-blue-200', icon: '🚀' },
+      neet: { accent: '#34d399', glow: 'rgba(16,185,129,0.15)', badge: 'bg-emerald-500/20 border-emerald-400/50 text-white', badgeLabel: 'text-emerald-200', icon: '🧬' },
+      cuet: { accent: '#a78bfa', glow: 'rgba(139,92,246,0.15)', badge: 'bg-violet-500/20 border-violet-400/50 text-white', badgeLabel: 'text-violet-200', icon: '🎓' },
     };
     const colors = examColors[stream] ?? examColors.jee;
 
@@ -318,13 +318,13 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
 
             {/* Chips */}
             <div className="grid grid-cols-2 gap-3">
-              <div className={cn('rounded-2xl border px-4 py-3 text-center', colors.badge)}>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-60">Exam</p>
-                <p className="font-extrabold text-sm">{examLabel}</p>
+              <div className={cn('rounded-2xl border px-4 py-3 text-center shadow-inner', colors.badge)}>
+                <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1", colors.badgeLabel)}>Exam</p>
+                <p className="font-black text-sm">{examLabel}</p>
               </div>
-              <div className={cn('rounded-2xl border px-4 py-3 text-center', colors.badge)}>
-                <p className="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-60">Stage</p>
-                <p className="font-extrabold text-sm">{classLabel}</p>
+              <div className={cn('rounded-2xl border px-4 py-3 text-center shadow-inner', colors.badge)}>
+                <p className={cn("text-[10px] font-black uppercase tracking-widest mb-1", colors.badgeLabel)}>Stage</p>
+                <p className="font-black text-sm">{classLabel}</p>
               </div>
             </div>
 
@@ -407,10 +407,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
           <div className="flex items-center justify-center gap-2 pt-1">
             {['Select Exam', 'Select Stage', 'Get Assigned'].map((label, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-slate-400 bg-slate-50 border border-slate-100 rounded-full px-3 py-1">
+                <span className="text-[11px] font-black text-slate-900 bg-slate-50 border border-slate-200 shadow-sm rounded-full px-3 py-1">
                   {label}
                 </span>
-                {i < 2 && <ChevronRight className="w-3 h-3 text-slate-300" />}
+                {i < 2 && <ChevronRight className="w-3 h-3 text-slate-400" />}
               </div>
             ))}
           </div>
@@ -435,7 +435,6 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
       const streams = [
         { key: 'jee' as StreamType, title: 'JEE Main & Advanced', desc: 'Physics · Chemistry · Mathematics', icon: Rocket, keybind: '1' },
         { key: 'neet' as StreamType, title: 'NEET', desc: 'Physics · Chemistry · Biology', icon: Zap, keybind: '2' },
-        { key: 'cuet' as StreamType, title: 'CUET', desc: 'Domain Subjects · General Test', icon: GraduationCap, keybind: '3' },
       ];
 
       return (
@@ -471,8 +470,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ initialUserType, skipTo
                       <s.icon className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className={cn('font-extrabold text-sm sm:text-base leading-snug', isSelected ? 'text-blue-900' : 'text-slate-800')}>{s.title}</p>
-                      <p className="text-slate-400 text-xs mt-0.5 font-sans font-semibold">{s.desc}</p>
+                      <p className={cn('font-black text-base sm:text-lg leading-snug', isSelected ? 'text-blue-900' : 'text-slate-900')}>{s.title}</p>
+                      <p className="text-slate-500 text-xs mt-0.5 font-sans font-semibold">{s.desc}</p>
                     </div>
                   </div>
 

@@ -12,9 +12,11 @@ import { cn } from '@/lib/utils';
 import {
   ChevronRight, Play, BookOpen, PenTool, ClipboardCheck,
   RotateCcw, Brain, BarChart3, ArrowRight, Clock,
-  Atom, FlaskConical, Calculator, Leaf, GraduationCap, TrendingUp, Zap
+  Atom, FlaskConical, Calculator, Leaf, GraduationCap, TrendingUp, Zap, Rocket, PartyPopper
 } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { getFirstChapterId } from '@/data/syllabusClass';
+import { getChapterById } from '@/data/syllabus';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
 import { neetBiologyChapters } from '@/data/neetSyllabus';
 
@@ -155,6 +157,12 @@ export default function StudentHubPage() {
   const subjects   = isNeet ? NEET_SUBJECTS : isCuet ? CUET_SUBJECTS : JEE_SUBJECTS;
   const totalChapters = subjects.reduce((a, s) => a + s.chapters, 0);
 
+  const firstSubject = subjects[0];
+  const firstChapterIdTarget = getFirstChapterId(firstSubject.key, classStage);
+  const firstChapterNode = firstChapterIdTarget ? getChapterById(firstChapterIdTarget) : null;
+  const firstChapterName = firstChapterNode?.name || firstSubject.firstChapter.name;
+  const firstChapterRoute = `/learn/${firstSubject.key}/${firstChapterIdTarget || firstSubject.firstChapter.id}`;
+
   const [continueLearn, setContinueLearn] = useState<ContinueLearning | null>(null);
   const [progresses, setProgresses]       = useState<Record<string, number>>({});
 
@@ -256,91 +264,145 @@ export default function StudentHubPage() {
         </motion.div>
 
         {/* ═══════════════════════════════════════════
-            SECTION 2 — CONTINUE LEARNING
+            SECTION 2 — PROGRESS STATE
         ═══════════════════════════════════════════ */}
         <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.07 }}>
-          <p className="text-body-lg font-bold text-slate-800 mb-3">Continue Learning</p>
-
-          {continueLearn ? (() => {
-            const ContinueIcon = getSubjectIcon(continueLearn.IconName ?? 'BookOpen');
-            return (
-              <button
-                onClick={() => navigate(`/learn/${continueLearn.subject}/${continueLearn.chapterId}`)}
-                className="w-full text-left group"
-              >
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-5">
-                      {/* Subject icon */}
-                      <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-sm shrink-0">
-                        <ContinueIcon className="w-7 h-7 text-white" />
-                      </div>
-
-                      {/* Chapter info */}
-                      <div>
-                        <p className="text-caption font-semibold text-slate-400">
-                          {continueLearn.subjectLabel} · {continueLearn.chapterNum}
-                        </p>
-                        <h3 className="text-title-md font-bold text-slate-900 mt-0.5 leading-tight">
-                          {continueLearn.chapterName}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <Clock className="w-3.5 h-3.5 text-slate-400" />
-                          <p className="text-slate-400 text-caption font-medium">
-                            Last visited: <span className="text-slate-600 font-semibold">{continueLearn.tab}</span>
+          {overallPct === 100 ? (
+            // STATE 3: COMPLETED
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4 border border-emerald-200">
+                <PartyPopper className="w-8 h-8 text-emerald-600" />
+              </div>
+              <h3 className="text-title-lg font-black text-slate-900 mb-1">🎉 Congratulations!</h3>
+              <p className="text-body-md font-medium text-slate-500 mb-6">You've completed your syllabus.</p>
+              <div className="flex flex-wrap items-center justify-center gap-3 w-full">
+                <button onClick={() => navigate('/revision')} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors">
+                  <RotateCcw className="w-4 h-4" /> Start Revision
+                </button>
+                <button onClick={() => navigate('/test')} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors">
+                  <ClipboardCheck className="w-4 h-4" /> Take Full Syllabus Test
+                </button>
+                <button onClick={() => navigate('/analytics')} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors">
+                  <BarChart3 className="w-4 h-4" /> View Performance
+                </button>
+              </div>
+            </div>
+          ) : (overallPct === 0 && !continueLearn) ? (
+            // STATE 1: START PREPARATION (0%)
+            <>
+              <p className="text-body-lg font-bold text-slate-800 mb-3">Start Your Preparation</p>
+              <button onClick={() => navigate(firstChapterRoute)} className="w-full text-left group">
+                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    <div className="flex-1 space-y-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm shrink-0">
+                          <Rocket className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-title-md font-bold text-slate-900 mb-1">🚀 Start Your Preparation</h3>
+                          <p className="text-slate-500 text-body-sm font-medium leading-relaxed max-w-lg">
+                            Welcome to your personalized PrepEntrance journey. Begin with the first chapter from your roadmap and build a strong foundation for your exam.
                           </p>
                         </div>
                       </div>
+                      <div className="pl-16 space-y-2">
+                        <div className="flex items-center gap-2.5 text-sm font-medium text-slate-500">
+                          <div className="w-4 h-4 rounded border-2 border-slate-300 bg-white" /> Complete your first lesson
+                        </div>
+                        <div className="flex items-center gap-2.5 text-sm font-medium text-slate-500">
+                          <div className="w-4 h-4 rounded border-2 border-slate-300 bg-white" /> Solve your first practice questions
+                        </div>
+                        <div className="flex items-center gap-2.5 text-sm font-medium text-slate-500">
+                          <div className="w-4 h-4 rounded border-2 border-slate-300 bg-white" /> Build your first study streak
+                        </div>
+                      </div>
                     </div>
-
-                    {/* CTA */}
-                    <div className="shrink-0">
-                      <div className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-body-sm shadow-sm group-hover:bg-blue-700 transition-colors">
-                        <Play className="w-4 h-4 fill-current" />
-                        <span className="hidden sm:inline">Resume Learning</span>
-                        <span className="sm:hidden">Resume</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                    
+                    <div className="shrink-0 pt-2 sm:pt-0 sm:pl-0 pl-16">
+                      <p className="text-caption font-semibold text-slate-400 mb-1">Up Next</p>
+                      <p className="text-sm font-bold text-slate-800 mb-3">{firstSubject.label} • {firstChapterName}</p>
+                      <div className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-body-sm shadow-sm group-hover:bg-blue-700 transition-colors w-max">
+                        Start Learning <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                       </div>
                     </div>
                   </div>
                 </div>
               </button>
-            );
-          })() : (
-            // No previous chapter — show start CTA
-            <button
-              onClick={() => navigate(subjects[0]?.route ?? '/learn/physics')}
-              className="w-full text-left group"
-            >
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-sm shrink-0">
-                      <BookOpen className="w-7 h-7 text-white" />
+            </>
+          ) : (
+            // STATE 2: CONTINUE LEARNING
+            <>
+              <p className="text-body-lg font-bold text-slate-800 mb-1">Continue Learning</p>
+              <p className="text-caption font-medium text-slate-500 mb-3">Pick up where you left off.</p>
+              
+              {continueLearn ? (() => {
+                const ContinueIcon = getSubjectIcon(continueLearn.IconName ?? 'BookOpen');
+                return (
+                  <button onClick={() => navigate(`/learn/${continueLearn.subject}/${continueLearn.chapterId}`)} className="w-full text-left group">
+                    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-5">
+                          <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-sm shrink-0">
+                            <ContinueIcon className="w-7 h-7 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-caption font-semibold text-slate-400">
+                              {continueLearn.subjectLabel} · {continueLearn.chapterNum}
+                            </p>
+                            <h3 className="text-title-md font-bold text-slate-900 mt-0.5 leading-tight">
+                              {continueLearn.chapterName}
+                            </h3>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <Clock className="w-3.5 h-3.5 text-slate-400" />
+                              <p className="text-slate-400 text-caption font-medium">
+                                Last visited: <span className="text-slate-600 font-semibold">{continueLearn.tab}</span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="shrink-0">
+                          <div className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-body-sm shadow-sm group-hover:bg-blue-700 transition-colors">
+                            <Play className="w-4 h-4 fill-current" />
+                            <span className="hidden sm:inline">Resume Learning</span>
+                            <span className="sm:hidden">Resume</span>
+                            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-caption font-semibold text-slate-400">
-                        {subjects[0]?.label} · Chapter 01
-                      </p>
-                      <h3 className="text-title-md font-bold text-slate-900 mt-0.5">
-                        {subjects[0]?.firstChapter?.name ?? 'Kinematics'}
-                      </h3>
-                      <p className="text-slate-400 text-caption font-medium mt-1.5">
-                        Start here — your first chapter is ready
-                      </p>
+                  </button>
+                );
+              })() : (
+                <button onClick={() => navigate(firstChapterRoute)} className="w-full text-left group">
+                  <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-5">
+                        <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-sm shrink-0">
+                          <BookOpen className="w-7 h-7 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-caption font-semibold text-slate-400">
+                            {firstSubject.label}
+                          </p>
+                          <h3 className="text-title-md font-bold text-slate-900 mt-0.5">
+                            {firstChapterName}
+                          </h3>
+                        </div>
+                      </div>
+                      <div className="shrink-0">
+                        <div className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-body-sm shadow-sm group-hover:bg-blue-700 transition-colors">
+                          <Zap className="w-4 h-4" />
+                          <span className="hidden sm:inline">Resume</span>
+                          <span className="sm:hidden">Resume</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="shrink-0">
-                    <div className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-body-sm shadow-sm group-hover:bg-blue-700 transition-colors">
-                      <Zap className="w-4 h-4" />
-                      <span className="hidden sm:inline">Start Learning</span>
-                      <span className="sm:hidden">Start</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </button>
+                </button>
+              )}
+            </>
           )}
         </motion.div>
 

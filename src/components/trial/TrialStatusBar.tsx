@@ -44,68 +44,78 @@ export const TrialStatusBar: React.FC = () => {
     }
 
     const { daysLeft, hoursLeft, minutesLeft } = trialStatus;
-    const isCritical = daysLeft === 0; // Less than 24 hours remaining
+    const isLastDay = daysLeft === 0;
+    const isWarning = daysLeft === 1;
+    const isAmber = daysLeft >= 2 && daysLeft <= 5;
+    const isBlue = daysLeft > 5;
+
+    // Dynamic styles based on urgency
+    const bannerBg = isLastDay 
+        ? 'bg-red-50 border-red-200' 
+        : 'bg-gradient-to-r from-[#EEF4FF] to-[#F8FBFF] border-[#D6E4FF]';
+        
+    const timeColor = isLastDay || isWarning 
+        ? 'text-red-600 font-bold' 
+        : isAmber 
+        ? 'text-amber-600 font-bold' 
+        : 'text-blue-600 font-bold';
+        
+    const timeIconColor = isLastDay || isWarning ? 'text-red-500' : isAmber ? 'text-amber-500' : 'text-blue-500';
 
     return (
-        <div className={`relative w-full border-b transition-all duration-300 ${
-            isCritical 
-                ? 'border-red-500/20 bg-gradient-to-r from-red-950/40 via-orange-950/20 to-red-950/40' 
-                : 'border-amber-500/10 bg-gradient-to-r from-amber-950/30 via-slate-900/40 to-amber-950/30'
-        }`}>
-            {/* Ambient subtle glow background */}
-            <div className={`absolute top-0 right-1/4 w-96 h-full opacity-20 blur-3xl pointer-events-none rounded-full ${
-                isCritical ? 'bg-red-500/10' : 'bg-amber-500/10'
-            }`} />
-
-            <div className="max-w-7xl mx-auto px-4 py-2 sm:py-2.5 flex items-center justify-between gap-3 text-xs md:text-sm relative z-10">
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold uppercase text-[9px] tracking-wider shrink-0 ${
-                        isCritical 
-                            ? 'bg-red-500/20 text-red-400 animate-pulse' 
-                            : 'bg-amber-500/10 text-amber-400'
-                    }`}>
-                        🔥 Free Trial Active
+        <div className={`relative w-full border-b transition-all duration-300 ${bannerBg}`}>
+            <div className="max-w-7xl mx-auto px-4 py-2 sm:py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs md:text-sm relative z-10">
+                
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 flex-1 min-w-0">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-bold text-[10px] sm:text-xs text-blue-700 bg-blue-100/50 border border-blue-200 shrink-0">
+                        ✨ Free Trial Active
                     </span>
 
-                    <span className="text-white/40 hidden sm:inline">|</span>
+                    <span className="text-slate-300 hidden sm:inline">|</span>
+                    
+                    <span className={`text-slate-700 font-medium hidden md:inline`}>
+                        Enjoy all premium features.
+                    </span>
 
-                    <span className={`flex items-center gap-1.5 font-medium truncate ${
-                        isCritical ? 'text-red-300 font-bold' : 'text-slate-300'
-                    }`}>
-                        <Clock className={`w-3.5 h-3.5 shrink-0 ${isCritical ? 'text-red-400 animate-spin-slow' : 'text-amber-400'}`} />
-                        {isCritical ? (
-                            <span>Last Day! Only <strong className="text-red-400">{hoursLeft} hours {minutesLeft}m</strong> remaining</span>
+                    <span className="text-slate-300 hidden md:inline">|</span>
+
+                    <span className={`flex items-center gap-1.5 font-medium whitespace-nowrap ${timeColor}`}>
+                        {isLastDay || isWarning ? (
+                            <span className="flex items-center gap-1.5">
+                                ⚠ {isLastDay ? 'Last day of your free trial!' : 'Trial ends soon!'} 
+                                <strong className="ml-1">
+                                    {isLastDay ? `${hoursLeft}h ${minutesLeft}m` : `${daysLeft}d ${hoursLeft}h`} remaining
+                                </strong>
+                            </span>
                         ) : (
-                            <span>
-                                <strong>{daysLeft} Day{daysLeft !== 1 ? 's' : ''} {hoursLeft} Hour{hoursLeft !== 1 ? 's' : ''}</strong> remaining
+                            <span className="flex items-center gap-1.5">
+                                <Clock className={`w-3.5 h-3.5 shrink-0 ${timeIconColor}`} />
+                                ⏳ {daysLeft} Days {hoursLeft} Hours remaining
                             </span>
                         )}
-                        <span className="text-white/40 hidden md:inline ml-1 font-normal">• Premium features will lock afterwards</span>
                     </span>
+                    
+                    <span className="text-slate-500 hidden xl:inline ml-1 font-normal">• After your trial ends, you'll need a Premium plan to continue learning.</span>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
                     <Button
                         size="sm"
                         onClick={handleUpgrade}
                         disabled={isProcessing}
-                        className={`h-7.5 px-3.5 text-xs font-bold rounded-lg transition-all duration-300 shadow-md ${
-                            isCritical
-                                ? 'bg-red-500 hover:bg-red-600 text-white shadow-red-500/20'
-                                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 shadow-amber-500/10 hover:shadow-amber-500/20'
-                        }`}
+                        className="h-8 px-4 text-xs sm:text-sm font-bold rounded-lg transition-all duration-300 shadow-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:shadow-md hover:-translate-y-0.5"
                     >
                         {isProcessing ? (
-                            <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
                         ) : (
-                            <Sparkles className="w-3 h-3 mr-1" />
+                            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
                         )}
-                        Upgrade ₹349/mo
+                        Upgrade to Premium
                     </Button>
 
                     <button 
                         onClick={handleDismiss}
-                        className="text-white/40 hover:text-white/80 transition-colors p-1"
+                        className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors p-1.5"
                         aria-label="Dismiss banner"
                     >
                         <X className="w-4 h-4" />
