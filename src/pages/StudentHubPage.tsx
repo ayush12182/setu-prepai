@@ -287,7 +287,7 @@ export default function StudentHubPage() {
                 </button>
               </div>
             </div>
-          ) : (overallPct === 0 && !continueLearn) ? (
+          ) : (overallPct === 0) ? (
             // STATE 1: START PREPARATION (0%)
             <>
               <p className="text-body-lg font-bold text-slate-800 mb-3">Start Your Preparation</p>
