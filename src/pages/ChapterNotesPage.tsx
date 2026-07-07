@@ -916,6 +916,19 @@ const ChapterNotesPage: React.FC = () => {
     if (trimmed.startsWith('---')) return <hr key={key} className="my-10 border-border/60" />;
 
     if (trimmed.match(/^\d+\./)) return (
+      <li key={key} className="ml-6 my-4 text-slate-800 dark:text-slate-200 font-normal list-decimal marker:text-primary leading-relaxed text-[18px]">
+        <MathLine>{trimmed.replace(/^\d+\.\s*/, '')}</MathLine>
+      </li>
+    );
+
+    return (
+      <p key={key} className="mb-6 leading-relaxed text-[18px] text-slate-800 dark:text-slate-200 font-normal">
+        <MathLine>{trimmed}</MathLine>
+      </p>
+    );
+  }; // end of renderLine
+
+  const parseBlocks = (content: string) => {
     const cleanedContent = content.replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/, '').trim();
     const blockRe = /\[(DERIVATION|SVG|CALLOUT|JEE_INSIGHT|CONCEPT|JEE_TRICK|COMMON_MISTAKE|NCERT_INSIGHT|TEACHER_SAYS|FORMULA|GRAPH|INTERACTIVE_GRAPH|DIAGRAM|INTERACTIVE_DIAGRAM|WORKED_EXAMPLE|INTERACTIVE_EXAMPLE|SIMULATION)(?:\s+title="([^"]+)")?\]([\s\S]*?)\[\/\1\]/g;
     const elements: React.ReactNode[] = [];
