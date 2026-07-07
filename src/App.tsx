@@ -64,6 +64,7 @@ const TutorialSessionsPage = lazy(() => import("./pages/TutorialSessionsPage"));
 const QuestionQCPanel = lazy(() => import("./pages/Admin/QuestionQCPanel"));
 const QuestionGeneratorPage = lazy(() => import("./pages/Admin/QuestionGeneratorPage"));
 const BulkPYQGenerator = lazy(() => import("./pages/Admin/BulkPYQGenerator"));
+const ContentGenerationPage = lazy(() => import("./pages/Admin/ContentGenerationPage"));
 
 
 const queryClient = new QueryClient();
@@ -167,6 +168,7 @@ const App = () => (
                         <Route path="/admin/qc" element={<AdminRoute><QuestionQCPanel /></AdminRoute>} />
                         <Route path="/admin/question-generator" element={<AdminRoute><QuestionGeneratorPage /></AdminRoute>} />
                         <Route path="/admin/bulk-pyq-generator" element={<AdminRoute><BulkPYQGenerator /></AdminRoute>} />
+                        <Route path="/admin/content-generation" element={<AdminRoute><ContentGenerationPage /></AdminRoute>} />
                         
                         {/* Adaptive Practice Engine */}
                         <Route path="/practice/adaptive" element={<TrialGate><AdaptivePracticePage /></TrialGate>} />

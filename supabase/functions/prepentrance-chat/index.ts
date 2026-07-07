@@ -5,6 +5,7 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,8 +28,31 @@ serve(async (req) => {
     const body = await req.json();
     const message: string = String(body.message || '');
     const history: any[] = body.history || [];
+    const messages: any[] = body.messages || null;
     const examMode: string = body.examMode || 'JEE';
     const language: string = body.language || 'english';
+    const chapterId: string = body.chapterId || '';
+
+    let aiContextStr = '';
+    if (chapterId) {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+      if (supabaseUrl && supabaseKey) {
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        const { data } = await supabase
+          .from("chapter_content")
+          .select("ai_context")
+          .eq("chapter_id", chapterId)
+          .eq("status", "published")
+          .order("version", { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (data?.ai_context) {
+          aiContextStr = `\n\n[CHAPTER CONTEXT (Use this to answer doubts accurately)]:\n${JSON.stringify(data.ai_context)}`;
+        }
+      }
+    }
 
     const isEnglish = language.toLowerCase() === 'english';
     const langRule = isEnglish
@@ -45,21 +69,36 @@ IMPORTANT RULES:
 ${langRule}
 - Break down concepts step-by-step.
 - Don't just give the answer; explain the core approach/thought process behind the solution.
-- Keep the tone highly encouraging, personal, and authentic.`;
+- Keep the tone highly encouraging, personal, and authentic.${aiContextStr}`;
 
-    const historyTurns = history
-      .filter((m: any) => m.content && String(m.content).trim() !== "")
-      .map((m: any) => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: String(m.content) }]
-      }));
+    let contents: any[] = [];
 
-    // UPDATED: Prepending system prompt to ensure compatibility
-    const contents = [
-      { role: 'user', parts: [{ text: `SYSTEM INSTRUCTION: ${systemPrompt}` }] },
-      ...historyTurns,
-      { role: 'user', parts: [{ text: String(message) }] }
-    ];
+    if (messages && Array.isArray(messages)) {
+      // Handle the 'messages' array payload directly (used by AITeachingRoomPage)
+      contents = messages.map(m => {
+        if (m.role === 'system') {
+          return { role: 'user', parts: [{ text: `SYSTEM INSTRUCTION: ${m.content}${aiContextStr}` }] };
+        }
+        return {
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: String(m.content) }]
+        };
+      });
+    } else {
+      // Legacy handling
+      const historyTurns = history
+        .filter((m: any) => m.content && String(m.content).trim() !== "")
+        .map((m: any) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: String(m.content) }]
+        }));
+
+      contents = [
+        { role: 'user', parts: [{ text: `SYSTEM INSTRUCTION: ${systemPrompt}` }] },
+        ...historyTurns,
+        { role: 'user', parts: [{ text: String(message) }] }
+      ];
+    }
 
     const model = "gemini-2.5-flash";
     try {

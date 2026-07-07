@@ -898,6 +898,7 @@ const AITeachingRoomPage: React.FC = () => {
           ],
           examMode: 'jee',
           language,
+          chapterId: teacher.chapters[selectedChapter]?.topics[selectedTopic]?.toLowerCase().replace(/\s+/g, '-') || '',
         }),
       });
 
