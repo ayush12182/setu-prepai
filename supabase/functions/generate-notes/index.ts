@@ -55,10 +55,15 @@ PrepEntrance ${subject} | ${exam} | Class 11/12 • Droppers
 
 You MUST generate the following 15 sections in this EXACT order. Do not skip any section, and use exact ## headings. Make the content extremely detailed, comprehensive, and rich—this should feel like a full 40-page textbook chapter, not a summary.
 
-## 1. Teacher Insight
-Write a highly strategic introduction (300-500 words) from a senior faculty member.
-- Explain WHY this chapter is critical for ${exam} (historical weightage, question trends).
-- Detail exactly where students fail conceptually (common traps, mathematical pitfalls).
+## 1. Chapter Overview
+
+### Why ${chapterName} matters
+Provide a powerful 1-paragraph explanation of why this chapter is the foundation of its respective field (Physics/Chemistry/Maths/Biology).
+Then, provide a bulleted list of exactly how this chapter's concepts connect to at least 4-5 later chapters. Use this exact format:
+- **[Later Chapter Name]:** [Brief explanation of how this current chapter's concepts are directly used in that later chapter].
+
+After this, write a highly strategic introduction (300-500 words) from a senior faculty member.
+- Explain exactly where students fail conceptually (common traps, mathematical pitfalls).
 - Share how AIR (All India Rank) 1-100 students study and master this specific topic.
 - Provide a clear, actionable study strategy and a checklist of what to avoid.
 Use the following wrapper format:
