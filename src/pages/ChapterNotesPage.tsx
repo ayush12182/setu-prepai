@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { useChapterContent } from '@/hooks/useChapterContent';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { getChapterById, allChapters } from '@/data/syllabus';
 import { Button } from '@/components/ui/button';
@@ -199,14 +199,7 @@ const ChapterNotesPage: React.FC = () => {
   const { chapterId } = useParams<{ chapterId: string }>();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
-
-  const [notes, setNotes] = useState<string>('');
-  const [isGenerating, setIsGenerating] = useState(true);
-  const [hasAttemptedGen, setHasAttemptedGen] = useState(false);
   const [activeSmartMode, setActiveSmartMode] = useState<SmartMode>('default');
-  const [statusText, setStatusText] = useState<string>('');
-  const [generationError, setGenerationError] = useState<string | null>(null);
-  const [isRetrying, setIsRetrying] = useState<boolean>(false);
 
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showFloatingBar, setShowFloatingBar] = useState(false);
@@ -217,6 +210,23 @@ const ChapterNotesPage: React.FC = () => {
   const { isFoundation, classLabel } = useClassContext();
 
   const chapter = chapterId ? getChapterById(chapterId) : null;
+
+  // Determine exam type for content lookup
+  const examType = isFoundation ? 'FOUNDATION' : isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE';
+
+  // ── Permanent Content Repository Hook ────────────────────────
+  // Reads from chapter_content table. ZERO AI calls.
+  // Cache: React Query (memory) → localStorage → DB read (~200ms)
+  const {
+    content: chapterContent,
+    isLoading: isContentLoading,
+    isNotPublished,
+    error: contentError,
+  } = useChapterContent(chapter?.id ?? null, examType, language);
+
+  // Derive notes string from stored content (raw_content field)
+  const notes = chapterContent?.raw_content ?? '';
+  const isGenerating = isContentLoading;
 
   // Upgraded Priority Engine (V3)
   // Score = pyqData.total + (weightage * 10) + (difficulty * 5) + advancedBonus
@@ -345,285 +355,33 @@ const ChapterNotesPage: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Handle URL ?mode= param — set active smart mode + scroll to section
   useEffect(() => {
-    if (chapter && !hasAttemptedGen) {
-      const params = new URLSearchParams(window.location.search);
-      const m = params.get('mode') as SmartMode;
-      if (m && ['default', 'overview', 'theory', 'formulas', 'concepts', 'examples', 'pyqs', 'insights', 'summary'].includes(m)) {
-        setActiveSmartMode(m);
-        generateNotes('default');
-      } else {
-        generateNotes('default');
-      }
-    } else if (!chapter) {
-      setIsGenerating(false);
+    const params = new URLSearchParams(window.location.search);
+    const m = params.get('mode') as SmartMode;
+    if (m && ['default', 'overview', 'theory', 'formulas', 'concepts', 'examples', 'pyqs', 'insights', 'summary'].includes(m)) {
+      setActiveSmartMode(m);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chapter]);
+  }, []);
 
   useEffect(() => {
     if (notes && !isGenerating) {
       const params = new URLSearchParams(window.location.search);
       const m = params.get('mode') as SmartMode;
       if (m && m !== 'default') {
-        let sectionId = '';
-        if (m === 'overview') sectionId = 'section-overview';
-        else if (m === 'theory') sectionId = 'section-theory';
-        else if (m === 'formulas') sectionId = 'section-formulas';
-        else if (m === 'concepts') sectionId = 'section-concepts';
-        else if (m === 'examples') sectionId = 'section-examples';
-        else if (m === 'pyqs') sectionId = 'section-pyqs';
-        else if (m === 'insights') sectionId = 'section-insights';
-        else if (m === 'summary') sectionId = 'section-summary';
-        
-        if (sectionId) {
-          setTimeout(() => {
-            scrollToSection(sectionId);
-          }, 400);
-        }
+        const sectionMap: Record<string, string> = {
+          overview: 'section-overview', theory: 'section-theory',
+          formulas: 'section-formulas', concepts: 'section-concepts',
+          examples: 'section-examples', pyqs: 'section-pyqs',
+          insights: 'section-insights', summary: 'section-summary',
+        };
+        const sectionId = sectionMap[m];
+        if (sectionId) setTimeout(() => scrollToSection(sectionId), 400);
       }
     }
-   
   }, [notes, isGenerating]);
 
-  const generateNotes = async (mode: SmartMode, attempt = 1, forceRegenerate = false) => {
-    if (!chapter) return;
-    setIsGenerating(true);
-    setHasAttemptedGen(true);
-    setNotes('');
-    setGenerationError(null);
-
-    const loaderText = SMART_MODE_META[mode]?.loaderText || 'Loading notes...';
-    setStatusText(forceRegenerate ? 'Content generation mismatch detected. Regenerating notes...' : loaderText);
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 120000);
-    let isRetryPending = false;
-
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const token = session?.access_token || anonKey;
-
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-notes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'apikey': anonKey,
-        },
-        body: JSON.stringify({
-          chapterName: chapter.name,
-          subject: chapter.subject,
-          topics: chapter.topics || [],
-          smartMode: 'default',
-          language,
-          examMode: isFoundation ? `Class ${classLabel} (Foundation)` : isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
-          forceRegenerate,
-        }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error('[ChapterNotesPage] Edge function error:', response.status, errText);
-        setNotes(buildFallbackNotes(chapter));
-        setIsGenerating(false);
-        return;
-      }
-
-      const resJson = await response.json();
-      let fullNotes = '';
-
-      if (resJson.success && resJson.data) {
-        fullNotes = typeof resJson.data === 'string' ? resJson.data : JSON.stringify(resJson.data);
-        setNotes(fullNotes);
-      } else {
-        console.warn('[ChapterNotesPage] Failed to get valid notes data');
-        setNotes(buildFallbackNotes(chapter));
-        setIsGenerating(false);
-        return;
-      }
-
-      // Run validation checks
-      const validation = validateNotesContent(fullNotes, chapter.name, chapter.topics || []);
-      
-      // Extract generated chapter name for logging
-      const metadataRegex = /\[METADATA\]([\s\S]*?)\[\/METADATA\]/;
-      const metaMatch = fullNotes.match(metadataRegex);
-      let genChapter = 'Unknown';
-      if (metaMatch) {
-        const nameMatch = metaMatch[1].match(/chapter_name:\s*(.*)/i);
-        if (nameMatch) genChapter = nameMatch[1].trim();
-      }
-
-      console.log('[ChapterNotesPage] Validation check:', {
-        requestedChapter: chapter.name,
-        generatedChapter: genChapter,
-        cacheKey: `${chapter.id}-${language}`,
-        isValid: validation.isValid,
-        reason: validation.reason || 'None'
-      });
-
-      if (!validation.isValid) {
-        console.warn(`[ChapterNotesPage] Validation failed on attempt ${attempt}:`, validation.reason);
-        if (attempt < 3) {
-          // First: evict the bad cached content from DB using the service-role-key clearCache action
-          // This ensures the retry actually generates fresh content instead of re-reading bad cache
-          try {
-            const { data: { session } } = await supabase.auth.getSession();
-            const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-            const token = session?.access_token || anonKey;
-            const chapterSlug = chapter.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-notes`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-                'apikey': anonKey,
-              },
-              body: JSON.stringify({ action: 'clearCache', chapterId: chapterSlug }),
-            });
-            console.log(`[ChapterNotesPage] Cache cleared for ${chapterSlug}, retrying...`);
-          } catch (clearErr) {
-            console.warn('[ChapterNotesPage] Cache clear failed (non-fatal):', clearErr);
-          }
-          toast.warning(`Content mismatch detected. Retrying regeneration (Attempt ${attempt + 1}/3)...`);
-          setIsRetrying(true);
-          isRetryPending = true; // Prevent finally from killing the loading state
-          await generateNotes(mode, attempt + 1, true);
-          return;
-        } else {
-          toast.error('Failed to generate valid notes after 3 attempts. Loading fallback notes.');
-          setNotes(buildFallbackNotes(chapter));
-        }
-      } else {
-        setIsRetrying(false);
-      }
-
-    } catch (error) {
-      clearTimeout(timeoutId);
-      console.error('Error generating notes or timed out:', error);
-      setNotes(buildFallbackNotes(chapter));
-    } finally {
-      // Only set isGenerating to false if we are NOT handing off to a retry
-      if (!isRetryPending) {
-        setIsGenerating(false);
-      }
-    }
-  };
-
-  const buildFallbackNotes = (ch: ReturnType<typeof getChapterById>) => {
-    if (!ch) return '';
-
-    const topicListStr = ch.topics ? ch.topics.map(t => `- ${t}`).join('\n') : '';
-
-    return `# ${ch.name}
-Classroom notes curated by senior Kota faculty.
-
-[TEACHER_SAYS]
-Students, this chapter is extremely critical for your JEE preparation. Focus on deriving the fundamental relations rather than just memorizing the formulas. Pay special attention to the edge cases and common traps we've highlighted below.
-[/TEACHER_SAYS]
-
-## Chapter Overview
-
-### What this chapter studies:
-We begin by analyzing the fundamental definitions of the topics in this chapter. Understanding the physical/mathematical foundation is key to scoring high marks in JEE.
-- Core topics covered in this study guide:
-${topicListStr}
-
-### Why it matters & JEE relevance:
-This chapter is a foundational pillar for JEE. Concept questions are regularly tested with high weightage, and the principles are frequently integrated with other topics.
-
-## Core Theory
-
-[CONCEPT]
-A precise physical or mathematical concept definition:
-Every system has state parameters that dictate its behavior under external factors. Let us explore these properties systematically.
-[/CONCEPT]
-
-[NCERT_INSIGHT]
-NCERT highlights the conceptual background, which is frequently tested in direct conceptual questions in JEE. Ensure you read the side-margin highlights of NCERT for these topics.
-[/NCERT_INSIGHT]
-
-[DERIVATION]
-Let us derive the primary relation for the system.
-If we consider a small element $dx$ at distance $x$:
-$$dI = dm \cdot x^2$$
-Integrating over the entire domain:
-$$I = \\int r^2 dm$$
-This derivation forms the basis of all standard configurations.
-[/DERIVATION]
-
-## Formula Sheet
-
-Here is the curated vault of crucial formulas for ${ch.name}. Use the copy button to save them to your revision notes.
-
-[FORMULA title="Fundamental Relation"]
-F = G \\frac{m_1 m_2}{r^2}
-[/FORMULA]
-
-[FORMULA title="System Response Equation"]
-E = -\\frac{dV}{dx}
-[/FORMULA]
-
-[FORMULA title="General Solution Form"]
-x(t) = A \\sin(\\omega t + \\phi)
-[/FORMULA]
-
-## Important Concepts
-
-### Core JEE Topics
-- **High-Frequency Traps:** Look out for boundary conditions and direction vectors.
-- **Symmetry principles:** Using symmetry can simplify integral equations by 90%.
-
-[JEE_TRICK]
-Shortcut Trick: When dealing with symmetric configurations, use superposition to find the net field/potential at the center. This reduces calculation time by 80%!
-[/JEE_TRICK]
-
-## Solved Examples
-
-### Solved Illustration 1:
-**Given:** System with parameters $m_1 = 1\\text{ kg}$, $m_2 = 2\\text{ kg}$ at distance $r = 1\\text{ m}$.
-**To find:** Gravitational force of attraction.
-**Concept:** Newton's Law of Gravitation.
-**Solution:** 
-$$F = G \\frac{m_1 m_2}{r^2}$$
-$$F = (6.67 \\times 10^{-11}) \\frac{1 \\cdot 2}{1^2} = 1.33 \\times 10^{-10}\\text{ N}$$
-**Answer:** $1.33 \\times 10^{-10}\\text{ N}$
-
-## PYQ Intelligence Section
-
-### Past Years Trend Analysis (2020-2025)
-- **Question Frequency:** Historically, 1-2 questions appear in JEE Main and 1 in JEE Advanced.
-- **Difficulty Distribution:** 40% Easy application, 40% Medium multi-concept, 20% Hard advanced problems.
-- **Key Subtopics:** Graphical representations and boundary condition limits are highly tested.
-
-## JEE Insights
-
-### Common Student Mistakes
-[COMMON_MISTAKE]
-Conceptual Trap: Forgetting sign conventions when substituting values in vector equations is the #1 reason students lose marks. Always establish a coordinate system first!
-[/COMMON_MISTAKE]
-
-[COMMON_MISTAKE]
-Calculation Error: Misinterpreting radius versus diameter or neglecting units (e.g. converting cm to meters) in numerical calculations.
-[/COMMON_MISTAKE]
-
-### Time-Saving Approaches
-- Establish directions first.
-- Solve algebraically to the last step before substituting numbers.
-
-## Chapter Summary
-
-- Revise the core definitions and their domain of applicability.
-- Review the formula card sheets daily.
-- Practice at least 25 PYQs under timed conditions.
-- Re-solve the common mistake blocks before the exam day.
-`;
-  };
+  // Admin generates content via the Admin → Content Generation panel.
 
   if (!chapter) {
     return (
@@ -636,6 +394,28 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
     );
   }
 
+  // Content not yet published for this chapter
+  if (isNotPublished) {
+    return (
+      <MainLayout title={`${chapter.name} — Coming Soon`}>
+        <div className="flex flex-col items-center justify-center py-24 gap-6 text-center px-4">
+          <div className="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center">
+            <BookOpen className="w-10 h-10 text-primary" />
+          </div>
+          <h1 className="text-heading-lg font-bold text-foreground">{chapter.name}</h1>
+          <p className="text-body-lg text-muted-foreground max-w-md">
+            Premium notes for this chapter are being prepared by our faculty team and will be published soon.
+          </p>
+          <div className="flex items-center gap-2 text-amber-500 bg-amber-500/10 px-4 py-2 rounded-xl text-body-sm font-semibold">
+            <Sparkles className="w-4 h-4" />
+            Content under review — available soon
+          </div>
+          <Button onClick={() => navigate(-1)} variant="outline">← Go Back</Button>
+        </div>
+      </MainLayout>
+    );
+  }
+
   const subjectStr = chapter.subject as string;
   const subjectAccent = subjectStr === 'mathematics' ? 'text-violet-500 bg-violet-500/10 border-violet-500/20' :
     subjectStr === 'science' || subjectStr === 'physics' ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' :
@@ -643,7 +423,8 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
         'text-sky-500 bg-sky-500/10 border-sky-500/20';
 
   const handleCopy = () => {
-    const cleanedNotes = notes.replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/, '').trim();
+    const rawNotes = chapterContent?.raw_content || notes;
+    const cleanedNotes = rawNotes.replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/, '').trim();
     navigator.clipboard.writeText(`Notes for ${chapter.name}\n\n${cleanedNotes}`);
     setCopied(true);
     toast.success('Notes copied to clipboard!');
