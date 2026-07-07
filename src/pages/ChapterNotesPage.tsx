@@ -283,14 +283,21 @@ const ChapterNotesPage: React.FC = () => {
   const trendInsight = getTrendInsight();
 
   const sections = [
-    { id: 'section-overview', label: 'Chapter Overview' },
-    { id: 'section-theory',    label: 'Core Theory' },
-    { id: 'section-formulas',  label: 'Formula Sheet' },
-    { id: 'section-concepts',  label: 'Important Concepts' },
-    { id: 'section-examples',  label: 'Solved Examples' },
-    { id: 'section-pyqs',      label: 'PYQ Intelligence Section' },
-    { id: 'section-insights',  label: 'JEE Insights' },
-    { id: 'section-summary',   label: 'Chapter Summary' },
+    { id: 'section-overview',         label: '1. Chapter Overview' },
+    { id: 'section-outcomes',         label: '2. Learning Outcomes' },
+    { id: 'section-theory',           label: '3. Complete Theory' },
+    { id: 'section-visualization',    label: '4. Concept Visualization' },
+    { id: 'section-formulas',         label: '5. Formula Sheet' },
+    { id: 'section-graphs',           label: '6. Important Graphs' },
+    { id: 'section-examples',         label: '7. Solved Examples' },
+    { id: 'section-pyqs',             label: '8. PYQ Analysis' },
+    { id: 'section-mistakes',         label: '9. Common Mistakes' },
+    { id: 'section-shortcuts',        label: '10. Shortcuts' },
+    { id: 'section-revision',         label: '11. Revision Sheet' },
+    { id: 'section-summary',          label: '12. Chapter Summary' },
+    { id: 'section-mindmap',          label: '13. Mind Map' },
+    { id: 'section-examtips',         label: '14. Exam Tips' },
+    { id: 'section-aiinsights',       label: '15. AI Insights' },
   ];
 
   const scrollToSection = (id: string) => {
@@ -508,20 +515,34 @@ const ChapterNotesPage: React.FC = () => {
       const lower = headingText.toLowerCase();
       if (lower.includes('overview')) {
         id = 'section-overview';
-      } else if (lower.includes('theory') || lower.includes('concept notes')) {
+      } else if (lower.includes('learning outcomes')) {
+        id = 'section-outcomes';
+      } else if (lower.includes('theory')) {
         id = 'section-theory';
+      } else if (lower.includes('visualization')) {
+        id = 'section-visualization';
       } else if (lower.includes('formula')) {
         id = 'section-formulas';
-      } else if (lower.includes('important concepts')) {
-        id = 'section-concepts';
-      } else if (lower.includes('solved examples') || lower.includes('illustration') || lower.includes('examples')) {
+      } else if (lower.includes('important graphs')) {
+        id = 'section-graphs';
+      } else if (lower.includes('solved examples') || lower.includes('examples')) {
         id = 'section-examples';
       } else if (lower.includes('pyq')) {
         id = 'section-pyqs';
-      } else if (lower.includes('insight')) {
-        id = 'section-insights';
+      } else if (lower.includes('common mistakes')) {
+        id = 'section-mistakes';
+      } else if (lower.includes('shortcuts')) {
+        id = 'section-shortcuts';
+      } else if (lower.includes('revision sheet')) {
+        id = 'section-revision';
       } else if (lower.includes('summary')) {
         id = 'section-summary';
+      } else if (lower.includes('mind map')) {
+        id = 'section-mindmap';
+      } else if (lower.includes('exam tips')) {
+        id = 'section-examtips';
+      } else if (lower.includes('ai insights')) {
+        id = 'section-aiinsights';
       }
 
       return (

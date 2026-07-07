@@ -44,69 +44,41 @@ subject: ${subject}
 topic_tree: ${topicList}
 [/METADATA]
 
-Then, generate the following sections in order, using standard Markdown headings (#, ##, ###) and the custom blocks below where appropriate.
+# ${chapterName} — Complete Master Notes
 
-# ${chapterName}
-Classroom notes curated by senior Kota faculty.
+PrepEntrance ${subject} | ${exam} | Class 11/12 • Droppers
 
 [TEACHER_SAYS]
 Students, this chapter is extremely critical for your ${exam} preparation. Focus on the core principles rather than just memorizing formulas.
 [/TEACHER_SAYS]
 
-## Chapter Overview
-Provide a bulleted list of core topics and why it matters for the exam.
+You MUST generate the following 15 sections in this EXACT order. Do not skip any section, and use exact ## headings.
 
-## Core Theory
+## 1. Chapter Overview
+Provide why this chapter matters, where it appears in ${exam}, its connection with future chapters, weightage, and difficulty.
+
+## 2. Learning Outcomes
+Provide a bulleted list of what the student should be able to do by the end of the chapter.
+
+## 3. Complete Theory
+Provide the core theory, definitions, and derivations. Use standard Markdown headings (###) for subtopics.
 [CONCEPT]
 Define precise physical or mathematical concepts here.
 [/CONCEPT]
-
 [NCERT_INSIGHT]
 Highlight conceptual background frequently tested directly from NCERT.
 [/NCERT_INSIGHT]
-
 [DERIVATION]
 Show important derivations here using LaTeX inside standard $$ delimiters (e.g., $$F = ma$$).
 [/DERIVATION]
 
-### Interactive Visualizations
+## 4. Concept Visualization
 Provide at least one interactive graph, interactive diagram, or simulation block here!
-
-For Interactive Graphs, use:
 [GRAPH]
-{
-  "graphType": "velocity_time",
-  "title": "Velocity-Time Graph for Uniform Acceleration",
-  "xAxis": "Time (s)",
-  "yAxis": "Velocity (m/s)",
-  "equation": "v = u + a * t",
-  "sliders": {
-    "u": { "min": 0, "max": 50, "step": 1, "default": 10, "label": "Initial Velocity (u)", "unit": "m/s" },
-    "a": { "min": -10, "max": 10, "step": 0.5, "default": 2, "label": "Acceleration (a)", "unit": "m/s²" }
-  }
-}
+{ "graphType": "velocity_time", "title": "Example Graph", "xAxis": "Time (s)", "yAxis": "Velocity (m/s)", "equation": "v = u + a * t", "sliders": { "u": { "min": 0, "max": 50, "step": 1, "default": 10, "label": "Initial Velocity", "unit": "m/s" } } }
 [/GRAPH]
-(Note: Valid graphTypes are 'velocity_time', 'displacement_time', 'projectile_path', 'shm')
 
-For Interactive Diagrams, use:
-[DIAGRAM]
-{
-  "type": "projectile_motion",
-  "title": "Interactive Projectile Anatomy"
-}
-[/DIAGRAM]
-(Note: Valid types are 'projectile_motion', 'free_body_diagram', 'ray_optics', 'pulley_system')
-
-For Simulations, use:
-[SIMULATION]
-{
-  "type": "projectile",
-  "title": "Projectile Motion Simulator"
-}
-[/SIMULATION]
-(Note: Valid types are 'projectile', 'relative_motion', 'shm')
-
-## Formula Sheet
+## 5. Formula Sheet
 For every critical formula, use the following block:
 [FORMULA title="Formula Name"]
 Equation here (e.g. F = ma)
@@ -116,48 +88,51 @@ Equation here (e.g. F = ma)
 **Memory Trick:** A short phrase to remember.
 [/FORMULA]
 
-## Important Concepts
-List high-frequency traps and symmetry principles.
+## 6. Important Graphs
+Provide explanation of key graphs related to the topic (e.g., x-t, v-t graphs).
 
-[JEE_TRICK]
-Shortcut Trick: Provide a time-saving mathematical or conceptual shortcut.
-[/JEE_TRICK]
-
-## Solved Examples
+## 7. Solved Examples
 Provide 1-2 interactive solved examples formatted exactly like this:
 [WORKED_EXAMPLE]
 {
-  "question": "A block of mass 2 kg is pulled by a force of 10 N on a smooth surface. Find its acceleration.",
-  "hints": [
-    "Identify the horizontal force acting on the block.",
-    "Use Newton's Second Law: F = ma."
-  ],
-  "thinkTime": "What if there is friction of 2 N acting against the motion?",
-  "steps": [
-    "Identify given parameters: m = 2 kg, F = 10 N.",
-    "Apply F = ma: 10 = 2 * a.",
-    "Solve for a: a = 5 m/s²."
-  ],
+  "question": "A block of mass 2 kg is pulled...",
+  "hints": ["Identify the horizontal force..."],
+  "thinkTime": "What if there is friction...?",
+  "steps": ["Apply F = ma: 10 = 2 * a.", "Solve for a."],
   "finalAnswer": "$5\\text{ m/s}^2$",
-  "alternativeMethod": "No alternative needed here.",
-  "commonMistakes": [
-    "Confusing normal force with pulling force.",
-    "Neglecting units in the final calculation."
-  ]
+  "alternativeMethod": "None",
+  "commonMistakes": ["Confusing normal force with pulling force."]
 }
 [/WORKED_EXAMPLE]
 
-## PYQ Intelligence Section
+## 8. PYQ Analysis
 Provide past years trend analysis (Question frequency, Difficulty distribution, Key subtopics).
 
-## JEE Insights
+## 9. Common Mistakes
 Provide multiple common student mistakes using this block:
 [COMMON_MISTAKE]
 Conceptual Trap: Describe the most frequent conceptual mistake, typical exam trap, or sign convention error here.
 [/COMMON_MISTAKE]
 
-## Chapter Summary
-Provide a brief bulleted summary.
+## 10. Shortcuts
+[JEE_TRICK]
+Shortcut Trick: Provide a time-saving mathematical or conceptual shortcut.
+[/JEE_TRICK]
+
+## 11. Revision Sheet
+Provide a condensed bullet-point list of the most critical facts to revise just before the exam.
+
+## 12. Chapter Summary
+Provide a brief bulleted summary of the chapter.
+
+## 13. Mind Map
+Provide a text-based hierarchy or explanation of how concepts link together.
+
+## 14. Exam Tips
+Provide strategic advice on how to approach questions from this chapter during the exam.
+
+## 15. AI Insights
+Provide an overarching analytical insight from AI about how students typically perform on this topic.
 
 INPUT DETAILS:
   Chapter: ${chapterName}
