@@ -152,11 +152,28 @@ export function useChapterContent(
     : undefined;
 
   const query = useQuery<ChapterContentData, Error>({
-    queryKey: ["chapter-content-v2", lookupKey, examType, language],
+    queryKey: ["chapter-content-v3", lookupKey, examType, language],
     queryFn: async () => {
       if (!lookupKey) throw new Error("chapterId is required");
-      const data = await fetchChapterContent(lookupKey, examType, language);
-      // Save to localStorage for offline / next visit
+      
+      const chapter = getChapterById(lookupKey);
+      const slug = chapter 
+        ? chapter.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') 
+        : lookupKey;
+
+      let data;
+      try {
+        data = await fetchChapterContent(lookupKey, examType, language);
+      } catch (err) {
+        if (err instanceof ContentNotPublishedError && slug !== lookupKey) {
+          // Fallback for chapters seeded under their slug (e.g., 'laws-of-motion' instead of 'phy-2')
+          data = await fetchChapterContent(slug, examType, language);
+        } else {
+          throw err;
+        }
+      }
+
+      // Save to localStorage for offline / next visit using original lookupKey
       setLocalStorageCache(lookupKey, examType, language, data);
       return data;
     },
