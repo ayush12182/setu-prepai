@@ -18,7 +18,7 @@ function buildPrompt(chapterName: string, subject: string, topics: string[], exa
 
   return `SYSTEM PROMPT — PREPENTRANCE PREMIUM NOTES ENGINE
 
-You are an expert Kota faculty generating a highly structured revision note for ${exam}.
+You are an expert Kota faculty generating a highly structured, interactive revision note for ${exam}.
 CRITICAL LANGUAGE INSTRUCTION:
 - You must write in 100% professional, academic English.
 - DO NOT use Hinglish, Hindi words, or conversational slang (e.g., no "Beta", "Agar", "Samjho"). Keep terminology simple and student-friendly.
@@ -58,6 +58,43 @@ Highlight conceptual background frequently tested directly from NCERT.
 Show important derivations here using LaTeX inside standard $$ delimiters (e.g., $$F = ma$$).
 [/DERIVATION]
 
+### Interactive Visualizations
+Provide at least one interactive graph, interactive diagram, or simulation block here!
+
+For Interactive Graphs, use:
+[GRAPH]
+{
+  "graphType": "velocity_time",
+  "title": "Velocity-Time Graph for Uniform Acceleration",
+  "xAxis": "Time (s)",
+  "yAxis": "Velocity (m/s)",
+  "equation": "v = u + a * t",
+  "sliders": {
+    "u": { "min": 0, "max": 50, "step": 1, "default": 10, "label": "Initial Velocity (u)", "unit": "m/s" },
+    "a": { "min": -10, "max": 10, "step": 0.5, "default": 2, "label": "Acceleration (a)", "unit": "m/s²" }
+  }
+}
+[/GRAPH]
+(Note: Valid graphTypes are 'velocity_time', 'displacement_time', 'projectile_path', 'shm')
+
+For Interactive Diagrams, use:
+[DIAGRAM]
+{
+  "type": "projectile_motion",
+  "title": "Interactive Projectile Anatomy"
+}
+[/DIAGRAM]
+(Note: Valid types are 'projectile_motion', 'free_body_diagram', 'ray_optics', 'pulley_system')
+
+For Simulations, use:
+[SIMULATION]
+{
+  "type": "projectile",
+  "title": "Projectile Motion Simulator"
+}
+[/SIMULATION]
+(Note: Valid types are 'projectile', 'relative_motion', 'shm')
+
 ## Formula Sheet
 For every critical formula, use the following block:
 [FORMULA title="Formula Name"]
@@ -76,12 +113,28 @@ Shortcut Trick: Provide a time-saving mathematical or conceptual shortcut.
 [/JEE_TRICK]
 
 ## Solved Examples
-Provide 1-2 examples formatted exactly like this:
-**Given:** ...
-**To find:** ...
-**Concept:** ...
-**Solution:** ...
-**Answer:** ...
+Provide 1-2 interactive solved examples formatted exactly like this:
+[WORKED_EXAMPLE]
+{
+  "question": "A block of mass 2 kg is pulled by a force of 10 N on a smooth surface. Find its acceleration.",
+  "hints": [
+    "Identify the horizontal force acting on the block.",
+    "Use Newton's Second Law: F = ma."
+  ],
+  "thinkTime": "What if there is friction of 2 N acting against the motion?",
+  "steps": [
+    "Identify given parameters: m = 2 kg, F = 10 N.",
+    "Apply F = ma: 10 = 2 * a.",
+    "Solve for a: a = 5 m/s²."
+  ],
+  "finalAnswer": "$5\\text{ m/s}^2$",
+  "alternativeMethod": "No alternative needed here.",
+  "commonMistakes": [
+    "Confusing normal force with pulling force.",
+    "Neglecting units in the final calculation."
+  ]
+}
+[/WORKED_EXAMPLE]
 
 ## PYQ Intelligence Section
 Provide past years trend analysis (Question frequency, Difficulty distribution, Key subtopics).
@@ -157,14 +210,15 @@ serve(async (req) => {
 
       if (cachedNote?.content) {
         console.log(`[GenerateNotes] Cache HIT for Chapter: ${chapterName}`);
+        let responseData = cachedNote.content;
         try {
-            const parsedCache = JSON.parse(cachedNote.content);
-            return new Response(JSON.stringify({ success: true, data: parsedCache }), {
-              headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-cache" },
-            });
-        } catch(e) {
-            console.warn("[GenerateNotes] Cache contained invalid JSON, ignoring.");
+          responseData = JSON.parse(cachedNote.content);
+        } catch {
+          // Standard string response, not a double JSON serialized string
         }
+        return new Response(JSON.stringify({ success: true, data: responseData }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-cache" },
+        });
       }
     }
 

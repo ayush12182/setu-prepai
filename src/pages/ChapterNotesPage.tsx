@@ -17,6 +17,10 @@ import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import { cn } from '@/lib/utils';
 import { MathLine, processNotesContent, normalizeMathDelimiters } from '@/utils/mathRenderer';
+import { InteractiveGraph } from '@/components/interactive/InteractiveGraph';
+import { InteractiveDiagram } from '@/components/interactive/InteractiveDiagram';
+import { InteractiveExample } from '@/components/interactive/InteractiveExample';
+import { SimulationEngine } from '@/components/interactive/SimulationEngine';
 
 type SmartMode = 'default' | 'overview' | 'theory' | 'formulas' | 'concepts' | 'examples' | 'pyqs' | 'insights' | 'summary' | 'ask_ai';
 
@@ -790,10 +794,9 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
       </p>
     );
   };
-
   const renderNotes = (content: string) => {
     const cleanedContent = content.replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/, '').trim();
-    const blockRe = /\[(DERIVATION|SVG|CALLOUT|JEE_INSIGHT|CONCEPT|JEE_TRICK|COMMON_MISTAKE|NCERT_INSIGHT|TEACHER_SAYS|FORMULA)(?:\s+title="([^"]+)")?\]([\s\S]*?)\[\/\1\]/g;
+    const blockRe = /\[(DERIVATION|SVG|CALLOUT|JEE_INSIGHT|CONCEPT|JEE_TRICK|COMMON_MISTAKE|NCERT_INSIGHT|TEACHER_SAYS|FORMULA|GRAPH|INTERACTIVE_GRAPH|DIAGRAM|INTERACTIVE_DIAGRAM|WORKED_EXAMPLE|INTERACTIVE_EXAMPLE|SIMULATION)(?:\s+title="([^"]+)")?\]([\s\S]*?)\[\/\1\]/g;
     const elements: React.ReactNode[] = [];
     let lastIndex = 0;
     let match: RegExpExecArray | null;
@@ -930,6 +933,88 @@ Calculation Error: Misinterpreting radius versus diameter or neglecting units (e
             memoryTrick={trickMatch?.[1]?.trim()}
           />
         );
+      } else if (blockType === 'GRAPH' || blockType === 'INTERACTIVE_GRAPH') {
+        try {
+          const config = JSON.parse(blockContent);
+          elements.push(
+            <InteractiveGraph
+              key={`block-${keyIdx}`}
+              graphType={config.graphType}
+              title={config.title || blockTitle}
+              xAxis={config.xAxis}
+              yAxis={config.yAxis}
+              equation={config.equation}
+              sliders={config.sliders || config.slider || {}}
+            />
+          );
+        } catch (e) {
+          console.warn('[ChapterNotesPage] InteractiveGraph parse failed, rendering fallback:', e);
+          elements.push(
+            <div key={`block-${keyIdx}`} className="p-4 border border-dashed rounded-xl bg-destructive/10 text-destructive text-xs">
+              [Failed to parse Interactive Graph configuration]
+            </div>
+          );
+        }
+      } else if (blockType === 'DIAGRAM' || blockType === 'INTERACTIVE_DIAGRAM') {
+        try {
+          const config = JSON.parse(blockContent);
+          elements.push(
+            <InteractiveDiagram
+              key={`block-${keyIdx}`}
+              type={config.type}
+              title={config.title || blockTitle}
+            />
+          );
+        } catch (e) {
+          console.warn('[ChapterNotesPage] InteractiveDiagram parse failed, rendering fallback:', e);
+          elements.push(
+            <div key={`block-${keyIdx}`} className="p-4 border border-dashed rounded-xl bg-destructive/10 text-destructive text-xs">
+              [Failed to parse Interactive Diagram configuration]
+            </div>
+          );
+        }
+      } else if (blockType === 'WORKED_EXAMPLE' || blockType === 'INTERACTIVE_EXAMPLE') {
+        try {
+          const config = JSON.parse(blockContent);
+          elements.push(
+            <InteractiveExample
+              key={`block-${keyIdx}`}
+              id={`example-${keyIdx}`}
+              question={config.question}
+              hints={config.hints}
+              thinkTime={config.thinkTime}
+              steps={config.steps}
+              finalAnswer={config.finalAnswer}
+              alternativeMethod={config.alternativeMethod}
+              commonMistakes={config.commonMistakes}
+            />
+          );
+        } catch (e) {
+          console.warn('[ChapterNotesPage] InteractiveExample parse failed, rendering fallback:', e);
+          elements.push(
+            <div key={`block-${keyIdx}`} className="p-4 border border-dashed rounded-xl bg-destructive/10 text-destructive text-xs">
+              [Failed to parse Worked Example configuration]
+            </div>
+          );
+        }
+      } else if (blockType === 'SIMULATION') {
+        try {
+          const config = JSON.parse(blockContent);
+          elements.push(
+            <SimulationEngine
+              key={`block-${keyIdx}`}
+              type={config.type}
+              title={config.title || blockTitle}
+            />
+          );
+        } catch (e) {
+          console.warn('[ChapterNotesPage] SimulationEngine parse failed, rendering fallback:', e);
+          elements.push(
+            <div key={`block-${keyIdx}`} className="p-4 border border-dashed rounded-xl bg-destructive/10 text-destructive text-xs">
+              [Failed to parse Simulation configuration]
+            </div>
+          );
+        }
       }
 
       keyIdx++;
