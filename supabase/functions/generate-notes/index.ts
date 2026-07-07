@@ -23,13 +23,19 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-admin-key",
 };
 
+function cleanJsonString(str: string): string {
+  // Replace single backslashes with double backslashes, unless they escape a quote or another backslash
+  return str.replace(/(?<!\\)\\(?!["\\])/g, "\\\\");
+}
+
 function buildPrompt(chapterName: string, subject: string, topics: string[], examMode: string): string {
   const topicList = topics.length > 0 ? topics.join(", ") : chapterName;
   const exam = examMode.toUpperCase().includes("NEET") ? "NEET" : examMode.toUpperCase().includes("CUET") ? "CUET" : "JEE Main + Advanced";
 
-  return `SYSTEM PROMPT — PREPENTRANCE PREMIUM NOTES ENGINE
+  return `SYSTEM PROMPT — PREPENTRANCE PREMIUM NOTES ENGINE (COACHING GRADE)
 
-You are an expert Kota faculty generating a highly structured, interactive revision note for ${exam}.
+You are an elite senior HOD at a premier Kota coaching institute (Allen/Resonance/PW). You are generating comprehensive, mathematically rigorous classroom notes of absolute premium quality (comparable to a ₹50,000 coaching module, Cengage, and Physics Galaxy combined) for ${exam}.
+
 CRITICAL LANGUAGE INSTRUCTION:
 - You must write in 100% professional, academic English.
 - DO NOT use Hinglish, Hindi words, or conversational slang. Keep terminology simple and student-friendly.
@@ -45,94 +51,137 @@ topic_tree: ${topicList}
 [/METADATA]
 
 # ${chapterName} — Complete Master Notes
-
 PrepEntrance ${subject} | ${exam} | Class 11/12 • Droppers
 
+You MUST generate the following 15 sections in this EXACT order. Do not skip any section, and use exact ## headings. Make the content extremely detailed, comprehensive, and rich—this should feel like a full 40-page textbook chapter, not a summary.
+
+## 1. Teacher Insight
+Write a highly strategic introduction (300-500 words) from a senior faculty member.
+- Explain WHY this chapter is critical for ${exam} (historical weightage, question trends).
+- Detail exactly where students fail conceptually (common traps, mathematical pitfalls).
+- Share how AIR (All India Rank) 1-100 students study and master this specific topic.
+- Provide a clear, actionable study strategy and a checklist of what to avoid.
+Use the following wrapper format:
 [TEACHER_SAYS]
-Students, this chapter is extremely critical for your ${exam} preparation. Focus on the core principles rather than just memorizing formulas.
+Detailed text here...
 [/TEACHER_SAYS]
 
-You MUST generate the following 15 sections in this EXACT order. Do not skip any section, and use exact ## headings.
-
-## 1. Chapter Overview
-Provide why this chapter matters, where it appears in ${exam}, its connection with future chapters, weightage, and difficulty.
-
 ## 2. Learning Outcomes
-Provide a bulleted list of what the student should be able to do by the end of the chapter.
+Provide an exhaustive, bulleted list of 10-15 concrete learning outcomes. What derivations must they master? What specific problem types must they be able to solve?
 
 ## 3. Complete Theory
-Provide the core theory, definitions, and derivations. Use standard Markdown headings (###) for subtopics.
+Provide a massive, highly detailed theory section. Every subtopic should feel like 4-6 pages of coaching notes, complete with:
+- Formal definitions and deep physical/mathematical intuitions.
+- Step-by-step mathematical derivations of ALL core equations starting from absolute fundamentals (e.g., derive kinematics equations starting from differential calculus a = dv/dt, showing integration, boundaries, assumptions, and constraints).
+- Real-life analogies to make complex concepts intuitive.
+- Important exam observations and NCERT connections.
+- Advanced JEE/NEET insights and common misconceptions.
+Format concepts, NCERT connections, and derivations using these blocks:
 [CONCEPT]
-Define precise physical or mathematical concepts here.
+Concept details...
 [/CONCEPT]
 [NCERT_INSIGHT]
-Highlight conceptual background frequently tested directly from NCERT.
+NCERT connections/insights...
 [/NCERT_INSIGHT]
 [DERIVATION]
-Show important derivations here using LaTeX inside standard $$ delimiters (e.g., $$F = ma$$).
+Derivation text...
 [/DERIVATION]
 
 ## 4. Concept Visualization
-Provide at least one interactive graph, interactive diagram, or simulation block here!
+Define interactive diagrams, graphs, and simulation configurations for visual learning. Ensure the JSON is valid.
 [GRAPH]
-{ "graphType": "velocity_time", "title": "Example Graph", "xAxis": "Time (s)", "yAxis": "Velocity (m/s)", "equation": "v = u + a * t", "sliders": { "u": { "min": 0, "max": 50, "step": 1, "default": 10, "label": "Initial Velocity", "unit": "m/s" } } }
+{
+  "graphType": "velocity_time",
+  "title": "Velocity-Time Graph for Uniform Acceleration",
+  "xAxis": "Time (s)",
+  "yAxis": "Velocity (m/s)",
+  "equation": "v = u + a * t",
+  "sliders": {
+    "u": { "min": 0, "max": 50, "step": 1, "default": 10, "label": "Initial Velocity (u)", "unit": "m/s" },
+    "a": { "min": -10, "max": 10, "step": 0.5, "default": 2, "label": "Acceleration (a)", "unit": "m/s²" }
+  }
+}
 [/GRAPH]
 
 ## 5. Formula Sheet
-For every critical formula, use the following block:
+List every single critical formula using this block:
 [FORMULA title="Formula Name"]
-Equation here (e.g. F = ma)
-**Variables:** m = mass (kg), a = acceleration (m/s^2)
-**When to use:** Use when mass is constant.
-**Common Mistake:** Forgetting vector direction.
-**Memory Trick:** A short phrase to remember.
+Equation (e.g., T = \\frac{2u \\sin \\theta}{g})
+**Variables:** Variable definitions
+**When to use:** Detailed explanation of applicability
+**When NOT to use:** Limits, boundaries, constraints
+**Exam Level:** JEE Main / Advanced / NEET
+**Memory Trick:** Easy mnemonic to remember
+**Common Mistakes:** Conceptual traps
+**Solved Example:** A quick illustrative example
+**Related Formula:** Connected equations
 [/FORMULA]
 
 ## 6. Important Graphs
-Provide explanation of key graphs related to the topic (e.g., x-t, v-t graphs).
+Describe all critical graphs for this chapter. Explain what the slope, area, intercepts, and inflection points represent physically.
 
 ## 7. Solved Examples
-Provide 1-2 interactive solved examples formatted exactly like this:
+Provide 15-25 highly rigorous solved examples categorized by difficulty (Easy, Medium, Hard) and target exams (JEE Main, Advanced, NEET).
+Every solution must explain the WHY (conceptual strategy) before the HOW (mathematical execution). Do not skip any algebra or calculus steps.
 [WORKED_EXAMPLE]
 {
-  "question": "A block of mass 2 kg is pulled...",
-  "hints": ["Identify the horizontal force..."],
-  "thinkTime": "What if there is friction...?",
-  "steps": ["Apply F = ma: 10 = 2 * a.", "Solve for a."],
-  "finalAnswer": "$5\\text{ m/s}^2$",
-  "alternativeMethod": "None",
-  "commonMistakes": ["Confusing normal force with pulling force."]
+  "question": "Detailed question text...",
+  "hints": ["Hint 1", "Hint 2"],
+  "thinkTime": "Thought-provoking conceptual question about the scenario...",
+  "steps": ["Step 1 with math...", "Step 2 with math..."],
+  "finalAnswer": "LaTeX answer...",
+  "alternativeMethod": "Alternative method or shortcut...",
+  "commonMistakes": ["Mistake 1", "Mistake 2"]
 }
 [/WORKED_EXAMPLE]
 
 ## 8. PYQ Analysis
-Provide past years trend analysis (Question frequency, Difficulty distribution, Key subtopics).
+Provide a comprehensive past-year question trend analysis:
+- Topic-wise question frequency (e.g., Projectile: 35%, Relative Motion: 25%).
+- Difficulty distribution across recent years.
+- Repeated problem archetypes and expected future questions.
+- Key coaching observations and strategy for high-scoring topics.
 
 ## 9. Common Mistakes
-Provide multiple common student mistakes using this block:
+List 30-50 common student mistakes. For each mistake, detail:
+- The conceptual trap / mistake.
+- Why students make it.
+- Correct physical/mathematical thinking.
+- A mini-example illustrating the trap.
 [COMMON_MISTAKE]
-Conceptual Trap: Describe the most frequent conceptual mistake, typical exam trap, or sign convention error here.
+Mistake: ...
+Why: ...
+Correct: ...
 [/COMMON_MISTAKE]
 
 ## 10. Shortcuts
+Provide 5-10 elite coaching shortcuts, calculation tricks, approximation techniques, option elimination hacks, and advanced JEE/NEET hacks.
 [JEE_TRICK]
-Shortcut Trick: Provide a time-saving mathematical or conceptual shortcut.
+Trick: ...
 [/JEE_TRICK]
 
 ## 11. Revision Sheet
-Provide a condensed bullet-point list of the most critical facts to revise just before the exam.
+A ultra-condensed 2-page equivalent revision sheet. Summarize all formulas, graph properties, and critical takeaways for the day before the exam.
 
 ## 12. Chapter Summary
-Provide a brief bulleted summary of the chapter.
+Provide a bulleted, high-level summary of the entire chapter's core subtopics.
 
 ## 13. Mind Map
-Provide a text-based hierarchy or explanation of how concepts link together.
+Provide a text-based, expandable nested hierarchy showing exactly how topics branch out.
+Example:
+Kinematics
+├── Motion in 1D
+│   ├── Distance & Displacement
+│   └── Constant vs Variable Acceleration
+└── Motion in 2D
+    ├── Projectiles (Inclined vs Horizontal)
+    └── Relative Velocity (River-Boat, Rain-Man)
 
 ## 14. Exam Tips
-Provide strategic advice on how to approach questions from this chapter during the exam.
+Provide 20-30 tactical faculty tips on how to approach exam problems, read questions carefully, manage time, and verify calculations.
 
 ## 15. AI Insights
-Provide an overarching analytical insight from AI about how students typically perform on this topic.
+Provide deep cognitive insights based on student analytics (e.g., "90% of students lose marks in Relative Motion because they fail to set up reference frames...").
 
 INPUT DETAILS:
   Chapter: ${chapterName}
@@ -151,7 +200,12 @@ function parseStructuredFields(rawContent: string): Record<string, unknown> {
   const graphRegex = /\[GRAPH\]([\s\S]*?)\[\/GRAPH\]/g;
   let m;
   while ((m = graphRegex.exec(rawContent)) !== null) {
-    try { graphs.push(JSON.parse(m[1].trim())); } catch { /* skip malformed */ }
+    try {
+      const cleaned = cleanJsonString(m[1].trim());
+      graphs.push(JSON.parse(cleaned));
+    } catch (e) {
+      console.warn("[parseStructuredFields] Graph parse failed:", e);
+    }
   }
   if (graphs.length) parsed.graphs = graphs;
 
@@ -159,7 +213,12 @@ function parseStructuredFields(rawContent: string): Record<string, unknown> {
   const diagrams: unknown[] = [];
   const diagramRegex = /\[DIAGRAM\]([\s\S]*?)\[\/DIAGRAM\]/g;
   while ((m = diagramRegex.exec(rawContent)) !== null) {
-    try { diagrams.push(JSON.parse(m[1].trim())); } catch { /* skip */ }
+    try {
+      const cleaned = cleanJsonString(m[1].trim());
+      diagrams.push(JSON.parse(cleaned));
+    } catch (e) {
+      console.warn("[parseStructuredFields] Diagram parse failed:", e);
+    }
   }
   if (diagrams.length) parsed.diagrams = diagrams;
 
@@ -167,7 +226,12 @@ function parseStructuredFields(rawContent: string): Record<string, unknown> {
   const examples: unknown[] = [];
   const exampleRegex = /\[WORKED_EXAMPLE\]([\s\S]*?)\[\/WORKED_EXAMPLE\]/g;
   while ((m = exampleRegex.exec(rawContent)) !== null) {
-    try { examples.push(JSON.parse(m[1].trim())); } catch { /* skip */ }
+    try {
+      const cleaned = cleanJsonString(m[1].trim());
+      examples.push(JSON.parse(cleaned));
+    } catch (e) {
+      console.warn("[parseStructuredFields] Worked example parse failed:", e);
+    }
   }
   if (examples.length) parsed.worked_examples = examples;
 
@@ -196,8 +260,8 @@ function parseStructuredFields(rawContent: string): Record<string, unknown> {
   if (formulas.length) parsed.formulas = formulas;
 
   // Build ai_context: condensed summary for AI tutor (< 2000 chars)
-  const overviewMatch = rawContent.match(/## Chapter Overview([\s\S]*?)(?=##|$)/);
-  const summaryMatch = rawContent.match(/## Chapter Summary([\s\S]*?)(?=##|$)/);
+  const overviewMatch = rawContent.match(/## 1\. Chapter Overview([\s\S]*?)(?=##|$)/i);
+  const summaryMatch = rawContent.match(/## 12\. Chapter Summary([\s\S]*?)(?=##|$)/i);
   const aiCtxParts = [];
   if (overviewMatch) aiCtxParts.push(overviewMatch[1].trim());
   if (summaryMatch) aiCtxParts.push(summaryMatch[1].trim());

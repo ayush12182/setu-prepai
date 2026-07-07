@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import {
   ArrowLeft, Download, Copy, CheckCircle2,
   BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, AlertCircle, Calculator, Sparkles,
-  GraduationCap, RotateCcw, Lightbulb, Star,
+  GraduationCap, RotateCcw, Lightbulb, Star, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -23,6 +23,54 @@ import { InteractiveExample } from '@/components/interactive/InteractiveExample'
 import { SimulationEngine } from '@/components/interactive/SimulationEngine';
 
 type SmartMode = 'default' | 'overview' | 'theory' | 'formulas' | 'concepts' | 'examples' | 'pyqs' | 'insights' | 'summary' | 'ask_ai';
+
+const cleanJsonString = (str: string): string => {
+  // Replace single backslashes with double backslashes, unless they escape a quote or another backslash
+  return str.replace(/(?<!\\)\\(?!["\\])/g, '\\\\');
+};
+
+const CollapsibleDerivation: React.FC<{ content: string; keyIdx: number; renderLine: any }> = ({ content, keyIdx, renderLine }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="my-8 bg-violet-50/30 dark:bg-violet-950/10 border border-violet-200 dark:border-violet-900/50 rounded-2xl overflow-hidden shadow-sm transition-all duration-300">
+      <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="w-full flex items-center justify-between p-5 text-left font-bold text-violet-800 dark:text-violet-400 hover:bg-violet-50/50 dark:hover:bg-violet-950/20 transition-all"
+      >
+        <span className="flex items-center gap-2.5 text-body-md">
+          <Layers className="w-4 h-4 text-violet-500" />
+          Mathematical Derivation & Proof
+        </span>
+        <span className="flex items-center gap-1 text-caption font-bold bg-violet-500/10 dark:bg-violet-500/25 px-3 py-1 rounded-full text-violet-700 dark:text-violet-300">
+          {isOpen ? (
+            <>
+              Hide Derivation <ChevronUp className="w-3.5 h-3.5" />
+            </>
+          ) : (
+            <>
+              Show Derivation <ChevronDown className="w-3.5 h-3.5" />
+            </>
+          )}
+        </span>
+      </button>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-t border-violet-100 dark:border-violet-900/40 p-6"
+          >
+            <div className="prose prose-base dark:prose-invert max-w-none text-slate-800 dark:text-slate-200 leading-relaxed space-y-4">
+              {processNotesContent(content, (line, i) => renderLine(line, `deriv-${keyIdx}-${i}`))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 const SMART_MODE_META: Record<SmartMode, { label: string; loaderText: string }> = {
   default:   { label: 'Complete Notes',       loaderText: 'Loading complete concept notes curated by senior Kota faculty...' },
@@ -624,7 +672,7 @@ const ChapterNotesPage: React.FC = () => {
     }
 
     if (trimmed.startsWith('\u2022 ') || trimmed.startsWith('- ') || trimmed.startsWith('* ')) return (
-      <li key={key} className="ml-6 my-3 text-foreground font-bold list-disc marker:text-accent leading-relaxed text-body-md">
+      <li key={key} className="ml-6 my-3 text-slate-800 dark:text-slate-200 font-medium list-disc marker:text-accent leading-relaxed text-body-md">
         <MathLine>{trimmed.slice(2)}</MathLine>
       </li>
     );
@@ -639,13 +687,13 @@ const ChapterNotesPage: React.FC = () => {
     if (trimmed.startsWith('---')) return <hr key={key} className="my-10 border-border/60" />;
 
     if (trimmed.match(/^\d+\./)) return (
-      <p key={key} className="ml-2 my-4 font-bold text-slate-800 dark:text-slate-200 overflow-x-auto text-body-md">
+      <p key={key} className="ml-2 my-4 font-semibold text-slate-800 dark:text-slate-200 overflow-x-auto text-body-md">
         <MathLine>{trimmed}</MathLine>
       </p>
     );
 
     return (
-      <p key={key} className="my-6 text-foreground font-bold leading-relaxed text-body-md overflow-x-auto">
+      <p key={key} className="my-6 text-slate-800 dark:text-slate-200 font-normal leading-relaxed text-body-md overflow-x-auto">
         <MathLine>{trimmed}</MathLine>
       </p>
     );
@@ -675,86 +723,84 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'DERIVATION') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-violet-50/50 dark:bg-violet-950/20 border-l-4 border-violet-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-violet-700 dark:text-violet-400 text-caption font-bold tracking-wider flex items-center gap-2">
-              <Layers className="w-4 h-4 shrink-0" /> Mathematical Derivation & Proof
-            </h4>
-            <div className="prose prose-sm dark:prose-invert max-w-none text-slate-800 dark:text-slate-200">
-              {processNotesContent(blockContent, (line, i) => renderLine(line, `deriv-${keyIdx}-${i}`))}
-            </div>
-          </div>
+          <CollapsibleDerivation 
+            key={`block-${keyIdx}`} 
+            content={blockContent} 
+            keyIdx={keyIdx} 
+            renderLine={renderLine} 
+          />
         );
       } else if (blockType === 'CALLOUT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-blue-50/60 dark:bg-blue-950/20 border-l-4 border-blue-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-blue-700 dark:text-blue-400 text-caption font-bold tracking-wider flex items-center gap-2">
-              <BookOpen className="w-4 h-4 shrink-0" /> Structured Concept Callout
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-blue-50/40 dark:bg-blue-950/10 border-l-4 border-blue-500 rounded-r-2xl shadow-sm">
+            <h4 className="text-blue-800 dark:text-blue-400 text-body-md font-bold flex items-center gap-2">
+              <BookOpen className="w-4 h-4 shrink-0 text-blue-500" /> Structured Concept Callout
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed">
+            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `call-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'JEE_INSIGHT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-amber-50 dark:bg-amber-950/20 border-2 border-dashed border-amber-300 dark:border-amber-900/50 rounded-2xl shadow-sm">
-            <h4 className="text-amber-800 dark:text-amber-400 text-caption font-bold tracking-wider flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500 animate-pulse shrink-0" /> Star Batch JEE Insight & Tricks
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-amber-50/40 dark:bg-amber-950/10 border border-dashed border-amber-300 dark:border-amber-900/40 rounded-2xl shadow-sm">
+            <h4 className="text-amber-800 dark:text-amber-400 text-body-md font-bold flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-amber-500 shrink-0" /> Star Batch JEE Insight & Tricks
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed">
+            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `jee-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'CONCEPT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-50/50 dark:bg-sky-950/20 border-l-4 border-sky-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-sky-700 dark:text-sky-400 text-caption font-bold tracking-wider flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 shrink-0" /> CONCEPT
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-50/40 dark:bg-sky-950/10 border-l-4 border-sky-500 rounded-r-2xl shadow-sm">
+            <h4 className="text-sky-800 dark:text-sky-400 text-body-md font-bold flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 shrink-0 text-sky-500" /> CONCEPT
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed">
+            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `concept-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'JEE_TRICK') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-purple-50/50 dark:bg-purple-950/20 border-l-4 border-purple-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-purple-700 dark:text-purple-400 text-caption font-bold tracking-wider flex items-center gap-2">
-              <Zap className="w-4 h-4 shrink-0" /> JEE TRICK
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-purple-50/40 dark:bg-purple-950/10 border-l-4 border-purple-500 rounded-r-2xl shadow-sm">
+            <h4 className="text-purple-800 dark:text-purple-400 text-body-md font-bold flex items-center gap-2">
+              <Zap className="w-4 h-4 shrink-0 text-purple-500" /> JEE TRICK
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed">
+            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `trick-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'COMMON_MISTAKE') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-rose-50/80 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50 border-l-4 border-l-rose-500 rounded-2xl shadow-sm">
-            <h4 className="text-rose-700 dark:text-rose-400 text-caption font-bold tracking-wider flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 shrink-0" /> Common Student Pitfall
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-rose-50/30 dark:bg-rose-950/10 border border-rose-200 dark:border-rose-900/40 border-l-4 border-l-rose-500 rounded-2xl shadow-sm">
+            <h4 className="text-rose-800 dark:text-rose-400 text-body-md font-bold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" /> Common Student Pitfall
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-3">
+            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `mistake-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'NCERT_INSIGHT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-emerald-50/50 dark:bg-emerald-950/20 border-l-4 border-emerald-500 rounded-r-2xl shadow-sm">
-            <h4 className="text-emerald-700 dark:text-emerald-400 text-caption font-bold tracking-wider flex items-center gap-2">
-              <BookOpen className="w-4 h-4 shrink-0" /> NCERT INSIGHT
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-emerald-50/40 dark:bg-emerald-950/10 border-l-4 border-emerald-500 rounded-r-2xl shadow-sm">
+            <h4 className="text-emerald-800 dark:text-emerald-400 text-body-md font-bold flex items-center gap-2">
+              <BookOpen className="w-4 h-4 shrink-0 text-emerald-500" /> NCERT INSIGHT
             </h4>
-            <div className="text-slate-800 dark:text-slate-200 leading-relaxed">
+            <div className="text-slate-800 dark:text-slate-200 leading-relaxed mt-2 text-body-md">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `ncert-${keyIdx}-${i}`))}
             </div>
           </div>
         );
       } else if (blockType === 'TEACHER_SAYS') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-amber-50 dark:bg-amber-950/10 border border-amber-300 dark:border-amber-900/50 rounded-2xl shadow-md border-l-4 border-l-amber-500">
-            <h4 className="text-amber-800 dark:text-amber-400 text-caption font-bold tracking-wider flex items-center gap-2">
-              <GraduationCap className="w-5 h-5 shrink-0" /> Teacher Says / Teacher Insight
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-amber-50/40 dark:bg-amber-950/10 border border-amber-300 dark:border-amber-900/40 rounded-2xl shadow-md border-l-4 border-l-amber-500">
+            <h4 className="text-amber-800 dark:text-amber-400 text-body-md font-bold flex items-center gap-2">
+              <GraduationCap className="w-5 h-5 shrink-0 text-amber-500" /> Teacher Says / Teacher Insight
             </h4>
             <div className="text-amber-950 dark:text-amber-100 font-sans italic font-bold leading-relaxed mt-3 text-body-md">
               {processNotesContent(blockContent, (line, i) => {
@@ -791,7 +837,7 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'GRAPH' || blockType === 'INTERACTIVE_GRAPH') {
         try {
-          const config = JSON.parse(blockContent);
+          const config = JSON.parse(cleanJsonString(blockContent));
           elements.push(
             <InteractiveGraph
               key={`block-${keyIdx}`}
@@ -806,14 +852,15 @@ const ChapterNotesPage: React.FC = () => {
         } catch (e) {
           console.warn('[ChapterNotesPage] InteractiveGraph parse failed, rendering fallback:', e);
           elements.push(
-            <div key={`block-${keyIdx}`} className="p-4 border border-dashed rounded-xl bg-destructive/10 text-destructive text-xs">
-              [Failed to parse Interactive Graph configuration]
+            <div key={`block-${keyIdx}`} className="p-5 border border-dashed rounded-2xl bg-destructive/5 text-destructive border-destructive/20 text-body-sm flex flex-col gap-2 my-8 shadow-sm">
+              <span className="font-bold flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> Graph Visualisation Unavailable</span>
+              <span className="text-muted-foreground">The interactive simulation configuration was slightly malformed. Our engineering team has been notified.</span>
             </div>
           );
         }
       } else if (blockType === 'DIAGRAM' || blockType === 'INTERACTIVE_DIAGRAM') {
         try {
-          const config = JSON.parse(blockContent);
+          const config = JSON.parse(cleanJsonString(blockContent));
           elements.push(
             <InteractiveDiagram
               key={`block-${keyIdx}`}
@@ -824,14 +871,15 @@ const ChapterNotesPage: React.FC = () => {
         } catch (e) {
           console.warn('[ChapterNotesPage] InteractiveDiagram parse failed, rendering fallback:', e);
           elements.push(
-            <div key={`block-${keyIdx}`} className="p-4 border border-dashed rounded-xl bg-destructive/10 text-destructive text-xs">
-              [Failed to parse Interactive Diagram configuration]
+            <div key={`block-${keyIdx}`} className="p-5 border border-dashed rounded-2xl bg-destructive/5 text-destructive border-destructive/20 text-body-sm flex flex-col gap-2 my-8 shadow-sm">
+              <span className="font-bold flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> Interactive Diagram Unavailable</span>
+              <span className="text-muted-foreground">The visual component configuration was slightly malformed.</span>
             </div>
           );
         }
       } else if (blockType === 'WORKED_EXAMPLE' || blockType === 'INTERACTIVE_EXAMPLE') {
         try {
-          const config = JSON.parse(blockContent);
+          const config = JSON.parse(cleanJsonString(blockContent));
           elements.push(
             <InteractiveExample
               key={`block-${keyIdx}`}
@@ -848,14 +896,15 @@ const ChapterNotesPage: React.FC = () => {
         } catch (e) {
           console.warn('[ChapterNotesPage] InteractiveExample parse failed, rendering fallback:', e);
           elements.push(
-            <div key={`block-${keyIdx}`} className="p-4 border border-dashed rounded-xl bg-destructive/10 text-destructive text-xs">
-              [Failed to parse Worked Example configuration]
+            <div key={`block-${keyIdx}`} className="p-5 border border-dashed rounded-2xl bg-destructive/5 text-destructive border-destructive/20 text-body-sm flex flex-col gap-2 my-8 shadow-sm">
+              <span className="font-bold flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> Solved Example Mismatch</span>
+              <span className="text-muted-foreground">The step-by-step example could not be parsed properly.</span>
             </div>
           );
         }
       } else if (blockType === 'SIMULATION') {
         try {
-          const config = JSON.parse(blockContent);
+          const config = JSON.parse(cleanJsonString(blockContent));
           elements.push(
             <SimulationEngine
               key={`block-${keyIdx}`}
@@ -866,8 +915,9 @@ const ChapterNotesPage: React.FC = () => {
         } catch (e) {
           console.warn('[ChapterNotesPage] SimulationEngine parse failed, rendering fallback:', e);
           elements.push(
-            <div key={`block-${keyIdx}`} className="p-4 border border-dashed rounded-xl bg-destructive/10 text-destructive text-xs">
-              [Failed to parse Simulation configuration]
+            <div key={`block-${keyIdx}`} className="p-5 border border-dashed rounded-2xl bg-destructive/5 text-destructive border-destructive/20 text-body-sm flex flex-col gap-2 my-8 shadow-sm">
+              <span className="font-bold flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> Interactive Simulation Unavailable</span>
+              <span className="text-muted-foreground">The physics simulation engine config failed to load.</span>
             </div>
           );
         }
@@ -1396,7 +1446,7 @@ const ChapterNotesPage: React.FC = () => {
                   {/* Core Notes Content Box */}
                   <Card className="border border-border/80 shadow-xl overflow-hidden rounded-3xl">
                     <CardContent className="p-8 sm:p-14 relative bg-background">
-                      <div className="prose prose-base sm:prose-lg dark:prose-invert max-w-none">
+                      <div className="prose prose-base sm:prose-lg dark:prose-invert max-w-[850px] mx-auto space-y-8">
                         {renderNotes(notes)}
                         {isGenerating && <span className="inline-block w-3 h-5 bg-accent animate-pulse ml-2 align-middle rounded-sm" />}
                       </div>
