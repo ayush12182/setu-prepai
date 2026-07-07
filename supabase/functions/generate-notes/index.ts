@@ -104,17 +104,20 @@ Define interactive diagrams, graphs, and simulation configurations for visual le
 [/GRAPH]
 
 ## 5. Formula Sheet
-List every single critical formula using this block:
+IMPORTANT: This must be a complete formula repository containing EVERY formula required for NCERT, JEE Main, JEE Advanced, and NEET for this chapter. Do not summarize or skip equations. Group formulas under markdown subheadings (e.g., ### Motion in 1D, ### Projectile Motion).
+For every formula, list it as an independent card using this exact format:
 [FORMULA title="Formula Name"]
 Equation (e.g., T = \\frac{2u \\sin \\theta}{g})
-**Variables:** Variable definitions
+**Variables:** Variable meanings (e.g. u = initial velocity, theta = angle of projection)
+**SI Units:** Standard SI units of each variable
+**Physical Meaning:** The physical significance of the formula
 **When to use:** Detailed explanation of applicability
-**When NOT to use:** Limits, boundaries, constraints
-**Exam Level:** JEE Main / Advanced / NEET
-**Memory Trick:** Easy mnemonic to remember
-**Common Mistakes:** Conceptual traps
-**Solved Example:** A quick illustrative example
+**When NOT to use:** Limits, boundaries, constraints (e.g., constant acceleration only, small angles only)
+**Memory Trick:** Mnemonic or memory aid
+**Common Mistake:** Pitfalls, common errors to avoid
+**One Solved Example:** A quick illustrative example (with numbers/variables, step-by-step)
 **Related Formula:** Connected equations
+**Derivation:** Complete step-by-step calculus or algebraic proof
 [/FORMULA]
 
 ## 6. Important Graphs
@@ -252,10 +255,29 @@ function parseStructuredFields(rawContent: string): Record<string, unknown> {
     const body = m[2].trim();
     const lines = body.split("\n").map(l => l.trim()).filter(Boolean);
     const latex = lines[0] || "";
+    const variables = lines.find(l => l.startsWith("**Variables:**"))?.replace("**Variables:**", "").trim() || "";
+    const units = lines.find(l => l.startsWith("**SI Units:**"))?.replace("**SI Units:**", "").trim() || "";
+    const physicalMeaning = lines.find(l => l.startsWith("**Physical Meaning:**"))?.replace("**Physical Meaning:**", "").trim() || "";
     const whenToUse = lines.find(l => l.startsWith("**When to use:**"))?.replace("**When to use:**", "").trim() || "";
-    const commonMistake = lines.find(l => l.startsWith("**Common Mistake:**"))?.replace("**Common Mistake:**", "").trim() || "";
+    const whenNotToUse = lines.find(l => l.startsWith("**When NOT to use:**") || l.startsWith("**When fallback/not to use:**"))?.replace(/^\*\*When (?:NOT|fallback\/not) to use:\*\*/, "").trim() || "";
     const memoryTrick = lines.find(l => l.startsWith("**Memory Trick:**"))?.replace("**Memory Trick:**", "").trim() || "";
-    formulas.push({ title, latex, whenToUse, commonMistake, memoryTrick });
+    const commonMistake = lines.find(l => l.startsWith("**Common Mistake:**") || l.startsWith("**Common Mistakes:**"))?.replace(/^\*\*Common Mistakes?:\*\*/, "").trim() || "";
+    const solvedExample = lines.find(l => l.startsWith("**One Solved Example:**") || l.startsWith("**Solved Example:**"))?.replace(/^\*\*(?:One )?Solved Example:\*\*/, "").trim() || "";
+    const relatedFormula = lines.find(l => l.startsWith("**Related Formula:**"))?.replace("**Related Formula:**", "").trim() || "";
+    
+    formulas.push({ 
+      title, 
+      latex, 
+      variables, 
+      units, 
+      physicalMeaning, 
+      whenToUse, 
+      whenNotToUse, 
+      memoryTrick, 
+      commonMistake, 
+      solvedExample, 
+      relatedFormula 
+    });
   }
   if (formulas.length) parsed.formulas = formulas;
 

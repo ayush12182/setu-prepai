@@ -12,8 +12,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getChapterById } from "@/data/syllabus";
 
-const CACHE_PREFIX = "pe_chapter_content_v1_";
+const CACHE_PREFIX = "pe_chapter_content_v2_";
 const CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour
 
 export interface ChapterContentData {
@@ -142,21 +143,27 @@ export function useChapterContent(
   examType = "JEE",
   language = "english"
 ) {
+  // Map frontend chapter ID (e.g. 'phy-2') to standard slug (e.g. 'laws-of-motion')
+  const chapter = chapterId ? getChapterById(chapterId) : null;
+  const lookupKey = chapter 
+    ? chapter.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') 
+    : chapterId;
+
   // Pre-fetch from localStorage so React Query shows it instantly
-  const localCached = chapterId
-    ? getLocalStorageCache(chapterId, examType, language)
+  const localCached = lookupKey
+    ? getLocalStorageCache(lookupKey, examType, language)
     : undefined;
 
   const query = useQuery<ChapterContentData, Error>({
-    queryKey: ["chapter-content", chapterId, examType, language],
+    queryKey: ["chapter-content", lookupKey, examType, language],
     queryFn: async () => {
-      if (!chapterId) throw new Error("chapterId is required");
-      const data = await fetchChapterContent(chapterId, examType, language);
+      if (!lookupKey) throw new Error("chapterId is required");
+      const data = await fetchChapterContent(lookupKey, examType, language);
       // Save to localStorage for offline / next visit
-      setLocalStorageCache(chapterId, examType, language, data);
+      setLocalStorageCache(lookupKey, examType, language, data);
       return data;
     },
-    enabled: !!chapterId,
+    enabled: !!lookupKey,
     // Cache for 1 hour — chapter content rarely changes
     staleTime: CACHE_TTL_MS,
     gcTime: CACHE_TTL_MS * 24,

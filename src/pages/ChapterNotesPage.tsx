@@ -5,10 +5,11 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { getChapterById, allChapters } from '@/data/syllabus';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   ArrowLeft, Download, Copy, CheckCircle2,
   BookOpen, Layers, Zap, BrainCircuit, AlertTriangle, AlertCircle, Calculator, Sparkles,
-  GraduationCap, RotateCcw, Lightbulb, Star, ChevronDown, ChevronUp,
+  GraduationCap, RotateCcw, Lightbulb, Star, ChevronDown, ChevronUp, Search
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -101,6 +102,10 @@ const FormulaCard: React.FC<{
   units?: string;
   whenNotToUse?: string;
   derivation?: string;
+  physicalMeaning?: string;
+  solvedExample?: string;
+  relatedFormula?: string;
+  isCompact?: boolean;
 }> = ({ 
   equation, 
   title, 
@@ -110,7 +115,11 @@ const FormulaCard: React.FC<{
   variables,
   units,
   whenNotToUse,
-  derivation
+  derivation,
+  physicalMeaning,
+  solvedExample,
+  relatedFormula,
+  isCompact
 }) => {
   const [copied, setCopied] = useState(false);
   const [showDerivation, setShowDerivation] = useState(false);
@@ -122,6 +131,34 @@ const FormulaCard: React.FC<{
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Compact Quick Revision Mode
+  if (isCompact) {
+    return (
+      <div className="my-4 p-4 bg-gradient-to-br from-indigo-50/10 via-background to-secondary/5 dark:from-slate-900/10 dark:via-background dark:to-secondary/5 border border-border/60 rounded-xl shadow-[0_1px_4px_rgba(0,0,0,0.01)] flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
+        <div className="space-y-1.5 max-w-xl">
+          <div className="flex items-center gap-2">
+            <span className="text-body-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">{title || 'Formula'}</span>
+            {copied ? (
+              <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-0.5"><CheckCircle2 className="w-3 h-3" /> Copied!</span>
+            ) : (
+              <button onClick={handleCopy} className="text-muted-foreground hover:text-foreground text-[10px] flex items-center gap-0.5 opacity-60 hover:opacity-100"><Copy className="w-3 h-3" /> Copy</button>
+            )}
+          </div>
+          <div className="text-[18px] font-semibold py-0.5 text-foreground leading-relaxed">
+            <MathLine>{`$${equation.trim()}$`}</MathLine>
+          </div>
+          <p className="text-caption text-muted-foreground font-medium"><strong className="font-semibold text-slate-700 dark:text-slate-300">Use:</strong> {physicalMeaning || whenToUse || "General physics equation"}</p>
+        </div>
+        {memoryTrick && (
+          <div className="px-3 py-1.5 bg-amber-500/5 border border-amber-500/20 rounded-lg text-body-xs text-amber-700 dark:text-amber-400 font-semibold self-start sm:self-center">
+            💡 {memoryTrick}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Detailed Mode Card
   return (
     <div className="my-8 p-6 bg-gradient-to-br from-indigo-50/10 via-background to-secondary/5 dark:from-slate-900/20 dark:via-background dark:to-secondary/5 border border-border/80 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-col gap-5">
       
@@ -153,6 +190,14 @@ const FormulaCard: React.FC<{
         </Button>
       </div>
 
+      {/* Physical Meaning */}
+      {physicalMeaning && (
+        <div className="text-body-sm text-left border-l-2 border-indigo-500/30 pl-4 py-0.5">
+          <span className="font-bold text-slate-700 dark:text-slate-300 block mb-0.5">Physical Meaning:</span>
+          <p className="text-muted-foreground leading-relaxed"><MathLine>{physicalMeaning}</MathLine></p>
+        </div>
+      )}
+
       {/* Variables & SI Units Grid */}
       {(variables || units) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-secondary/20 dark:bg-slate-900/30 rounded-xl border border-border/40 text-body-sm text-left">
@@ -176,28 +221,46 @@ const FormulaCard: React.FC<{
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 pt-4 border-t border-border/40 text-body-sm text-left">
           {whenToUse && (
             <div>
-              <span className="font-bold text-emerald-600 dark:text-emerald-400 block mb-1">When to use:</span>
+              <span className="font-bold text-sky-600 dark:text-sky-400 block mb-1">When to use:</span>
               <span className="text-muted-foreground"><MathLine>{whenToUse}</MathLine></span>
             </div>
           )}
           {whenNotToUse && (
             <div>
-              <span className="font-bold text-rose-600 dark:text-rose-400 block mb-1">When NOT to use:</span>
+              <span className="font-bold text-sky-600 dark:text-sky-400 block mb-1">When NOT to use:</span>
               <span className="text-muted-foreground"><MathLine>{whenNotToUse}</MathLine></span>
             </div>
           )}
           {commonMistake && (
             <div>
-              <span className="font-bold text-red-600 dark:text-red-400 block mb-1">Common Mistake:</span>
+              <span className="font-bold text-sky-600 dark:text-sky-400 block mb-1">Common Mistake:</span>
               <span className="text-muted-foreground"><MathLine>{commonMistake}</MathLine></span>
             </div>
           )}
           {memoryTrick && (
             <div>
-              <span className="font-bold text-amber-600 dark:text-amber-400 block mb-1">Memory Trick:</span>
+              <span className="font-bold text-sky-600 dark:text-sky-400 block mb-1">Memory Trick:</span>
               <span className="text-muted-foreground"><MathLine>{memoryTrick}</MathLine></span>
             </div>
           )}
+        </div>
+      )}
+
+      {/* One Solved Example */}
+      {solvedExample && (
+        <div className="mt-2 p-4 bg-indigo-500/5 dark:bg-indigo-950/10 rounded-xl border border-indigo-500/10 text-body-sm text-left">
+          <span className="font-extrabold text-indigo-600 dark:text-indigo-400 block mb-1.5 uppercase tracking-wider text-body-xs">Solved Illustration:</span>
+          <div className="text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
+            <MathLine>{solvedExample}</MathLine>
+          </div>
+        </div>
+      )}
+
+      {/* Related Formula */}
+      {relatedFormula && (
+        <div className="text-body-xs text-left text-muted-foreground/80 flex items-center gap-1.5 mt-1">
+          <span className="font-bold uppercase tracking-wider">Related Equations:</span>
+          <span className="font-medium"><MathLine>{relatedFormula}</MathLine></span>
         </div>
       )}
 
@@ -322,6 +385,8 @@ const ChapterNotesPage: React.FC = () => {
   const [showFloatingBar, setShowFloatingBar] = useState(false);
   const [activeSection, setActiveSection] = useState('section-theory');
   const [completedSections, setCompletedSections] = useState<Record<string, boolean>>({});
+  const [formulaSearchQuery, setFormulaSearchQuery] = useState('');
+  const [isQuickRevision, setIsQuickRevision] = useState(false);
 
   const { language } = useLanguage();
   const { isNeet, isCuet } = useExamMode();
@@ -766,10 +831,10 @@ const ChapterNotesPage: React.FC = () => {
       }
 
       return (
-        <div key={key} id={id} className="pt-16 pb-6 border-b border-border/60 scroll-mt-28 group">
+        <div key={key} id={id} className="pt-16 pb-6 border-b border-border/60 scroll-mt-28 group text-left">
           <div className="flex items-baseline gap-3 mb-2">
             {displayNum && (
-              <span className="text-[20px] font-extrabold text-indigo-600 dark:text-indigo-400 font-display">
+              <span className="text-[20px] font-extrabold text-sky-600 dark:text-sky-400 font-display">
                 {displayNum}
               </span>
             )}
@@ -781,6 +846,40 @@ const ChapterNotesPage: React.FC = () => {
             <p className="text-body-sm text-muted-foreground/80 font-medium leading-relaxed max-w-2xl mt-1">
               {desc}
             </p>
+          )}
+          {id === 'section-formulas' && (
+            <div className="flex flex-col sm:flex-row gap-4 mt-6 p-4 bg-sky-500/5 dark:bg-sky-950/10 rounded-2xl border border-sky-100/50 dark:border-sky-900/30 justify-between items-center">
+              {/* Search input */}
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search range, velocity, projectile..."
+                  value={formulaSearchQuery}
+                  onChange={(e) => setFormulaSearchQuery(e.target.value)}
+                  className="pl-9 h-10 rounded-xl bg-background border border-border focus:border-sky-500 focus:ring-sky-500/20 text-body-sm"
+                />
+              </div>
+              {/* Quick Revision Switch */}
+              <div className="flex items-center gap-3 self-end sm:self-auto">
+                <span className="text-body-xs font-semibold text-muted-foreground">Quick Revision Mode</span>
+                <button
+                  type="button"
+                  onClick={() => setIsQuickRevision(!isQuickRevision)}
+                  className={cn(
+                    "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2",
+                    isQuickRevision ? "bg-sky-600" : "bg-input"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow ring-0 transition duration-200 ease-in-out",
+                      isQuickRevision ? "translate-x-5" : "translate-x-0"
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
           )}
         </div>
       );
@@ -850,9 +949,9 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'CALLOUT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-blue-500/5 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-900/40 border-l-4 border-l-blue-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
-            <h4 className="text-blue-800 dark:text-blue-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
-              <BookOpen className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" /> Concept Callout
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-500/5 dark:bg-sky-950/10 border border-sky-100/40 dark:border-sky-900/30 border-l-4 border-l-sky-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-sky-800 dark:text-sky-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <BookOpen className="w-4 h-4 shrink-0 text-sky-600 dark:text-sky-400" /> Concept Callout
             </h4>
             <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `call-${keyIdx}-${i}`))}
@@ -861,9 +960,9 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'JEE_INSIGHT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-amber-500/5 dark:bg-amber-950/20 border border-dashed border-amber-300 dark:border-amber-900/40 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
-            <h4 className="text-amber-850 dark:text-amber-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse" /> Star Batch JEE Insight
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-500/5 dark:bg-sky-950/10 border border-dashed border-sky-300 dark:border-sky-900/40 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-sky-800 dark:text-sky-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" /> Star Batch JEE Insight
             </h4>
             <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `jee-${keyIdx}-${i}`))}
@@ -872,7 +971,7 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'CONCEPT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-500/5 dark:bg-sky-950/20 border border-sky-200/60 dark:border-sky-900/40 border-l-4 border-l-sky-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-500/5 dark:bg-sky-950/10 border border-sky-100/40 dark:border-sky-900/30 border-l-4 border-l-sky-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
             <h4 className="text-sky-850 dark:text-sky-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
               <Lightbulb className="w-4 h-4 shrink-0 text-sky-600 dark:text-sky-400" /> Core Concept
             </h4>
@@ -883,9 +982,9 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'JEE_TRICK') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-purple-500/5 dark:bg-purple-950/20 border border-purple-200/60 dark:border-purple-900/40 border-l-4 border-l-purple-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
-            <h4 className="text-purple-850 dark:text-purple-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
-              <Zap className="w-4 h-4 shrink-0 text-purple-600 dark:text-purple-400" /> JEE Shortcut Trick
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-500/5 dark:bg-sky-950/10 border border-sky-100/40 dark:border-sky-900/30 border-l-4 border-l-sky-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-sky-850 dark:text-sky-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <Zap className="w-4 h-4 shrink-0 text-sky-600 dark:text-sky-400" /> JEE Shortcut Trick
             </h4>
             <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `trick-${keyIdx}-${i}`))}
@@ -894,9 +993,9 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'COMMON_MISTAKE') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-rose-500/5 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/40 border-l-4 border-l-rose-600 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
-            <h4 className="text-rose-800 dark:text-rose-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" /> Common Pitfall to Avoid
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-500/5 dark:bg-sky-950/10 border border-sky-100/40 dark:border-sky-900/30 border-l-4 border-l-sky-600 rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-sky-800 dark:text-sky-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-sky-600 dark:text-sky-400" /> Common Pitfall to Avoid
             </h4>
             <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `mistake-${keyIdx}-${i}`))}
@@ -905,9 +1004,9 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'NCERT_INSIGHT') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-emerald-500/5 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 border-l-4 border-l-emerald-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
-            <h4 className="text-emerald-800 dark:text-emerald-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
-              <BookOpen className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" /> NCERT Line Insight
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-500/5 dark:bg-sky-950/10 border border-sky-100/40 dark:border-sky-900/30 border-l-4 border-l-sky-600 rounded-r-2xl shadow-[0_2px_8px_rgba(0,0,0,0.01)] text-left">
+            <h4 className="text-sky-800 dark:text-sky-400 text-body-sm font-extrabold uppercase tracking-wider flex items-center gap-2">
+              <BookOpen className="w-4 h-4 shrink-0 text-sky-600 dark:text-sky-400" /> NCERT Line Insight
             </h4>
             <div className="text-slate-800 dark:text-slate-200 leading-[1.8] mt-3 text-[18px] font-normal">
               {processNotesContent(blockContent, (line, i) => renderLine(line, `ncert-${keyIdx}-${i}`))}
@@ -916,15 +1015,15 @@ const ChapterNotesPage: React.FC = () => {
         );
       } else if (blockType === 'TEACHER_SAYS') {
         elements.push(
-          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-indigo-50/30 dark:bg-indigo-950/10 border border-indigo-200/60 dark:border-indigo-900/40 rounded-2xl border-l-4 border-l-indigo-600 shadow-[0_2px_12px_rgba(79,70,229,0.02)] flex gap-4 text-left">
-            <div className="w-10 h-10 rounded-full bg-indigo-600/10 flex items-center justify-center text-[20px] shrink-0 border border-indigo-600/20">
+          <div key={`block-${keyIdx}`} className="my-8 p-6 bg-sky-500/5 dark:bg-sky-950/10 border border-sky-100/40 dark:border-sky-900/30 border-l-4 border-l-sky-600 shadow-[0_2px_12px_rgba(79,70,229,0.02)] flex gap-4 text-left">
+            <div className="w-10 h-10 rounded-full bg-sky-500/10 flex items-center justify-center text-[20px] shrink-0 border border-sky-500/20">
               👨‍🏫
             </div>
             <div className="space-y-2 flex-1">
-              <h4 className="text-indigo-600 dark:text-indigo-400 text-body-sm font-extrabold uppercase tracking-wider">
+              <h4 className="text-sky-600 dark:text-sky-400 text-body-sm font-extrabold uppercase tracking-wider">
                 Teacher's Advice
               </h4>
-              <div className="text-slate-800 dark:text-slate-200 italic font-medium leading-[1.8] text-[18px] border-l-2 border-indigo-600/20 pl-4 py-1">
+              <div className="text-slate-800 dark:text-slate-200 italic font-medium leading-[1.8] text-[18px] border-l-2 border-sky-500/20 pl-4 py-1">
                 {processNotesContent(blockContent, (line, i) => {
                   const trimmed = line.trim();
                   if (!trimmed) return <br key={`t-${keyIdx}-${i}`} />;
@@ -941,31 +1040,68 @@ const ChapterNotesPage: React.FC = () => {
       } else if (blockType === 'FORMULA') {
         const variablesMatch = blockContent.match(/\*\*Variables:\*\*\s*(.*?)(?=\*\*|$)/is);
         const unitsMatch = blockContent.match(/\*\*SI Units:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const physicalMeaningMatch = blockContent.match(/\*\*Physical Meaning:\*\*\s*(.*?)(?=\*\*|$)/is);
         const whenToUseMatch = blockContent.match(/\*\*When to use:\*\*\s*(.*?)(?=\*\*|$)/is);
-        const whenNotToUseMatch = blockContent.match(/\*\*When not to use:\*\*\s*(.*?)(?=\*\*|$)/is);
-        const mistakeMatch = blockContent.match(/\*\*Common Mistake:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const whenNotToUseMatch = blockContent.match(/\*\*When not to use:\*\*\s*(.*?)(?=\*\*|$)/is) || blockContent.match(/\*\*When NOT to use:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const mistakeMatch = blockContent.match(/\*\*Common Mistake:\*\*\s*(.*?)(?=\*\*|$)/is) || blockContent.match(/\*\*Common Mistakes:\*\*\s*(.*?)(?=\*\*|$)/is);
         const trickMatch = blockContent.match(/\*\*Memory Trick:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const solvedExampleMatch = blockContent.match(/\*\*One Solved Example:\*\*\s*(.*?)(?=\*\*|$)/is) || blockContent.match(/\*\*Solved Example:\*\*\s*(.*?)(?=\*\*|$)/is);
+        const relatedFormulaMatch = blockContent.match(/\*\*Related Formula:\*\*\s*(.*?)(?=\*\*|$)/is);
         const derivationMatch = blockContent.match(/\*\*Derivation:\*\*\s*(.*?)(?=\*\*|$)/is);
         
         let equation = blockContent;
-        if (whenToUseMatch || mistakeMatch || trickMatch || blockContent.includes('**Variables:**') || blockContent.includes('**SI Units:**') || blockContent.includes('**Derivation:**')) {
-          equation = blockContent.split(/\*\*Variables:\*\*|\*\*SI Units:\*\*|\*\*When to use:\*\*|\*\*When not to use:\*\*|\*\*Common Mistake:\*\*|\*\*Memory Trick:\*\*|\*\*Derivation:\*\*/)[0].trim();
+        const splitKeywords = [
+          '**Variables:**',
+          '**SI Units:**',
+          '**Physical Meaning:**',
+          '**When to use:**',
+          '**When NOT to use:**',
+          '**When not to use:**',
+          '**Memory Trick:**',
+          '**Common Mistake:**',
+          '**Common Mistakes:**',
+          '**One Solved Example:**',
+          '**Solved Example:**',
+          '**Related Formula:**',
+          '**Derivation:**'
+        ];
+        
+        let firstKeywordIndex = -1;
+        for (const kw of splitKeywords) {
+          const idx = blockContent.indexOf(kw);
+          if (idx !== -1 && (firstKeywordIndex === -1 || idx < firstKeywordIndex)) {
+            firstKeywordIndex = idx;
+          }
+        }
+        
+        if (firstKeywordIndex !== -1) {
+          equation = blockContent.substring(0, firstKeywordIndex).trim();
         }
 
-        elements.push(
-          <FormulaCard 
-            key={`block-${keyIdx}`} 
-            equation={equation} 
-            title={blockTitle} 
-            variables={variablesMatch?.[1]?.trim()}
-            units={unitsMatch?.[1]?.trim()}
-            whenToUse={whenToUseMatch?.[1]?.trim()}
-            whenNotToUse={whenNotToUseMatch?.[1]?.trim()}
-            commonMistake={mistakeMatch?.[1]?.trim()}
-            memoryTrick={trickMatch?.[1]?.trim()}
-            derivation={derivationMatch?.[1]?.trim()}
-          />
-        );
+        const isMatch = !formulaSearchQuery || 
+          blockTitle.toLowerCase().includes(formulaSearchQuery.toLowerCase()) || 
+          blockContent.toLowerCase().includes(formulaSearchQuery.toLowerCase());
+
+        if (isMatch) {
+          elements.push(
+            <FormulaCard 
+              key={`block-${keyIdx}`} 
+              equation={equation} 
+              title={blockTitle} 
+              variables={variablesMatch?.[1]?.trim()}
+              units={unitsMatch?.[1]?.trim()}
+              physicalMeaning={physicalMeaningMatch?.[1]?.trim()}
+              whenToUse={whenToUseMatch?.[1]?.trim()}
+              whenNotToUse={whenNotToUseMatch?.[1]?.trim()}
+              commonMistake={mistakeMatch?.[1]?.trim()}
+              memoryTrick={trickMatch?.[1]?.trim()}
+              solvedExample={solvedExampleMatch?.[1]?.trim()}
+              relatedFormula={relatedFormulaMatch?.[1]?.trim()}
+              derivation={derivationMatch?.[1]?.trim()}
+              isCompact={isQuickRevision}
+            />
+          );
+        }
       } else if (blockType === 'GRAPH' || blockType === 'INTERACTIVE_GRAPH') {
         try {
           const config = JSON.parse(cleanJsonString(blockContent));
