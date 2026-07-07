@@ -423,6 +423,27 @@ const ChapterNotesPage: React.FC = () => {
     );
   }
 
+  // Handle generic errors (e.g., DB errors, network issues)
+  if (contentError && !isNotPublished) {
+    return (
+      <MainLayout title="Error Loading Notes">
+        <div className="flex flex-col items-center justify-center py-24 gap-6 text-center px-4">
+          <div className="w-20 h-20 rounded-3xl bg-destructive/10 flex items-center justify-center">
+            <AlertTriangle className="w-10 h-10 text-destructive" />
+          </div>
+          <h1 className="text-heading-lg font-bold text-foreground">Failed to Load Notes</h1>
+          <p className="text-body-lg text-muted-foreground max-w-md">
+            We encountered an unexpected error while fetching the notes. Please try refreshing the page.
+          </p>
+          <p className="text-body-sm font-mono text-destructive bg-destructive/5 p-4 rounded-xl border border-destructive/20 max-w-lg overflow-auto">
+            {contentError.message}
+          </p>
+          <Button onClick={() => window.location.reload()} variant="default">Refresh Page</Button>
+        </div>
+      </MainLayout>
+    );
+  }
+
   const subjectStr = chapter.subject as string;
   const subjectAccent = subjectStr === 'mathematics' ? 'text-violet-500 bg-violet-500/10 border-violet-500/20' :
     subjectStr === 'science' || subjectStr === 'physics' ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' :
