@@ -143,11 +143,8 @@ export function useChapterContent(
   examType = "JEE",
   language = "english"
 ) {
-  // Map frontend chapter ID (e.g. 'phy-2') to standard slug (e.g. 'laws-of-motion')
-  const chapter = chapterId ? getChapterById(chapterId) : null;
-  const lookupKey = chapter 
-    ? chapter.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') 
-    : chapterId;
+  // Pass frontend chapter ID directly (e.g. 'phy-1')
+  const lookupKey = chapterId;
 
   // Pre-fetch from localStorage so React Query shows it instantly
   const localCached = lookupKey
