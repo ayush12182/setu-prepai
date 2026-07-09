@@ -9,6 +9,7 @@ export interface QuestionGeneratorParams {
   exam: string;
   subject: string;
   chapter: string;
+  chapterId?: string;
   subchapter?: string;
   difficulty: 'easy' | 'medium' | 'hard';
   count: number;
@@ -130,10 +131,12 @@ export async function generateQuestions(
   try {
     const { data, error } = await supabase.functions.invoke('generate-questions', {
       body: {
-        exam: params.exam,
+        examMode: params.exam,
         subject: params.subject,
-        chapter: params.chapter,
-        subtopic: params.subchapter,
+        chapterId: params.chapterId || params.chapter,
+        chapterName: params.chapter,
+        subchapterId: params.subchapter,
+        subchapterName: params.chapter,
         difficulty: params.difficulty,
         count: params.count,
         excludeQuestionIds: params.excludeQuestionIds

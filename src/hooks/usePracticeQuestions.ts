@@ -416,10 +416,13 @@ export const usePracticeQuestions = () => {
         console.warn('Failed to load attempts for question generator:', e);
       }
 
+      const chapterId = nodeId.split('-').slice(0, 2).join('-');
       const result = await getUnifiedQuestions({
         exam,
         subject: subject || exam,
         chapter: topicName,
+        chapterId: chapterId,
+        subchapter: nodeId,
         difficulty: effectiveDifficulty,
         count,
         excludeQuestionIds
