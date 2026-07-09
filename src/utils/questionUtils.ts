@@ -9,18 +9,27 @@ export interface BaseQuestion {
 
 /**
  * Shuffles the options (A, B, C, D) of a question 
- * and updates the correct_option to match the new position.
+ * and updates the correct_option/answer to match the new position.
  */
 export const shuffleQuestionOptions = <T extends BaseQuestion>(q: T): T => {
-    if (!q.option_a || !q.option_b || !q.option_c || !q.option_d || !q.correct_option) {
+    // Standardize correct answer key
+    const correctOpt = ((q.correct_option || q.answer || 'A') as string).toUpperCase();
+    
+    // Support option_a/b/c/d or options.A/B/C/D
+    const optA = q.option_a || (q.options as any)?.A;
+    const optB = q.option_b || (q.options as any)?.B;
+    const optC = q.option_c || (q.options as any)?.C;
+    const optD = q.option_d || (q.options as any)?.D;
+
+    if (!optA || !optB || !optC || !optD || !correctOpt) {
         return q; // Skip if options are not properly formed
     }
 
     const options = [
-        { key: 'A', text: q.option_a },
-        { key: 'B', text: q.option_b },
-        { key: 'C', text: q.option_c },
-        { key: 'D', text: q.option_d },
+        { key: 'A', text: optA },
+        { key: 'B', text: optB },
+        { key: 'C', text: optC },
+        { key: 'D', text: optD },
     ];
 
     // Fisher-Yates shuffle
@@ -29,9 +38,12 @@ export const shuffleQuestionOptions = <T extends BaseQuestion>(q: T): T => {
         [options[i], options[j]] = [options[j], options[i]];
     }
 
-    // Identify new correct option
-    const oldCorrectKey = q.correct_option.toUpperCase();
-    const correctText = q[`option_${oldCorrectKey.toLowerCase()}`];
+    // Find the text of the old correct option
+    let correctText = '';
+    if (correctOpt === 'A') correctText = optA;
+    else if (correctOpt === 'B') correctText = optB;
+    else if (correctOpt === 'C') correctText = optC;
+    else if (correctOpt === 'D') correctText = optD;
 
     let newCorrectKey = 'A';
     options.forEach((opt, idx) => {
@@ -41,12 +53,29 @@ export const shuffleQuestionOptions = <T extends BaseQuestion>(q: T): T => {
         }
     });
 
-    return {
+    const updated: any = {
         ...q,
         option_a: options[0].text,
         option_b: options[1].text,
         option_c: options[2].text,
         option_d: options[3].text,
-        correct_option: newCorrectKey,
     };
+
+    if (q.correct_option !== undefined) {
+        updated.correct_option = newCorrectKey;
+    }
+    if (q.answer !== undefined) {
+        updated.answer = newCorrectKey;
+    }
+    if (q.options !== undefined || (q.options as any)) {
+        updated.options = {
+            A: options[0].text,
+            B: options[1].text,
+            C: options[2].text,
+            D: options[3].text,
+        };
+    }
+
+    return updated as T;
 };
+

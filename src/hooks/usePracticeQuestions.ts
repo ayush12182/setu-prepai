@@ -61,7 +61,7 @@ const mapQuestionBankToInterface = (qbItem: any): Question => {
       C: qbItem.option_c || '',
       D: qbItem.option_d || ''
     },
-    answer: qbItem.answer || qbItem.correct_option,
+    answer: (qbItem.answer || qbItem.correct_option || 'A').toUpperCase(),
     explanation: qbItem.metadata?.explanation || qbItem.explanation || '',
     concept_tested: qbItem.metadata?.concept || qbItem.concept_tested || 'General',
     common_mistake: qbItem.metadata?.common_mistake,
@@ -428,11 +428,12 @@ export const usePracticeQuestions = () => {
         excludeQuestionIds
       });
 
-      setQuestions(result.questions);
+      const shuffledQuestions = result.questions.map((q: any) => shuffleQuestionOptions(q));
+      setQuestions(shuffledQuestions);
       setSessionDiagnostics(result.diagnostics || null);
       setGenerationStatus('completed');
       setGenerationMode(result.generationMode);
-      return result.questions;
+      return shuffledQuestions;
     } catch (err: any) {
       console.warn('Unified question generation failed, silently falling back to offline bank:', err);
       try {
@@ -609,32 +610,38 @@ export const usePracticeQuestions = () => {
       try {
         const offlineQs = getOfflineQuestions(subject, subchapterName || conceptTested, 'medium', 3);
         if (offlineQs && offlineQs.length > 0) {
-          return offlineQs.map(q => ({
-            question_text: q.question_text,
-            option_a: q.option_a,
-            option_b: q.option_b,
-            option_c: q.option_c,
-            option_d: q.option_d,
-            correct_option: q.correct_option || (q.answer as string),
-            explanation: q.explanation || q.explanation_text || '',
-            difficulty_note: `Generated offline (Adaptive Relevance: ${q.jeeRelevanceScore || 9.0}/10)`
-          }));
+          return offlineQs.map(q => {
+            const shuffledQ = shuffleQuestionOptions(q);
+            return {
+              question_text: shuffledQ.question_text,
+              option_a: shuffledQ.option_a,
+              option_b: shuffledQ.option_b,
+              option_c: shuffledQ.option_c,
+              option_d: shuffledQ.option_d,
+              correct_option: shuffledQ.correct_option || (shuffledQ.answer as string),
+              explanation: shuffledQ.explanation || shuffledQ.explanation_text || '',
+              difficulty_note: `Generated offline (Adaptive Relevance: ${shuffledQ.jeeRelevanceScore || 9.0}/10)`
+            };
+          });
         }
       } catch (fallbackErr) {
         console.error('Offline similar question generator failed, trying general fallback:', fallbackErr);
         try {
           const generalQs = getOfflineQuestions(subject || 'Physics', 'General', 'medium', 3);
           if (generalQs && generalQs.length > 0) {
-            return generalQs.map(q => ({
-              question_text: q.question_text,
-              option_a: q.option_a,
-              option_b: q.option_b,
-              option_c: q.option_c,
-              option_d: q.option_d,
-              correct_option: q.correct_option || (q.answer as string),
-              explanation: q.explanation || q.explanation_text || '',
-              difficulty_note: `Generated offline (Adaptive Relevance: ${q.jeeRelevanceScore || 9.0}/10)`
-            }));
+            return generalQs.map(q => {
+              const shuffledQ = shuffleQuestionOptions(q);
+              return {
+                question_text: shuffledQ.question_text,
+                option_a: shuffledQ.option_a,
+                option_b: shuffledQ.option_b,
+                option_c: shuffledQ.option_c,
+                option_d: shuffledQ.option_d,
+                correct_option: shuffledQ.correct_option || (shuffledQ.answer as string),
+                explanation: shuffledQ.explanation || shuffledQ.explanation_text || '',
+                difficulty_note: `Generated offline (Adaptive Relevance: ${shuffledQ.jeeRelevanceScore || 9.0}/10)`
+              };
+            });
           }
         } catch (ultimateErr) {
           console.error('Ultimate similar question fallback failed:', ultimateErr);
