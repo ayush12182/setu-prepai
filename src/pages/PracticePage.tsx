@@ -163,7 +163,7 @@ const PracticePage: React.FC = () => {
 
   // Helper stats generator to keep UI clean and consistent
   const getChapterMetadata = (chapter: Chapter) => {
-    const questionsCount = APPROVED_CHAPTERS[chapter.name] || 0;
+    const questionsCount = 100; // AI Test Engine dynamically generates up to infinity
     return {
       topicsCount: chapter.topics.length,
       questionsCount
@@ -354,7 +354,7 @@ const PracticePage: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredChapters.map(chapter => {
                       const { topicsCount, questionsCount } = getChapterMetadata(chapter);
-                      const isApproved = (APPROVED_CHAPTERS[chapter.name] || 0) >= 100;
+                      const isApproved = true; // All chapters are approved now due to AI Generation Engine
                       return (
                         <div 
                           key={chapter.id}

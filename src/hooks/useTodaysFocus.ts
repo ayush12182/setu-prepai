@@ -60,12 +60,13 @@ const CLASS_11_CHAPTER_IDS = new Set([
   'phy-1',  // Kinematics
   'phy-2',  // Laws of Motion
   'phy-3',  // Work, Energy & Power
-  'phy-4',  // Rotational Motion
-  'phy-5',  // Gravitation
-  'phy-6',  // Properties of Matter
-  'phy-7',  // Thermodynamics
-  'phy-8',  // SHM
-  'phy-9',  // Waves
+  'phy-4',  // System of Particles & Centre of Mass
+  'phy-5',  // Rotational Motion
+  'phy-6',  // Gravitation
+  'phy-7',  // Mechanical Properties of Solids
+  'phy-8',  // Mechanical Properties of Fluids
+  'phy-9',  // SHM & Waves
+  'phy-10', // Thermodynamics
   // Chemistry Class 11
   'chem-1', // Some Basics of Chemistry
   'chem-2', // Atomic Structure

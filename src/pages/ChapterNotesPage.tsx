@@ -431,82 +431,16 @@ const ChapterNotesPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [generationState]);
 
+  // Automatic client-side generation has been removed to prevent token waste and API abuse.
+  // Generation is now strictly controlled by the Admin Dashboard via batch scripts or manual triggers.
   useEffect(() => {
-    if (isNotPublished && generationState === 'idle' && chapter) {
-      setGenerationState('generating');
-      
-      const triggerGeneration = async () => {
-        try {
-          const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-notes`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
-            },
-            body: JSON.stringify({
-               chapterId: chapter.id,
-               chapterName: chapter.name,
-               subject: chapter.subject,
-               topics: chapter.topics || [],
-               examType: examType,
-               language: language
-            })
-          });
-
-          if (res.status === 409) {
-            // Locked by another user
-            setGenerationState('polling');
-          } else if (res.status === 400) {
-            // Already published
-            queryClient.invalidateQueries({ queryKey: ["chapter-content-v3", chapter.id, examType, language] });
-            setGenerationState('idle');
-          } else if (!res.ok) {
-            setGenerationState('failed');
-          } else {
-            // Success! Invalidate cache to load newly published content
-            queryClient.invalidateQueries({ queryKey: ["chapter-content-v3", chapter.id, examType, language] });
-            setGenerationState('idle'); 
-          }
-        } catch (err) {
-          console.error("Failed to generate notes:", err);
-          setGenerationState('failed');
-        }
-      };
-      triggerGeneration();
+    if (isNotPublished && chapter) {
+      setGenerationState('idle'); // Just idle, we don't trigger anything.
     }
-  }, [isNotPublished, generationState, chapter, examType, language, queryClient]);
-
-  // Polling Logic
-  useEffect(() => {
-    let pollInterval: any;
-    if (generationState === 'polling' && chapter) {
-      pollInterval = setInterval(async () => {
-        try {
-          const { data } = await supabase
-            .from('chapter_content')
-            .select('status, version_label')
-            .eq('chapter_id', chapter.id)
-            .eq('exam_type', examType)
-            .eq('language', language)
-            .eq('version', 0)
-            .maybeSingle();
-
-          if (!data) {
-            // Lock is gone, invalidate to refetch actual content
-            queryClient.invalidateQueries({ queryKey: ["chapter-content-v3", chapter.id, examType, language] });
-          } else if (data.version_label === 'failed') {
-            setGenerationState('failed');
-            clearInterval(pollInterval);
-          }
-        } catch (e) { }
-      }, 5000);
-    }
-    return () => clearInterval(pollInterval);
-  }, [generationState, chapter, examType, language, queryClient]);
+  }, [isNotPublished, chapter]);
 
   const notes = chapterContent?.raw_content ?? '';
-  const isGenerating = isContentLoading || generationState === 'generating' || generationState === 'polling';
+  const isGenerating = isContentLoading;
 
   // Upgraded Priority Engine (V3)
   // Score = pyqData.total + (weightage * 10) + (difficulty * 5) + advancedBonus
@@ -700,44 +634,33 @@ const ChapterNotesPage: React.FC = () => {
     );
   }
 
-  // ── Generation UI States ──────────────────────────────────
-  if (generationState === 'generating' || generationState === 'polling') {
+  if (isNotPublished && !isContentLoading) {
     return (
-      <MainLayout title={`${chapter.name} — Preparing Notes`}>
+      <MainLayout title={`${chapter.name} — Coming Soon`}>
         <div className="flex flex-col items-center justify-center py-24 px-4 min-h-[70vh]">
           <div className="relative max-w-md w-full">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-primary/20 rounded-full blur-[80px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-amber-500/10 rounded-full blur-[80px] pointer-events-none" />
             
-            <Card className="relative border border-border/80 shadow-2xl overflow-hidden rounded-3xl bg-background/50 backdrop-blur-xl">
+            <Card className="relative border border-amber-200/50 shadow-2xl overflow-hidden rounded-3xl bg-background/50 backdrop-blur-xl">
               <CardContent className="p-10 text-center flex flex-col items-center gap-6">
-                <div className="relative">
-                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl shadow-primary/30 animate-pulse">
-                    <BookOpen className="w-10 h-10 text-white" />
-                  </div>
-                  <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-background border-2 border-border flex items-center justify-center animate-spin">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                  </div>
+                <div className="w-20 h-20 rounded-3xl bg-amber-100 flex items-center justify-center shadow-inner">
+                  <BookOpen className="w-10 h-10 text-amber-600" />
                 </div>
-
                 <div className="space-y-3">
-                  <h1 className="text-title-lg font-display font-bold text-foreground">
-                    📚 Preparing Premium Notes
+                  <h1 className="text-2xl font-bold text-slate-900">
+                    Notes Coming Soon
                   </h1>
-                  <p className="text-body-md text-muted-foreground">
-                    Our AI Academic Engine is preparing a comprehensive chapter for you. This usually happens only once for each chapter.
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    Premium notes for <strong className="text-slate-700">{chapter.name}</strong> are currently being curated and verified by our expert faculty. They will be available shortly.
                   </p>
                 </div>
-
-                <div className="w-full space-y-2 mt-4">
-                  <div className="h-2 w-full bg-secondary rounded-full overflow-hidden relative">
-                    <div className="absolute left-0 top-0 h-full bg-primary rounded-full transition-all duration-[15000ms] ease-out w-[95%]" />
-                  </div>
-                  <p className="text-caption text-primary font-medium animate-pulse mt-2">
-                    {loadingFacts[loadingFactIndex]}
-                  </p>
-                  <p className="text-caption text-muted-foreground mt-4">
-                    Estimated time: 10–20 seconds
-                  </p>
+                <div className="flex flex-col sm:flex-row gap-3 w-full mt-4">
+                  <Button onClick={() => navigate('/learn')} variant="outline" className="flex-1 rounded-xl border-slate-200">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Back to Chapters
+                  </Button>
+                  <Button onClick={() => queryClient.invalidateQueries({ queryKey: ["chapter-content-v3", chapter.id, examType, language] })} variant="default" className="flex-1 rounded-xl">
+                    <RotateCcw className="w-4 h-4 mr-2" /> Check Again
+                  </Button>
                 </div>
               </CardContent>
             </Card>

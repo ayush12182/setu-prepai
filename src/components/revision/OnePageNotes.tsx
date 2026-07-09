@@ -160,37 +160,47 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const token = session?.access_token || anonKey;
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-notes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-        body: JSON.stringify({
-          chapterName: chapter.name,
-          subject: chapter.subject,
-          topics: chapter.topics,
-          examMode: isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
-          mode: 'notes',
-          forceRegenerate: false
-        }),
+      // READ-ONLY: Fetch published notes from permanent content repository
+      // Students NEVER call generate-notes — only get-chapter-content
+      const params = new URLSearchParams({
+        chapterId: chapter.id,
+        examType: isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
+        language: language || 'english',
       });
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-chapter-content?${params}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'apikey': anonKey,
+          },
+        }
+      );
 
-      if (!response.ok) throw new Error('Failed to generate notes');
-      
+      if (!response.ok) {
+        if (response.status === 404) {
+          toast.info('Notes for this chapter are being prepared by our expert faculty. Check back soon!');
+          setIsGeneratingNotes(false);
+          setSelectedChapter(null);
+          return;
+        }
+        throw new Error('Failed to fetch notes');
+      }
+
       const responseData = await response.json();
-      
+
       if (responseData.success && responseData.data) {
         setNotesJson(responseData.data);
       } else {
-        throw new Error('Invalid JSON received');
+        throw new Error('Invalid data received');
       }
     } catch (error) {
-      console.error(`Error generating notes:`, error);
-      toast.error(`Failed to generate revision notes. Showing offline version.`);
+      console.error(`Error fetching notes:`, error);
+      toast.error('Notes are not available yet. Our team is preparing them.');
+      setSelectedChapter(null);
     } finally {
       setIsGeneratingNotes(false);
     }

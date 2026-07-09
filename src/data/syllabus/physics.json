@@ -125,6 +125,52 @@
   },
   {
     "id": "phy-4",
+    "name": "System of Particles & Centre of Mass",
+    "subject": "physics",
+    "weightage": "High",
+    "difficulty": "Medium",
+    "prerequisites": [
+      "phy-1",
+      "phy-2",
+      "phy-3"
+    ],
+    "topics": [
+      "Centre of Mass discrete system",
+      "Centre of Mass continuous bodies",
+      "Motion of Centre of Mass",
+      "Momentum Conservation & Recoil",
+      "Impulse & Variable Force",
+      "Collisions (1D & 2D)",
+      "Variable Mass Rocket Propulsion"
+    ],
+    "keyFormulas": [
+      "Xcm = Σm_i x_i / Σm_i",
+      "Xcm = ∫x dm / ∫dm",
+      "P_total = M Vcm",
+      "F_ext = M Acm",
+      "Impulse J = ∫F dt = ΔP",
+      "e = (v2 - v1) / (u1 - u2)",
+      "Thrust F = u (dm/dt)"
+    ],
+    "pyqData": {
+      "total": 40,
+      "postCovid": 18,
+      "preCovid": 15,
+      "legacy": 7,
+      "trendingConcepts": [
+        "Cavity center of mass",
+        "Spring-block collision",
+        "Recoil boat-man"
+      ]
+    },
+    "examTips": [
+      "Internal forces never change velocity of center of mass",
+      "In oblique elastic identical mass collisions, angles add to 90 degrees",
+      "For variable mass, watch out for the sign of relative velocity"
+    ]
+  },
+  {
+    "id": "phy-5",
     "name": "Rotational Motion",
     "subject": "physics",
     "weightage": "High",
@@ -132,7 +178,8 @@
     "prerequisites": [
       "phy-1",
       "phy-2",
-      "phy-3"
+      "phy-3",
+      "phy-4"
     ],
     "topics": [
       "Moment of Inertia",
@@ -170,7 +217,7 @@
     ]
   },
   {
-    "id": "phy-5",
+    "id": "phy-6",
     "name": "Gravitation",
     "subject": "physics",
     "weightage": "Medium",
@@ -213,7 +260,98 @@
     ]
   },
   {
-    "id": "phy-6",
+    "id": "phy-7",
+    "name": "Mechanical Properties of Solids",
+    "subject": "physics",
+    "weightage": "Medium",
+    "difficulty": "Medium",
+    "prerequisites": [
+      "phy-2",
+      "phy-3"
+    ],
+    "topics": [
+      "Elastic behavior",
+      "Stress-strain relationship",
+      "Hooke's law",
+      "Young's modulus, bulk modulus, shear modulus",
+      "Poisson's ratio",
+      "Elastic potential energy in stretched wire"
+    ],
+    "keyFormulas": [
+      "Stress = F/A",
+      "Strain = ΔL/L",
+      "Young Modulus Y = (F/A)/(ΔL/L)",
+      "Bulk Modulus B = -V ΔP/ΔV",
+      "Shear Modulus G = (F/A)/θ",
+      "Elastic PE density u = ½ × Stress × Strain = ½ Y × Strain²"
+    ],
+    "pyqData": {
+      "total": 25,
+      "postCovid": 10,
+      "preCovid": 11,
+      "legacy": 4,
+      "trendingConcepts": [
+        "Elongation of rod under own weight",
+        "Composite wires",
+        "Thermal stress"
+      ]
+    },
+    "examTips": [
+      "Poisson ratio limit: -1 to 0.5 (practically positive)",
+      "Work done in stretching a wire is stored as elastic PE",
+      "Thermal stress equation: F/A = Y α ΔT"
+    ]
+  },
+  {
+    "id": "phy-8",
+    "name": "Mechanical Properties of Fluids",
+    "subject": "physics",
+    "weightage": "High",
+    "difficulty": "Medium",
+    "prerequisites": [
+      "phy-2",
+      "phy-3",
+      "phy-7"
+    ],
+    "topics": [
+      "Fluid Pressure & Pascal's Law",
+      "Buoyancy & Archimedes Principle",
+      "Viscosity & Stokes' Law",
+      "Terminal Velocity",
+      "Equation of Continuity",
+      "Bernoulli's Theorem & Applications",
+      "Surface Tension & Excess Pressure",
+      "Capillarity"
+    ],
+    "keyFormulas": [
+      "P = P0 + ρgh",
+      "Continuity: A1v1 = A2v2",
+      "Bernoulli: P + ½ρv² + ρgh = constant",
+      "Stokes: F = 6π η r v",
+      "Terminal Velocity vt = 2r²(ρ - σ)g / (9η)",
+      "Excess Pressure drop = 2T/R, bubble = 4T/R",
+      "Capillary Rise h = 2T cosθ / (ρ r g)"
+    ],
+    "pyqData": {
+      "total": 38,
+      "postCovid": 15,
+      "preCovid": 16,
+      "legacy": 7,
+      "trendingConcepts": [
+        "Terminal velocity ratios",
+        "Bernoulli venturimeter",
+        "Capillary rise",
+        "Excess pressure work"
+      ]
+    },
+    "examTips": [
+      "In terminal velocity, net acceleration is zero",
+      "Bernoulli is energy conservation for streamline flow",
+      "Wetting vs non-wetting capillary angles (θ < 90 vs θ > 90)"
+    ]
+  },
+  {
+    "id": "phy-9",
     "name": "SHM & Waves",
     "subject": "physics",
     "weightage": "High",
@@ -257,7 +395,7 @@
     ]
   },
   {
-    "id": "phy-7",
+    "id": "phy-10",
     "name": "Thermodynamics",
     "subject": "physics",
     "weightage": "High",
@@ -297,7 +435,7 @@
     ]
   },
   {
-    "id": "phy-8",
+    "id": "phy-11",
     "name": "Electrostatics",
     "subject": "physics",
     "weightage": "High",
@@ -337,13 +475,13 @@
     ]
   },
   {
-    "id": "phy-9",
+    "id": "phy-12",
     "name": "Current Electricity",
     "subject": "physics",
     "weightage": "High",
     "difficulty": "Medium",
     "prerequisites": [
-      "phy-8"
+      "phy-11"
     ],
     "topics": [
       "Ohm's Law",
@@ -379,13 +517,13 @@
     ]
   },
   {
-    "id": "phy-10",
+    "id": "phy-13",
     "name": "Magnetism & EMI",
     "subject": "physics",
     "weightage": "High",
     "difficulty": "Hard",
     "prerequisites": [
-      "phy-9"
+      "phy-12"
     ],
     "topics": [
       "Biot-Savart Law",
@@ -422,13 +560,13 @@
     ]
   },
   {
-    "id": "phy-11",
+    "id": "phy-14",
     "name": "Optics",
     "subject": "physics",
     "weightage": "High",
     "difficulty": "Medium",
     "prerequisites": [
-      "phy-6"
+      "phy-9"
     ],
     "topics": [
       "Reflection & Mirrors",
@@ -464,7 +602,7 @@
     ]
   },
   {
-    "id": "phy-12",
+    "id": "phy-15",
     "name": "Modern Physics",
     "subject": "physics",
     "weightage": "High",

@@ -55,7 +55,7 @@ const mapQuestionBankToInterface = (qbItem: any): Question => {
     exam_type: qbItem.exam_type || 'JEE',
     difficulty: (qbItem.difficulty || 'medium').toLowerCase() as 'easy' | 'medium' | 'hard',
     question_text: qbItem.content?.question || qbItem.question_text,
-    options: qbItem.content?.options || {
+    options: qbItem.options || qbItem.content?.options || {
       A: qbItem.option_a || '',
       B: qbItem.option_b || '',
       C: qbItem.option_c || '',

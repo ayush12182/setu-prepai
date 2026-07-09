@@ -1,10 +1,5 @@
 import React from 'react';
-
-/**
- * JEE Clean-Syntax Math Renderer
- * Renders mathematical expressions in exam-style notation
- * Supports subscripts, superscripts, fractions, vectors, and chemical equations
- */
+import { MathLine } from '@/utils/mathRenderer';
 
 // Subscript character mappings
 const subscriptMap: Record<string, string> = {
@@ -38,14 +33,14 @@ const greekMap: Record<string, string> = {
   'Phi': 'Φ', 'Psi': 'Ψ', 'Omega': 'Ω',
 };
 
-// Mathematical symbols
+// Mathematical symbols - Removed 'int' mapping to prevent ligature conflicts like point -> po∫
 const mathSymbols: Record<string, string> = {
   '->': '→', '<-': '←', '<->': '↔', '=>': '⇒',
   '>=': '≥', '<=': '≤', '!=': '≠', '~=': '≈',
   'inf': '∞', 'sqrt': '√', 'cbrt': '∛',
   '+-': '±', '-+': '∓', '...': '⋯',
   'times': '×', 'cdot': '·', 'div': '÷',
-  'int': '∫', 'sum': 'Σ', 'prod': 'Π',
+  'sum': 'Σ', 'prod': 'Π',
   'partial': '∂', 'nabla': '∇', 'degree': '°',
   'perp': '⊥', 'parallel': '∥', 'angle': '∠',
   'proportional': '∝', 'element': '∈', 'notin': '∉',
@@ -153,9 +148,6 @@ export function formatJeeMath(text: string): string {
   // Implies arrow
   result = result.replace(/⇒/g, '⇒');
   
-  // Determinant bars | ... |
-  // Keep as is for display
-  
   // Clean up multiple spaces
   result = result.replace(/\s+/g, ' ').trim();
   
@@ -168,10 +160,8 @@ export function formatJeeMath(text: string): string {
 export function formatJeeSolution(solution: string): string {
   if (!solution) return '';
   
-  // Split by lines and process each
   const lines = solution.split('\n');
   const formattedLines = lines.map(line => {
-    // Don't process explanatory text lines (starts with normal text)
     if (/^[A-Z][a-z]/.test(line.trim()) && !line.includes('=') && !line.includes('→')) {
       return line;
     }
@@ -195,21 +185,7 @@ export const JeeMathText: React.FC<JeeMathTextProps> = ({
   className = '',
   block = false 
 }) => {
-  const formatted = formatJeeMath(children);
-  
-  if (block) {
-    return (
-      <div className={`font-mono whitespace-pre-wrap ${className}`}>
-        {formatted}
-      </div>
-    );
-  }
-  
-  return (
-    <span className={`font-mono ${className}`}>
-      {formatted}
-    </span>
-  );
+  return <MathLine>{children}</MathLine>;
 };
 
 /**
@@ -224,15 +200,9 @@ export const JeeSolution: React.FC<JeeSolutionProps> = ({
   solution, 
   className = '' 
 }) => {
-  const formatted = formatJeeSolution(solution);
-  
   return (
-    <div className={`font-mono text-sm leading-relaxed whitespace-pre-wrap ${className}`}>
-      {formatted.split('\n').map((line, idx) => (
-        <div key={idx} className={line.trim() === '' ? 'h-2' : ''}>
-          {line}
-        </div>
-      ))}
+    <div className={`text-sm leading-relaxed whitespace-pre-wrap ${className}`}>
+      <MathLine>{solution}</MathLine>
     </div>
   );
 };
@@ -244,11 +214,9 @@ export const JeeQuestion: React.FC<{
   question: string; 
   className?: string;
 }> = ({ question, className = '' }) => {
-  const formatted = formatJeeMath(question);
-  
   return (
     <div className={`leading-relaxed ${className}`}>
-      {formatted}
+      <MathLine>{question}</MathLine>
     </div>
   );
 };
@@ -260,11 +228,9 @@ export const JeeOption: React.FC<{
   option: string; 
   className?: string;
 }> = ({ option, className = '' }) => {
-  const formatted = formatJeeMath(option);
-  
   return (
     <span className={className}>
-      {formatted}
+      <MathLine>{option}</MathLine>
     </span>
   );
 };

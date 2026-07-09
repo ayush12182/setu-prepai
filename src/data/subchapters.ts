@@ -462,8 +462,8 @@ export const workEnergySubchapters: Subchapter[] = [
 
 export const rotationalMotionSubchapters: Subchapter[] = [
   {
-    id: 'phy-4-1',
-    chapterId: 'phy-4',
+    id: 'phy-5-1',
+    chapterId: 'phy-5',
     name: 'Moment of Inertia',
     jeeAsks: [
       'I for standard shapes',
@@ -484,8 +484,8 @@ export const rotationalMotionSubchapters: Subchapter[] = [
     setuLine: 'MI = mass distribution from axis. Door ho mass, zyada MI.'
   },
   {
-    id: 'phy-4-2',
-    chapterId: 'phy-4',
+    id: 'phy-5-2',
+    chapterId: 'phy-5',
     name: 'Torque & Angular Momentum',
     jeeAsks: [
       'τ = r × F calculations',
@@ -506,8 +506,8 @@ export const rotationalMotionSubchapters: Subchapter[] = [
     setuLine: 'Angular momentum tabhi conserved jab external torque zero ho.'
   },
   {
-    id: 'phy-4-3',
-    chapterId: 'phy-4',
+    id: 'phy-5-3',
+    chapterId: 'phy-5',
     name: 'Rotational Kinematics',
     jeeAsks: [
       'ω, α, θ relations',
@@ -528,8 +528,8 @@ export const rotationalMotionSubchapters: Subchapter[] = [
     setuLine: 'Linear equations ki tarah hi hai. s → θ, v → ω, a → α.'
   },
   {
-    id: 'phy-4-4',
-    chapterId: 'phy-4',
+    id: 'phy-5-4',
+    chapterId: 'phy-5',
     name: 'Rolling Motion',
     jeeAsks: [
       'Pure rolling condition v = ωr',
@@ -550,8 +550,8 @@ export const rotationalMotionSubchapters: Subchapter[] = [
     setuLine: 'Rolling = translation + rotation. v = ωr yaad rakho, baaki follow karega.'
   },
   {
-    id: 'phy-4-5',
-    chapterId: 'phy-4',
+    id: 'phy-5-5',
+    chapterId: 'phy-5',
     name: 'Toppling vs Sliding',
     jeeAsks: [
       'Critical angle for toppling',
@@ -576,8 +576,8 @@ export const rotationalMotionSubchapters: Subchapter[] = [
 // More subchapters for other physics chapters...
 export const gravitationSubchapters: Subchapter[] = [
   {
-    id: 'phy-5-1',
-    chapterId: 'phy-5',
+    id: 'phy-6-1',
+    chapterId: 'phy-6',
     name: "Newton's Law of Gravitation",
     jeeAsks: [
       'F = GMm/r² applications',
@@ -598,8 +598,8 @@ export const gravitationSubchapters: Subchapter[] = [
     setuLine: 'G aur g mein confusion mat karo. G constant hai, g jagah ke saath badalta hai.'
   },
   {
-    id: 'phy-5-2',
-    chapterId: 'phy-5',
+    id: 'phy-6-2',
+    chapterId: 'phy-6',
     name: 'Gravitational Field & Potential',
     jeeAsks: [
       'E = -dV/dr relation',
@@ -620,8 +620,8 @@ export const gravitationSubchapters: Subchapter[] = [
     setuLine: 'Potential negative hai, energy bhi. Isse infinity reference point se samjho.'
   },
   {
-    id: 'phy-5-3',
-    chapterId: 'phy-5',
+    id: 'phy-6-3',
+    chapterId: 'phy-6',
     name: 'Orbital Motion & Satellites',
     jeeAsks: [
       'Orbital velocity and period',
@@ -642,8 +642,8 @@ export const gravitationSubchapters: Subchapter[] = [
     setuLine: 'Satellite problems mein T² ∝ r³ yaad rakho. Baaki formulas isse derive hote hain.'
   },
   {
-    id: 'phy-5-4',
-    chapterId: 'phy-5',
+    id: 'phy-6-4',
+    chapterId: 'phy-6',
     name: 'Escape & Orbital Velocity',
     jeeAsks: [
       'Escape velocity derivation',
@@ -664,8 +664,8 @@ export const gravitationSubchapters: Subchapter[] = [
     setuLine: 'Escape velocity = √2 × orbital velocity. Yahi relation yaad rakho.'
   },
   {
-    id: 'phy-5-5',
-    chapterId: 'phy-5',
+    id: 'phy-6-5',
+    chapterId: 'phy-6',
     name: "Kepler's Laws",
     jeeAsks: [
       'Law of areas (L conservation)',
@@ -690,8 +690,8 @@ export const gravitationSubchapters: Subchapter[] = [
 // Electrostatics subchapters
 export const electrostaticsSubchapters: Subchapter[] = [
   {
-    id: 'phy-8-1',
-    chapterId: 'phy-8',
+    id: 'phy-11-1',
+    chapterId: 'phy-11',
     name: "Coulomb's Law",
     jeeAsks: [
       'Force between charges',
@@ -712,8 +712,8 @@ export const electrostaticsSubchapters: Subchapter[] = [
     setuLine: 'Coulomb = Gravitational wala hi formula hai. Bas charges hain, masses nahi.'
   },
   {
-    id: 'phy-8-2',
-    chapterId: 'phy-8',
+    id: 'phy-11-2',
+    chapterId: 'phy-11',
     name: 'Electric Field',
     jeeAsks: [
       'Field due to point charge',
@@ -734,8 +734,8 @@ export const electrostaticsSubchapters: Subchapter[] = [
     setuLine: 'Electric field = imaginary force on +1C charge. Simple concept.'
   },
   {
-    id: 'phy-8-3',
-    chapterId: 'phy-8',
+    id: 'phy-11-3',
+    chapterId: 'phy-11',
     name: "Gauss's Law",
     jeeAsks: [
       'Flux calculation',
@@ -756,8 +756,8 @@ export const electrostaticsSubchapters: Subchapter[] = [
     setuLine: 'Symmetry dekho, Gaussian surface choose karo, integration avoid karo.'
   },
   {
-    id: 'phy-8-4',
-    chapterId: 'phy-8',
+    id: 'phy-11-4',
+    chapterId: 'phy-11',
     name: 'Electric Potential',
     jeeAsks: [
       'V = kq/r for point charge',
@@ -778,8 +778,8 @@ export const electrostaticsSubchapters: Subchapter[] = [
     setuLine: 'Potential scalar hai, add karo directly. Field se kaam mushkil ho toh potential use karo.'
   },
   {
-    id: 'phy-8-5',
-    chapterId: 'phy-8',
+    id: 'phy-11-5',
+    chapterId: 'phy-11',
     name: 'Capacitors',
     jeeAsks: [
       'C = εA/d for parallel plate',
@@ -800,8 +800,8 @@ export const electrostaticsSubchapters: Subchapter[] = [
     setuLine: 'Capacitor = charge store karta hai. Series mein kam, parallel mein zyada.'
   },
   {
-    id: 'phy-8-6',
-    chapterId: 'phy-8',
+    id: 'phy-11-6',
+    chapterId: 'phy-11',
     name: 'Dielectrics',
     jeeAsks: [
       'Capacitance with dielectric',
@@ -826,8 +826,8 @@ export const electrostaticsSubchapters: Subchapter[] = [
 // SHM & Waves subchapters
 export const shmWavesSubchapters: Subchapter[] = [
   {
-    id: 'phy-6-1',
-    chapterId: 'phy-6',
+    id: 'phy-9-1',
+    chapterId: 'phy-9',
     name: 'Simple Harmonic Motion',
     jeeAsks: [
       'SHM equation and parameters',
@@ -848,8 +848,8 @@ export const shmWavesSubchapters: Subchapter[] = [
     setuLine: 'SHM = oscillation jahan acceleration displacement ke opposite aur proportional ho.'
   },
   {
-    id: 'phy-6-2',
-    chapterId: 'phy-6',
+    id: 'phy-9-2',
+    chapterId: 'phy-9',
     name: 'Spring-Mass System',
     jeeAsks: [
       'Time period of spring oscillation',
@@ -870,8 +870,8 @@ export const shmWavesSubchapters: Subchapter[] = [
     setuLine: 'T = 2π√(m/k). Spring combinations mein k nikalo, baaki same formula.'
   },
   {
-    id: 'phy-6-3',
-    chapterId: 'phy-6',
+    id: 'phy-9-3',
+    chapterId: 'phy-9',
     name: 'Simple Pendulum',
     jeeAsks: [
       'T = 2π√(l/g)',
@@ -892,8 +892,8 @@ export const shmWavesSubchapters: Subchapter[] = [
     setuLine: 'Pendulum mein g badlo toh T badalta hai. Lift mein sochne wale questions aate hain.'
   },
   {
-    id: 'phy-6-4',
-    chapterId: 'phy-6',
+    id: 'phy-9-4',
+    chapterId: 'phy-9',
     name: 'Wave Equation & Properties',
     jeeAsks: [
       'y = A sin(kx - ωt) interpretation',
@@ -914,8 +914,8 @@ export const shmWavesSubchapters: Subchapter[] = [
     setuLine: 'Wave equation mein sign dekho - minus means positive direction.'
   },
   {
-    id: 'phy-6-5',
-    chapterId: 'phy-6',
+    id: 'phy-9-5',
+    chapterId: 'phy-9',
     name: 'Standing Waves',
     jeeAsks: [
       'Nodes and antinodes positions',
@@ -936,8 +936,8 @@ export const shmWavesSubchapters: Subchapter[] = [
     setuLine: 'Standing wave = superposition of two travelling waves. Nodes mein zero displacement.'
   },
   {
-    id: 'phy-6-6',
-    chapterId: 'phy-6',
+    id: 'phy-9-6',
+    chapterId: 'phy-9',
     name: 'Beats & Doppler Effect',
     jeeAsks: [
       'Beat frequency = |f₁ - f₂|',
@@ -962,8 +962,8 @@ export const shmWavesSubchapters: Subchapter[] = [
 // Current Electricity subchapters
 export const currentElectricitySubchapters: Subchapter[] = [
   {
-    id: 'phy-9-1',
-    chapterId: 'phy-9',
+    id: 'phy-12-1',
+    chapterId: 'phy-12',
     name: "Ohm's Law & Resistance",
     jeeAsks: [
       'V = IR applications',
@@ -984,8 +984,8 @@ export const currentElectricitySubchapters: Subchapter[] = [
     setuLine: 'Ohm ka law basic hai. Wire stretch karo, resistance n² ho jaata hai.'
   },
   {
-    id: 'phy-9-2',
-    chapterId: 'phy-9',
+    id: 'phy-12-2',
+    chapterId: 'phy-12',
     name: "Kirchhoff's Laws",
     jeeAsks: [
       'Current law (junction rule)',
@@ -1006,8 +1006,8 @@ export const currentElectricitySubchapters: Subchapter[] = [
     setuLine: 'Kirchhoff = charge conservation + energy conservation. Loop likho, solve karo.'
   },
   {
-    id: 'phy-9-3',
-    chapterId: 'phy-9',
+    id: 'phy-12-3',
+    chapterId: 'phy-12',
     name: 'Series & Parallel Combinations',
     jeeAsks: [
       'Equivalent resistance',
@@ -1028,8 +1028,8 @@ export const currentElectricitySubchapters: Subchapter[] = [
     setuLine: 'Complex circuit ko simple banao. Step by step equivalent nikalo.'
   },
   {
-    id: 'phy-9-4',
-    chapterId: 'phy-9',
+    id: 'phy-12-4',
+    chapterId: 'phy-12',
     name: 'RC Circuits',
     jeeAsks: [
       'Charging and discharging equations',
@@ -1050,8 +1050,8 @@ export const currentElectricitySubchapters: Subchapter[] = [
     setuLine: 'RC circuit mein τ = RC. 5τ ke baad almost fully charged.'
   },
   {
-    id: 'phy-9-5',
-    chapterId: 'phy-9',
+    id: 'phy-12-5',
+    chapterId: 'phy-12',
     name: 'Electrical Instruments',
     jeeAsks: [
       'Meter bridge working',
@@ -1072,8 +1072,8 @@ export const currentElectricitySubchapters: Subchapter[] = [
     setuLine: 'Potentiometer null method use karta hai - current zero par measurement.'
   },
   {
-    id: 'phy-9-6',
-    chapterId: 'phy-9',
+    id: 'phy-12-6',
+    chapterId: 'phy-12',
     name: 'Heating Effect & Power',
     jeeAsks: [
       'P = I²R = V²/R = VI',
@@ -1098,8 +1098,8 @@ export const currentElectricitySubchapters: Subchapter[] = [
 // Modern Physics subchapters
 export const modernPhysicsSubchapters: Subchapter[] = [
   {
-    id: 'phy-12-1',
-    chapterId: 'phy-12',
+    id: 'phy-15-1',
+    chapterId: 'phy-15',
     name: 'Photoelectric Effect',
     jeeAsks: [
       'Einstein equation: hν = φ + KEmax',
@@ -1120,8 +1120,8 @@ export const modernPhysicsSubchapters: Subchapter[] = [
     setuLine: 'Frequency badao → electrons nikle. Intensity badao → zyada electrons nikle.'
   },
   {
-    id: 'phy-12-2',
-    chapterId: 'phy-12',
+    id: 'phy-15-2',
+    chapterId: 'phy-15',
     name: 'Bohr Model of Hydrogen',
     jeeAsks: [
       'Energy levels: En = -13.6/n² eV',
@@ -1142,8 +1142,8 @@ export const modernPhysicsSubchapters: Subchapter[] = [
     setuLine: 'Bohr model = quantized orbits. Energy -13.6/n² yaad rakho, baaki derive karo.'
   },
   {
-    id: 'phy-12-3',
-    chapterId: 'phy-12',
+    id: 'phy-15-3',
+    chapterId: 'phy-15',
     name: 'de Broglie & Wave-Particle Duality',
     jeeAsks: [
       'λ = h/mv = h/p',
@@ -1164,8 +1164,8 @@ export const modernPhysicsSubchapters: Subchapter[] = [
     setuLine: 'Matter bhi wave hai. λ = h/p. Chota particle, bada λ.'
   },
   {
-    id: 'phy-12-4',
-    chapterId: 'phy-12',
+    id: 'phy-15-4',
+    chapterId: 'phy-15',
     name: 'X-rays',
     jeeAsks: [
       'Continuous and characteristic X-rays',
@@ -1186,8 +1186,8 @@ export const modernPhysicsSubchapters: Subchapter[] = [
     setuLine: 'X-ray mein λmin = hc/eV. Target change karo, characteristic change hoga.'
   },
   {
-    id: 'phy-12-5',
-    chapterId: 'phy-12',
+    id: 'phy-15-5',
+    chapterId: 'phy-15',
     name: 'Nuclear Physics & Radioactivity',
     jeeAsks: [
       'Binding energy and stability',
@@ -1208,8 +1208,8 @@ export const modernPhysicsSubchapters: Subchapter[] = [
     setuLine: 'Radioactivity mein half-life formula yaad rakho. N = N₀/2ⁿ for n half-lives.'
   },
   {
-    id: 'phy-12-6',
-    chapterId: 'phy-12',
+    id: 'phy-15-6',
+    chapterId: 'phy-15',
     name: 'Semiconductors',
     jeeAsks: [
       'Intrinsic and extrinsic semiconductors',
@@ -1234,8 +1234,8 @@ export const modernPhysicsSubchapters: Subchapter[] = [
 // Optics subchapters
 export const opticsSubchapters: Subchapter[] = [
   {
-    id: 'phy-11-1',
-    chapterId: 'phy-11',
+    id: 'phy-14-1',
+    chapterId: 'phy-14',
     name: 'Reflection & Mirrors',
     jeeAsks: [
       'Mirror formula: 1/v + 1/u = 1/f',
@@ -1256,8 +1256,8 @@ export const opticsSubchapters: Subchapter[] = [
     setuLine: 'Mirror problems mein sign convention pakka karo. Real = negative, virtual = positive.'
   },
   {
-    id: 'phy-11-2',
-    chapterId: 'phy-11',
+    id: 'phy-14-2',
+    chapterId: 'phy-14',
     name: 'Refraction & Lenses',
     jeeAsks: [
       'Snell\'s law: n₁sinθ₁ = n₂sinθ₂',
@@ -1278,8 +1278,8 @@ export const opticsSubchapters: Subchapter[] = [
     setuLine: 'Lens mein power = 1/f. Dioptre mein answer chahiye toh f metres mein.'
   },
   {
-    id: 'phy-11-3',
-    chapterId: 'phy-11',
+    id: 'phy-14-3',
+    chapterId: 'phy-14',
     name: 'Total Internal Reflection',
     jeeAsks: [
       'Critical angle',
@@ -1300,8 +1300,8 @@ export const opticsSubchapters: Subchapter[] = [
     setuLine: 'TIR = light gets reflected instead of refracted. Dense se rare mein hi hota hai.'
   },
   {
-    id: 'phy-11-4',
-    chapterId: 'phy-11',
+    id: 'phy-14-4',
+    chapterId: 'phy-14',
     name: 'Prism & Dispersion',
     jeeAsks: [
       'Prism formula',
@@ -1322,8 +1322,8 @@ export const opticsSubchapters: Subchapter[] = [
     setuLine: 'Prism mein violet zyada mudta hai kyunki n violet ke liye highest hai.'
   },
   {
-    id: 'phy-11-5',
-    chapterId: 'phy-11',
+    id: 'phy-14-5',
+    chapterId: 'phy-14',
     name: 'Interference (YDSE)',
     jeeAsks: [
       'Path difference and phase difference',
@@ -1344,8 +1344,8 @@ export const opticsSubchapters: Subchapter[] = [
     setuLine: 'YDSE = constructive and destructive interference. Path difference dekho.'
   },
   {
-    id: 'phy-11-6',
-    chapterId: 'phy-11',
+    id: 'phy-14-6',
+    chapterId: 'phy-14',
     name: 'Diffraction & Polarization',
     jeeAsks: [
       'Single slit diffraction',
@@ -1370,8 +1370,8 @@ export const opticsSubchapters: Subchapter[] = [
 // Thermodynamics subchapters
 export const thermodynamicsSubchapters: Subchapter[] = [
   {
-    id: 'phy-7-1',
-    chapterId: 'phy-7',
+    id: 'phy-10-1',
+    chapterId: 'phy-10',
     name: 'First Law of Thermodynamics',
     jeeAsks: [
       'dQ = dU + dW',
@@ -1392,8 +1392,8 @@ export const thermodynamicsSubchapters: Subchapter[] = [
     setuLine: 'First law = energy conservation. Heat = internal energy change + work done.'
   },
   {
-    id: 'phy-7-2',
-    chapterId: 'phy-7',
+    id: 'phy-10-2',
+    chapterId: 'phy-10',
     name: 'Thermodynamic Processes',
     jeeAsks: [
       'Isothermal: T constant',
@@ -1414,8 +1414,8 @@ export const thermodynamicsSubchapters: Subchapter[] = [
     setuLine: 'Process identify karo PV curve se. Each has different formula.'
   },
   {
-    id: 'phy-7-3',
-    chapterId: 'phy-7',
+    id: 'phy-10-3',
+    chapterId: 'phy-10',
     name: 'Carnot Cycle & Heat Engines',
     jeeAsks: [
       'Carnot efficiency: η = 1 - T₂/T₁',
@@ -1436,8 +1436,8 @@ export const thermodynamicsSubchapters: Subchapter[] = [
     setuLine: 'Carnot = ideal engine. Real engines have lower efficiency.'
   },
   {
-    id: 'phy-7-4',
-    chapterId: 'phy-7',
+    id: 'phy-10-4',
+    chapterId: 'phy-10',
     name: 'Kinetic Theory of Gases',
     jeeAsks: [
       'RMS, average, most probable speeds',
@@ -1458,8 +1458,8 @@ export const thermodynamicsSubchapters: Subchapter[] = [
     setuLine: 'Gas molecules har direction mein move karte hain. RMS speed use karo mostly.'
   },
   {
-    id: 'phy-7-5',
-    chapterId: 'phy-7',
+    id: 'phy-10-5',
+    chapterId: 'phy-10',
     name: 'Specific Heat Capacities',
     jeeAsks: [
       'Cp - Cv = R',
@@ -1484,8 +1484,8 @@ export const thermodynamicsSubchapters: Subchapter[] = [
 // Magnetism subchapters
 export const magnetismSubchapters: Subchapter[] = [
   {
-    id: 'phy-10-1',
-    chapterId: 'phy-10',
+    id: 'phy-13-1',
+    chapterId: 'phy-13',
     name: 'Biot-Savart Law',
     jeeAsks: [
       'Magnetic field due to current element',
@@ -1506,8 +1506,8 @@ export const magnetismSubchapters: Subchapter[] = [
     setuLine: 'Biot-Savart = current element se magnetic field. Right hand rule for direction.'
   },
   {
-    id: 'phy-10-2',
-    chapterId: 'phy-10',
+    id: 'phy-13-2',
+    chapterId: 'phy-13',
     name: "Ampere's Law",
     jeeAsks: [
       '∮B.dl = μ₀I_enclosed',
@@ -1528,8 +1528,8 @@ export const magnetismSubchapters: Subchapter[] = [
     setuLine: 'Ampere law = magnetic Gauss law. Symmetry mein use karo.'
   },
   {
-    id: 'phy-10-3',
-    chapterId: 'phy-10',
+    id: 'phy-13-3',
+    chapterId: 'phy-13',
     name: 'Force on Current & Moving Charge',
     jeeAsks: [
       'F = qv×B for moving charge',
@@ -1550,8 +1550,8 @@ export const magnetismSubchapters: Subchapter[] = [
     setuLine: 'Magnetic force velocity ke perpendicular. Work zero, speed constant.'
   },
   {
-    id: 'phy-10-4',
-    chapterId: 'phy-10',
+    id: 'phy-13-4',
+    chapterId: 'phy-13',
     name: "Faraday's & Lenz's Laws (EMI)",
     jeeAsks: [
       'ε = -dφ/dt',
@@ -1572,8 +1572,8 @@ export const magnetismSubchapters: Subchapter[] = [
     setuLine: 'EMI = changing flux induces EMF. Lenz law se direction pata chalta hai.'
   },
   {
-    id: 'phy-10-5',
-    chapterId: 'phy-10',
+    id: 'phy-13-5',
+    chapterId: 'phy-13',
     name: 'Inductance',
     jeeAsks: [
       'Self inductance L',
@@ -1594,8 +1594,8 @@ export const magnetismSubchapters: Subchapter[] = [
     setuLine: 'Inductor opposes change in current. τ = L/R for LR circuit.'
   },
   {
-    id: 'phy-10-6',
-    chapterId: 'phy-10',
+    id: 'phy-13-6',
+    chapterId: 'phy-13',
     name: 'AC Circuits',
     jeeAsks: [
       'Impedance in LCR circuit',
@@ -2700,20 +2700,150 @@ export const trigonometrySubchapters: Subchapter[] = [
 ];
 
 // Export all subchapters in a map
+
+export const systemOfParticlesSubchapters: Subchapter[] = [
+  {
+    id: 'phy-4-1',
+    chapterId: 'phy-4',
+    name: 'Centre of Mass discrete system',
+    jeeAsks: ['CM of two-particle system', 'Discrete mass coordinate calculations', 'Shifting origin coordinate impacts'],
+    pyqFocus: { trends: ['Coordinates of composite systems', 'Finding third mass position'], patterns: ['Xcm = Σmx/Σm'], traps: ['Forgetting negative coordinates', 'Confusing area/volume distribution for mass'] },
+    commonMistakes: ['Sign errors in coordinates', 'Not using symmetric simplifications'],
+    setuLine: 'Discrete particles ka CM coordinate average hai weight ke proportional.'
+  },
+  {
+    id: 'phy-4-2',
+    chapterId: 'phy-4',
+    name: 'Centre of Mass continuous bodies',
+    jeeAsks: ['CM of rod with variable density', 'Semicircular ring and disc', 'Hemisphere and cone CM', 'Cavity problems'],
+    pyqFocus: { trends: ['Removal of circle/disc cavity', 'Linear density functions integration'], patterns: ['Xcm = ∫x dm / M'], traps: ['Treating cavity area as positive instead of negative mass', 'Standard formula height of solid vs hollow cone'] },
+    commonMistakes: ['Integrating without writing dm in terms of dx', 'Using hollow cone formula for solid cone (h/3 vs h/4)'],
+    setuLine: 'Continuous bodies mein integration ya symmetric shapes ka direct values use karo.'
+  },
+  {
+    id: 'phy-4-3',
+    chapterId: 'phy-4',
+    name: 'Motion of Centre of Mass',
+    jeeAsks: ['Velocity and acceleration of CM', 'Linear momentum conservation', 'Fext = 0 implies Vcm constant', 'Man-plank boat motion problems'],
+    pyqFocus: { trends: ['Internal explosions trajectory of CM', 'Plank walking displacement calculations'], patterns: ['ΔXcm = 0 when Fext = 0'], traps: ['Internal forces changing CM position (impossible)', 'Including friction between man and plank as external'] },
+    commonMistakes: ['Thinking internal explosion changes CM trajectory', 'Incorrect coordinate setup for relative motion'],
+    setuLine: 'Internal forces CM ko accelerate nahi kar sakte. Uski motion constant rahegi.'
+  },
+  {
+    id: 'phy-4-4',
+    chapterId: 'phy-4',
+    name: 'Collisions (1D & 2D)',
+    jeeAsks: ['Elastic vs inelastic collisions', 'Coefficient of restitution', 'Oblique collisions and line of impact', 'Loss of kinetic energy'],
+    pyqFocus: { trends: ['Identical mass oblique elastic scattering', 'Finding kinetic energy loss fraction'], patterns: ['Momentum conserved along line of impact', 'e = relative separation speed / relative approach speed'], traps: ['Conserving KE in inelastic collisions', 'Conserving momentum perpendicular to line of impact for individual bodies'] },
+    commonMistakes: ['Confusing e formula speed directions', 'Assuming velocities exchange for different masses in elastic collision'],
+    setuLine: 'Collision mein momentum hamesha conserved. Energy sirf elastic mein.'
+  },
+  {
+    id: 'phy-4-5',
+    chapterId: 'phy-4',
+    name: 'Impulse & Variable Mass Systems',
+    jeeAsks: ['Force-time graph area', 'Impulse-momentum theorem', 'Rocket propulsion with variable mass', 'Thrust force calculations'],
+    pyqFocus: { trends: ['Rocket climbing with fuel burn rate', 'Varying force impulse'], patterns: ['J = ∫F dt = ΔP', 'v = u + v_rel ln(m0/m)'], traps: ['Neglecting gravity in rocket equation if stated', 'Confusing thrust direction with gas eject direction'] },
+    commonMistakes: ['Forgetting that impulse is vector', 'Sign error in rocket relative speed term'],
+    setuLine: 'Impulse = change in momentum. Variable mass mein thrust force = v_rel * (dm/dt).'
+  }
+];
+
+export const solidsSubchapters: Subchapter[] = [
+  {
+    id: 'phy-7-1',
+    chapterId: 'phy-7',
+    name: "Stress, Strain & Hooke's Law",
+    jeeAsks: ['Types of stress (tensile, shear, hydraulic)', 'Strain definitions', "Hooke's law limits", 'Stress-strain curve regions'],
+    pyqFocus: { trends: ['Identifying yield point and ultimate strength', 'Proportional limit applications'], patterns: ['Stress = Y × Strain'], traps: ["Assuming Hooke's law holds up to breaking point", 'Confusing restoring force with applied force'] },
+    commonMistakes: ['Using original area instead of deformed area in high strain', 'Not distinguishing between elastic limit and proportional limit'],
+    setuLine: "Hooke's law proportional limit tak hi valid hai. Elastic range thoda bada hota hai."
+  },
+  {
+    id: 'phy-7-2',
+    chapterId: 'phy-7',
+    name: 'Elastic Moduli',
+    jeeAsks: ["Young's modulus of composite wires", 'Bulk modulus and compressibility', 'Shear modulus calculations', "Poisson's ratio constraints"],
+    pyqFocus: { trends: ['Series/parallel wire combinations', 'Volume change under pressure'], patterns: ['Y = FL / AΔL', 'B = -VΔP/ΔV', 'Compressibility = 1/B'], traps: ['Poisson ratio range limit (-1 to 0.5)', 'Forgetting bulk modulus is negative by definition'] },
+    commonMistakes: ['Ignoring cross-section differences in composite wires', 'Taking Poisson ratio larger than 0.5'],
+    setuLine: "Young's modulus length/area par depend nahi karta, material ki properties hai."
+  },
+  {
+    id: 'phy-7-3',
+    chapterId: 'phy-7',
+    name: 'Elastic Potential Energy & Thermal Stress',
+    jeeAsks: ['Energy stored in stretched wire', 'Energy density', 'Thermal expansion restraint stress', 'Elongation under own weight'],
+    pyqFocus: { trends: ['Energy lost in hysteresis loops', 'Self-weight elongation (ΔL = ρgL²/2Y)', 'Thermal force calculations'], patterns: ['U = ½ F ΔL', 'Energy density = ½ stress × strain', 'Thermal stress = Y α ΔT'], traps: ['Using ΔL = ρgL²/Y for self-weight (missing factor of 2)', 'Forgetting volume factor in total energy vs energy density'] },
+    commonMistakes: ['Confusing total energy stored with energy density', 'Neglecting thermal expansion coefficient units'],
+    setuLine: 'Self-weight se elongation aadhi hoti hai (½ ρgL²/Y) compared to point load at end.'
+  }
+];
+
+export const fluidsSubchapters: Subchapter[] = [
+  {
+    id: 'phy-8-1',
+    chapterId: 'phy-8',
+    name: "Fluid Pressure & Pascal's Law",
+    jeeAsks: ['Hydrostatic pressure with depth', 'Barometer & manometer', "Pascal's law in hydraulic lift", 'Pressure in rotating containers'],
+    pyqFocus: { trends: ['Pressure variations in accelerating liquids', 'U-tube liquid levels'], patterns: ['P = P0 + ρgh', 'dP/dx = ρa (horizontal acceleration)'], traps: ['Forgetting atmospheric pressure', 'Assuming fluid levels same in accelerating containers'] },
+    commonMistakes: ['Not accounting for density variation with temperature', 'Wrong acceleration direction for relative height of liquid columns'],
+    setuLine: 'Accelerating fluid container mein free surface effective g کے perpendicular hoti hai.'
+  },
+  {
+    id: 'phy-8-2',
+    chapterId: 'phy-8',
+    name: 'Buoyancy & Archimedes Principle',
+    jeeAsks: ['Buoyant force on fully/partially submerged bodies', 'Apparent weight in fluid', 'Floatation conditions & metacentre', 'Apparent weight in accelerating lift'],
+    pyqFocus: { trends: ['Ice melting in water container level changes', 'Body suspended in two immiscible liquids'], patterns: ['Fb = V_submerged × ρ_liquid × g'], traps: ['Using body density instead of liquid density in buoyant force', 'Neglecting effective gravity in accelerating frames'] },
+    commonMistakes: ['Thinking buoyant force changes when body moves deeper (constant if fully submerged)', 'Wrong volume submerged calculations'],
+    setuLine: 'Buoyant force displaced fluid ka weight hai. Body ka weight nahi.'
+  },
+  {
+    id: 'phy-8-3',
+    chapterId: 'phy-8',
+    name: 'Fluid Dynamics (Continuity & Bernoulli)',
+    jeeAsks: ['Equation of Continuity', "Bernoulli's Equation applications", "Torricelli's Law of Efflux", 'Venturimeter and dynamic lift'],
+    pyqFocus: { trends: ['Time to empty a tank through orifice', 'Horizontal projectile range of efflux', 'Velocity of efflux with pressurized tanks'], patterns: ['A1v1 = A2v2', 'P + ½ρv² + ρgh = constant', 'v = √(2gh)'], traps: ['Applying Bernoulli to turbulent flow', 'Forgetting velocity of fluid surface in continuity equation for wide tanks'] },
+    commonMistakes: ['Using Torricelli formula when top of tank is closed and pressurized', 'Incorrect pressure signs at different sections'],
+    setuLine: 'Continuity means volume flow rate conservation. Bernoulli is energy conservation.'
+  },
+  {
+    id: 'phy-8-4',
+    chapterId: 'phy-8',
+    name: 'Viscosity & Stokes\' Law',
+    jeeAsks: ["Newton's law of viscosity", "Stokes' drag force", 'Terminal velocity of sphere falling in liquid', 'Poiseuille\'s equation (flow rate)'],
+    pyqFocus: { trends: ['Spherical bubble rising terminal speed', 'Ratio of terminal speeds for different radii'], patterns: ['F = 6π η r v', 'vt = 2r²(ρ - σ)g / (9η)'], traps: ['Bubble rising vs drop falling density signs', 'Forgetting terminal velocity depends on square of radius (vt ∝ r²)'] },
+    commonMistakes: ['Confusing viscosity with density', 'Neglecting buoyant force of air/medium when calculating drop speed'],
+    setuLine: 'Terminal velocity radius squared ke proportional hai. Bubble rise karegi kyunki air density < liquid density.'
+  },
+  {
+    id: 'phy-8-5',
+    chapterId: 'phy-8',
+    name: 'Surface Tension & Capillarity',
+    jeeAsks: ['Surface energy definition', 'Work done in blowing bubble/drop', 'Excess pressure in drop/bubble/air-bubble-in-liquid', "Capillary rise (Jurin's Law)"],
+    pyqFocus: { trends: ['Drops coalescing into larger drop heat change', 'Capillary rise in tilted tubes', 'Excess pressure in combined bubbles'], patterns: ['W = T ΔA', 'h = 2T cosθ / (ρ r g)', 'P_excess = 2T/R (drop/air bubble), 4T/R (soap bubble)'], traps: ['Using 2T/R for soap bubble instead of 4T/R', 'Forgetting soap bubble has two surfaces, so area change = 2 × 4πr²'] },
+    commonMistakes: ['Not multiplying by 2 for soap bubble area changes', 'Taking negative height for capillary depression (θ > 90) as positive'],
+    setuLine: 'Soap bubble has two free surfaces. Excess pressure 4T/R. Capillary rise cosθ pe depend karega.'
+  }
+];
+
 export const subchaptersByChapter: Record<string, Subchapter[]> = {
   // Physics
   'phy-1': kinematicsSubchapters,
   'phy-2': lawsOfMotionSubchapters,
   'phy-3': workEnergySubchapters,
-  'phy-4': rotationalMotionSubchapters,
-  'phy-5': gravitationSubchapters,
-  'phy-6': shmWavesSubchapters,
-  'phy-7': thermodynamicsSubchapters,
-  'phy-8': electrostaticsSubchapters,
-  'phy-9': currentElectricitySubchapters,
-  'phy-10': magnetismSubchapters,
-  'phy-11': opticsSubchapters,
-  'phy-12': modernPhysicsSubchapters,
+  'phy-4': systemOfParticlesSubchapters,
+  'phy-5': rotationalMotionSubchapters,
+  'phy-6': gravitationSubchapters,
+  'phy-7': solidsSubchapters,
+  'phy-8': fluidsSubchapters,
+  'phy-9': shmWavesSubchapters,
+  'phy-10': thermodynamicsSubchapters,
+  'phy-11': electrostaticsSubchapters,
+  'phy-12': currentElectricitySubchapters,
+  'phy-13': magnetismSubchapters,
+  'phy-14': opticsSubchapters,
+  'phy-15': modernPhysicsSubchapters,
   // Chemistry
   'chem-1': moleConceptSubchapters,
   'chem-2': atomicStructureSubchapters,

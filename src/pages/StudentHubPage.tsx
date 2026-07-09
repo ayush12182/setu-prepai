@@ -333,8 +333,12 @@ export default function StudentHubPage() {
           ) : (
             // STATE 2: CONTINUE LEARNING
             <>
-              <p className="text-body-lg font-bold text-slate-800 mb-1">Continue Learning</p>
-              <p className="text-caption font-medium text-slate-500 mb-3">Pick up where you left off.</p>
+              <p className="text-body-lg font-bold text-slate-800 mb-1">
+                {continueLearn ? 'Continue Learning' : 'Start Learning'}
+              </p>
+              <p className="text-caption font-medium text-slate-500 mb-3">
+                {continueLearn ? 'Pick up where you left off.' : 'Jump right into your first chapter.'}
+              </p>
               
               {continueLearn ? (() => {
                 const ContinueIcon = getSubjectIcon(continueLearn.IconName ?? 'BookOpen');

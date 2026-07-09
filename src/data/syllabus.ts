@@ -68,33 +68,16 @@ export const physicsChapters: Chapter[] = [
     weightage: 'High',
     difficulty: 'Medium',
     prerequisites: [],
-    topics: [
-      'Motion in 1D',
-      'Motion in 2D',
-      'Projectile Motion',
-      'Relative Motion',
-      'Graphs of Motion'
-    ],
-    keyFormulas: [
-      'v = u + at',
-      's = ut + ½at²',
-      'v² = u² + 2as',
-      'R = u²sin2θ/g (Range)',
-      'H = u²sin²θ/2g (Max Height)',
-      'T = 2usinθ/g (Time of Flight)'
-    ],
+    topics: ["Motion in 1D","Motion in 2D","Projectile Motion","Relative Motion","Graphs of Motion"],
+    keyFormulas: ["v = u + at","s = ut + ½at²","v² = u² + 2as","R = u²sin2θ/g (Range)","H = u²sin²θ/2g (Max Height)","T = 2usinθ/g (Time of Flight)"],
     pyqData: {
       total: 45,
       postCovid: 18,
       preCovid: 20,
       legacy: 7,
-      trendingConcepts: ['Projectile on incline', 'Relative velocity problems', 'Graph-based questions']
+      trendingConcepts: ["Projectile on incline","Relative velocity problems","Graph-based questions"]
     },
-    examTips: [
-      'Direction of velocity changes but speed may not',
-      'At highest point of projectile, vy = 0, not v',
-      'Use components for 2D problems'
-    ]
+    examTips: ["Direction of velocity changes but speed may not","At highest point of projectile, vy = 0, not v","Use components for 2D problems"]
   },
   {
     id: 'phy-2',
@@ -102,34 +85,17 @@ export const physicsChapters: Chapter[] = [
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Medium',
-    prerequisites: ['phy-1'],
-    topics: [
-      "Newton's Laws",
-      'Free Body Diagrams',
-      'Friction (Static & Kinetic)',
-      'Circular Motion Dynamics',
-      'Pseudo Forces',
-      'Constraint Relations'
-    ],
-    keyFormulas: [
-      'F = ma',
-      'fs ≤ μsN',
-      'fk = μkN',
-      'ac = v²/r = ω²r',
-      'Fpseudo = -ma (non-inertial frame)'
-    ],
+    prerequisites: ["phy-1"],
+    topics: ["Newton's Laws","Free Body Diagrams","Friction (Static & Kinetic)","Circular Motion Dynamics","Pseudo Forces","Constraint Relations"],
+    keyFormulas: ["F = ma","fs ≤ μsN","fk = μkN","ac = v²/r = ω²r","Fpseudo = -ma (non-inertial frame)"],
     pyqData: {
       total: 52,
       postCovid: 22,
       preCovid: 22,
       legacy: 8,
-      trendingConcepts: ['Pulley constraint problems', 'Friction on incline', 'Banking of roads']
+      trendingConcepts: ["Pulley constraint problems","Friction on incline","Banking of roads"]
     },
-    examTips: [
-      'Always draw FBD first',
-      'Check if friction is static or kinetic',
-      'Constraint: acceleration relation via string length'
-    ]
+    examTips: ["Always draw FBD first","Check if friction is static or kinetic","Constraint: acceleration relation via string length"]
   },
   {
     id: 'phy-3',
@@ -137,365 +103,233 @@ export const physicsChapters: Chapter[] = [
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Medium',
-    prerequisites: ['phy-1', 'phy-2'],
-    topics: [
-      'Work by constant/variable force',
-      'Work-Energy Theorem',
-      'Conservation of Energy',
-      'Potential Energy curves',
-      'Collisions (1D & 2D)',
-      'Power'
-    ],
-    keyFormulas: [
-      'W = F·s·cosθ',
-      'W = ∫F·dx',
-      'KE = ½mv²',
-      'PE (spring) = ½kx²',
-      'PE (gravity) = mgh',
-      'e = (v2-v1)/(u1-u2)',
-      'P = dW/dt = F·v'
-    ],
+    prerequisites: ["phy-1","phy-2"],
+    topics: ["Work by constant/variable force","Work-Energy Theorem","Conservation of Energy","Potential Energy curves","Collisions (1D & 2D)","Power"],
+    keyFormulas: ["W = F·s·cosθ","W = ∫F·dx","KE = ½mv²","PE (spring) = ½kx²","PE (gravity) = mgh","e = (v2-v1)/(u1-u2)","P = dW/dt = F·v"],
     pyqData: {
       total: 48,
       postCovid: 20,
       preCovid: 20,
       legacy: 8,
-      trendingConcepts: ['Collision problems', 'Variable force work', 'PE curve analysis']
+      trendingConcepts: ["Collision problems","Variable force work","PE curve analysis"]
     },
-    examTips: [
-      'Use energy conservation when forces are conservative',
-      'In collision, momentum always conserved',
-      'Check if collision is elastic (e=1) or inelastic'
-    ]
+    examTips: ["Use energy conservation when forces are conservative","In collision, momentum always conserved","Check if collision is elastic (e=1) or inelastic"]
   },
   {
     id: 'phy-4',
+    name: 'System of Particles & Centre of Mass',
+    subject: 'physics',
+    weightage: 'High',
+    difficulty: 'Medium',
+    prerequisites: ["phy-1","phy-2","phy-3"],
+    topics: ["Centre of Mass discrete system","Centre of Mass continuous bodies","Motion of Centre of Mass","Momentum Conservation & Recoil","Impulse & Variable Force","Collisions (1D & 2D)","Variable Mass Rocket Propulsion"],
+    keyFormulas: ["Xcm = Σm_i x_i / Σm_i","Xcm = ∫x dm / ∫dm","P_total = M Vcm","F_ext = M Acm","Impulse J = ∫F dt = ΔP","e = (v2 - v1) / (u1 - u2)","Thrust F = u (dm/dt)"],
+    pyqData: {
+      total: 40,
+      postCovid: 18,
+      preCovid: 15,
+      legacy: 7,
+      trendingConcepts: ["Cavity center of mass","Spring-block collision","Recoil boat-man"]
+    },
+    examTips: ["Internal forces never change velocity of center of mass","In oblique elastic identical mass collisions, angles add to 90 degrees","For variable mass, watch out for the sign of relative velocity"]
+  },
+  {
+    id: 'phy-5',
     name: 'Rotational Motion',
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Hard',
-    prerequisites: ['phy-1', 'phy-2', 'phy-3'],
-    topics: [
-      'Moment of Inertia',
-      'Parallel & Perpendicular Axis Theorems',
-      'Torque & Angular Momentum',
-      'Rotational Kinematics',
-      'Rolling Motion',
-      'Angular Impulse',
-      'Toppling vs Sliding'
-    ],
-    keyFormulas: [
-      'τ = r × F = Iα',
-      'L = Iω = r × p',
-      'I = Σmr² or ∫r²dm',
-      'I∥ = Icm + Md²',
-      'I⊥ = Ix + Iy (for lamina)',
-      'KE(rolling) = ½mv² + ½Iω²',
-      'v = ωr (pure rolling)'
-    ],
+    prerequisites: ["phy-1","phy-2","phy-3","phy-4"],
+    topics: ["Moment of Inertia","Parallel & Perpendicular Axis Theorems","Torque & Angular Momentum","Rotational Kinematics","Rolling Motion","Angular Impulse","Toppling vs Sliding"],
+    keyFormulas: ["τ = r × F = Iα","L = Iω = r × p","I = Σmr² or ∫r²dm","I∥ = Icm + Md²","I⊥ = Ix + Iy (for lamina)","KE(rolling) = ½mv² + ½Iω²","v = ωr (pure rolling)"],
     pyqData: {
       total: 55,
       postCovid: 24,
       preCovid: 23,
       legacy: 8,
-      trendingConcepts: ['Pure rolling problems', 'Angular momentum conservation', 'Toppling vs sliding']
+      trendingConcepts: ["Pure rolling problems","Angular momentum conservation","Toppling vs sliding"]
     },
-    examTips: [
-      'For rolling: v = ωr at contact point',
-      'Use energy method for incline problems',
-      'Angular momentum conserved if no external torque'
-    ]
+    examTips: ["For rolling: v = ωr at contact point","Use energy method for incline problems","Angular momentum conserved if no external torque"]
   },
   {
-    id: 'phy-5',
+    id: 'phy-6',
     name: 'Gravitation',
     subject: 'physics',
     weightage: 'Medium',
     difficulty: 'Medium',
-    prerequisites: ['phy-1', 'phy-2'],
-    topics: [
-      "Newton's Law of Gravitation",
-      'Gravitational Field & Potential',
-      'Orbital Motion',
-      'Escape & Orbital Velocity',
-      "Kepler's Laws",
-      'Satellites'
-    ],
-    keyFormulas: [
-      'F = GMm/r²',
-      'g = GM/R²',
-      've = √(2gR) = √(2GM/R)',
-      'vo = √(gR) = √(GM/R)',
-      'T² ∝ a³ (Kepler III)',
-      'U = -GMm/r'
-    ],
+    prerequisites: ["phy-1","phy-2"],
+    topics: ["Newton's Law of Gravitation","Gravitational Field & Potential","Orbital Motion","Escape & Orbital Velocity","Kepler's Laws","Satellites"],
+    keyFormulas: ["F = GMm/r²","g = GM/R²","ve = √(2gR) = √(2GM/R)","vo = √(gR) = √(GM/R)","T² ∝ a³ (Kepler III)","U = -GMm/r"],
     pyqData: {
       total: 35,
       postCovid: 14,
       preCovid: 15,
       legacy: 6,
-      trendingConcepts: ['Satellite problems', 'Variation of g', 'Energy in orbits']
+      trendingConcepts: ["Satellite problems","Variation of g","Energy in orbits"]
     },
-    examTips: [
-      'Negative sign in potential energy is important',
-      'At surface: use g, not G formula',
-      'Geostationary orbit: T = 24 hrs'
-    ]
+    examTips: ["Negative sign in potential energy is important","At surface: use g, not G formula","Geostationary orbit: T = 24 hrs"]
   },
   {
-    id: 'phy-6',
+    id: 'phy-7',
+    name: 'Mechanical Properties of Solids',
+    subject: 'physics',
+    weightage: 'Medium',
+    difficulty: 'Medium',
+    prerequisites: ["phy-2","phy-3"],
+    topics: ["Elastic behavior","Stress-strain relationship","Hooke's law","Young's modulus, bulk modulus, shear modulus","Poisson's ratio","Elastic potential energy in stretched wire"],
+    keyFormulas: ["Stress = F/A","Strain = ΔL/L","Young Modulus Y = (F/A)/(ΔL/L)","Bulk Modulus B = -V ΔP/ΔV","Shear Modulus G = (F/A)/θ","Elastic PE density u = ½ × Stress × Strain = ½ Y × Strain²"],
+    pyqData: {
+      total: 25,
+      postCovid: 10,
+      preCovid: 11,
+      legacy: 4,
+      trendingConcepts: ["Elongation of rod under own weight","Composite wires","Thermal stress"]
+    },
+    examTips: ["Poisson ratio limit: -1 to 0.5 (practically positive)","Work done in stretching a wire is stored as elastic PE","Thermal stress equation: F/A = Y α ΔT"]
+  },
+  {
+    id: 'phy-8',
+    name: 'Mechanical Properties of Fluids',
+    subject: 'physics',
+    weightage: 'High',
+    difficulty: 'Medium',
+    prerequisites: ["phy-2","phy-3","phy-7"],
+    topics: ["Fluid Pressure & Pascal's Law","Buoyancy & Archimedes Principle","Viscosity & Stokes' Law","Terminal Velocity","Equation of Continuity","Bernoulli's Theorem & Applications","Surface Tension & Excess Pressure","Capillarity"],
+    keyFormulas: ["P = P0 + ρgh","Continuity: A1v1 = A2v2","Bernoulli: P + ½ρv² + ρgh = constant","Stokes: F = 6π η r v","Terminal Velocity vt = 2r²(ρ - σ)g / (9η)","Excess Pressure drop = 2T/R, bubble = 4T/R","Capillary Rise h = 2T cosθ / (ρ r g)"],
+    pyqData: {
+      total: 38,
+      postCovid: 15,
+      preCovid: 16,
+      legacy: 7,
+      trendingConcepts: ["Terminal velocity ratios","Bernoulli venturimeter","Capillary rise","Excess pressure work"]
+    },
+    examTips: ["In terminal velocity, net acceleration is zero","Bernoulli is energy conservation for streamline flow","Wetting vs non-wetting capillary angles (θ < 90 vs θ > 90)"]
+  },
+  {
+    id: 'phy-9',
     name: 'SHM & Waves',
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Hard',
-    prerequisites: ['phy-1'],
-    topics: [
-      'Simple Harmonic Motion',
-      'Spring-Mass System',
-      'Simple Pendulum',
-      'Wave Equation',
-      'Superposition',
-      'Standing Waves',
-      'Beats & Doppler Effect'
-    ],
-    keyFormulas: [
-      'x = A sin(ωt + φ)',
-      'v = Aω cos(ωt + φ)',
-      'a = -ω²x',
-      'T = 2π√(m/k) (spring)',
-      'T = 2π√(l/g) (pendulum)',
-      'v = √(T/μ) (wave on string)',
-      "f' = f(v±vo)/(v∓vs) (Doppler)"
-    ],
+    prerequisites: ["phy-1"],
+    topics: ["Simple Harmonic Motion","Spring-Mass System","Simple Pendulum","Wave Equation","Superposition","Standing Waves","Beats & Doppler Effect"],
+    keyFormulas: ["x = A sin(ωt + φ)","v = Aω cos(ωt + φ)","a = -ω²x","T = 2π√(m/k) (spring)","T = 2π√(l/g) (pendulum)","v = √(T/μ) (wave on string)","f' = f(v±vo)/(v∓vs) (Doppler)"],
     pyqData: {
       total: 50,
       postCovid: 21,
       preCovid: 21,
       legacy: 8,
-      trendingConcepts: ['Combination of SHMs', 'Standing wave problems', 'Doppler effect']
+      trendingConcepts: ["Combination of SHMs","Standing wave problems","Doppler effect"]
     },
-    examTips: [
-      'Energy in SHM oscillates between KE and PE',
-      'Phase difference important in superposition',
-      'For standing waves: nodes and antinodes fixed'
-    ]
+    examTips: ["Energy in SHM oscillates between KE and PE","Phase difference important in superposition","For standing waves: nodes and antinodes fixed"]
   },
   {
-    id: 'phy-7',
+    id: 'phy-10',
     name: 'Thermodynamics',
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Medium',
     prerequisites: [],
-    topics: [
-      'First Law of Thermodynamics',
-      'Thermodynamic Processes',
-      'Heat Engines',
-      'Carnot Cycle',
-      'Entropy',
-      'Kinetic Theory of Gases'
-    ],
-    keyFormulas: [
-      'dQ = dU + dW',
-      'W = ∫PdV',
-      'PV = nRT',
-      'Cp - Cv = R',
-      'η = 1 - T2/T1 (Carnot)',
-      'vrms = √(3RT/M)'
-    ],
+    topics: ["First Law of Thermodynamics","Thermodynamic Processes","Heat Engines","Carnot Cycle","Entropy","Kinetic Theory of Gases"],
+    keyFormulas: ["dQ = dU + dW","W = ∫PdV","PV = nRT","Cp - Cv = R","η = 1 - T2/T1 (Carnot)","vrms = √(3RT/M)"],
     pyqData: {
       total: 42,
       postCovid: 18,
       preCovid: 18,
       legacy: 6,
-      trendingConcepts: ['PV diagram analysis', 'Process identification', 'Engine efficiency']
+      trendingConcepts: ["PV diagram analysis","Process identification","Engine efficiency"]
     },
-    examTips: [
-      'For cyclic process: ΔU = 0',
-      'Isothermal: ΔT = 0, ΔU = 0',
-      'Adiabatic: Q = 0'
-    ]
+    examTips: ["For cyclic process: ΔU = 0","Isothermal: ΔT = 0, ΔU = 0","Adiabatic: Q = 0"]
   },
   {
-    id: 'phy-8',
+    id: 'phy-11',
     name: 'Electrostatics',
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Hard',
     prerequisites: [],
-    topics: [
-      "Coulomb's Law",
-      'Electric Field',
-      "Gauss's Law",
-      'Electric Potential',
-      'Capacitors',
-      'Dielectrics'
-    ],
-    keyFormulas: [
-      'F = kq1q2/r²',
-      'E = kq/r²',
-      'V = kq/r',
-      'φ = ∫E·dA = qenc/ε0',
-      'C = ε0A/d (parallel plate)',
-      'U = ½CV² = ½QV = Q²/2C'
-    ],
+    topics: ["Coulomb's Law","Electric Field","Gauss's Law","Electric Potential","Capacitors","Dielectrics"],
+    keyFormulas: ["F = kq1q2/r²","E = kq/r²","V = kq/r","φ = ∫E·dA = qenc/ε0","C = ε0A/d (parallel plate)","U = ½CV² = ½QV = Q²/2C"],
     pyqData: {
       total: 58,
       postCovid: 25,
       preCovid: 25,
       legacy: 8,
-      trendingConcepts: ['Capacitor combinations', 'Gauss law applications', 'Conductor properties']
+      trendingConcepts: ["Capacitor combinations","Gauss law applications","Conductor properties"]
     },
-    examTips: [
-      'Inside conductor: E = 0',
-      'Capacitors in series: 1/C = Σ(1/Ci)',
-      'Energy stored changes when battery disconnected vs connected'
-    ]
+    examTips: ["Inside conductor: E = 0","Capacitors in series: 1/C = Σ(1/Ci)","Energy stored changes when battery disconnected vs connected"]
   },
   {
-    id: 'phy-9',
+    id: 'phy-12',
     name: 'Current Electricity',
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Medium',
-    prerequisites: ['phy-8'],
-    topics: [
-      "Ohm's Law",
-      'Resistance & Resistivity',
-      "Kirchhoff's Laws",
-      'RC Circuits',
-      'Electrical Instruments',
-      'Heating Effect'
-    ],
-    keyFormulas: [
-      'V = IR',
-      'R = ρl/A',
-      'P = I²R = V²/R = VI',
-      'Rs = R1 + R2 + ...',
-      '1/Rp = 1/R1 + 1/R2 + ...',
-      'q = q0(1 - e^(-t/RC))'
-    ],
+    prerequisites: ["phy-11"],
+    topics: ["Ohm's Law","Resistance & Resistivity","Kirchhoff's Laws","RC Circuits","Electrical Instruments","Heating Effect"],
+    keyFormulas: ["V = IR","R = ρl/A","P = I²R = V²/R = VI","Rs = R1 + R2 + ...","1/Rp = 1/R1 + 1/R2 + ...","q = q0(1 - e^(-t/RC))"],
     pyqData: {
       total: 55,
       postCovid: 23,
       preCovid: 24,
       legacy: 8,
-      trendingConcepts: ['Meter bridge', 'Potentiometer', 'RC circuit charging/discharging']
+      trendingConcepts: ["Meter bridge","Potentiometer","RC circuit charging/discharging"]
     },
-    examTips: [
-      'Use Kirchhoff when circuit is complex',
-      'Wheatstone bridge: no current through galvanometer when balanced',
-      'Time constant τ = RC'
-    ]
+    examTips: ["Use Kirchhoff when circuit is complex","Wheatstone bridge: no current through galvanometer when balanced","Time constant τ = RC"]
   },
   {
-    id: 'phy-10',
+    id: 'phy-13',
     name: 'Magnetism & EMI',
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Hard',
-    prerequisites: ['phy-9'],
-    topics: [
-      'Biot-Savart Law',
-      "Ampere's Law",
-      'Magnetic Force on Current',
-      "Faraday's Law",
-      "Lenz's Law",
-      'Inductance',
-      'AC Circuits'
-    ],
-    keyFormulas: [
-      'dB = (μ0/4π)(Idl × r̂)/r²',
-      'F = qv × B = BIL',
-      'ε = -dφ/dt',
-      'φ = LI',
-      'XL = ωL, XC = 1/ωC',
-      'Z = √(R² + (XL-XC)²)'
-    ],
+    prerequisites: ["phy-12"],
+    topics: ["Biot-Savart Law","Ampere's Law","Magnetic Force on Current","Faraday's Law","Lenz's Law","Inductance","AC Circuits"],
+    keyFormulas: ["dB = (μ0/4π)(Idl × r̂)/r²","F = qv × B = BIL","ε = -dφ/dt","φ = LI","XL = ωL, XC = 1/ωC","Z = √(R² + (XL-XC)²)"],
     pyqData: {
       total: 52,
       postCovid: 22,
       preCovid: 22,
       legacy: 8,
-      trendingConcepts: ['LCR circuits', 'Motional EMF', 'Transformer problems']
+      trendingConcepts: ["LCR circuits","Motional EMF","Transformer problems"]
     },
-    examTips: [
-      'Lenz law: induced current opposes change',
-      'At resonance: XL = XC, Z = R',
-      'Power factor = cosφ = R/Z'
-    ]
+    examTips: ["Lenz law: induced current opposes change","At resonance: XL = XC, Z = R","Power factor = cosφ = R/Z"]
   },
   {
-    id: 'phy-11',
+    id: 'phy-14',
     name: 'Optics',
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Medium',
-    prerequisites: ['phy-6'],
-    topics: [
-      'Reflection & Mirrors',
-      'Refraction & Lenses',
-      'Prism & Dispersion',
-      'Interference',
-      'Diffraction',
-      'Polarization'
-    ],
-    keyFormulas: [
-      '1/v + 1/u = 1/f (mirror/lens)',
-      'n = sin i / sin r',
-      'δ = (n-1)A (thin prism)',
-      'Path diff = d sinθ',
-      'β = λD/d (fringe width)',
-      'I = I0 cos²θ (Malus law)'
-    ],
+    prerequisites: ["phy-9"],
+    topics: ["Reflection & Mirrors","Refraction & Lenses","Prism & Dispersion","Interference","Diffraction","Polarization"],
+    keyFormulas: ["1/v + 1/u = 1/f (mirror/lens)","n = sin i / sin r","δ = (n-1)A (thin prism)","Path diff = d sinθ","β = λD/d (fringe width)","I = I0 cos²θ (Malus law)"],
     pyqData: {
       total: 48,
       postCovid: 20,
       preCovid: 20,
       legacy: 8,
-      trendingConcepts: ['YDSE variations', 'Lens combinations', 'TIR applications']
+      trendingConcepts: ["YDSE variations","Lens combinations","TIR applications"]
     },
-    examTips: [
-      'Sign convention is crucial',
-      'For thin lens: power = 1/f (in meters)',
-      'YDSE: central fringe always bright'
-    ]
+    examTips: ["Sign convention is crucial","For thin lens: power = 1/f (in meters)","YDSE: central fringe always bright"]
   },
   {
-    id: 'phy-12',
+    id: 'phy-15',
     name: 'Modern Physics',
     subject: 'physics',
     weightage: 'High',
     difficulty: 'Medium',
     prerequisites: [],
-    topics: [
-      'Photoelectric Effect',
-      'Bohr Model',
-      'X-rays',
-      'Nuclear Physics',
-      'Radioactivity',
-      'Semiconductors'
-    ],
-    keyFormulas: [
-      'E = hν = hc/λ',
-      'KEmax = hν - φ',
-      'En = -13.6/n² eV (H-atom)',
-      'λ = h/mv (de Broglie)',
-      'N = N0 e^(-λt)',
-      't½ = 0.693/λ'
-    ],
+    topics: ["Photoelectric Effect","Bohr Model","X-rays","Nuclear Physics","Radioactivity","Semiconductors"],
+    keyFormulas: ["E = hν = hc/λ","KEmax = hν - φ","En = -13.6/n² eV (H-atom)","λ = h/mv (de Broglie)","N = N0 e^(-λt)","t½ = 0.693/λ"],
     pyqData: {
       total: 52,
       postCovid: 22,
       preCovid: 22,
       legacy: 8,
-      trendingConcepts: ['Photoelectric graphs', 'H-atom transitions', 'Radioactive decay chains']
+      trendingConcepts: ["Photoelectric graphs","H-atom transitions","Radioactive decay chains"]
     },
-    examTips: [
-      'Photoelectric: frequency matters, not intensity (for emission)',
-      'Ground state n=1, first excited n=2',
-      'Half-life problems: use N = N0/2^n'
-    ]
+    examTips: ["Photoelectric: frequency matters, not intensity (for emission)","Ground state n=1, first excited n=2","Half-life problems: use N = N0/2^n"]
   }
 ];
 

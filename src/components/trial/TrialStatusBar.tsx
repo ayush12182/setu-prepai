@@ -51,33 +51,33 @@ export const TrialStatusBar: React.FC = () => {
 
     // Dynamic styles based on urgency
     const bannerBg = isLastDay 
-        ? 'bg-red-50 border-red-200' 
-        : 'bg-gradient-to-r from-[#EEF4FF] to-[#F8FBFF] border-[#D6E4FF]';
+        ? 'bg-red-600 border-red-700 text-white' 
+        : 'bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-indigo-900/50 text-white';
         
     const timeColor = isLastDay || isWarning 
-        ? 'text-red-600 font-bold' 
+        ? 'text-red-300 font-bold' 
         : isAmber 
-        ? 'text-amber-600 font-bold' 
-        : 'text-blue-600 font-bold';
+        ? 'text-amber-400 font-bold' 
+        : 'text-indigo-300 font-bold';
         
-    const timeIconColor = isLastDay || isWarning ? 'text-red-500' : isAmber ? 'text-amber-500' : 'text-blue-500';
+    const timeIconColor = isLastDay || isWarning ? 'text-red-400' : isAmber ? 'text-amber-400' : 'text-indigo-400';
 
     return (
         <div className={`relative w-full border-b transition-all duration-300 ${bannerBg}`}>
             <div className="max-w-7xl mx-auto px-4 py-2 sm:py-2.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs md:text-sm relative z-10">
                 
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 flex-1 min-w-0">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-bold text-[10px] sm:text-xs text-blue-700 bg-blue-100/50 border border-blue-200 shrink-0">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-bold text-[10px] sm:text-xs text-white bg-white/20 border border-white/20 shrink-0 shadow-sm backdrop-blur-sm">
                         ✨ Free Trial Active
                     </span>
 
-                    <span className="text-slate-300 hidden sm:inline">|</span>
+                    <span className="text-white/30 hidden sm:inline">|</span>
                     
-                    <span className={`text-slate-700 font-medium hidden md:inline`}>
+                    <span className={`text-white/90 font-medium hidden md:inline`}>
                         Enjoy all premium features.
                     </span>
 
-                    <span className="text-slate-300 hidden md:inline">|</span>
+                    <span className="text-white/30 hidden md:inline">|</span>
 
                     <span className={`flex items-center gap-1.5 font-medium whitespace-nowrap ${timeColor}`}>
                         {isLastDay || isWarning ? (
@@ -95,7 +95,7 @@ export const TrialStatusBar: React.FC = () => {
                         )}
                     </span>
                     
-                    <span className="text-slate-500 hidden xl:inline ml-1 font-normal">• After your trial ends, you'll need a Premium plan to continue learning.</span>
+                    <span className="text-white/60 hidden xl:inline ml-1 font-normal">• After your trial ends, you'll need a Premium plan to continue learning.</span>
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
@@ -103,19 +103,19 @@ export const TrialStatusBar: React.FC = () => {
                         size="sm"
                         onClick={handleUpgrade}
                         disabled={isProcessing}
-                        className="h-8 px-4 text-xs sm:text-sm font-bold rounded-lg transition-all duration-300 shadow-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:shadow-md hover:-translate-y-0.5"
+                        className="h-8 px-4 text-xs sm:text-sm font-bold rounded-lg transition-all duration-300 shadow-sm bg-white text-indigo-900 hover:bg-slate-100 hover:shadow-md hover:-translate-y-0.5 border-0"
                     >
                         {isProcessing ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                            <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5 text-indigo-900" />
                         ) : (
-                            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-indigo-600" />
                         )}
                         Upgrade to Premium
                     </Button>
 
                     <button 
                         onClick={handleDismiss}
-                        className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors p-1.5"
+                        className="text-white/50 hover:text-white hover:bg-white/10 rounded-lg transition-colors p-1.5"
                         aria-label="Dismiss banner"
                     >
                         <X className="w-4 h-4" />

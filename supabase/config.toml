@@ -93,6 +93,9 @@ verify_jwt = false
 [functions.get-batch-leaderboard]
 verify_jwt = false
 
+[functions.seed-curriculum]
+verify_jwt = false
+
 [functions.count-questions]
 enabled = true
 verify_jwt = true

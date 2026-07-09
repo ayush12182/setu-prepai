@@ -14,17 +14,20 @@ export const physicsClassMapping: ClassChapterMapping[] = [
   { chapterId: 'phy-1', class: '11' },  // Kinematics
   { chapterId: 'phy-2', class: '11' },  // Laws of Motion
   { chapterId: 'phy-3', class: '11' },  // Work, Energy & Power
-  { chapterId: 'phy-4', class: '11' },  // Rotational Motion
-  { chapterId: 'phy-5', class: '11' },  // Gravitation
-  { chapterId: 'phy-6', class: '11' },  // SHM & Waves
-  { chapterId: 'phy-7', class: '11' },  // Thermodynamics
+  { chapterId: 'phy-4', class: '11' },  // System of Particles & Centre of Mass
+  { chapterId: 'phy-5', class: '11' },  // Rotational Motion
+  { chapterId: 'phy-6', class: '11' },  // Gravitation
+  { chapterId: 'phy-7', class: '11' },  // Mechanical Properties of Solids
+  { chapterId: 'phy-8', class: '11' },  // Mechanical Properties of Fluids
+  { chapterId: 'phy-9', class: '11' },  // SHM & Waves
+  { chapterId: 'phy-10', class: '11' }, // Thermodynamics
   
   // Class 12 Physics
-  { chapterId: 'phy-8', class: '12' },  // Electrostatics
-  { chapterId: 'phy-9', class: '12' },  // Current Electricity
-  { chapterId: 'phy-10', class: '12' }, // Magnetism & EMI
-  { chapterId: 'phy-11', class: '12' }, // Optics
-  { chapterId: 'phy-12', class: '12' }, // Modern Physics
+  { chapterId: 'phy-11', class: '12' }, // Electrostatics
+  { chapterId: 'phy-12', class: '12' }, // Current Electricity
+  { chapterId: 'phy-13', class: '12' }, // Magnetism & EMI
+  { chapterId: 'phy-14', class: '12' }, // Optics
+  { chapterId: 'phy-15', class: '12' }, // Modern Physics
 ];
 
 // Chemistry chapters mapped to class

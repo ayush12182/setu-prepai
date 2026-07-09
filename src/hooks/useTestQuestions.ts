@@ -308,6 +308,7 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: st
 export const useTestQuestions = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [generationMode, setGenerationMode] = useState<'ai' | 'offline' | 'recovery' | 'idle' | 'fetching'>('idle');
   const { examMode, isCuet, isNeet } = useExamMode();
@@ -319,6 +320,7 @@ export const useTestQuestions = () => {
     questionsPerChapter: number = 5
   ) => {
     setLoading(true);
+    setLoadingMessage('Initializing test engine...');
     setError(null);
     setQuestions([]);
     setGenerationMode('fetching');
@@ -328,154 +330,100 @@ export const useTestQuestions = () => {
 
       // Fetch questions from each chapter
       for (const chapter of chapters) {
-        // First try to get existing questions from database
-        // Select pdf_sources relation to verify style
-        let query = supabase
-          .from('questions')
-          .select('*')
-          .eq('verification_status', 'APPROVED')
-          .eq('chapter_id', chapter.chapterId);
-
-        if (chapter.subchapterId) {
-          query = query.eq('subchapter_id', chapter.subchapterId);
-        }
-
-        const { data: dbData, error: fetchError } = await withTimeout(
-          Promise.resolve(query),
-          2500,
-          'Database query timed out'
-        );
-
-        if (fetchError) {
-          throw fetchError;
-        }
-
-        let chapterQuestions: any[] = [];
-
-        if (dbData && dbData.length > 0) {
-          // Separate real vs. approved AI questions
-          const realQs = dbData.filter(q => !q.is_ai_generated);
-          const aiQs = dbData.filter(q => q.is_ai_generated);
-
-          // Sort by quality score, then randomly
-          const sortPool = (pool: any[]) =>
-            pool.sort((a, b) => {
-              const qualityOrder: Record<string, number> = { 'ELITE': 3, 'GOOD': 2, 'AVERAGE': 1, 'REJECTED': 0 };
-              const qA = qualityOrder[a.question_quality_score || 'AVERAGE'] || 1;
-              const qB = qualityOrder[b.question_quality_score || 'AVERAGE'] || 1;
-              if (qA !== qB) return qB - qA;
-              return Math.random() - 0.5;
-            });
-
-          // Sort both pools
-          const sortedReal = sortPool([...realQs]);
-          const sortedAI = sortPool([...aiQs]);
-
-          // Calculate 70/30 distribution
-          const targetRealCount = Math.max(1, Math.round(questionsPerChapter * 0.7));
-          const targetAICount = questionsPerChapter - targetRealCount;
-
-          // Select questions
-          const selectedReal = sortedReal.slice(0, targetRealCount);
-          const selectedAI = sortedAI.slice(0, targetAICount);
-
-          chapterQuestions = [...selectedReal, ...selectedAI];
-
-          // Fill gap from remaining pools if needed
-          if (chapterQuestions.length < questionsPerChapter) {
-            const remainingReal = sortedReal.slice(targetRealCount);
-            const remainingAI = sortedAI.slice(targetAICount);
-            const extraPool = [...remainingReal, ...remainingAI].sort(() => Math.random() - 0.5);
-            const gap = questionsPerChapter - chapterQuestions.length;
-            chapterQuestions.push(...extraPool.slice(0, gap));
-          }
-        }
-
-        if (chapterQuestions.length >= questionsPerChapter) {
-          const mapped = chapterQuestions.map((q: any) => {
-            const shuffledQ = shuffleQuestionOptions(q);
-            return mapDbQuestionToQuestion(shuffledQ);
+        setLoadingMessage(`Checking cache for ${chapter.chapterName}...`);
+        try {
+          const invokePromise = supabase.functions.invoke('generate-test', {
+            body: {
+              exam: examModeUpper,
+              subject: chapter.subject,
+              chapter: chapter.chapterName,
+              difficulty: 'medium',
+              count: questionsPerChapter
+            }
           });
-          allQuestions.push(...mapped);
-          setGenerationMode('ai');
-        } else {
-          // Calculate the remaining count needed
-          const gap = questionsPerChapter - chapterQuestions.length;
-          
-          try {
-            const genResult = await withTimeout(
-              getUnifiedQuestions({
-                exam: examModeUpper,
-                subject: chapter.subject,
-                chapter: chapter.chapterName,
-                subchapter: chapter.subchapterName || chapter.chapterName,
-                difficulty: 'medium',
-                count: gap
-              }),
-              3000,
-              'Unified question generation timed out'
-            );
-            
-            if (genResult?.questions?.length > 0) {
-              const mapped = genResult.questions.map((q: any) => {
-                const shuffledQ = shuffleQuestionOptions(q);
-                return mapDbQuestionToQuestion(shuffledQ);
-              });
-              allQuestions.push(...mapped);
-              setGenerationMode(genResult.generationMode);
+
+          const { data, error: fnError } = await withTimeout(
+            invokePromise,
+            30000, // Allow up to 30s for inline generation when cache is completely empty
+            'Edge function generation timed out'
+          );
+
+          if (fnError) {
+            console.error('generate-test edge function error:', fnError);
+            throw fnError;
+          }
+
+          if (data && data.questions) {
+            if (data.generationMode?.includes('ai')) {
+              setLoadingMessage(`Generated new questions for ${chapter.chapterName}...`);
             } else {
-              // Final fallback to getOfflineQuestions directly if result is empty
-              const offlineQs = getOfflineQuestions(chapter.subject, chapter.chapterName, 'medium', gap);
+              setLoadingMessage(`Loaded ${chapter.chapterName} from cache...`);
+            }
+
+            const mapped = data.questions.map((q: any) => {
+              const shuffledQ = shuffleQuestionOptions(q);
+              return mapDbQuestionToQuestion(shuffledQ);
+            });
+            allQuestions.push(...mapped);
+            setGenerationMode(data.generationMode || 'ai');
+
+            // Fire and forget background trigger if threshold met
+            if (data.triggerBackground) {
+              supabase.functions.invoke('generate-test', {
+                body: {
+                  exam: examModeUpper,
+                  subject: chapter.subject,
+                  chapter: chapter.chapterName,
+                  difficulty: 'medium',
+                  count: data.backgroundCount || 100,
+                  isBackgroundJob: true
+                }
+              }).catch(e => console.warn("Background trigger failed:", e));
+            }
+          }
+        } catch (genErr) {
+          console.error('Generation failed for chapter:', chapter.chapterName, genErr);
+          // In production, we might want to alert the user or fallback to cached ONLY.
+          // For now, we will just continue to the next chapter so the test doesn't completely fail.
+        }
+      }
+
+      if (!allQuestions || allQuestions.length === 0) {
+        console.warn("[TestEngine] Live generation returned 0 questions. Engaging self-healing offline fallback...");
+        setLoadingMessage('Engaging offline self-healing engine...');
+        
+        for (const chapter of chapters) {
+          try {
+            const offlineQs = getOfflineQuestions(chapter.subject || 'Physics', chapter.chapterName, 'medium', questionsPerChapter);
+            if (offlineQs && offlineQs.length > 0) {
               const mapped = offlineQs.map((q: any) => {
                 const shuffledQ = shuffleQuestionOptions(q);
                 return mapDbQuestionToQuestion(shuffledQ);
               });
               allQuestions.push(...mapped);
-              setGenerationMode('offline');
+            } else {
+              const mockQs = generateOfflineMockQuestions(chapter.chapterName, examModeUpper, 'medium', questionsPerChapter);
+              allQuestions.push(...mockQs);
             }
-          } catch (genErr) {
-            console.error('Unified generation failed for chapter:', chapter.chapterName, genErr);
-            
-            // Final fallback to getOfflineQuestions directly
-            const offlineQs = getOfflineQuestions(chapter.subject, chapter.chapterName, 'medium', gap);
-            const mapped = offlineQs.map((q: any) => {
-              const shuffledQ = shuffleQuestionOptions(q);
-              return mapDbQuestionToQuestion(shuffledQ);
-            });
-            allQuestions.push(...mapped);
-            setGenerationMode('offline');
+          } catch (e) {
+            console.error("Failed to load fallback questions for chapter:", chapter.chapterName, e);
           }
         }
       }
 
       if (!allQuestions || allQuestions.length === 0) {
-        throw new Error('No questions fetched or generated');
+        throw new Error('No questions could be generated or fetched. Please try again.');
       }
 
       // Shuffle all questions
       const shuffledAll = allQuestions.sort(() => Math.random() - 0.5);
       setQuestions(shuffledAll);
       return shuffledAll;
-    } catch (err) {
-      console.warn('fetchMixedTestQuestions failed, silently falling back to offline generator:', err);
-      const fallbackQs: Question[] = [];
-      for (const chapter of chapters) {
-        try {
-          const offlineQs = getOfflineQuestions(chapter.subject, chapter.chapterName, 'medium', questionsPerChapter);
-          const mapped = offlineQs.map((q: any) => {
-            const shuffledQ = shuffleQuestionOptions(q);
-            return mapDbQuestionToQuestion(shuffledQ);
-          });
-          fallbackQs.push(...mapped);
-        } catch (offlineErr) {
-          console.error('Offline questions failed inside catch:', offlineErr);
-        }
-      }
-      const shuffledAll = fallbackQs.sort(() => Math.random() - 0.5);
-      setQuestions(shuffledAll);
-      setGenerationMode('offline');
-      setError(null);
-      return shuffledAll;
+    } catch (err: any) {
+      console.error('fetchMixedTestQuestions failed:', err);
+      setError(err.message || 'Failed to generate test');
+      setGenerationMode('idle');
+      return [];
     } finally {
       setLoading(false);
     }
@@ -752,6 +700,7 @@ export const useTestQuestions = () => {
   return {
     questions,
     loading,
+    loadingMessage,
     error,
     generationMode,
     fetchMixedTestQuestions,

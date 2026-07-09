@@ -3,7 +3,7 @@ import { useTestQuestions, ChapterSelection } from '@/hooks/useTestQuestions';
 import { Question } from '@/hooks/usePracticeQuestions';
 import TestResults from '@/components/practice/TestResults';
 import { TestAnswer } from '@/components/practice/TestModeQuiz';
-import { Loader2, AlertCircle, Info, HelpCircle, ArrowLeft, BookOpen, PenTool, X, Flame } from 'lucide-react';
+import { Sparkles, Loader2, AlertCircle, Info, HelpCircle, ArrowLeft, BookOpen, PenTool, X, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -229,6 +229,7 @@ const TestExecution: React.FC<TestExecutionProps> = ({
   const {
     questions,
     loading,
+    loadingMessage,
     error,
     generationMode,
     fetchMixedTestQuestions,
@@ -551,11 +552,21 @@ const TestExecution: React.FC<TestExecutionProps> = ({
   // Loading screen
   if (loading || !fetchDone || step === 'loading') {
     return (
-      <div className="flex flex-col items-center justify-center py-20 max-w-md mx-auto text-center space-y-4">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-        <div>
-          <p className="text-sm font-bold text-white uppercase tracking-wider">Loading Mock Test Details</p>
-          <p className="text-xs text-slate-400 mt-1">Generating mock candidate questions matching official standards...</p>
+      <div className="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center">
+        <div className="text-center space-y-6 max-w-sm w-full px-6">
+          <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+            <div className="absolute inset-0 border-4 border-slate-800 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-t-primary border-r-primary rounded-full animate-spin"></div>
+            <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white mb-2">{loadingMessage || 'Initializing Test Engine...'}</h2>
+            <p className="text-sm text-slate-400">
+              {loadingMessage?.includes('Generated') || loadingMessage?.includes('Checking') 
+                ? 'Building your personalized practice session. This may take a moment.' 
+                : 'Please wait while we prepare your questions.'}
+            </p>
+          </div>
         </div>
       </div>
     );

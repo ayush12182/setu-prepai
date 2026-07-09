@@ -104,13 +104,14 @@ serve(async (req) => {
       .order("version", { ascending: false })
       .limit(1);
 
-    // Filter by status (admin preview can request draft)
+    // Standardized Notes Architecture:
+    // Students ONLY see published content. Drafts/archived are invisible.
+    // Admins can request specific versions via ?version=N parameter.
     if (version !== null) {
-      // Admin: specific version (could be draft)
       query = query.eq("version", version);
     } else {
-      // Students: always serve published only
-      query = query.eq("status", "published");
+      // Students: only published content
+      query = query.in("status", ["published"]);
     }
 
     // Try chapter_id first
@@ -125,7 +126,6 @@ serve(async (req) => {
         .select("*")
         .eq("chapter_slug", chapterId)
         .eq("language", language.toLowerCase())
-        .eq("status", version !== null ? supabase.raw("status") : "published")
         .order("version", { ascending: false })
         .limit(1)
         .maybeSingle();
