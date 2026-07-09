@@ -337,6 +337,7 @@ export const useTestQuestions = () => {
               exam: examModeUpper,
               subject: chapter.subject,
               chapter: chapter.chapterName,
+              chapterId: chapter.chapterId,
               difficulty: 'medium',
               count: questionsPerChapter
             }
