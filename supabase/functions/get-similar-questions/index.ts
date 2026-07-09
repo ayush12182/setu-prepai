@@ -30,33 +30,6 @@ async function getEmbedding(apiKey: string, text: string): Promise<number[] | nu
   }
 }
 
-async function generateQuestionAI(apiKey: string, systemPrompt: string, userPrompt: string): Promise<any> {
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
-      generationConfig: {
-        temperature: 0.6,
-        response_mime_type: 'application/json'
-      }
-    })
-  });
-  if (!res.ok) {
-    throw new Error(`Gemini error: ${await res.text()}`);
-  }
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Gemini returned empty response");
-  
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    const cleanString = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    return JSON.parse(cleanString);
-  }
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -68,7 +41,6 @@ serve(async (req) => {
 
     const { conceptTested, subchapterName, subject, originalQuestion, count = 3 } = await req.json();
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured");
 
     // 1. Fetch original question metadata and ID
     const { data: origQ } = await supabaseClient
@@ -81,221 +53,111 @@ serve(async (req) => {
     const originalQuestionId = origQ?.id || null;
     const currentDifficulty = origQ?.difficulty || 'medium';
     const currentExamType = origQ?.exam_type || 'JEE_MAINS';
+    const chapterId = origQ?.chapter_id || null;
+    const subjectName = subject || origQ?.subject || '';
 
-    // 2. Generate vector embedding of the original question
-    const origEmbedding = await getEmbedding(GEMINI_API_KEY, originalQuestion);
+    // 2. Query Top 20 similar questions via pgvector RPC if embedding is available
+    let exemplars: any[] = [];
+    if (GEMINI_API_KEY && originalQuestion) {
+      const origEmbedding = await getEmbedding(GEMINI_API_KEY, originalQuestion);
 
-    // 3. Query Top 10 similar questions via pgvector RPC
-    let exemplars = [];
-    if (origEmbedding) {
-      const { data: matches, error: matchError } = await supabaseClient.rpc('match_questions', {
-        query_embedding: origEmbedding,
-        match_threshold: 0.1,
-        match_count: 10
-      });
+      if (origEmbedding) {
+        const { data: matches, error: matchError } = await supabaseClient.rpc('match_questions', {
+          query_embedding: origEmbedding,
+          match_threshold: 0.1,
+          match_count: 20
+        });
 
-      if (!matchError && matches && matches.length > 0) {
-        // Fetch full fields including pdf_sources relation
-        const matchIds = matches.map(m => m.id);
-        const { data: fullQuestions } = await supabaseClient
-          .from('questions')
-          .select('*, pdf_sources(source_style)')
-          .in('id', matchIds);
+        if (!matchError && matches && matches.length > 0) {
+          const matchIds = matches.map(m => m.id).filter(id => id !== originalQuestionId);
+          const { data: fullQuestions } = await supabaseClient
+            .from('questions')
+            .select('*')
+            .in('id', matchIds)
+            .eq('verification_status', 'APPROVED');
 
-        if (fullQuestions) {
-          // Programmatic Reranking: prioritize same chapter, same difficulty, same exam, and quality score
-          const reranked = fullQuestions.map(q => {
-            // Find similarity from match list
-            const matchRecord = matches.find(m => m.id === q.id);
-            let score = matchRecord ? matchRecord.similarity : 0.5;
+          if (fullQuestions && fullQuestions.length > 0) {
+            const reranked = fullQuestions.map(q => {
+              const matchRecord = matches.find(m => m.id === q.id);
+              let score = matchRecord ? matchRecord.similarity : 0.5;
 
-            // Chapter match boost
-            if (q.chapter_id && origQ?.chapter_id && q.chapter_id.toLowerCase() === origQ.chapter_id.toLowerCase()) {
-              score += 0.2;
-            }
+              // Chapter match boost
+              if (q.chapter_id && origQ?.chapter_id && q.chapter_id.toLowerCase() === origQ.chapter_id.toLowerCase()) {
+                score += 0.3;
+              }
+              // Difficulty match boost
+              if (q.difficulty && currentDifficulty && q.difficulty.toLowerCase() === currentDifficulty.toLowerCase()) {
+                score += 0.15;
+              }
+              // Exam type match boost
+              if (q.exam_type && currentExamType && q.exam_type === currentExamType) {
+                score += 0.1;
+              }
+              return { ...q, rerankScore: score };
+            });
 
-            // Difficulty match boost
-            if (q.difficulty && currentDifficulty && q.difficulty.toLowerCase() === currentDifficulty.toLowerCase()) {
-              score += 0.15;
-            }
-
-            // Exam type match boost
-            if (q.exam_type && currentExamType && q.exam_type === currentExamType) {
-              score += 0.1;
-            }
-
-            // Quality score boost
-            if (q.question_quality_score === 'ELITE') score += 0.2;
-            else if (q.question_quality_score === 'GOOD') score += 0.1;
-            else if (q.question_quality_score === 'AVERAGE') score += 0.05;
-
-            return { ...q, rerankScore: score };
-          });
-
-          // Sort by rerankScore descending and take top 3
-          reranked.sort((a, b) => b.rerankScore - a.rerankScore);
-          exemplars = reranked.slice(0, 3);
+            reranked.sort((a: any, b: any) => b.rerankScore - a.rerankScore);
+            exemplars = reranked;
+          }
         }
       }
     }
 
-    // 4. Construct system prompt with guidelines and style benchmark
-    const isJee = (subject || "").toUpperCase().includes("JEE") || true;
-    
-    // Check if there is an active style associated with exemplars
-    const exemplarStyles = exemplars
-      .map(e => e.pdf_sources?.source_style)
-      .filter(Boolean);
-    const targetStyle = exemplarStyles[0] || 'STANDARD';
-
-    const systemPrompt = `You are an elite JEE exam question setter. Generate exactly ${count} conceptually similar questions that reflect the exact depth, style, and numerical complexity of our gold-standard benchmark datasets.
-We are targeting the style of: ${targetStyle}.
-
-${targetStyle === 'ALLEN' ? '- Allen style: Involve multi-concept application, comprehensive calculations, and structured options.' : ''}
-${targetStyle === 'RESONANCE' ? '- Resonance style: Highly structured, calculation-intensive, testing core physical/mathematical equations in-depth.' : ''}
-${targetStyle === 'FIITJEE' ? '- FIITJEE style: Extremely tricky, requiring out-of-the-box analytical reasoning and combining 3-4 distinct topics.' : ''}
-${targetStyle === 'PYQ' ? '- PYQ style: Standard NTA/IIT-JEE patterns, mathematically rigorous, with exact numerical calibration.' : ''}
-
-You must create exactly 3 conceptually similar variants of the original question:
-- Variant 1 (Index 0): Same formula/concept, only numeric values changed (Numeric realism: use realistic, non-integer values).
-- Variant 2 (Index 1): Same concept, different wording/physical setup (e.g. sphere instead of cylinder, keeping the same density error formula).
-- Variant 3 (Index 2): One difficulty level higher (e.g. additional uncertainty term or concept added).
-
-Important Constraints:
-- Never generate completely different concepts (relevance must be 85% same concept, 15% variation).
-- Every generated explanation must strictly contain these five labeled sections:
-  1. **Concept**: Explain what chapter idea is being tested.
-  2. **Formula Used**: Displayed in standard LaTeX notation (e.g. \\rho=\\frac{m}{V}).
-  3. **Step-by-Step Solution**: Detailed, line-by-line derivation showing the mathematical steps.
-  4. **Shortcut**: Conceptual shortcuts, dimensional analysis checks, etc., if available.
-  5. **JEE Insight**: A "Teacher's Note" reflecting the historical frequency and common student traps for this concept in JEE Main/Advanced.
-
-You must output a JSON object containing a "questions" array of exactly ${count} items matching this schema:
-- "question_text": string
-- "options": array of exactly 4 strings
-- "correct_answer": string ("A" | "B" | "C" | "D" or comma-separated list like "A,B" for Multi Correct)
-- "explanation": string (MUST be formatted with **Concept**, **Formula Used**, **Step-by-Step Solution**, **Shortcut**, **JEE Insight**)
-- "solution_steps": array of strings
-- "concept_tags": array of strings (e.g. ["Coulomb's Law", "Electric Field"])
-- "difficulty": "easy" | "medium" | "hard"
-- "avg_time_seconds": integer
-- "concept_depth": integer (1 to 5)
-- "multi_concept_level": integer (1 to 5)
-- "calculation_intensity": integer (1 to 5)
-- "trickiness_score": integer (1 to 5)
-- "question_type": "MCQ" | "Numerical" | "Multi Correct" | "Integer"`;
-
-    // 5. Construct few-shot user prompt
-    let userPrompt = `Failed concept: ${conceptTested} (${subchapterName}, ${subject}).
-Original question: "${originalQuestion}".
-
-Exemplar Questions from target source style:
-`;
-
-    if (exemplars.length > 0) {
-      exemplars.forEach((ex, idx) => {
-        userPrompt += `
-Exemplar #${idx + 1}:
-Text: ${ex.question_text}
-Options: A: ${ex.option_a}, B: ${ex.option_b}, C: ${ex.option_c}, D: ${ex.option_d}
-Correct Answer: ${ex.correct_answer || ex.correct_option}
-Explanation: ${ex.explanation}
-Style: ${ex.pdf_sources?.source_style || 'Standard'}
-Pattern Metrics: Depth=${ex.concept_depth}, Multi-concept=${ex.multi_concept_level}, Calculation=${ex.calculation_intensity}, Trickiness=${ex.trickiness_score}
-`;
-      });
-    } else {
-      userPrompt += "No exemplars found. Generate standard high-quality questions.\n";
-    }
-
-    userPrompt += `\nGenerate exactly ${count} new, high-fidelity questions conceptually similar to the original question but not duplicates.`;
-
-    // 6. Generate the questions
-    const genData = await generateQuestionAI(GEMINI_API_KEY, systemPrompt, userPrompt);
-    const generatedQuestionsList = genData.questions || [];
-
-    const savedQuestions = [];
-
-    // 7. Save generated questions to DB with PENDING status
-    for (const q of generatedQuestionsList) {
-      const qText = q.question_text || '';
-      if (!qText.trim()) continue;
-
-      // Convert options list to A/B/C/D object
-      let optionsObj: Record<string, string> = {};
-      if (Array.isArray(q.options) && q.options.length > 0) {
-        const keys = ['A', 'B', 'C', 'D'];
-        q.options.forEach((opt: string, idx: number) => {
-          if (idx < keys.length) {
-            optionsObj[keys[idx]] = opt;
-          }
-        });
-      } else if (typeof q.options === 'object' && q.options !== null) {
-        optionsObj = q.options;
-      }
-
-      const payload = {
-        parent_question_id: originalQuestionId,
-        question_text: qText,
-        question_type: q.question_type || 'MCQ',
-        options: optionsObj,
-        correct_answer: q.correct_answer || q.correct_option || 'A',
-        explanation: q.explanation || '',
-        is_ai_generated: true,
-        embedding: null,
-        attempts_count: 0,
-        correct_count: 0,
-        avg_time_taken: q.avg_time_seconds || 180,
-        difficulty_score: q.difficulty === 'easy' ? 25.0 : q.difficulty === 'hard' ? 75.0 : 50.0,
-        concept_depth: q.concept_depth || 1,
-        multi_concept_level: q.multi_concept_level || 1,
-        calculation_intensity: q.calculation_intensity || 1,
-        trickiness_score: q.trickiness_score || 1,
-        verification_status: 'PENDING', // MUST go to review first
-        is_verified: false,
-        subject: subject || origQ?.subject || '',
-        difficulty: q.difficulty || currentDifficulty,
-        exam_type: currentExamType,
-        // Legacy column fallbacks
-        chapter_id: origQ?.chapter_id || '',
-        subchapter_id: origQ?.subchapter_id || '',
-        concept_tested: conceptTested || origQ?.concept_tested || 'General',
-        source: 'ai_generated'
-      };
-
-      const { data: dbData, error: dbError } = await supabaseClient
+    // 3. Fallback: Query by chapter/subject metadata to fill target count
+    if (exemplars.length < count) {
+      let query = supabaseClient
         .from('questions')
-        .insert(payload)
-        .select()
-        .single();
+        .select('*')
+        .eq('verification_status', 'APPROVED');
 
-      if (dbError) {
-        console.error("Failed to insert AI generated question:", dbError);
-        continue;
+      if (originalQuestionId) {
+        query = query.neq('id', originalQuestionId);
       }
 
-      // Add concept tags
-      const tags = q.concept_tags || [];
-      if (dbData && tags.length > 0) {
-        const tagPayload = tags.map((t: string) => ({
-          question_id: dbData.id,
-          tag: t.trim()
-        }));
-        await supabaseClient.from('question_tags').insert(tagPayload);
+      if (chapterId) {
+        query = query.eq('chapter_id', chapterId);
+      } else if (subjectName) {
+        query = query.eq('subject', subjectName);
       }
 
-      savedQuestions.push({
-        ...dbData,
-        // Match structure expected by QuizInterface or getSimilarQuestions hook
-        option_a: optionsObj['A'] || '',
-        option_b: optionsObj['B'] || '',
-        option_c: optionsObj['C'] || '',
-        option_d: optionsObj['D'] || '',
-        correct_option: q.correct_answer || q.correct_option || 'A'
-      });
+      const { data: directMatch } = await query.limit(30);
+
+      if (directMatch && directMatch.length > 0) {
+        const existingIds = exemplars.map(e => e.id);
+        const filteredDirect = directMatch.filter(q => !existingIds.includes(q.id));
+
+        const withScore = filteredDirect.map(q => {
+          let score = 0.5;
+          if (conceptTested && q.concept_tested && q.concept_tested.toLowerCase().includes(conceptTested.toLowerCase())) {
+            score += 0.4;
+          }
+          if (q.difficulty && currentDifficulty && q.difficulty.toLowerCase() === currentDifficulty.toLowerCase()) {
+            score += 0.1;
+          }
+          return { ...q, rerankScore: score };
+        });
+
+        withScore.sort((a: any, b: any) => b.rerankScore - a.rerankScore);
+        exemplars = [...exemplars, ...withScore];
+      }
     }
 
-    return new Response(JSON.stringify({ questions: savedQuestions }), {
+    // 4. Return top count formatted questions
+    const finalQuestions = exemplars.slice(0, count).map(q => ({
+      id: q.id,
+      question_text: q.question_text,
+      option_a: q.option_a,
+      option_b: q.option_b,
+      option_c: q.option_c,
+      option_d: q.option_d,
+      correct_option: q.correct_option || q.correct_answer || q.answer || 'A',
+      explanation: q.explanation || '',
+      concept_tested: q.concept_tested || 'General',
+      difficulty: q.difficulty || 'medium',
+      exam_type: q.exam_type || 'JEE_MAINS'
+    }));
+
+    return new Response(JSON.stringify({ questions: finalQuestions }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
