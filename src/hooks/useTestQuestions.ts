@@ -8,6 +8,63 @@ import { generateQuestionsGemini } from '@/lib/gemini';
 import { generateQuestions as getUnifiedQuestions } from '@/services/questionGenerator';
 import { getOfflineQuestions } from '@/data/offlineQuestionBank';
 
+export const mapMockChapterIdToReal = (id: string): string => {
+  const mapping: Record<string, string> = {
+    // Physics
+    'ph-units': 'phy-1',
+    'ph-kin1d': 'phy-1',
+    'ph-proj': 'phy-1',
+    'ph-nlm': 'phy-2',
+    'ph-wep': 'phy-3',
+    'ph-com': 'phy-4',
+    'ph-rot': 'phy-4',
+    'ph-grav': 'phy-5',
+    'ph-solids': 'phy-6',
+    'ph-fluids': 'phy-7',
+    'ph-shm': 'phy-8',
+    'ph-waves': 'phy-8',
+    'ph-thermo': 'phy-9',
+    'ph-estatic': 'phy-10',
+    'ph-cap': 'phy-10',
+    'ph-cur': 'phy-11',
+    'ph-mag': 'phy-12',
+    'ph-emi': 'phy-12',
+    'ph-optics': 'phy-13',
+    'ph-modern': 'phy-14',
+    'ph-semi': 'phy-14',
+
+    // Chemistry
+    'ch-mole': 'chem-1',
+    'ch-atom': 'chem-2',
+    'ch-bond': 'chem-3',
+    'ch-thermo': 'chem-4',
+    'ch-equil': 'chem-5',
+    'ch-electro': 'chem-6',
+    'ch-kinetic': 'chem-7',
+    'ch-goc': 'chem-8',
+    'ch-carbo': 'chem-10',
+    'ch-biomol': 'chem-10',
+    'ch-periodic': 'chem-11',
+    'ch-pblock': 'chem-12',
+
+    // Mathematics
+    'ma-sets': 'math-1',
+    'ma-trig': 'math-12',
+    'ma-cplx': 'math-2',
+    'ma-quad': 'math-1',
+    'ma-seq': 'math-4',
+    'ma-perm': 'math-4',
+    'ma-binom': 'math-3',
+    'ma-mat': 'math-3',
+    'ma-coor': 'math-10',
+    'ma-calc': 'math-6',
+    'ma-integ': 'math-9',
+    'ma-prob': 'math-5',
+  };
+
+  return mapping[id] || id;
+};
+
 const mapDbQuestionToQuestion = (dbQ: any): Question => {
   return {
     id: dbQ.id,
@@ -337,7 +394,7 @@ export const useTestQuestions = () => {
               exam: examModeUpper,
               subject: chapter.subject,
               chapter: chapter.chapterName,
-              chapterId: chapter.chapterId,
+              chapterId: mapMockChapterIdToReal(chapter.chapterId),
               difficulty: 'medium',
               count: questionsPerChapter
             }
@@ -442,6 +499,8 @@ export const useTestQuestions = () => {
     setQuestions([]);
     setGenerationMode('fetching');
 
+    const mappedChapterId = chapterId ? mapMockChapterIdToReal(chapterId) : undefined;
+
     try {
       let query = supabase
         .from('questions')
@@ -454,8 +513,8 @@ export const useTestQuestions = () => {
       }
 
       // Filter by chapter if specified
-      if (chapterId) {
-        query = query.eq('chapter_id', chapterId);
+      if (mappedChapterId) {
+        query = query.eq('chapter_id', mappedChapterId);
       }
 
       // Filter by year range if specified
@@ -498,7 +557,7 @@ export const useTestQuestions = () => {
         const invokePromise = supabase.functions.invoke('generate-pyq-questions', {
           body: {
             subject,
-            chapterId,
+            chapterId: mappedChapterId,
             yearRange: yearRange || defaultYearRange,
             count,
             examMode: examModeUpper,
@@ -522,7 +581,7 @@ export const useTestQuestions = () => {
           const genPromise = getUnifiedQuestions({
             exam: examModeUpper,
             subject: subject || examModeUpper,
-            chapter: chapterId || 'General',
+            chapter: mappedChapterId || 'General',
             difficulty: 'medium',
             count
           });
@@ -545,7 +604,7 @@ export const useTestQuestions = () => {
         }
 
         // Final fallback to getOfflineQuestions directly
-        const offlineQs = getOfflineQuestions(subject || examModeUpper, chapterId || 'General', 'medium', count);
+        const offlineQs = getOfflineQuestions(subject || examModeUpper, mappedChapterId || 'General', 'medium', count);
         const mapped = offlineQs.map((q: any) => {
           const shuffledQ = shuffleQuestionOptions(q);
           return mapDbQuestionToQuestion(shuffledQ);
