@@ -11,6 +11,7 @@ import { ExamModeProvider } from "@/contexts/ExamModeContext";
 import { ClassProvider } from "@/contexts/ClassContext";
 import { ErrorBoundary, PageLoader } from "@/components/ErrorBoundary";
 import { TrialGate } from "./components/trial/TrialGate";
+import { GlobalProgressBar } from "@/components/GlobalProgressBar";
 
 // ─── Eagerly loaded (small/critical path pages) ───────────────
 import LandingPage from "./pages/LandingPage";
@@ -99,6 +100,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <BrowserRouter>
+        <GlobalProgressBar />
         <AuthProvider>
           <ExamModeProvider>
             <ClassProvider>
