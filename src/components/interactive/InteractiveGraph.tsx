@@ -76,19 +76,40 @@ export const InteractiveGraph: React.FC<InteractiveGraphProps> = ({
         expr = expr.replace(/\\nu|ν/g, 'nu');
         expr = expr.replace(/\\pi|π/g, 'pi');
         
-        // 2. Replace e^ with 2.71828**
+        // 2. Separate common concatenated physics variables (e.g. lambdat -> lambda * t)
+        expr = expr.replace(/\blambda\s*t\b/g, 'lambda * t');
+        expr = expr.replace(/\bomega\s*t\b/g, 'omega * t');
+        expr = expr.replace(/\bk\s*T\b/g, 'k * T');
+        expr = expr.replace(/\bmu\s*N\b/g, 'mu * N');
+        expr = expr.replace(/\bh\s*v\b/g, 'h * v');
+        expr = expr.replace(/\bh\s*f\b/g, 'h * f');
+        expr = expr.replace(/\bh\s*nu\b/g, 'h * nu');
+        expr = expr.replace(/\bq\s*V\b/g, 'q * V');
+        expr = expr.replace(/\be\s*V\b/g, 'e * V');
+        expr = expr.replace(/\bm\s*g\b/g, 'm * g');
+        expr = expr.replace(/\bk\s*x\b/g, 'k * x');
+        expr = expr.replace(/\bP\s*V\b/g, 'P * V');
+        expr = expr.replace(/\bn\s*R\s*T\b/g, 'n * R * T');
+
+        // 3. Inject '*' for implicit multiplication (e.g., 2A -> 2*A, (3)x -> (3)*x)
+        expr = expr.replace(/(\d)(?=[a-zA-Z(])/g, '$1*');
+        expr = expr.replace(/([a-zA-Z)])(?=\d)/g, '$1*');
+        expr = expr.replace(/([a-zA-Z)])(?=\()/g, '$1*');
+        expr = expr.replace(/(\))(?=[a-zA-Z])/g, '$1*');
+
+        // 4. Replace e^ with 2.71828**
         expr = expr.replace(/e\^/g, '2.71828**');
         // Replace ^ with **
         expr = expr.replace(/\^/g, '**');
         
-        // 3. Convert standard math functions
+        // 5. Convert standard math functions
         expr = expr.replace(/exp\(/g, 'Math.exp(');
         expr = expr.replace(/sin\(/g, 'Math.sin(');
         expr = expr.replace(/cos\(/g, 'Math.cos(');
         expr = expr.replace(/tan\(/g, 'Math.tan(');
         expr = expr.replace(/sqrt\(/g, 'Math.sqrt(');
 
-        // 4. Identify the independent variable (xVar)
+        // 6. Identify the independent variable (xVar)
         // Find whichever variable in the equation is NOT in the sliders (params)
         const possibleVars = ['x', 't', 'v', 'V', 'f', 'r', 'd', 'A'];
         let xVar = 'x';
