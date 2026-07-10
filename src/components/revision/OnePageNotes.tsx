@@ -193,7 +193,16 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
       const responseData = await response.json();
 
       if (responseData.success && responseData.data) {
-        setNotesJson(responseData.data);
+        let parsedNotes = responseData.data;
+        // The edge function returns the full database row. The JSON for OnePageNotes is stored in revision_notes.
+        if (responseData.data.revision_notes) {
+          parsedNotes = typeof responseData.data.revision_notes === 'string' 
+            ? JSON.parse(responseData.data.revision_notes) 
+            : responseData.data.revision_notes;
+        } else if (responseData.data.raw_content) {
+          try { parsedNotes = JSON.parse(responseData.data.raw_content); } catch (e) {}
+        }
+        setNotesJson(parsedNotes);
       } else {
         throw new Error('Invalid data received');
       }
