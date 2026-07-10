@@ -135,6 +135,7 @@ const FormulaCard: React.FC<{
   };
 
   const cleanEq = useMemo(() => {
+    if (!equation) return '';
     return equation
       .trim()
       .replace(/^(\$\$|\$|\\\[|\\\()/, '')
