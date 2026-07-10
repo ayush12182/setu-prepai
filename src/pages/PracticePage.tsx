@@ -156,9 +156,24 @@ const PracticePage: React.FC = () => {
     generateQuestions(node.id, difficulty === 'mixed' ? 'medium' : difficulty, 10, examParam, node.name, activeSubject);
   };
 
-  const handleGetSimilar = async (question: { concept_tested: string; question_text: string }) => {
+  const handleGetSimilar = async (question: {
+    id?: string;
+    concept_tested?: string;
+    chapter_id?: string;
+    difficulty?: string;
+    exam_type?: string;
+    question_text?: string;
+  }) => {
     if (state.step !== 'quiz') return null;
-    return getSimilarQuestions(question.concept_tested, state.node?.name || 'Mixed', 'Mixed', question.question_text);
+    const chapterId = question.chapter_id || (state.node?.id?.split('-').slice(0, 2).join('-')) || '';
+    const examType = question.exam_type || (examParam === 'jee' ? 'JEE_MAINS' : (examParam || 'JEE_MAINS').toUpperCase());
+    return getSimilarQuestions(
+      question.concept_tested || '',
+      chapterId,
+      question.id || '',
+      question.difficulty || 'medium',
+      examType
+    );
   };
 
   // Helper stats generator to keep UI clean and consistent

@@ -8,6 +8,8 @@ import { recordStudentAttempt } from '@/services/studentIntelligence';
 import { JEE_PROMPT_CONSTRAINTS } from '@/lib/gemini';
 import { generateQuestions as getUnifiedQuestions } from '@/services/questionGenerator';
 import { getOfflineQuestions } from '@/data/offlineQuestionBank';
+import { mapMockChapterIdToReal, classifyQuestion } from '@/utils/chapterClassifier';
+import { trackQuestionAttempt } from '@/utils/activityTracker';
 
 // The interface expected by QuizInterface components
 export type QuestionType = 'MCQ' | 'AR' | 'NUMERICAL';
@@ -19,6 +21,7 @@ export interface Question {
   exam_type: string;
   difficulty: 'easy' | 'medium' | 'hard';
   question_text: string;
+  chapter_id?: string;
   options?: {
     A: string;
     B: string;
@@ -55,6 +58,7 @@ const mapQuestionBankToInterface = (qbItem: any): Question => {
     exam_type: qbItem.exam_type || 'JEE',
     difficulty: (qbItem.difficulty || 'medium').toLowerCase() as 'easy' | 'medium' | 'hard',
     question_text: qbItem.content?.question || qbItem.question_text,
+    chapter_id: qbItem.chapter_id || '',
     options: qbItem.options || qbItem.content?.options || {
       A: qbItem.option_a || '',
       B: qbItem.option_b || '',
@@ -416,24 +420,58 @@ export const usePracticeQuestions = () => {
         console.warn('Failed to load attempts for question generator:', e);
       }
 
-      const chapterId = nodeId.split('-').slice(0, 2).join('-');
+      const rawChapterId = nodeId.split('-').slice(0, 2).join('-');
+      const realChapterId = mapMockChapterIdToReal(rawChapterId);
       const result = await getUnifiedQuestions({
         exam,
         subject: subject || exam,
         chapter: topicName,
-        chapterId: chapterId,
+        chapterId: realChapterId,
         subchapter: nodeId,
         difficulty: effectiveDifficulty,
         count,
         excludeQuestionIds
       });
 
-      const shuffledQuestions = result.questions.map((q: any) => shuffleQuestionOptions(q));
-      setQuestions(shuffledQuestions);
+      const mapped = result.questions.map((q: any) => shuffleQuestionOptions(q));
+      
+      let validated = mapped.filter((q: any) => {
+        const classified = classifyQuestion(subject || 'Physics', q.question_text || q.content?.question, [q.option_a || q.options?.A || '', q.option_b || q.options?.B || '', q.option_c || q.options?.C || '', q.option_d || q.options?.D || ''], q.explanation || q.explanation_text || '');
+        if (classified.detectedChapterId !== realChapterId && (subject || 'Physics').toLowerCase().includes('phys')) {
+          console.warn(`[VALIDATOR REJECT PRACTICE] Question: "${(q.question_text || '').slice(0, 60)}..." | Requested: ${realChapterId} | Classified: ${classified.detectedChapterId}`);
+          return false;
+        }
+        return true;
+      });
+
+      // Self-Healing Deficit Refilling for Practice mode
+      if (validated.length < count) {
+        const deficit = count - validated.length;
+        console.log(`[Self-Healing Practice] Refilling ${deficit} questions for ${topicName}`);
+        const offlineQs = getOfflineQuestions(subject || 'Physics', topicName, effectiveDifficulty, deficit * 3);
+        const mappedOffline = offlineQs.map((q: any) => {
+          const shuffledQ = shuffleQuestionOptions(q);
+          return mapQuestionBankToInterface(shuffledQ);
+        });
+        const validatedOffline = mappedOffline.filter((q: Question) => {
+          const classified = classifyQuestion(subject || 'Physics', q.question_text, [q.options?.A || '', q.options?.B || '', q.options?.C || '', q.options?.D || ''], q.explanation);
+          return classified.detectedChapterId === realChapterId || !(subject || 'Physics').toLowerCase().includes('phys');
+        }).slice(0, deficit);
+        validated.push(...validatedOffline);
+
+        // If still deficit, generate mock offline questions
+        if (validated.length < count) {
+          const remainingDeficit = count - validated.length;
+          const mockQs = generateOfflineMockQuestions(topicName, exam, effectiveDifficulty, remainingDeficit);
+          validated.push(...mockQs);
+        }
+      }
+
+      setQuestions(validated);
       setSessionDiagnostics(result.diagnostics || null);
       setGenerationStatus('completed');
       setGenerationMode(result.generationMode);
-      return shuffledQuestions;
+      return validated;
     } catch (err: any) {
       console.warn('Unified question generation failed, silently falling back to offline bank:', err);
       try {
@@ -590,77 +628,40 @@ export const usePracticeQuestions = () => {
 
   const getSimilarQuestions = async (
     conceptTested: string,
-    subchapterName: string,
-    subject: string,
-    originalQuestion: string
+    chapterId: string,
+    originalQuestionId: string,
+    difficulty: string,
+    examType: string = 'JEE_MAINS'
   ): Promise<SimilarQuestion[] | null> => {
     try {
       const { data, error: fnError } = await supabase.functions.invoke('get-similar-questions', {
-        body: { conceptTested, subchapterName, subject, originalQuestion, count: 3 }
+        body: {
+          chapterId,
+          conceptTested,
+          originalQuestionId,
+          difficulty,
+          examType,
+          count: 5  // Fetch 5 so cycling through them works well
+        }
       });
 
       if (fnError) throw fnError;
-      if (data.error) { throw new Error(data.error); }
+      if (data?.error) throw new Error(data.error);
+
+      if (!data?.questions || data.questions.length === 0) {
+        console.warn('[getSimilarQuestions] No similar questions found in DB for chapter:', chapterId);
+        return null;
+      }
 
       return (data.questions as SimilarQuestion[]).map(q =>
         shuffleQuestionOptions(q as any) as unknown as SimilarQuestion
       );
     } catch (err) {
-      console.warn('Failed to get remote similar questions, falling back to smart offline generator:', err);
-      try {
-        const offlineQs = getOfflineQuestions(subject, subchapterName || conceptTested, 'medium', 3);
-        if (offlineQs && offlineQs.length > 0) {
-          return offlineQs.map(q => {
-            const shuffledQ = shuffleQuestionOptions(q);
-            return {
-              question_text: shuffledQ.question_text,
-              option_a: shuffledQ.option_a,
-              option_b: shuffledQ.option_b,
-              option_c: shuffledQ.option_c,
-              option_d: shuffledQ.option_d,
-              correct_option: shuffledQ.correct_option || (shuffledQ.answer as string),
-              explanation: shuffledQ.explanation || shuffledQ.explanation_text || '',
-              difficulty_note: `Generated offline (Adaptive Relevance: ${shuffledQ.jeeRelevanceScore || 9.0}/10)`
-            };
-          });
-        }
-      } catch (fallbackErr) {
-        console.error('Offline similar question generator failed, trying general fallback:', fallbackErr);
-        try {
-          const generalQs = getOfflineQuestions(subject || 'Physics', 'General', 'medium', 3);
-          if (generalQs && generalQs.length > 0) {
-            return generalQs.map(q => {
-              const shuffledQ = shuffleQuestionOptions(q);
-              return {
-                question_text: shuffledQ.question_text,
-                option_a: shuffledQ.option_a,
-                option_b: shuffledQ.option_b,
-                option_c: shuffledQ.option_c,
-                option_d: shuffledQ.option_d,
-                correct_option: shuffledQ.correct_option || (shuffledQ.answer as string),
-                explanation: shuffledQ.explanation || shuffledQ.explanation_text || '',
-                difficulty_note: `Generated offline (Adaptive Relevance: ${shuffledQ.jeeRelevanceScore || 9.0}/10)`
-              };
-            });
-          }
-        } catch (ultimateErr) {
-          console.error('Ultimate similar question fallback failed:', ultimateErr);
-        }
-      }
-      return [
-        {
-          question_text: "Which of the following describes the key characteristic of conservative forces?",
-          option_a: "Work done is path-independent and depends only on initial and final positions.",
-          option_b: "Work done depends completely on the path taken.",
-          option_c: "They always dissipate energy in the form of heat.",
-          option_d: "Their curl is non-zero in all regions.",
-          correct_option: "A",
-          explanation: "Conservative forces like gravity or electrostatic forces have path-independent work done.",
-          difficulty_note: "Adaptive Concept Backup"
-        }
-      ];
+      console.error('[getSimilarQuestions] Failed:', err);
+      return null;
     }
   };
+
 
   const recordAttempt = async (
     questionId: string,
@@ -723,6 +724,11 @@ export const usePracticeQuestions = () => {
           organization_id:    context.organization_id
         });
       }
+
+      // ✅ Update dashboard stats in real-time (localStorage + DOM event)
+      const chapterId = qObj?.chapter_id || context?.subtopic || '';
+      trackQuestionAttempt(isCorrect, context?.subject, chapterId);
+
     } catch (err) {
       console.error('Failed to record attempt:', err);
     }

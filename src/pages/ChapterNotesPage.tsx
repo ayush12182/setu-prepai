@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
+import { trackNotesRead } from '@/utils/activityTracker';
 import { cn } from '@/lib/utils';
 import { MathLine, processNotesContent, normalizeMathDelimiters } from '@/utils/mathRenderer';
 import { InteractiveGraph } from '@/components/interactive/InteractiveGraph';
@@ -620,6 +621,13 @@ const ChapterNotesPage: React.FC = () => {
       }
     }
   }, [notes, isGenerating]);
+
+  // ✅ Track notes reading when content loads successfully
+  useEffect(() => {
+    if (notes && !isGenerating && chapter) {
+      trackNotesRead(chapter.id, chapter.subject, chapter.name);
+    }
+  }, [notes, isGenerating, chapter?.id]);
 
   // Admin generates content via the Admin → Content Generation panel.
 

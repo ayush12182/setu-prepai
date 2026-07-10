@@ -20,6 +20,7 @@ import {
 } from '@/data/syllabus';
 import { neetBiologyChapters } from '@/data/neetSyllabus';
 import { useExamMode } from '@/contexts/ExamModeContext';
+import { trackChapterVisit, trackNotesRead } from '@/utils/activityTracker';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Tab = 'notes' | 'practice' | 'tests' | 'revision' | 'ai-mentor';
@@ -123,6 +124,8 @@ const NotesTab: React.FC<{ chapter: Chapter }> = ({ chapter }) => {
               if (note.key === 'ask_ai') {
                 navigate(`/ask-prepentrance?chapter=${chapter.id}`);
               } else {
+                // Mark notes as read when student clicks any study material
+                trackNotesRead(chapter.id, chapter.subject, chapter.name);
                 navigate(`/chapter/${chapter.id}/notes?mode=${note.key}`);
               }
             }}
@@ -449,39 +452,24 @@ const ChapterDetailPage: React.FC = () => {
   const prevChapter = currentIdx > 0 ? chapters[currentIdx - 1] : null;
   const nextChapter = currentIdx < chapters.length - 1 ? chapters[currentIdx + 1] : null;
 
-  // Save last visited chapter to localStorage
+  // Track chapter visit & update dashboard via activityTracker
   useEffect(() => {
     if (!chapter) return;
-    try {
-      localStorage.setItem('last_chapter', JSON.stringify({
-        subject,
-        subjectLabel: config.label,
-        chapterId: chapter.id,
-        chapterName: chapter.name,
-        chapterNum: `CH-${String(currentIdx + 1).padStart(2, '0')}`,
-        tab: TABS.find(t => t.key === activeTab)?.label ?? 'Notes',
-        color: config.accent,
-        bg: `${config.accent}15`,
-      }));
-    } catch { /* ignore */ }
-  }, [chapter, activeTab]);
-
-  // Update last tab in localStorage
-  useEffect(() => {
-    if (!chapter) return;
-    try {
-      const raw = localStorage.getItem('last_chapter');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.chapterId === chapterId) {
-          localStorage.setItem('last_chapter', JSON.stringify({
-            ...parsed,
-            tab: TABS.find(t => t.key === activeTab)?.label ?? 'Notes',
-          }));
-        }
-      }
-    } catch { /* ignore */ }
-  }, [activeTab]);
+    trackChapterVisit({
+      subject,
+      subjectLabel: config.label,
+      chapterId: chapter.id,
+      chapterName: chapter.name,
+      chapterNum: `CH-${String(currentIdx + 1).padStart(2, '0')}`,
+      tab: TABS.find(t => t.key === activeTab)?.label ?? 'Notes',
+      accent: config.accent,
+      bg: `${config.accent}15`,
+    });
+    // If student opened Notes tab, mark notes as read
+    if (activeTab === 'notes') {
+      trackNotesRead(chapter.id, subject, chapter.name);
+    }
+  }, [chapter?.id, activeTab]);
 
   if (!chapter) {
     return (

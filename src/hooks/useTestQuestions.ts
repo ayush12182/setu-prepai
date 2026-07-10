@@ -7,63 +7,9 @@ import { useExamMode } from '@/contexts/ExamModeContext';
 import { generateQuestionsGemini } from '@/lib/gemini';
 import { generateQuestions as getUnifiedQuestions } from '@/services/questionGenerator';
 import { getOfflineQuestions } from '@/data/offlineQuestionBank';
+import { mapMockChapterIdToReal, classifyQuestion } from '@/utils/chapterClassifier';
+import { trackQuestionAttempt } from '@/utils/activityTracker';
 
-export const mapMockChapterIdToReal = (id: string): string => {
-  const mapping: Record<string, string> = {
-    // Physics
-    'ph-units': 'phy-1',
-    'ph-kin1d': 'phy-1',
-    'ph-proj': 'phy-1',
-    'ph-nlm': 'phy-2',
-    'ph-wep': 'phy-3',
-    'ph-com': 'phy-4',
-    'ph-rot': 'phy-4',
-    'ph-grav': 'phy-5',
-    'ph-solids': 'phy-6',
-    'ph-fluids': 'phy-7',
-    'ph-shm': 'phy-8',
-    'ph-waves': 'phy-8',
-    'ph-thermo': 'phy-9',
-    'ph-estatic': 'phy-10',
-    'ph-cap': 'phy-10',
-    'ph-cur': 'phy-11',
-    'ph-mag': 'phy-12',
-    'ph-emi': 'phy-12',
-    'ph-optics': 'phy-13',
-    'ph-modern': 'phy-14',
-    'ph-semi': 'phy-14',
-
-    // Chemistry
-    'ch-mole': 'chem-1',
-    'ch-atom': 'chem-2',
-    'ch-bond': 'chem-3',
-    'ch-thermo': 'chem-4',
-    'ch-equil': 'chem-5',
-    'ch-electro': 'chem-6',
-    'ch-kinetic': 'chem-7',
-    'ch-goc': 'chem-8',
-    'ch-carbo': 'chem-10',
-    'ch-biomol': 'chem-10',
-    'ch-periodic': 'chem-11',
-    'ch-pblock': 'chem-12',
-
-    // Mathematics
-    'ma-sets': 'math-1',
-    'ma-trig': 'math-12',
-    'ma-cplx': 'math-2',
-    'ma-quad': 'math-1',
-    'ma-seq': 'math-4',
-    'ma-perm': 'math-4',
-    'ma-binom': 'math-3',
-    'ma-mat': 'math-3',
-    'ma-coor': 'math-10',
-    'ma-calc': 'math-6',
-    'ma-integ': 'math-9',
-    'ma-prob': 'math-5',
-  };
-
-  return mapping[id] || id;
-};
 
 const mapDbQuestionToQuestion = (dbQ: any): Question => {
   return {
@@ -422,7 +368,41 @@ export const useTestQuestions = () => {
               const shuffledQ = shuffleQuestionOptions(q);
               return mapDbQuestionToQuestion(shuffledQ);
             });
-            allQuestions.push(...mapped);
+
+            const realChapterId = mapMockChapterIdToReal(chapter.chapterId);
+            let validated = mapped.filter((q: Question) => {
+              const classified = classifyQuestion(chapter.subject || 'Physics', q.question_text, [q.option_a || '', q.option_b || '', q.option_c || '', q.option_d || ''], q.explanation);
+              if (classified.detectedChapterId !== realChapterId && (chapter.subject || 'Physics').toLowerCase().includes('phys')) {
+                console.warn(`[VALIDATOR REJECT] Question: "${q.question_text.slice(0, 60)}..." | Requested Chapter: ${realChapterId} | Classified: ${classified.detectedChapterId}`);
+                return false;
+              }
+              return true;
+            });
+
+            // Self-Healing Deficit Refilling
+            if (validated.length < questionsPerChapter) {
+              const deficit = questionsPerChapter - validated.length;
+              console.log(`[Self-Healing] Chapter ${chapter.chapterName} has ${deficit} mismatched questions. Filling with offline questions.`);
+              const offlineQs = getOfflineQuestions(chapter.subject || 'Physics', chapter.chapterName, 'medium', deficit * 3);
+              const mappedOffline = offlineQs.map((q: any) => {
+                const shuffledQ = shuffleQuestionOptions(q);
+                return mapDbQuestionToQuestion(shuffledQ);
+              });
+              const validatedOffline = mappedOffline.filter((q: Question) => {
+                const classified = classifyQuestion(chapter.subject || 'Physics', q.question_text, [q.option_a || '', q.option_b || '', q.option_c || '', q.option_d || ''], q.explanation);
+                return classified.detectedChapterId === realChapterId || !(chapter.subject || 'Physics').toLowerCase().includes('phys');
+              }).slice(0, deficit);
+              validated.push(...validatedOffline);
+
+              // If still deficit, generate mock offline questions
+              if (validated.length < questionsPerChapter) {
+                const remainingDeficit = questionsPerChapter - validated.length;
+                const mockQs = generateOfflineMockQuestions(chapter.chapterName, examModeUpper, 'medium', remainingDeficit);
+                validated.push(...mockQs);
+              }
+            }
+
+            allQuestions.push(...validated);
             setGenerationMode(data.generationMode || 'ai');
 
             // Fire and forget background trigger if threshold met
@@ -752,6 +732,10 @@ export const useTestQuestions = () => {
         is_correct: isCorrect,
         time_taken_seconds: timeTakenSeconds
       });
+
+      // ✅ Update dashboard stats in real-time
+      trackQuestionAttempt(isCorrect);
+
     } catch (err) {
       console.error('Failed to record attempt:', err);
     }

@@ -6,156 +6,119 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-async function getEmbedding(apiKey: string, text: string): Promise<number[] | null> {
-  try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'models/text-embedding-004',
-        content: {
-          parts: [{ text }]
-        }
-      })
-    });
-    if (!res.ok) {
-      console.error("Failed to generate embedding:", await res.text());
-      return null;
-    }
-    const data = await res.json();
-    return data.embedding?.values || null;
-  } catch (err) {
-    console.error("Embedding generation error:", err);
-    return null;
-  }
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    const { conceptTested, subchapterName, subject, originalQuestion, count = 3 } = await req.json();
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    const {
+      chapterId,
+      conceptTested,
+      originalQuestionId,
+      difficulty,
+      count = 3,
+      examType = "JEE_MAINS"
+    } = await req.json();
 
-    // 1. Fetch original question metadata and ID
-    const { data: origQ } = await supabaseClient
-      .from('questions')
-      .select('*')
-      .eq('question_text', originalQuestion)
-      .limit(1)
-      .maybeSingle();
+    // Only serve JEE questions for this feature
+    const jeeExamTypes = ["JEE_MAINS", "JEE_ADVANCED", "JEE"];
+    const isJee = jeeExamTypes.includes((examType || "").toUpperCase());
+    if (!isJee) {
+      return new Response(JSON.stringify({ questions: [], message: "Similar questions only available for JEE" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    const originalQuestionId = origQ?.id || null;
-    const currentDifficulty = origQ?.difficulty || 'medium';
-    const currentExamType = origQ?.exam_type || 'JEE_MAINS';
-    const chapterId = origQ?.chapter_id || null;
-    const subjectName = subject || origQ?.subject || '';
+    if (!chapterId) {
+      return new Response(JSON.stringify({ questions: [], error: "chapterId is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // 2. Query Top 20 similar questions via pgvector RPC if embedding is available
-    let exemplars: any[] = [];
-    if (GEMINI_API_KEY && originalQuestion) {
-      const origEmbedding = await getEmbedding(GEMINI_API_KEY, originalQuestion);
+    let results: any[] = [];
 
-      if (origEmbedding) {
-        const { data: matches, error: matchError } = await supabaseClient.rpc('match_questions', {
-          query_embedding: origEmbedding,
-          match_threshold: 0.1,
-          match_count: 20
-        });
+    // STRATEGY 1: Same chapter_id + same concept_tested — MOST SIMILAR
+    if (conceptTested) {
+      const { data: conceptMatches } = await supabase
+        .from("questions")
+        .select("*")
+        .eq("chapter_id", chapterId)
+        .eq("verification_status", "APPROVED")
+        .in("exam_type", jeeExamTypes)
+        .ilike("concept_tested", `%${conceptTested}%`)
+        .neq("id", originalQuestionId || "00000000-0000-0000-0000-000000000000")
+        .limit(50);
 
-        if (!matchError && matches && matches.length > 0) {
-          const matchIds = matches.map(m => m.id).filter(id => id !== originalQuestionId);
-          const { data: fullQuestions } = await supabaseClient
-            .from('questions')
-            .select('*')
-            .in('id', matchIds)
-            .eq('verification_status', 'APPROVED');
-
-          if (fullQuestions && fullQuestions.length > 0) {
-            const reranked = fullQuestions.map(q => {
-              const matchRecord = matches.find(m => m.id === q.id);
-              let score = matchRecord ? matchRecord.similarity : 0.5;
-
-              // Chapter match boost
-              if (q.chapter_id && origQ?.chapter_id && q.chapter_id.toLowerCase() === origQ.chapter_id.toLowerCase()) {
-                score += 0.3;
-              }
-              // Difficulty match boost
-              if (q.difficulty && currentDifficulty && q.difficulty.toLowerCase() === currentDifficulty.toLowerCase()) {
-                score += 0.15;
-              }
-              // Exam type match boost
-              if (q.exam_type && currentExamType && q.exam_type === currentExamType) {
-                score += 0.1;
-              }
-              return { ...q, rerankScore: score };
-            });
-
-            reranked.sort((a: any, b: any) => b.rerankScore - a.rerankScore);
-            exemplars = reranked;
-          }
-        }
+      if (conceptMatches && conceptMatches.length > 0) {
+        // Shuffle for variety
+        const shuffled = conceptMatches.sort(() => Math.random() - 0.5);
+        results = shuffled.slice(0, count);
       }
     }
 
-    // 3. Fallback: Query by chapter/subject metadata to fill target count
-    if (exemplars.length < count) {
-      let query = supabaseClient
-        .from('questions')
-        .select('*')
-        .eq('verification_status', 'APPROVED');
+    // STRATEGY 2: If not enough — same chapter_id + same difficulty
+    if (results.length < count) {
+      const existingIds = [originalQuestionId, ...results.map((r) => r.id)].filter(Boolean);
+      const needed = count - results.length;
 
-      if (originalQuestionId) {
-        query = query.neq('id', originalQuestionId);
-      }
+      const { data: difficultyMatches } = await supabase
+        .from("questions")
+        .select("*")
+        .eq("chapter_id", chapterId)
+        .eq("verification_status", "APPROVED")
+        .in("exam_type", jeeExamTypes)
+        .eq("difficulty", (difficulty || "medium").toLowerCase())
+        .not("id", "in", `(${existingIds.map((id) => `"${id}"`).join(",")})`)
+        .limit(50);
 
-      if (chapterId) {
-        query = query.eq('chapter_id', chapterId);
-      } else if (subjectName) {
-        query = query.eq('subject', subjectName);
-      }
-
-      const { data: directMatch } = await query.limit(30);
-
-      if (directMatch && directMatch.length > 0) {
-        const existingIds = exemplars.map(e => e.id);
-        const filteredDirect = directMatch.filter(q => !existingIds.includes(q.id));
-
-        const withScore = filteredDirect.map(q => {
-          let score = 0.5;
-          if (conceptTested && q.concept_tested && q.concept_tested.toLowerCase().includes(conceptTested.toLowerCase())) {
-            score += 0.4;
-          }
-          if (q.difficulty && currentDifficulty && q.difficulty.toLowerCase() === currentDifficulty.toLowerCase()) {
-            score += 0.1;
-          }
-          return { ...q, rerankScore: score };
-        });
-
-        withScore.sort((a: any, b: any) => b.rerankScore - a.rerankScore);
-        exemplars = [...exemplars, ...withScore];
+      if (difficultyMatches && difficultyMatches.length > 0) {
+        const shuffled = difficultyMatches.sort(() => Math.random() - 0.5);
+        results = [...results, ...shuffled.slice(0, needed)];
       }
     }
 
-    // 4. Return top count formatted questions
-    const finalQuestions = exemplars.slice(0, count).map(q => ({
+    // STRATEGY 3: Final fallback — any question from same chapter
+    if (results.length < count) {
+      const existingIds = [originalQuestionId, ...results.map((r) => r.id)].filter(Boolean);
+      const needed = count - results.length;
+
+      const { data: chapterMatches } = await supabase
+        .from("questions")
+        .select("*")
+        .eq("chapter_id", chapterId)
+        .eq("verification_status", "APPROVED")
+        .in("exam_type", jeeExamTypes)
+        .not("id", "in", `(${existingIds.map((id) => `"${id}"`).join(",")})`)
+        .limit(50);
+
+      if (chapterMatches && chapterMatches.length > 0) {
+        const shuffled = chapterMatches.sort(() => Math.random() - 0.5);
+        results = [...results, ...shuffled.slice(0, needed)];
+      }
+    }
+
+    const finalQuestions = results.slice(0, count).map((q) => ({
       id: q.id,
       question_text: q.question_text,
       option_a: q.option_a,
       option_b: q.option_b,
       option_c: q.option_c,
       option_d: q.option_d,
-      correct_option: q.correct_option || q.correct_answer || q.answer || 'A',
-      explanation: q.explanation || '',
-      concept_tested: q.concept_tested || 'General',
-      difficulty: q.difficulty || 'medium',
-      exam_type: q.exam_type || 'JEE_MAINS'
+      correct_option: q.correct_option || q.correct_answer || "A",
+      explanation: q.explanation || "",
+      concept_tested: q.concept_tested || "General",
+      difficulty: q.difficulty || "medium",
+      exam_type: q.exam_type || "JEE_MAINS",
+      chapter_id: q.chapter_id,
+      similarity_source: results.findIndex((r) => r.id === q.id) < 1 ? "concept_match" : "chapter_match"
     }));
+
+    console.log(`[get-similar-questions] chapter=${chapterId}, concept=${conceptTested}, found=${finalQuestions.length}`);
 
     return new Response(JSON.stringify({ questions: finalQuestions }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -163,8 +126,9 @@ serve(async (req) => {
 
   } catch (error) {
     console.error("[get-similar-questions]", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Internal Error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Internal Error" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });
