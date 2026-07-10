@@ -134,6 +134,14 @@ const FormulaCard: React.FC<{
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const cleanEq = useMemo(() => {
+    return equation
+      .trim()
+      .replace(/^(\$\$|\$|\\\[|\\\()/, '')
+      .replace(/(\$\$|\$|\\\]|\\\))$/, '')
+      .trim();
+  }, [equation]);
+
   // Compact Quick Revision Mode
   if (isCompact) {
     return (
@@ -148,7 +156,7 @@ const FormulaCard: React.FC<{
             )}
           </div>
           <div className="text-[18px] font-semibold py-0.5 text-foreground leading-relaxed">
-            <MathLine>{`$${equation.trim()}$`}</MathLine>
+            <MathLine>{`$${cleanEq}$`}</MathLine>
           </div>
           <p className="text-caption text-muted-foreground font-medium"><strong className="font-semibold text-slate-700 dark:text-slate-300">Use:</strong> {physicalMeaning || whenToUse || "General physics equation"}</p>
         </div>
@@ -170,7 +178,7 @@ const FormulaCard: React.FC<{
         <div className="space-y-1.5 flex-1 text-left">
           <span className="text-body-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">{title || 'Formula'}</span>
           <div className="text-[22px] font-semibold py-2 text-foreground overflow-x-auto leading-relaxed">
-            <MathLine>{`$$${equation.trim()}$$`}</MathLine>
+            <MathLine>{`$$${cleanEq}$$`}</MathLine>
           </div>
         </div>
         <Button 

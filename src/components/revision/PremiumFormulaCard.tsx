@@ -66,7 +66,7 @@ export const PremiumFormulaCard: React.FC<PremiumFormulaCardProps> = ({ formula,
           <div>
             <h4 className="font-bold text-gray-900 text-[15px] mb-2">{formula.title}</h4>
             <div className="text-xl font-medium text-gray-800">
-              <MathLine>{`$${formula.latex}$`}</MathLine>
+              <MathLine>{`$${formula.latex.trim().replace(/^(\$\$|\$|\\\[|\\\()/, '').replace(/(\$\$|\$|\\\]|\\\))$/, '').trim()}$`}</MathLine>
             </div>
           </div>
         </div>

@@ -57,7 +57,7 @@ export const FormulaCard: React.FC<FormulaCardProps> = ({ name, formula, variabl
       {/* White Notion-Style Formula Container */}
       <div className="bg-white border border-white/10 rounded-2xl p-6 mb-4 flex justify-center text-lg text-black font-semibold shadow-inner relative group/math">
         <div className="w-full text-black overflow-x-auto py-1 text-center select-all flex justify-center">
-          <BlockMath math={formula} />
+          <BlockMath math={formula.trim().replace(/^(\$\$|\$|\\\[|\\\()/, '').replace(/(\$\$|\$|\\\]|\\\))$/, '').trim()} />
         </div>
       </div>
       
