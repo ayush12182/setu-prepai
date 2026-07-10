@@ -26,7 +26,18 @@ function katexToHtml(tex: string, displayMode: boolean): string {
 // ─── Delimiter normalisation ──────────────────────────────────────────────────
 
 /** Convert every AI LaTeX delimiter style → unified $$ / $ */
+export function stripAiMetaTags(text: string): string {
+  if (!text) return '';
+  // Remove METADATA blocks and any AI meta tags that should never render
+  return text
+    .replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/gi, '')
+    .replace(/\[(\/?)(CONCEPT_TESTED|THINKING_PROCESS|DETAILED_SOLUTION|QUESTION|SOLUTION|ANSWER|HINT|EXPLANATION|STEP|META)[^\]]*\]/gi, '')
+    .trim();
+}
+
 export function normalizeMathDelimiters(text: string): string {
+  // Safety: guard against undefined/null from AI-omitted fields
+  if (!text) return '';
   // Fix Form Feed characters caused by JavaScript single backslash conversion of \f (in \frac etc.)
   const cleanText = text.replace(/\\f/g, '\\f');
   return cleanText
@@ -66,8 +77,10 @@ function chunkText(text: string): MathChunk[] {
  * MathLine — renders a single line/sentence that may contain inline $…$ math.
  * Handles ALL AI delimiter styles. Never shows raw LaTeX.
  */
-export const MathLine: React.FC<{ children: string }> = ({ children }) => {
-  const normalized = normalizeMathDelimiters(children);
+export const MathLine: React.FC<{ children?: string | null }> = ({ children }) => {
+  // Safety: guard against undefined/null AI-generated content
+  if (!children) return <></>;
+  const normalized = normalizeMathDelimiters(String(children));
   const chunks = chunkText(normalized);
   return (
     <>
@@ -118,7 +131,9 @@ export function processNotesContent(
   content: string,
   lineRenderer: (line: string, key: number) => React.ReactNode
 ): React.ReactNode[] {
-  const normalized = normalizeMathDelimiters(content);
+  // First strip any AI meta tags that shouldn't be visible
+  const cleaned = stripAiMetaTags(content);
+  const normalized = normalizeMathDelimiters(cleaned);
   const elements: React.ReactNode[] = [];
   let keyIdx = 0;
 
