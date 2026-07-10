@@ -110,7 +110,9 @@ export const InteractiveGraph: React.FC<InteractiveGraphProps> = ({
         }
         pts.push([V, I]);
       }
-    } else if (graphType === 'photoelectric_svsf' || title.toLowerCase().includes('stopping potential vs. frequency') || title.toLowerCase().includes('stopping potential vs frequency')) {
+    } else if (graphType === 'photoelectric_svsf' || 
+               title.toLowerCase().includes('stopping potential') || 
+               yAxis.toLowerCase().includes('stopping potential')) {
       // Stopping Potential vs Frequency
       const phi = params.phi ?? params.work_function ?? params.W ?? 2;
       const h_e = 1.2; // Artificial visual slope
@@ -120,6 +122,33 @@ export const InteractiveGraph: React.FC<InteractiveGraphProps> = ({
         const v = vMin + (vMax - vMin) * (i / steps);
         const V0 = h_e * v - phi;
         pts.push([v, V0]);
+      }
+    } else if (graphType === 'radioactive_decay' || 
+               title.toLowerCase().includes('nuclei') || 
+               title.toLowerCase().includes('decay') ||
+               yAxis.toLowerCase().includes('nuclei')) {
+      // Radioactive Decay Curve
+      const N0 = params.N0 ?? params.initial_nuclei ?? params.N_0 ?? 400;
+      const lambda = params.lambda ?? params.decay_constant ?? 0.5;
+      const tMin = 0;
+      const tMax = 10;
+      for(let i=0; i<=steps; i++) {
+        const t = tMin + (tMax - tMin) * (i / steps);
+        const N = N0 * Math.exp(-lambda * t);
+        pts.push([t, N]);
+      }
+    } else if (graphType === 'binding_energy' || 
+               title.toLowerCase().includes('binding energy') || 
+               yAxis.toLowerCase().includes('binding energy')) {
+      // Binding Energy per Nucleon empirical curve
+      const aMin = 1;
+      const aMax = 240;
+      for(let i=0; i<=steps; i++) {
+        const A = aMin + (aMax - aMin) * (i / steps);
+        // Visual approximation of the Binding Energy curve
+        // Rapid rise to ~8.8 at Fe-56, then slow drop
+        const be = 8.8 * (1 - Math.exp(-0.05 * A)) - 0.004 * A;
+        pts.push([A, be]);
       }
     } else {
       // 🚀 GENERIC FALLBACK FOR UNKNOWN AI GRAPHS using MathJS
