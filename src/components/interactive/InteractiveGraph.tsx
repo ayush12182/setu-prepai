@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { evaluate } from 'mathjs';
 
 export interface GraphSlider {
   min: number;
@@ -94,9 +95,77 @@ export const InteractiveGraph: React.FC<InteractiveGraphProps> = ({
         const x = A * Math.sin(omega * t + phi);
         pts.push([t, x]);
       }
+    } else if (graphType === 'photoelectric_iv' || title.toLowerCase().includes('photocurrent vs')) {
+      // Photoelectric Photocurrent vs Voltage
+      const I_sat = params.intensity ?? params.I ?? params.I_sat ?? 5; // Light Intensity controls Saturation Current
+      const freq = params.frequency ?? params.nu ?? params.v ?? params.f ?? 5; 
+      const V0 = freq * 0.8; // Stopping potential scales with frequency
+      const xMin = -5;
+      const xMax = 10;
+      for(let i=0; i<=steps; i++) {
+        const V = xMin + (xMax - xMin) * (i / steps);
+        let I = 0;
+        if (V >= -V0) {
+           I = I_sat * (1 - Math.exp(-(V + V0)));
+        }
+        pts.push([V, I]);
+      }
+    } else if (graphType === 'photoelectric_svsf' || title.toLowerCase().includes('stopping potential vs. frequency') || title.toLowerCase().includes('stopping potential vs frequency')) {
+      // Stopping Potential vs Frequency
+      const phi = params.phi ?? params.work_function ?? params.W ?? 2;
+      const h_e = 1.2; // Artificial visual slope
+      const vMin = 0;
+      const vMax = 10;
+      for(let i=0; i<=steps; i++) {
+        const v = vMin + (vMax - vMin) * (i / steps);
+        const V0 = h_e * v - phi;
+        pts.push([v, V0]);
+      }
+    } else {
+      // 🚀 GENERIC FALLBACK FOR UNKNOWN AI GRAPHS using MathJS
+      try {
+        let rhs = equation;
+        if (equation.includes('=')) rhs = equation.split('=')[1];
+        
+        // Clean up common AI equation formats for mathjs
+        rhs = rhs.replace(/e\^/g, 'exp').replace(/Phi/g, 'phi');
+        
+        const xMin = 0;
+        const xMax = 10;
+        
+        // Find the likely independent variable (not in sliders)
+        const possibleVars = ['x', 't', 'v', 'V', 'f', 'r', 'd'];
+        let indVar = 'x';
+        for (const v of possibleVars) {
+          if (rhs.includes(v) && !(v in params)) {
+            indVar = v;
+            break;
+          }
+        }
+
+        for(let i=0; i<=steps; i++) {
+          const xVal = xMin + (xMax - xMin) * (i / steps);
+          const scope = { 
+            ...params, 
+            [indVar]: xVal,
+            e: Math.E,
+            pi: Math.PI,
+            h: 6.626, // scaled visually
+            k: 1.38,
+            kT: 1
+          };
+          
+          let yVal = evaluate(rhs, scope);
+          if (typeof yVal === 'number' && !isNaN(yVal)) {
+            pts.push([xVal, yVal]);
+          }
+        }
+      } catch (err) {
+        console.warn('MathJS generic graph evaluation failed:', err);
+      }
     }
     return pts;
-  }, [graphType, params]);
+  }, [graphType, params, equation, title]);
 
   // Compute graph bounds
   const xVals = points.map(([x]) => x);
