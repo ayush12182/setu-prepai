@@ -135,6 +135,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('[AuthContext] Error getting auth user for profile fetch:', userError.message);
       }
 
+      // Prevent state leaking across accounts in the same browser
+      const storedUserId = localStorage.getItem('last_user_id');
+      if (storedUserId !== userId) {
+        const mockKeys = [
+          'progress_physics', 'progress_chemistry', 'progress_mathematics', 'progress_biology',
+          'last_chapter', 'study_streak', 'total_questions_solved', 'avg_accuracy',
+          'demo_chapter_stats', 'academic_stage', 'batch_name'
+        ];
+        mockKeys.forEach(k => localStorage.removeItem(k));
+        
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('ch_progress_')) toRemove.push(key);
+        }
+        toRemove.forEach(k => localStorage.removeItem(k));
+        
+        localStorage.setItem('last_user_id', userId);
+      }
+
       // 1. Try to fetch existing profile
       const { data: initialData, error } = await supabase
         .from('profiles')

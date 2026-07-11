@@ -247,8 +247,8 @@ export default function StudentHubPage() {
     };
     if (isNewStudent) return {
       headline: `Your journey begins today, ${firstName}.`,
-      body: `Every IIT topper started exactly where you are. I recommend starting with ${firstSubject.label} · ${firstChapterName}. It's the perfect foundation and unlocks everything else.`,
-      highlight: 'First chapter: ' + firstChapterName,
+      body: `Every IIT topper started exactly where you are. Select a subject above to begin your very first learning session.`,
+      highlight: 'Select a subject to begin',
     };
     return {
       headline: continueLearn ? `Continue where you left off.` : `Let's build momentum today.`,
