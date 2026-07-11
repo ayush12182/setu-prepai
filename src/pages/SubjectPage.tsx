@@ -12,6 +12,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import {
   physicsChapters, chemistryChapters, mathsChapters,
   Chapter, APPROVED_CHAPTERS
+} from '@/data/syllabus';
 import { neetBiologyChapters } from '@/data/neetSyllabus';
 import { safePercent, safeNumber } from '@/lib/utils';
 
