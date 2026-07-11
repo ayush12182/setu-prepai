@@ -35,8 +35,7 @@ const PricingSection: React.FC = () => {
           
           {/* Card 1 — Aarambh */}
           <div
-            style={{ contentVisibility: 'auto' }}
-            className="reveal relative flex flex-col justify-between rounded-[24px] bg-[#FAFAF7] border-[1.5px] border-[#F0EDE6] p-8 shadow-sm hover:shadow-[0_12px_32px_rgba(0,0,0,0.05)] hover:border-[#FF6B00]/30 hover:translate-y-[-4px] transition-all duration-300 overflow-hidden group"
+            className="relative flex flex-col justify-between rounded-[24px] bg-[#FAFAF7] border-[1.5px] border-[#F0EDE6] p-8 shadow-sm hover:shadow-[0_12px_32px_rgba(0,0,0,0.05)] hover:border-[#FF6B00]/30 hover:translate-y-[-4px] transition-all duration-300 overflow-hidden group"
           >
             <div className="space-y-6 relative z-10">
               <div>
@@ -84,8 +83,7 @@ const PricingSection: React.FC = () => {
 
           {/* Card 2 — Aarohan (Featured) */}
           <div
-            style={{ contentVisibility: 'auto' }}
-            className="reveal relative flex flex-col justify-between rounded-[24px] bg-white border-2 border-[#FF6B00] p-8 shadow-[0_16px_40px_rgba(255,107,0,0.08)] hover:shadow-[0_20px_48px_rgba(255,107,0,0.14)] hover:translate-y-[-4px] transition-all duration-300 overflow-hidden group transform md:scale-105 z-10"
+            className="relative flex flex-col justify-between rounded-[24px] bg-white border-2 border-[#FF6B00] p-8 shadow-[0_16px_40px_rgba(255,107,0,0.08)] hover:shadow-[0_20px_48px_rgba(255,107,0,0.14)] hover:translate-y-[-4px] transition-all duration-300 overflow-hidden group transform md:scale-105 z-10"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/[0.02] to-transparent pointer-events-none" />
             
@@ -146,8 +144,7 @@ const PricingSection: React.FC = () => {
 
           {/* Card 3 — Shikhar */}
           <div
-            style={{ contentVisibility: 'auto' }}
-            className="reveal relative flex flex-col justify-between rounded-[24px] bg-[#FAFAF7] border-[1.5px] border-[#F0EDE6] p-8 shadow-sm hover:shadow-[0_12px_32px_rgba(0,0,0,0.05)] hover:border-violet-500/30 hover:translate-y-[-4px] transition-all duration-300 overflow-hidden group"
+            className="relative flex flex-col justify-between rounded-[24px] bg-[#FAFAF7] border-[1.5px] border-[#F0EDE6] p-8 shadow-sm hover:shadow-[0_12px_32px_rgba(0,0,0,0.05)] hover:border-violet-500/30 hover:translate-y-[-4px] transition-all duration-300 overflow-hidden group"
           >
             <div className="space-y-6 relative z-10">
               <div className="inline-block px-3 py-1 rounded-full bg-[#F3F0FF] text-[#6D28D9] text-[10px] font-extrabold font-sans tracking-wide">

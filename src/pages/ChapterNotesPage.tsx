@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useChapterContent } from '@/hooks/useChapterContent';
 import { MainLayout } from '@/components/layout/MainLayout';
@@ -488,6 +488,8 @@ const ChapterNotesPage: React.FC = () => {
     // Choose trend index deterministically based on chapter name length or similar
     const idx = (chapter.name.length) % concepts.length;
     const coreConcept = concepts[idx];
+    
+    if (!coreConcept) return 'Core Concepts Focus';
     
     if (chapter.subject === 'physics') {
       if (coreConcept.toLowerCase().includes('graph')) {

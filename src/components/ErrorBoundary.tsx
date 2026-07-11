@@ -47,14 +47,17 @@ export class ErrorBoundary extends Component<Props, State> {
               </p>
             </div>
             {this.state.error && (
-              <details className="text-left">
-                <summary className="text-xs text-muted-foreground/60 cursor-pointer hover:text-muted-foreground">
-                  Technical details
-                </summary>
-                <pre className="mt-2 text-xs bg-secondary rounded-lg p-3 overflow-auto text-muted-foreground">
+              <div className="text-left bg-red-100 border border-red-500 p-4 rounded-xl">
+                <h3 className="font-bold text-red-700">Error Details:</h3>
+                <p className="text-red-900 font-mono text-sm whitespace-pre-wrap">
                   {this.state.error.message}
-                </pre>
-              </details>
+                </p>
+                {this.state.error.stack && (
+                  <pre className="mt-2 text-xs bg-red-50 text-red-800 rounded p-2 overflow-auto max-h-64">
+                    {this.state.error.stack}
+                  </pre>
+                )}
+              </div>
             )}
             <div className="flex gap-3 justify-center">
               <button

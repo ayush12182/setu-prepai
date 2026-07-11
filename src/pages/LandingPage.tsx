@@ -71,11 +71,11 @@ const features = [
 const batches = [
   {
     mainName: 'AARAMBH',
-    year: '2028',
-    name: 'AARAMBH 2028',
-    subtitle: 'For Class 11',
+    year: '1 Month',
+    name: 'Aarambh Plan',
+    subtitle: 'For Quick Access',
     mission: '"The journey begins."',
-    label: 'Class 11 Students',
+    label: '1 Month Plan',
     labelBg: 'bg-blue-950/30 border border-blue-500/10 text-blue-300/75',
     btnBg: 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 shadow-[0_4px_20px_rgba(37,99,235,0.25)] hover:shadow-[0_6px_25px_rgba(37,99,235,0.45)]',
     mountain: '/images/mountain_blue.png',
@@ -89,17 +89,18 @@ const batches = [
     accentColor: '#2563eb',
     particleColor: 'rgba(245,158,11,0.6)',
     price: '₹349',
-    slug: 'aarambh-2028',
+    period: '/ month',
+    slug: 'aarambh',
     btnText: 'Explore Aarambh →',
-    features: ['AI Mentor (24×7)', 'Unlimited Practice', 'Full Mock Tests', 'Personalized Roadmap'],
+    features: ['1 month complete access', '2,500+ practice questions', 'Daily AI Study Plans', 'Ask AI Mentor'],
   },
   {
     mainName: 'AAROHAN',
-    year: '2027',
-    name: 'AAROHAN 2027',
-    subtitle: 'For Class 12',
+    year: '12 Months',
+    name: 'Aarohan Plan',
+    subtitle: 'Most Popular',
     mission: '"Rise above the competition."',
-    label: 'Class 12 Students',
+    label: '12 Month Plan',
     labelBg: 'bg-purple-950/30 border border-purple-500/10 text-purple-300/75',
     btnBg: 'bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 shadow-[0_4px_20px_rgba(168,85,247,0.25)] hover:shadow-[0_6px_25px_rgba(168,85,247,0.45)]',
     mountain: '/images/mountain_purple.png',
@@ -112,18 +113,19 @@ const batches = [
     glowClass: 'glow-title-aarohan',
     accentColor: '#a855f7',
     particleColor: 'rgba(59,130,246,0.6)',
-    price: '₹349',
-    slug: 'aarohan-2027',
+    price: '₹3,839',
+    period: '/ year',
+    slug: 'aarohan',
     btnText: 'Explore Aarohan →',
-    features: ['AI Mentor (24×7)', 'Unlimited Practice', 'Full Mock Tests', 'Personalized Roadmap'],
+    features: ['1 year complete access', '5,000+ practice questions', 'Rank Predictor included', 'Unlimited AI Mentor'],
   },
   {
     mainName: 'SHIKHAR',
-    year: '2027',
-    name: 'SHIKHAR 2027',
-    subtitle: 'For Droppers',
+    year: '24 Months',
+    name: 'Shikhar Plan',
+    subtitle: 'Best Value',
     mission: '"Reach the peak."',
-    label: 'Droppers Batch',
+    label: '24 Month Plan',
     labelBg: 'bg-orange-950/30 border border-orange-500/10 text-orange-300/75',
     btnBg: 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 shadow-[0_4px_20px_rgba(249,115,22,0.25)] hover:shadow-[0_6px_25px_rgba(249,115,22,0.45)]',
     mountain: '/images/mountain_orange.png',
@@ -136,10 +138,11 @@ const batches = [
     glowClass: 'glow-title-shikhar',
     accentColor: '#fb923c',
     particleColor: 'rgba(168,85,247,0.6)',
-    price: '₹349',
-    slug: 'shikhar-2027',
+    price: '₹7,329',
+    period: '/ 2 years',
+    slug: 'shikhar',
     btnText: 'Explore Shikhar →',
-    features: ['AI Mentor (24×7)', 'Unlimited Practice', 'Full Mock Tests', 'Personalized Roadmap'],
+    features: ['2 years complete access', '10,000+ practice questions', 'Complete Mock Test Series', 'Unlimited AI Mentor'],
   },
 ];
 
@@ -293,12 +296,10 @@ const LandingPage: React.FC = () => {
   const { user, profile, loading: authLoading, profileLoading } = useAuth();
   
   useEffect(() => {
-    // Wait for both auth session and profile fetch to complete before redirecting
+    // If the user has logged in but hasn't completed onboarding (no target exam),
+    // they should be redirected to the auth flow to complete it.
     if (!authLoading && !profileLoading && user) {
-      if (profile?.class) {
-        navigate('/student-hub', { replace: true });
-      } else {
-        // Logged in but no class set (new Google Auth user or incomplete profile) -> onboarding
+      if (!profile?.target_exam && !profile?.class) {
         navigate('/auth', { replace: true });
       }
     }
