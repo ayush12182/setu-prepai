@@ -189,17 +189,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
 
-      // 4. Fallback: check student_profiles for onboarding_completed if falsy
+      // 4. Fallback: Check if they are a legacy user who already completed onboarding
+      // Previously, onboarding completion was tracked purely by the existence of target_exam.
       if (!profileData.onboarding_completed) {
-        const { data: spData } = await supabase
-          .from('student_profiles')
-          .select('onboarding_completed')
-          .eq('student_id', userId)
-          .maybeSingle();
+        let isLegacyCompleted = false;
         
-        if (spData?.onboarding_completed) {
+        if (profileData.target_exam) {
+          isLegacyCompleted = true;
+        } else {
+          // Check student_profiles as secondary fallback
+          const { data: spData } = await supabase
+            .from('student_profiles')
+            .select('target_exam') // check target_exam here since onboarding_completed col is missing
+            .eq('student_id', userId)
+            .maybeSingle();
+          
+          if (spData?.target_exam) {
+            isLegacyCompleted = true;
+          }
+        }
+
+        if (isLegacyCompleted) {
           profileData.onboarding_completed = true;
-          // Sync it back to metadata to avoid future DB hits if possible
+          // Sync it back to metadata to permanently heal the session
           supabase.auth.updateUser({ data: { onboarding_completed: true } }).catch(() => {});
         }
       }
