@@ -23,7 +23,7 @@ import { useExamMode } from '@/contexts/ExamModeContext';
 import { trackChapterVisit, trackNotesRead } from '@/utils/activityTracker';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type Tab = 'notes' | 'practice' | 'tests' | 'revision' | 'ai-mentor';
+type Tab = 'notes' | 'practice' | 'tests' | 'revision';
 type SubjectKey = 'physics' | 'chemistry' | 'maths' | 'biology';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
@@ -42,7 +42,6 @@ const TABS: { key: Tab; label: string; icon: React.FC<{ className?: string }> }[
   { key: 'practice',   label: 'Practice',  icon: PenTool },
   { key: 'tests',      label: 'Tests',     icon: ClipboardCheck },
   { key: 'revision',   label: 'Revision',  icon: RotateCcw },
-  { key: 'ai-mentor',  label: 'Ask PrepEntrance', icon: Brain },
 ];
 
 function getChapters(subject: string): Chapter[] {
@@ -64,7 +63,6 @@ const NOTE_TYPES = [
   { key: 'pyqs',          icon: Star,          label: 'PYQ Insights',         desc: 'Exam appearance logs and topper focus areas',       color: 'text-purple-600',  bg: 'bg-purple-50',  border: 'border-purple-200',  emoji: '🎯' },
   { key: 'mistakes_only', icon: AlertTriangle, label: 'Common Mistakes',   desc: 'Concept traps resolved with clear fixes',           color: 'text-red-600',     bg: 'bg-red-50',     border: 'border-red-200',     emoji: '❌' },
   { key: 'revision',      icon: RotateCcw,     label: 'Quick Revision',       desc: 'Rapid 5-minute study recall summaries',             color: 'text-violet-600',  bg: 'bg-violet-50',  border: 'border-violet-200',  emoji: '📝' },
-  { key: 'ask_ai',        icon: Brain,         label: 'Ask PrepEntrance',     desc: 'AI Study Assistant chatbot for doubts',             color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', emoji: '🤖' },
 ];
 
 // ─── Practice sets ────────────────────────────────────────────────────────────
@@ -74,14 +72,7 @@ const DIFFICULTY_CONFIG = {
   Hard:   { color: 'text-red-600',     bg: 'bg-red-50',     border: 'border-red-200',     dot: 'bg-red-500' },
 };
 
-// ─── AI Mentor features ───────────────────────────────────────────────────────
-const AI_FEATURES = [
-  { icon: HelpCircle,    label: 'Doubt Solving',        desc: 'Ask any concept doubt and get instant explanation', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200', route: '/ask-prepentrance' },
-  { icon: Lightbulb,     label: 'Concept Explanation',  desc: 'Deep dive into any topic with AI-powered clarity', color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', route: '/ask-prepentrance' },
-  { icon: Sparkles,      label: 'Question Generation',  desc: 'Generate custom practice questions on any topic', color: 'text-violet-600', bg: 'bg-violet-50', border: 'border-violet-200', route: '/ask-prepentrance' },
-  { icon: CalendarDays,  label: 'Study Planning',       desc: 'Get a personalized study plan for this chapter', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200', route: '/ask-prepentrance' },
-  { icon: BarChart3,     label: 'Performance Analysis', desc: 'Understand your weak points in this chapter', color: 'text-pink-600', bg: 'bg-pink-50', border: 'border-pink-200', route: '/analytics' },
-];
+// ─── AI Mentor features removed ───────────────────────────────────────────────
 
 // ─── Revision types ───────────────────────────────────────────────────────────
 const REVISION_TYPES = [
@@ -374,53 +365,7 @@ const RevisionTab: React.FC<{ chapter: Chapter }> = ({ chapter }) => {
   );
 };
 
-const AIMentorTab: React.FC<{ chapter: Chapter }> = ({ chapter }) => {
-  const navigate = useNavigate();
-  return (
-    <div className="space-y-3">
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
-        AI-Powered Learning · {chapter.name}
-      </p>
-      {AI_FEATURES.map((feat) => {
-        const Icon = feat.icon;
-        return (
-          <button
-            key={feat.label}
-            onClick={() => navigate(feat.route)}
-            className={cn('w-full flex items-center justify-between p-4 bg-white border rounded-xl hover:shadow-sm transition-all group text-left', feat.border)}
-          >
-            <div className="flex items-center gap-4">
-              <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center border shrink-0', feat.bg, feat.border)}>
-                <Icon className={cn('w-5 h-5', feat.color)} />
-              </div>
-              <div>
-                <p className="text-slate-900 font-bold text-sm">{feat.label}</p>
-                <p className="text-slate-400 text-xs font-medium mt-0.5">{feat.desc}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white shrink-0"
-              style={{ background: '#3b82f6' }}>
-              <Sparkles className="w-3 h-3" /> Ask AI
-            </div>
-          </button>
-        );
-      })}
-
-      {/* Quick prompt box */}
-      <div className="mt-4 bg-gradient-to-br from-blue-50 to-violet-50 border border-blue-200 rounded-xl p-4">
-        <p className="text-slate-700 font-bold text-sm mb-2">Ask about {chapter.name}</p>
-        <button
-          onClick={() => navigate('/ask-prepentrance')}
-          className="w-full flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl text-left hover:border-blue-300 hover:shadow-sm transition-all group"
-        >
-          <MessageSquare className="w-4 h-4 text-slate-400 shrink-0" />
-          <span className="text-slate-400 text-sm">Explain {chapter.topics[0]}...</span>
-          <Sparkles className="w-4 h-4 text-blue-500 ml-auto shrink-0" />
-        </button>
-      </div>
-    </div>
-  );
-};
+// AIMentorTab removed
 
 // Helper function to return standard exam question weightage
 const getQuestionsAskedText = (subject: string, examType: 'NEET' | 'CUET' | 'JEE', weightage: string) => {
@@ -658,7 +603,6 @@ const ChapterDetailPage: React.FC = () => {
                   {activeTab === 'practice'  && <PracticeTab  chapter={chapter} accent={config.accent} />}
                   {activeTab === 'tests'     && <TestsTab     chapter={chapter} accent={config.accent} />}
                   {activeTab === 'revision'  && <RevisionTab  chapter={chapter} />}
-                  {activeTab === 'ai-mentor' && <AIMentorTab  chapter={chapter} />}
                 </motion.div>
               </AnimatePresence>
             </div>
