@@ -22,6 +22,7 @@ import MixedTestDialog from '@/components/test/MixedTestDialog';
 import PYQTestDialog from '@/components/test/PYQTestDialog';
 import TestExecution from '@/components/test/TestExecution';
 import { ChapterSelection } from '@/hooks/useTestQuestions';
+import { mapMockChapterIdToReal } from '@/utils/chapterClassifier';
 import { toast } from 'sonner';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -829,7 +830,7 @@ const TestPage: React.FC = () => {
                                 PYQ Test
                               </button>
                               <button
-                                onClick={() => navigate(`/learn/${activeSubject}/${ch.id}`)}
+                                onClick={() => navigate(`/learn/${activeSubject}/${mapMockChapterIdToReal(ch.id)}`)}
                                 className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-caption font-bold rounded-xl hover:border-blue-300 hover:text-blue-700 transition-colors"
                               >
                                 <BookOpen className="w-3.5 h-3.5" />

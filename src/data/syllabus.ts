@@ -62,6 +62,24 @@ export interface Chapter {
 // ==================== PHYSICS ====================
 export const physicsChapters: Chapter[] = [
   {
+    id: 'phy-0',
+    name: 'Units & Dimensions',
+    subject: 'physics',
+    weightage: 'Medium',
+    difficulty: 'Easy',
+    prerequisites: [],
+    topics: ["Dimensional Analysis", "Significant Figures", "Errors in Measurement", "Vernier Caliper", "Screw Gauge"],
+    keyFormulas: [],
+    pyqData: {
+      total: 30,
+      postCovid: 15,
+      preCovid: 10,
+      legacy: 5,
+      trendingConcepts: ["Error propagation", "Vernier least count"]
+    },
+    examTips: ["Always check dimensions first in formulas", "Significant figures rule for addition vs multiplication"]
+  },
+  {
     id: 'phy-1',
     name: 'Kinematics',
     subject: 'physics',
