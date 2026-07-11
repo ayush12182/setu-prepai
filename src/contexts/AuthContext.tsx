@@ -63,6 +63,8 @@ interface Profile {
   cohortName?: string | null;
   diagnostic_completed?: boolean | null;
   exam_goal?: string | null;
+  onboarding_completed?: boolean | null;
+  subscription_plan?: string | null;
 }
 
 
@@ -320,7 +322,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     toast.success('Signed out successfully.');
+    
+    // Clear preferred language
     localStorage.removeItem('preferredLanguage');
+
+    // Clear all mock learning progress from localStorage so new users get a fresh state
+    const mockKeys = [
+      'progress_physics', 'progress_chemistry', 'progress_mathematics', 'progress_biology',
+      'last_chapter', 'study_streak', 'total_questions_solved', 'avg_accuracy',
+      'demo_chapter_stats', 'academic_stage', 'batch_name'
+    ];
+    mockKeys.forEach(k => localStorage.removeItem(k));
+    
+    // Clear chapter-specific progress
+    const toRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('ch_progress_')) {
+        toRemove.push(key);
+      }
+    }
+    toRemove.forEach(k => localStorage.removeItem(k));
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {

@@ -101,10 +101,7 @@ const AuthPage: React.FC = () => {
       if (showOnboarding || showWelcome) return;
 
       if (profile) {
-        // Onboarding is complete if the student has set their target exam.
-        // Previously this checked profile.class which caused Google Auth users
-        // (who never went through class selection) to get stuck in an infinite loop.
-        if (profile.target_exam) {
+        if (profile.onboarding_completed) {
           navigate('/student-hub', { replace: true });
           return;
         } else {
@@ -321,27 +318,13 @@ const AuthPage: React.FC = () => {
         class: studentClass,
         student_level: 'Intermediate',
         user_type: 'student',
+        onboarding_completed: true,
       });
 
       await refreshProfile();
       await supabase.auth.updateUser({ data: { target_exam: examGoal, user_type: 'student' } });
 
-      // Inject Mock Task for first-time students
-      const { data: latestProfile } = await supabase.from('profiles').select('id').single();
-      if (latestProfile) {
-        try {
-          await supabase.from('assigned_tasks').insert({
-            student_id: latestProfile.id,
-            teacher_id: latestProfile.id,
-            topic: examGoal === 'NEET' ? 'Cell Biology' : 'Kinematics',
-            subtopic: examGoal === 'NEET' ? 'Cell Cycle and Cell Division' : 'Motion in 1D',
-            status: 'pending',
-            initial_accuracy: 45.5,
-          });
-        } catch (e) {
-          console.warn('Mock task creation failed(non-fatal)');
-        }
-      }
+      // Removed mock task generation for Kinematics / Cell Biology
 
       toast.success('All set! Let\'s begin your journey 🚀');
       navigate('/student-hub');

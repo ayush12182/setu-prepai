@@ -4,25 +4,32 @@ import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, ArrowLeft, Check, Loader2,
   Rocket, Brain, Zap, Award, Sparkles,
-  BookOpen, Users, Star, ChevronRight, Trophy
+  BookOpen, Users, Star, ChevronRight, Trophy,
+  MapPin, Phone, Building, GraduationCap, User
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-type OnboardingStep = 1 | 2 | 3;
-type StreamType = 'jee' | 'neet' | 'cuet' | '';
+type OnboardingStep = 1 | 2 | 3 | 4;
+type StreamType = 'jee' | 'neet' | '';
+type PlanType = 'aarambh' | 'aarohan' | 'shikher' | '';
 
-// ─── Exam display helpers ─────────────────────────────────────────────────────
 const EXAM_LABELS: Record<string, string> = {
   jee: 'JEE Main & Advanced',
   neet: 'NEET',
-  cuet: 'CUET',
 };
 
-// ─── Glow Background ─────────────────────────────────────────────────────────
+const PLAN_DETAILS = {
+  aarambh: { title: 'Aarambh', duration: '1 month', questions: '2,500 questions', color: 'blue' },
+  aarohan: { title: 'Aarohan', duration: '12 months', questions: '5,000 questions', color: 'emerald', popular: true },
+  shikher: { title: 'Shikher', duration: '24 months', questions: '10,000+ questions', color: 'violet' }
+};
+
 const GlowBg: React.FC = () => (
   <div className="pointer-events-none fixed inset-0 overflow-hidden bg-gradient-to-tr from-slate-50 via-white to-blue-50/20">
     <div className="absolute top-[-20%] left-1/4 w-[750px] h-[750px] rounded-full bg-blue-500/[0.03] blur-[150px]" />
@@ -34,7 +41,6 @@ const GlowBg: React.FC = () => (
   </div>
 );
 
-// ─── Slide variants ───────────────────────────────────────────────────────────
 const slide = {
   enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
   center: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 25 } },
@@ -55,13 +61,20 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   const [step, setStep] = useState<OnboardingStep>(1);
   const [dir, setDir] = useState(1);
 
-  const [stream, setStream] = useState<StreamType>('');
+  const [formData, setFormData] = useState({
+    firstName: user?.user_metadata?.full_name?.split(' ')[0] || '',
+    lastName: user?.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
+    mobile: '+91 ',
+    city: '',
+    class: '',
+    institute: ''
+  });
 
-  // Loading synthesis state
+  const [stream, setStream] = useState<StreamType>('');
+  const [plan, setPlan] = useState<PlanType>('');
+
   const [loadingPhase, setLoadingPhase] = useState(0);
   const [isCompiling, setIsCompiling] = useState(false);
-
-  // Welcome screen state
   const [showWelcomeScreen, setShowWelcomeScreen] = useState(false);
 
   const go = (newStep: OnboardingStep, direction = 1) => {
@@ -69,37 +82,11 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     setStep(newStep);
   };
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isCompiling || showWelcomeScreen) return;
-
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        if (step === 1) go(2);
-        else if (step === 2 && stream) handleStartSynthesis();
-      }
-
-      if (e.key === '1' || e.key === '2') {
-        const index = parseInt(e.key) - 1;
-        if (step === 2) {
-          const streams: StreamType[] = ['jee', 'neet'];
-          if (index < streams.length) setStream(streams[index]);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [step, stream, isCompiling, showWelcomeScreen]);
-
-  // ─── Main synthesis handler ───────────────────────────────────────────────
   const handleStartSynthesis = async () => {
     if (!user) return;
     setIsCompiling(true);
-    go(3); // loading screen
+    go(4); // loading screen
 
-    // Visual phase animations
     const phaseDelays = [900, 900, 900, 700];
     for (let i = 0; i < phaseDelays.length; i++) {
       await new Promise((r) => setTimeout(r, phaseDelays[i]));
@@ -110,267 +97,174 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
       let examGoal = 'JEE Main';
       let dbExam = 'JEE';
       if (stream === 'neet') { examGoal = 'NEET'; dbExam = 'NEET'; }
-      else if (stream === 'cuet') { examGoal = 'CUET'; dbExam = 'CUET'; }
 
-      // Set global exam mode
       if (stream === 'jee') setExamMode('jee');
       else if (stream === 'neet') setExamMode('neet');
-      else if (stream === 'cuet') setExamMode('cuet');
 
-      // Persist to cohorts table (default to class 12 for DB compatibility)
-      const { data: cohortData } = await supabase
-        .from('cohorts')
-        .select('id')
-        .eq('exam', dbExam)
-        .eq('class', '12')
-        .maybeSingle();
+      // Update auth metadata
+      await supabase.auth.updateUser({ data: { target_exam: examGoal, user_type: 'student' } });
 
-      const cohortId = cohortData?.id || null;
-
-      // Update profile — class defaults to '12', subscription_tier defaults to null (free/trial)
+      // Update profiles
       await updateProfile({
         target_exam: examGoal,
-        class: '12',
+        class: formData.class,
         student_level: 'Intermediate',
         user_type: 'student',
+        onboarding_completed: true,
+        subscription_plan: plan,
       });
 
       // Upsert student_profiles
       const baseProfile = {
         student_id: user.id,
-        name: user.user_metadata?.full_name || null,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: user.email,
+        mobile: formData.mobile,
+        city: formData.city,
+        institute_name: formData.institute || null,
+        class: formData.class,
         target_exam: examGoal,
-        class: '12',
-        target_year: 2027,
+        subscription_plan: plan,
+        onboarding_completed: true,
         current_level: 'Intermediate',
-        cohort_id: cohortId,
         physics_level: 'Intermediate',
         chemistry_level: 'Intermediate',
         maths_level: 'Intermediate',
         biology_level: 'Intermediate',
         last_active: new Date().toISOString(),
       };
-      try {
-        await supabase.from('student_profiles').upsert({
-          ...baseProfile,
-          batch_id: `${stream}_premium`,
-          batch_name: `${dbExam} Premium`,
-          exam_type: dbExam,
-          academic_stage: '12',
-        });
-      } catch {
-        // Fallback: upsert without extended batch columns if schema not yet migrated
-        await supabase.from('student_profiles').upsert(baseProfile);
-      }
+      
+      await supabase.from('student_profiles').upsert(baseProfile);
 
-      // Store in localStorage for immediate UI use
-      localStorage.setItem('batch_id', `${stream}_premium`);
-      localStorage.setItem('batch_name', `${dbExam} Premium`);
+      localStorage.setItem('batch_name', plan);
       localStorage.setItem('exam_type', dbExam);
-      localStorage.setItem('academic_stage', '12');
+      localStorage.setItem('academic_stage', formData.class);
 
       await refreshProfile();
-
-      // Seed first task
-      try {
-        await supabase.from('assigned_tasks').insert({
-          student_id: user.id,
-          teacher_id: user.id,
-          topic: examGoal === 'NEET' ? 'Cell Biology' : 'Kinematics',
-          subtopic: examGoal === 'NEET' ? 'Cell Cycle and Cell Division' : 'Motion in 1D',
-          status: 'pending',
-          initial_accuracy: 50.0,
-        });
-      } catch {
-        console.warn('First task creation skipped (non-fatal)');
-      }
-
       setShowWelcomeScreen(true);
-
     } catch (e: any) {
       toast.error(e.message || 'Something went wrong during setup.');
       setIsCompiling(false);
-      go(2, -1);
+      go(3, -1);
     }
+  };
+
+  const validateStep1 = () => {
+    if (!formData.firstName.trim()) return toast.error('First name is required');
+    if (!formData.mobile.trim() || formData.mobile === '+91 ') return toast.error('Mobile number is required');
+    if (!formData.city.trim()) return toast.error('City is required');
+    if (!formData.class) return toast.error('Please select your class');
+    go(2);
   };
 
   // ─── WELCOME SCREEN ────────────────────────────────────────────────
   if (showWelcomeScreen) {
     const examLabel = EXAM_LABELS[stream] ?? stream.toUpperCase();
-
-    const examColors: Record<string, { accent: string; glow: string; badge: string; badgeLabel: string; icon: string }> = {
-      jee:  { accent: '#60a5fa', glow: 'rgba(59,130,246,0.15)', badge: 'bg-blue-500/20 border-blue-400/50 text-white', badgeLabel: 'text-blue-200', icon: '🚀' },
-      neet: { accent: '#34d399', glow: 'rgba(16,185,129,0.15)', badge: 'bg-emerald-500/20 border-emerald-400/50 text-white', badgeLabel: 'text-emerald-200', icon: '🧬' },
-      cuet: { accent: '#a78bfa', glow: 'rgba(139,92,246,0.15)', badge: 'bg-violet-500/20 border-violet-400/50 text-white', badgeLabel: 'text-violet-200', icon: '🎓' },
+    const examColors: Record<string, any> = {
+      jee:  { accent: '#60a5fa', glow: 'rgba(59,130,246,0.15)', icon: '🚀' },
+      neet: { accent: '#34d399', glow: 'rgba(16,185,129,0.15)', icon: '🧬' },
     };
     const colors = examColors[stream] ?? examColors.jee;
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center p-4 overflow-hidden">
-        {/* Ambient glow */}
         <div className="pointer-events-none fixed inset-0">
-          <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] rounded-full blur-[150px]"
-            style={{ background: colors.glow }} />
-          <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full blur-[120px]"
-            style={{ background: 'rgba(16,185,129,0.05)' }} />
+          <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] rounded-full blur-[150px]" style={{ background: colors.glow }} />
+          <div className="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full blur-[120px]" style={{ background: 'rgba(16,185,129,0.05)' }} />
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10 w-full max-w-md space-y-4"
-        >
-          {/* ── Header card ── */}
+        <motion.div initial={{ opacity: 0, y: 32 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="relative z-10 w-full max-w-md space-y-4">
           <div className="bg-white/[0.05] backdrop-blur-2xl rounded-3xl p-8 border border-white/[0.08] shadow-2xl text-center space-y-5">
-            <motion.div
-              initial={{ scale: 0, rotate: -30 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.2 }}
-              className="w-24 h-24 rounded-full border-2 flex items-center justify-center mx-auto text-5xl"
-              style={{ borderColor: colors.accent, background: colors.glow }}
-            >
+            <motion.div initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.2 }} className="w-24 h-24 rounded-full border-2 flex items-center justify-center mx-auto text-5xl" style={{ borderColor: colors.accent, background: colors.glow }}>
               {colors.icon}
             </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-              className="space-y-2"
-            >
-              <p className="text-xs font-black uppercase tracking-[0.25em]" style={{ color: colors.accent }}>
-                You're All Set ✓
-              </p>
-              <h1 className="text-white text-2xl sm:text-3xl font-black leading-tight">
-                Welcome aboard,<br />
-                <span style={{ color: colors.accent }}>{user?.user_metadata?.full_name?.split(' ')[0] ?? 'Scholar'}!</span>
-              </h1>
-              <p className="text-white/50 text-sm font-medium leading-relaxed max-w-xs mx-auto">
-                Your personalized PrepEntrance dashboard is ready with content tailored to {examLabel}.
-              </p>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="space-y-2">
+              <p className="text-xs font-black uppercase tracking-[0.25em]" style={{ color: colors.accent }}>You're All Set ✓</p>
+              <h1 className="text-white text-2xl sm:text-3xl font-black leading-tight">Welcome aboard,<br /><span style={{ color: colors.accent }}>{formData.firstName}!</span></h1>
+              <p className="text-white/50 text-sm font-medium leading-relaxed max-w-xs mx-auto">Your personalized PrepEntrance dashboard is ready.</p>
             </motion.div>
           </div>
 
-          {/* ── Details card ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="bg-white/[0.05] backdrop-blur-2xl rounded-3xl p-6 border border-white/[0.08] shadow-xl space-y-4"
-          >
-            <div className="flex items-center gap-2 mb-1">
-              <Trophy className="w-4 h-4 text-amber-400" />
-              <span className="text-white/50 text-xs font-bold uppercase tracking-wider">Your PrepEntrance Access</span>
-            </div>
-
-            {/* Exam & Plan */}
-            <div className="flex items-center justify-between p-4 rounded-2xl border" style={{ borderColor: `${colors.accent}33`, background: colors.glow }}>
-              <div>
-                <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Exam</p>
-                <p className="text-white font-black text-xl leading-tight">{examLabel}</p>
-              </div>
-              <div className="text-3xl">🏅</div>
-            </div>
-
-            {/* What you'll get */}
-            <div className="space-y-2 pt-1">
-              {[
-                { icon: BookOpen, text: 'Complete syllabus & personalized study plan' },
-                { icon: Zap, text: 'Targeted mock tests & adaptive practice' },
-                { icon: Brain, text: 'AI Mentor available 24×7' },
-                { icon: Users, text: 'PDFs, notes & resources for your exam' },
-              ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.55 + i * 0.07 }}
-                  className="flex items-center gap-3 text-white/60 text-sm"
-                >
-                  <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 bg-white/[0.06] border border-white/[0.08]">
-                    <item.icon className="w-3.5 h-3.5" style={{ color: colors.accent }} />
-                  </div>
-                  <span className="font-medium">{item.text}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* ── CTA ── */}
-          <motion.button
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            onClick={async () => {
-              await refreshProfile();
-              window.location.href = '/student-hub';
-            }}
-            className="w-full h-16 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-white"
-            style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)`, boxShadow: `0 8px 32px ${colors.glow}` }}
-          >
-            <Sparkles className="w-5 h-5" />
-            Enter Dashboard
-            <ChevronRight className="w-5 h-5" />
+          <motion.button initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} onClick={async () => { await refreshProfile(); window.location.href = '/student-hub'; }} className="w-full h-16 rounded-2xl font-black text-base flex items-center justify-center gap-3 shadow-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer text-white" style={{ background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent}cc)`, boxShadow: `0 8px 32px ${colors.glow}` }}>
+            <Sparkles className="w-5 h-5" /> Enter Dashboard <ChevronRight className="w-5 h-5" />
           </motion.button>
-
-          <p className="text-center text-white/20 text-xs font-medium">
-            You can explore premium plans from your profile settings.
-          </p>
         </motion.div>
       </div>
     );
   }
 
-  // ─── Step rendering ───────────────────────────────────────────────────────
   const renderStep = () => {
-    // ════════════════ STEP 1: WELCOME ════════════════
+    // ════════════════ STEP 1: Details ════════════════
     if (step === 1) {
       return (
-        <div className="space-y-7 text-center py-6">
-          <div className="brand-logo-container rounded-3xl w-20 h-20 mx-auto mb-6 flex items-center justify-center animate-pulse-soft">
-            <img
-              src="/prepentrance-logo.png"
-              alt="PrepEntrance Logo"
-              className="brand-logo-img"
-            />
+        <div className="space-y-6 py-2">
+          <div className="text-center space-y-2 mb-4">
+            <h2 className="text-slate-900 text-2xl font-black font-display tracking-tight leading-snug">About You</h2>
+            <p className="text-slate-500 text-xs font-sans font-medium">Let's set up your personalized profile.</p>
           </div>
-
-          <div className="space-y-3">
-            <span className="text-blue-600 text-xs font-black uppercase tracking-[0.25em] block leading-none">
-              Welcome to PrepEntrance
-            </span>
-            <h1 className="text-slate-900 text-3xl sm:text-[36px] font-black leading-tight tracking-tight font-display">
-              Let's Personalize <br />Your Preparation.
-            </h1>
-            <p className="text-slate-500 text-sm max-w-sm mx-auto leading-relaxed font-sans font-medium">
-              Tell us your target exam — we'll set up your personalized dashboard in seconds.
-            </p>
-          </div>
-
-          {/* Step preview pills */}
-          <div className="flex items-center justify-center gap-2 pt-1">
-            {['Select Exam', 'Get Started'].map((label, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="text-[11px] font-black text-slate-900 bg-slate-50 border border-slate-200 shadow-sm rounded-full px-3 py-1">
-                  {label}
-                </span>
-                {i < 1 && <ChevronRight className="w-3 h-3 text-slate-400" />}
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-slate-500 text-[10px] font-bold uppercase">First Name *</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} className="pl-9 h-11 bg-slate-50" placeholder="First Name" />
+                </div>
               </div>
-            ))}
+              <div className="space-y-1.5">
+                <Label className="text-slate-500 text-[10px] font-bold uppercase">Last Name</Label>
+                <Input value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} className="h-11 bg-slate-50" placeholder="Last Name" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-500 text-[10px] font-bold uppercase">Email (Read-only)</Label>
+              <Input value={user?.email || ''} readOnly className="h-11 bg-slate-100 text-slate-500" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-slate-500 text-[10px] font-bold uppercase">Mobile *</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input value={formData.mobile} onChange={e => setFormData({...formData, mobile: e.target.value})} className="pl-9 h-11 bg-slate-50" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-slate-500 text-[10px] font-bold uppercase">City *</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} className="pl-9 h-11 bg-slate-50" placeholder="e.g. Kota" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-500 text-[10px] font-bold uppercase">Academic Class *</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {['11', '12', 'dropper'].map(cls => (
+                  <button key={cls} onClick={() => setFormData({...formData, class: cls})} className={cn("h-11 rounded-lg border text-sm font-bold transition-all", formData.class === cls ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50")}>
+                    {cls === 'dropper' ? 'Dropper' : `Class ${cls}`}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-slate-500 text-[10px] font-bold uppercase">Institute (Optional)</Label>
+              <div className="relative">
+                <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input value={formData.institute} onChange={e => setFormData({...formData, institute: e.target.value})} className="pl-9 h-11 bg-slate-50" placeholder="e.g. ALLEN, PW, DPS, Self Study" />
+              </div>
+            </div>
           </div>
 
-          <div className="pt-4 space-y-4">
-            <button
-              onClick={() => go(2)}
-              className="w-full h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/10 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer"
-            >
-              Get Started <ArrowRight className="w-5 h-5" />
-            </button>
-            <span className="text-slate-400 text-[10px] font-sans font-bold block">
-              Press <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-500 font-mono font-bold">Enter</span> to begin
-            </span>
-          </div>
+          <button onClick={validateStep1} className="w-full h-12 mt-4 rounded-xl font-display font-extrabold text-sm flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-all">
+            Continue <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       );
     }
@@ -378,56 +272,76 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     // ════════════════ STEP 2: SELECT EXAM ════════════════
     if (step === 2) {
       const streams = [
-        { key: 'jee' as StreamType, title: 'JEE Main & Advanced', desc: 'Physics · Chemistry · Mathematics', icon: Rocket, keybind: '1' },
-        { key: 'neet' as StreamType, title: 'NEET', desc: 'Physics · Chemistry · Biology', icon: Zap, keybind: '2' },
+        { key: 'jee' as StreamType, title: 'JEE Main & Advanced', desc: 'Physics · Chemistry · Mathematics', icon: Rocket },
+        { key: 'neet' as StreamType, title: 'NEET', desc: 'Physics · Chemistry · Biology', icon: Zap },
       ];
 
       return (
         <div className="space-y-6 py-2">
           <div className="text-center space-y-2">
-            <h2 className="text-slate-900 text-2xl sm:text-3xl font-black font-display tracking-tight leading-snug">
-              Which exam are you targeting?
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm font-sans font-medium leading-relaxed">
-              Your syllabus, mock tests, and AI mentor will be tuned to your exam.
-            </p>
+            <h2 className="text-slate-900 text-2xl font-black font-display tracking-tight leading-snug">Target Exam</h2>
+            <p className="text-slate-500 text-xs font-sans font-medium">Select your primary target examination.</p>
           </div>
 
           <div className="space-y-3 pt-2">
             {streams.map((s) => {
               const isSelected = stream === s.key;
               return (
-                <button
-                  key={s.key}
-                  onClick={() => setStream(s.key)}
-                  className={cn(
-                    'w-full p-4.5 rounded-2xl border text-left flex items-center justify-between transition-all duration-205 cursor-pointer select-none group',
-                    isSelected
-                      ? 'border-blue-500 bg-blue-50/50 shadow-sm'
-                      : 'border-slate-100 bg-slate-50/60 hover:border-slate-200 hover:bg-slate-100/30'
-                  )}
-                >
+                <button key={s.key} onClick={() => setStream(s.key)} className={cn('w-full p-4.5 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer group', isSelected ? 'border-blue-500 bg-blue-50/50 shadow-sm' : 'border-slate-100 bg-slate-50/60 hover:border-slate-200')}>
                   <div className="flex items-center gap-4">
-                    <div className={cn(
-                      'w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors shadow-xs',
-                      isSelected ? 'bg-blue-100 border-blue-200 text-blue-600' : 'bg-slate-100 border-slate-200/60 text-slate-400 group-hover:text-slate-600'
-                    )}>
-                      <s.icon className="w-5 h-5" />
-                    </div>
+                    <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border transition-colors', isSelected ? 'bg-blue-100 border-blue-200 text-blue-600' : 'bg-slate-100 border-slate-200 text-slate-400')}><s.icon className="w-5 h-5" /></div>
                     <div>
-                      <p className={cn('font-black text-base sm:text-lg leading-snug', isSelected ? 'text-blue-900' : 'text-slate-900')}>{s.title}</p>
-                      <p className="text-slate-500 text-xs mt-0.5 font-sans font-semibold">{s.desc}</p>
+                      <p className={cn('font-black text-base', isSelected ? 'text-blue-900' : 'text-slate-900')}>{s.title}</p>
+                      <p className="text-slate-500 text-xs font-semibold">{s.desc}</p>
                     </div>
                   </div>
+                  <div className={cn('w-5 h-5 rounded-full border flex items-center justify-center transition-all', isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300')}>
+                    {isSelected && <Check className="w-3 h-3 text-white stroke-[4]" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
 
-                  <div className="flex items-center gap-3">
-                    <span className="hidden sm:inline-block text-[9px] bg-slate-100 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold">
-                      Key {s.keybind}
-                    </span>
-                    <div className={cn(
-                      'w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200',
-                      isSelected ? 'bg-blue-600 border-blue-600 scale-105' : 'border-slate-300'
-                    )}>
+          <div className="flex items-center gap-3 pt-2">
+            <button onClick={() => go(1, -1)} className="w-1/3 h-14 rounded-2xl border border-slate-200 text-slate-500 hover:bg-slate-50 font-bold flex items-center justify-center gap-1.5"><ArrowLeft className="w-4 h-4" /> Back</button>
+            <button disabled={!stream} onClick={() => go(3)} className="flex-1 h-14 rounded-2xl font-extrabold flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40">Continue <ArrowRight className="w-5 h-5" /></button>
+          </div>
+        </div>
+      );
+    }
+
+    // ════════════════ STEP 3: PLAN ════════════════
+    if (step === 3) {
+      const plans: {key: PlanType; details: any}[] = [
+        { key: 'aarambh', details: PLAN_DETAILS.aarambh },
+        { key: 'aarohan', details: PLAN_DETAILS.aarohan },
+        { key: 'shikher', details: PLAN_DETAILS.shikher },
+      ];
+
+      return (
+        <div className="space-y-6 py-2">
+          <div className="text-center space-y-2">
+            <h2 className="text-slate-900 text-2xl font-black font-display tracking-tight leading-snug">Choose Your Plan</h2>
+            <p className="text-slate-500 text-xs font-sans font-medium">Select a subscription plan based on your needs.</p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            {plans.map((p) => {
+              const isSelected = plan === p.key;
+              const d = p.details;
+              return (
+                <button key={p.key} onClick={() => setPlan(p.key)} className={cn('w-full relative p-4 rounded-2xl border text-left transition-all cursor-pointer group', isSelected ? 'border-blue-500 bg-blue-50/50 shadow-sm' : 'border-slate-100 bg-slate-50/60 hover:border-slate-200')}>
+                  {d.popular && <div className="absolute -top-2.5 right-4 bg-emerald-500 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Most Popular</div>}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className={cn('font-black text-lg', isSelected ? 'text-blue-900' : 'text-slate-900')}>{d.title}</p>
+                        <span className="text-[10px] font-bold bg-slate-200 text-slate-600 px-1.5 rounded">{d.duration}</span>
+                      </div>
+                      <p className="text-slate-500 text-xs font-semibold mt-1 flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5"/> {d.questions}</p>
+                    </div>
+                    <div className={cn('w-5 h-5 rounded-full border flex items-center justify-center transition-all', isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300')}>
                       {isSelected && <Check className="w-3 h-3 text-white stroke-[4]" />}
                     </div>
                   </div>
@@ -436,92 +350,41 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
             })}
           </div>
 
-          {/* Plan preview */}
-          {stream && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-50 border border-blue-100"
-            >
-              <Award className="w-4 h-4 text-blue-600 shrink-0" />
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-400">Ready to assign</p>
-                <p className="text-blue-900 font-extrabold text-sm">{EXAM_LABELS[stream]} — Full Syllabus Access</p>
-              </div>
-            </motion.div>
-          )}
-
-          <div className="flex items-center gap-3 pt-2 shrink-0">
-            <button
-              onClick={() => go(1, -1)}
-              className="w-1/3 h-14 rounded-2xl border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 text-sm font-sans font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" /> Back
-            </button>
-            <button
-              disabled={!stream}
-              onClick={handleStartSynthesis}
-              className="flex-1 h-14 rounded-2xl font-display font-extrabold text-base flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 cursor-pointer shadow-md shadow-blue-500/10"
-            >
-              Start My Journey <ArrowRight className="w-5 h-5" />
-            </button>
+          <div className="flex items-center gap-3 pt-2">
+            <button onClick={() => go(2, -1)} className="w-1/3 h-14 rounded-2xl border border-slate-200 text-slate-500 hover:bg-slate-50 font-bold flex items-center justify-center gap-1.5"><ArrowLeft className="w-4 h-4" /> Back</button>
+            <button disabled={!plan} onClick={handleStartSynthesis} className="flex-1 h-14 rounded-2xl font-extrabold flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-40">Start My Journey <ArrowRight className="w-5 h-5" /></button>
           </div>
         </div>
       );
     }
 
-    // ════════════════ STEP 3: SYNTHESIS LOADING ════════════════
-    if (step === 3) {
+    // ════════════════ STEP 4: SYNTHESIS LOADING ════════════════
+    if (step === 4) {
       const examLabel = EXAM_LABELS[stream] ?? 'Your Exam';
       const phases = [
-        { icon: Brain, label: 'Verifying your exam profile...' },
-        { icon: Award, label: `Setting up ${examLabel} dashboard...` },
+        { icon: Brain, label: 'Verifying your profile details...' },
+        { icon: Award, label: `Setting up ${examLabel} ${PLAN_DETAILS[plan as keyof typeof PLAN_DETAILS]?.title || ''} plan...` },
         { icon: Rocket, label: 'Building your personalized workspace...' },
-        { icon: Star, label: 'All set! Opening your classroom...' },
+        { icon: Star, label: 'All set! Opening your dashboard...' },
       ];
 
       return (
         <div className="space-y-8 py-8 text-center animate-pulse-soft">
-          <div className="w-20 h-20 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto shadow-sm relative z-10">
-            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-          </div>
-
+          <div className="w-20 h-20 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto shadow-sm relative z-10"><Loader2 className="w-10 h-10 text-blue-600 animate-spin" /></div>
           <div className="space-y-3">
-            <h2 className="text-slate-900 text-2xl font-black font-display tracking-tight leading-snug">
-              Setting Up Your Dashboard
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm font-sans font-medium max-w-xs mx-auto leading-relaxed">
-              Configuring your personalized PrepEntrance workspace. This takes just a moment.
-            </p>
+            <h2 className="text-slate-900 text-2xl font-black font-display tracking-tight leading-snug">Setting Up Your Dashboard</h2>
+            <p className="text-slate-500 text-xs sm:text-sm font-sans font-medium max-w-xs mx-auto leading-relaxed">Configuring your personalized PrepEntrance workspace. This takes just a moment.</p>
           </div>
-
           <div className="space-y-3 max-w-sm mx-auto text-left bg-slate-50 border border-slate-100 rounded-3xl p-5 relative z-10">
             {phases.map((p, idx) => {
               const isActive = loadingPhase === idx;
               const isDone = loadingPhase > idx;
-              const Icon = p.icon;
-
               return (
-                <div
-                  key={idx}
-                  className={cn(
-                    'flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300',
-                    isActive ? 'bg-blue-50 border-blue-100 shadow-xs' : 'opacity-40 border-transparent'
-                  )}
-                >
-                  <div className={cn(
-                    'w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border',
-                    isDone ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
-                      (isActive ? 'bg-blue-100 border-blue-200 text-blue-600' : 'bg-slate-100 border-slate-200/60 text-slate-400')
-                  )}>
-                    {isDone ? <Check className="w-4 h-4 stroke-[3.5]" /> : <Icon className={cn('w-4 h-4', isActive && 'animate-pulse')} />}
+                <div key={idx} className={cn('flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-300', isActive ? 'bg-blue-50 border-blue-100 shadow-xs' : 'opacity-40 border-transparent')}>
+                  <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border', isDone ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : (isActive ? 'bg-blue-100 border-blue-200 text-blue-600' : 'bg-slate-100 border-slate-200/60 text-slate-400'))}>
+                    {isDone ? <Check className="w-4 h-4 stroke-[3.5]" /> : <p.icon className={cn('w-4 h-4', isActive && 'animate-pulse')} />}
                   </div>
-                  <span className={cn(
-                    'text-[12.5px] font-sans font-bold leading-none tracking-normal',
-                    isDone ? 'text-slate-400 line-through' : (isActive ? 'text-blue-900 font-extrabold' : 'text-slate-550')
-                  )}>
-                    {p.label}
-                  </span>
+                  <span className={cn('text-[12.5px] font-sans font-bold leading-none tracking-normal', isDone ? 'text-slate-400 line-through' : (isActive ? 'text-blue-900 font-extrabold' : 'text-slate-550'))}>{p.label}</span>
                 </div>
               );
             })}
@@ -534,62 +397,30 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   return (
     <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden">
       <GlowBg />
-
       <div className="w-full max-w-[480px] relative z-10 space-y-6 py-8">
-
-        {/* Progress bar: 2 real steps */}
-        {step < 3 && (
+        {step < 4 && (
           <div className="w-full h-1.5 bg-slate-100 border border-slate-200/60 rounded-full overflow-hidden select-none shrink-0">
-            <motion.div
-              animate={{ width: `${((step - 1) / 2) * 100}%` }}
-              transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-              className="h-full bg-blue-600 rounded-full"
-            />
+            <motion.div animate={{ width: `${(step / 3) * 100}%` }} transition={{ type: 'spring', stiffness: 200, damping: 25 }} className="h-full bg-blue-600 rounded-full" />
           </div>
         )}
-
-        {/* Step counter */}
-        {step < 3 && (
+        {step < 4 && (
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs text-slate-400 font-bold">
-              Step {step} of 2
-            </span>
+            <span className="text-xs text-slate-400 font-bold">Step {step} of 3</span>
             <div className="flex gap-1.5">
-              {[1, 2].map((s) => (
+              {[1, 2, 3].map((s) => (
                 <div key={s} className={cn('w-1.5 h-1.5 rounded-full transition-all', step >= s ? 'bg-blue-600' : 'bg-slate-200')} />
               ))}
             </div>
           </div>
         )}
-
-        {/* Card */}
         <div className="bg-white rounded-[2rem] border border-slate-100 shadow-2xl shadow-slate-200/80 p-7 sm:p-9 relative">
-
-          {/* Close button */}
-          {step < 3 && (
-            <button
-              onClick={() => navigate('/')}
-              className="absolute right-6 top-6 p-1.5 rounded-full border border-slate-100 text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer z-20"
-              aria-label="Close onboarding"
-            >
-              ✕
-            </button>
+          {step < 4 && (
+            <button onClick={() => navigate('/')} className="absolute right-6 top-6 p-1.5 rounded-full border border-slate-100 text-slate-400 hover:text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer z-20">✕</button>
           )}
-
           <AnimatePresence mode="wait" custom={dir}>
-            <motion.div
-              key={step}
-              custom={dir}
-              variants={slide}
-              initial="enter"
-              animate="center"
-              exit="exit"
-            >
-              {renderStep()}
-            </motion.div>
+            <motion.div key={step} custom={dir} variants={slide} initial="enter" animate="center" exit="exit">{renderStep()}</motion.div>
           </AnimatePresence>
         </div>
-
       </div>
     </div>
   );

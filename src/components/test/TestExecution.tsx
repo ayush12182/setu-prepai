@@ -496,6 +496,30 @@ const TestExecution: React.FC<TestExecutionProps> = ({
       };
     });
 
+    const correctAnswersCount = quizAnswers.filter(a => a.isCorrect).length;
+    const scorePercentage = Math.round((correctAnswersCount / questions.length) * 100);
+
+    // MOCK FOR DEMO: Save stats to localStorage so TestPage can read them
+    try {
+      if (config.chapters && config.chapters.length > 0) {
+        const chId = config.chapters[0].chapterId;
+        const raw = localStorage.getItem('demo_chapter_stats');
+        const demoStats = raw ? JSON.parse(raw) : {};
+        
+        const prevStats = demoStats[chId] || { testsAttempted: 0, questionsSolved: 0, mastery: 0 };
+        
+        demoStats[chId] = {
+          testsAttempted: prevStats.testsAttempted + 1,
+          questionsSolved: prevStats.questionsSolved + correctAnswersCount,
+          mastery: Math.max(prevStats.mastery, scorePercentage),
+          lastScore: scorePercentage,
+          lastAttempt: new Date().toISOString()
+        };
+        
+        localStorage.setItem('demo_chapter_stats', JSON.stringify(demoStats));
+      }
+    } catch(e) {}
+
     setTestAnswers(quizAnswers);
     setTotalTime(timeSpent);
     setStep('results');

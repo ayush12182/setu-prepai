@@ -1,185 +1,60 @@
 import React from 'react';
-import katex from 'katex';
-import 'katex/dist/katex.min.css';
+import { MathMarkdownRenderer } from '@/components/ui/MathMarkdownRenderer';
 
-// ─── KaTeX renderer ───────────────────────────────────────────────────────────
+// ─── Legacy Shims using the robust MathMarkdownRenderer ──────────────────────
 
-function katexToHtml(tex: string, displayMode: boolean): string {
-  try {
-    return katex.renderToString(tex, {
-      throwOnError: false,
-      displayMode,
-      strict: 'ignore',
-      trust: true,
-      output: 'html',
-    });
-  } catch {
-    return tex
-      .replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, '($1)/($2)')
-      .replace(/\\sqrt\{([^}]*)\}/g, '√($1)')
-      .replace(/\\vec\{([^}]*)\}/g, '→$1')
-      .replace(/\\[a-zA-Z]+/g, '')
-      .replace(/[{}]/g, '');
-  }
-}
-
-// ─── Delimiter normalisation ──────────────────────────────────────────────────
-
-/** Convert every AI LaTeX delimiter style → unified $$ / $ */
+/**
+ * Normalises AI LaTeX delimiters (shimmed to new normalizer if needed, but MathMarkdownRenderer handles it internally)
+ */
 export function stripAiMetaTags(text: string): string {
   if (!text) return '';
-  // Remove METADATA blocks and any AI meta tags that should never render
-  return text
-    .replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/gi, '')
-    .replace(/\[(\/?)(CONCEPT_TESTED|THINKING_PROCESS|DETAILED_SOLUTION|QUESTION|SOLUTION|ANSWER|HINT|EXPLANATION|STEP|META)[^\]]*\]/gi, '')
-    .trim();
+  return text.replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/gi, '').trim();
 }
 
 export function normalizeMathDelimiters(text: string): string {
-  // Safety: guard against undefined/null from AI-omitted fields
-  if (!text) return '';
-  // Fix Form Feed characters caused by JavaScript single backslash conversion of \f (in \frac etc.)
-  const cleanText = text.replace(/\\f/g, '\\f');
-  return cleanText
-    .replace(/\\\[([\s\S]*?)\\\]/g, (_, inner) => `$$${inner.trim()}$$`)
-    .replace(/\\\(([\s\S]*?)\\\)/g, (_, inner) => `$${inner.trim()}$`)
-    .replace(/\*\*([^*\n]+)\*\*/g, '$1'); // strip markdown bold
+  return text || '';
 }
-
-// ─── Chunk parser ─────────────────────────────────────────────────────────────
-
-interface MathChunk {
-  type: 'text' | 'inline' | 'display';
-  value: string;
-}
-
-function chunkText(text: string): MathChunk[] {
-  const chunks: MathChunk[] = [];
-  const re = /\$\$([\s\S]*?)\$\$|\$([^$\n]+?)\$/g;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(text)) !== null) {
-    if (m.index > last) chunks.push({ type: 'text', value: text.slice(last, m.index) });
-    if (m[1] !== undefined) {
-      chunks.push({ type: 'display', value: m[1].trim() });
-    } else {
-      chunks.push({ type: 'inline', value: (m[2] ?? '').trim() });
-    }
-    last = re.lastIndex;
-  }
-  if (last < text.length) chunks.push({ type: 'text', value: text.slice(last) });
-  return chunks;
-}
-
-// ─── Components ───────────────────────────────────────────────────────────────
 
 /**
- * MathLine — renders a single line/sentence that may contain inline $…$ math.
- * Handles ALL AI delimiter styles. Never shows raw LaTeX.
+ * MathLine — renders a single line/sentence that may contain inline math.
+ * Shimmed to use MathMarkdownRenderer for robust KaTeX support.
  */
 export const MathLine: React.FC<{ children?: string | null }> = ({ children }) => {
-  // Safety: guard against undefined/null AI-generated content
   if (!children) return <></>;
-  const normalized = normalizeMathDelimiters(String(children));
-  const chunks = chunkText(normalized);
-  return (
-    <>
-      {chunks.map((chunk, i) => {
-        if (chunk.type === 'inline') {
-          return (
-            <span
-              key={i}
-              dangerouslySetInnerHTML={{ __html: katexToHtml(chunk.value, false) }}
-            />
-          );
-        }
-        if (chunk.type === 'display') {
-          return (
-            <span
-              key={i}
-              className="block text-center my-3 overflow-x-auto"
-              dangerouslySetInnerHTML={{ __html: katexToHtml(chunk.value, true) }}
-            />
-          );
-        }
-        return <span key={i}>{chunk.value}</span>;
-      })}
-    </>
-  );
+  // We use MathMarkdownRenderer but wrapped lightly to mimic inline behavior
+  return <MathMarkdownRenderer content={String(children)} />;
 };
 
-/** Centred display-math block (for $$…$$ expressions) */
+/** Centred display-math block */
 export const DisplayMath: React.FC<{ tex: string }> = ({ tex }) => (
-  <div
-    className="my-5 py-2 overflow-x-auto flex justify-center"
-    dangerouslySetInnerHTML={{ __html: katexToHtml(tex, true) }}
-  />
+  <MathMarkdownRenderer content={`$$${tex}$$`} />
 );
 
-// ─── Full-content processor ───────────────────────────────────────────────────
-
 /**
- * processNotesContent — processes a full AI-generated markdown string:
- *  1. Normalises all delimiter styles
- *  2. Splits out $$…$$ display blocks
- *  3. Passes text segments line-by-line to `lineRenderer`
- *  4. Renders display blocks with KaTeX (displayMode: true)
- *
- * Used by: OnePageNotes, ChapterNotesPage, StudyPrepEntrance, AskPrepEntrance, AITeachingRoom
+ * processNotesContent — processes a full AI-generated markdown string.
+ * Shimmed to directly use MathMarkdownRenderer for all content parsing.
  */
 export function processNotesContent(
   content: string,
-  lineRenderer: (line: string, key: number) => React.ReactNode
+  lineRenderer?: (line: string, key: number) => React.ReactNode
 ): React.ReactNode[] {
-  // First strip any AI meta tags that shouldn't be visible
-  const cleaned = stripAiMetaTags(content);
-  const normalized = normalizeMathDelimiters(cleaned);
-  const elements: React.ReactNode[] = [];
-  let keyIdx = 0;
-
-  const blockRe = /\$\$([\s\S]*?)\$\$/g;
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = blockRe.exec(normalized)) !== null) {
-    if (match.index > lastIndex) {
-      normalized.slice(lastIndex, match.index).split('\n').forEach((line) => {
-        elements.push(lineRenderer(line, keyIdx++));
-      });
-    }
-    elements.push(<DisplayMath key={keyIdx++} tex={match[1].trim()} />);
-    lastIndex = blockRe.lastIndex;
-  }
-
-  if (lastIndex < normalized.length) {
-    normalized.slice(lastIndex).split('\n').forEach((line) => {
-      elements.push(lineRenderer(line, keyIdx++));
-    });
-  }
-
-  return elements;
+  // Instead of breaking it line by line and rendering custom components, 
+  // the new pipeline handles the entire markdown document as a single unit.
+  return [<MathMarkdownRenderer key={0} content={content} />];
 }
-
-// ─── Generic prose renderer ───────────────────────────────────────────────────
 
 /**
  * renderProseNotes — lightweight renderer for chat/AI responses.
- * Handles headings, bullets, bold, and all LaTeX styles.
- * Use this for AskPrepEntrance, AITeachingRoom, StudyPrepEntrance notes, etc.
  */
 export function renderProseNotes(content: string): React.ReactNode[] {
-  return processNotesContent(content, (line, key) => {
-    const t = line.trim();
-    if (!t) return <br key={key} />;
-    if (t.startsWith('# '))   return <h2 key={key} className="text-lg font-bold mt-4 mb-2 text-foreground"><MathLine>{t.slice(2)}</MathLine></h2>;
-    if (t.startsWith('## '))  return <h3 key={key} className="text-base font-semibold mt-3 mb-1 text-foreground"><MathLine>{t.slice(3)}</MathLine></h3>;
-    if (t.startsWith('### ')) return <h4 key={key} className="text-sm font-semibold mt-2 mb-1 text-foreground/90"><MathLine>{t.slice(4)}</MathLine></h4>;
-    if (t.startsWith('• ') || t.startsWith('- ') || t.startsWith('* '))
-      return <p key={key} className="ml-4 my-1 flex gap-2"><span className="shrink-0 mt-1 text-primary">•</span><MathLine>{t.slice(2)}</MathLine></p>;
-    if (t.startsWith('⚡') || t.startsWith('💡'))
-      return <p key={key} className="ml-0 my-2 font-semibold text-prepentrance-saffron"><MathLine>{t}</MathLine></p>;
-    if (t.startsWith('---')) return <hr key={key} className="my-4 border-border" />;
-    if (t.match(/^\d+\./))   return <p key={key} className="ml-4 my-1 font-medium"><MathLine>{t}</MathLine></p>;
-    return <p key={key} className="my-1.5 leading-relaxed"><MathLine>{t}</MathLine></p>;
-  });
+  return [<MathMarkdownRenderer key={0} content={content} />];
 }
+
+export default {
+  MathLine,
+  DisplayMath,
+  processNotesContent,
+  renderProseNotes,
+  stripAiMetaTags,
+  normalizeMathDelimiters
+};

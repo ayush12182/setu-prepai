@@ -143,11 +143,7 @@ const MATHEMATICS_CHAPTERS: ChapterData[] = [
   { id: 'ma-prob', name: 'Probability', emoji: '🎯', mastery: 88, questionsSolved: 44, questionsTotal: 50, pyqsCount: 42, testsAttempted: 3, lastScore: 88, lastAttempt: '2 days ago', status: 'strong', difficulty: 'medium', keywords: ['Bayes theorem', 'conditional'] },
 ];
 
-const ALL_CHAPTERS: Record<SubjectKey, ChapterData[]> = {
-  physics: PHYSICS_CHAPTERS,
-  chemistry: CHEMISTRY_CHAPTERS,
-  mathematics: MATHEMATICS_CHAPTERS,
-};
+// MOCK MAPPING MOVED INSIDE COMPONENT FOR DYNAMIC UPDATES
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
@@ -277,6 +273,47 @@ const TestPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'strong' | 'average' | 'weak'>('all');
+  const [demoRefreshCounter, setDemoRefreshCounter] = useState(0);
+
+  const ALL_CHAPTERS = useMemo(() => {
+    let demoStats: Record<string, any> = {};
+    try {
+      const raw = localStorage.getItem('demo_chapter_stats');
+      if (raw) demoStats = JSON.parse(raw);
+    } catch (e) {}
+
+    const applyStats = (chapters: ChapterData[]): ChapterData[] => chapters.map(ch => {
+      const s = demoStats[ch.id];
+      if (s) {
+        return {
+          ...ch,
+          mastery: s.mastery || 0,
+          questionsSolved: s.questionsSolved || 0,
+          pyqsCount: ch.pyqsCount,
+          testsAttempted: s.testsAttempted || 0,
+          lastScore: s.lastScore || 0,
+          lastAttempt: 'Just now',
+          status: s.mastery >= 70 ? 'strong' : s.mastery >= 50 ? 'average' : 'weak',
+        };
+      }
+      return {
+        ...ch,
+        mastery: 0,
+        questionsSolved: 0,
+        pyqsCount: 0,
+        testsAttempted: 0,
+        lastScore: null,
+        lastAttempt: 'Not attempted',
+        status: 'average',
+      };
+    });
+
+    return {
+      physics: applyStats(PHYSICS_CHAPTERS),
+      chemistry: applyStats(CHEMISTRY_CHAPTERS),
+      mathematics: applyStats(MATHEMATICS_CHAPTERS),
+    } as Record<SubjectKey, ChapterData[]>;
+  }, [demoRefreshCounter]);
 
   // Dialog states
   const [showChapterSelect, setShowChapterSelect] = useState(false);
@@ -322,13 +359,13 @@ const TestPage: React.FC = () => {
   }, [activeSubject, searchQuery, filterStatus]);
 
   const weakChapters = useMemo(() =>
-    allChapters.filter(c => c.status === 'weak').slice(0, 3), [allChapters]);
+    allChapters.filter(c => c.mastery > 0 && c.mastery < 50).slice(0, 3), [allChapters]);
   const strongChapters = useMemo(() =>
-    allChapters.filter(c => c.status === 'strong').slice(0, 3), [allChapters]);
+    allChapters.filter(c => c.mastery >= 70).slice(0, 3), [allChapters]);
 
-  // Last attempted chapter (from strong list as proxy)
+  // Last attempted chapter
   const lastAttempted = useMemo(() =>
-    [...allChapters].sort((a, b) => b.testsAttempted - a.testsAttempted).slice(0, 3), [allChapters]);
+    [...allChapters].filter(c => c.testsAttempted > 0).sort((a, b) => b.testsAttempted - a.testsAttempted).slice(0, 3), [allChapters]);
 
   const handleStartTest = useCallback((chapter: ChapterData) => {
     setActiveTest({
@@ -344,8 +381,8 @@ const TestPage: React.FC = () => {
     return (
       <TestExecution
         config={activeTest}
-        onComplete={() => { setActiveTest(null); toast.success('Test completed!'); }}
-        onExit={() => setActiveTest(null)}
+        onComplete={() => { setActiveTest(null); setDemoRefreshCounter(c => c + 1); toast.success('Test completed!'); }}
+        onExit={() => { setActiveTest(null); setDemoRefreshCounter(c => c + 1); }}
       />
     );
   }
@@ -542,19 +579,25 @@ const TestPage: React.FC = () => {
               <span className="text-body-sm font-bold text-slate-800">Recently Attempted</span>
             </div>
             <div className="space-y-2">
-              {lastAttempted.map(ch => (
-                <button
-                  key={ch.id}
-                  onClick={() => handleStartTest(ch)}
-                  className="w-full flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-slate-50 transition-colors group"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-base shrink-0">{ch.emoji}</span>
-                    <span className="text-caption font-semibold text-slate-700 truncate">{ch.name}</span>
-                  </div>
-                  <span className="text-caption font-bold text-blue-600 shrink-0 group-hover:underline">Resume</span>
-                </button>
-              ))}
+              {lastAttempted.length > 0 ? (
+                lastAttempted.map(ch => (
+                  <button
+                    key={ch.id}
+                    onClick={() => handleStartTest(ch)}
+                    className="w-full flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-slate-50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-base shrink-0">{ch.emoji}</span>
+                      <span className="text-caption font-semibold text-slate-700 truncate">{ch.name}</span>
+                    </div>
+                    <span className="text-caption font-bold text-blue-600 shrink-0 group-hover:underline">Resume</span>
+                  </button>
+                ))
+              ) : (
+                <div className="py-6 text-center text-slate-400 text-caption font-medium border-2 border-dashed border-slate-100 rounded-xl">
+                  Take your first test to see history
+                </div>
+              )}
             </div>
           </div>
 
@@ -565,19 +608,25 @@ const TestPage: React.FC = () => {
               <span className="text-body-sm font-bold text-slate-800">Weak Chapters</span>
             </div>
             <div className="space-y-2">
-              {weakChapters.map(ch => (
-                <button
-                  key={ch.id}
-                  onClick={() => { setActiveSubject(Object.keys(ALL_CHAPTERS).find(s => ALL_CHAPTERS[s as SubjectKey].some(c => c.id === ch.id)) as SubjectKey); handleStartTest(ch); }}
-                  className="w-full flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-red-50 transition-colors group"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-base shrink-0">{ch.emoji}</span>
-                    <span className="text-caption font-semibold text-slate-700 truncate">{ch.name}</span>
-                  </div>
-                  <span className="text-caption font-bold text-red-500 shrink-0">{ch.mastery}%</span>
-                </button>
-              ))}
+              {weakChapters.length > 0 ? (
+                weakChapters.map(ch => (
+                  <button
+                    key={ch.id}
+                    onClick={() => { setActiveSubject(Object.keys(ALL_CHAPTERS).find(s => ALL_CHAPTERS[s as SubjectKey].some(c => c.id === ch.id)) as SubjectKey); handleStartTest(ch); }}
+                    className="w-full flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-red-50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-base shrink-0">{ch.emoji}</span>
+                      <span className="text-caption font-semibold text-slate-700 truncate">{ch.name}</span>
+                    </div>
+                    <span className="text-caption font-bold text-red-500 shrink-0">{ch.mastery}%</span>
+                  </button>
+                ))
+              ) : (
+                <div className="py-6 text-center text-slate-400 text-caption font-medium border-2 border-dashed border-red-50 rounded-xl">
+                  No weak areas identified yet
+                </div>
+              )}
             </div>
           </div>
 
@@ -588,23 +637,29 @@ const TestPage: React.FC = () => {
               <span className="text-body-sm font-bold text-slate-800">AI Recommended</span>
             </div>
             <div className="space-y-2">
-              {weakChapters.slice(0, 2).map(ch => (
-                <div key={ch.id} className="p-2.5 bg-white rounded-xl border border-blue-100 shadow-xs">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm">{ch.emoji}</span>
-                    <span className="text-caption font-bold text-slate-800 truncate">{ch.name}</span>
+              {weakChapters.length > 0 ? (
+                weakChapters.slice(0, 2).map(ch => (
+                  <div key={ch.id} className="p-2.5 bg-white rounded-xl border border-blue-100 shadow-xs">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm">{ch.emoji}</span>
+                      <span className="text-caption font-bold text-slate-800 truncate">{ch.name}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 leading-snug">
+                      Practice 15 targeted questions to boost mastery by ~20%
+                    </p>
+                    <button
+                      onClick={() => handleStartTest(ch)}
+                      className="mt-2 text-[10px] font-bold text-blue-600 hover:underline"
+                    >
+                      Start → AI Practice Set
+                    </button>
                   </div>
-                  <p className="text-[10px] text-slate-500 leading-snug">
-                    Practice 15 targeted questions to boost mastery by ~20%
-                  </p>
-                  <button
-                    onClick={() => handleStartTest(ch)}
-                    className="mt-2 text-[10px] font-bold text-blue-600 hover:underline"
-                  >
-                    Start → AI Practice Set
-                  </button>
+                ))
+              ) : (
+                <div className="py-6 text-center text-blue-400/70 text-caption font-medium border-2 border-dashed border-blue-100 rounded-xl">
+                  Start practicing to get recommendations
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </motion.div>

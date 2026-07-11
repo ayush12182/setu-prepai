@@ -306,105 +306,146 @@ export default function StudentHubPage() {
         </motion.div>
 
         {/* ══════════════════════════════════════════════════
-            HERO — TODAY'S MISSION CARD
+            HERO — TODAY'S MISSION CARD OR ONBOARDING
         ══════════════════════════════════════════════════ */}
         <motion.div {...fade(0.07)}>
-          <div
-            className="relative overflow-hidden rounded-3xl"
-            style={{
-              background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #6366f1 100%)',
-            }}
-          >
-            {/* Decorative blobs */}
-            <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10 blur-3xl"
-              style={{ background: 'white', transform: 'translate(30%, -30%)' }} />
-            <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10 blur-2xl"
-              style={{ background: 'white', transform: 'translate(-20%, 30%)' }} />
+          {isNewStudent ? (
+            <div
+              className="relative overflow-hidden rounded-3xl p-8 sm:p-12 shadow-md"
+              style={{ background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #6366f1 100%)' }}
+            >
+              {/* Decorative blobs */}
+              <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10 blur-3xl"
+                style={{ background: 'white', transform: 'translate(30%, -30%)' }} />
+              <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10 blur-2xl"
+                style={{ background: 'white', transform: 'translate(-20%, 30%)' }} />
 
-            <div className="relative p-7 sm:p-9">
-              {/* Label */}
-              <div className="flex items-center gap-2 mb-5">
-                <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
-                  <Target className="w-3.5 h-3.5 text-white" />
-                  <span className="text-xs font-bold text-white tracking-wide uppercase">Today's Mission</span>
+              <div className="relative text-center max-w-2xl mx-auto space-y-6">
+                <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/20">
+                  <Sparkles className="w-4 h-4 text-white" />
+                  <span className="text-xs font-bold text-white tracking-wide uppercase">Welcome to PrepEntrance</span>
+                </div>
+                
+                <h2 className="text-white font-black text-3xl sm:text-4xl leading-tight">
+                  Start Your Preparation
+                </h2>
+                <p className="text-blue-100 text-base font-medium leading-relaxed max-w-lg mx-auto">
+                  Choose a subject to begin your journey. Your activity will automatically personalize this dashboard with daily missions, roadmaps, and AI recommendations.
+                </p>
+
+                <div className="flex flex-wrap justify-center gap-4 pt-4">
+                  {subjects.map(sub => {
+                    const SubIcon = sub.Icon;
+                    return (
+                      <button
+                        key={sub.key}
+                        onClick={() => navigate(sub.route)}
+                        className="group flex items-center gap-3 bg-white/10 hover:bg-white text-white hover:text-blue-900 font-bold px-6 py-4 rounded-2xl border border-white/20 hover:border-white transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1"
+                      >
+                        <SubIcon className="w-5 h-5 transition-colors" />
+                        {sub.label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+            </div>
+          ) : (
+            <div
+              className="relative overflow-hidden rounded-3xl"
+              style={{
+                background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #6366f1 100%)',
+              }}
+            >
+              {/* Decorative blobs */}
+              <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-10 blur-3xl"
+                style={{ background: 'white', transform: 'translate(30%, -30%)' }} />
+              <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full opacity-10 blur-2xl"
+                style={{ background: 'white', transform: 'translate(-20%, 30%)' }} />
 
-              <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-white font-black text-2xl sm:text-3xl leading-tight mb-2">
-                    {mission.subject} · {mission.chapter}
-                  </h2>
-                  <p className="text-blue-100 text-sm font-medium mb-6 max-w-md">
-                    {isNewStudent
-                      ? `Start your ${examLabel} journey here. This chapter is the gateway to everything else.`
-                      : `Complete today's mission to stay ahead of your roadmap. Every chapter done is a step closer to your dream.`}
-                  </p>
-
-                  {/* Mission stats row */}
-                  <div className="flex flex-wrap gap-4 mb-7">
-                    {[
-                      { icon: Clock,    value: '45 min',   label: 'Est. Time' },
-                      { icon: BookOpen, value: '3',        label: 'Concepts' },
-                      { icon: PenTool,  value: '20 Qs',    label: 'Practice' },
-                      { icon: Target,   value: '75%',      label: 'Target Acc.' },
-                    ].map(({ icon: Icon, value, label }) => (
-                      <div key={label} className="flex items-center gap-2.5 bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-2xl border border-white/15">
-                        <Icon className="w-4 h-4 text-blue-200 shrink-0" />
-                        <div>
-                          <p className="text-white font-bold text-sm leading-none">{value}</p>
-                          <p className="text-blue-200 text-xs font-medium mt-0.5">{label}</p>
-                        </div>
-                      </div>
-                    ))}
+              <div className="relative p-7 sm:p-9">
+                {/* Label */}
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="flex items-center gap-1.5 bg-white/15 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
+                    <Target className="w-3.5 h-3.5 text-white" />
+                    <span className="text-xs font-bold text-white tracking-wide uppercase">Today's Mission</span>
                   </div>
-
-                  {/* Expected gains */}
-                  <div className="flex items-center gap-6 mb-8">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-blue-200" />
-                      <span className="text-blue-100 text-sm font-semibold">+2% Syllabus</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Star className="w-4 h-4 text-yellow-300" />
-                      <span className="text-blue-100 text-sm font-semibold">+150 XP</span>
-                    </div>
-                  </div>
-
-                  {/* CTA */}
-                  <button
-                    onClick={() => navigate(mission.route)}
-                    className="group flex items-center gap-3 bg-white text-blue-700 font-black text-base px-7 py-4 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                  >
-                    <Play className="w-5 h-5 fill-current shrink-0" />
-                    {isNewStudent ? 'Begin Learning' : continueLearn ? 'Continue Learning' : 'Start Learning'}
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-                  </button>
                 </div>
 
-                {/* Overall Progress Ring — right side */}
-                <div className="hidden lg:flex flex-col items-center gap-3 shrink-0">
-                  <div className="relative w-28 h-28">
-                    <svg className="w-28 h-28 -rotate-90" viewBox="0 0 112 112">
-                      <circle cx="56" cy="56" r="48" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="8" />
-                      <circle cx="56" cy="56" r="48" fill="none" stroke="white" strokeWidth="8"
-                        strokeDasharray={`${2 * Math.PI * 48}`}
-                        strokeDashoffset={`${2 * Math.PI * 48 * (1 - overallPct / 100)}`}
-                        strokeLinecap="round" className="transition-all duration-1000" />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-white font-black text-2xl leading-none">{overallPct}%</span>
-                      <span className="text-blue-200 text-xs font-medium mt-0.5">Complete</span>
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-white font-black text-2xl sm:text-3xl leading-tight mb-2">
+                      {mission.subject} · {mission.chapter}
+                    </h2>
+                    <p className="text-blue-100 text-sm font-medium mb-6 max-w-md">
+                      Complete today's mission to stay ahead of your roadmap. Every chapter done is a step closer to your dream.
+                    </p>
+
+                    {/* Mission stats row */}
+                    <div className="flex flex-wrap gap-4 mb-7">
+                      {[
+                        { icon: Clock,    value: '45 min',   label: 'Est. Time' },
+                        { icon: BookOpen, value: '3',        label: 'Concepts' },
+                        { icon: PenTool,  value: '20 Qs',    label: 'Practice' },
+                        { icon: Target,   value: '75%',      label: 'Target Acc.' },
+                      ].map(({ icon: Icon, value, label }) => (
+                        <div key={label} className="flex items-center gap-2.5 bg-white/10 backdrop-blur-sm px-4 py-2.5 rounded-2xl border border-white/15">
+                          <Icon className="w-4 h-4 text-blue-200 shrink-0" />
+                          <div>
+                            <p className="text-white font-bold text-sm leading-none">{value}</p>
+                            <p className="text-blue-200 text-xs font-medium mt-0.5">{label}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
+
+                    {/* Expected gains */}
+                    <div className="flex items-center gap-6 mb-8">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-blue-200" />
+                        <span className="text-blue-100 text-sm font-semibold">+2% Syllabus</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Star className="w-4 h-4 text-yellow-300" />
+                        <span className="text-blue-100 text-sm font-semibold">+150 XP</span>
+                      </div>
+                    </div>
+
+                    {/* CTA */}
+                    <button
+                      onClick={() => navigate(mission.route)}
+                      className="group flex items-center gap-3 bg-white text-blue-700 font-black text-base px-7 py-4 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                    >
+                      <Play className="w-5 h-5 fill-current shrink-0" />
+                      {continueLearn ? 'Continue Learning' : 'Start Learning'}
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+                    </button>
                   </div>
-                  <div className="text-center">
-                    <p className="text-white font-bold text-sm">{completedChapters}/{totalChapters}</p>
-                    <p className="text-blue-200 text-xs font-medium">Chapters done</p>
+
+                  {/* Overall Progress Ring — right side */}
+                  <div className="hidden lg:flex flex-col items-center gap-3 shrink-0">
+                    <div className="relative w-28 h-28">
+                      <svg className="w-28 h-28 -rotate-90" viewBox="0 0 112 112">
+                        <circle cx="56" cy="56" r="48" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="8" />
+                        <circle cx="56" cy="56" r="48" fill="none" stroke="white" strokeWidth="8"
+                          strokeDasharray={`${2 * Math.PI * 48}`}
+                          strokeDashoffset={`${2 * Math.PI * 48 * (1 - overallPct / 100)}`}
+                          strokeLinecap="round" className="transition-all duration-1000" />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-white font-black text-2xl leading-none">{overallPct}%</span>
+                        <span className="text-blue-200 text-xs font-medium mt-0.5">Complete</span>
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white font-bold text-sm">{completedChapters}/{totalChapters}</p>
+                      <p className="text-blue-200 text-xs font-medium">Chapters done</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </motion.div>
 
         {/* ══════════════════════════════════════════════════
@@ -594,7 +635,7 @@ export default function StudentHubPage() {
                       className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-xl transition-all group-hover:gap-2.5"
                       style={{ color: subject.accent }}
                     >
-                      Continue
+                      {progress > 0 ? 'Continue' : 'Start'}
                       <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </div>
@@ -690,7 +731,7 @@ export default function StudentHubPage() {
 
                 <div className="space-y-2.5 mb-4">
                   {[
-                    { text: `Complete ${mission.chapter}`, done: false },
+                    { text: isNewStudent ? 'Select a subject to begin' : `Complete ${mission.chapter}`, done: false },
                     { text: 'Solve 20 Practice Questions', done: false },
                     { text: 'Achieve 70%+ Accuracy', done: false },
                   ].map(({ text, done }) => (
@@ -777,7 +818,7 @@ export default function StudentHubPage() {
               onClick={() => navigate(mission.route)}
               className="shrink-0 flex items-center gap-2.5 px-6 py-3.5 bg-blue-600 text-white font-bold text-sm rounded-2xl hover:bg-blue-700 hover:shadow-lg transition-all duration-200"
             >
-              {isCompleted ? 'Take Mock Test' : 'Continue →'}
+              {isCompleted ? 'Take Mock Test' : isNewStudent ? 'Start Learning →' : 'Continue →'}
             </button>
           </div>
         </motion.div>

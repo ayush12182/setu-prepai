@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Question, QuestionType } from '@/hooks/usePracticeQuestions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { JeeQuestion, JeeOption } from '@/lib/jeeMathRenderer';
+import { MathMarkdownRenderer } from '@/components/ui/MathMarkdownRenderer';
 import { cn } from '@/lib/utils';
 import { CheckCircle, XCircle } from 'lucide-react';
 
@@ -64,8 +64,8 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
               )}>
                 {opt}
               </span>
-              <div className="flex-1 pt-0.5 font-medium text-slate-850">
-                <JeeOption option={optionText} />
+              <div className="flex-1 font-medium text-slate-850">
+                <MathMarkdownRenderer content={optionText} />
               </div>
               {showResult && isCorrect && <CheckCircle className="w-5 h-5 text-emerald-500 ml-auto shrink-0" />}
               {showResult && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-destructive ml-auto shrink-0" />}
@@ -175,7 +175,7 @@ export const QuestionRenderer: React.FC<QuestionRendererProps> = ({
   return (
     <div className="space-y-6">
       <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-8">
-        <JeeQuestion question={question.question_text} className="text-lg sm:text-xl font-medium leading-relaxed text-slate-800" />
+        <MathMarkdownRenderer content={question.question_text} className="text-lg sm:text-xl font-medium" />
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">

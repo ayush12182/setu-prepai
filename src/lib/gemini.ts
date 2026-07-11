@@ -57,12 +57,27 @@ MANDATORY QUESTION QUALITY CRITERIA:
    - Generate standard single-correct MCQs, numeric integer type, concept matching matrices, or Assertion-Reasoning (Statement 1 and Statement 2) depending on the chapter.
 
 MANDATORY EXPLANATION FORMAT:
-Every generated solution MUST contain exactly the following five sections:
-- **Concept**: Explain what chapter idea and theory is being tested.
-- **Formula Used**: Displayed in standard LaTeX notation (e.g. \\rho=\\frac{m}{V} or E=\\frac{\\sigma}{2\\epsilon_0}).
-- **Step-by-Step Solution**: Detailed, line-by-line derivation showing the mathematical transitions.
-- **Shortcut**: A conceptual trick or dimensional analysis shortcut, if available.
-- **JEE Insight**: A "Teacher's Note" reflecting the historical frequency and traps associated with this concept in recent JEE exams.
+Every generated solution MUST contain exactly the following four sections, using exactly these markdown headings:
+### Concept Used
+(Short explanation of the concept being tested).
+### Step-by-Step Solution
+(Detailed derivation. Use **Step 1:**, **Step 2:** etc.)
+### Final Answer
+(The final numeric or algebraic answer, inside a \\boxed{} in a block equation)
+### Mentor Tip
+(A short JEE-focused shortcut or mistake warning)
+
+CRITICAL LATEX AND FORMATTING RULES:
+1. NO RAW LATEX STRINGS. You MUST use standard markdown math delimiters.
+2. For inline math, use exactly one dollar sign: $x^2 + y^2$. NEVER use \\(.
+3. For block math, use exactly two dollar signs on their own lines: 
+$$
+T_{r+1} = \\binom{n}{r}a^{n-r}b^r
+$$
+NEVER use \\[, \\], \\$$, or a single standalone $.
+4. Do NOT generate question ranges (e.g., "Q41-Q50"). The solution must ONLY explain the CURRENT question.
+5. Do NOT include multiple solutions or alternate methods in one answer. Keep it singular and focused.
+6. Use standard KaTeX syntax for fractions (\\frac{a}{b}), binomials (\\binom{n}{r}), integrals, etc.
 
 MOST IMPORTANT VALIDATION TEST:
 "Could this question realistically appear in an actual JEE Main or Advanced paper?" If the answer is NO, discard it and generate a new one.
@@ -84,26 +99,54 @@ export async function generateQuestionsGemini(
 
   const userPrompt = `Generate exactly ${count} MCQs on "${topic}" for ${exam}. Difficulty: ${difficulty}. Each question must have: question_text, option_a, option_b, option_c, option_d, correct_option (A/B/C/D), explanation, concept_tested.`;
 
-  const data = await callGemini<{ questions: any[] }>(
-    systemPrompt,
-    userPrompt,
-    0.3
-  );
-  return (data.questions || []).map((q: any, i: number) => ({
-    id: `gemini-${Date.now()}-${i}`,
-    node_id: nodeId || topic,
-    type: 'MCQ' as const,
-    exam_type: exam,
-    difficulty: ((q.difficulty || difficulty) as string).toLowerCase() as 'easy' | 'medium' | 'hard',
-    question_text: q.question_text,
-    options: { A: q.option_a || '', B: q.option_b || '', C: q.option_c || '', D: q.option_d || '' },
-    answer: q.correct_option,
-    explanation: q.explanation || '',
-    concept_tested: q.concept_tested || topic,
-    option_a: q.option_a || '',
-    option_b: q.option_b || '',
-    option_c: q.option_c || '',
-    option_d: q.option_d || '',
-    correct_option: q.correct_option,
-  }));
+  let attempt = 0;
+  while (attempt < 2) {
+    try {
+      const data = await callGemini<{ questions: any[] }>(
+        systemPrompt,
+        userPrompt,
+        0.3
+      );
+      
+      const parsedQuestions = (data.questions || []).map((q: any, i: number) => {
+        const expl = q.explanation || '';
+        // Output Validation: Check for forbidden patterns
+        if (
+          expl.includes('\\$$') || 
+          expl.includes('Q41') || // heuristic for range generation
+          expl.includes('\\(') || 
+          expl.includes('\\[')
+        ) {
+          throw new Error('Validation failed: Malformed LaTeX or forbidden patterns detected in AI output.');
+        }
+
+        return {
+          id: `gemini-${Date.now()}-${i}`,
+          node_id: nodeId || topic,
+          type: 'MCQ' as const,
+          exam_type: exam,
+          difficulty: ((q.difficulty || difficulty) as string).toLowerCase() as 'easy' | 'medium' | 'hard',
+          question_text: q.question_text,
+          options: { A: q.option_a || '', B: q.option_b || '', C: q.option_c || '', D: q.option_d || '' },
+          answer: q.correct_option,
+          explanation: expl,
+          concept_tested: q.concept_tested || topic,
+          option_a: q.option_a || '',
+          option_b: q.option_b || '',
+          option_c: q.option_c || '',
+          option_d: q.option_d || '',
+          correct_option: q.correct_option,
+        };
+      });
+      return parsedQuestions;
+    } catch (error) {
+      console.warn(`Gemini generation attempt ${attempt + 1} failed or validation failed:`, error);
+      attempt++;
+      if (attempt >= 2) {
+        console.error('All Gemini generation attempts failed.');
+        return []; // Fallback gracefully if validation fails repeatedly
+      }
+    }
+  }
+  return [];
 }

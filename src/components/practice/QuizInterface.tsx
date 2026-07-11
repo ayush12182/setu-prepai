@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ConfidenceLevel } from '@/hooks/useMCQ';
 import { QuestionRenderer } from './QuestionRenderer';
+import { MathMarkdownRenderer } from '@/components/ui/MathMarkdownRenderer';
 import { recordRemediationSuccess } from '@/services/studentIntelligence';
 import { Link } from 'react-router-dom';
 
@@ -333,11 +334,8 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
               {showExplanation && (
                 <div className="bg-slate-50/50 border border-slate-150 rounded-xl p-4 space-y-4 text-left">
                   {/* Step-by-Step Solution */}
-                  <div>
-                    <h4 className="font-black text-xs text-slate-500 mb-2 uppercase tracking-wider">Step-by-Step Solution</h4>
-                    <div className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
-                      {currentQuestion.explanation}
-                    </div>
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 mb-4">
+                    <MathMarkdownRenderer content={currentQuestion.explanation || ''} isSolution={true} />
                   </div>
                   
                   {/* Misconception Diagnosis */}
