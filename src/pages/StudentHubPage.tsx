@@ -20,6 +20,7 @@ import { getFirstChapterId } from '@/data/syllabusClass';
 import { getChapterById } from '@/data/syllabus';
 import { physicsChapters, chemistryChapters, mathsChapters } from '@/data/syllabus';
 import { neetBiologyChapters } from '@/data/neetSyllabus';
+import { safePercent, safeNumber } from '@/lib/utils';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 interface SubjectConfig {
@@ -151,12 +152,12 @@ function getGreeting(name: string): { text: string; emoji: string } {
 }
 
 function getSubjectProgress(subject: string): number {
-  try { return Math.min(100, Math.max(0, Number(localStorage.getItem(`progress_${subject}`) || '0'))); }
+  try { return safePercent(localStorage.getItem(`progress_${subject}`)); }
   catch { return 0; }
 }
 
 function getStudyStreak(): number {
-  try { return Number(localStorage.getItem('study_streak') || '0'); }
+  try { return safeNumber(localStorage.getItem('study_streak'), 0); }
   catch { return 0; }
 }
 
@@ -219,8 +220,9 @@ export default function StudentHubPage() {
     return () => window.removeEventListener('prepentrance:activity', handler);
   }, []);
 
+  const sumProgress = subjects.reduce((a, s) => a + safePercent(progresses[s.key]), 0);
   const overallPct = subjects.length > 0
-    ? Math.round(subjects.reduce((a, s) => a + (progresses[s.key] ?? 0), 0) / subjects.length)
+    ? safePercent(Math.round(sumProgress / subjects.length))
     : 0;
 
   const completedChapters = Math.round(totalChapters * overallPct / 100);

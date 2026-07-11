@@ -50,11 +50,11 @@ export function trackNotesRead(chapterId: string, subject: string, chapterName: 
 export function trackQuestionAttempt(isCorrect: boolean, subject?: string, chapterId?: string) {
   try {
     // Increment total questions solved
-    const prevSolved = Number(localStorage.getItem('total_questions_solved') || '0');
+    const prevSolved = safeNumber(localStorage.getItem('total_questions_solved'), 0);
     localStorage.setItem('total_questions_solved', String(prevSolved + 1));
 
     // Update running accuracy
-    const prevCorrect = Number(localStorage.getItem('total_questions_correct') || '0');
+    const prevCorrect = safeNumber(localStorage.getItem('total_questions_correct'), 0);
     const newCorrect  = prevCorrect + (isCorrect ? 1 : 0);
     localStorage.setItem('total_questions_correct', String(newCorrect));
     const newAccuracy = Math.round((newCorrect / (prevSolved + 1)) * 100);
@@ -91,10 +91,13 @@ function bumpSubjectProgress(subject: string, chapterId: string) {
     // Calculate per-subject chapter counts (Physics=15, Chem=16, Maths=16, Bio=38 etc.)
     // We read the subject-specific total from the chapter list length or use a safe default
     const subjectChapterCounts: Record<string, number> = {
-      physics: 15, chemistry: 16, maths: 16, biology: 38
+      physics: physicsChapters.length, 
+      chemistry: chemistryChapters.length, 
+      maths: mathsChapters.length, 
+      biology: neetBiologyChapters.length
     };
     const total = subjectChapterCounts[subject] || 15;
-    const pct   = Math.min(100, Math.round((touched.length / total) * 100));
+    const pct   = safePercent(touched.length, total);
     localStorage.setItem(`progress_${subject}`, String(pct));
   } catch { /* ignore */ }
 }
@@ -102,14 +105,13 @@ function bumpSubjectProgress(subject: string, chapterId: string) {
 /** Maintains a daily study streak based on activity timestamps */
 function updateStreak() {
   try {
-    const now      = new Date();
-    const today    = now.toDateString();
-    const lastDay  = localStorage.getItem('streak_last_day');
-    const streak   = Number(localStorage.getItem('study_streak') || '0');
+    const today = new Date().toDateString();
+    const lastActive = localStorage.getItem('last_active_date');
+    const streak   = safeNumber(localStorage.getItem('study_streak'), 0);
 
-    if (lastDay === today) return; // already counted today
+    if (lastActive === today) return; // already counted today
 
-    const yesterday = new Date(now);
+    const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
     if (lastDay === yesterday.toDateString()) {

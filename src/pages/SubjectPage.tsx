@@ -12,8 +12,8 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import {
   physicsChapters, chemistryChapters, mathsChapters,
   Chapter, APPROVED_CHAPTERS
-} from '@/data/syllabus';
 import { neetBiologyChapters } from '@/data/neetSyllabus';
+import { safePercent, safeNumber } from '@/lib/utils';
 
 type SubjectKey = 'physics' | 'chemistry' | 'maths' | 'biology';
 
@@ -57,7 +57,7 @@ function getChapters(subject: string): Chapter[] {
 function getChapterProgress(chapterId: string): number {
   try {
     const raw = localStorage.getItem(`ch_progress_${chapterId}`);
-    return raw ? Math.min(100, Math.max(0, Number(raw))) : 0;
+    return safePercent(raw);
   } catch { return 0; }
 }
 
@@ -94,8 +94,9 @@ const SubjectPage: React.FC = () => {
 
   const completedCount = chapters.filter(ch => (progresses[ch.id] ?? 0) === 100).length;
   const highWeightageCount = chapters.filter(ch => ch.weightage === 'High').length;
+  const sumProgress = chapters.reduce((acc, ch) => acc + safePercent(progresses[ch.id]), 0);
   const overallProgress = chapters.length > 0
-    ? Math.round(chapters.reduce((acc, ch) => acc + (progresses[ch.id] ?? 0), 0) / chapters.length)
+    ? safePercent(Math.round(sumProgress / chapters.length))
     : 0;
 
   const handleChapterClick = (chapter: Chapter) => {
