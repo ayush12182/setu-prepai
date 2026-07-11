@@ -1,0 +1,167 @@
+{
+  "chapterTitle": "Kinematics",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Kinematics is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine position and displacement with speed and velocity.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Kinematics",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Position and displacement",
+        "children": [
+          "Speed and velocity"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Acceleration",
+        "children": [
+          "Motion graphs"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Equations of motion",
+        "children": [
+          "Free fall"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Relative motion",
+        "children": [
+          "Projectile motion"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "v=u+at",
+      "meaning": "Core relation for Position and displacement.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "s=ut+\\frac12at^2",
+      "meaning": "Core relation for Speed and velocity.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "v^2=u^2+2as",
+      "meaning": "Core relation for Acceleration.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "R=\\frac{u^2\\sin2\\theta}{g}",
+      "meaning": "Core relation for Motion graphs.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "H=\\frac{u^2\\sin^2\\theta}{2g}",
+      "meaning": "Core relation for Equations of motion.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "T=\\frac{2u\\sin\\theta}{g}",
+      "meaning": "Core relation for Free fall.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Position and displacement",
+      "frequency": 3
+    },
+    {
+      "topic": "Speed and velocity",
+      "frequency": 3
+    },
+    {
+      "topic": "Acceleration",
+      "frequency": 2
+    },
+    {
+      "topic": "Motion graphs",
+      "frequency": 2
+    },
+    {
+      "topic": "Equations of motion",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Position and displacement",
+      "priority": 3
+    },
+    {
+      "topic": "Speed and velocity",
+      "priority": 3
+    },
+    {
+      "topic": "Acceleration",
+      "priority": 3
+    },
+    {
+      "topic": "Motion graphs",
+      "priority": 3
+    },
+    {
+      "topic": "Equations of motion",
+      "priority": 2
+    },
+    {
+      "topic": "Free fall",
+      "priority": 2
+    },
+    {
+      "topic": "Relative motion",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Position and displacement without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Speed and velocity without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing position and displacement or speed and velocity before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "v=u+at",
+    "s=ut+\\frac12at^2",
+    "v^2=u^2+2as",
+    "R=\\frac{u^2\\sin2\\theta}{g}",
+    "H=\\frac{u^2\\sin^2\\theta}{2g}",
+    "T=\\frac{2u\\sin\\theta}{g}"
+  ]
+}

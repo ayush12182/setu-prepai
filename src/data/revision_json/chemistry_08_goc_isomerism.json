@@ -1,0 +1,155 @@
+{
+  "chapterTitle": "Goc & Isomerism",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Goc & Isomerism is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine bond fission with electrophiles.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Goc & Isomerism",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "bond fission",
+        "children": [
+          "electrophiles",
+          "nucleophiles",
+          "inductive effect"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "resonance",
+        "children": [
+          "hyperconjugation",
+          "acidity",
+          "basicity"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "carbocations",
+        "children": [
+          "carbanions",
+          "radicals",
+          "tautomerism"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "structural",
+        "children": [
+          "conformational"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "Acidity follows conjugate-base stability",
+      "meaning": "Core relation for bond fission.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "basicity follows lone-pair availability",
+      "meaning": "Core relation for electrophiles.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "stereoisomer count is symmetry dependent",
+      "meaning": "Core relation for nucleophiles.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "bond fission",
+      "frequency": 3
+    },
+    {
+      "topic": "electrophiles",
+      "frequency": 3
+    },
+    {
+      "topic": "nucleophiles",
+      "frequency": 2
+    },
+    {
+      "topic": "inductive effect",
+      "frequency": 2
+    },
+    {
+      "topic": "resonance",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "bond fission",
+      "priority": 3
+    },
+    {
+      "topic": "electrophiles",
+      "priority": 3
+    },
+    {
+      "topic": "nucleophiles",
+      "priority": 3
+    },
+    {
+      "topic": "inductive effect",
+      "priority": 3
+    },
+    {
+      "topic": "resonance",
+      "priority": 2
+    },
+    {
+      "topic": "hyperconjugation",
+      "priority": 2
+    },
+    {
+      "topic": "acidity",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from bond fission without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising electrophiles without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing bond fission or electrophiles before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "Acidity follows conjugate-base stability",
+    "basicity follows lone-pair availability",
+    "stereoisomer count is symmetry dependent"
+  ]
+}

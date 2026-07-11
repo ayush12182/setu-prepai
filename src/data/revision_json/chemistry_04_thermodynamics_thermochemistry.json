@@ -1,0 +1,165 @@
+{
+  "chapterTitle": "Thermodynamics & Thermochemistry",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Thermodynamics & Thermochemistry is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine system with state functions.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Thermodynamics & Thermochemistry",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "system",
+        "children": [
+          "state functions",
+          "internal energy",
+          "heat"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "work",
+        "children": [
+          "first law",
+          "enthalpy",
+          "heat capacity"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Hess law",
+        "children": [
+          "bond enthalpy",
+          "entropy",
+          "Gibbs energy"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "spontaneity",
+        "children": []
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "ΔU=q+w",
+      "meaning": "Core relation for system.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "w=-P_extΔV",
+      "meaning": "Core relation for state functions.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ΔH=ΔU+Δn_gRT",
+      "meaning": "Core relation for internal energy.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ΔS=q_rev/T",
+      "meaning": "Core relation for heat.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ΔG=ΔH-TΔS",
+      "meaning": "Core relation for work.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "system",
+      "frequency": 3
+    },
+    {
+      "topic": "state functions",
+      "frequency": 3
+    },
+    {
+      "topic": "internal energy",
+      "frequency": 2
+    },
+    {
+      "topic": "heat",
+      "frequency": 2
+    },
+    {
+      "topic": "work",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "system",
+      "priority": 3
+    },
+    {
+      "topic": "state functions",
+      "priority": 3
+    },
+    {
+      "topic": "internal energy",
+      "priority": 3
+    },
+    {
+      "topic": "heat",
+      "priority": 3
+    },
+    {
+      "topic": "work",
+      "priority": 2
+    },
+    {
+      "topic": "first law",
+      "priority": 2
+    },
+    {
+      "topic": "enthalpy",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from system without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising state functions without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing system or state functions before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "ΔU=q+w",
+    "w=-P_extΔV",
+    "ΔH=ΔU+Δn_gRT",
+    "ΔS=q_rev/T",
+    "ΔG=ΔH-TΔS"
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "chapterTitle": "Trigonometry",
+  "subject": "Mathematics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Trigonometry is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine angles and measurement with trigonometric ratios.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Trigonometry",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "angles and measurement",
+        "children": [
+          "trigonometric ratios",
+          "standard values",
+          "signs and quadrants"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "compound angles",
+        "children": [
+          "multiple and submultiple angles",
+          "trigonometric identities",
+          "transformations of sums and products"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "trigonometric equations",
+        "children": [
+          "inverse trigonometric functions",
+          "principal values",
+          "properties of inverse trigonometric functions"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "heights and distances basics",
+        "children": []
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "sin²x+cos²x=1",
+      "meaning": "Core relation for angles and measurement.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "1+tan²x=sec²x",
+      "meaning": "Core relation for trigonometric ratios.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "sin(A±B)=sinAcosB±cosAsinB",
+      "meaning": "Core relation for standard values.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "cos(A±B)=cosAcosB∓sinAsinB",
+      "meaning": "Core relation for signs and quadrants.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "sin2x=2sinxcosx",
+      "meaning": "Core relation for compound angles.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "cos2x=cos²x-sin²x",
+      "meaning": "Core relation for multiple and submultiple angles.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "angles and measurement",
+      "frequency": 3
+    },
+    {
+      "topic": "trigonometric ratios",
+      "frequency": 3
+    },
+    {
+      "topic": "standard values",
+      "frequency": 2
+    },
+    {
+      "topic": "signs and quadrants",
+      "frequency": 2
+    },
+    {
+      "topic": "compound angles",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "angles and measurement",
+      "priority": 3
+    },
+    {
+      "topic": "trigonometric ratios",
+      "priority": 3
+    },
+    {
+      "topic": "standard values",
+      "priority": 3
+    },
+    {
+      "topic": "signs and quadrants",
+      "priority": 3
+    },
+    {
+      "topic": "compound angles",
+      "priority": 2
+    },
+    {
+      "topic": "multiple and submultiple angles",
+      "priority": 2
+    },
+    {
+      "topic": "trigonometric identities",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from angles and measurement without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising trigonometric ratios without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing angles and measurement or trigonometric ratios before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "sin²x+cos²x=1",
+    "1+tan²x=sec²x",
+    "sin(A±B)=sinAcosB±cosAsinB",
+    "cos(A±B)=cosAcosB∓sinAsinB",
+    "sin2x=2sinxcosx",
+    "cos2x=cos²x-sin²x"
+  ]
+}

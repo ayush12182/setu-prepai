@@ -1,0 +1,171 @@
+{
+  "chapterTitle": "Application Of Derivatives",
+  "subject": "Mathematics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Application Of Derivatives is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine rate of change with increasing and decreasing functions.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Application Of Derivatives",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "rate of change",
+        "children": [
+          "increasing and decreasing functions",
+          "critical points",
+          "local maxima and minima"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "first derivative test",
+        "children": [
+          "second derivative test",
+          "absolute extrema",
+          "tangent and normal"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "angle of intersection",
+        "children": [
+          "approximation and differentials",
+          "Rolle theorem",
+          "Lagrange mean value theorem"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "optimization",
+        "children": []
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "slope tangent=dy/dx",
+      "meaning": "Core relation for rate of change.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "slope normal=-1/(dy/dx)",
+      "meaning": "Core relation for increasing and decreasing functions.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "f'(c)=0 at interior extremum when differentiable",
+      "meaning": "Core relation for critical points.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "f''(c)>0 ⇒ local minimum",
+      "meaning": "Core relation for local maxima and minima.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "f''(c)<0 ⇒ local maximum",
+      "meaning": "Core relation for first derivative test.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "dy≈f'(x)dx",
+      "meaning": "Core relation for second derivative test.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "rate of change",
+      "frequency": 3
+    },
+    {
+      "topic": "increasing and decreasing functions",
+      "frequency": 3
+    },
+    {
+      "topic": "critical points",
+      "frequency": 2
+    },
+    {
+      "topic": "local maxima and minima",
+      "frequency": 2
+    },
+    {
+      "topic": "first derivative test",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "rate of change",
+      "priority": 3
+    },
+    {
+      "topic": "increasing and decreasing functions",
+      "priority": 3
+    },
+    {
+      "topic": "critical points",
+      "priority": 3
+    },
+    {
+      "topic": "local maxima and minima",
+      "priority": 3
+    },
+    {
+      "topic": "first derivative test",
+      "priority": 2
+    },
+    {
+      "topic": "second derivative test",
+      "priority": 2
+    },
+    {
+      "topic": "absolute extrema",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from rate of change without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising increasing and decreasing functions without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing rate of change or increasing and decreasing functions before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "slope tangent=dy/dx",
+    "slope normal=-1/(dy/dx)",
+    "f'(c)=0 at interior extremum when differentiable",
+    "f''(c)>0 ⇒ local minimum",
+    "f''(c)<0 ⇒ local maximum",
+    "dy≈f'(x)dx"
+  ]
+}

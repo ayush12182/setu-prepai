@@ -1,0 +1,155 @@
+{
+  "chapterTitle": "Coordination Chemistry",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Coordination Chemistry is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine werner theory with ligands.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Coordination Chemistry",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Werner theory",
+        "children": [
+          "ligands",
+          "denticity",
+          "chelation"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "coordination number",
+        "children": [
+          "oxidation state",
+          "nomenclature",
+          "structural and stereoisomerism"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "VBT",
+        "children": [
+          "CFT",
+          "octahedral and tetrahedral splitting",
+          "high spin"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "low spin",
+        "children": [
+          "CFSE"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "μ=√[n(n+2)] BM",
+      "meaning": "Core relation for Werner theory.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Δ_t≈4Δ_o/9",
+      "meaning": "Core relation for ligands.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "CFSE_oct=(-0.4n_t2g+0.6n_eg)Δ_o",
+      "meaning": "Core relation for denticity.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Werner theory",
+      "frequency": 3
+    },
+    {
+      "topic": "ligands",
+      "frequency": 3
+    },
+    {
+      "topic": "denticity",
+      "frequency": 2
+    },
+    {
+      "topic": "chelation",
+      "frequency": 2
+    },
+    {
+      "topic": "coordination number",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Werner theory",
+      "priority": 3
+    },
+    {
+      "topic": "ligands",
+      "priority": 3
+    },
+    {
+      "topic": "denticity",
+      "priority": 3
+    },
+    {
+      "topic": "chelation",
+      "priority": 3
+    },
+    {
+      "topic": "coordination number",
+      "priority": 2
+    },
+    {
+      "topic": "oxidation state",
+      "priority": 2
+    },
+    {
+      "topic": "nomenclature",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Werner theory without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising ligands without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing werner theory or ligands before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "μ=√[n(n+2)] BM",
+    "Δ_t≈4Δ_o/9",
+    "CFSE_oct=(-0.4n_t2g+0.6n_eg)Δ_o"
+  ]
+}

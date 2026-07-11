@@ -19,26 +19,26 @@ export const RevisionRenderer: React.FC<{ jsonOutput: any, chapter?: Chapter }> 
       <div className="flex justify-between items-center border-b-4 border-gray-100 pb-4 mb-6">
         <div className="flex items-center gap-4">
           <h1 className="text-4xl font-black text-blue-700 tracking-tight uppercase">
-            {jsonOutput.metadata?.title || jsonOutput.chapter}
+            {jsonOutput.chapterTitle || jsonOutput.chapter}
           </h1>
           <div className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-bold">
-            {subjectStr} • {classStr}
+            {jsonOutput.subject || subjectStr} • {jsonOutput.classLevel || classStr}
           </div>
         </div>
         
         <div className="flex items-center gap-8 text-center">
           <div>
             <div className="text-[10px] font-bold text-gray-500 uppercase">JEE Main Weightage</div>
-            <div className="text-yellow-500 text-lg leading-none">{jsonOutput.metadata?.weightage}</div>
+            <div className="text-yellow-500 text-lg leading-none">{jsonOutput.jeeWeightage}</div>
           </div>
           <div>
             <div className="text-[10px] font-bold text-gray-500 uppercase">Expected Questions</div>
-            <div className="font-bold text-xl leading-none">{jsonOutput.metadata?.expectedQuestions}</div>
+            <div className="font-bold text-xl leading-none">{jsonOutput.expectedQuestions}</div>
           </div>
           <div>
             <div className="text-[10px] font-bold text-gray-500 uppercase">Revision Time</div>
             <div className="font-bold text-xl leading-none flex items-center gap-1">
-              <span>⏱</span> {jsonOutput.metadata?.time}
+              <span>⏱</span> {jsonOutput.revisionTime}
             </div>
           </div>
         </div>
@@ -51,17 +51,19 @@ export const RevisionRenderer: React.FC<{ jsonOutput: any, chapter?: Chapter }> 
         <div className="col-span-1 flex flex-col gap-4">
           
           {/* Why This Matters */}
-          <div className="bg-blue-50/50 border border-blue-200 rounded-md">
-            <SectionHeader title="Why This Chapter Matters" colorClass="bg-blue-600 text-white border-blue-700" />
-            <ul className="p-4 space-y-3">
-              {jsonOutput.whyThisMatters?.map((bullet: string, i: number) => (
-                <li key={i} className="flex gap-2 items-start text-xs font-medium text-gray-700 leading-tight">
-                  <span className="w-1 h-1 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                  <MathLine>{bullet}</MathLine>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {jsonOutput.whyChapterMatters && jsonOutput.whyChapterMatters.length > 0 && (
+            <div className="bg-blue-50/50 border border-blue-200 rounded-md">
+              <SectionHeader title="Why This Chapter Matters" colorClass="bg-blue-600 text-white border-blue-700" />
+              <ul className="p-4 space-y-3">
+                {jsonOutput.whyChapterMatters.map((bullet: string, i: number) => (
+                  <li key={i} className="flex gap-2 items-start text-xs font-medium text-gray-700 leading-tight">
+                    <span className="w-1 h-1 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                    <MathLine>{bullet}</MathLine>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Motion Graphs */}
           {jsonOutput.graphs && jsonOutput.graphs.length > 0 && (
@@ -88,131 +90,157 @@ export const RevisionRenderer: React.FC<{ jsonOutput: any, chapter?: Chapter }> 
           )}
           
           {/* Common Mistakes */}
-          <div className="border border-pink-500 rounded-md overflow-hidden">
-             <SectionHeader title="Common Mistakes" colorClass="bg-pink-500 text-white" />
-             <div className="p-3 space-y-2 bg-pink-50/30">
-               {jsonOutput.commonMistakes?.map((mistake: any, i: number) => (
-                 <div key={i} className="flex gap-2 items-start bg-white border border-pink-100 p-2 rounded">
-                    <span className="text-red-500 font-bold text-sm shrink-0">×</span>
-                    <div>
-                      <p className="text-[10px] font-bold text-gray-800 leading-tight border-b border-pink-100 pb-1 mb-1"><MathLine>{mistake.wrong}</MathLine></p>
-                      <p className="text-[10px] text-gray-600 leading-tight"><MathLine>{mistake.right}</MathLine></p>
-                    </div>
-                 </div>
-               ))}
-             </div>
-          </div>
+          {jsonOutput.commonMistakes && jsonOutput.commonMistakes.length > 0 && (
+            <div className="border border-pink-500 rounded-md overflow-hidden">
+               <SectionHeader title="Common Mistakes" colorClass="bg-pink-500 text-white" />
+               <div className="p-3 space-y-2 bg-pink-50/30">
+                 {jsonOutput.commonMistakes.map((mistake: any, i: number) => (
+                   <div key={i} className="flex gap-2 items-start bg-white border border-pink-100 p-2 rounded">
+                      <span className="text-red-500 font-bold text-sm shrink-0">×</span>
+                      <div>
+                        {typeof mistake === 'string' ? (
+                          <p className="text-[10px] font-bold text-gray-800 leading-tight"><MathLine>{mistake}</MathLine></p>
+                        ) : (
+                          <>
+                            <p className="text-[10px] font-bold text-gray-800 leading-tight border-b border-pink-100 pb-1 mb-1"><MathLine>{mistake.wrong}</MathLine></p>
+                            <p className="text-[10px] text-gray-600 leading-tight"><MathLine>{mistake.right}</MathLine></p>
+                          </>
+                        )}
+                      </div>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          )}
         </div>
 
         {/* MIDDLE COLUMN (2/4 width) */}
         <div className="col-span-2 flex flex-col gap-4">
           
           {/* Concept Map */}
-          <div className="border border-gray-200 rounded-md p-4 text-center">
-            <SolidSectionHeader title="CONCEPT MAP" color="#8B5CF6" />
-            <ConceptMapRenderer data={jsonOutput.conceptMap} />
-          </div>
+          {jsonOutput.conceptMap && (
+            <div className="border border-gray-200 rounded-md p-4 text-center">
+              <SolidSectionHeader title="CONCEPT MAP" color="#8B5CF6" />
+              <ConceptMapRenderer data={jsonOutput.conceptMap} />
+            </div>
+          )}
 
           {/* Key Formulas */}
-          <div className="border border-blue-600 rounded-md overflow-hidden flex-1">
-             <SectionHeader title="KEY FORMULAS" colorClass="bg-blue-600 text-white" />
-             <div className="p-0">
-                <table className="w-full text-left border-collapse">
-                  <tbody>
-                    {jsonOutput.formulaCards?.map((formula: any, i: number) => (
-                      <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-blue-50/50">
-                        <td className="p-3 font-semibold text-blue-800 text-sm border-r border-gray-100 bg-blue-50/30 whitespace-nowrap overflow-hidden">
-                          <MathLine>{`$${formula.latex}$`}</MathLine>
-                        </td>
-                        <td className="p-3 text-[11px] font-medium text-gray-700">
-                          {formula.name}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-             </div>
-          </div>
+          {jsonOutput.keyFormulas && jsonOutput.keyFormulas.length > 0 && (
+            <div className="border border-blue-600 rounded-md overflow-hidden flex-1">
+               <SectionHeader title="KEY FORMULAS" colorClass="bg-blue-600 text-white" />
+               <div className="p-0">
+                  <table className="w-full text-left border-collapse">
+                    <tbody>
+                      {jsonOutput.keyFormulas.map((f: any, i: number) => (
+                        <tr key={i} className="border-b border-gray-100 last:border-0 hover:bg-blue-50/50">
+                          <td className="p-3 font-semibold text-blue-800 text-sm border-r border-gray-100 bg-blue-50/30 whitespace-nowrap overflow-hidden">
+                            <MathLine>{f.formula.includes('$') ? f.formula : `$$${f.formula}$$`}</MathLine>
+                          </td>
+                          <td className="p-3 text-[11px] font-medium text-gray-700">
+                            <MathLine>{f.meaning || f.name}</MathLine>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+               </div>
+            </div>
+          )}
 
           {/* PYQ Trend */}
-          <div className="border border-purple-500 rounded-md overflow-hidden">
-             <SectionHeader title="PYQ TREND (JEE MAIN)" colorClass="bg-purple-500 text-white" />
-             <div className="p-3 bg-purple-50/30">
-               <table className="w-full text-[11px] font-bold">
-                 <thead>
-                   <tr className="text-gray-500 border-b border-gray-200"><th className="text-left pb-1">TOPIC</th><th className="text-right pb-1">FREQUENCY</th></tr>
-                 </thead>
-                 <tbody>
-                   {jsonOutput.pyqAnalysis?.map((pyq: any, i: number) => (
-                     <tr key={i} className="border-b border-purple-100 last:border-0">
-                       <td className="py-2 text-gray-800">{pyq.topic}</td>
-                       <td className="py-2 text-right text-purple-600 text-sm">
-                         {Array.from({ length: pyq.stars || 0 }).map((_, idx) => <span key={idx}>★</span>)}
-                       </td>
-                     </tr>
-                   ))}
-                 </tbody>
-               </table>
-             </div>
-          </div>
+          {jsonOutput.pyqTrends && jsonOutput.pyqTrends.length > 0 && (
+            <div className="border border-purple-500 rounded-md overflow-hidden">
+               <SectionHeader title="PYQ TREND (JEE MAIN)" colorClass="bg-purple-500 text-white" />
+               <div className="p-3 bg-purple-50/30">
+                 <table className="w-full text-[11px] font-bold">
+                   <thead>
+                     <tr className="text-gray-500 border-b border-gray-200"><th className="text-left pb-1">TOPIC</th><th className="text-right pb-1">FREQUENCY</th></tr>
+                   </thead>
+                   <tbody>
+                     {jsonOutput.pyqTrends.map((pyq: any, i: number) => (
+                       <tr key={i} className="border-b border-purple-100 last:border-0">
+                         <td className="py-2 text-gray-800"><MathLine>{pyq.topic}</MathLine></td>
+                         <td className="py-2 text-right text-purple-600 text-sm">
+                           {Array.from({ length: pyq.frequency || pyq.stars || 1 }).map((_, idx) => <span key={idx}>★</span>)}
+                         </td>
+                       </tr>
+                     ))}
+                   </tbody>
+                 </table>
+               </div>
+            </div>
+          )}
         </div>
 
         {/* RIGHT COLUMN (1/4 width) */}
         <div className="col-span-1 flex flex-col gap-4">
           
           {/* High Yield */}
-          <div className="border border-red-500 rounded-md overflow-hidden">
-             <SectionHeader title="HIGH-YIELD TOPICS" colorClass="bg-red-600 text-white" />
-             <div className="bg-red-50/30 p-0">
-               {jsonOutput.highYieldTopics?.map((topic: any, i: number) => (
-                 <div key={i} className="flex justify-between items-center border-b border-red-100 last:border-0 p-3 text-xs font-bold text-gray-800">
-                   <span>{topic.topic}</span>
-                   <span className="text-red-500">
-                     {Array.from({ length: topic.stars || 0 }).map((_, idx) => <span key={idx}>★</span>)}
-                   </span>
-                 </div>
-               ))}
-             </div>
-          </div>
+          {jsonOutput.highYieldTopics && jsonOutput.highYieldTopics.length > 0 && (
+            <div className="border border-red-500 rounded-md overflow-hidden">
+               <SectionHeader title="HIGH-YIELD TOPICS" colorClass="bg-red-600 text-white" />
+               <div className="bg-red-50/30 p-0">
+                 {jsonOutput.highYieldTopics.map((topic: any, i: number) => (
+                   <div key={i} className="flex justify-between items-center border-b border-red-100 last:border-0 p-3 text-xs font-bold text-gray-800">
+                     <span><MathLine>{topic.topic}</MathLine></span>
+                     <span className="text-red-500">
+                       {Array.from({ length: topic.priority || topic.stars || 1 }).map((_, idx) => <span key={idx}>★</span>)}
+                     </span>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          )}
 
           {/* Kota Faculty Tricks */}
-          <div className="border border-green-600 rounded-md overflow-hidden">
-             <SectionHeader title="KOTA FACULTY TRICKS" colorClass="bg-green-600 text-white" />
-             <div className="p-3 space-y-3 bg-green-50/30">
-               {jsonOutput.memoryTricks?.map((trick: any, i: number) => (
-                 <div key={i}>
-                    <h5 className="text-[11px] font-extrabold text-green-800 mb-0.5">{trick.title}</h5>
-                    <p className="text-[10px] font-medium text-gray-700 leading-tight"><MathLine>{trick.explanation}</MathLine></p>
-                 </div>
-               ))}
-             </div>
-          </div>
+          {jsonOutput.kotaFacultyTricks && jsonOutput.kotaFacultyTricks.length > 0 && (
+            <div className="border border-green-600 rounded-md overflow-hidden">
+               <SectionHeader title="KOTA FACULTY TRICKS" colorClass="bg-green-600 text-white" />
+               <div className="p-3 space-y-3 bg-green-50/30">
+                 {jsonOutput.kotaFacultyTricks.map((trick: any, i: number) => (
+                   <div key={i}>
+                      <h5 className="text-[11px] font-extrabold text-green-800 mb-0.5"><MathLine>{trick.title}</MathLine></h5>
+                      <p className="text-[10px] font-medium text-gray-700 leading-tight"><MathLine>{trick.content || trick.explanation}</MathLine></p>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          )}
 
           {/* Quick Formula Box */}
-          <div className="border border-orange-500 rounded-md overflow-hidden">
-             <SectionHeader title="QUICK FORMULA BOX" colorClass="bg-orange-500 text-white" />
-             <div className="p-3 bg-orange-50/30 space-y-2">
-                {jsonOutput.quickRevision?.formulas?.map((f: any, i: number) => (
-                   <div key={i} className="flex justify-between items-center border-b border-orange-100 pb-2 last:border-0">
-                      <span className="font-bold text-orange-800 text-sm overflow-hidden text-ellipsis mr-2"><MathLine>{f.equation.includes('$') ? f.equation : `$${f.equation}$`}</MathLine></span>
-                      <span className="text-[9px] text-gray-600 text-right font-medium max-w-[50%] shrink-0">{f.name}</span>
-                   </div>
-                ))}
-             </div>
-          </div>
+          {jsonOutput.quickFormulaBox && jsonOutput.quickFormulaBox.length > 0 && (
+            <div className="border border-orange-500 rounded-md overflow-hidden">
+               <SectionHeader title="QUICK FORMULA BOX" colorClass="bg-orange-500 text-white" />
+               <div className="p-3 bg-orange-50/30 space-y-2">
+                  {jsonOutput.quickFormulaBox.map((f: any, i: number) => (
+                     <div key={i} className="flex justify-between items-center border-b border-orange-100 pb-2 last:border-0">
+                        <span className="font-bold text-orange-800 text-sm overflow-hidden text-ellipsis mr-2">
+                          <MathLine>{typeof f === 'string' ? (f.includes('$') ? f : `$$${f}$$`) : (f.equation.includes('$') ? f.equation : `$$${f.equation}$$`)}</MathLine>
+                        </span>
+                        <span className="text-[9px] text-gray-600 text-right font-medium max-w-[50%] shrink-0">
+                          <MathLine>{typeof f === 'string' ? '' : f.name}</MathLine>
+                        </span>
+                     </div>
+                  ))}
+               </div>
+            </div>
+          )}
 
           {/* 30 Sec Checklist */}
-          <div className="border-2 border-emerald-500 rounded-md overflow-hidden">
-             <SectionHeader title="30-SECOND REVISION CHECKLIST" colorClass="bg-emerald-500 text-white" />
-             <div className="p-3 bg-emerald-50/20 space-y-2">
-               {jsonOutput.checklist?.map((item: string, i: number) => (
-                 <label key={i} className="flex gap-2 items-start text-[10px] font-bold text-gray-700 leading-tight cursor-pointer hover:text-emerald-700">
-                    <input type="checkbox" className="mt-0.5 rounded text-emerald-500 focus:ring-emerald-500" />
-                    <span><MathLine>{item}</MathLine></span>
-                 </label>
-               ))}
-             </div>
-          </div>
+          {jsonOutput.checklist && jsonOutput.checklist.length > 0 && (
+            <div className="border-2 border-emerald-500 rounded-md overflow-hidden">
+               <SectionHeader title="30-SECOND REVISION CHECKLIST" colorClass="bg-emerald-500 text-white" />
+               <div className="p-3 bg-emerald-50/20 space-y-2">
+                 {jsonOutput.checklist.map((item: string, i: number) => (
+                   <label key={i} className="flex gap-2 items-start text-[10px] font-bold text-gray-700 leading-tight cursor-pointer hover:text-emerald-700">
+                      <input type="checkbox" className="mt-0.5 rounded text-emerald-500 focus:ring-emerald-500" />
+                      <span><MathLine>{item}</MathLine></span>
+                   </label>
+                 ))}
+               </div>
+            </div>
+          )}
 
         </div>
       </div>

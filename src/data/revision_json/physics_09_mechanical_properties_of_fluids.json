@@ -1,0 +1,193 @@
+{
+  "chapterTitle": "Mechanical Properties Of Fluids",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Mechanical Properties Of Fluids is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine pressure and pascal's law with hydrostatic pressure.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Mechanical Properties Of Fluids",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Pressure and Pascal's law",
+        "children": [
+          "Hydrostatic pressure",
+          "Atmospheric pressure and manometers",
+          "Buoyancy and Archimedes' principle"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Fluid flow and streamline motion",
+        "children": [
+          "Equation of continuity",
+          "Bernoulli's theorem",
+          "Torricelli's theorem"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Viscosity",
+        "children": [
+          "Stokes' law and terminal velocity",
+          "Surface tension",
+          "Surface energy"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Excess pressure",
+        "children": [
+          "Capillarity"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "P=P₀+ρgh",
+      "meaning": "Core relation for Pressure and Pascal's law.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "F_b=ρ_fluid V_displaced g",
+      "meaning": "Core relation for Hydrostatic pressure.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "A₁v₁=A₂v₂",
+      "meaning": "Core relation for Atmospheric pressure and manometers.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "P+½ρv²+ρgh=constant",
+      "meaning": "Core relation for Buoyancy and Archimedes' principle.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "v=√(2gh)",
+      "meaning": "Core relation for Fluid flow and streamline motion.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "F_v=6πηrv",
+      "meaning": "Core relation for Equation of continuity.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "v_t=2r²(ρ-σ)g/(9η)",
+      "meaning": "Core relation for Bernoulli's theorem.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ΔP_drop=2T/r",
+      "meaning": "Core relation for Torricelli's theorem.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ΔP_bubble=4T/r",
+      "meaning": "Core relation for Viscosity.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "h=2Tcosθ/(ρgr)",
+      "meaning": "Core relation for Stokes' law and terminal velocity.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Pressure and Pascal's law",
+      "frequency": 3
+    },
+    {
+      "topic": "Hydrostatic pressure",
+      "frequency": 3
+    },
+    {
+      "topic": "Atmospheric pressure and manometers",
+      "frequency": 2
+    },
+    {
+      "topic": "Buoyancy and Archimedes' principle",
+      "frequency": 2
+    },
+    {
+      "topic": "Fluid flow and streamline motion",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Pressure and Pascal's law",
+      "priority": 3
+    },
+    {
+      "topic": "Hydrostatic pressure",
+      "priority": 3
+    },
+    {
+      "topic": "Atmospheric pressure and manometers",
+      "priority": 3
+    },
+    {
+      "topic": "Buoyancy and Archimedes' principle",
+      "priority": 3
+    },
+    {
+      "topic": "Fluid flow and streamline motion",
+      "priority": 2
+    },
+    {
+      "topic": "Equation of continuity",
+      "priority": 2
+    },
+    {
+      "topic": "Bernoulli's theorem",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Pressure and Pascal's law without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Hydrostatic pressure without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing pressure and pascal's law or hydrostatic pressure before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "P=P₀+ρgh",
+    "F_b=ρ_fluid V_displaced g",
+    "A₁v₁=A₂v₂",
+    "P+½ρv²+ρgh=constant",
+    "v=√(2gh)",
+    "F_v=6πηrv"
+  ]
+}

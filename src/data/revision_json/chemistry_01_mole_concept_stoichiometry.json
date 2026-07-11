@@ -1,0 +1,164 @@
+{
+  "chapterTitle": "Mole Concept & Stoichiometry",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Mole Concept & Stoichiometry is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine mole with avogadro constant.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Mole Concept & Stoichiometry",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "mole",
+        "children": [
+          "Avogadro constant",
+          "molar mass"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "empirical formula",
+        "children": [
+          "limiting reagent",
+          "yield"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "purity",
+        "children": [
+          "molarity",
+          "molality"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "mole fraction",
+        "children": [
+          "equivalents"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "n=m/M",
+      "meaning": "Core relation for mole.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "N=nN_A",
+      "meaning": "Core relation for Avogadro constant.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Molarity=n/V",
+      "meaning": "Core relation for molar mass.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Molality=n/kg solvent",
+      "meaning": "Core relation for empirical formula.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "χ_i=n_i/Σn",
+      "meaning": "Core relation for limiting reagent.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "mole",
+      "frequency": 3
+    },
+    {
+      "topic": "Avogadro constant",
+      "frequency": 3
+    },
+    {
+      "topic": "molar mass",
+      "frequency": 2
+    },
+    {
+      "topic": "empirical formula",
+      "frequency": 2
+    },
+    {
+      "topic": "limiting reagent",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "mole",
+      "priority": 3
+    },
+    {
+      "topic": "Avogadro constant",
+      "priority": 3
+    },
+    {
+      "topic": "molar mass",
+      "priority": 3
+    },
+    {
+      "topic": "empirical formula",
+      "priority": 3
+    },
+    {
+      "topic": "limiting reagent",
+      "priority": 2
+    },
+    {
+      "topic": "yield",
+      "priority": 2
+    },
+    {
+      "topic": "purity",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from mole without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Avogadro constant without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing mole or avogadro constant before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "n=m/M",
+    "N=nN_A",
+    "Molarity=n/V",
+    "Molality=n/kg solvent",
+    "χ_i=n_i/Σn"
+  ]
+}

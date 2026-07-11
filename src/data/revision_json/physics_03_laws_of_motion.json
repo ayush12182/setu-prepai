@@ -1,0 +1,162 @@
+{
+  "chapterTitle": "Laws of Motion",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Laws of Motion is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine newton's laws with free body diagrams.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Laws of Motion",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Newton's laws",
+        "children": [
+          "Free body diagrams",
+          "Inertia"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Momentum",
+        "children": [
+          "Impulse",
+          "Friction"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Connected bodies",
+        "children": [
+          "Pseudo force",
+          "Circular dynamics"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "\\vec F=m\\vec a",
+      "meaning": "Core relation for Newton's laws.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "\\vec p=m\\vec v",
+      "meaning": "Core relation for Free body diagrams.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "\\vec J=\\Delta\\vec p",
+      "meaning": "Core relation for Inertia.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "f_s\\leq\\mu_sN",
+      "meaning": "Core relation for Momentum.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "f_k=\\mu_kN",
+      "meaning": "Core relation for Impulse.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "F_c=\\frac{mv^2}{r}",
+      "meaning": "Core relation for Friction.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Newton's laws",
+      "frequency": 3
+    },
+    {
+      "topic": "Free body diagrams",
+      "frequency": 3
+    },
+    {
+      "topic": "Inertia",
+      "frequency": 2
+    },
+    {
+      "topic": "Momentum",
+      "frequency": 2
+    },
+    {
+      "topic": "Impulse",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Newton's laws",
+      "priority": 3
+    },
+    {
+      "topic": "Free body diagrams",
+      "priority": 3
+    },
+    {
+      "topic": "Inertia",
+      "priority": 3
+    },
+    {
+      "topic": "Momentum",
+      "priority": 3
+    },
+    {
+      "topic": "Impulse",
+      "priority": 2
+    },
+    {
+      "topic": "Friction",
+      "priority": 2
+    },
+    {
+      "topic": "Connected bodies",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Newton's laws without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Free body diagrams without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing newton's laws or free body diagrams before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "\\vec F=m\\vec a",
+    "\\vec p=m\\vec v",
+    "\\vec J=\\Delta\\vec p",
+    "f_s\\leq\\mu_sN",
+    "f_k=\\mu_kN",
+    "F_c=\\frac{mv^2}{r}"
+  ]
+}

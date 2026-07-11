@@ -1,0 +1,193 @@
+{
+  "chapterTitle": "Current Electricity",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Current Electricity is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine electric current with drift velocity and mobility.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Current Electricity",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Electric current",
+        "children": [
+          "Drift velocity and mobility",
+          "Ohm's law",
+          "Resistance and resistivity"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Temperature dependence of resistance",
+        "children": [
+          "Series and parallel resistors",
+          "Cells emf and internal resistance",
+          "Cells in series and parallel"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Kirchhoff's laws",
+        "children": [
+          "Wheatstone bridge",
+          "Meter bridge",
+          "Potentiometer"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Electrical power and energy",
+        "children": [
+          "RC charging fundamentals"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "I=dQ/dt",
+      "meaning": "Core relation for Electric current.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "I=neAv_d",
+      "meaning": "Core relation for Drift velocity and mobility.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "J=I/A=nev_d",
+      "meaning": "Core relation for Ohm's law.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "V=IR",
+      "meaning": "Core relation for Resistance and resistivity.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "R=ρL/A",
+      "meaning": "Core relation for Temperature dependence of resistance.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ρ_T=ρ₀[1+α(T-T₀)]",
+      "meaning": "Core relation for Series and parallel resistors.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "V_terminal=E-Ir",
+      "meaning": "Core relation for Cells emf and internal resistance.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ΣI=0",
+      "meaning": "Core relation for Cells in series and parallel.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ΣΔV=0",
+      "meaning": "Core relation for Kirchhoff's laws.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "P=VI=I²R=V²/R",
+      "meaning": "Core relation for Wheatstone bridge.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Electric current",
+      "frequency": 3
+    },
+    {
+      "topic": "Drift velocity and mobility",
+      "frequency": 3
+    },
+    {
+      "topic": "Ohm's law",
+      "frequency": 2
+    },
+    {
+      "topic": "Resistance and resistivity",
+      "frequency": 2
+    },
+    {
+      "topic": "Temperature dependence of resistance",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Electric current",
+      "priority": 3
+    },
+    {
+      "topic": "Drift velocity and mobility",
+      "priority": 3
+    },
+    {
+      "topic": "Ohm's law",
+      "priority": 3
+    },
+    {
+      "topic": "Resistance and resistivity",
+      "priority": 3
+    },
+    {
+      "topic": "Temperature dependence of resistance",
+      "priority": 2
+    },
+    {
+      "topic": "Series and parallel resistors",
+      "priority": 2
+    },
+    {
+      "topic": "Cells emf and internal resistance",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Electric current without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Drift velocity and mobility without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing electric current or drift velocity and mobility before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "I=dQ/dt",
+    "I=neAv_d",
+    "J=I/A=nev_d",
+    "V=IR",
+    "R=ρL/A",
+    "ρ_T=ρ₀[1+α(T-T₀)]"
+  ]
+}

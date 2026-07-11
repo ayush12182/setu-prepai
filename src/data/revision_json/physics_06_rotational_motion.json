@@ -1,0 +1,167 @@
+{
+  "chapterTitle": "Rotational Motion",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Rotational Motion is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine angular variables with torque.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Rotational Motion",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Angular variables",
+        "children": [
+          "Torque",
+          "Moment of inertia"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Radius of gyration",
+        "children": [
+          "Angular momentum",
+          "Rotational dynamics"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Rolling motion",
+        "children": [
+          "Parallel axis theorem",
+          "Perpendicular axis theorem"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "\\omega=\\frac{d\\theta}{dt}",
+      "meaning": "Core relation for Angular variables.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "\\alpha=\\frac{d\\omega}{dt}",
+      "meaning": "Core relation for Torque.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "\\tau=I\\alpha",
+      "meaning": "Core relation for Moment of inertia.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "L=I\\omega",
+      "meaning": "Core relation for Radius of gyration.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "K_{rot}=\\frac12I\\omega^2",
+      "meaning": "Core relation for Angular momentum.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "I=I_{CM}+Md^2",
+      "meaning": "Core relation for Rotational dynamics.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "v_{CM}=\\omega R",
+      "meaning": "Core relation for Rolling motion.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Angular variables",
+      "frequency": 3
+    },
+    {
+      "topic": "Torque",
+      "frequency": 3
+    },
+    {
+      "topic": "Moment of inertia",
+      "frequency": 2
+    },
+    {
+      "topic": "Radius of gyration",
+      "frequency": 2
+    },
+    {
+      "topic": "Angular momentum",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Angular variables",
+      "priority": 3
+    },
+    {
+      "topic": "Torque",
+      "priority": 3
+    },
+    {
+      "topic": "Moment of inertia",
+      "priority": 3
+    },
+    {
+      "topic": "Radius of gyration",
+      "priority": 3
+    },
+    {
+      "topic": "Angular momentum",
+      "priority": 2
+    },
+    {
+      "topic": "Rotational dynamics",
+      "priority": 2
+    },
+    {
+      "topic": "Rolling motion",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Angular variables without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Torque without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing angular variables or torque before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "\\omega=\\frac{d\\theta}{dt}",
+    "\\alpha=\\frac{d\\omega}{dt}",
+    "\\tau=I\\alpha",
+    "L=I\\omega",
+    "K_{rot}=\\frac12I\\omega^2",
+    "I=I_{CM}+Md^2"
+  ]
+}

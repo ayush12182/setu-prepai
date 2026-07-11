@@ -19,12 +19,9 @@ import { cn } from '@/lib/utils';
 import { useExamMode } from '@/contexts/ExamModeContext';
 import { useClassContext } from '@/contexts/ClassContext';
 import FormulaSheet from '@/components/revision/FormulaSheet';
-import DifferenceTables from '@/components/revision/DifferenceTables';
-import QuickQuiz from '@/components/revision/QuickQuiz';
 import OnePageNotes from '@/components/revision/OnePageNotes';
-import HandwrittenNotesAnalysis from '@/components/revision/HandwrittenNotesAnalysis';
 
-type RevisionMode = 'home' | 'notes' | 'formulas' | 'tables' | 'quiz' | 'handwritten';
+type RevisionMode = 'home' | 'notes' | 'formulas';
 
 const RevisionPage: React.FC = () => {
   const [activeMode, setActiveMode] = useState<RevisionMode>('home');
@@ -45,16 +42,6 @@ const RevisionPage: React.FC = () => {
       emoji: '📝',
     },
     {
-      id: 'handwritten' as RevisionMode,
-      icon: PenTool,
-      title: 'Analyze My Notes',
-      description: 'Upload your handwritten notes and let AI teach you from them',
-      action: 'Upload Notes',
-      gradient: 'from-violet-500 to-purple-500',
-      bgGlow: 'bg-violet-500/10',
-      emoji: '✍️',
-    },
-    {
       id: 'formulas' as RevisionMode,
       icon: ListChecks,
       title: isFoundation ? 'Key Formulas & Rules' : 'Formula Sheets',
@@ -65,28 +52,6 @@ const RevisionPage: React.FC = () => {
       gradient: 'from-emerald-500 to-green-500',
       bgGlow: 'bg-emerald-500/10',
       emoji: '📐',
-    },
-    {
-      id: 'tables' as RevisionMode,
-      icon: Table,
-      title: 'Difference Tables',
-      description: 'Confused between similar concepts? Compare them side by side',
-      action: 'View Tables',
-      gradient: 'from-orange-500 to-amber-500',
-      bgGlow: 'bg-orange-500/10',
-      emoji: '⚖️',
-    },
-    {
-      id: 'quiz' as RevisionMode,
-      icon: Zap,
-      title: isFoundation ? 'Quick Quiz' : '1-Mark Questions',
-      description: isFoundation
-        ? 'Rapid-fire questions to test how well you remember concepts'
-        : 'Rapid-fire quick questions to test your revision in seconds',
-      action: 'Start Quiz',
-      gradient: 'from-rose-500 to-pink-500',
-      bgGlow: 'bg-rose-500/10',
-      emoji: '⚡',
     }
   ];
 
@@ -219,9 +184,7 @@ const RevisionPage: React.FC = () => {
   const renderContent = () => {
     switch (activeMode) {
       case 'notes': return <OnePageNotes onBack={() => setActiveMode('home')} />;
-      case 'handwritten': return <HandwrittenNotesAnalysis onBack={() => setActiveMode('home')} />;
-      case 'tables': return <DifferenceTables onBack={() => setActiveMode('home')} />;
-      case 'quiz': return <QuickQuiz onBack={() => setActiveMode('home')} />;
+      case 'formulas': return <FormulaSheet onBack={() => setActiveMode('home')} />;
       default: return null;
     }
   };

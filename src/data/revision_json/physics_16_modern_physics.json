@@ -1,0 +1,193 @@
+{
+  "chapterTitle": "Modern Physics",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Modern Physics is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine photon concept and quantum nature of radiation with photoelectric effect.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Modern Physics",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Photon concept and quantum nature of radiation",
+        "children": [
+          "Photoelectric effect",
+          "Einstein's photoelectric equation",
+          "Stopping potential and photoelectric graphs"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "de Broglie wavelength",
+        "children": [
+          "Davisson-Germer experiment",
+          "Bohr model of hydrogen atom",
+          "Hydrogen energy levels"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Hydrogen spectrum and Rydberg formula",
+        "children": [
+          "X-rays basics",
+          "Atomic nucleus",
+          "Mass defect and binding energy"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Binding energy per nucleon curve",
+        "children": [
+          "Radioactive decay law"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "E=hν=hc/λ",
+      "meaning": "Core relation for Photon concept and quantum nature of radiation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "K_max=hν-φ=eV₀",
+      "meaning": "Core relation for Photoelectric effect.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "λ=h/p=h/(mv)",
+      "meaning": "Core relation for Einstein's photoelectric equation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "λ(Å)=12.27/√V for electron",
+      "meaning": "Core relation for Stopping potential and photoelectric graphs.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "r_n=n²a₀/Z",
+      "meaning": "Core relation for de Broglie wavelength.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "E_n=-13.6Z²/n² eV",
+      "meaning": "Core relation for Davisson-Germer experiment.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "1/λ=RZ²(1/n₁²-1/n₂²)",
+      "meaning": "Core relation for Bohr model of hydrogen atom.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Δm=Zm_p+Nm_n-M_nucleus",
+      "meaning": "Core relation for Hydrogen energy levels.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "E_b=Δmc²",
+      "meaning": "Core relation for Hydrogen spectrum and Rydberg formula.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "N=N₀e^{-λt}",
+      "meaning": "Core relation for X-rays basics.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Photon concept and quantum nature of radiation",
+      "frequency": 3
+    },
+    {
+      "topic": "Photoelectric effect",
+      "frequency": 3
+    },
+    {
+      "topic": "Einstein's photoelectric equation",
+      "frequency": 2
+    },
+    {
+      "topic": "Stopping potential and photoelectric graphs",
+      "frequency": 2
+    },
+    {
+      "topic": "de Broglie wavelength",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Photon concept and quantum nature of radiation",
+      "priority": 3
+    },
+    {
+      "topic": "Photoelectric effect",
+      "priority": 3
+    },
+    {
+      "topic": "Einstein's photoelectric equation",
+      "priority": 3
+    },
+    {
+      "topic": "Stopping potential and photoelectric graphs",
+      "priority": 3
+    },
+    {
+      "topic": "de Broglie wavelength",
+      "priority": 2
+    },
+    {
+      "topic": "Davisson-Germer experiment",
+      "priority": 2
+    },
+    {
+      "topic": "Bohr model of hydrogen atom",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Photon concept and quantum nature of radiation without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Photoelectric effect without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing photon concept and quantum nature of radiation or photoelectric effect before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "E=hν=hc/λ",
+    "K_max=hν-φ=eV₀",
+    "λ=h/p=h/(mv)",
+    "λ(Å)=12.27/√V for electron",
+    "r_n=n²a₀/Z",
+    "E_n=-13.6Z²/n² eV"
+  ]
+}

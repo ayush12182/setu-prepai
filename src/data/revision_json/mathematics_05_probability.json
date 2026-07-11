@@ -1,0 +1,176 @@
+{
+  "chapterTitle": "Probability",
+  "subject": "Mathematics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Probability is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine random experiments with sample space and events.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Probability",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "random experiments",
+        "children": [
+          "sample space and events",
+          "classical probability",
+          "addition theorem"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "conditional probability",
+        "children": [
+          "multiplication theorem",
+          "independent events",
+          "Bayes theorem"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "total probability",
+        "children": [
+          "Bernoulli trials",
+          "binomial distribution",
+          "random variable basics"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "expectation and variance",
+        "children": []
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "P(A)=n(A)/n(S)",
+      "meaning": "Core relation for random experiments.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "P(A∪B)=P(A)+P(B)-P(A∩B)",
+      "meaning": "Core relation for sample space and events.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "P(A|B)=P(A∩B)/P(B)",
+      "meaning": "Core relation for classical probability.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "P(A∩B)=P(A)P(B|A)",
+      "meaning": "Core relation for addition theorem.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "P(X=r)=nC_r p^r q^(n-r)",
+      "meaning": "Core relation for conditional probability.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "E(X)=np",
+      "meaning": "Core relation for multiplication theorem.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Var(X)=npq",
+      "meaning": "Core relation for independent events.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "random experiments",
+      "frequency": 3
+    },
+    {
+      "topic": "sample space and events",
+      "frequency": 3
+    },
+    {
+      "topic": "classical probability",
+      "frequency": 2
+    },
+    {
+      "topic": "addition theorem",
+      "frequency": 2
+    },
+    {
+      "topic": "conditional probability",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "random experiments",
+      "priority": 3
+    },
+    {
+      "topic": "sample space and events",
+      "priority": 3
+    },
+    {
+      "topic": "classical probability",
+      "priority": 3
+    },
+    {
+      "topic": "addition theorem",
+      "priority": 3
+    },
+    {
+      "topic": "conditional probability",
+      "priority": 2
+    },
+    {
+      "topic": "multiplication theorem",
+      "priority": 2
+    },
+    {
+      "topic": "independent events",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from random experiments without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising sample space and events without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing random experiments or sample space and events before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "P(A)=n(A)/n(S)",
+    "P(A∪B)=P(A)+P(B)-P(A∩B)",
+    "P(A|B)=P(A∩B)/P(B)",
+    "P(A∩B)=P(A)P(B|A)",
+    "P(X=r)=nC_r p^r q^(n-r)",
+    "E(X)=np"
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "chapterTitle": "Chemical Kinetics",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Chemical Kinetics is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine reaction rate with rate law.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Chemical Kinetics",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "reaction rate",
+        "children": [
+          "rate law",
+          "order"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "molecularity",
+        "children": [
+          "zero order",
+          "first order"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "second order",
+        "children": [
+          "half-life",
+          "Arrhenius equation"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "activation energy",
+        "children": [
+          "catalysis"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "rate=k[A]^m[B]^n",
+      "meaning": "Core relation for reaction rate.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "[A]_t=[A]_0-kt",
+      "meaning": "Core relation for rate law.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ln([A]_0/[A]_t)=kt",
+      "meaning": "Core relation for order.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "t_1/2=0.693/k",
+      "meaning": "Core relation for molecularity.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "k=Ae^(-E_a/RT)",
+      "meaning": "Core relation for zero order.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "reaction rate",
+      "frequency": 3
+    },
+    {
+      "topic": "rate law",
+      "frequency": 3
+    },
+    {
+      "topic": "order",
+      "frequency": 2
+    },
+    {
+      "topic": "molecularity",
+      "frequency": 2
+    },
+    {
+      "topic": "zero order",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "reaction rate",
+      "priority": 3
+    },
+    {
+      "topic": "rate law",
+      "priority": 3
+    },
+    {
+      "topic": "order",
+      "priority": 3
+    },
+    {
+      "topic": "molecularity",
+      "priority": 3
+    },
+    {
+      "topic": "zero order",
+      "priority": 2
+    },
+    {
+      "topic": "first order",
+      "priority": 2
+    },
+    {
+      "topic": "second order",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from reaction rate without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising rate law without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing reaction rate or rate law before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "rate=k[A]^m[B]^n",
+    "[A]_t=[A]_0-kt",
+    "ln([A]_0/[A]_t)=kt",
+    "t_1/2=0.693/k",
+    "k=Ae^(-E_a/RT)"
+  ]
+}

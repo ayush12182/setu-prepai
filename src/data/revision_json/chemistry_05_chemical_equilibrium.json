@@ -1,0 +1,164 @@
+{
+  "chapterTitle": "Chemical Equilibrium",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Chemical Equilibrium is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine dynamic equilibrium with kc.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Chemical Equilibrium",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "dynamic equilibrium",
+        "children": [
+          "Kc",
+          "Kp"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "reaction quotient",
+        "children": [
+          "Le Chatelier principle",
+          "acids and bases"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "pH",
+        "children": [
+          "buffers",
+          "hydrolysis"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "common ion effect",
+        "children": [
+          "Ksp"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "K_p=K_c(RT)^Δn",
+      "meaning": "Core relation for dynamic equilibrium.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "K_w=[H⁺][OH⁻]",
+      "meaning": "Core relation for Kc.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "pH=-log[H⁺]",
+      "meaning": "Core relation for Kp.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "K_aK_b=K_w",
+      "meaning": "Core relation for reaction quotient.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "pH=pK_a+log([salt]/[acid])",
+      "meaning": "Core relation for Le Chatelier principle.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "dynamic equilibrium",
+      "frequency": 3
+    },
+    {
+      "topic": "Kc",
+      "frequency": 3
+    },
+    {
+      "topic": "Kp",
+      "frequency": 2
+    },
+    {
+      "topic": "reaction quotient",
+      "frequency": 2
+    },
+    {
+      "topic": "Le Chatelier principle",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "dynamic equilibrium",
+      "priority": 3
+    },
+    {
+      "topic": "Kc",
+      "priority": 3
+    },
+    {
+      "topic": "Kp",
+      "priority": 3
+    },
+    {
+      "topic": "reaction quotient",
+      "priority": 3
+    },
+    {
+      "topic": "Le Chatelier principle",
+      "priority": 2
+    },
+    {
+      "topic": "acids and bases",
+      "priority": 2
+    },
+    {
+      "topic": "pH",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from dynamic equilibrium without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Kc without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing dynamic equilibrium or kc before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "K_p=K_c(RT)^Δn",
+    "K_w=[H⁺][OH⁻]",
+    "pH=-log[H⁺]",
+    "K_aK_b=K_w",
+    "pH=pK_a+log([salt]/[acid])"
+  ]
+}

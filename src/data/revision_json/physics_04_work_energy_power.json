@@ -1,0 +1,167 @@
+{
+  "chapterTitle": "Work, Energy & Power",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Work, Energy & Power is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine work with kinetic energy.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Work, Energy & Power",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Work",
+        "children": [
+          "Kinetic energy"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Work-energy theorem",
+        "children": [
+          "Potential energy"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Conservative forces",
+        "children": [
+          "Power"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Spring energy",
+        "children": [
+          "Collisions and energy"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "W=\\int\\vec F\\cdot d\\vec r",
+      "meaning": "Core relation for Work.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "K=\\frac12mv^2",
+      "meaning": "Core relation for Kinetic energy.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "W_{net}=\\Delta K",
+      "meaning": "Core relation for Work-energy theorem.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "U_g=mgh",
+      "meaning": "Core relation for Potential energy.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "U_s=\\frac12kx^2",
+      "meaning": "Core relation for Conservative forces.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "P=\\frac{dW}{dt}=\\vec F\\cdot\\vec v",
+      "meaning": "Core relation for Power.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Work",
+      "frequency": 3
+    },
+    {
+      "topic": "Kinetic energy",
+      "frequency": 3
+    },
+    {
+      "topic": "Work-energy theorem",
+      "frequency": 2
+    },
+    {
+      "topic": "Potential energy",
+      "frequency": 2
+    },
+    {
+      "topic": "Conservative forces",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Work",
+      "priority": 3
+    },
+    {
+      "topic": "Kinetic energy",
+      "priority": 3
+    },
+    {
+      "topic": "Work-energy theorem",
+      "priority": 3
+    },
+    {
+      "topic": "Potential energy",
+      "priority": 3
+    },
+    {
+      "topic": "Conservative forces",
+      "priority": 2
+    },
+    {
+      "topic": "Power",
+      "priority": 2
+    },
+    {
+      "topic": "Spring energy",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Work without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Kinetic energy without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing work or kinetic energy before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "W=\\int\\vec F\\cdot d\\vec r",
+    "K=\\frac12mv^2",
+    "W_{net}=\\Delta K",
+    "U_g=mgh",
+    "U_s=\\frac12kx^2",
+    "P=\\frac{dW}{dt}=\\vec F\\cdot\\vec v"
+  ]
+}

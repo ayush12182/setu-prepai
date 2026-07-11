@@ -1,0 +1,171 @@
+{
+  "chapterTitle": "Differentiation",
+  "subject": "Mathematics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Differentiation is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine derivative from first principle with standard derivatives.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Differentiation",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "derivative from first principle",
+        "children": [
+          "standard derivatives",
+          "product rule"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "quotient rule",
+        "children": [
+          "chain rule",
+          "implicit differentiation"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "logarithmic differentiation",
+        "children": [
+          "parametric differentiation",
+          "higher-order derivatives"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "derivatives of inverse trigonometric functions",
+        "children": [
+          "derivatives of exponential and logarithmic functions",
+          "Leibniz theorem basics"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "d(x^n)/dx=nx^(n-1)",
+      "meaning": "Core relation for derivative from first principle.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "d(uv)/dx=u'v+uv'",
+      "meaning": "Core relation for standard derivatives.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "d(u/v)/dx=(vu'-uv')/v²",
+      "meaning": "Core relation for product rule.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "dy/dx=(dy/dt)/(dx/dt)",
+      "meaning": "Core relation for quotient rule.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "d(lnx)/dx=1/x",
+      "meaning": "Core relation for chain rule.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "d(e^x)/dx=e^x",
+      "meaning": "Core relation for implicit differentiation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "derivative from first principle",
+      "frequency": 3
+    },
+    {
+      "topic": "standard derivatives",
+      "frequency": 3
+    },
+    {
+      "topic": "product rule",
+      "frequency": 2
+    },
+    {
+      "topic": "quotient rule",
+      "frequency": 2
+    },
+    {
+      "topic": "chain rule",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "derivative from first principle",
+      "priority": 3
+    },
+    {
+      "topic": "standard derivatives",
+      "priority": 3
+    },
+    {
+      "topic": "product rule",
+      "priority": 3
+    },
+    {
+      "topic": "quotient rule",
+      "priority": 3
+    },
+    {
+      "topic": "chain rule",
+      "priority": 2
+    },
+    {
+      "topic": "implicit differentiation",
+      "priority": 2
+    },
+    {
+      "topic": "logarithmic differentiation",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from derivative from first principle without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising standard derivatives without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing derivative from first principle or standard derivatives before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "d(x^n)/dx=nx^(n-1)",
+    "d(uv)/dx=u'v+uv'",
+    "d(u/v)/dx=(vu'-uv')/v²",
+    "dy/dx=(dy/dt)/(dx/dt)",
+    "d(lnx)/dx=1/x",
+    "d(e^x)/dx=e^x"
+  ]
+}

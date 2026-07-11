@@ -10,15 +10,26 @@ interface Edge {
   to: string;
 }
 
-export const ConceptMapRenderer: React.FC<{ data: { nodes: Node[], edges: Edge[] } }> = ({ data }) => {
-  if (!data || !data.nodes) return null;
+export const ConceptMapRenderer: React.FC<{ data: { nodes: any[], edges?: Edge[] } }> = ({ data }) => {
+  if (!data || !data.nodes || data.nodes.length === 0) return null;
 
-  // Extremely basic tree renderer assuming a central root node (usually the first one)
   const rootNode = data.nodes[0];
   if (!rootNode) return null;
 
-  const childEdges = data.edges.filter(e => e.from === rootNode.id);
-  const children = childEdges.map(e => data.nodes.find(n => n.id === e.to)).filter(Boolean) as Node[];
+  // Build edges if the JSON uses the 'children' string array instead of an edges array
+  let edges = data.edges || [];
+  if (edges.length === 0) {
+    data.nodes.forEach(node => {
+      if (node.children && Array.isArray(node.children)) {
+        node.children.forEach((childId: string) => {
+          edges.push({ from: node.id, to: childId });
+        });
+      }
+    });
+  }
+
+  const childEdges = edges.filter(e => e.from === rootNode.id);
+  const children = childEdges.map(e => data.nodes.find(n => n.id === e.to)).filter(Boolean) as any[];
 
   return (
     <div className="flex flex-col items-center justify-center py-4 relative">
@@ -47,8 +58,8 @@ export const ConceptMapRenderer: React.FC<{ data: { nodes: Node[], edges: Edge[]
             <div className="flex w-full justify-between px-4 z-10 gap-2">
               {children.map((child, i) => {
                 // Find grandchildren
-                const grandChildEdges = data.edges.filter(e => e.from === child.id);
-                const grandChildren = grandChildEdges.map(e => data.nodes.find(n => n.id === e.to)).filter(Boolean) as Node[];
+                const grandChildEdges = edges.filter(e => e.from === child.id);
+                const grandChildren = grandChildEdges.map(e => data.nodes.find(n => n.id === e.to)).filter(Boolean) as any[];
 
                 return (
                   <div key={child.id} className="flex flex-col items-center flex-1">

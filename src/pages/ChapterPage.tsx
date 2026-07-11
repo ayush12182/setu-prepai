@@ -54,14 +54,14 @@ const ChapterPage: React.FC = () => {
             onClick={() => {
               document.getElementById('topics-section')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="action-learn flex flex-col items-center justify-center gap-3 p-6 rounded-2xl"
+            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-300"
           >
-            <div className="w-12 h-12 rounded-full bg-blue-500/25 flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-blue-400" />
+            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-blue-600" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-white">Learn</p>
-              <p className="text-xs text-blue-300/80">Read topics</p>
+              <p className="font-extrabold text-slate-900 dark:text-white">Learn</p>
+              <p className="text-xs font-medium text-slate-500 mt-1">Read topics</p>
             </div>
           </motion.button>
 
@@ -69,14 +69,14 @@ const ChapterPage: React.FC = () => {
             whileHover={{ y: -5 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate(`/chapter/${chapter.id}/notes`)}
-            className="action-learn flex flex-col items-center justify-center gap-3 p-6 rounded-2xl"
+            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-300"
           >
-            <div className="w-12 h-12 rounded-full bg-blue-500/25 flex items-center justify-center">
-              <FileText className="w-6 h-6 text-blue-400" />
+            <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-emerald-600" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-white">Notes</p>
-              <p className="text-xs text-blue-300/80">Quick revision</p>
+              <p className="font-extrabold text-slate-900 dark:text-white">Notes</p>
+              <p className="text-xs font-medium text-slate-500 mt-1">Quick revision</p>
             </div>
           </motion.button>
 
@@ -84,14 +84,14 @@ const ChapterPage: React.FC = () => {
             whileHover={{ y: -5 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate(`/practice?chapter=${chapter.id}`)}
-            className="action-practice flex flex-col items-center justify-center gap-3 p-6 rounded-2xl"
+            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-300"
           >
-            <div className="w-12 h-12 rounded-full bg-purple-500/25 flex items-center justify-center">
-              <PenTool className="w-6 h-6 text-purple-400" />
+            <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center">
+              <PenTool className="w-6 h-6 text-purple-600" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-white">Practice</p>
-              <p className="text-xs text-purple-300/80">Solve MCQs</p>
+              <p className="font-extrabold text-slate-900 dark:text-white">Practice</p>
+              <p className="text-xs font-medium text-slate-500 mt-1">Solve MCQs</p>
             </div>
           </motion.button>
 
@@ -99,14 +99,14 @@ const ChapterPage: React.FC = () => {
             whileHover={{ y: -5 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate(`/test?chapter=${chapter.id}`)}
-            className="action-test flex flex-col items-center justify-center gap-3 p-6 rounded-2xl"
+            className="flex flex-col items-center justify-center gap-3 p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-md hover:border-primary/40 transition-all duration-300"
           >
-            <div className="w-12 h-12 rounded-full bg-orange-500/25 flex items-center justify-center">
-              <CheckSquare className="w-6 h-6 text-orange-400" />
+            <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center">
+              <CheckSquare className="w-6 h-6 text-orange-600" />
             </div>
             <div className="text-center">
-              <p className="font-semibold text-white">Test</p>
-              <p className="text-xs text-orange-300/80">Assess yourself</p>
+              <p className="font-extrabold text-slate-900 dark:text-white">Test</p>
+              <p className="text-xs font-medium text-slate-500 mt-1">Assess yourself</p>
             </div>
           </motion.button>
         </div>

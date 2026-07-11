@@ -1,0 +1,167 @@
+{
+  "chapterTitle": "Gravitation",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Gravitation is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine newton's law of gravitation with gravitational field.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Gravitation",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Newton's law of gravitation",
+        "children": [
+          "Gravitational field",
+          "Potential"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Potential energy",
+        "children": [
+          "Acceleration due to gravity",
+          "Satellites"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Orbital velocity",
+        "children": [
+          "Escape velocity",
+          "Kepler's laws"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "F=\\frac{GMm}{r^2}",
+      "meaning": "Core relation for Newton's law of gravitation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "g=\\frac{GM}{r^2}",
+      "meaning": "Core relation for Gravitational field.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "V=-\\frac{GM}{r}",
+      "meaning": "Core relation for Potential.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "U=-\\frac{GMm}{r}",
+      "meaning": "Core relation for Potential energy.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "v_o=\\sqrt{\\frac{GM}{r}}",
+      "meaning": "Core relation for Acceleration due to gravity.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "v_e=\\sqrt{\\frac{2GM}{R}}",
+      "meaning": "Core relation for Satellites.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "T^2\\propto r^3",
+      "meaning": "Core relation for Orbital velocity.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Newton's law of gravitation",
+      "frequency": 3
+    },
+    {
+      "topic": "Gravitational field",
+      "frequency": 3
+    },
+    {
+      "topic": "Potential",
+      "frequency": 2
+    },
+    {
+      "topic": "Potential energy",
+      "frequency": 2
+    },
+    {
+      "topic": "Acceleration due to gravity",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Newton's law of gravitation",
+      "priority": 3
+    },
+    {
+      "topic": "Gravitational field",
+      "priority": 3
+    },
+    {
+      "topic": "Potential",
+      "priority": 3
+    },
+    {
+      "topic": "Potential energy",
+      "priority": 3
+    },
+    {
+      "topic": "Acceleration due to gravity",
+      "priority": 2
+    },
+    {
+      "topic": "Satellites",
+      "priority": 2
+    },
+    {
+      "topic": "Orbital velocity",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Newton's law of gravitation without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Gravitational field without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing newton's law of gravitation or gravitational field before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "F=\\frac{GMm}{r^2}",
+    "g=\\frac{GM}{r^2}",
+    "V=-\\frac{GM}{r}",
+    "U=-\\frac{GMm}{r}",
+    "v_o=\\sqrt{\\frac{GM}{r}}",
+    "v_e=\\sqrt{\\frac{2GM}{R}}"
+  ]
+}

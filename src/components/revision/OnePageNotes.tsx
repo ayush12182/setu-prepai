@@ -159,111 +159,23 @@ const OnePageNotes: React.FC<OnePageNotesProps> = ({ onBack }) => {
     setNotesJson(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-      const token = session?.access_token || anonKey;
-
-      // READ-ONLY: Fetch published notes from permanent content repository
-      // Students NEVER call generate-notes — only get-chapter-content
-      const params = new URLSearchParams({
-        chapterId: chapter.id,
-        examType: isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE',
-        language: language || 'english',
-      });
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-chapter-content?${params}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'apikey': anonKey,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          toast.info('Notes for this chapter are being prepared by our expert faculty. Check back soon!');
-          setIsGeneratingNotes(false);
-          setSelectedChapter(null);
-          return;
-        }
-        throw new Error('Failed to fetch notes');
-      }
-
-      const responseData = await response.json();
-
-      if (responseData.success && responseData.data) {
-        let parsedNotes = responseData.data;
-        // The edge function returns the full database row. The JSON for OnePageNotes is stored in revision_notes.
-        if (responseData.data.revision_notes) {
-          parsedNotes = typeof responseData.data.revision_notes === 'string' 
-            ? JSON.parse(responseData.data.revision_notes) 
-            : responseData.data.revision_notes;
-        } else if (responseData.data.raw_content) {
-          try { parsedNotes = JSON.parse(responseData.data.raw_content); } catch (e) {}
-        }
-        setNotesJson(parsedNotes);
+      // Load directly from the new JSON registry
+      const { getRevisionData } = await import('@/data/revision_json/registry');
+      const data = await getRevisionData(chapter.subject, chapter.id);
+      
+      if (data) {
+        setNotesJson(data);
       } else {
-        throw new Error('Invalid data received');
+        toast.error('Notes are not available yet. Our team is preparing them.');
+        setSelectedChapter(null);
       }
     } catch (error) {
       console.error(`Error fetching notes:`, error);
-      toast.error('Notes are not available yet. Our team is preparing them.');
+      toast.error('Failed to load revision notes.');
       setSelectedChapter(null);
     } finally {
       setIsGeneratingNotes(false);
     }
-  };
-
-
-  const generateFallbackNotes = (chapter: Chapter): string => {
-    const formattedFormulas = chapter.keyFormulas.map(f => f.replace(/=/g, ' = '));
-    const examName = isCuet ? 'CUET' : isNeet ? 'NEET' : 'JEE';
-
-    let subjectContext = '';
-    if (isCuet) {
-      subjectContext = `NCERT Class 12 based chapter. ${examName} mein direct definitions aur facts se questions aate hain. Focus on key terms and concepts.`;
-    } else if (chapter.subject === 'physics') {
-      subjectContext = `Yeh chapter physics ke core concepts cover karta hai. ${examName} mein direct questions aate hain, especially numerical type.`;
-    } else if (chapter.subject === 'chemistry') {
-      subjectContext = `Is chapter mein important reactions aur concepts hain jo ${examName} mein regularly pooche jaate hain.`;
-    } else if (chapter.subject === 'maths') {
-      subjectContext = 'Mathematics ka yeh chapter problem solving ke liye bahut important hai. Formulas yaad karo aur practice karo.';
-    } else {
-      subjectContext = `Yeh chapter biology ka foundation hai. ${examName} mein line-by-line NCERT se questions aate hain.`;
-    }
-
-    return `${chapter.name.toUpperCase()}
-
-What this chapter is about
-${subjectContext}
-
-Chapter syllabus (exam-oriented)
-${chapter.topics.map(t => `- ${t}`).join('\n')}
-
-What ${examName} actually asks from this chapter
-Post-2020 mein ${chapter.pyqData.postCovid} questions aaye hain is chapter se. Trending concepts: ${chapter.pyqData.trendingConcepts.join(', ')}.
-
-Core ideas you must remember
-${chapter.topics.slice(0, 5).map(t => `- ${t} ka basic concept samjho`).join('\n')}
-
-Key formulas / Concepts
-${formattedFormulas.length > 0 ? formattedFormulas.map(f => `- ${f}`).join('\n') : 'No specific formulas. Focus on definitions and diagrams.'}
-
-Common mistakes students make
-${chapter.examTips.map(t => `- ${t}`).join('\n')}
-
-PYQ focus (Post-COVID priority)
-- 2020-2025: ${chapter.pyqData.postCovid} questions (HIGH PRIORITY)
-- Total questions: ${chapter.pyqData.total}
-- Focus areas: ${chapter.pyqData.trendingConcepts.join(', ')}
-
-How to revise in last 24 hours
-1. Pehle saare concepts ek baar likh ke dekho
-2. Previous years ke questions solve karo
-3. Common mistakes wali list dekh lo
-
-Beta, itna clear ho gaya na? Ab practice karo, bas wahi exam hai.`;
   };
 
   const renderNotes = (content: string) => { return null; } // Deprecated text rendering

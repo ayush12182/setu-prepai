@@ -1,0 +1,171 @@
+{
+  "chapterTitle": "Coordinate Geometry",
+  "subject": "Mathematics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Coordinate Geometry is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine distance and section formula with locus.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Coordinate Geometry",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "distance and section formula",
+        "children": [
+          "locus",
+          "straight lines",
+          "slope and angle between lines"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "distance from point to line",
+        "children": [
+          "family of lines",
+          "circle",
+          "tangent and normal to circle"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "parabola",
+        "children": [
+          "ellipse",
+          "hyperbola",
+          "chord and tangent concepts"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "pair of straight lines basics",
+        "children": []
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "distance=√[(x₂-x₁)²+(y₂-y₁)²]",
+      "meaning": "Core relation for distance and section formula.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "m=(y₂-y₁)/(x₂-x₁)",
+      "meaning": "Core relation for locus.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "tanθ=|(m₂-m₁)/(1+m₁m₂)|",
+      "meaning": "Core relation for straight lines.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "distance point-line=|ax₁+by₁+c|/√(a²+b²)",
+      "meaning": "Core relation for slope and angle between lines.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "circle: x²+y²+2gx+2fy+c=0",
+      "meaning": "Core relation for distance from point to line.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "parabola: y²=4ax",
+      "meaning": "Core relation for family of lines.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "distance and section formula",
+      "frequency": 3
+    },
+    {
+      "topic": "locus",
+      "frequency": 3
+    },
+    {
+      "topic": "straight lines",
+      "frequency": 2
+    },
+    {
+      "topic": "slope and angle between lines",
+      "frequency": 2
+    },
+    {
+      "topic": "distance from point to line",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "distance and section formula",
+      "priority": 3
+    },
+    {
+      "topic": "locus",
+      "priority": 3
+    },
+    {
+      "topic": "straight lines",
+      "priority": 3
+    },
+    {
+      "topic": "slope and angle between lines",
+      "priority": 3
+    },
+    {
+      "topic": "distance from point to line",
+      "priority": 2
+    },
+    {
+      "topic": "family of lines",
+      "priority": 2
+    },
+    {
+      "topic": "circle",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from distance and section formula without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising locus without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing distance and section formula or locus before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "distance=√[(x₂-x₁)²+(y₂-y₁)²]",
+    "m=(y₂-y₁)/(x₂-x₁)",
+    "tanθ=|(m₂-m₁)/(1+m₁m₂)|",
+    "distance point-line=|ax₁+by₁+c|/√(a²+b²)",
+    "circle: x²+y²+2gx+2fy+c=0",
+    "parabola: y²=4ax"
+  ]
+}

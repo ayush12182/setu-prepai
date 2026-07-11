@@ -1,0 +1,193 @@
+{
+  "chapterTitle": "Thermodynamics",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Thermodynamics is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine thermal equilibrium and zeroth law with state variables and equation of state.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Thermodynamics",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Thermal equilibrium and zeroth law",
+        "children": [
+          "State variables and equation of state",
+          "Heat work and internal energy",
+          "First law of thermodynamics"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Thermodynamic processes",
+        "children": [
+          "Isothermal process",
+          "Adiabatic process",
+          "Isochoric and isobaric processes"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "PV diagrams",
+        "children": [
+          "Heat capacities",
+          "Mayer's relation",
+          "Reversible and irreversible processes"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Heat engines",
+        "children": [
+          "Carnot engine"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "ΔQ=ΔU+ΔW",
+      "meaning": "Core relation for Thermal equilibrium and zeroth law.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "W=∫P dV",
+      "meaning": "Core relation for State variables and equation of state.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "PV=nRT",
+      "meaning": "Core relation for Heat work and internal energy.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "C_p-C_v=R",
+      "meaning": "Core relation for First law of thermodynamics.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "γ=C_p/C_v",
+      "meaning": "Core relation for Thermodynamic processes.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "PV^γ=constant",
+      "meaning": "Core relation for Isothermal process.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "TV^(γ-1)=constant",
+      "meaning": "Core relation for Adiabatic process.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "η=W/Q_H",
+      "meaning": "Core relation for Isochoric and isobaric processes.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "η_Carnot=1-T_C/T_H",
+      "meaning": "Core relation for PV diagrams.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "COP_R=Q_C/W",
+      "meaning": "Core relation for Heat capacities.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Thermal equilibrium and zeroth law",
+      "frequency": 3
+    },
+    {
+      "topic": "State variables and equation of state",
+      "frequency": 3
+    },
+    {
+      "topic": "Heat work and internal energy",
+      "frequency": 2
+    },
+    {
+      "topic": "First law of thermodynamics",
+      "frequency": 2
+    },
+    {
+      "topic": "Thermodynamic processes",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Thermal equilibrium and zeroth law",
+      "priority": 3
+    },
+    {
+      "topic": "State variables and equation of state",
+      "priority": 3
+    },
+    {
+      "topic": "Heat work and internal energy",
+      "priority": 3
+    },
+    {
+      "topic": "First law of thermodynamics",
+      "priority": 3
+    },
+    {
+      "topic": "Thermodynamic processes",
+      "priority": 2
+    },
+    {
+      "topic": "Isothermal process",
+      "priority": 2
+    },
+    {
+      "topic": "Adiabatic process",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Thermal equilibrium and zeroth law without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising State variables and equation of state without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing thermal equilibrium and zeroth law or state variables and equation of state before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "ΔQ=ΔU+ΔW",
+    "W=∫P dV",
+    "PV=nRT",
+    "C_p-C_v=R",
+    "γ=C_p/C_v",
+    "PV^γ=constant"
+  ]
+}

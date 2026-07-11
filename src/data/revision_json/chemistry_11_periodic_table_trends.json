@@ -1,0 +1,155 @@
+{
+  "chapterTitle": "Periodic Table & Trends",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Periodic Table & Trends is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine modern periodic law with blocks.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Periodic Table & Trends",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "modern periodic law",
+        "children": [
+          "blocks",
+          "effective nuclear charge",
+          "shielding"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "atomic radius",
+        "children": [
+          "ionic radius",
+          "ionisation enthalpy",
+          "electron gain enthalpy"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "electronegativity",
+        "children": [
+          "metallic character",
+          "oxidation states",
+          "diagonal relationship"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "inert pair effect",
+        "children": [
+          "anomalies and oxide character"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "Z_eff=Z-S",
+      "meaning": "Core relation for modern periodic law.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "cation radius < atom",
+      "meaning": "Core relation for blocks.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "anion radius > atom",
+      "meaning": "Core relation for effective nuclear charge.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "modern periodic law",
+      "frequency": 3
+    },
+    {
+      "topic": "blocks",
+      "frequency": 3
+    },
+    {
+      "topic": "effective nuclear charge",
+      "frequency": 2
+    },
+    {
+      "topic": "shielding",
+      "frequency": 2
+    },
+    {
+      "topic": "atomic radius",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "modern periodic law",
+      "priority": 3
+    },
+    {
+      "topic": "blocks",
+      "priority": 3
+    },
+    {
+      "topic": "effective nuclear charge",
+      "priority": 3
+    },
+    {
+      "topic": "shielding",
+      "priority": 3
+    },
+    {
+      "topic": "atomic radius",
+      "priority": 2
+    },
+    {
+      "topic": "ionic radius",
+      "priority": 2
+    },
+    {
+      "topic": "ionisation enthalpy",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from modern periodic law without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising blocks without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing modern periodic law or blocks before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "Z_eff=Z-S",
+    "cation radius < atom",
+    "anion radius > atom"
+  ]
+}

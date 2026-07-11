@@ -1,0 +1,193 @@
+{
+  "chapterTitle": "Shm & Waves",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Shm & Waves is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine periodic and oscillatory motion with simple harmonic motion.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Shm & Waves",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Periodic and oscillatory motion",
+        "children": [
+          "Simple harmonic motion",
+          "SHM differential equation",
+          "Displacement velocity and acceleration"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Phase and phasor representation",
+        "children": [
+          "Energy in SHM",
+          "Spring-mass systems",
+          "Simple pendulum"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Combination of springs",
+        "children": [
+          "Superposition of SHMs",
+          "Wave motion",
+          "Progressive wave equation"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Wave speed",
+        "children": [
+          "Principle of superposition"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "x=Acos(ωt+φ)",
+      "meaning": "Core relation for Periodic and oscillatory motion.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "a=-ω²x",
+      "meaning": "Core relation for Simple harmonic motion.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "v=±ω√(A²-x²)",
+      "meaning": "Core relation for SHM differential equation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "T=2π/ω",
+      "meaning": "Core relation for Displacement velocity and acceleration.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "E=½mω²A²",
+      "meaning": "Core relation for Phase and phasor representation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "T_spring=2π√(m/k)",
+      "meaning": "Core relation for Energy in SHM.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "T_pendulum=2π√(l/g)",
+      "meaning": "Core relation for Spring-mass systems.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "y=Asin(kx-ωt+φ)",
+      "meaning": "Core relation for Simple pendulum.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "v=νλ=ω/k",
+      "meaning": "Core relation for Combination of springs.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "f_beats=|f₁-f₂|",
+      "meaning": "Core relation for Superposition of SHMs.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Periodic and oscillatory motion",
+      "frequency": 3
+    },
+    {
+      "topic": "Simple harmonic motion",
+      "frequency": 3
+    },
+    {
+      "topic": "SHM differential equation",
+      "frequency": 2
+    },
+    {
+      "topic": "Displacement velocity and acceleration",
+      "frequency": 2
+    },
+    {
+      "topic": "Phase and phasor representation",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Periodic and oscillatory motion",
+      "priority": 3
+    },
+    {
+      "topic": "Simple harmonic motion",
+      "priority": 3
+    },
+    {
+      "topic": "SHM differential equation",
+      "priority": 3
+    },
+    {
+      "topic": "Displacement velocity and acceleration",
+      "priority": 3
+    },
+    {
+      "topic": "Phase and phasor representation",
+      "priority": 2
+    },
+    {
+      "topic": "Energy in SHM",
+      "priority": 2
+    },
+    {
+      "topic": "Spring-mass systems",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Periodic and oscillatory motion without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Simple harmonic motion without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing periodic and oscillatory motion or simple harmonic motion before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "x=Acos(ωt+φ)",
+    "a=-ω²x",
+    "v=±ω√(A²-x²)",
+    "T=2π/ω",
+    "E=½mω²A²",
+    "T_spring=2π√(m/k)"
+  ]
+}

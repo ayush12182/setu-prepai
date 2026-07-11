@@ -1,0 +1,167 @@
+{
+  "chapterTitle": "Electrochemistry",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Electrochemistry is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine redox with galvanic cells.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Electrochemistry",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "redox",
+        "children": [
+          "galvanic cells",
+          "cell notation",
+          "electrode potential"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "SHE",
+        "children": [
+          "Nernst equation",
+          "conductance",
+          "conductivity"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "molar conductivity",
+        "children": [
+          "Kohlrausch law",
+          "electrolysis",
+          "Faraday laws"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "batteries",
+        "children": [
+          "corrosion"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "E_cell=E_cathode-E_anode",
+      "meaning": "Core relation for redox.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "E=E°-(0.0591/n)logQ",
+      "meaning": "Core relation for galvanic cells.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ΔG=-nFE",
+      "meaning": "Core relation for cell notation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "κ=G(l/A)",
+      "meaning": "Core relation for electrode potential.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Λ_m=κ×1000/C",
+      "meaning": "Core relation for SHE.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "redox",
+      "frequency": 3
+    },
+    {
+      "topic": "galvanic cells",
+      "frequency": 3
+    },
+    {
+      "topic": "cell notation",
+      "frequency": 2
+    },
+    {
+      "topic": "electrode potential",
+      "frequency": 2
+    },
+    {
+      "topic": "SHE",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "redox",
+      "priority": 3
+    },
+    {
+      "topic": "galvanic cells",
+      "priority": 3
+    },
+    {
+      "topic": "cell notation",
+      "priority": 3
+    },
+    {
+      "topic": "electrode potential",
+      "priority": 3
+    },
+    {
+      "topic": "SHE",
+      "priority": 2
+    },
+    {
+      "topic": "Nernst equation",
+      "priority": 2
+    },
+    {
+      "topic": "conductance",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from redox without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising galvanic cells without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing redox or galvanic cells before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "E_cell=E_cathode-E_anode",
+    "E=E°-(0.0591/n)logQ",
+    "ΔG=-nFE",
+    "κ=G(l/A)",
+    "Λ_m=κ×1000/C"
+  ]
+}

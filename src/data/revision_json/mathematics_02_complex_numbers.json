@@ -1,0 +1,171 @@
+{
+  "chapterTitle": "Complex Numbers",
+  "subject": "Mathematics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Complex Numbers is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine imaginary unit and complex numbers with algebra of complex numbers.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Complex Numbers",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "imaginary unit and complex numbers",
+        "children": [
+          "algebra of complex numbers",
+          "conjugate"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "modulus and argument",
+        "children": [
+          "Argand plane",
+          "polar form"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Euler form",
+        "children": [
+          "De Moivre theorem",
+          "powers and roots"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "cube roots of unity",
+        "children": [
+          "locus problems",
+          "geometry with complex numbers"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "i²=-1",
+      "meaning": "Core relation for imaginary unit and complex numbers.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "z=x+iy",
+      "meaning": "Core relation for algebra of complex numbers.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "|z|=√(x²+y²)",
+      "meaning": "Core relation for conjugate.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "z z̄=|z|²",
+      "meaning": "Core relation for modulus and argument.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "z=r(cosθ+i sinθ)",
+      "meaning": "Core relation for Argand plane.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "z^n=r^n(cos nθ+i sin nθ)",
+      "meaning": "Core relation for polar form.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "imaginary unit and complex numbers",
+      "frequency": 3
+    },
+    {
+      "topic": "algebra of complex numbers",
+      "frequency": 3
+    },
+    {
+      "topic": "conjugate",
+      "frequency": 2
+    },
+    {
+      "topic": "modulus and argument",
+      "frequency": 2
+    },
+    {
+      "topic": "Argand plane",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "imaginary unit and complex numbers",
+      "priority": 3
+    },
+    {
+      "topic": "algebra of complex numbers",
+      "priority": 3
+    },
+    {
+      "topic": "conjugate",
+      "priority": 3
+    },
+    {
+      "topic": "modulus and argument",
+      "priority": 3
+    },
+    {
+      "topic": "Argand plane",
+      "priority": 2
+    },
+    {
+      "topic": "polar form",
+      "priority": 2
+    },
+    {
+      "topic": "Euler form",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from imaginary unit and complex numbers without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising algebra of complex numbers without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing imaginary unit and complex numbers or algebra of complex numbers before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "i²=-1",
+    "z=x+iy",
+    "|z|=√(x²+y²)",
+    "z z̄=|z|²",
+    "z=r(cosθ+i sinθ)",
+    "z^n=r^n(cos nθ+i sin nθ)"
+  ]
+}

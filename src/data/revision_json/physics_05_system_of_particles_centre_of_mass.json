@@ -1,0 +1,161 @@
+{
+  "chapterTitle": "System of Particles & Centre of Mass",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "System of Particles & Centre of Mass is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine centre of mass with com of discrete systems.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "System of Particles & Centre of Mass",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Centre of mass",
+        "children": [
+          "COM of discrete systems"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "COM of continuous bodies",
+        "children": [
+          "Motion of COM"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Linear momentum",
+        "children": [
+          "Impulse"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Conservation of momentum",
+        "children": [
+          "Collisions"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "\\vec R=\\frac{\\sum m_i\\vec r_i}{\\sum m_i}",
+      "meaning": "Core relation for Centre of mass.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "\\vec V_{CM}=\\frac{\\sum m_i\\vec v_i}{M}",
+      "meaning": "Core relation for COM of discrete systems.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "\\vec P=M\\vec V_{CM}",
+      "meaning": "Core relation for COM of continuous bodies.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "\\vec F_{ext}=M\\vec a_{CM}",
+      "meaning": "Core relation for Motion of COM.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "e=\\frac{v_2-v_1}{u_1-u_2}",
+      "meaning": "Core relation for Linear momentum.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Centre of mass",
+      "frequency": 3
+    },
+    {
+      "topic": "COM of discrete systems",
+      "frequency": 3
+    },
+    {
+      "topic": "COM of continuous bodies",
+      "frequency": 2
+    },
+    {
+      "topic": "Motion of COM",
+      "frequency": 2
+    },
+    {
+      "topic": "Linear momentum",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Centre of mass",
+      "priority": 3
+    },
+    {
+      "topic": "COM of discrete systems",
+      "priority": 3
+    },
+    {
+      "topic": "COM of continuous bodies",
+      "priority": 3
+    },
+    {
+      "topic": "Motion of COM",
+      "priority": 3
+    },
+    {
+      "topic": "Linear momentum",
+      "priority": 2
+    },
+    {
+      "topic": "Impulse",
+      "priority": 2
+    },
+    {
+      "topic": "Conservation of momentum",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Centre of mass without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising COM of discrete systems without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing centre of mass or com of discrete systems before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "\\vec R=\\frac{\\sum m_i\\vec r_i}{\\sum m_i}",
+    "\\vec V_{CM}=\\frac{\\sum m_i\\vec v_i}{M}",
+    "\\vec P=M\\vec V_{CM}",
+    "\\vec F_{ext}=M\\vec a_{CM}",
+    "e=\\frac{v_2-v_1}{u_1-u_2}"
+  ]
+}

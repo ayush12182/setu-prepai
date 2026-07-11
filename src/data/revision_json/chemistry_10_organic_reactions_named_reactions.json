@@ -1,0 +1,161 @@
+{
+  "chapterTitle": "Organic Reactions & Named Reactions",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Organic Reactions & Named Reactions is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine sn1 with sn2.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Organic Reactions & Named Reactions",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "SN1",
+        "children": [
+          "SN2",
+          "E1",
+          "E2"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "alcohols",
+        "children": [
+          "phenols",
+          "ethers",
+          "carbonyls"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "carboxylic acids",
+        "children": [
+          "amines",
+          "diazonium salts",
+          "Aldol"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Cannizzaro",
+        "children": [
+          "Clemmensen"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "SN1 rate=k[RX]",
+      "meaning": "Core relation for SN1.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "SN2 rate=k[RX][Nu⁻]",
+      "meaning": "Core relation for SN2.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Aldol requires α-H",
+      "meaning": "Core relation for E1.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Hofmann bromamide shortens carbon chain by one",
+      "meaning": "Core relation for E2.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "SN1",
+      "frequency": 3
+    },
+    {
+      "topic": "SN2",
+      "frequency": 3
+    },
+    {
+      "topic": "E1",
+      "frequency": 2
+    },
+    {
+      "topic": "E2",
+      "frequency": 2
+    },
+    {
+      "topic": "alcohols",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "SN1",
+      "priority": 3
+    },
+    {
+      "topic": "SN2",
+      "priority": 3
+    },
+    {
+      "topic": "E1",
+      "priority": 3
+    },
+    {
+      "topic": "E2",
+      "priority": 3
+    },
+    {
+      "topic": "alcohols",
+      "priority": 2
+    },
+    {
+      "topic": "phenols",
+      "priority": 2
+    },
+    {
+      "topic": "ethers",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from SN1 without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising SN2 without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing sn1 or sn2 before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "SN1 rate=k[RX]",
+    "SN2 rate=k[RX][Nu⁻]",
+    "Aldol requires α-H",
+    "Hofmann bromamide shortens carbon chain by one"
+  ]
+}

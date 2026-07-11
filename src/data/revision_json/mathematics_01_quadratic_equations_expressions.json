@@ -1,0 +1,165 @@
+{
+  "chapterTitle": "Quadratic Equations & Expressions",
+  "subject": "Mathematics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Quadratic Equations & Expressions is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine quadratic expressions and equations with nature of roots.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Quadratic Equations & Expressions",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "quadratic expressions and equations",
+        "children": [
+          "nature of roots",
+          "discriminant"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "relation between roots and coefficients",
+        "children": [
+          "formation of quadratic equation",
+          "common roots"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "location of roots",
+        "children": [
+          "range of quadratic expression",
+          "sign of quadratic expression"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "maximum and minimum value",
+        "children": [
+          "quadratic inequalities",
+          "transformation of roots"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "D=b²-4ac",
+      "meaning": "Core relation for quadratic expressions and equations.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "α+β=-b/a",
+      "meaning": "Core relation for nature of roots.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "αβ=c/a",
+      "meaning": "Core relation for discriminant.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "x=(-b±√D)/(2a)",
+      "meaning": "Core relation for relation between roots and coefficients.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "f(x)=a(x+h)²+k",
+      "meaning": "Core relation for formation of quadratic equation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "quadratic expressions and equations",
+      "frequency": 3
+    },
+    {
+      "topic": "nature of roots",
+      "frequency": 3
+    },
+    {
+      "topic": "discriminant",
+      "frequency": 2
+    },
+    {
+      "topic": "relation between roots and coefficients",
+      "frequency": 2
+    },
+    {
+      "topic": "formation of quadratic equation",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "quadratic expressions and equations",
+      "priority": 3
+    },
+    {
+      "topic": "nature of roots",
+      "priority": 3
+    },
+    {
+      "topic": "discriminant",
+      "priority": 3
+    },
+    {
+      "topic": "relation between roots and coefficients",
+      "priority": 3
+    },
+    {
+      "topic": "formation of quadratic equation",
+      "priority": 2
+    },
+    {
+      "topic": "common roots",
+      "priority": 2
+    },
+    {
+      "topic": "location of roots",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from quadratic expressions and equations without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising nature of roots without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing quadratic expressions and equations or nature of roots before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "D=b²-4ac",
+    "α+β=-b/a",
+    "αβ=c/a",
+    "x=(-b±√D)/(2a)",
+    "f(x)=a(x+h)²+k"
+  ]
+}

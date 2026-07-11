@@ -1,0 +1,165 @@
+{
+  "chapterTitle": "Hydrocarbons",
+  "subject": "Chemistry",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Hydrocarbons is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine alkanes with radical halogenation.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Hydrocarbons",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "alkanes",
+        "children": [
+          "radical halogenation",
+          "conformations",
+          "alkenes"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "electrophilic addition",
+        "children": [
+          "Markovnikov rule",
+          "peroxide effect",
+          "ozonolysis"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "alkynes",
+        "children": [
+          "aromaticity",
+          "benzene",
+          "EAS"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "directive effects",
+        "children": []
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "Alkane C_nH_(2n+2)",
+      "meaning": "Core relation for alkanes.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Alkene C_nH_(2n)",
+      "meaning": "Core relation for radical halogenation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Alkyne C_nH_(2n-2)",
+      "meaning": "Core relation for conformations.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "DBE=(2C+2+N-H-X)/2",
+      "meaning": "Core relation for alkenes.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "aromatic systems follow Hückel 4n+2 rule",
+      "meaning": "Core relation for electrophilic addition.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "alkanes",
+      "frequency": 3
+    },
+    {
+      "topic": "radical halogenation",
+      "frequency": 3
+    },
+    {
+      "topic": "conformations",
+      "frequency": 2
+    },
+    {
+      "topic": "alkenes",
+      "frequency": 2
+    },
+    {
+      "topic": "electrophilic addition",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "alkanes",
+      "priority": 3
+    },
+    {
+      "topic": "radical halogenation",
+      "priority": 3
+    },
+    {
+      "topic": "conformations",
+      "priority": 3
+    },
+    {
+      "topic": "alkenes",
+      "priority": 3
+    },
+    {
+      "topic": "electrophilic addition",
+      "priority": 2
+    },
+    {
+      "topic": "Markovnikov rule",
+      "priority": 2
+    },
+    {
+      "topic": "peroxide effect",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from alkanes without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising radical halogenation without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing alkanes or radical halogenation before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "Alkane C_nH_(2n+2)",
+    "Alkene C_nH_(2n)",
+    "Alkyne C_nH_(2n-2)",
+    "DBE=(2C+2+N-H-X)/2",
+    "aromatic systems follow Hückel 4n+2 rule"
+  ]
+}

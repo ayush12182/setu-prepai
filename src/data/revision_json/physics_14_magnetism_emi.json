@@ -1,0 +1,193 @@
+{
+  "chapterTitle": "Magnetism & Emi",
+  "subject": "Physics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Magnetism & Emi is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine magnetic field and lorentz force with motion of charged particle in magnetic field.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Magnetism & Emi",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "Magnetic field and Lorentz force",
+        "children": [
+          "Motion of charged particle in magnetic field",
+          "Cyclotron",
+          "Biot-Savart law"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "Magnetic field due to current",
+        "children": [
+          "Ampere's circuital law",
+          "Force between parallel currents",
+          "Force and torque on current loop"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "Moving coil galvanometer",
+        "children": [
+          "Bar magnet and magnetic dipole",
+          "Earth's magnetism",
+          "Magnetic materials"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "Magnetic flux",
+        "children": [
+          "Faraday's laws"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "F=q(v×B)",
+      "meaning": "Core relation for Magnetic field and Lorentz force.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "r=mv/(qB)",
+      "meaning": "Core relation for Motion of charged particle in magnetic field.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ω=qB/m",
+      "meaning": "Core relation for Cyclotron.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "dB=(μ₀/4π)I(dl×r̂)/r²",
+      "meaning": "Core relation for Biot-Savart law.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "B_wire=μ₀I/(2πr)",
+      "meaning": "Core relation for Magnetic field due to current.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "F/L=μ₀I₁I₂/(2πd)",
+      "meaning": "Core relation for Ampere's circuital law.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "τ=m×B",
+      "meaning": "Core relation for Force between parallel currents.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "m=NIA",
+      "meaning": "Core relation for Force and torque on current loop.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "Φ_B=∫B·dA",
+      "meaning": "Core relation for Moving coil galvanometer.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "ε=-dΦ_B/dt",
+      "meaning": "Core relation for Bar magnet and magnetic dipole.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "Magnetic field and Lorentz force",
+      "frequency": 3
+    },
+    {
+      "topic": "Motion of charged particle in magnetic field",
+      "frequency": 3
+    },
+    {
+      "topic": "Cyclotron",
+      "frequency": 2
+    },
+    {
+      "topic": "Biot-Savart law",
+      "frequency": 2
+    },
+    {
+      "topic": "Magnetic field due to current",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "Magnetic field and Lorentz force",
+      "priority": 3
+    },
+    {
+      "topic": "Motion of charged particle in magnetic field",
+      "priority": 3
+    },
+    {
+      "topic": "Cyclotron",
+      "priority": 3
+    },
+    {
+      "topic": "Biot-Savart law",
+      "priority": 3
+    },
+    {
+      "topic": "Magnetic field due to current",
+      "priority": 2
+    },
+    {
+      "topic": "Ampere's circuital law",
+      "priority": 2
+    },
+    {
+      "topic": "Force between parallel currents",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from Magnetic field and Lorentz force without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising Motion of charged particle in magnetic field without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing magnetic field and lorentz force or motion of charged particle in magnetic field before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "F=q(v×B)",
+    "r=mv/(qB)",
+    "ω=qB/m",
+    "dB=(μ₀/4π)I(dl×r̂)/r²",
+    "B_wire=μ₀I/(2πr)",
+    "F/L=μ₀I₁I₂/(2πd)"
+  ]
+}

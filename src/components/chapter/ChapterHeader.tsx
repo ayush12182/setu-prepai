@@ -100,7 +100,7 @@ export const ChapterHeader: React.FC<ChapterHeaderProps> = ({ chapter, subchapte
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
               {chapter.name}
             </h1>
 

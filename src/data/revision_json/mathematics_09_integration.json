@@ -1,0 +1,165 @@
+{
+  "chapterTitle": "Integration",
+  "subject": "Mathematics",
+  "classLevel": "JEE Class 11/12",
+  "jeeWeightage": "High",
+  "expectedQuestions": "1–2",
+  "revisionTime": "15 Mins",
+  "whyChapterMatters": [
+    "Integration is a recurring JEE chapter where concept recognition directly affects speed and accuracy.",
+    "Questions commonly combine integration as inverse differentiation with standard integrals.",
+    "Strong command of standard results reduces avoidable algebra and calculation errors."
+  ],
+  "conceptMap": {
+    "nodes": [
+      {
+        "id": "root",
+        "label": "Integration",
+        "children": [
+          "branch-1",
+          "branch-2",
+          "branch-3",
+          "branch-4"
+        ]
+      },
+      {
+        "id": "branch-1",
+        "label": "integration as inverse differentiation",
+        "children": [
+          "standard integrals",
+          "substitution"
+        ]
+      },
+      {
+        "id": "branch-2",
+        "label": "integration by parts",
+        "children": [
+          "partial fractions",
+          "trigonometric integrals"
+        ]
+      },
+      {
+        "id": "branch-3",
+        "label": "special algebraic forms",
+        "children": [
+          "definite integration",
+          "properties of definite integrals"
+        ]
+      },
+      {
+        "id": "branch-4",
+        "label": "fundamental theorem of calculus",
+        "children": [
+          "area under curves",
+          "reduction patterns"
+        ]
+      }
+    ]
+  },
+  "keyFormulas": [
+    {
+      "formula": "∫x^n dx=x^(n+1)/(n+1)+C",
+      "meaning": "Core relation for integration as inverse differentiation.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "∫f'(x)/f(x)dx=ln|f(x)|+C",
+      "meaning": "Core relation for standard integrals.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "∫u dv=uv-∫v du",
+      "meaning": "Core relation for substitution.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "∫_a^b f(x)dx=-∫_b^a f(x)dx",
+      "meaning": "Core relation for integration by parts.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    },
+    {
+      "formula": "∫_a^b f(x)dx=∫_a^b f(a+b-x)dx",
+      "meaning": "Core relation for partial fractions.",
+      "condition": "Use only after checking the assumptions and variable definitions."
+    }
+  ],
+  "pyqTrends": [
+    {
+      "topic": "integration as inverse differentiation",
+      "frequency": 3
+    },
+    {
+      "topic": "standard integrals",
+      "frequency": 3
+    },
+    {
+      "topic": "substitution",
+      "frequency": 2
+    },
+    {
+      "topic": "integration by parts",
+      "frequency": 2
+    },
+    {
+      "topic": "partial fractions",
+      "frequency": 2
+    }
+  ],
+  "highYieldTopics": [
+    {
+      "topic": "integration as inverse differentiation",
+      "priority": 3
+    },
+    {
+      "topic": "standard integrals",
+      "priority": 3
+    },
+    {
+      "topic": "substitution",
+      "priority": 3
+    },
+    {
+      "topic": "integration by parts",
+      "priority": 3
+    },
+    {
+      "topic": "partial fractions",
+      "priority": 2
+    },
+    {
+      "topic": "trigonometric integrals",
+      "priority": 2
+    },
+    {
+      "topic": "special algebraic forms",
+      "priority": 2
+    }
+  ],
+  "commonMistakes": [
+    "Using a standard result from integration as inverse differentiation without checking its conditions.",
+    "Skipping domain, sign, unit, charge, or boundary checks before finalising the answer.",
+    "Memorising standard integrals without understanding the governing principle.",
+    "Substituting numerical values too early and losing the structure of the problem."
+  ],
+  "kotaFacultyTricks": [
+    {
+      "title": "First 20 Seconds",
+      "content": "Identify whether the question is primarily testing integration as inverse differentiation or standard integrals before writing equations."
+    },
+    {
+      "title": "Exam Strategy",
+      "content": "Write the governing relation first, preserve the symbolic form, and apply restrictions before substitution."
+    },
+    {
+      "title": "Final Check",
+      "content": "Use a quick sign, unit, limiting-case, or structural check before marking the answer."
+    }
+  ],
+  "quickFormulaBox": [
+    "∫x^n dx=x^(n+1)/(n+1)+C",
+    "∫f'(x)/f(x)dx=ln|f(x)|+C",
+    "∫u dv=uv-∫v du",
+    "∫_a^b f(x)dx=-∫_b^a f(x)dx",
+    "∫_a^b f(x)dx=∫_a^b f(a+b-x)dx"
+  ]
+}
