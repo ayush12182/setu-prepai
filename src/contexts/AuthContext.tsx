@@ -172,6 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user_type: dbData?.user_type || meta.user_type || null,
         organization_id: dbData?.organization_id || meta.organization_id || null,
         teacher_id: dbData?.teacher_id || null,
+        onboarding_completed: dbData?.onboarding_completed || meta.onboarding_completed || false,
       };
 
       // 3. Fetch Mentor Details if linked
@@ -185,6 +186,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (mentor) {
           profileData.mentor_name = mentor.full_name;
           profileData.mentor_avatar = mentor.avatar_url;
+        }
+      }
+
+      // 4. Fallback: check student_profiles for onboarding_completed if falsy
+      if (!profileData.onboarding_completed) {
+        const { data: spData } = await supabase
+          .from('student_profiles')
+          .select('onboarding_completed')
+          .eq('student_id', userId)
+          .maybeSingle();
+        
+        if (spData?.onboarding_completed) {
+          profileData.onboarding_completed = true;
+          // Sync it back to metadata to avoid future DB hits if possible
+          supabase.auth.updateUser({ data: { onboarding_completed: true } }).catch(() => {});
         }
       }
 

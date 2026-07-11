@@ -102,7 +102,13 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
       else if (stream === 'neet') setExamMode('neet');
 
       // Update auth metadata
-      await supabase.auth.updateUser({ data: { target_exam: examGoal, user_type: 'student' } });
+      await supabase.auth.updateUser({ 
+        data: { 
+          target_exam: examGoal, 
+          user_type: 'student',
+          onboarding_completed: true 
+        } 
+      });
 
       // Update profiles
       await updateProfile({
