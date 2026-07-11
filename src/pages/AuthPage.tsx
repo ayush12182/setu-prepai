@@ -101,7 +101,10 @@ const AuthPage: React.FC = () => {
       if (showOnboarding || showWelcome) return;
 
       if (profile) {
-        if (profile.class) {
+        // Onboarding is complete if the student has set their target exam.
+        // Previously this checked profile.class which caused Google Auth users
+        // (who never went through class selection) to get stuck in an infinite loop.
+        if (profile.target_exam) {
           navigate('/student-hub', { replace: true });
           return;
         } else {
@@ -117,6 +120,7 @@ const AuthPage: React.FC = () => {
       }
     }
   }, [user, profile, authLoading, profileLoading, navigate, showOnboarding, showWelcome]);
+
 
   const validateEmail = (value: string) => {
     try { 

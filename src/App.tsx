@@ -20,8 +20,6 @@ import NotFound from "./pages/NotFound";
 import PricingPage from "./pages/PricingPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
-import BatchesPage from "./pages/BatchesPage";
-import BatchDetailPage from "./pages/BatchDetailPage";
 
 // ─── Lazily loaded (large pages — split into separate chunks) ──
 const StudentHubPage = lazy(() => import("./pages/StudentHubPage"));
@@ -115,9 +113,9 @@ const App = () => (
                         <Route path="/auth" element={<AuthPage />} />
                         <Route path="/login" element={<Navigate to="/auth?mode=login" replace />} />
                         <Route path="/signup" element={<Navigate to="/auth?mode=signup" replace />} />
-                        {/* Batch pages */}
-                        <Route path="/batches" element={<BatchesPage />} />
-                        <Route path="/batches/:slug" element={<BatchDetailPage />} />
+                        {/* Batch pages redirected to pricing */}
+                        <Route path="/batches" element={<Navigate to="/pricing" replace />} />
+                        <Route path="/batches/:slug" element={<Navigate to="/pricing" replace />} />
                         <Route path="/select-exam" element={<Navigate to="/auth" replace />} />
                         <Route path="/dashboard" element={<Navigate to="/student-hub" replace />} />
                         <Route path="/platform-updated" element={<Navigate to="/student-hub" replace />} />
@@ -192,35 +190,38 @@ const App = () => (
                         <Route path="/contact" element={<ContactPage />} />
 
                         {/* ─── PrepEntrance v2 — Public Exam Prep Hub ──────────────── */}
-                        {/* /hub → default to JEE Class 11 */}
-                        <Route path="/hub" element={<Navigate to="/jee/class-11" replace />} />
+                        {/* /hub → default to JEE */}
+                        <Route path="/hub" element={<Navigate to="/jee" replace />} />
 
-                        {/* Exam shortcuts */}
-                        <Route path="/jee" element={<Navigate to="/jee/class-11" replace />} />
-                        <Route path="/neet" element={<Navigate to="/neet/class-11" replace />} />
-                        <Route path="/cuet" element={<Navigate to="/cuet/class-12" replace />} />
+                        {/* Exam Hubs */}
+                        <Route path="/jee" element={<ExamHubPage />} />
+                        <Route path="/neet" element={<ExamHubPage />} />
+                        <Route path="/cuet" element={<ExamHubPage />} />
+                        
+                        {/* Exam Resource Categories */}
+                        <Route path="/jee/:category" element={<ResourceCategoryPage />} />
+                        <Route path="/neet/:category" element={<ResourceCategoryPage />} />
+                        <Route path="/cuet/:category" element={<ResourceCategoryPage />} />
 
-                        {/* JEE */}
-                        <Route path="/jee/class-11" element={<ExamHubPage />} />
-                        <Route path="/jee/class-12" element={<ExamHubPage />} />
-                        <Route path="/jee/droppers" element={<ExamHubPage />} />
-                        <Route path="/jee/class-11/:category" element={<ResourceCategoryPage />} />
-                        <Route path="/jee/class-12/:category" element={<ResourceCategoryPage />} />
-                        <Route path="/jee/droppers/:category" element={<ResourceCategoryPage />} />
+                        {/* Legacy redirects for old class-based URLs */}
+                        <Route path="/jee/class-11" element={<Navigate to="/jee" replace />} />
+                        <Route path="/jee/class-12" element={<Navigate to="/jee" replace />} />
+                        <Route path="/jee/droppers" element={<Navigate to="/jee" replace />} />
+                        <Route path="/jee/class-11/:category" element={<Navigate to="/jee" replace />} />
+                        <Route path="/jee/class-12/:category" element={<Navigate to="/jee" replace />} />
+                        <Route path="/jee/droppers/:category" element={<Navigate to="/jee" replace />} />
+                        
+                        <Route path="/neet/class-11" element={<Navigate to="/neet" replace />} />
+                        <Route path="/neet/class-12" element={<Navigate to="/neet" replace />} />
+                        <Route path="/neet/droppers" element={<Navigate to="/neet" replace />} />
+                        <Route path="/neet/class-11/:category" element={<Navigate to="/neet" replace />} />
+                        <Route path="/neet/class-12/:category" element={<Navigate to="/neet" replace />} />
+                        <Route path="/neet/droppers/:category" element={<Navigate to="/neet" replace />} />
 
-                        {/* NEET */}
-                        <Route path="/neet/class-11" element={<ExamHubPage />} />
-                        <Route path="/neet/class-12" element={<ExamHubPage />} />
-                        <Route path="/neet/droppers" element={<ExamHubPage />} />
-                        <Route path="/neet/class-11/:category" element={<ResourceCategoryPage />} />
-                        <Route path="/neet/class-12/:category" element={<ResourceCategoryPage />} />
-                        <Route path="/neet/droppers/:category" element={<ResourceCategoryPage />} />
-
-                        {/* CUET */}
-                        <Route path="/cuet/class-12" element={<ExamHubPage />} />
-                        <Route path="/cuet/droppers" element={<ExamHubPage />} />
-                        <Route path="/cuet/class-12/:category" element={<ResourceCategoryPage />} />
-                        <Route path="/cuet/droppers/:category" element={<ResourceCategoryPage />} />
+                        <Route path="/cuet/class-12" element={<Navigate to="/cuet" replace />} />
+                        <Route path="/cuet/droppers" element={<Navigate to="/cuet" replace />} />
+                        <Route path="/cuet/class-12/:category" element={<Navigate to="/cuet" replace />} />
+                        <Route path="/cuet/droppers/:category" element={<Navigate to="/cuet" replace />} />
 
                         <Route path="*" element={<NotFound />} />
                       </Routes>

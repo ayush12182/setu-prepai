@@ -11,83 +11,10 @@ import { EXAM_META, type Exam, type ClassLevel } from '@/types/hub';
 import { ResourceCard } from '@/components/hub/ResourceCard';
 
 // Helper to parse URL params
-function parseParams(exam?: string, cls?: string): { exam: Exam; cls: ClassLevel } {
+function parseParams(exam?: string): { exam: Exam } {
   const validExam = (s?: string): Exam =>
     s === 'neet' ? 'neet' : s === 'cuet' ? 'cuet' : 'jee';
-  const parseClass = (s?: string): ClassLevel => {
-    if (s === 'class-12') return '12';
-    if (s === 'droppers') return 'dropper';
-    return '11';
-  };
-  return { exam: validExam(exam), cls: parseClass(cls) };
-}
-
-// Helper to get cohort details dynamically
-function getCohortDetails(exam: Exam, cls: ClassLevel): { name: string; tag: string; slug: string } {
-  const isJee = exam === 'jee';
-  const isNeet = exam === 'neet';
-  
-  if (isJee) {
-    if (cls === '11') {
-      return {
-        name: 'AARAMBH 2028',
-        tag: 'Class 11 Students • JEE Main & Advanced',
-        slug: 'aarambh-2028'
-      };
-    } else if (cls === '12') {
-      return {
-        name: 'AAROHAN 2027',
-        tag: 'Class 12 Students • JEE Main & Advanced',
-        slug: 'aarohan-2027'
-      };
-    } else {
-      return {
-        name: 'SHIKHAR 2027',
-        tag: 'JEE Droppers • High-Intensity Prep',
-        slug: 'shikhar-2027'
-      };
-    }
-  } else if (isNeet) {
-    if (cls === '11') {
-      return {
-        name: 'AARAMBH NEET 2028',
-        tag: 'Class 11 NEET Aspirants • Fundamentals',
-        slug: 'aarambh-neet-2028'
-      };
-    } else if (cls === '12') {
-      return {
-        name: 'AAROHAN NEET 2027',
-        tag: 'Class 12 NEET Aspirants • Rank Booster',
-        slug: 'aarohan-neet-2027'
-      };
-    } else {
-      return {
-        name: 'SHIKHAR NEET 2027',
-        tag: 'NEET Droppers • Focus Batch',
-        slug: 'shikhar-neet-2027'
-      };
-    }
-  } else { // cuet
-    if (cls === '11') {
-      return {
-        name: 'AARAMBH CUET 2028',
-        tag: 'Class 11 CUET Aspirants • Foundation',
-        slug: 'aarambh-cuet-2028'
-      };
-    } else if (cls === '12') {
-      return {
-        name: 'AAROHAN CUET 2027',
-        tag: 'Class 12 CUET Aspirants • Domain + GT + English',
-        slug: 'aarohan-cuet-2027'
-      };
-    } else {
-      return {
-        name: 'SHIKHAR CUET 2027',
-        tag: 'CUET Droppers • High-Intensity Prep',
-        slug: 'shikhar-cuet-2027'
-      };
-    }
-  }
+  return { exam: validExam(exam) };
 }
 
 // Exam Details Copy mapping
@@ -132,27 +59,23 @@ const ExamHubPage: React.FC = () => {
   const pathname = window.location.pathname;
   const parts = pathname.split('/').filter(Boolean);
   const examParam = parts[0];
-  const classParam = parts[1] || (examParam === 'cuet' ? 'class-12' : 'class-11');
   
-  const { exam, cls } = parseParams(examParam, classParam);
+  const { exam } = parseParams(examParam);
   const { user } = useAuth();
 
   const details = EXAM_DETAILS[exam];
   const meta = EXAM_META[exam];
-  const cohort = getCohortDetails(exam, cls);
 
   const [activeSubject, setActiveSubject] = useState('');
 
   React.useEffect(() => {
     const examLabel = exam === 'jee' ? 'IIT JEE' : exam === 'neet' ? 'NEET UG' : 'CUET';
-    const classLabel = cls === '11' ? 'Class 11' : cls === '12' ? 'Class 12' : 'Droppers';
-    document.title = `${examLabel} ${classLabel} Preparation Hub | PrepEntrance`;
-  }, [exam, cls]);
+    document.title = `${examLabel} Preparation Hub | PrepEntrance`;
+  }, [exam]);
   const [search, setSearch] = useState('');
 
   const { resources, loading } = useResources({
     exam,
-    class: cls,
     subject: activeSubject || undefined,
     search: search || undefined,
   });
@@ -166,16 +89,7 @@ const ExamHubPage: React.FC = () => {
     { key: 'cuet', label: 'CUET (UG)' },
   ];
 
-  // Cohort Class filter
-  const classFilter = [
-    { key: 'class-11', label: 'Class 11' },
-    { key: 'class-12', label: 'Class 12' },
-    { key: 'droppers', label: 'Droppers' },
-  ];
-
-  const handleClassChange = (newCls: string) => {
-    navigate(`/${exam}/${newCls}`);
-  };
+  // Removed classFilter
 
   const handleView = (r: any) => {
     if (r.content_url) window.open(r.content_url, '_blank');
@@ -257,10 +171,10 @@ const ExamHubPage: React.FC = () => {
               <div className="flex-1 space-y-4 z-10">
                 <div>
                   <span className={`inline-block text-[10px] font-black uppercase tracking-widest text-white px-2 py-0.5 rounded ${details.badgeBg}`}>
-                    PrepEntrance Cohort
+                    PrepEntrance Pro
                   </span>
-                  <h3 className="text-2xl font-black mt-2 tracking-tight">{cohort.name}</h3>
-                  <p className="text-xs font-bold text-white/80">{cohort.tag}</p>
+                  <h3 className="text-2xl font-black mt-2 tracking-tight">Premium Access</h3>
+                  <p className="text-xs font-bold text-white/80">Complete Syllabus • All Subjects</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs font-semibold">
@@ -278,10 +192,10 @@ const ExamHubPage: React.FC = () => {
                     <span className="text-[10px] font-bold opacity-80 ml-0.5">/month</span>
                   </div>
                   <button 
-                    onClick={() => navigate(`/batches/${cohort.slug}`)}
+                    onClick={() => navigate(`/pricing`)}
                     className="px-5 py-2.5 bg-white text-slate-900 hover:bg-slate-100 font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
                   >
-                    Explore Batch <ArrowRight className="w-4 h-4" />
+                    View Plans <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -378,24 +292,7 @@ const ExamHubPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
               <h2 className="text-xl font-black text-slate-900">Free PDF Bank & Study Materials</h2>
-              <p className="text-xs font-semibold text-slate-500 mt-1">Select class and filters to explore dynamic resources</p>
-            </div>
-
-            {/* Class tabs switcher */}
-            <div className="flex bg-slate-100 p-1 rounded-xl">
-              {classFilter.map((cf) => (
-                <button
-                  key={cf.key}
-                  onClick={() => handleClassChange(cf.key)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    classParam === cf.key
-                      ? 'bg-white text-slate-900 shadow-sm'
-                      : 'text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  {cf.label}
-                </button>
-              ))}
+              <p className="text-xs font-semibold text-slate-500 mt-1">Explore dynamic resources</p>
             </div>
           </div>
 

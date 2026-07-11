@@ -15,6 +15,12 @@ export interface QuestionGeneratorParams {
   count: number;
   variantOf?: string;
   excludeQuestionIds?: string[];
+  /**
+   * Per-chapter question cap derived from the student's subscription tier.
+   * Set by useQuestionEntitlement.getLimit() before calling generateQuestions.
+   * If not provided, the edge function defaults to its own safe limit.
+   */
+  chapterQuestionLimit?: number;
 }
 
 export interface TelemetryEvent {
@@ -139,7 +145,9 @@ export async function generateQuestions(
         subchapterName: params.chapter,
         difficulty: params.difficulty,
         count: params.count,
-        excludeQuestionIds: params.excludeQuestionIds
+        excludeQuestionIds: params.excludeQuestionIds,
+        // Subscription-based per-chapter limit: enforces balanced entitlement
+        chapterQuestionLimit: params.chapterQuestionLimit,
       }
     });
 

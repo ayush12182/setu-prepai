@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LandingNav from '@/components/landing/LandingNav';
+import PricingSection from '@/components/landing/PricingSection';
 import { Button } from '@/components/ui/button';
 import {
   Check, Shield, Zap, Sparkles, Brain, Users, Target, HelpCircle, ChevronDown, ChevronUp, AlertCircle
@@ -94,69 +95,8 @@ export const PricingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. THE SINGLE PRICING CARD */}
-      <section className="py-16 bg-white border-b border-slate-100 relative">
-        <div className="max-w-5xl mx-auto px-6 lg:px-8">
-          
-          <div className="bg-slate-950 border border-slate-850 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden max-w-2xl mx-auto text-slate-100">
-            {/* Top right gradient accent */}
-            <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            
-            <div className="absolute top-0 right-8 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-b-xl shadow-lg">
-              Official Plan
-            </div>
-
-            <div className="relative z-10 space-y-8">
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-white flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-yellow-400" /> PrepEntrance Pro
-                </h3>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider">Unrestricted access to all tools</p>
-              </div>
-
-              <div className="flex items-baseline gap-2 border-b border-slate-900 pb-6">
-                <span className="text-5xl font-black text-white">₹349</span>
-                <span className="text-slate-500 font-bold">/month</span>
-              </div>
-
-              <div className="space-y-4">
-                <p className="text-xs font-black uppercase text-slate-400 tracking-wider">Features Included:</p>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[
-                    "24/7 AI Academic Mentor",
-                    "Unlimited Practice Questions",
-                    "JEE, NEET & CUET Mocks",
-                    "Personalized Daily Study Plans",
-                    "Deep Performance Analytics",
-                    "Weak Chapter Re-attempts",
-                    "Commune Focus Rooms",
-                    "Progress Tracking"
-                  ].map((feat, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs font-semibold text-slate-300">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      {feat}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="space-y-4 pt-4">
-                <button
-                  onClick={() => handleCheckout(349)}
-                  disabled={isProcessing}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4.5 rounded-xl transition-all shadow-lg shadow-blue-500/20 text-sm tracking-wide active:scale-98 disabled:opacity-50"
-                >
-                  {isProcessing ? 'Initializing Secured Gateway...' : 'Get Started for ₹349/month'} 🚀
-                </button>
-                <div className="flex items-center justify-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                  <Shield className="w-4 h-4" /> Secured Transaction via Cashfree Payments
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
+      {/* 2. THE PRICING PLANS */}
+      <PricingSection />
 
       {/* 3. COMPARISON TABLE */}
       <section className="py-20 bg-slate-50 border-b border-slate-100">

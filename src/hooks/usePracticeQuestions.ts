@@ -10,6 +10,7 @@ import { generateQuestions as getUnifiedQuestions } from '@/services/questionGen
 import { getOfflineQuestions } from '@/data/offlineQuestionBank';
 import { mapMockChapterIdToReal, classifyQuestion } from '@/utils/chapterClassifier';
 import { trackQuestionAttempt } from '@/utils/activityTracker';
+import { getChapterQuestionLimit, resolveSubscriptionTier } from '@/hooks/useQuestionEntitlement';
 
 // The interface expected by QuizInterface components
 export type QuestionType = 'MCQ' | 'AR' | 'NUMERICAL';
@@ -422,6 +423,17 @@ export const usePracticeQuestions = () => {
 
       const rawChapterId = nodeId.split('-').slice(0, 2).join('-');
       const realChapterId = mapMockChapterIdToReal(rawChapterId);
+
+      // ─── Subscription Entitlement ───────────────────────────────────────
+      // Resolve the student's plan tier and compute the per-chapter question cap
+      // so question access is balanced across all chapters (not just first N rows).
+      const rawTier =
+        localStorage.getItem('subscription_tier') ||
+        localStorage.getItem('batch_id');
+      const tier = resolveSubscriptionTier(rawTier);
+      const chapterQuestionLimit = getChapterQuestionLimit(tier, exam);
+      // ─────────────────────────────────────────────────────────────────────
+
       const result = await getUnifiedQuestions({
         exam,
         subject: subject || exam,
@@ -430,7 +442,8 @@ export const usePracticeQuestions = () => {
         subchapter: nodeId,
         difficulty: effectiveDifficulty,
         count,
-        excludeQuestionIds
+        excludeQuestionIds,
+        chapterQuestionLimit,  // ← enforces balanced subscription cap
       });
 
       const mapped = result.questions.map((q: any) => shuffleQuestionOptions(q));

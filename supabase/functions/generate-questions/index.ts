@@ -290,13 +290,22 @@ serve(async (req) => {
       difficulty,
       count = 10,
       excludeIds = [],
-      excludeQuestionIds = []
+      excludeQuestionIds = [],
+      // Subscription-based per-chapter cap (set by useQuestionEntitlement)
+      chapterQuestionLimit,
     } = body;
 
     const examStr = examMode || "JEE";
     const chapterCode = chapterId || "phy-1";
     const difficultyStr = difficulty || "medium";
     const finalExcludeIds = [...excludeIds, ...excludeQuestionIds];
+
+    // Compute the effective DB fetch limit:
+    // Use the client-supplied chapterQuestionLimit if provided, otherwise
+    // default to a generous fetch (5x count) so the session builder has enough pool.
+    const effectiveDbLimit = chapterQuestionLimit
+      ? Math.min(chapterQuestionLimit, Math.max(count * 5, 150))
+      : Math.max(count * 5, 150);
 
     if (!examStr || !subject || !chapterCode || !difficultyStr) {
       return new Response(JSON.stringify({ error: "Missing required parameters", body }), {
@@ -319,7 +328,7 @@ serve(async (req) => {
       .in('exam_type', examTypes)
       .eq('chapter_id', chapterCode)
       .eq('difficulty', difficultyStr.toLowerCase())
-      .limit(Math.max(count * 5, 150));
+      .limit(effectiveDbLimit);
 
 
     if (dbError) {

@@ -128,7 +128,7 @@ const FormulaCard: React.FC<{
   const [showDerivation, setShowDerivation] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(equation.trim());
+    navigator.clipboard.writeText(equation?.trim() || '');
     setCopied(true);
     toast.success(`Copied: ${title || 'Formula'}`);
     setTimeout(() => setCopied(false), 2000);
@@ -745,7 +745,10 @@ const ChapterNotesPage: React.FC = () => {
 
   const handleCopy = () => {
     const rawNotes = chapterContent?.raw_content || notes;
-    const cleanedNotes = rawNotes.replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/, '').trim();
+    const cleanedNotes = rawNotes
+      .replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/g, '')
+      .replace(/\[(\/?)(CONCEPT_TESTED|THINKING_PROCESS|DETAILED_SOLUTION|QUESTION|SOLUTION|ANSWER|HINT|EXPLANATION|STEP|METADATA|META)[^\]]*\]/g, '')
+      .trim();
     navigator.clipboard.writeText(`Notes for ${chapter.name}\n\n${cleanedNotes}`);
     setCopied(true);
     toast.success('Notes copied to clipboard!');
@@ -987,7 +990,11 @@ const ChapterNotesPage: React.FC = () => {
   }; // end of renderLine
 
   const parseBlocks = (content: string) => {
-    const cleanedContent = content.replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/, '').trim();
+    // Strip [METADATA] blocks and any raw AI meta-tags that should never be visible
+    const cleanedContent = content
+      .replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/g, '')
+      .replace(/\[(\/?)(CONCEPT_TESTED|THINKING_PROCESS|DETAILED_SOLUTION|QUESTION|SOLUTION|ANSWER|HINT|EXPLANATION|STEP|META)[^\]]*\]/g, '')
+      .trim();
     const blockRe = /\[(DERIVATION|SVG|CALLOUT|JEE_INSIGHT|CONCEPT|JEE_TRICK|COMMON_MISTAKE|NCERT_INSIGHT|TEACHER_SAYS|FORMULA|GRAPH|INTERACTIVE_GRAPH|DIAGRAM|INTERACTIVE_DIAGRAM|WORKED_EXAMPLE|INTERACTIVE_EXAMPLE|SIMULATION)(?:\s+title="([^"]+)")?\]([\s\S]*?)\[\/\1\]/g;
     const elements: React.ReactNode[] = [];
     let lastIndex = 0;

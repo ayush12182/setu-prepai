@@ -1,0 +1,2380 @@
+PrepEntrance Elite Question Repository (PEQR)
+Physics – Chapter 4: System of Particles & Centre of Mass
+Batch 7 (Questions 81–100)
+Difficulty: JEE Main (2024–2026)
+Focus: Ballistic Pendulum, 2D Momentum, Centre of Mass, Recoil & Advanced Collisions
+
+Editorial Standard: These questions are numerically verified and closer to recent JEE Main patterns.
+
+Q81. Ballistic Pendulum
+A 20 g bullet moving at 200 m/s embeds into a 980 g wooden block suspended by a light string.
+
+The speed of the block immediately after impact is
+
+A. 2 m/s
+
+B. 4 m/s
+
+C. 6 m/s
+
+D. 8 m/s
+
+Answer: B
+
+Q82. Ballistic Pendulum
+In Q81, neglecting losses after impact, the maximum height reached by the block is
+
+(Take g=10m/s2)
+
+A. 0.2 m
+
+B. 0.4 m
+
+C. 0.8 m
+
+D. 1.0 m
+
+Answer: C
+
+Q83. Centre of Mass
+Four particles of masses 1 kg, 2 kg, 3 kg and 4 kg are placed at (0,0),(2,0),(0,2),(2,2)
+The x-coordinate of COM is
+
+A. 1.0 m
+
+B. 1.2 m
+
+C. 1.4 m
+
+D. 1.6 m
+
+Answer: B
+
+Q84. Momentum Conservation
+A 4 kg block moving at 6 m/s collides elastically with a stationary 4 kg block.
+
+The speed of the first block after collision is
+
+A. 0 m/s
+
+B. 2 m/s
+
+C. 4 m/s
+
+D. 6 m/s
+
+Answer: A
+
+Q85. Impulse
+A force increases uniformly from 0 N to 50 N in 5 s.
+
+Impulse delivered is
+
+A. 100 N·s
+
+B. 125 N·s
+
+C. 150 N·s
+
+D. 175 N·s
+
+Answer: B
+
+Q86. Explosion
+A shell at rest breaks into two fragments of masses 3 kg and 1 kg.
+
+The heavier fragment moves at 2 m/s.
+
+The lighter fragment moves with
+
+A. 4 m/s
+
+B. 6 m/s
+
+C. 8 m/s
+
+D. 10 m/s
+
+Answer: B
+
+Q87. Recoil
+A rifle of mass 4 kg fires a 40 g bullet with speed 300 m/s.
+
+The recoil speed is
+
+A. 2 m/s
+
+B. 3 m/s
+
+C. 4 m/s
+
+D. 5 m/s
+
+Answer: B
+
+Q88. Centre of Mass Motion
+If the net external force acting on a system is 80 N and total mass is 20 kg,
+
+Acceleration of COM is
+
+A. 2 m/s²
+
+B. 3 m/s²
+
+C. 4 m/s²
+
+D. 5 m/s²
+
+Answer: C
+
+Q89. Impulse-Momentum
+A 4 kg particle changes velocity from 5 m/s to 9 m/s.
+
+Impulse equals
+
+A. 12 N·s
+
+B. 16 N·s
+
+C. 20 N·s
+
+D. 24 N·s
+
+Answer: B
+
+Q90. Mixed Collision
+A 2 kg body moving at 8 m/s sticks to a 6 kg body at rest.
+
+The common speed is
+
+A. 1 m/s
+
+B. 2 m/s
+
+C. 3 m/s
+
+D. 4 m/s
+
+Answer: B
+
+Q91. 2D Centre of Mass
+Equal masses are placed at (0,0),(4,0),(4,2),(0,2)
+The y-coordinate of COM is
+
+A. 0.5 m
+
+B. 1 m
+
+C. 1.5 m
+
+D. 2 m
+
+Answer: B
+
+Q92. Linear Momentum
+A 10 kg truck moving at 3 m/s has momentum
+
+A. 20 kg·m/s
+
+B. 25 kg·m/s
+
+C. 30 kg·m/s
+
+D. 35 kg·m/s
+
+Answer: C
+
+Q93. Force-Time Graph
+A constant force of 40 N acts for 3 s.
+
+Impulse is
+
+A. 100 N·s
+
+B. 110 N·s
+
+C. 120 N·s
+
+D. 130 N·s
+
+Answer: C
+
+Q94. Elastic Collision
+For a perfectly elastic collision,
+
+A. Only momentum is conserved
+
+B. Only kinetic energy is conserved
+
+C. Both momentum and kinetic energy are conserved
+
+D. Neither is conserved
+
+Answer: C
+
+Q95. Bullet-Block
+A 50 g bullet moving at 100 m/s embeds into a 950 g block.
+
+The common velocity is
+
+A. 2 m/s
+
+B. 5 m/s
+
+C. 8 m/s
+
+D. 10 m/s
+
+Answer: B
+
+Q96. COM
+The centre of mass of a uniform circular disc lies
+
+A. At its centre
+
+B. On the circumference
+
+C. Halfway along the radius
+
+D. Outside the disc
+
+Answer: A
+
+Q97. Explosion
+Momentum after explosion is conserved because
+
+A. Internal forces cancel
+
+B. External force is zero
+
+C. Both A and B
+
+D. Energy is conserved
+
+Answer: C
+
+Q98. Recoil
+A person of mass 50 kg jumps from a 25 kg boat with speed 3 m/s.
+
+The recoil speed of the boat is
+
+A. 4 m/s
+
+B. 5 m/s
+
+C. 6 m/s
+
+D. 7 m/s
+
+Answer: C
+
+Q99. COM Velocity
+Two equal masses move with velocities +8 m/s and –2 m/s.
+
+Velocity of COM equals
+
+A. 2 m/s
+
+B. 3 m/s
+
+C. 4 m/s
+
+D. 5 m/s
+
+Answer: B
+
+Q100. JEE Main Integrated Problem
+A 4 kg block moving at 10 m/s collides perfectly inelastically with a 6 kg block moving at 2 m/s in the same direction.
+
+The common velocity immediately after collision is
+
+A. 4.8 m/s
+
+B. 5.2 m/s
+
+C. 6.0 m/s
+
+D. 6.8 m/s
+
+Answer: B
+
+PrepEntrance Elite Question Repository (PEQR)
+Physics – Chapter 4: System of Particles & Centre of Mass
+Batch 8 (Questions 101–120)
+Difficulty: JEE Main (2024–2026)
+Focus: Advanced Momentum, Ballistic Pendulum, Centre of Mass, Recoil & Mixed Concepts
+
+Q101. Ballistic Pendulum
+A bullet of mass 10 g moving with a speed of 500 m/s embeds into a wooden block of mass 990 g.
+
+The common speed immediately after collision is
+
+A. 2 m/s
+
+B. 5 m/s
+
+C. 8 m/s
+
+D. 10 m/s
+
+Answer: B
+
+Q102. Ballistic Pendulum
+For Q101, neglecting all losses after impact, the maximum vertical height attained by the block is
+
+(Take g=10m/s2)
+
+A. 0.625 m
+
+B. 1.00 m
+
+C. 1.25 m
+
+D. 2.50 m
+
+Answer: C
+
+Q103. Centre of Mass (1D)
+Two particles of masses 6 kg and 4 kg are located at x=2m and x=8m.
+
+The centre of mass is located at
+
+A. 4.0 m
+
+B. 4.4 m
+
+C. 5.2 m
+
+D. 5.6 m
+
+Answer: B
+
+Q104. COM Velocity
+Three particles of masses 2 kg, 3 kg and 5 kg move along the x-axis with velocities 8 m/s, 4 m/s and –2 m/s, respectively.
+
+The velocity of the centre of mass is
+
+A. 1.8 m/s
+
+B. 2.2 m/s
+
+C. 2.6 m/s
+
+D. 3.0 m/s
+
+Answer: A
+
+Q105. Impulse
+A force changes uniformly from 20 N to 60 N in 4 s.
+
+The impulse delivered is
+
+A. 120 N·s
+
+B. 140 N·s
+
+C. 160 N·s
+
+D. 180 N·s
+
+Answer: C
+
+Q106. Perfectly Inelastic Collision
+A 5 kg block moving at 8 m/s sticks to a 5 kg block moving toward it at 2 m/s.
+
+The common velocity after collision is
+
+A. 2 m/s
+
+B. 3 m/s
+
+C. 4 m/s
+
+D. 5 m/s
+
+Answer: B
+
+Q107. Elastic Collision
+Two identical smooth spheres move toward each other with speeds 6 m/s and 4 m/s.
+
+The collision is perfectly elastic.
+
+The velocity of the first sphere after collision is
+
+A. +6 m/s
+
+B. +4 m/s
+
+C. –4 m/s
+
+D. –6 m/s
+
+Answer: C
+
+Q108. Explosion
+A shell of mass 8 kg explodes into two fragments of masses 2 kg and 6 kg.
+
+The lighter fragment moves with 24 m/s.
+
+The speed of the heavier fragment is
+
+A. 6 m/s
+
+B. 8 m/s
+
+C. 10 m/s
+
+D. 12 m/s
+
+Answer: B
+
+Q109. Recoil
+A gun of mass 8 kg fires a 40 g bullet with speed 600 m/s.
+
+The recoil speed of the gun is
+
+A. 2 m/s
+
+B. 3 m/s
+
+C. 4 m/s
+
+D. 5 m/s
+
+Answer: B
+
+Q110. Centre of Mass (2D)
+Four equal masses are placed at (0,0),(8,0),(8,4),(0,4)
+The coordinates of the centre of mass are
+
+A. (2,2)
+
+B. (4,2)
+
+C. (4,4)
+
+D. (8,2)
+
+Answer: B
+
+Q111. Momentum
+A 12 kg object moves with velocity 5 m/s.
+
+Its momentum is
+
+A. 50 kg·m/s
+
+B. 55 kg·m/s
+
+C. 60 kg·m/s
+
+D. 65 kg·m/s
+
+Answer: C
+
+Q112. Force-Time Graph
+A force increases uniformly from 0 N to 100 N in 2 s.
+
+The impulse delivered equals
+
+A. 50 N·s
+
+B. 100 N·s
+
+C. 150 N·s
+
+D. 200 N·s
+
+Answer: B
+
+Q113. Bullet-Block
+A 50 g bullet moving at 200 m/s embeds into a 1.95 kg wooden block.
+
+The common velocity is
+
+A. 4 m/s
+
+B. 5 m/s
+
+C. 6 m/s
+
+D. 8 m/s
+
+Answer: B
+
+Q114. Centre of Mass
+The centre of mass of a uniform solid sphere lies
+
+A. At the centre
+
+B. On the surface
+
+C. At half the radius
+
+D. Outside the sphere
+
+Answer: A
+
+Q115. Momentum Conservation
+Momentum is conserved whenever
+
+A. External force is zero
+
+B. External force is constant
+
+C. Internal force is zero
+
+D. Kinetic energy is constant
+
+Answer: A
+
+Q116. Impulse-Momentum
+A 3 kg body changes velocity from 4 m/s to 12 m/s.
+
+Impulse equals
+
+A. 18 N·s
+
+B. 24 N·s
+
+C. 30 N·s
+
+D. 36 N·s
+
+Answer: B
+
+Q117. Recoil
+A 70 kg person jumps from a 35 kg stationary boat with a speed of 4 m/s.
+
+The recoil speed of the boat is
+
+A. 4 m/s
+
+B. 6 m/s
+
+C. 8 m/s
+
+D. 10 m/s
+
+Answer: C
+
+Q118. Explosion
+A body explodes into four fragments while initially at rest.
+
+The vector sum of the momenta of all fragments is
+
+A. Maximum
+
+B. Equal to momentum of largest fragment
+
+C. Zero
+
+D. Depends on explosion energy
+
+Answer: C
+
+Q119. Centre of Mass Motion
+The acceleration of the centre of mass depends on
+
+A. Internal forces only
+
+B. External force only
+
+C. Internal and external forces
+
+D. Number of particles
+
+Answer: B
+
+Q120. Integrated JEE Main Problem
+A 4 kg body moving at 12 m/s collides perfectly inelastically with a 8 kg body moving at 3 m/s in the same direction.
+
+The common velocity immediately after collision is
+
+A. 5 m/s
+
+B. 6 m/s
+
+C. 7 m/s
+
+D. 8 m/s
+
+Answer: B
+
+PrepEntrance Elite Question Repository (PEQR)
+Physics – Chapter 5: Rotational Motion
+Batch 1 (Questions 1–20)
+Difficulty: JEE Main (2024–2026)
+Focus: Torque, Angular Motion, Moment of Inertia, Rolling Motion
+
+Q1. Angular Velocity
+A wheel rotates at 120 rpm.
+
+Its angular velocity is
+
+A. 2π rad/s
+
+B. 4π rad/s
+
+C. 6π rad/s
+
+D. 8π rad/s
+
+Answer: B
+
+Q2. Torque
+A force of 20 N acts perpendicular to a rod at a distance of 0.5 m from the pivot.
+
+Torque is
+
+A. 5 N·m
+
+B. 10 N·m
+
+C. 15 N·m
+
+D. 20 N·m
+
+Answer: B
+
+Q3. Angular Acceleration
+A wheel increases its angular speed uniformly from 10 rad/s to 30 rad/s in 5 s.
+
+Angular acceleration equals
+
+A. 2 rad/s²
+
+B. 4 rad/s²
+
+C. 5 rad/s²
+
+D. 6 rad/s²
+
+Answer: B
+
+Q4. Rotational Kinetic Energy
+A disc has moment of inertia 2 kg·m² and angular velocity 6 rad/s.
+
+Rotational kinetic energy is
+
+A. 18 J
+
+B. 24 J
+
+C. 36 J
+
+D. 72 J
+
+Answer: C
+
+Q5. Relation Between Linear and Angular Speed
+A wheel of radius 0.4 m rotates with angular velocity 20 rad/s.
+
+Linear speed at the rim is
+
+A. 4 m/s
+
+B. 6 m/s
+
+C. 8 m/s
+
+D. 10 m/s
+
+Answer: C
+
+Q6. Moment of Inertia
+The moment of inertia of a thin ring about its central axis is
+
+A. MR2
+
+B. 1/2 MR2
+
+C. 2/5 MR2
+
+D. 1/3 MR2
+
+Answer: A
+
+Q7. Rolling Motion
+A solid cylinder rolls without slipping.
+
+The relation between linear speed v and angular speed ω is
+
+A. v=ωR
+
+B. v=2ωR
+
+C. v=ωR/2
+
+D. v=ω2R
+
+Answer: A
+
+Q8. Angular Momentum
+A body of moment of inertia 5 kg·m² rotates with angular speed 4 rad/s.
+
+Angular momentum equals
+
+A. 10 kg·m²/s
+
+B. 15 kg·m²/s
+
+C. 20 kg·m²/s
+
+D. 25 kg·m²/s
+
+Answer: C
+
+Q9. Torque
+If the force acts through the axis of rotation,
+
+the torque produced is
+
+A. Maximum
+
+B. Minimum
+
+C. Zero
+
+D. Infinite
+
+Answer: C
+
+Q10. Rotational Dynamics
+A wheel has moment of inertia 4 kg·m².
+
+A torque of 20 N·m acts on it.
+
+Angular acceleration equals
+
+A. 2 rad/s²
+
+B. 4 rad/s²
+
+C. 5 rad/s²
+
+D. 8 rad/s²
+
+Answer: C
+
+Q11. Angular Displacement
+A wheel starts from rest with angular acceleration 3 rad/s².
+
+Angular displacement in 4 s is
+
+A. 12 rad
+
+B. 18 rad
+
+C. 24 rad
+
+D. 30 rad
+
+Answer: C
+
+Q12. Rotational Work
+A torque of 15 N·m rotates a wheel through 8 rad.
+
+The work done is
+
+A. 100 J
+
+B. 110 J
+
+C. 120 J
+
+D. 130 J
+
+Answer: C
+
+Q13. Disc vs Ring
+For the same mass and radius,
+
+which has the larger moment of inertia?
+
+A. Disc
+
+B. Ring
+
+C. Same
+
+D. Cannot be determined
+
+Answer: B
+
+Q14. Rolling Without Slipping
+For pure rolling,
+
+A. Friction is always zero.
+
+B. Point of contact has zero instantaneous velocity.
+
+C. Centre of mass is at rest.
+
+D. Angular velocity is zero.
+
+Answer: B
+
+Q15. Radius of Gyration
+If I=Mk2 then k is called
+
+A. Radius
+
+B. Radius of curvature
+
+C. Radius of gyration
+
+D. Lever arm
+
+Answer: C
+
+Q16. Angular Momentum Conservation
+If external torque is zero,
+
+A. Angular velocity remains constant.
+
+B. Angular momentum remains constant.
+
+C. Torque becomes maximum.
+
+D. Moment of inertia becomes zero.
+
+Answer: B
+
+Q17. Rotational KE
+A ring has I=MR2
+Mass = 2 kg
+
+Radius = 0.5 m
+
+Angular velocity = 10 rad/s
+
+Rotational kinetic energy is
+
+A. 12.5 J
+
+B. 25 J
+
+C. 50 J
+
+D. 75 J
+
+Answer: B
+
+Q18. Angular Speed
+A wheel completes 5 revolutions per second.
+
+Angular speed equals
+
+A. 5π
+
+B. 10π
+
+C. 15π
+
+D. 20π
+
+Answer: B
+
+Q19. Torque Direction
+The direction of torque is determined by
+
+A. Fleming's rule
+
+B. Right-hand rule
+
+C. Left-hand rule
+
+D. Lenz's law
+
+Answer: B
+
+Q20. Mixed JEE Main
+A solid disc of mass 4 kg and radius 0.5 m rotates with angular speed 8 rad/s.
+
+Its rotational kinetic energy is
+
+A. 8 J
+
+B. 12 J
+
+C. 16 J
+
+D. 32 J
+
+Answer: C
+
+PrepEntrance Elite Question Repository (PEQR)
+Physics – Chapter 5: Rotational Motion
+Batch 2 (Questions 21–40)
+Difficulty: JEE Main (2024–2026)
+Focus: Moment of Inertia, Torque, Rolling Motion, Angular Momentum
+
+Q21. Parallel Axis Theorem
+The moment of inertia of a body about an axis through its centre of mass is ICM = 4 kg·m². If the new axis is parallel and 3 m away, and the mass is 2 kg, the new moment of inertia is
+
+A. 18 kg·m²
+
+B. 20 kg·m²
+
+C. 22 kg·m²
+
+D. 24 kg·m²
+
+Answer: C
+
+Q22. Perpendicular Axis Theorem
+A thin circular disc has moment of inertia Iz about an axis perpendicular to its plane through the centre.
+
+Its moment of inertia about any diameter is
+
+A. Iz
+
+B. Iz/2
+
+C. 2Iz
+
+D. Iz/4
+
+Answer: B
+
+Q23. Torque
+A force of 50 N acts at 30° to a 2 m long rod.
+
+The torque about one end is
+
+A. 25 N·m
+
+B. 40 N·m
+
+C. 50 N·m
+
+D. 60 N·m
+
+Answer: C
+
+Q24. Rolling Motion
+A solid sphere rolls without slipping with speed 6 m/s.
+
+Its angular speed is
+
+A. 6/R
+
+B. 3/R
+
+C. 12/R
+
+D. 18/R
+
+Answer: A
+
+Q25. Angular Momentum
+A disc has I=8kgm2
+ω=5rad/s
+Angular momentum equals
+
+A. 20 kg·m²/s
+
+B. 30 kg·m²/s
+
+C. 40 kg·m²/s
+
+D. 50 kg·m²/s
+
+Answer: C
+
+Q26. Rotational KE
+A ring of mass 4 kg and radius 0.5 m rotates at 20 rad/s.
+
+Rotational kinetic energy is
+
+A. 100 J
+
+B. 150 J
+
+C. 200 J
+
+D. 250 J
+
+Answer: C
+
+Q27. Radius of Gyration
+For a thin ring,
+
+Radius of gyration is
+
+A. R/2
+
+B. R/√2
+
+C. R
+
+D. 2R
+
+Answer: C
+
+Q28. Angular Acceleration
+A wheel starts from rest.
+
+Angular acceleration = 4 rad/s²
+
+Angular speed after 5 s
+
+A. 10 rad/s
+
+B. 15 rad/s
+
+C. 20 rad/s
+
+D. 25 rad/s
+
+Answer: C
+
+Q29. Work Done by Torque
+Torque = 12 N·m
+
+Angular displacement = 15 rad
+
+Work done equals
+
+A. 120 J
+
+B. 150 J
+
+C. 180 J
+
+D. 200 J
+
+Answer: C
+
+Q30. Rolling Energy
+A solid cylinder rolls without slipping.
+
+The ratio KErotation/KEtranslation is
+
+A. 1/4
+
+B. 1/2
+
+C. 2/3
+
+D. 1
+
+Answer: B
+
+Q31. Angular Momentum Conservation
+A skater pulls in her arms.
+
+Her moment of inertia decreases.
+
+Her angular speed
+
+A. Decreases
+
+B. Remains constant
+
+C. Increases
+
+D. Becomes zero
+
+Answer: C
+
+Q32. Moment of Inertia
+Moment of inertia depends upon
+
+A. Mass only
+
+B. Shape only
+
+C. Axis of rotation
+
+D. Temperature only
+
+Answer: C
+
+Q33. Torque Equilibrium
+A body is in rotational equilibrium if
+
+A. Net force is zero only
+
+B. Net torque is zero
+
+C. Angular velocity is zero
+
+D. Angular momentum is zero
+
+Answer: B
+
+Q34. Angular Displacement
+A wheel rotates at constant angular velocity 8 rad/s.
+
+Angular displacement in 6 s is
+
+A. 36 rad
+
+B. 42 rad
+
+C. 48 rad
+
+D. 54 rad
+
+Answer: C
+
+Q35. Rolling Without Slipping
+For pure rolling,
+
+A. Static friction acts.
+
+B. Kinetic friction acts.
+
+C. No friction is possible.
+
+D. Friction always opposes motion.
+
+Answer: A
+
+Q36. Moment of Inertia
+The moment of inertia of a solid disc about its central axis is
+
+A. MR2
+
+B. 1/2 MR2
+
+C. 2/5 MR2
+
+D. 2/3 MR2
+
+Answer: B
+
+Q37. Angular Impulse
+Angular impulse equals
+
+A. Change in torque
+
+B. Change in angular momentum
+
+C. Rotational kinetic energy
+
+D. Angular displacement
+
+Answer: B
+
+Q38. Rotational Power
+A wheel experiences a torque of 25 N·m and rotates at 8 rad/s.
+
+Power delivered is
+
+A. 100 W
+
+B. 150 W
+
+C. 200 W
+
+D. 250 W
+
+Answer: C
+
+Q39. Rolling Incline
+A body rolls down a rough incline without slipping.
+
+At the bottom,
+
+A. Only translational KE exists.
+
+B. Only rotational KE exists.
+
+C. Both translational and rotational KE exist.
+
+D. Total KE is zero.
+
+Answer: C
+
+Q40. Mixed JEE Main
+A solid disc of mass 2 kg and radius 0.40 m rotates at 100 rad/s.
+
+Its angular momentum is
+
+A. 8 kg·m²/s
+
+B. 12 kg·m²/s
+
+C. 16 kg·m²/s
+
+D. 20 kg·m²/s
+
+Answer: C
+
+PrepEntrance Elite Question Repository (PEQR)
+Physics – Chapter 5: Rotational Motion
+Batch 3 (Questions 41–60)
+Difficulty: JEE Main (2024–2026)
+Focus: Advanced Torque, Moment of Inertia, Rolling Motion, Angular Momentum
+
+Q41. Parallel Axis Theorem
+A uniform disc has moment of inertia 2 kg·m² about its centre. Its mass is 4 kg. Find the moment of inertia about a parallel axis 1.5 m away.
+
+A. 9 kg·m²
+
+B. 10 kg·m²
+
+C. 11 kg·m²
+
+D. 12 kg·m²
+
+Answer: C
+
+Q42. Angular Momentum
+A wheel has moment of inertia 6 kg·m² and rotates at 12 rad/s.
+
+Angular momentum equals
+
+A. 48 kg·m²/s
+
+B. 60 kg·m²/s
+
+C. 72 kg·m²/s
+
+D. 84 kg·m²/s
+
+Answer: C
+
+Q43. Rotational Kinetic Energy
+A flywheel has moment of inertia 10 kg·m² rotating at 4 rad/s.
+
+Rotational kinetic energy is
+
+A. 40 J
+
+B. 60 J
+
+C. 80 J
+
+D. 100 J
+
+Answer: C
+
+Q44. Torque
+A force of 30 N acts perpendicular to a 1.2 m spanner.
+
+Torque produced is
+
+A. 24 N·m
+
+B. 30 N·m
+
+C. 36 N·m
+
+D. 42 N·m
+
+Answer: C
+
+Q45. Angular Acceleration
+A torque of 24 N·m acts on a body of moment of inertia 6 kg·m².
+
+Angular acceleration equals
+
+A. 2 rad/s²
+
+B. 3 rad/s²
+
+C. 4 rad/s²
+
+D. 6 rad/s²
+
+Answer: C
+
+Q46. Rolling Motion
+A solid sphere rolls without slipping at 10 m/s.
+
+If its radius is 0.5 m, angular velocity is
+
+A. 10 rad/s
+
+B. 15 rad/s
+
+C. 20 rad/s
+
+D. 25 rad/s
+
+Answer: C
+
+Q47. Radius of Gyration
+If a body's moment of inertia is 18 kg·m² and mass is 2 kg, its radius of gyration is
+
+A. 2 m
+
+B. 3 m
+
+C. 4 m
+
+D. 5 m
+
+Answer: B
+
+Q48. Work Done by Torque
+A constant torque of 8 N·m rotates a wheel through 25 rad.
+
+Work done is
+
+A. 150 J
+
+B. 180 J
+
+C. 200 J
+
+D. 220 J
+
+Answer: C
+
+Q49. Power in Rotation
+A motor applies a torque of 40 N·m while rotating at 15 rad/s.
+
+Power developed is
+
+A. 400 W
+
+B. 500 W
+
+C. 600 W
+
+D. 700 W
+
+Answer: C
+
+Q50. Rolling Energy
+For a solid sphere rolling without slipping, KErot/KEtotal equals
+
+A. 2/5
+
+B. 2/7
+
+C. 5/7
+
+D. 7/10
+
+Answer: B
+
+Q51. Angular Momentum Conservation
+A rotating platform has its moment of inertia reduced to half.
+
+Ignoring external torque, angular speed becomes
+
+A. Half
+
+B. Double
+
+C. Four times
+
+D. Unchanged
+
+Answer: B
+
+Q52. Perpendicular Axis Theorem
+The theorem is applicable only for
+
+A. Any rigid body
+
+B. Three-dimensional bodies
+
+C. Plane laminae
+
+D. Spheres
+
+Answer: C
+
+Q53. Torque Direction
+The direction of torque is given by
+
+A. Fleming's Left-Hand Rule
+
+B. Right-Hand Thumb Rule
+
+C. Lenz's Law
+
+D. Right-Hand Grip Rule for Current
+
+Answer: B
+
+Q54. Rotational Equilibrium
+A rigid body is in rotational equilibrium if
+
+A. Net force is zero
+
+B. Net torque is zero
+
+C. Angular velocity is constant
+
+D. Angular momentum is zero
+
+Answer: B
+
+Q55. Moment of Inertia
+Which body has the greatest moment of inertia about its central axis for the same mass and radius?
+
+A. Solid sphere
+
+B. Solid cylinder
+
+C. Ring
+
+D. Disc
+
+Answer: C
+
+Q56. Angular Displacement
+A wheel rotates at 15 rad/s for 8 s.
+
+Angular displacement is
+
+A. 100 rad
+
+B. 110 rad
+
+C. 120 rad
+
+D. 130 rad
+
+Answer: C
+
+Q57. Rolling Down an Incline
+Which body reaches the bottom first on a rough incline without slipping?
+
+A. Ring
+
+B. Hollow sphere
+
+C. Solid cylinder
+
+D. Solid sphere
+
+Answer: D
+
+Q58. Rotational KE
+A ring and a disc have the same mass, radius and angular speed.
+
+Which has greater rotational kinetic energy?
+
+A. Disc
+
+B. Ring
+
+C. Equal
+
+D. Depends on mass
+
+Answer: B
+
+Q59. Angular Momentum
+Angular momentum is conserved when
+
+A. Net external torque is zero
+
+B. Net force is zero
+
+C. Velocity is constant
+
+D. Mechanical energy is conserved
+
+Answer: A
+
+Q60. Mixed JEE Main
+A solid disc of mass 5 kg and radius 0.4 m rotates at 20 rad/s.
+
+Its rotational kinetic energy is
+
+A. 60 J
+
+B. 80 J
+
+C. 100 J
+
+D. 120 J
+
+Answer: B
+
+PrepEntrance Elite Question Repository (PEQR)
+Physics – Chapter 5: Rotational Motion
+Batch 4 (Questions 61–80)
+Difficulty: JEE Main (2024–2026)
+Focus: Rolling Motion, Torque, Angular Momentum, MOI, Mixed Problems
+
+Q61. Rolling Motion
+A solid cylinder rolls without slipping with a speed of 5 m/s.
+
+If its radius is 0.25 m, its angular speed is
+
+A. 10 rad/s
+
+B. 15 rad/s
+
+C. 20 rad/s
+
+D. 25 rad/s
+
+Answer: C
+
+Q62. Torque
+A force of 40 N acts at an angle of 90° on a spanner of length 0.75 m.
+
+Torque produced is
+
+A. 20 N·m
+
+B. 25 N·m
+
+C. 30 N·m
+
+D. 35 N·m
+
+Answer: C
+
+Q63. Parallel Axis Theorem
+A body has ICM = 5 kgm2
+Mass = 3 kg
+Moment of inertia about an axis 2 m away is
+
+A. 13 kg·m²
+
+B. 15 kg·m²
+
+C. 17 kg·m²
+
+D. 19 kg·m²
+
+Answer: C
+
+Q64. Angular Momentum
+A wheel has I = 12 kgm2
+ω = 8 rad/s
+Angular momentum equals
+
+A. 72
+
+B. 84
+
+C. 96
+
+D. 108
+
+Answer: C
+
+Q65. Rotational KE
+A flywheel has I = 8 kgm2
+ω = 10 rad/s
+Rotational kinetic energy equals
+
+A. 300 J
+
+B. 350 J
+
+C. 400 J
+
+D. 450 J
+
+Answer: C
+
+Q66. Angular Acceleration
+A torque of 45 N·m acts on a body having moment of inertia 9 kg·m².
+
+Angular acceleration is
+
+A. 3 rad/s²
+
+B. 4 rad/s²
+
+C. 5 rad/s²
+
+D. 6 rad/s²
+
+Answer: C
+
+Q67. Rolling Without Slipping
+For pure rolling,
+
+The instantaneous velocity of the point in contact with the ground is
+
+A. Zero
+
+B. Equal to COM velocity
+
+C. Double COM velocity
+
+D. Half COM velocity
+
+Answer: A
+
+Q68. Radius of Gyration
+A body has Mass = 5 kg
+Moment of inertia = 80 kg·m²
+Radius of gyration equals
+
+A. 2 m
+
+B. 4 m
+
+C. 5 m
+
+D. 6 m
+
+Answer: B
+
+Q69. Rotational Power
+Torque = 30 N·m
+
+Angular velocity = 12 rad/s
+
+Power equals
+
+A. 300 W
+
+B. 320 W
+
+C. 360 W
+
+D. 400 W
+
+Answer: C
+
+Q70. Disc vs Ring
+Which has greater rotational kinetic energy for the same mass, radius and angular speed?
+
+A. Disc
+
+B. Ring
+
+C. Same
+
+D. Depends on torque
+
+Answer: B
+
+Q71. Angular Momentum Conservation
+A rotating platform has its moment of inertia increased by 25%.
+
+Ignoring external torque,
+
+the new angular speed becomes
+
+A. 0.6ω
+
+B. 0.8ω
+
+C. 0.9ω
+
+D. 1.25ω
+
+Answer: B
+
+Q72. Angular Displacement
+A wheel rotates with angular speed 25 rad/s for 4 s.
+
+Angular displacement equals
+
+A. 80 rad
+
+B. 90 rad
+
+C. 100 rad
+
+D. 120 rad
+
+Answer: C
+
+Q73. Torque
+A force acts along the radius of a wheel.
+
+Torque produced is
+
+A. Maximum
+
+B. Minimum
+
+C. Zero
+
+D. Depends on speed
+
+Answer: C
+
+Q74. MOI
+The SI unit of moment of inertia is
+
+A. kg·m
+
+B. kg·m²
+
+C. N·m²
+
+D. J·s
+
+Answer: B
+
+Q75. Angular Velocity
+A wheel completes 15 revolutions in 3 seconds.
+
+Angular speed equals
+
+A. 5π
+
+B. 10π
+
+C. 15π
+
+D. 20π
+
+Answer: B
+
+Q76. Rolling Energy
+For a solid disc, KErot/KEtotal equals
+
+A. 1/4
+
+B. 1/3
+
+C. 1/2
+
+D. 2/3
+
+Answer: B
+
+Q77. Perpendicular Axis Theorem
+The theorem is applicable to
+
+A. Rods
+
+B. Rings
+
+C. Plane laminae
+
+D. Solid spheres
+
+Answer: C
+
+Q78. Angular Momentum
+Angular momentum is a
+
+A. Scalar
+
+B. Vector
+
+C. Tensor
+
+D. Dimensionless quantity
+
+Answer: B
+
+Q79. Rolling Sphere
+A solid sphere rolls down an incline.
+
+The acceleration of its centre of mass is
+
+A. gsinθ
+
+B. 5/7 gsinθ
+
+C. 2/3 gsinθ
+
+D. 1/2 gsinθ
+
+Answer: B
+
+Q80. Mixed JEE Main
+A solid cylinder of mass 4 kg and radius 0.5 m rotates with angular speed 36 rad/s.
+
+Its angular momentum is
+
+A. 12 kg·m²/s
+
+B. 18 kg·m²/s
+
+C. 24 kg·m²/s
+
+D. 36 kg·m²/s
+
+Answer: B
+
+PrepEntrance Elite Question Repository (PEQR)
+Physics – Chapter 5: Rotational Motion
+Batch 5 (Questions 81–100)
+Difficulty: JEE Main (2024–2026)
+Focus: Advanced JEE Main – Rolling Motion, Torque, Angular Momentum, Moment of Inertia
+
+Q81. Angular Velocity
+A wheel rotates at 300 rpm. Its angular velocity is
+
+A. 5π rad/s
+
+B. 10π rad/s
+
+C. 15π rad/s
+
+D. 20π rad/s
+
+Answer: B
+
+Q82. Torque
+A force of 25 N acts at an angle of 60° to a 2 m rod.
+
+The torque about one end is
+
+A. 25 Nm
+
+B. 25√3 Nm
+
+C. 50 Nm
+
+D. 50√3 Nm
+
+Answer: B
+
+Q83. Angular Acceleration
+A wheel slows uniformly from 40 rad/s to 20 rad/s in 10 s.
+
+Angular acceleration is
+
+A. –1 rad/s²
+
+B. –2 rad/s²
+
+C. –3 rad/s²
+
+D. –4 rad/s²
+
+Answer: B
+
+Q84. Rotational Kinetic Energy
+A ring has Mass = 3 kg
+Radius = 0.40 m
+Angular speed = 10 rad/s
+Rotational kinetic energy equals
+
+A. 18 J
+
+B. 20 J
+
+C. 24 J
+
+D. 30 J
+
+Answer: C
+
+Q85. Moment of Inertia
+The moment of inertia of a solid sphere about its diameter is
+
+A. 2/5 MR2
+
+B. 1/2 MR2
+
+C. 3/5 MR2
+
+D. 2/3 MR2
+
+Answer: A
+
+Q86. Angular Momentum
+A disc has I=4kgm2
+ω=15rad/s
+Angular momentum equals
+
+A. 45
+
+B. 50
+
+C. 60
+
+D. 75
+
+Answer: C
+
+Q87. Parallel Axis Theorem
+A disc has ICM = 3 kgm2
+Mass = 2 kg
+Find the MOI about an axis 2 m away.
+
+A. 9 kg·m²
+
+B. 10 kg·m²
+
+C. 11 kg·m²
+
+D. 12 kg·m²
+
+Answer: C
+
+Q88. Rolling Motion
+A solid sphere rolls without slipping.
+
+If its centre moves at 7 m/s, its angular velocity is
+
+A. 7/R
+
+B. 14/R
+
+C. 21/R
+
+D. 28/R
+
+Answer: A
+
+Q89. Radius of Gyration
+A body has Mass = 8 kg
+MOI = 72 kg·m²
+Radius of gyration is
+
+A. 2 m
+
+B. 3 m
+
+C. 4 m
+
+D. 5 m
+
+Answer: B
+
+Q90. Rotational Work
+A constant torque of 16 N·m rotates a wheel through 15 rad.
+
+Work done is
+
+A. 180 J
+
+B. 200 J
+
+C. 220 J
+
+D. 240 J
+
+Answer: D
+
+Q91. Rolling Motion
+For a hollow cylinder rolling without slipping, KErot/KEtrans equals
+
+A. 1/2
+
+B. 2/3
+
+C. 1
+
+D. 2
+
+Answer: C
+
+Q92. Angular Momentum Conservation
+A rotating dancer doubles her moment of inertia.
+
+Ignoring external torque, her angular speed becomes
+
+A. Half
+
+B. Double
+
+C. Four times
+
+D. Same
+
+Answer: A
+
+Q93. Torque
+Maximum torque is produced when the angle between force and radius vector is
+
+A. 0°
+
+B. 30°
+
+C. 60°
+
+D. 90°
+
+Answer: D
+
+Q94. Rotational Power
+Torque = 18 Nm
+
+Angular velocity = 25 rad/s
+
+Power equals
+
+A. 350 W
+
+B. 400 W
+
+C. 450 W
+
+D. 500 W
+
+Answer: C
+
+Q95. Disc vs Sphere
+For the same mass and radius,
+
+which has the greater moment of inertia?
+
+A. Solid disc
+
+B. Solid sphere
+
+C. Equal
+
+D. Depends on speed
+
+Answer: A
+
+Q96. Angular Displacement
+A body rotates with ω=12rad/s for 8 seconds.
+
+Angular displacement equals
+
+A. 84 rad
+
+B. 90 rad
+
+C. 96 rad
+
+D. 100 rad
+
+Answer: C
+
+Q97. Rolling Down Incline
+Which reaches the bottom first?
+
+A. Ring
+
+B. Hollow cylinder
+
+C. Solid cylinder
+
+D. Solid sphere
+
+Answer: D
+
+Q98. Moment of Inertia
+The SI dimension of moment of inertia is
+
+A. MLT-1
+
+B. ML2
+
+C. ML2T-1
+
+D. MLT-2
+
+Answer: B
+
+Q99. Angular Momentum
+Angular momentum about a point is conserved if
+
+A. Net force is zero
+
+B. Net external torque about that point is zero
+
+C. Velocity is constant
+
+D. Kinetic energy is constant
+
+Answer: B
+
+Q100. Mixed JEE Main
+A solid sphere of mass 5 kg and radius 0.20 m rotates at 20 rad/s.
+
+Its rotational kinetic energy is
+
+A. 8 J
+
+B. 12 J
+
+C. 16 J
+
+D. 20 J
+
+Answer: C
+
+PrepEntrance Elite Question Repository (PEQR)
+Physics – Chapter 5: Rotational Motion
+Batch 6 (Questions 101–120)
+Difficulty: JEE Main (2024–2026)
+Focus: Advanced Rotational Dynamics, Rolling Motion & JEE Main Applications
+
+Q101. Torque
+A force of 60 N acts perpendicular to a 0.80 m long rod.
+
+The torque produced is
+
+A. 36 N·m
+
+B. 42 N·m
+
+C. 48 N·m
+
+D. 54 N·m
+
+Answer: C
+
+Q102. Angular Velocity
+A wheel rotates at 180 rpm.
+
+Its angular velocity is
+
+A. 3π rad/s
+
+B. 4π rad/s
+
+C. 6π rad/s
+
+D. 8π rad/s
+
+Answer: C
+
+Q103. Rotational Kinetic Energy
+A disc has I = 5 kgm2
+ω = 8 rad/s
+Rotational kinetic energy equals
+
+A. 120 J
+
+B. 140 J
+
+C. 160 J
+
+D. 180 J
+
+Answer: C
+
+Q104. Angular Momentum
+A flywheel has I = 15 kgm2
+ω = 4 rad/s
+Angular momentum equals
+
+A. 40
+
+B. 50
+
+C. 60
+
+D. 80
+
+Answer: C
+
+Q105. Angular Acceleration
+A torque of 72 N·m acts on a wheel having moment of inertia 12 kg·m².
+
+Angular acceleration equals
+
+A. 4 rad/s²
+
+B. 5 rad/s²
+
+C. 6 rad/s²
+
+D. 7 rad/s²
+
+Answer: C
+
+Q106. Parallel Axis Theorem
+A body has ICM = 6 kgm2
+Mass = 5 kg
+Find MOI about a parallel axis 2 m away.
+
+A. 24 kg·m²
+
+B. 26 kg·m²
+
+C. 28 kg·m²
+
+D. 30 kg·m²
+
+Answer: B
+
+Q107. Radius of Gyration
+A body has I = 50 kgm2
+Mass = 2 kg
+Radius of gyration equals
+
+A. 3 m
+
+B. 4 m
+
+C. 5 m
+
+D. 6 m
+
+Answer: C
+
+Q108. Rotational Work
+A constant torque of 18 N·m rotates a wheel through 20 rad.
+
+Work done equals
+
+A. 300 J
+
+B. 320 J
+
+C. 360 J
+
+D. 400 J
+
+Answer: C
+
+Q109. Rotational Power
+A motor develops a torque of 30 N·m while rotating at 16 rad/s.
+
+Power produced equals
+
+A. 420 W
+
+B. 450 W
+
+C. 480 W
+
+D. 500 W
+
+Answer: C
+
+Q110. Rolling Motion
+A solid disc rolls without slipping at 8 m/s.
+
+Its angular speed is
+
+A. 8/R
+
+B. 16/R
+
+C. 24/R
+
+D. 32/R
+
+Answer: A
+
+Q111. Angular Momentum Conservation
+A rotating body reduces its moment of inertia to one-third.
+
+Its angular velocity becomes
+
+A. ω/3
+
+B. 2ω
+
+C. 3ω
+
+D. 9ω
+
+Answer: C
+
+Q112. Torque
+Torque is maximum when the angle between the force and radius vector is
+
+A. 30°
+
+B. 45°
+
+C. 60°
+
+D. 90°
+
+Answer: D
+
+Q113. Rolling Without Slipping
+The friction acting during pure rolling on a rough horizontal surface is
+
+A. Always kinetic
+
+B. Always static
+
+C. Always zero
+
+D. Always opposite to motion
+
+Answer: B
+
+Q114. Moment of Inertia
+Which has the least moment of inertia about its diameter for equal mass and radius?
+
+A. Ring
+
+B. Disc
+
+C. Solid sphere
+
+D. Hollow sphere
+
+Answer: C
+
+Q115. Angular Displacement
+A wheel rotates uniformly with ω=18rad/s for 5 s.
+
+Angular displacement equals
+
+A. 80 rad
+
+B. 85 rad
+
+C. 90 rad
+
+D. 95 rad
+
+Answer: C
+
+Q116. Rolling Energy
+For a solid sphere, KEtrans/KEtotal equals
+
+A. 2/7
+
+B. 5/7
+
+C. 3/5
+
+D. 1/2
+
+Answer: B
+
+Q117. Perpendicular Axis Theorem
+The theorem states
+
+A. Iz = Ix - Iy
+
+B. Iz = Ix + Iy
+
+C. Ix = Iy
+
+D. Ix = 2Iy
+
+Answer: B
+
+Q118. Rotational Dynamics
+The rotational analogue of Newton's Second Law is
+
+A. F = ma
+
+B. τ = Iα
+
+C. P = Fv
+
+D. L = Iω
+
+Answer: B
+
+Q119. Rolling Down Incline
+For rolling without slipping, acceleration depends upon
+
+A. Radius only
+
+B. Mass only
+
+C. Shape (moment of inertia)
+
+D. Angular velocity only
+
+Answer: C
+
+Q120. Mixed JEE Main
+A solid cylinder of mass 6 kg and radius 0.30 m rotates at 10 rad/s.
+
+Its rotational kinetic energy is
+
+A. 9 J
+
+B. 13.5 J
+
+C. 18 J
+
+D. 27 J
+
+Answer: B

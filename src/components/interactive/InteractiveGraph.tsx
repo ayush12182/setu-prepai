@@ -13,27 +13,27 @@ export interface GraphSlider {
 }
 
 export interface InteractiveGraphProps {
-  graphType: 'velocity_time' | 'displacement_time' | 'projectile_path' | 'shm';
-  title: string;
-  xAxis: string;
-  yAxis: string;
-  equation: string;
-  sliders: Record<string, GraphSlider>;
+  graphType?: string;
+  title?: string;
+  xAxis?: string;
+  yAxis?: string;
+  equation?: string;
+  sliders?: Record<string, GraphSlider>;
 }
 
 export const InteractiveGraph: React.FC<InteractiveGraphProps> = ({
-  graphType,
-  title,
-  xAxis,
-  yAxis,
-  equation,
-  sliders
+  graphType = '',
+  title = '',
+  xAxis = '',
+  yAxis = '',
+  equation = '',
+  sliders = {}
 }) => {
   // Initialize slider states dynamically
   const [params, setParams] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
-    Object.entries(sliders).forEach(([key, config]) => {
-      initial[key] = config.default;
+    Object.entries(sliders || {}).forEach(([key, config]) => {
+      initial[key] = config?.default ?? 0;
     });
     return initial;
   });
