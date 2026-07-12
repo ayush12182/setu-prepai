@@ -396,9 +396,9 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
                 </div>
               )}
 
-              {/* Re-attempt & Similar / Harder Questions */}
+              {/* Re-attempt & Similar Questions */}
               {!isCurrentCorrect && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="mt-4">
                   <button
                     onClick={() => {
                       if (similarQuestions && similarQuestions.length > 0) {
@@ -417,34 +417,7 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
                   >
                     <RefreshCw className={cn('w-4 h-4 text-blue-700', loadingSimilar && 'animate-spin')} />
                     <span className="font-bold text-xs text-blue-700">
-                      {loadingSimilar ? 'Loading new question...' : 'Try Similar Question'}
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      if (similarQuestions && similarQuestions.length > 0) {
-                        // Load harder variant
-                        const nextIndex = (similarQueueIndex + 1) % similarQuestions.length;
-                        const sq = {
-                          ...similarQuestions[nextIndex],
-                          difficulty_note: 'Harder Follow-up Question',
-                          difficulty: 'hard' as any
-                        };
-                        setPracticeQuestion(sq);
-                        setSimilarQueueIndex(prev => prev + 2);
-                      }
-                      setSelectedAnswer(null);
-                      setHasSubmitted(false);
-                      setShowExplanation(false);
-                      setQuestionStartTime(Date.now());
-                    }}
-                    disabled={!similarQuestions || similarQuestions.length === 0}
-                    className="w-full flex items-center justify-center gap-2 p-4 bg-purple-50 hover:bg-purple-100/80 border border-purple-250 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Sparkles className="w-4 h-4 text-purple-700" />
-                    <span className="font-bold text-xs text-purple-700">
-                      Harder Follow-up Question
+                      {loadingSimilar ? 'Loading similar question...' : 'Try Similar Question'}
                     </span>
                   </button>
                 </div>

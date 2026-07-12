@@ -647,28 +647,25 @@ export const usePracticeQuestions = () => {
     examType: string = 'JEE_MAINS'
   ): Promise<SimilarQuestion[] | null> => {
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('get-similar-questions', {
-        body: {
-          chapterId,
-          conceptTested,
-          originalQuestionId,
-          difficulty,
-          examType,
-          count: 5  // Fetch 5 so cycling through them works well
-        }
-      });
+      // Direct query from DB to avoid AI generation overhead
+      const { data, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('chapter_id', chapterId)
+        .neq('id', originalQuestionId)
+        .limit(5);
 
-      if (fnError) throw fnError;
-      if (data?.error) throw new Error(data.error);
+      if (error) throw error;
 
-      if (!data?.questions || data.questions.length === 0) {
+      if (!data || data.length === 0) {
         console.warn('[getSimilarQuestions] No similar questions found in DB for chapter:', chapterId);
         return null;
       }
 
-      return (data.questions as SimilarQuestion[]).map(q =>
-        shuffleQuestionOptions(q as any) as unknown as SimilarQuestion
-      );
+      return data.map((q: any) => {
+        const mapped = mapQuestionBankToInterface(q);
+        return shuffleQuestionOptions(mapped) as unknown as SimilarQuestion;
+      });
     } catch (err) {
       console.error('[getSimilarQuestions] Failed:', err);
       return null;
