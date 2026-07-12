@@ -317,176 +317,176 @@ const LandingPage: React.FC = () => {
     <div className="min-h-screen bg-white text-slate-800 overflow-x-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <LandingNav />
 
-      {/* ══════════════════════════════════
-          1. HERO SECTION — PREMIUM
-      ══════════════════════════════════ */}
-      <section className="bg-gradient-to-b from-slate-50 to-white border-b border-slate-100 pt-6 pb-0 lg:pt-8 overflow-hidden">
+      {/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+          1. HERO SECTION
+      \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */}
+      <section className="bg-white border-b border-slate-100 pt-6 pb-0 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-[1fr_1fr] gap-4 lg:gap-0 items-end">
+          <div className="grid lg:grid-cols-[40%_60%] items-center gap-0">
 
-            {/* LEFT COLUMN */}
-            <div className="space-y-5 pb-10 lg:pb-14 pt-4">
+            {/* ── LEFT COLUMN ── */}
+            <div className="space-y-4 py-10 pr-8 z-10 relative">
+
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-caption font-bold tracking-wide shadow-sm">
-                <Zap className="w-3.5 h-3.5 fill-blue-500 text-blue-500" />
-                AI-Powered Preparation Platform
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold tracking-widest shadow-sm">
+                <Star className="w-3 h-3 fill-blue-500 text-blue-500" />
+                AI-POWERED PREPARATION PLATFORM
               </div>
 
-              {/* Headline */}
-              <h1 className="text-display-lg font-bold text-slate-900 leading-[1.1] tracking-tight">
-                Crack JEE, NEET &amp; CUET with{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+              {/* Headline — safe zone, NEVER overlapped by image */}
+              <h1 className="text-display-lg font-bold text-slate-900 leading-[1.08] tracking-tight">
+                Crack JEE, NEET <br />
+                &amp; CUET with <br />
+                <span className="text-blue-600">
                   AI-Powered Learning
                 </span>
               </h1>
 
               {/* Subheadline */}
-              <p className="text-body-md text-slate-500 leading-relaxed max-w-lg font-normal">
-                Practice smarter with personalized study plans, AI doubt solving, mock tests, performance analytics and adaptive learning.
+              <p className="text-[15px] text-slate-500 leading-relaxed font-normal max-w-xs">
+                Smart study plans, PYQs, mock tests &amp; AI doubt solving to help you study better, not just harder.
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-3 pt-1">
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={() => navigate('/signup')}
                   id="hero-cta-primary"
-                  className="flex items-center gap-2 px-7 py-3.5 rounded-lg bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold text-body-sm transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 active:scale-[0.98]"
+                  className="flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-blue-500/30 active:scale-[0.98]"
                 >
-                  Start Free Practice Test
-                  <ArrowRight className="w-4 h-4" />
+                  Start Your Preparation <ArrowRight className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => navigate('/signup')}
+                  onClick={() => {}}
                   id="hero-cta-secondary"
-                  className="flex items-center gap-2 px-7 py-3.5 rounded-lg bg-white border-2 border-slate-200 text-slate-800 font-bold text-body-sm hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm active:scale-[0.98]"
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-slate-700 font-bold text-sm hover:text-blue-600 transition-all duration-200"
                 >
-                  <Bot className="w-4 h-4 text-blue-600" />
-                  Talk To AI Mentor
+                  <div className="w-7 h-7 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center shrink-0">
+                    <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[8px] border-l-blue-600 border-b-[5px] border-b-transparent ml-0.5" />
+                  </div>
+                  Watch Demo
                 </button>
               </div>
 
-              {/* Trust indicators */}
-              <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1 text-body-sm font-semibold text-slate-500">
+              {/* Trust microcopy */}
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-medium text-slate-400">
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> No Credit Card Required
+                  <CheckCircle2 className="w-3 h-3 text-emerald-500" /> No Credit Card Required
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Instant Access
+                  <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Instant Access
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Cancel Anytime
+                  <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Cancel Anytime
                 </span>
               </div>
+
+              {/* Compact inline stats panel */}
+              <div className="flex items-start gap-0 pt-2 border-t border-slate-100">
+                <div className="flex-1 flex flex-col gap-0.5 pr-4 border-r border-slate-100">
+                  <Users className="w-4 h-4 text-blue-600" />
+                  <div className="text-[16px] font-black text-slate-900 leading-none">1 Lakh+</div>
+                  <div className="text-[10px] font-medium text-slate-400 leading-tight">Aspirants Trust Us</div>
+                </div>
+                <div className="flex-1 flex flex-col gap-0.5 px-4 border-r border-slate-100">
+                  <FileText className="w-4 h-4 text-purple-600" />
+                  <div className="text-[16px] font-black text-slate-900 leading-none">10K+</div>
+                  <div className="text-[10px] font-medium text-slate-400 leading-tight">Mock Tests Daily</div>
+                </div>
+                <div className="flex-1 flex flex-col gap-0.5 px-4 border-r border-slate-100">
+                  <BookOpen className="w-4 h-4 text-emerald-600" />
+                  <div className="text-[16px] font-black text-slate-900 leading-none">50 Lakh+</div>
+                  <div className="text-[10px] font-medium text-slate-400 leading-tight">PYQs Practiced</div>
+                </div>
+                <div className="flex-1 flex flex-col gap-0.5 pl-4">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  <div className="text-[16px] font-black text-slate-900 leading-none">4.8/5</div>
+                  <div className="text-[10px] font-medium text-slate-400 leading-tight">Student Rating</div>
+                </div>
+              </div>
+
             </div>
 
-            {/* RIGHT COLUMN — Premium Hero Visual */}
-            <div className="relative flex justify-center items-end min-h-[500px] lg:min-h-[540px] select-none overflow-visible">
-
-              {/* Decorative circle background */}
-              <div
-                className="absolute bottom-0 w-[420px] h-[420px] rounded-full"
-                style={{ background: 'radial-gradient(circle, #eff6ff 0%, #e0e7ff 60%, transparent 100%)' }}
-              />
-
-              {/* Subtle radial grid — very low opacity structural texture */}
-              <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #94a3b8 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-
-              {/* Student image — large and dominant */}
+            {/* ── RIGHT COLUMN: Wide landscape illustration ── */}
+            <div className="relative w-full flex items-end justify-end overflow-hidden" style={{ height: '520px' }}>
               <img
-                src="/images/student_standing.png"
-                alt="PrepEntrance Student"
-                className="relative z-10 w-[320px] sm:w-[360px] lg:w-[380px] object-contain object-bottom"
-                style={{ height: '490px', objectFit: 'contain', objectPosition: 'bottom center', filter: 'drop-shadow(0 20px 40px rgba(37,99,235,0.18))' }}
+                src="/images/hero_wide.png"
+                alt="PrepEntrance students studying with AI-powered platform, laptop dashboard, PYQ books"
+                className="w-full h-full"
+                style={{
+                  objectFit: 'cover',
+                  objectPosition: 'center top',
+                  /* Soft left edge fade — text region is completely clear */
+                  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 12%, black 28%, black 100%)',
+                  maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.6) 12%, black 28%, black 100%)',
+                }}
               />
-
-              {/* Analytics card — overlaps the student (left) */}
-              <div className="hidden md:block absolute left-0 top-[8%] z-20 bg-white border border-slate-200 rounded-2xl p-4 shadow-2xl w-[195px]" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
-                <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-caption font-bold text-slate-700 tracking-wide">JEE Main Mock Test</span>
-                  <BarChart2 className="w-3.5 h-3.5 text-blue-500" />
-                </div>
-                <div className="text-caption font-bold text-slate-400 mb-0.5">Overall Score</div>
-                <div className="text-heading-md font-bold text-slate-900 leading-none mb-2.5">156<span className="text-body-md font-bold text-slate-400">/300</span></div>
-                <div className="grid grid-cols-2 gap-2 mb-2.5">
-                  <div>
-                    <div className="text-caption font-bold text-slate-400 mb-0.5">Percentile</div>
-                    <div className="text-body-sm font-bold text-slate-900">92.4</div>
-                  </div>
-                  <div>
-                    <div className="text-caption font-bold text-slate-400 mb-0.5">Pred. Rank</div>
-                    <div className="text-body-sm font-bold text-slate-900">1235</div>
-                  </div>
-                </div>
-                {/* Mini bar graph */}
-                <div className="flex gap-1 items-end h-9 mb-2.5">
-                  {[35, 60, 42, 75, 50, 90, 68].map((h, i) => (
-                    <div key={i} className="flex-1 rounded-sm transition-all" style={{ height: `${h}%`, backgroundColor: i === 5 ? '#2563eb' : '#bfdbfe' }} />
-                  ))}
-                </div>
-                <span className="inline-block px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-caption font-bold flex items-center gap-1">
-                  <Check className="w-2.5 h-2.5 stroke-[3]" /> Excellent Performance
-                </span>
-              </div>
-
-              {/* AI Mentor card — overlaps on right side */}
-              <div className="hidden md:block absolute right-0 top-[12%] z-20 bg-white border border-slate-200 rounded-2xl p-3.5 shadow-2xl w-[215px]" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}>
-                <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-slate-100">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span className="text-caption font-bold text-slate-800">AI Mentor</span>
-                  </div>
-                  <div className="flex gap-1">
-                    <Plus className="w-3 h-3 text-slate-300" />
-                    <Settings className="w-3 h-3 text-slate-300" />
-                  </div>
-                </div>
-                <p className="text-body-sm text-slate-500 font-semibold bg-slate-50 rounded-lg px-2.5 py-2 mb-2.5">
-                  Hi! How can I help you today?
-                </p>
-                <div className="space-y-1.5">
-                  {[
-                    { icon: <BookOpen className="w-3 h-3 text-blue-500" />, text: 'Explain this concept' },
-                    { icon: <HelpCircle className="w-3 h-3 text-emerald-500" />, text: 'Solve a doubt' },
-                    { icon: <Calendar className="w-3 h-3 text-purple-500" />, text: 'Generate study plan' },
-                    { icon: <TrendingUp className="w-3 h-3 text-indigo-500" />, text: 'Analyze my performance' },
-                  ].map((pill, i) => (
-                    <button
-                      key={i}
-                      onClick={() => navigate('/signup')}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-slate-100 bg-white text-caption font-semibold text-slate-600 hover:bg-blue-50 hover:border-blue-100 hover:text-blue-700 transition-all"
-                    >
-                      <div className="flex items-center gap-1.5">{pill.icon}<span>{pill.text}</span></div>
-                      <ChevronRight className="w-2.5 h-2.5 text-slate-300" />
-                    </button>
-                  ))}
-                </div>
-                <div className="relative mt-2.5">
-                  <input
-                    type="text"
-                    placeholder="Ask a question..."
-                    disabled
-                    className="w-full text-caption bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 pr-8 text-slate-400 font-medium"
-                  />
-                  <button className="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center">
-                    <ArrowRight className="w-2.5 h-2.5 text-white" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Achievement badge floating */}
-              <div className="hidden sm:flex absolute bottom-[12%] left-[5%] z-20 bg-white border border-amber-200 rounded-xl px-3 py-2 shadow-lg items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center">
-                  <Trophy className="w-4 h-4 text-amber-500" />
-                </div>
-                <div>
-                  <div className="text-caption font-bold text-slate-800">Top 5%</div>
-                  <div className="text-caption font-semibold text-slate-400">Percentile Rank</div>
-                </div>
-              </div>
             </div>
+
           </div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════
+          FEATURE STRIP
+      ══════════════════════════════════ */}
+      <div className="bg-white border-b border-slate-100 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-0 md:divide-x divide-slate-100 bg-white border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-xl py-4">
+            
+            <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left px-5 gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+                <Calendar className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <div className="text-[13px] font-bold text-slate-900 leading-tight">AI Study Planner</div>
+                <div className="text-[11px] font-medium text-slate-500 leading-snug mt-0.5">Personalized plan for your success</div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left px-5 gap-3">
+              <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
+                <Target className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <div className="text-[13px] font-bold text-slate-900 leading-tight">Smart Practice</div>
+                <div className="text-[11px] font-medium text-slate-500 leading-snug mt-0.5">AI-generated questions &amp; PYQ practice</div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left px-5 gap-3">
+              <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <div className="text-[13px] font-bold text-slate-900 leading-tight">Mock Test Series</div>
+                <div className="text-[11px] font-medium text-slate-500 leading-snug mt-0.5">Real exam interface &amp; analysis</div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left px-5 gap-3">
+              <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center shrink-0">
+                <MessageSquare className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div>
+                <div className="text-[13px] font-bold text-slate-900 leading-tight">AI Doubt Solving</div>
+                <div className="text-[11px] font-medium text-slate-500 leading-snug mt-0.5">24×7 AI + Expert Doubt Support</div>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center md:items-start text-center md:text-left px-5 gap-3">
+              <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
+                <BarChart2 className="w-5 h-5 text-orange-600" />
+              </div>
+              <div>
+                <div className="text-[13px] font-bold text-slate-900 leading-tight">Performance Tracker</div>
+                <div className="text-[11px] font-medium text-slate-500 leading-snug mt-0.5">Detailed analytics to improve every day</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
 
       {/* ══════════════════════════════════
           2. OUR EXAMS
@@ -596,35 +596,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* ══════════════════════════════════
-          3. WHY STUDENTS CHOOSE
-      ══════════════════════════════════ */}
-      <section id="features" className="py-16 bg-slate-50 border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-10">
-            <p className="text-caption font-bold text-blue-600 tracking-widest uppercase mb-2">Platform Features</p>
-            <h2 className="text-heading-lg font-extrabold text-slate-900 leading-tight">Why Students Choose PrepEntrance</h2>
-            <p className="text-body-md text-slate-500 font-normal mt-2 max-w-xl">Everything a JEE or NEET aspirant needs, in one focused platform.</p>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {features.map((f, i) => (
-              <div
-                key={i}
-                className="bg-white border border-slate-100 rounded-xl p-6 hover:shadow-md hover:border-slate-200 transition-all duration-200 cursor-default group flex items-start gap-4"
-              >
-                <div className={`w-11 h-11 rounded-lg border flex items-center justify-center shrink-0 ${f.color}`}>
-                  {f.icon}
-                </div>
-                <div>
-                  <h3 className="text-title-sm font-semibold text-slate-900 leading-snug mb-1">{f.title}</h3>
-                  <p className="text-body-sm font-normal text-slate-500 leading-relaxed">{f.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ══════════════════════════════════
           4. OUR BATCHES
@@ -642,113 +614,207 @@ const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {batches.map((b, i) => {
-              const isPurple = b.slug === 'aarohan';
-              const isOrange = b.slug === 'shikhar';
-              const isBlue = b.slug === 'aarambh';
-
-              const badgeBg = isPurple ? 'bg-purple-600 text-white' : isOrange ? 'bg-orange-500 text-white' : 'bg-blue-600 text-white';
-              const titleColor = 'text-slate-900';
-              const subColor = isPurple ? 'text-purple-700' : isOrange ? 'text-orange-600' : 'text-blue-700';
-              const btnBg = isPurple ? 'bg-purple-700 hover:bg-purple-800' : isOrange ? 'bg-orange-600 hover:bg-orange-700' : 'bg-blue-700 hover:bg-blue-800';
-              const checkColor = isPurple ? 'text-purple-600 bg-purple-100' : isOrange ? 'text-orange-600 bg-orange-100' : 'text-blue-600 bg-blue-100';
-              const borderColor = isPurple ? 'border-purple-200' : isOrange ? 'border-orange-200' : 'border-blue-200';
-              
-              const illustration = isBlue ? <AarambhIllustration /> : isPurple ? <AarohanIllustration /> : <ShikharIllustration />;
-
-              return (
-                <div
-                  key={i}
-                  className={`relative rounded-2xl bg-white border flex flex-col overflow-hidden shadow-sm ${borderColor}`}
-                >
-                  {/* Most Popular Flag */}
-                  {isPurple && (
-                    <div className="absolute top-0 right-4 px-3 py-1 rounded-b bg-purple-700 text-white text-[9px] font-black tracking-widest uppercase shadow-sm z-10 flex items-center gap-1">
-                      <Star className="w-3 h-3 fill-white" /> MOST POPULAR
-                    </div>
-                  )}
-
-                  <div className="p-5 flex flex-col h-full">
-                    {/* Top Row: Labels and Illustration */}
-                    <div className="flex items-start mb-4" style={{ minHeight: 172 }}>
-                      <div className="flex-1 mt-1 pr-2" style={{ minWidth: 0 }}>
-                        <span className={`inline-block px-2.5 py-1 rounded text-[8px] font-bold tracking-widest uppercase mb-3 shadow-sm ${badgeBg}`}>
-                          {b.label}
-                        </span>
-                        <h3 className={`text-[28px] font-black leading-none mb-1 tracking-tight ${titleColor}`}>
-                          {b.mainName}
-                        </h3>
-                        <div className={`text-xs font-bold tracking-widest uppercase ${subColor}`}>
-                          {b.year}
-                        </div>
-                        <div className="text-body-sm font-bold text-slate-800 mt-3">{b.subtitle}</div>
-                        <div className="text-[10px] font-medium text-slate-500 italic mt-0.5">{b.mission}</div>
-                      </div>
-                      
-                      {/* Illustration Area — fixed 172px height, 45% width, no clipping */}
-                      <div className="shrink-0" style={{ width: '45%', height: 172, maxWidth: 200, overflow: 'visible', position: 'relative' }}>
-                        {illustration}
-                      </div>
-                    </div>
-                    
-                    <hr className="border-slate-100 mb-5" />
-
-                    {/* Features List */}
-                    <ul className="space-y-2.5 mb-6 flex-1">
-                      {b.features.map((feat, j) => (
-                        <li key={j} className="flex items-center gap-2.5 text-xs font-medium text-slate-700">
-                          <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${checkColor}`}>
-                            <Check className="w-2.5 h-2.5 stroke-[3.5]" />
-                          </div>
-                          <span>{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    {/* Pricing Display */}
-                    <div className="bg-slate-50/50 rounded-xl flex flex-col items-center justify-center py-4 mb-4 min-h-[96px] border border-slate-100">
-                      {isBlue && (
-                        <div className="flex flex-col items-center gap-0.5">
-                          <div className="text-slate-500 text-[10px] font-bold">Starting at</div>
-                          <div className={`text-4xl font-black leading-none tracking-tight ${subColor}`}>₹349</div>
-                          <div className="text-slate-500 text-[10px] font-bold tracking-wide">per month</div>
-                        </div>
-                      )}
-                      
-                      {isPurple && (
-                        <div className="flex flex-col items-center">
-                          <div className="text-slate-400 text-[11px] font-bold line-through mb-0.5">₹4,188</div>
-                          <div className={`text-4xl font-black leading-none tracking-tight mb-1 ${subColor}`}>₹3,839</div>
-                          <div className="text-slate-500 text-[10px] font-bold tracking-wide mb-1.5">for 12 months</div>
-                          <div className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black tracking-widest uppercase">
-                            SAVE ₹349
-                          </div>
-                        </div>
-                      )}
-                      
-                      {isOrange && (
-                        <div className="flex flex-col items-center">
-                          <div className="text-slate-400 text-[11px] font-bold line-through mb-0.5">₹8,376</div>
-                          <div className={`text-4xl font-black leading-none tracking-tight mb-1 ${subColor}`}>₹7,329</div>
-                          <div className="text-slate-500 text-[10px] font-bold tracking-wide mb-1.5">for 24 months</div>
-                          <div className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black tracking-widest uppercase">
-                            SAVE ₹1,047
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* CTA */}
-                    <button
-                      onClick={() => navigate(`/batches/${b.slug}`)}
-                      className={`w-full py-3.5 rounded-lg text-white font-bold text-sm tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer shadow-sm ${btnBg}`}
-                    >
-                      {b.btnText}
-                    </button>
+            {/* AARAMBH */}
+            <div className="relative bg-white border border-blue-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full overflow-hidden">
+              <div className="p-5 flex-1 flex flex-col xl:flex-row gap-4 border-b border-slate-100 bg-gradient-to-br from-white to-blue-50/30">
+                {/* Left Identity */}
+                <div className="flex-1 flex flex-col items-start">
+                  <div className="bg-blue-600 text-white text-[9px] font-black tracking-widest uppercase px-2.5 py-1 rounded mb-3">
+                    1 MONTH PLAN
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 leading-none tracking-tight mb-1">AARAMBH</h3>
+                  <div className="text-[10px] font-bold tracking-widest uppercase text-blue-700 mb-2">START YOUR PREPARATION</div>
+                  
+                  <div className="text-[10px] font-bold text-slate-500 mb-3">
+                    JEE <span className="mx-1 text-slate-300">|</span> NEET <span className="mx-1 text-slate-300">|</span> CUET
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
+                    {['AI Plan', 'PYQs', 'DPPs', 'AI Mentor'].map((c, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded border border-blue-100 bg-white text-[10px] font-bold text-slate-600">{c}</span>
+                    ))}
                   </div>
                 </div>
-              );
-            })}
+                
+                {/* Right Dashboard */}
+                <div className="w-full xl:w-[150px] shrink-0 bg-white rounded-xl border border-blue-100 p-3 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="text-[9px] font-bold text-blue-600 mb-2 uppercase tracking-widest">DAY 01 PLAN</div>
+                    <div className="space-y-2">
+                      <div>
+                        <div className="flex justify-between text-[9px] font-bold text-slate-700 mb-1"><span>Physics</span><span className="text-blue-600">35%</span></div>
+                        <div className="h-1 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-blue-500 w-[35%] rounded-full" /></div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-[9px] font-bold text-slate-700 mb-1"><span>Chemistry</span><span className="text-blue-600">60%</span></div>
+                        <div className="h-1 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-blue-500 w-[60%] rounded-full" /></div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between text-[9px] font-bold text-slate-700 mb-1"><span>Mathematics</span><span className="text-blue-600">45%</span></div>
+                        <div className="h-1 bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-blue-500 w-[45%] rounded-full" /></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100 text-[8px] font-bold text-slate-500">
+                    <span className="flex items-center gap-0.5"><FileText className="w-2.5 h-2.5" /> DPP 01</span>
+                    <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> 45 min</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Footer */}
+              <div className="p-4 flex items-center justify-between bg-white">
+                <div>
+                  <div className="text-2xl font-black text-slate-900 leading-none">₹349 <span className="text-xs font-bold text-slate-500">/ month</span></div>
+                </div>
+                <button onClick={() => navigate('/batches/aarambh')} className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1 transition-colors">
+                  Explore Aarambh <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* AAROHAN */}
+            <div className="relative bg-white border border-purple-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full overflow-hidden">
+              <div className="absolute top-0 right-4 bg-purple-600 text-white text-[8px] font-black tracking-widest uppercase px-2 py-1 rounded-b shadow-sm z-10 flex items-center gap-1">
+                <Star className="w-2.5 h-2.5 fill-white" /> MOST POPULAR
+              </div>
+              
+              <div className="p-5 flex-1 flex flex-col xl:flex-row gap-4 border-b border-slate-100 bg-gradient-to-br from-white to-purple-50/30">
+                {/* Left Identity */}
+                <div className="flex-1 flex flex-col items-start mt-2 xl:mt-0">
+                  <div className="bg-purple-600 text-white text-[9px] font-black tracking-widest uppercase px-2.5 py-1 rounded mb-3">
+                    12 MONTH PLAN
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 leading-none tracking-tight mb-1">AAROHAN</h3>
+                  <div className="text-[10px] font-bold tracking-widest uppercase text-purple-700 mb-2">BOOST YOUR RANK</div>
+                  
+                  <div className="text-[10px] font-bold text-slate-500 mb-3">
+                    JEE <span className="mx-1 text-slate-300">|</span> CLASS 12
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
+                    {['Mock Tests', 'PYQs', 'Rank Predictor', 'AI Mentor'].map((c, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded border border-purple-100 bg-white text-[10px] font-bold text-slate-600">{c}</span>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Right Dashboard */}
+                <div className="w-full xl:w-[160px] shrink-0 bg-white rounded-xl border border-purple-100 p-3 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="text-[9px] font-bold text-purple-600 mb-2 uppercase tracking-widest">MOCK TEST PROGRESS</div>
+                    <div className="flex items-end justify-between h-12 mb-1 px-1">
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="text-[9px] font-bold text-slate-700">142</div>
+                        <div className="w-4 bg-purple-200 rounded-t-sm" style={{ height: '30px' }} />
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="text-[9px] font-bold text-slate-700">181</div>
+                        <div className="w-4 bg-purple-400 rounded-t-sm" style={{ height: '38px' }} />
+                      </div>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="text-[9px] font-bold text-purple-700">213</div>
+                        <div className="w-4 bg-purple-600 rounded-t-sm" style={{ height: '48px' }} />
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-[7px] font-bold text-slate-400 uppercase">
+                      <span>Mock 01</span><span>Mock 05</span><span>Mock 10</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1 mt-3 pt-2 border-t border-slate-100 text-center">
+                    <div>
+                      <div className="text-[7px] font-bold text-slate-400">PYQ Acc.</div>
+                      <div className="text-[10px] font-bold text-slate-700">84%</div>
+                    </div>
+                    <div>
+                      <div className="text-[7px] font-bold text-slate-400">Physics</div>
+                      <div className="text-[10px] font-bold text-emerald-600">+12%</div>
+                    </div>
+                    <div>
+                      <div className="text-[7px] font-bold text-slate-400">Weak Ch.</div>
+                      <div className="text-[10px] font-bold text-rose-600">06</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Footer */}
+              <div className="p-4 flex items-center justify-between bg-white">
+                <div className="flex flex-col">
+                  <div className="text-[10px] font-bold text-slate-400 line-through">₹4,188</div>
+                  <div className="text-2xl font-black text-slate-900 leading-none flex items-end gap-1">
+                    ₹3,839 <span className="text-xs font-bold text-slate-500 pb-0.5">/ 12 months</span>
+                  </div>
+                </div>
+                <button onClick={() => navigate('/batches/aarohan')} className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1 transition-colors">
+                  Explore Aarohan <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* SHIKHAR */}
+            <div className="relative bg-white border border-orange-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow flex flex-col h-full overflow-hidden">
+              <div className="p-5 flex-1 flex flex-col xl:flex-row gap-4 border-b border-slate-100 bg-gradient-to-br from-white to-orange-50/30">
+                {/* Left Identity */}
+                <div className="flex-1 flex flex-col items-start">
+                  <div className="bg-orange-500 text-white text-[9px] font-black tracking-widest uppercase px-2.5 py-1 rounded mb-3">
+                    24 MONTH PLAN
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 leading-none tracking-tight mb-1">SHIKHAR</h3>
+                  <div className="text-[10px] font-bold tracking-widest uppercase text-orange-600 mb-2">ACHIEVE SELECTION</div>
+                  
+                  <div className="text-[10px] font-bold text-slate-500 mb-3">
+                    JEE <span className="mx-1 text-slate-300">|</span> NEET
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1.5 mt-auto">
+                    {['Full Syllabus Tests', 'Rank Predictor', 'Personal Mentorship'].map((c, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded border border-orange-100 bg-white text-[10px] font-bold text-slate-600">{c}</span>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Right Dashboard */}
+                <div className="w-full xl:w-[150px] shrink-0 bg-white rounded-xl border border-orange-100 p-3 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                  <div>
+                    <div className="text-[9px] font-bold text-orange-600 mb-3 uppercase tracking-widest">LATEST TEST RESULT</div>
+                    
+                    <div className="space-y-2 relative z-10">
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase">Percentile</div>
+                        <div className="text-sm font-black text-orange-600">99.46%ile</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase">AIR (All India Rank)</div>
+                        <div className="text-sm font-black text-slate-800">1,243</div>
+                      </div>
+                      <div>
+                        <div className="text-[8px] font-bold text-slate-400 uppercase">Score</div>
+                        <div className="text-sm font-black text-slate-800">275 <span className="text-[10px] font-bold text-slate-400">/ 300</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Background Trophy / Element */}
+                  <div className="absolute -right-2 -bottom-2 opacity-20 pointer-events-none">
+                    <Trophy className="w-20 h-20 text-orange-500" />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Footer */}
+              <div className="p-4 flex items-center justify-between bg-white">
+                <div className="flex flex-col">
+                  <div className="text-[10px] font-bold text-slate-400 line-through">₹8,376</div>
+                  <div className="text-2xl font-black text-slate-900 leading-none flex items-end gap-1">
+                    ₹7,329 <span className="text-xs font-bold text-slate-500 pb-0.5">/ 24 months</span>
+                  </div>
+                </div>
+                <button onClick={() => navigate('/batches/shikhar')} className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1 transition-colors">
+                  Explore Shikhar <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Bottom Trust Strip */}

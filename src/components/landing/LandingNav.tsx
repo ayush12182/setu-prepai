@@ -5,14 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 
 const NAV_LINKS = [
-  { label: 'Home', href: '/' },
   { label: 'JEE', href: '/jee' },
   { label: 'NEET', href: '/neet' },
   { label: 'CUET', href: '/cuet' },
-  { label: 'AI Tutor', href: '#features' },
-  { label: 'Practice Tests', href: '/practice-tests' },
+  { label: 'Features', href: '#features' },
+  { label: 'Test Series', href: '/practice-tests' },
+  { label: 'AI Mentor', href: '#features' },
   { label: 'Pricing', href: '/pricing' },
-  { label: 'Blog', href: '/blog' },
 ];
 
 const LandingNav: React.FC = () => {
@@ -115,7 +114,7 @@ const LandingNav: React.FC = () => {
             className="group relative flex items-center justify-center gap-2 h-[52px] px-6 rounded-[14px] bg-white border border-[#E2E8F0] hover:border-indigo-600 hover:bg-blue-50/20 text-slate-700 hover:text-indigo-700 text-sm font-semibold hover:-translate-y-[2px] active:translate-y-0 transition-all duration-200 ease-out shadow-xs focus:outline-none"
           >
             <User className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-            Sign In
+            Log in
           </button>
           {user ? (
             <button
@@ -133,7 +132,7 @@ const LandingNav: React.FC = () => {
                 onClick={() => navigate('/signup')}
                 className="group relative flex items-center justify-center gap-3.5 h-[52px] px-8 rounded-[14px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/35 hover:-translate-y-[2px] active:translate-y-0 transition-all duration-200 ease-out focus:outline-none"
               >
-                Join PrepEntrance
+                Get Started
                 <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shrink-0 shadow-xs">
                   <ArrowRight className="w-3.5 h-3.5 text-indigo-600 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </div>
@@ -203,7 +202,7 @@ const LandingNav: React.FC = () => {
                   className="group w-full flex items-center justify-center gap-2 h-[52px] px-6 rounded-[14px] bg-white border border-[#E2E8F0] hover:border-indigo-600 hover:bg-blue-50/20 text-slate-700 hover:text-indigo-700 text-sm font-semibold hover:-translate-y-[2px] active:translate-y-0 transition-all duration-200 ease-out shadow-xs focus:outline-none"
                 >
                   <User className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                  Sign In
+                  Log in
                 </button>
                 {user ? (
                   <button
@@ -221,7 +220,7 @@ const LandingNav: React.FC = () => {
                       onClick={() => { navigate('/signup'); setMobileOpen(false); }}
                       className="group w-full flex items-center justify-center gap-3.5 h-[52px] px-8 rounded-[14px] bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/35 hover:-translate-y-[2px] active:translate-y-0 transition-all duration-200 ease-out focus:outline-none"
                     >
-                      Join PrepEntrance
+                      Get Started
                       <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shrink-0 shadow-xs">
                         <ArrowRight className="w-3.5 h-3.5 text-indigo-600 transition-transform duration-200 group-hover:translate-x-0.5" />
                       </div>
