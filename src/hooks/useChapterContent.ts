@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { getChapterById } from "@/data/syllabus";
 
-const CACHE_PREFIX = "pe_chapter_content_v2_";
+const CACHE_PREFIX = "pe_chapter_content_v3_";
 const CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour
 
 export interface ChapterContentData {
@@ -100,7 +100,7 @@ async function fetchChapterContent(
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   const token = session?.access_token || anonKey;
 
-  const params = new URLSearchParams({ chapterId, examType, language });
+  const params = new URLSearchParams({ chapterId, examType, language, cb: "v5" });
   const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-chapter-content?${params}`;
 
   const response = await fetch(url, {
