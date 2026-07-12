@@ -37,15 +37,12 @@ function normalizeMarkdownContent(text: string): string {
   normalized = normalized.replace(/([^\n])\s+(#{1,6}\s+[A-Za-z0-9])/g, '$1\n\n$2');
 
   // 1b. UN-SQUASH LIST ITEMS (Numbers)
-  // Fix lists collapsed into a single line (especially Learning Outcomes).
-  // Looks for a number, period, space, and a capital letter/number, and forces it to a new line.
-  // Example: "motion). 2. String Tension:" -> "motion).\n\n2. String Tension:"
-  normalized = normalized.replace(/([a-z0-9\)\.]|[^\n])\s+(\d+\.\s+[A-Za-z0-9\*])/g, '$1\n\n$2');
+  // Fix lists collapsed into a single line. Must follow punctuation to avoid breaking math.
+  normalized = normalized.replace(/([.:?!\]])\s+(\d+\.\s+[A-Z])/g, '$1\n\n$2');
 
   // 1c. UN-SQUASH BULLETS
-  // Fix multiple spaces or squashed bullets around list items (* or -)
-  // Example: "v_top >= \sqrt{gR} * To oscillate:" -> "v_top >= \sqrt{gR}\n\n* To oscillate:"
-  normalized = normalized.replace(/([^\n])\s+([-\*]\s+[A-Za-z0-9])/g, '$1\n\n$2');
+  // Fix bullets collapsed into a single line. Must follow punctuation to avoid breaking math minus signs.
+  normalized = normalized.replace(/([.:?!\]])\s+([-\*]\s+[A-Z])/g, '$1\n\n$2');
 
   // 1d. SEPARATE INLINE HEADINGS (e.g. "### 3. Normal Force: The normal force...")
   // If an entire paragraph is squashed into an h3 because of a missing newline after the title.
