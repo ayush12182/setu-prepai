@@ -815,7 +815,7 @@ const LandingPage: React.FC = () => {
                 <Users className="w-8 h-8 text-blue-700" />
               </div>
               <div>
-                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">Expert Faculty</h4>
+                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">Expert Faculty Material</h4>
                 <p className="text-[10px] font-medium text-slate-500 mt-0.5 leading-tight">Learn from top teachers<br/>from Kota.</p>
               </div>
             </div>
