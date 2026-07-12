@@ -807,7 +807,52 @@ const LandingPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Bottom Trust Strip */}
+          <div className="mt-8 mb-4 rounded-xl bg-white border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col md:flex-row items-center justify-between p-2 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+            {/* Item 1 */}
+            <div className="flex flex-1 items-center gap-3 px-4 py-3 md:py-1">
+              <div className="w-10 h-10 rounded flex items-center justify-center shrink-0">
+                <Users className="w-8 h-8 text-blue-700" />
+              </div>
+              <div>
+                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">Expert Faculty</h4>
+                <p className="text-[10px] font-medium text-slate-500 mt-0.5 leading-tight">Learn from top teachers<br/>from Kota.</p>
+              </div>
+            </div>
+            
+            {/* Item 2 */}
+            <div className="flex flex-1 items-center gap-3 px-4 py-3 md:py-1">
+              <div className="w-10 h-10 rounded flex items-center justify-center shrink-0">
+                <TrendingUp className="w-8 h-8 text-purple-700" />
+              </div>
+              <div>
+                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">Proven Results</h4>
+                <p className="text-[10px] font-medium text-slate-500 mt-0.5 leading-tight">Trusted by lakhs of<br/>aspirants across India.</p>
+              </div>
+            </div>
 
+            {/* Item 3 */}
+            <div className="flex flex-1 items-center gap-3 px-4 py-3 md:py-1">
+              <div className="w-10 h-10 rounded flex items-center justify-center shrink-0">
+                <FileText className="w-8 h-8 text-orange-600" />
+              </div>
+              <div>
+                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">Structured Preparation</h4>
+                <p className="text-[10px] font-medium text-slate-500 mt-0.5 leading-tight">Study, practice & test in<br/>perfect sequence.</p>
+              </div>
+            </div>
+
+            {/* Item 4 */}
+            <div className="flex flex-1 items-center gap-3 px-4 py-3 md:py-1">
+              <div className="w-10 h-10 rounded flex items-center justify-center shrink-0">
+                <Headphones className="w-8 h-8 text-green-600" />
+              </div>
+              <div>
+                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">24×7 Doubt Support</h4>
+                <p className="text-[10px] font-medium text-slate-500 mt-0.5 leading-tight">AI + Human experts<br/>whenever you need.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

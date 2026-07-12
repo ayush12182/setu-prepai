@@ -62,11 +62,7 @@ function normalizeMarkdownContent(text: string): string {
   // Fix \( and \) to $
   normalized = normalized.replace(/\\\(/g, '$').replace(/\\\)/g, '$');
   
-  // Ensure block math $$ has newlines around it so it renders as a proper block element in markdown
-  normalized = normalized.replace(/\$\$(.*?)\$\$/gs, (match, inner) => {
-    return `\n\n$$${inner}$$\n\n`;
-  });
-  
+
   // Remove any raw AI structural metadata like [METADATA]
   normalized = normalized.replace(/\[METADATA\][\s\S]*?\[\/METADATA\]/gi, '');
   
