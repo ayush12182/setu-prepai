@@ -201,7 +201,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                       {/* Options */}
                       <div className="space-y-2">
                         {(['A', 'B', 'C', 'D'] as const).map((opt) => {
-                          const optionText = {
+                          const optionText = q.options?.[opt] || {
                             A: q.option_a,
                             B: q.option_b,
                             C: q.option_c,
@@ -320,7 +320,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                       {/* Options */}
                       <div className="space-y-2">
                         {(['A', 'B', 'C', 'D'] as const).map((opt) => {
-                          const optionText = {
+                          const optionText = q.options?.[opt] || {
                             A: q.option_a,
                             B: q.option_b,
                             C: q.option_c,
