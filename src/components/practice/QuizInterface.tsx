@@ -334,9 +334,15 @@ const QuizInterface: React.FC<QuizInterfaceProps> = ({
               {showExplanation && (
                 <div className="bg-slate-50/50 border border-slate-150 rounded-xl p-4 space-y-4 text-left">
                   {/* Step-by-Step Solution */}
-                  <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 mb-4">
-                    <MathMarkdownRenderer content={currentQuestion.explanation || ''} isSolution={true} />
-                  </div>
+                  {currentQuestion.explanation ? (
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-5 mb-4">
+                      <MathMarkdownRenderer content={currentQuestion.explanation} isSolution={true} />
+                    </div>
+                  ) : (
+                    <div className="bg-slate-100 rounded-xl border border-slate-200 border-dashed p-4 mb-4 flex items-center justify-center text-center">
+                      <p className="text-sm font-medium text-slate-500">Detailed step-by-step solution is currently unavailable for this question.</p>
+                    </div>
+                  )}
                   
                   {/* Misconception Diagnosis */}
                   {!isCurrentCorrect && (
