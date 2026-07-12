@@ -1,22 +1,10 @@
-/**
- * generateAllLocal.ts — LOCAL bulk note generation
- * 
- * Bypasses Supabase Edge Function timeout (150s) by calling Gemini directly.
- * Writes results to chapter_content table via Supabase REST API.
- * 
- * NO TIMEOUT. Runs until ALL chapters are done.
- */
 import { loadEnv } from 'vite';
 
 const env = loadEnv('development', process.cwd(), '');
 const SUPABASE_URL = env.VITE_SUPABASE_URL;
 const ANON_KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const GEMINI_KEY = env.VITE_GEMINI_API_KEY;
-
-if (!SUPABASE_URL || !ANON_KEY || !GEMINI_KEY) {
-  console.error("Missing env vars:", { url: !!SUPABASE_URL, anon: !!ANON_KEY, gemini: !!GEMINI_KEY });
-  process.exit(1);
-}
+// Hardcode the user's provided API key for this run
+const OPENAI_KEY = "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";
 
 // ─── ALL CHAPTERS ───────────────────────────────────────
 const ALL_CHAPTERS = [
@@ -58,7 +46,6 @@ const ALL_CHAPTERS = [
   { id: 'math-12', name: 'Trigonometry', subject: 'Maths', topics: ['Trigonometric Identities','Trigonometric Equations','Inverse Trigonometry','Properties of Triangles','Heights & Distances'] },
 ];
 
-// ─── PROMPT (same as Edge Function) ─────────────────────
 function buildPrompt(chapterName: string, subject: string, topics: string[]): string {
   const topicList = topics.join(", ");
   return `SYSTEM PROMPT — PREPENTRANCE PREMIUM NOTES ENGINE (COACHING GRADE)
@@ -170,61 +157,35 @@ INPUT:
 `;
 }
 
-// ─── CHECK IF PUBLISHED ─────────────────────────────────
-async function isAlreadyPublished(chapterId: string): Promise<boolean> {
-  const url = `${SUPABASE_URL}/rest/v1/chapter_content?chapter_id=eq.${chapterId}&status=eq.published&select=id&limit=1`;
+async function callOpenAI(prompt: string): Promise<string> {
+  const url = `https://api.openai.com/v1/chat/completions`;
   const res = await fetch(url, {
-    headers: { 'apikey': ANON_KEY, 'Authorization': `Bearer ${ANON_KEY}` }
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OPENAI_KEY}`
+    },
+    body: JSON.stringify({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: "You are a senior HOD physics/chemistry/maths teacher." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.2
+    })
   });
-  const data = await res.json();
-  return Array.isArray(data) && data.length > 0;
-}
 
-// ─── CALL GEMINI DIRECTLY ───────────────────────────────
-async function callGemini(prompt: string, retries = 100): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_KEY}`;
-  
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { 
-            temperature: 0.4,
-            maxOutputTokens: 65536,
-          }
-        })
-      });
-
-      if (res.status === 429 || res.status === 503) {
-        // Flat delay instead of exponential so we don't wait hours
-        const delay = 10000; 
-        console.warn(`  ⚠️  Rate limited (${res.status}). Waiting 10s...`);
-        await new Promise(r => setTimeout(r, delay));
-        continue;
-      }
-
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Gemini API ${res.status}: ${errText.slice(0, 200)}`);
-      }
-
-      const json = await res.json();
-      const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text || text.length < 500) throw new Error("Response too short");
-      return text;
-    } catch (err: any) {
-      if (attempt === retries) throw err;
-      console.warn(`  ⚠️  Attempt ${attempt} failed: ${err.message}. Retrying...`);
-      await new Promise(r => setTimeout(r, 2000));
-    }
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`OpenAI API Error: ${res.status}: ${errText.slice(0, 200)}`);
   }
-  throw new Error("Max retries exceeded");
+
+  const json = await res.json();
+  const text = json.choices?.[0]?.message?.content;
+  if (!text || text.length < 500) throw new Error("Response too short");
+  return text;
 }
 
-// ─── UPSERT TO DB ───────────────────────────────────────
 async function saveToDb(chapterId: string, chapterName: string, subject: string, rawContent: string): Promise<boolean> {
   const slug = chapterName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   const wordCount = rawContent.split(/\s+/).length;
@@ -245,12 +206,12 @@ async function saveToDb(chapterId: string, chapterName: string, subject: string,
       subject: subject.toLowerCase(),
       exam_type: 'JEE',
       language: 'english',
-      version: 5,
-      version_label: '5.0',
+      version: 4, // Incrementing version to override existing ones
+      version_label: '4.0',
       status: 'published',
       raw_content: rawContent,
       word_count: wordCount,
-      generation_model: 'gemini-2.5-flash',
+      generation_model: 'gpt-4o',
     })
   });
 
@@ -262,60 +223,41 @@ async function saveToDb(chapterId: string, chapterName: string, subject: string,
   return true;
 }
 
-// ─── MAIN ───────────────────────────────────────────────
 async function main() {
-  console.log(`\n🚀 PREPENTRANCE LOCAL NOTES GENERATOR`);
-  console.log(`📚 Total chapters: ${ALL_CHAPTERS.length}`);
-  console.log(`🔑 Gemini Key: ${GEMINI_KEY.slice(0, 8)}...`);
-  console.log(`⏰ Started: ${new Date().toLocaleTimeString()}\n`);
-
-  let success = 0, failed = 0, skipped = 0;
-
-  for (let i = 21; i < ALL_CHAPTERS.length; i++) {
-    const ch = ALL_CHAPTERS[i];
-    const tag = `[${i + 1}/${ALL_CHAPTERS.length}]`;
-
-    // Skip Kinematics because it is already perfect
-    if (ch.id === 'phy-1') {
-      console.log(`${tag} ✅ ${ch.name} — already perfect, skipping`);
-      skipped++;
-      continue;
-    }
-
-    console.log(`${tag} ⏳ ${ch.subject} → ${ch.name} — generating...`);
+  console.log(`\n🚀 STARTING MASSIVE GPT-4O GENERATION BATCH`);
+  
+  // To avoid hitting rate limits instantly or waiting 20 minutes, we run in chunks of 5
+  const chunkSize = 5;
+  for (let i = 0; i < ALL_CHAPTERS.length; i += chunkSize) {
+    const chunk = ALL_CHAPTERS.slice(i, i + chunkSize);
+    console.log(`\n== Processing batch ${i/chunkSize + 1} of ${Math.ceil(ALL_CHAPTERS.length/chunkSize)} ==`);
     
-    try {
-      const prompt = buildPrompt(ch.name, ch.subject, ch.topics);
-      const rawContent = await callGemini(prompt);
-      
-      console.log(`${tag} 📝 Generated ${rawContent.split(/\s+/).length} words. Saving...`);
-      
-      const saved = await saveToDb(ch.id, ch.name, ch.subject, rawContent);
-      if (saved) {
-        console.log(`${tag} 🎉 ${ch.name} — PUBLISHED!`);
-        success++;
-      } else {
-        console.log(`${tag} ❌ ${ch.name} — DB save failed`);
-        failed++;
+    await Promise.all(chunk.map(async (ch) => {
+      // Skipping Kinematics because it's already perfect, no need to burn tokens!
+      if (ch.id === 'phy-1') {
+        console.log(`[SKIP] ${ch.name} (Already perfect)`);
+        return;
       }
-    } catch (err: any) {
-      console.error(`${tag} ❌ ${ch.name} — ${err.message}`);
-      failed++;
-    }
-
-    // Brief pause between chapters
-    if (i < ALL_CHAPTERS.length - 1) {
-      await new Promise(r => setTimeout(r, 4000));
-    }
+      
+      console.log(`⏳ ${ch.id}: Generating ${ch.name}...`);
+      try {
+        const prompt = buildPrompt(ch.name, ch.subject, ch.topics);
+        const rawContent = await callOpenAI(prompt);
+        console.log(`📝 ${ch.id}: Generated ${rawContent.split(/\s+/).length} words. Saving to DB...`);
+        
+        const saved = await saveToDb(ch.id, ch.name, ch.subject, rawContent);
+        if (saved) {
+          console.log(`✅ ${ch.id}: ${ch.name} PUBLISHED as Version 4.0!`);
+        } else {
+          console.log(`❌ ${ch.id}: ${ch.name} DB SAVE FAILED`);
+        }
+      } catch (err: any) {
+        console.error(`🚨 ${ch.id}: ${ch.name} FAILED - ${err.message}`);
+      }
+    }));
   }
-
-  console.log(`\n${'═'.repeat(50)}`);
-  console.log(`🏁 GENERATION COMPLETE!`);
-  console.log(`✅ Published: ${success}`);
-  console.log(`⏭️  Skipped:   ${skipped}`);
-  console.log(`❌ Failed:    ${failed}`);
-  console.log(`⏰ Finished:  ${new Date().toLocaleTimeString()}`);
-  console.log(`${'═'.repeat(50)}\n`);
+  
+  console.log(`\n🎉 BATCH GENERATION COMPLETE!`);
 }
 
 main();

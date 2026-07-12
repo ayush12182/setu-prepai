@@ -10,13 +10,7 @@ const ANON_KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const NOTES_DIR = path.join(os.homedir(), 'Downloads', 'PrepEntrance_Physics_Chapters_01_to_07_Master_Notes');
 
 const CHAPTERS = [
-  { file: '01_Units_and_Dimensions_Complete_Master_Notes.md', id: 'phy-0', name: 'Units & Dimensions' },
-  { file: '02_Kinematics_Complete_Master_Notes.md', id: 'phy-1', name: 'Kinematics' },
-  { file: '03_Laws_of_Motion_Complete_Master_Notes.md', id: 'phy-2', name: 'Laws of Motion' },
-  { file: '04_Work_Energy_and_Power_Complete_Master_Notes.md', id: 'phy-3', name: 'Work, Energy & Power' },
-  { file: '05_System_of_Particles_and_Centre_of_Mass_Complete_Master_Notes.md', id: 'phy-4', name: 'System of Particles & Centre of Mass' },
-  { file: '06_Rotational_Motion_Complete_Master_Notes.md', id: 'phy-5', name: 'Rotational Motion' },
-  { file: '07_Gravitation_Complete_Master_Notes.md', id: 'phy-6', name: 'Gravitation' }
+  { file: '01_Units_and_Dimensions_Complete_Master_Notes.md', id: 'phy-0', name: 'Units & Dimensions' }
 ];
 
 async function saveToDb(chapterId: string, chapterName: string, rawContent: string): Promise<boolean> {
@@ -39,12 +33,12 @@ async function saveToDb(chapterId: string, chapterName: string, rawContent: stri
       subject: 'physics',
       exam_type: 'JEE',
       language: 'english',
-      version: 1,
-      version_label: '1.0',
+      version: 2, // Increment version to bypass unique constraint
+      version_label: '2.0',
       status: 'published',
       raw_content: rawContent,
       word_count: wordCount,
-      generation_model: 'manual-upload',
+      generation_model: 'manual-upload-v2',
     })
   });
 

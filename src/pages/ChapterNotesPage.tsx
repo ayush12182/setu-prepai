@@ -1321,8 +1321,8 @@ const ChapterNotesPage: React.FC = () => {
 
         {/* Back navigation */}
         <div className="pt-4 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/chapter/${chapter.id}`)} className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Chapter
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/learn/${chapter.subject}`)} className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Subject
           </Button>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="h-10" onClick={handleCopy}>

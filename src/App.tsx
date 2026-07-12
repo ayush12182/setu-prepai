@@ -125,7 +125,7 @@ const App = () => (
                         <Route path="/learn/:subject" element={<StudentHubRoute><SubjectPage /></StudentHubRoute>} />
                         <Route path="/learn/:subject/:chapterId" element={<StudentHubRoute><ChapterDetailPage /></StudentHubRoute>} />
                         <Route path="/tutorial-sessions" element={<TutorialSessionsPage />} />
-                        <Route path="/chapter/:chapterId" element={<ChapterPage />} />
+                        <Route path="/chapter/:chapterId" element={<Navigate to="notes" replace />} />
                         <Route path="/chapter/:chapterId/notes" element={<ChapterNotesPage />} />
                         <Route path="/subchapter/:subchapterId" element={<SubchapterPage />} />
                         <Route path="/practice" element={<TrialGate><PracticePage /></TrialGate>} />
