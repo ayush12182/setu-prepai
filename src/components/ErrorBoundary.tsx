@@ -20,11 +20,26 @@ export class ErrorBoundary extends Component<Props, State> {
   public state: State = { hasError: false, error: null };
 
   public static getDerivedStateFromError(error: Error): State {
+    // Automatically handle Vite dynamic import chunk failures after deployments
+    if (
+      error.message.includes('Failed to fetch dynamically imported module') ||
+      error.message.includes('Importing a module script failed')
+    ) {
+      // Force a hard reload to get the new index.html and chunks
+      window.location.reload();
+      // Return state while reloading
+      return { hasError: true, error };
+    }
     return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[ErrorBoundary] Caught error:', error, info);
+    if (
+      !error.message.includes('Failed to fetch dynamically imported module') &&
+      !error.message.includes('Importing a module script failed')
+    ) {
+      console.error('[ErrorBoundary] Caught error:', error, info);
+    }
   }
 
   handleRetry = () => {

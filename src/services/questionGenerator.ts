@@ -184,7 +184,7 @@ export async function generateQuestions(
 
   // TIER 3: SMART OFFLINE QUESTION BANK
   try {
-    const offlineQuestions = getOfflineQuestions(params.subject, params.chapter, params.difficulty, params.count * 3);
+    const offlineQuestions = getOfflineQuestions(params.subject, params.chapterId || params.chapter, params.difficulty, params.count * 3);
     const built = tryBuild(offlineQuestions, 'offline');
     if (built) {
       console.log('[QuestionGenerator] Smart Offline Bank succeeded & Audited!');

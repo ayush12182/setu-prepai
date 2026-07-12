@@ -501,23 +501,31 @@ const TestExecution: React.FC<TestExecutionProps> = ({
 
     // MOCK FOR DEMO: Save stats to localStorage so TestPage can read them
     try {
+      const raw = localStorage.getItem('demo_chapter_stats');
+      const demoStats = raw ? JSON.parse(raw) : {};
+      
+      // Update overall test counter
+      demoStats['__overall'] = (demoStats['__overall'] || 0) + 1;
+
+      // Update specific chapters if provided
       if (config.chapters && config.chapters.length > 0) {
-        const chId = config.chapters[0].chapterId;
-        const raw = localStorage.getItem('demo_chapter_stats');
-        const demoStats = raw ? JSON.parse(raw) : {};
+        // Distribute questions solved
+        const qPerCh = Math.ceil(correctAnswersCount / config.chapters.length);
         
-        const prevStats = demoStats[chId] || { testsAttempted: 0, questionsSolved: 0, mastery: 0 };
-        
-        demoStats[chId] = {
-          testsAttempted: prevStats.testsAttempted + 1,
-          questionsSolved: prevStats.questionsSolved + correctAnswersCount,
-          mastery: Math.max(prevStats.mastery, scorePercentage),
-          lastScore: scorePercentage,
-          lastAttempt: new Date().toISOString()
-        };
-        
-        localStorage.setItem('demo_chapter_stats', JSON.stringify(demoStats));
+        config.chapters.forEach(ch => {
+          const chId = ch.chapterId;
+          const prevStats = demoStats[chId] || { testsAttempted: 0, questionsSolved: 0, mastery: 0 };
+          
+          demoStats[chId] = {
+            testsAttempted: prevStats.testsAttempted + 1,
+            questionsSolved: prevStats.questionsSolved + qPerCh,
+            mastery: Math.max(prevStats.mastery, scorePercentage),
+            lastScore: scorePercentage,
+            lastAttempt: new Date().toISOString()
+          };
+        });
       }
+      localStorage.setItem('demo_chapter_stats', JSON.stringify(demoStats));
     } catch(e) {}
 
     setTestAnswers(quizAnswers);

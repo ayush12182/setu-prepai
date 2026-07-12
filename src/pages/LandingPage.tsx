@@ -3,11 +3,13 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import LandingNav from '@/components/landing/LandingNav';
+import { AarambhIllustration, AarohanIllustration, ShikharIllustration } from '@/components/landing/BatchIllustrations';
 import {
   Bot, LineChart, Brain, Clock, ChevronRight, Check, FileText, Users, Trophy,
   ChevronLeft, Settings, Plus, Building, Facebook, Instagram, Youtube, Twitter,
   Star, ArrowRight, TrendingUp, Calendar, Zap, CheckCircle2, BookOpen, HelpCircle,
   Target, MessageSquare, BarChart2, Layers, Sparkles, MapPin, Rocket, Shield,
+  Atom, Stethoscope, Headphones,
 } from 'lucide-react';
 
 /* ─────────────────────────────────────────────
@@ -217,39 +219,7 @@ const CUETIllustration = () => (
 /* ─────────────────────────────────────────────
    FLOATING DECORATIVE ELEMENTS FOR HERO
 ───────────────────────────────────────────── */
-const FloatingStars = () => (
-  <>
-    {/* Animated star decorations */}
-    <div className="absolute top-4 right-12 animate-bounce" style={{ animationDuration: '3s' }}>
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path d="M10 1L12.47 7.27H19.51L13.9 11.18L16.18 17.51L10 13.27L3.82 17.51L6.1 11.18L0.49 7.27H7.53L10 1Z" fill="#FBBF24" opacity="0.8" />
-      </svg>
-    </div>
-    <div className="absolute top-16 right-4 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}>
-      <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
-        <path d="M10 1L12.47 7.27H19.51L13.9 11.18L16.18 17.51L10 13.27L3.82 17.51L6.1 11.18L0.49 7.27H7.53L10 1Z" fill="#FBBF24" opacity="0.6" />
-      </svg>
-    </div>
-    <div className="absolute bottom-20 right-6 animate-bounce" style={{ animationDuration: '5s', animationDelay: '0.5s' }}>
-      <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-        <path d="M10 1L12.47 7.27H19.51L13.9 11.18L16.18 17.51L10 13.27L3.82 17.51L6.1 11.18L0.49 7.27H7.53L10 1Z" fill="#A78BFA" opacity="0.7" />
-      </svg>
-    </div>
-    {/* Upward trending arrow */}
-    <div className="absolute top-8 left-[45%] opacity-50">
-      <svg width="40" height="30" viewBox="0 0 40 30" fill="none">
-        <polyline points="2,28 12,18 22,22 36,6" stroke="#2563eb" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <polyline points="30,4 38,4 38,12" stroke="#2563eb" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </div>
-    {/* Circular graph deco */}
-    <div className="absolute bottom-28 left-[40%] opacity-30">
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="13" stroke="#10b981" strokeWidth="2" strokeDasharray="50 32" strokeLinecap="round" />
-      </svg>
-    </div>
-  </>
-);
+// FloatingStars removed — decorative noise with no consumer value
 
 const collegesData = {
   engineering: [
@@ -418,8 +388,8 @@ const LandingPage: React.FC = () => {
                 style={{ background: 'radial-gradient(circle, #eff6ff 0%, #e0e7ff 60%, transparent 100%)' }}
               />
 
-              {/* Floating decorative elements */}
-              <FloatingStars />
+              {/* Subtle radial grid — very low opacity structural texture */}
+              <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #94a3b8 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
               {/* Student image — large and dominant */}
               <img
@@ -453,8 +423,8 @@ const LandingPage: React.FC = () => {
                     <div key={i} className="flex-1 rounded-sm transition-all" style={{ height: `${h}%`, backgroundColor: i === 5 ? '#2563eb' : '#bfdbfe' }} />
                   ))}
                 </div>
-                <span className="inline-block px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-caption font-bold">
-                  ✓ Excellent Performance!
+                <span className="inline-block px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-caption font-bold flex items-center gap-1">
+                  <Check className="w-2.5 h-2.5 stroke-[3]" /> Excellent Performance
                 </span>
               </div>
 
@@ -465,7 +435,10 @@ const LandingPage: React.FC = () => {
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                     <span className="text-caption font-bold text-slate-800">AI Mentor</span>
                   </div>
-                  <div className="flex gap-1.5 text-slate-300 text-caption font-bold">+ ✕</div>
+                  <div className="flex gap-1">
+                    <Plus className="w-3 h-3 text-slate-300" />
+                    <Settings className="w-3 h-3 text-slate-300" />
+                  </div>
                 </div>
                 <p className="text-body-sm text-slate-500 font-semibold bg-slate-50 rounded-lg px-2.5 py-2 mb-2.5">
                   Hi! How can I help you today?
@@ -502,7 +475,9 @@ const LandingPage: React.FC = () => {
 
               {/* Achievement badge floating */}
               <div className="hidden sm:flex absolute bottom-[12%] left-[5%] z-20 bg-white border border-amber-200 rounded-xl px-3 py-2 shadow-lg items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-body-md">🏆</div>
+                <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center">
+                  <Trophy className="w-4 h-4 text-amber-500" />
+                </div>
                 <div>
                   <div className="text-caption font-bold text-slate-800">Top 5%</div>
                   <div className="text-caption font-semibold text-slate-400">Percentile Rank</div>
@@ -518,158 +493,104 @@ const LandingPage: React.FC = () => {
       ══════════════════════════════════ */}
       <section id="exams" className="py-12 bg-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <span className="h-px w-12 bg-slate-200" />
-            <h2 className="text-heading-lg font-bold text-slate-900 text-center">Our Exams</h2>
-            <span className="h-px w-12 bg-slate-200" />
+          <div className="flex flex-col items-center justify-center mb-10 text-center">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <span className="h-px w-12 bg-slate-200" />
+              <h2 className="text-heading-lg font-bold text-slate-900">Our Exams</h2>
+              <span className="h-px w-12 bg-slate-200" />
+            </div>
+            <p className="text-body-md text-slate-500 font-medium">Choose your exam goal. We'll help you get there.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* JEE */}
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6.5 hover:border-blue-200 hover:shadow-xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between min-h-[310px]">
-              {/* Subtle watermark background */}
-              <div className="absolute right-3 bottom-3 w-20 h-20 pointer-events-none z-0">
-                <img 
-                  src="/images/card_jee.png" 
-                  alt="JEE Watermark" 
-                  className="w-full h-full object-contain opacity-15 group-hover:opacity-25 transition-all duration-300 group-hover:scale-105" 
-                  style={{ filter: 'grayscale(100%) sepia(100%) hue-rotate(195deg) saturate(350%) brightness(95%)' }}
-                />
-              </div>
-              
-              <div className="relative z-10 space-y-3.5 text-left">
-                {/* Top: Icon + Category */}
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
-                    <Settings className="w-4 h-4" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
+            {/* JEE CARD */}
+            <div className="bg-white border border-slate-200 rounded-[24px] p-6 hover:border-blue-300 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between relative overflow-hidden min-h-[340px]">
+              <div className="flex flex-col sm:flex-row gap-6 relative z-10 mb-6 flex-1">
+                <div className="flex-1 space-y-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700">
+                    <Atom className="w-4 h-4" />
+                    <span className="text-[10px] font-bold tracking-widest uppercase">ENGINEERING</span>
                   </div>
-                  <span className="text-caption font-bold text-blue-600 tracking-wider">Engineering</span>
+                  
+                  <h3 className="text-[40px] font-extrabold text-slate-900 leading-none tracking-tight group-hover:text-blue-600 transition-colors">JEE</h3>
+                  
+                  <p className="text-body-sm text-slate-600 font-medium leading-relaxed max-w-[240px]">
+                    Gateway to IITs, NITs & Top Engineering Colleges
+                  </p>
+                  
+                  <div className="pt-2">
+                    <span className="text-[10px] font-bold text-blue-600 block mb-2 tracking-widest uppercase">Career Paths</span>
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-2 text-xs font-semibold text-slate-500">
+                      <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-blue-400" />Computer Science</div>
+                      <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-blue-400" />Mechanical Engineering</div>
+                      <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-blue-400" />Electrical Engineering</div>
+                      <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-blue-400" />AI & Data Science</div>
+                    </div>
+                  </div>
                 </div>
                 
-                {/* Middle: Exam Name */}
-                <h3 className="text-heading-md font-bold text-slate-900 leading-none">JEE</h3>
-                
-                {/* Description */}
-                <p className="text-body-md text-slate-600 leading-relaxed font-normal">
-                  Gateway to IITs, NITs & Top Engineering Colleges
-                </p>
-                
-                {/* Career Paths */}
-                <div className="pt-1">
-                  <span className="text-caption font-bold text-slate-400 block mb-0.5">Career Paths</span>
-                  <p className="text-body-sm font-semibold text-slate-500">
-                    Software Engineering • AI • Core Engineering
-                  </p>
+                <div className="hidden sm:flex w-1/3 relative shrink-0 items-end justify-center">
+                  <div className="absolute inset-0 bg-blue-50/50 rounded-2xl flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/card_jee.png" 
+                      alt="JEE Engineering" 
+                      className="w-[120%] h-[120%] object-contain opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-300 drop-shadow-md"
+                    />
+                  </div>
                 </div>
               </div>
               
-              {/* Bottom: Explore Button */}
-              <div className="relative z-10 pt-4">
-                <button
-                  onClick={() => navigate('/jee')}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-blue-200 text-blue-600 font-bold text-body-sm hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all duration-200 active:scale-98"
-                >
-                  Explore JEE <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+              <button
+                onClick={() => navigate('/jee')}
+                className="relative z-10 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-blue-600 text-white font-bold text-body-md hover:bg-blue-700 transition-all duration-200 shadow-md shadow-blue-600/20 active:scale-[0.98]"
+              >
+                Explore JEE <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* NEET */}
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6.5 hover:border-emerald-200 hover:shadow-xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between min-h-[310px]">
-              {/* Subtle watermark background */}
-              <div className="absolute right-3 bottom-3 w-20 h-20 pointer-events-none z-0">
-                <img 
-                  src="/images/card_neet.png" 
-                  alt="NEET Watermark" 
-                  className="w-full h-full object-contain opacity-15 group-hover:opacity-25 transition-all duration-300 group-hover:scale-105" 
-                  style={{ filter: 'grayscale(100%) sepia(100%) hue-rotate(90deg) saturate(350%) brightness(95%)' }}
-                />
-              </div>
-              
-              <div className="relative z-10 space-y-3.5 text-left">
-                {/* Top: Icon + Category */}
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
-                    <Plus className="w-4 h-4" />
+            {/* NEET CARD */}
+            <div className="bg-white border border-slate-200 rounded-[24px] p-6 hover:border-emerald-300 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between relative overflow-hidden min-h-[340px]">
+              <div className="flex flex-col sm:flex-row gap-6 relative z-10 mb-6 flex-1">
+                <div className="flex-1 space-y-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700">
+                    <Stethoscope className="w-4 h-4" />
+                    <span className="text-[10px] font-bold tracking-widest uppercase">MEDICAL</span>
                   </div>
-                  <span className="text-caption font-bold text-emerald-600 tracking-wider">Medical</span>
-                </div>
-                
-                {/* Middle: Exam Name */}
-                <h3 className="text-heading-md font-bold text-slate-900 leading-none">NEET</h3>
-                
-                {/* Description */}
-                <p className="text-body-md text-slate-600 leading-relaxed font-normal">
-                  Gateway to AIIMS, JIPMER & Premier Medical Colleges
-                </p>
-                
-                {/* Career Paths */}
-                <div className="pt-1">
-                  <span className="text-caption font-bold text-slate-400 block mb-0.5">Career Paths</span>
-                  <p className="text-body-sm font-semibold text-slate-500">
-                    Medicine (MBBS) • Dental (BDS) • Healthcare Science
+                  
+                  <h3 className="text-[40px] font-extrabold text-slate-900 leading-none tracking-tight group-hover:text-emerald-600 transition-colors">NEET</h3>
+                  
+                  <p className="text-body-sm text-slate-600 font-medium leading-relaxed max-w-[240px]">
+                    Gateway to AIIMS, JIPMER & Premier Medical Colleges
                   </p>
-                </div>
-              </div>
-              
-              {/* Bottom: Explore Button */}
-              <div className="relative z-10 pt-4">
-                <button
-                  onClick={() => navigate('/neet')}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-emerald-200 text-emerald-600 font-bold text-body-sm hover:bg-emerald-600 hover:text-white hover:border-emerald-600 transition-all duration-200 active:scale-98"
-                >
-                  Explore NEET <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* CUET */}
-            <div className="bg-white border-2 border-slate-100 rounded-2xl p-6.5 hover:border-purple-200 hover:shadow-xl transition-all duration-300 group relative overflow-hidden flex flex-col justify-between min-h-[310px]">
-              {/* Subtle watermark background */}
-              <div className="absolute right-3 bottom-3 w-20 h-20 pointer-events-none z-0">
-                <img 
-                  src="/images/card_cuet.png" 
-                  alt="CUET Watermark" 
-                  className="w-full h-full object-contain opacity-15 group-hover:opacity-25 transition-all duration-300 group-hover:scale-105" 
-                  style={{ filter: 'grayscale(100%) sepia(100%) hue-rotate(240deg) saturate(350%) brightness(95%)' }}
-                />
-              </div>
-              
-              <div className="relative z-10 space-y-3.5 text-left">
-                {/* Top: Icon + Category */}
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600">
-                    <Building className="w-4 h-4" />
+                  
+                  <div className="pt-2">
+                    <span className="text-[10px] font-bold text-emerald-600 block mb-2 tracking-widest uppercase">Career Paths</span>
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-2 text-xs font-semibold text-slate-500">
+                      <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-emerald-400" />MBBS</div>
+                      <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-emerald-400" />Pharmacy</div>
+                      <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-emerald-400" />BDS</div>
+                      <div className="flex items-center gap-1.5"><div className="w-1 h-1 rounded-full bg-emerald-400" />Healthcare Science</div>
+                    </div>
                   </div>
-                  <span className="text-caption font-bold text-purple-600 tracking-wider">University Entrance</span>
                 </div>
                 
-                {/* Middle: Exam Name */}
-                <h3 className="text-heading-md font-bold text-slate-900 leading-none">CUET</h3>
-                
-                {/* Description */}
-                <p className="text-body-md text-slate-600 leading-relaxed font-normal">
-                  One Exam. Access to Hundreds of Top Central Universities.
-                </p>
-                
-                {/* Career Paths */}
-                <div className="pt-1">
-                  <span className="text-caption font-bold text-slate-400 block mb-0.5">Career Paths</span>
-                  <p className="text-body-sm font-semibold text-slate-500">
-                    Liberal Arts • Science & Technology • Business & Commerce
-                  </p>
+                <div className="hidden sm:flex w-1/3 relative shrink-0 items-end justify-center">
+                  <div className="absolute inset-0 bg-emerald-50/50 rounded-2xl flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/images/card_neet.png" 
+                      alt="NEET Medical" 
+                      className="w-[120%] h-[120%] object-contain opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-300 drop-shadow-md"
+                    />
+                  </div>
                 </div>
               </div>
               
-              {/* Bottom: Explore Button */}
-              <div className="relative z-10 pt-4">
-                <button
-                  onClick={() => navigate('/cuet')}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-purple-200 text-purple-600 font-bold text-body-sm hover:bg-purple-600 hover:text-white hover:border-purple-600 transition-all duration-200 active:scale-98"
-                >
-                  Explore CUET <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+              <button
+                onClick={() => navigate('/neet')}
+                className="relative z-10 w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-emerald-600 text-white font-bold text-body-md hover:bg-emerald-700 transition-all duration-200 shadow-md shadow-emerald-600/20 active:scale-[0.98]"
+              >
+                Explore NEET <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
@@ -678,25 +599,27 @@ const LandingPage: React.FC = () => {
       {/* ══════════════════════════════════
           3. WHY STUDENTS CHOOSE
       ══════════════════════════════════ */}
-      <section id="features" className="py-12 bg-slate-50 border-b border-slate-100">
+      <section id="features" className="py-16 bg-slate-50 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <span className="h-px w-12 bg-slate-200" />
-            <h2 className="text-heading-lg font-bold text-slate-900 text-center">Why Students Choose PrepEntrance?</h2>
-            <span className="h-px w-12 bg-slate-200" />
+          <div className="mb-10">
+            <p className="text-caption font-bold text-blue-600 tracking-widest uppercase mb-2">Platform Features</p>
+            <h2 className="text-heading-lg font-extrabold text-slate-900 leading-tight">Why Students Choose PrepEntrance</h2>
+            <p className="text-body-md text-slate-500 font-normal mt-2 max-w-xl">Everything a JEE or NEET aspirant needs, in one focused platform.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => (
               <div
                 key={i}
-                className="bg-white border border-slate-100 rounded-xl p-6 text-center hover:-translate-y-2 hover:shadow-xl transition-all duration-200 space-y-4 cursor-default group"
+                className="bg-white border border-slate-100 rounded-xl p-6 hover:shadow-md hover:border-slate-200 transition-all duration-200 cursor-default group flex items-start gap-4"
               >
-                <div className={`w-14 h-14 rounded-xl border mx-auto flex items-center justify-center ${f.color} group-hover:scale-110 transition-transform`}>
+                <div className={`w-11 h-11 rounded-lg border flex items-center justify-center shrink-0 ${f.color}`}>
                   {f.icon}
                 </div>
-                <h3 className="text-title-md font-semibold text-slate-900 leading-snug">{f.title}</h3>
-                <p className="text-body-md font-normal text-slate-500 leading-relaxed">{f.desc}</p>
+                <div>
+                  <h3 className="text-title-sm font-semibold text-slate-900 leading-snug mb-1">{f.title}</h3>
+                  <p className="text-body-sm font-normal text-slate-500 leading-relaxed">{f.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -706,234 +629,171 @@ const LandingPage: React.FC = () => {
       {/* ══════════════════════════════════
           4. OUR BATCHES
       ══════════════════════════════════ */}
-      <section id="batches" className="py-20 bg-white border-b border-slate-100 relative overflow-hidden">
-        {/* Subtle radial glow behind cards only */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.04),transparent_70%)] pointer-events-none" />
-
-        <style>{`
-          .glow-particle {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background-color: var(--glow-color, rgba(255,255,255,0.8));
-            box-shadow: 0 0 8px var(--glow-color, rgba(255,255,255,0.8));
-            opacity: 0;
-          }
-          @keyframes float-particle-1 {
-            0% { transform: translateY(0) scale(1); opacity: 0; }
-            30% { opacity: 0.6; }
-            100% { transform: translateY(-120px) scale(0.3); opacity: 0; }
-          }
-          @keyframes float-particle-2 {
-            0% { transform: translateY(0) scale(1.2); opacity: 0; }
-            40% { opacity: 0.8; }
-            100% { transform: translateY(-160px) scale(0.2); opacity: 0; }
-          }
-          @keyframes float-particle-3 {
-            0% { transform: translateY(0) scale(0.8); opacity: 0; }
-            20% { opacity: 0.5; }
-            100% { transform: translateY(-100px) scale(0.4); opacity: 0; }
-          }
-          .group:hover .animate-particle-1 { animation: float-particle-1 5s infinite linear; }
-          .group:hover .animate-particle-2 { animation: float-particle-2 7s infinite linear; }
-          .group:hover .animate-particle-3 { animation: float-particle-3 6s infinite linear; }
-
-          .glow-title {
-            text-shadow: 0 0 20px rgba(255,255,255,0.15);
-            transition: text-shadow 0.3s ease-in-out;
-          }
-          .group:hover .glow-title-aarambh {
-            text-shadow: 0 0 30px rgba(96,165,250,0.25);
-          }
-          .group:hover .glow-title-aarohan {
-            text-shadow: 0 0 30px rgba(192,132,252,0.25);
-          }
-          .group:hover .glow-title-shikhar {
-            text-shadow: 0 0 30px rgba(251,146,60,0.25);
-          }
-        `}</style>
-
-        <div className="max-w-[1420px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Flanking lines with a continuous brand gradient flow (Blue -> Purple -> Orange) */}
-          <div className="flex items-center justify-center gap-4 mb-12">
-            <span className="h-[1.5px] w-16 sm:w-24 bg-gradient-to-r from-blue-500/0 via-blue-500/30 to-purple-500/70" />
-            <h2 className="text-heading-lg font-extrabold text-slate-900 text-center tracking-wider px-2">Our Batches</h2>
-            <span className="h-[1.5px] w-16 sm:w-24 bg-gradient-to-r from-purple-500/70 via-orange-500/30 to-orange-500/0" />
+      <section id="batches" className="py-16 bg-slate-50 border-b border-slate-100 relative overflow-hidden">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          
+          <div className="flex flex-col items-center justify-center mb-10 text-center">
+            <div className="flex items-center justify-center gap-4 mb-2">
+              <span className="h-[2px] w-8 bg-blue-600 rounded-full" />
+              <h2 className="text-heading-lg font-extrabold text-slate-900 tracking-tight">Our Batches</h2>
+              <span className="h-[2px] w-8 bg-orange-500 rounded-full" />
+            </div>
+            <p className="text-body-md text-slate-500 font-medium">Choose the perfect plan for your JEE / NEET preparation journey.</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {batches.map((b, i) => (
-              <div
-                key={i}
-                className="relative rounded-2xl text-white overflow-hidden flex flex-col border transition-all duration-300 ease-out cursor-default group hover:-translate-y-2 hover:scale-[1.01] transform-gpu"
-                style={{
-                  minHeight: '570px',
-                  borderColor: b.borderColor,
-                  boxShadow: `0 0 20px ${b.shadowColor}`,
-                  ['--glow-color' as any]: b.accent,
-                  ['--hover-shadow' as any]: b.hoverShadow,
-                  ['--border-glow' as any]: b.accent,
-                } as React.CSSProperties}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = b.accent;
-                  e.currentTarget.style.boxShadow = `0 0 60px ${b.hoverShadow}`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = b.borderColor;
-                  e.currentTarget.style.boxShadow = `0 0 20px ${b.shadowColor}`;
-                }}
-              >
-                {/* Mountain background */}
-                <img
-                  src={b.mountain}
-                  alt={b.name}
-                  className="absolute inset-0 w-full h-full object-cover transition-all duration-300 ease-out group-hover:scale-[1.03] group-hover:brightness-[1.08] group-hover:saturate-[1.15]"
-                  style={{ objectPosition: b.objectPosition }}
-                />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {batches.map((b, i) => {
+              const isPurple = b.slug === 'aarohan';
+              const isOrange = b.slug === 'shikhar';
+              const isBlue = b.slug === 'aarambh';
 
-                {/* Top reflection highlight (Apple-style) - Top 20% */}
-                <div className="absolute top-0 inset-x-0 h-[20%] bg-gradient-to-b from-white/8 to-transparent pointer-events-none z-20" />
+              const badgeBg = isPurple ? 'bg-purple-600 text-white' : isOrange ? 'bg-orange-500 text-white' : 'bg-blue-600 text-white';
+              const titleColor = 'text-slate-900';
+              const subColor = isPurple ? 'text-purple-700' : isOrange ? 'text-orange-600' : 'text-blue-700';
+              const btnBg = isPurple ? 'bg-purple-700 hover:bg-purple-800' : isOrange ? 'bg-orange-600 hover:bg-orange-700' : 'bg-blue-700 hover:bg-blue-800';
+              const checkColor = isPurple ? 'text-purple-600 bg-purple-100' : isOrange ? 'text-orange-600 bg-orange-100' : 'text-blue-600 bg-blue-100';
+              const borderColor = isPurple ? 'border-purple-200' : isOrange ? 'border-orange-200' : 'border-blue-200';
+              
+              const illustration = isBlue ? <AarambhIllustration /> : isPurple ? <AarohanIllustration /> : <ShikharIllustration />;
 
-                {/* Top subtle overlay for badge and title readability */}
-                <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black/40 to-transparent pointer-events-none" />
-
-                {/* Bottom fade overlay to blend artwork naturally into CTA area (transparent -> rgba(0,0,0,0.75)) */}
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/75 via-black/35 to-transparent pointer-events-none" />
-
-                {/* Cinematic Radial Light source behind the title */}
-                <div 
-                  className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none blur-3xl opacity-[0.14]"
-                  style={{ background: `radial-gradient(circle, ${b.accentColor} 0%, transparent 70%)` }}
-                />
-
-                {/* Floating Particles - Visible only on hover */}
-                <div 
-                  className="absolute inset-0 pointer-events-none overflow-hidden z-10 opacity-0 group-hover:opacity-75 transition-opacity duration-500"
-                  style={{ '--glow-color': b.particleColor } as React.CSSProperties}
+              return (
+                <div
+                  key={i}
+                  className={`relative rounded-2xl bg-white border flex flex-col overflow-hidden shadow-sm ${borderColor}`}
                 >
-                  <span className="glow-particle animate-particle-1" style={{ left: '15%', top: '80%', width: '2px', height: '2px' }} />
-                  <span className="glow-particle animate-particle-2" style={{ left: '45%', top: '75%', width: '3px', height: '3px' }} />
-                  <span className="glow-particle animate-particle-3" style={{ left: '75%', top: '85%', width: '2.5px', height: '2.5px' }} />
-                  <span className="glow-particle animate-particle-1" style={{ left: '30%', top: '90%', width: '3px', height: '3px', animationDelay: '1s' }} />
-                  <span className="glow-particle animate-particle-2" style={{ left: '60%', top: '70%', width: '2px', height: '2px', animationDelay: '2s' }} />
-                  <span className="glow-particle animate-particle-3" style={{ left: '85%', top: '80%', width: '3.5px', height: '3.5px', animationDelay: '0.5s' }} />
-                  <span className="glow-particle animate-particle-1" style={{ left: '50%', top: '85%', width: '2.5px', height: '2.5px', animationDelay: '1.5s' }} />
-                </div>
+                  {/* Most Popular Flag */}
+                  {isPurple && (
+                    <div className="absolute top-0 right-4 px-3 py-1 rounded-b bg-purple-700 text-white text-[9px] font-black tracking-widest uppercase shadow-sm z-10 flex items-center gap-1">
+                      <Star className="w-3 h-3 fill-white" /> MOST POPULAR
+                    </div>
+                  )}
 
-                {/* Card content - Changed pt-10 to pt-8 for super compact Apple top padding */}
-                <div className="relative z-10 flex flex-col flex-1 p-6 pt-8">
-                  {/* Top: Batch Badge - font-semibold and lower saturation */}
-                  <div className="flex justify-between items-center w-full">
-                    <span className={`inline-block px-3 py-1 rounded-md text-caption font-semibold ${b.labelBg} uppercase tracking-wider`}>
-                      {b.label}
-                    </span>
-                  </div>
+                  <div className="p-5 flex flex-col h-full">
+                    {/* Top Row: Labels and Illustration */}
+                    <div className="flex items-start mb-4" style={{ minHeight: 172 }}>
+                      <div className="flex-1 mt-1 pr-2" style={{ minWidth: 0 }}>
+                        <span className={`inline-block px-2.5 py-1 rounded text-[8px] font-bold tracking-widest uppercase mb-3 shadow-sm ${badgeBg}`}>
+                          {b.label}
+                        </span>
+                        <h3 className={`text-[28px] font-black leading-none mb-1 tracking-tight ${titleColor}`}>
+                          {b.mainName}
+                        </h3>
+                        <div className={`text-xs font-bold tracking-widest uppercase ${subColor}`}>
+                          {b.year}
+                        </div>
+                        <div className="text-body-sm font-bold text-slate-800 mt-3">{b.subtitle}</div>
+                        <div className="text-[10px] font-medium text-slate-500 italic mt-0.5">{b.mission}</div>
+                      </div>
+                      
+                      {/* Illustration Area — fixed 172px height, 45% width, no clipping */}
+                      <div className="shrink-0" style={{ width: '45%', height: 172, maxWidth: 200, overflow: 'visible', position: 'relative' }}>
+                        {illustration}
+                      </div>
+                    </div>
+                    
+                    <hr className="border-slate-100 mb-5" />
 
-                  {/* Center: Hero/Mission details */}
-                  <div className="flex flex-col justify-start items-center text-center mt-4">
-                    <h3 className={`text-display-lg font-bold text-white tracking-tight leading-none drop-shadow-md glow-title ${b.glowClass}`}>
-                      {b.mainName}
-                    </h3>
-                    <span className="text-title-lg font-semibold text-white/70 tracking-widest uppercase mt-1.5 drop-shadow-sm">
-                      {b.year}
-                    </span>
-                    <p className="text-title-md font-semibold text-white/95 mt-3 drop-shadow-sm">
-                      {b.subtitle}
-                    </p>
-                    <p className="text-body-md font-normal text-white/85 mt-2.5 max-w-[240px] drop-shadow-sm italic">
-                      {b.mission}
-                    </p>
-                  </div>
+                    {/* Features List */}
+                    <ul className="space-y-2.5 mb-6 flex-1">
+                      {b.features.map((feat, j) => (
+                        <li key={j} className="flex items-center gap-2.5 text-xs font-medium text-slate-700">
+                          <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${checkColor}`}>
+                            <Check className="w-2.5 h-2.5 stroke-[3.5]" />
+                          </div>
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
 
-                  {/* Spacer to push checklist/CTA down (min-h set to 50px for balanced compact layout) */}
-                  <div className="flex-1 min-h-[50px]" />
-
-                  {/* Bottom: Features, Pricing & CTA */}
-                  <div className="mt-auto">
-                    {/* Glassmorphic Features Container */}
-                    <div 
-                      className="rounded-xl py-2.5 px-4 mb-3.5 border"
-                      style={{ 
-                        background: 'rgba(0,0,0,0.25)', 
-                        backdropFilter: 'blur(16px)', 
-                        WebkitBackdropFilter: 'blur(16px)', 
-                        borderColor: 'rgba(255,255,255,0.08)' 
-                      }}
-                    >
-                      <ul className="space-y-1.5">
-                        {b.features.map((feat, j) => (
-                          <li key={j} className="flex items-center gap-2.5 text-body-sm font-semibold text-white/90">
-                            <Check 
-                              className="w-3.5 h-3.5 stroke-[3.5] shrink-0" 
-                              style={{ color: b.checkColor }} 
-                            />
-                            <span>{feat}</span>
-                          </li>
-                        ))}
-                      </ul>
+                    {/* Pricing Display */}
+                    <div className="bg-slate-50/50 rounded-xl flex flex-col items-center justify-center py-4 mb-4 min-h-[96px] border border-slate-100">
+                      {isBlue && (
+                        <div className="flex flex-col items-center gap-0.5">
+                          <div className="text-slate-500 text-[10px] font-bold">Starting at</div>
+                          <div className={`text-4xl font-black leading-none tracking-tight ${subColor}`}>₹349</div>
+                          <div className="text-slate-500 text-[10px] font-bold tracking-wide">per month</div>
+                        </div>
+                      )}
+                      
+                      {isPurple && (
+                        <div className="flex flex-col items-center">
+                          <div className="text-slate-400 text-[11px] font-bold line-through mb-0.5">₹4,188</div>
+                          <div className={`text-4xl font-black leading-none tracking-tight mb-1 ${subColor}`}>₹3,839</div>
+                          <div className="text-slate-500 text-[10px] font-bold tracking-wide mb-1.5">for 12 months</div>
+                          <div className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black tracking-widest uppercase">
+                            SAVE ₹349
+                          </div>
+                        </div>
+                      )}
+                      
+                      {isOrange && (
+                        <div className="flex flex-col items-center">
+                          <div className="text-slate-400 text-[11px] font-bold line-through mb-0.5">₹8,376</div>
+                          <div className={`text-4xl font-black leading-none tracking-tight mb-1 ${subColor}`}>₹7,329</div>
+                          <div className="text-slate-500 text-[10px] font-bold tracking-wide mb-1.5">for 24 months</div>
+                          <div className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black tracking-widest uppercase">
+                            SAVE ₹1,047
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Secondary Pricing (Starting at ₹349/month) */}
-                    <div className="text-center text-white/50 text-xs font-semibold mb-3.5">
-                      Starting at <span className="text-white/90 font-extrabold">{b.price}</span>/month
-                    </div>
-
-                    {/* Premium CTA Button */}
+                    {/* CTA */}
                     <button
                       onClick={() => navigate(`/batches/${b.slug}`)}
-                      className={`w-full py-3.5 rounded-xl text-white font-bold text-body-md tracking-wide transition-all duration-300 active:scale-[0.98] hover:scale-[1.02] hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer ${b.btnBg}`}
+                      className={`w-full py-3.5 rounded-lg text-white font-bold text-sm tracking-wide transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer shadow-sm ${btnBg}`}
                     >
                       {b.btnText}
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          {/* Bottom Feature Strip (Light Glass Container) */}
-          <div 
-            className="mt-16 p-6 sm:p-8 rounded-2xl bg-slate-50/80 border border-slate-100 grid grid-cols-1 md:grid-cols-4 gap-6 text-slate-800"
-            style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shrink-0 shadow-sm">
-                <Rocket className="w-5 h-5" />
+          {/* Bottom Trust Strip */}
+          <div className="mt-8 mb-4 rounded-xl bg-white border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex flex-col md:flex-row items-center justify-between p-2 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+            {/* Item 1 */}
+            <div className="flex flex-1 items-center gap-3 px-4 py-3 md:py-1">
+              <div className="w-10 h-10 rounded flex items-center justify-center shrink-0">
+                <Users className="w-8 h-8 text-blue-700" />
               </div>
               <div>
-                <h4 className="text-body-md font-bold text-slate-900">AI-Powered Learning</h4>
-                <p className="text-[11px] font-semibold text-slate-500 mt-0.5">Smart, Adaptive, Personal.</p>
+                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">Expert Faculty</h4>
+                <p className="text-[10px] font-medium text-slate-500 mt-0.5 leading-tight">Learn from top teachers<br/>from Kota.</p>
+              </div>
+            </div>
+            
+            {/* Item 2 */}
+            <div className="flex flex-1 items-center gap-3 px-4 py-3 md:py-1">
+              <div className="w-10 h-10 rounded flex items-center justify-center shrink-0">
+                <TrendingUp className="w-8 h-8 text-purple-700" />
+              </div>
+              <div>
+                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">Proven Results</h4>
+                <p className="text-[10px] font-medium text-slate-500 mt-0.5 leading-tight">Trusted by lakhs of<br/>aspirants across India.</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shrink-0 shadow-sm">
-                <Target className="w-5 h-5" />
+            {/* Item 3 */}
+            <div className="flex flex-1 items-center gap-3 px-4 py-3 md:py-1">
+              <div className="w-10 h-10 rounded flex items-center justify-center shrink-0">
+                <FileText className="w-8 h-8 text-orange-600" />
               </div>
               <div>
-                <h4 className="text-body-md font-bold text-slate-900">Proven Results</h4>
-                <p className="text-[11px] font-semibold text-slate-500 mt-0.5">Top ranks. Every year.</p>
+                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">Structured Preparation</h4>
+                <p className="text-[10px] font-medium text-slate-500 mt-0.5 leading-tight">Study, practice & test in<br/>perfect sequence.</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0 shadow-sm">
-                <TrendingUp className="w-5 h-5" />
+            {/* Item 4 */}
+            <div className="flex flex-1 items-center gap-3 px-4 py-3 md:py-1">
+              <div className="w-10 h-10 rounded flex items-center justify-center shrink-0">
+                <Headphones className="w-8 h-8 text-green-600" />
               </div>
               <div>
-                <h4 className="text-body-md font-bold text-slate-900">Personalized Roadmap</h4>
-                <p className="text-[11px] font-semibold text-slate-500 mt-0.5">Your path. Your pace.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 shadow-sm">
-                <Shield className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-body-md font-bold text-slate-900">24×7 Support</h4>
-                <p className="text-[11px] font-semibold text-slate-500 mt-0.5">We're always here.</p>
+                <h4 className="text-[13px] font-bold text-slate-900 leading-tight">24×7 Doubt Support</h4>
+                <p className="text-[10px] font-medium text-slate-500 mt-0.5 leading-tight">AI + Human experts<br/>whenever you need.</p>
               </div>
             </div>
           </div>
@@ -943,47 +803,49 @@ const LandingPage: React.FC = () => {
       {/* ══════════════════════════════════
           5. SUCCESS JOURNEY
       ══════════════════════════════════ */}
-      <section id="journey" className="py-12 bg-slate-50 border-b border-slate-100">
+      <section id="journey" className="py-16 bg-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-3 mb-10">
-            <span className="h-px w-12 bg-slate-200" />
-            <h2 className="text-heading-lg font-bold text-slate-900 text-center">Your Success Journey with PrepEntrance</h2>
-            <span className="h-px w-12 bg-slate-200" />
+          <div className="mb-12">
+            <p className="text-caption font-bold text-blue-600 tracking-widest uppercase mb-2">How It Works</p>
+            <h2 className="text-heading-lg font-extrabold text-slate-900 leading-tight">Your Success Journey</h2>
+            <p className="text-body-md text-slate-500 font-normal mt-2 max-w-xl">A structured, AI-guided path from where you are to where you want to be.</p>
           </div>
 
-          {/* Steps */}
+          {/* Steps — vertical timeline on mobile, horizontal on desktop */}
           <div className="relative">
-            <div className="hidden md:block absolute top-7 left-[10%] right-[10%] h-px border-t-2 border-dashed border-slate-200 z-0" />
-            <div className="grid md:grid-cols-5 gap-6 relative z-10">
+            {/* Desktop connector line */}
+            <div className="hidden md:block absolute top-6 left-[9%] right-[9%] h-px bg-slate-100 z-0" />
+
+            <div className="grid md:grid-cols-5 gap-y-8 gap-x-4 relative z-10">
               {journeySteps.map((s, i) => (
-                <div key={i} className="flex flex-col items-center text-center space-y-3">
-                  <div className="w-14 h-14 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center text-blue-600 shadow-sm hover:border-blue-500 hover:shadow-lg transition-all duration-200">
-                    {s.icon}
+                <div key={i} className="flex md:flex-col items-start md:items-center gap-4 md:gap-3 md:text-center">
+                  {/* Number circle */}
+                  <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shrink-0 shadow-md shadow-blue-600/20">
+                    <span className="text-white font-black text-body-sm">{s.step}</span>
                   </div>
-                  <span className="text-caption font-bold text-blue-600 tracking-wider">Step {s.step}</span>
-                  <h4 className="text-title-md font-bold text-slate-900 leading-tight">{s.title}</h4>
-                  <p className="text-body-sm font-normal text-slate-400 max-w-[180px]">{s.desc}</p>
+                  <div>
+                    <h4 className="text-title-sm font-bold text-slate-900 leading-tight mb-1">{s.title}</h4>
+                    <p className="text-body-sm font-normal text-slate-500 leading-relaxed">{s.desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Benefits strip */}
-          <div className="mt-10 bg-white border border-slate-100 rounded-xl p-5 shadow-sm">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-center">
-              {[
-                { icon: <Bot className="w-6 h-6" />, label: 'AI-Powered Learning' },
-                { icon: <FileText className="w-6 h-6" />, label: 'Unlimited Practice Questions' },
-                { icon: <CheckCircle2 className="w-6 h-6" />, label: 'Personalized Study Plans' },
-                { icon: <BarChart2 className="w-6 h-6" />, label: 'Detailed Analytics' },
-                { icon: <Clock className="w-6 h-6" />, label: '24/7 AI Mentor' },
-              ].map((b, i) => (
-                <div key={i} className="flex flex-col items-center gap-2">
-                  <div className="text-blue-600">{b.icon}</div>
-                  <span className="text-body-sm font-bold text-slate-700">{b.label}</span>
-                </div>
-              ))}
-            </div>
+          {/* Key capabilities strip */}
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-px bg-slate-100 border border-slate-100 rounded-xl overflow-hidden">
+            {[
+              { icon: <Bot className="w-5 h-5" />, label: 'AI-Powered Learning' },
+              { icon: <FileText className="w-5 h-5" />, label: 'Unlimited Practice' },
+              { icon: <CheckCircle2 className="w-5 h-5" />, label: 'Personalised Plans' },
+              { icon: <BarChart2 className="w-5 h-5" />, label: 'Detailed Analytics' },
+              { icon: <Clock className="w-5 h-5" />, label: '24×7 AI Mentor' },
+            ].map((b, i) => (
+              <div key={i} className="flex items-center gap-2.5 bg-white px-5 py-4">
+                <div className="text-blue-600 shrink-0">{b.icon}</div>
+                <span className="text-body-sm font-semibold text-slate-700">{b.label}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -991,15 +853,14 @@ const LandingPage: React.FC = () => {
       {/* ══════════════════════════════════
           6. TESTIMONIALS — EMBLA AUTOPLAY
       ══════════════════════════════════ */}
-      <section id="testimonials" className="py-12 bg-white border-b border-slate-100">
+      <section id="testimonials" className="py-16 bg-slate-50 border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <span className="h-px w-10 bg-slate-200" />
-              <h2 className="text-heading-lg font-bold text-slate-900">What Students Say</h2>
-              <span className="h-px w-10 bg-slate-200" />
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="text-caption font-bold text-blue-600 tracking-widest uppercase mb-2">Student Reviews</p>
+              <h2 className="text-heading-lg font-extrabold text-slate-900">What Students Say</h2>
             </div>
             <div className="flex gap-2">
               <button
@@ -1038,32 +899,38 @@ const LandingPage: React.FC = () => {
                   className="shrink-0 w-full sm:w-1/2 md:w-1/3 pl-5"
                 >
                   <div
-                    className={`group h-full bg-white border-2 rounded-xl p-5 flex flex-col gap-3
+                    className={`group h-full bg-white border rounded-xl p-6 flex flex-col gap-4
                       transition-all duration-300 ease-out cursor-default
-                      hover:-translate-y-1.5 hover:shadow-xl
+                      hover:-translate-y-1 hover:shadow-md
                       ${ i === activeSlide
-                        ? 'border-blue-300 shadow-lg ring-2 ring-blue-50'
-                        : 'border-slate-100 shadow-sm hover:border-blue-200'
+                        ? 'border-blue-200 shadow-md'
+                        : 'border-slate-100 shadow-sm hover:border-slate-200'
                       }`}
-                    style={{ minHeight: '190px' }}
+                    style={{ minHeight: '210px' }}
                   >
-                    {/* Stars */}
+                    {/* Stars — SVG, no emoji */}
                     <div className="flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, si) => (
-                        <Star key={si} className="w-4 h-4 text-amber-400 fill-amber-400" />
+                        <Star key={si} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                       ))}
                     </div>
 
                     {/* Quote */}
-                    <p className="text-body-sm text-slate-600 font-semibold leading-relaxed italic flex-1">
-                      "{t.text}"
+                    <p className="text-body-sm text-slate-600 font-normal leading-relaxed flex-1">
+                      &ldquo;{t.text}&rdquo;
                     </p>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                      <div>
-                        <div className="text-body-sm font-bold text-slate-900">{t.name}</div>
-                        <div className="text-caption font-semibold text-slate-400 mt-0.5">{t.subtitle}</div>
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                      <div className="flex items-center gap-3">
+                        {/* Initials avatar */}
+                        <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                          <span className="text-caption font-black text-blue-600">{t.name.charAt(0)}</span>
+                        </div>
+                        <div>
+                          <div className="text-body-sm font-semibold text-slate-900">{t.name}</div>
+                          <div className="text-caption font-medium text-slate-400 mt-0.5">{t.subtitle}</div>
+                        </div>
                       </div>
                       <span className={`inline-block px-2.5 py-0.5 rounded-full border text-caption font-bold tracking-wide ${badgeColors[t.badge] ?? 'bg-slate-50 text-slate-600 border-slate-200'}`}>
                         {t.badge}
@@ -1223,14 +1090,14 @@ const LandingPage: React.FC = () => {
             {/* Bottom: Statistics strip */}
             <div className="border-t border-white/10 mt-12 pt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               {[
-                { val: '25L+', desc: 'Students Trust Us', icon: '👥' },
-                { val: '10,000+', desc: 'Practice Questions', icon: '📝' },
-                { val: '500+', desc: 'Chapter Tests', icon: '📖' },
-                { val: '24×7', desc: 'AI Mentor Support', icon: '🤖' },
-                { val: 'Top Results', desc: 'Every Year', icon: '🏆' }
+                { val: '25L+', desc: 'Students Trust Us', icon: <Users className="w-5 h-5" /> },
+                { val: '10,000+', desc: 'Practice Questions', icon: <FileText className="w-5 h-5" /> },
+                { val: '500+', desc: 'Chapter Tests', icon: <BookOpen className="w-5 h-5" /> },
+                { val: '24×7', desc: 'AI Mentor Support', icon: <Bot className="w-5 h-5" /> },
+                { val: 'Top Results', desc: 'Every Year', icon: <Trophy className="w-5 h-5" /> }
               ].map((stat, idx) => (
                 <div key={idx} className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 shadow-inner text-left">
-                  <span className="text-title-md">{stat.icon}</span>
+                  <div className="text-blue-300 shrink-0">{stat.icon}</div>
                   <div>
                     <div className="text-body-lg font-bold text-white leading-tight">{stat.val}</div>
                     <div className="text-caption font-bold text-blue-200 mt-0.5">{stat.desc}</div>

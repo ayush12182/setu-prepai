@@ -52,8 +52,8 @@ const TestResults: React.FC<TestResultsProps> = ({
   const accuracy = Math.round((correct / totalQuestions) * 100);
   const avgTimePerQuestion = Math.round(totalTime / totalQuestions);
 
-  const wrongAnswers = answers.filter(a => !a.isCorrect);
-  
+  const wrongAnswers = answers.filter(a => !a.isCorrect && a.selectedOption);
+  const unattemptedAnswers = answers.filter(a => !a.selectedOption);
   const getPerformanceLevel = () => {
     if (accuracy >= 80) return { label: 'Excellent!', color: 'text-prepentrance-success', emoji: '🏆', message: 'Outstanding performance! You\'ve mastered this topic.' };
     if (accuracy >= 60) return { label: 'Good Job!', color: 'text-prepentrance-saffron', emoji: '👍', message: 'Solid understanding. A bit more practice will make it perfect.' };
@@ -180,15 +180,9 @@ const TestResults: React.FC<TestResultsProps> = ({
                         className="font-medium text-foreground line-clamp-2"
                       />
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {answer.selectedOption ? (
-                          <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">
-                            Your answer: {answer.selectedOption}
-                          </span>
-                        ) : (
-                          <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
-                            Not answered
-                          </span>
-                        )}
+                        <span className="text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded">
+                          Your answer: {answer.selectedOption}
+                        </span>
                         <span className="text-xs bg-prepentrance-success/10 text-prepentrance-success px-2 py-0.5 rounded">
                           Correct: {q.correct_option}
                         </span>
@@ -263,6 +257,112 @@ const TestResults: React.FC<TestResultsProps> = ({
                             </div>
                           </div>
                         )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Unattempted Questions Analysis */}
+      {unattemptedAnswers.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-muted-foreground" />
+            Unattempted Questions ({unattemptedAnswers.length})
+          </h3>
+          <div className="space-y-4">
+            {unattemptedAnswers.map((answer, idx) => {
+              const globalIdx = wrongAnswers.length + idx;
+              const isExpanded = expandedQuestions.has(globalIdx);
+              const q = answer.question;
+              
+              return (
+                <div 
+                  key={globalIdx} 
+                  className="border border-border rounded-xl overflow-hidden"
+                >
+                  {/* Question Header */}
+                  <button
+                    onClick={() => toggleExpand(globalIdx)}
+                    className="w-full p-4 bg-secondary/10 hover:bg-secondary/30 transition-colors text-left flex items-start gap-3"
+                  >
+                    <span className="w-6 h-6 rounded-full bg-muted text-muted-foreground text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <JeeQuestion 
+                        question={q.question_text}
+                        className="font-medium text-foreground line-clamp-2"
+                      />
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded">
+                          Not answered
+                        </span>
+                        <span className="text-xs bg-prepentrance-success/10 text-prepentrance-success px-2 py-0.5 rounded">
+                          Correct: {q.correct_option}
+                        </span>
+                      </div>
+                    </div>
+                    {isExpanded ? (
+                      <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                    )}
+                  </button>
+
+                  {/* Expanded Content */}
+                  {isExpanded && (
+                    <div className="p-4 space-y-4 border-t border-border">
+                      {/* Options */}
+                      <div className="space-y-2">
+                        {(['A', 'B', 'C', 'D'] as const).map((opt) => {
+                          const optionText = {
+                            A: q.option_a,
+                            B: q.option_b,
+                            C: q.option_c,
+                            D: q.option_d
+                          }[opt];
+                          
+                          const isCorrectOpt = opt === q.correct_option;
+                          
+                          return (
+                            <div
+                              key={opt}
+                              className={cn(
+                                'p-3 rounded-lg flex items-start gap-2 text-sm',
+                                isCorrectOpt && 'bg-prepentrance-success/10 border border-prepentrance-success/30',
+                                !isCorrectOpt && 'bg-secondary/50'
+                              )}
+                            >
+                              <span className="font-semibold">{opt}.</span>
+                              <JeeOption option={optionText} className="flex-1" />
+                              {isCorrectOpt && <CheckCircle className="w-4 h-4 text-prepentrance-success" />}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Explanation */}
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
+                          <Lightbulb className="w-5 h-5 text-prepentrance-saffron mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium mb-1">Solution</p>
+                            <JeeSolution solution={q.explanation} className="text-muted-foreground" />
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
+                          <BookOpen className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium">Concept Tested</p>
+                            <p className="text-sm text-muted-foreground">{q.concept_tested}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}

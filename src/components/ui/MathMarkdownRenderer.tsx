@@ -42,6 +42,30 @@ function normalizeMathContent(text: string): string {
   // Remove multiple consecutive newlines
   normalized = normalized.replace(/\n{3,}/g, '\n\n');
 
+  // --- Auto-format unescaped/plain text math (like x^2/a^2=1) into KaTeX ---
+  
+  // 7. Fix escaped characters that break MathJax
+  normalized = normalized.replace(/\\\^/g, '^').replace(/\\>/g, '>').replace(/\\</g, '<');
+
+  // 8. Add braces to superscripts if missing: ^-2 -> ^{-2} so KaTeX renders it properly
+  normalized = normalized.replace(/\^([-\+]?\w+)/g, '^{$1}');
+
+  // 9. Auto-wrap tokens containing math symbols (^, =, >, <) in $...$ if they aren't already
+  const mathChars = /^[a-zA-Z0-9\^\+\-\/\=\>\<\(\)\[\]\{\}]+[\.,]?$/;
+  normalized = normalized.split(/\s+/).map(token => {
+    if (token.startsWith('$') || token.endsWith('$')) return token;
+    
+    let cleanToken = token.replace(/[\.,]$/, ''); // Ignore trailing punctuation
+    
+    if ((cleanToken.includes('^') || cleanToken.includes('=') || cleanToken.includes('>') || cleanToken.includes('<')) 
+        && mathChars.test(cleanToken)
+        && !/^[a-zA-Z]+$/.test(cleanToken) // Not just regular text
+    ) {
+      return token.replace(cleanToken, `$${cleanToken}$`);
+    }
+    return token;
+  }).join(' ');
+
   return normalized.trim();
 }
 

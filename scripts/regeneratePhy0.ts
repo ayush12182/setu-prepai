@@ -5,12 +5,7 @@ const SUPABASE_URL = env.VITE_SUPABASE_URL;
 const ANON_KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY;
 const GEMINI_KEY = env.VITE_GEMINI_API_KEY;
 
-if (!SUPABASE_URL || !ANON_KEY || !GEMINI_KEY) {
-  console.error("Missing env vars");
-  process.exit(1);
-}
-
-const ch = { id: 'phy-0', name: 'Units & Dimensions', subject: 'Physics', topics: ['Dimensional Analysis', 'Significant Figures', 'Error Analysis', 'Measuring Instruments (Vernier, Screw Gauge)'] };
+const chapter = { id: 'phy-0', name: 'Units and Dimensions', subject: 'Physics', topics: ['Physical Quantities','SI Units','Dimensions','Dimensional Analysis','Significant Figures','Error Analysis'] };
 
 function buildPrompt(chapterName: string, subject: string, topics: string[]): string {
   const topicList = topics.join(", ");
@@ -18,13 +13,10 @@ function buildPrompt(chapterName: string, subject: string, topics: string[]): st
 
 You are an elite senior HOD at a premier Kota coaching institute (Allen/Resonance/PW). You are generating comprehensive, mathematically rigorous classroom notes of absolute premium quality for JEE Main + Advanced.
 
-CRITICAL INSTRUCTIONS:
-1. You must write in 100% professional, academic English.
-2. DO NOT wrap the output in JSON or markdown code blocks (like \`\`\`markdown).
-3. YOU MUST EXACTLY start with the metadata block, followed IMMEDIATELY by the Main Title and Subtitle. Do NOT skip them!
-4. You must strictly use the custom markdown block formats: [TEACHER_SAYS]...[/TEACHER_SAYS], [CONCEPT]...[/CONCEPT], [NCERT_INSIGHT]...[/NCERT_INSIGHT], etc.
+Your output MUST be a continuous text document using custom markdown block formats. Do NOT wrap the entire output in JSON or markdown code blocks.
+CRITICAL RULE: YOU MUST OUTPUT RAW MARKDOWN TEXT. DO NOT OUTPUT A JSON OBJECT AT THE ROOT LEVEL. The very first line of your output MUST be exactly [METADATA].
 
-YOUR OUTPUT MUST BEGIN EXACTLY LIKE THIS:
+REQUIRED METADATA BLOCK (Must be the very first thing):
 [METADATA]
 chapter_slug: ${chapterName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}
 chapter_name: ${chapterName}
@@ -35,18 +27,20 @@ topic_tree: ${topicList}
 # ${chapterName} — Complete Master Notes
 PrepEntrance ${subject} | JEE Main + Advanced | Class 11/12 • Droppers
 
+Generate the following 15 sections in this EXACT order with exact ## headings. Make the content extremely detailed, comprehensive, and rich—this should feel like a full 40-page textbook chapter.
+
 ## 1. Chapter Overview
 ### Why ${chapterName} matters
+1-paragraph explanation. Include:
 [TEACHER_SAYS]
-Write 300 words of senior faculty strategic introduction here — where students fail, how toppers study this topic.
+Senior faculty strategic introduction (300-500 words) — where students fail, how toppers study this topic.
 [/TEACHER_SAYS]
 
-Then proceed to generate the remaining 14 sections in EXACT order:
 ## 2. Learning Outcomes
 10-15 concrete learning outcomes.
 
 ## 3. Complete Theory
-Massive theory section. Each subtopic = 4-6 pages. Include formal definitions, derivations, real-life analogies, exam observations.
+Massive theory section. Each subtopic = 4-6 pages.
 Use blocks: [CONCEPT]...[/CONCEPT], [NCERT_INSIGHT]...[/NCERT_INSIGHT], [DERIVATION]...[/DERIVATION]
 
 ## 4. Concept Visualization
@@ -111,38 +105,41 @@ Text-based nested hierarchy.
 
 ## 15. AI Insights
 Cognitive insights from student analytics.
+
+INPUT:
+  Chapter: ${chapterName}
+  Subject: ${subject}
+  Topics: ${topicList}
+  Target Exam: JEE Main + Advanced
 `;
 }
 
-async function callGemini(prompt: string): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
+async function run() {
+  console.log(`Starting generation for ${chapter.name}...`);
+  const prompt = buildPrompt(chapter.name, chapter.subject, chapter.topics);
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_KEY}`;
+  
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { 
-        temperature: 0.1,
-        maxOutputTokens: 65536,
-      }
+      generationConfig: { temperature: 0.4, maxOutputTokens: 65536 }
     })
   });
+
   if (!res.ok) {
     const errText = await res.text();
-    throw new Error(`Gemini API ${res.status}: ${errText.slice(0, 200)}`);
+    console.error(`Gemini Error:`, errText);
+    return;
   }
   const json = await res.json();
-  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text || text.length < 500) throw new Error("Response too short");
-  return text;
-}
-
-async function saveToDb(chapterId: string, chapterName: string, subject: string, rawContent: string): Promise<boolean> {
-  const slug = chapterName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-  const wordCount = rawContent.split(/\s+/).length;
-
-  const url = `${SUPABASE_URL}/functions/v1/save-local-notes`;
-  const res = await fetch(url, {
+  const rawContent = json.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!rawContent) { console.error("No content generated"); return; }
+  
+  console.log("Saving to DB...");
+  const saveUrl = `${SUPABASE_URL}/functions/v1/save-local-notes`;
+  const saveRes = await fetch(saveUrl, {
     method: 'POST',
     headers: {
       'apikey': ANON_KEY,
@@ -151,44 +148,22 @@ async function saveToDb(chapterId: string, chapterName: string, subject: string,
     },
     body: JSON.stringify({
       secret: "LOCAL_BULK_SCRIPT",
-      chapter_id: chapterId,
-      chapter_slug: slug,
-      chapter_name: chapterName,
-      subject: subject.toLowerCase(),
+      chapter_id: chapter.id,
+      chapter_slug: chapter.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      chapter_name: chapter.name,
+      subject: chapter.subject.toLowerCase(),
       exam_type: 'JEE',
       language: 'english',
-      version: 1,
-      version_label: '1.0',
+      version: 5,
+      version_label: '5.0',
       status: 'published',
       raw_content: rawContent,
-      word_count: wordCount,
-      generation_model: 'gemini-2.5-flash',
+      word_count: rawContent.split(/\s+/).length,
+      generation_model: 'gemini-flash-latest',
     })
   });
 
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error(`  DB Error: ${errText.slice(0, 200)}`);
-    return false;
-  }
-  return true;
+  if (saveRes.ok) console.log(`Successfully generated and saved ${chapter.name}!`);
+  else console.error(`DB Save Error:`, await saveRes.text());
 }
-
-async function main() {
-  console.log(`Generating notes for ${ch.name}...`);
-  try {
-    const prompt = buildPrompt(ch.name, ch.subject, ch.topics);
-    const rawContent = await callGemini(prompt);
-    console.log(`Generated ${rawContent.split(/\s+/).length} words. Saving to DB...`);
-    const saved = await saveToDb(ch.id, ch.name, ch.subject, rawContent);
-    if (saved) {
-      console.log(`Successfully published ${ch.name}!`);
-    } else {
-      console.log(`Failed to save ${ch.name} to DB.`);
-    }
-  } catch (err: any) {
-    console.error(`Error: ${err.message}`);
-  }
-}
-
-main();
+run();

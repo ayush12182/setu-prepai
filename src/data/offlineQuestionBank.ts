@@ -1,5 +1,6 @@
 import { Question } from '@/hooks/usePracticeQuestions';
 import { UNIVERSAL_TOPIC_CATALOG } from '../services/topicCatalog';
+import realQuestionsRaw from './realQuestionBank.json';
 
 export interface UnifiedQuestion extends Question {
   question_id: string;
@@ -1462,6 +1463,52 @@ export function getOfflineQuestions(
       );
     }
 
+    // TIER 0: Check the Real Database (JSON) first!
+    const matchedRealQuestions = realQuestionsRaw.filter(q => {
+      // Check if it matches chapter ID or name
+      return q.chapter_id === chapter || q.chapter_id === chapClean || (q.concept_tested && q.concept_tested.toLowerCase().includes(chapClean));
+    });
+
+    if (matchedRealQuestions.length > 0) {
+       console.log(`[Offline Bank] Found ${matchedRealQuestions.length} REAL questions for ${chapter}!`);
+       // Shuffle and pick
+       const shuffled = matchedRealQuestions.sort(() => Math.random() - 0.5);
+       const selected = shuffled.slice(0, count * 3);
+       return selected.map((q: any, index: number) => {
+         const optionsObj = {
+           A: q.option_a,
+           B: q.option_b,
+           C: q.option_c,
+           D: q.option_d
+         };
+         return {
+            id: `real-${q.chapter_id}-${Date.now()}-${index}`,
+            question_id: `real-${q.chapter_id}-${Date.now()}-${index}`,
+            node_id: q.chapter_id,
+            type: q.question_type || "MCQ",
+            exam_type: q.exam_type || "JEE",
+            difficulty: q.difficulty,
+            question_text: q.question_text,
+            options: optionsObj,
+            option_a: q.option_a,
+            option_b: q.option_b,
+            option_c: q.option_c,
+            option_d: q.option_d,
+            answer: q.correct_option,
+            correct_option: q.correct_option,
+            correct_answer: q.correct_option,
+            explanation: q.explanation,
+            explanation_text: q.explanation,
+            concept_tested: q.concept_tested,
+            is_variant: false,
+            parent_question_id: null,
+            difficultyScore: q.difficulty === 'easy' ? 4 : q.difficulty === 'medium' ? 6 : 8,
+            conceptCoverage: 0.9,
+            jeeRelevanceScore: 9.5
+         };
+       });
+    }
+
     // Default fallback (strictly within chapters of the subject)
     if (!matchedChapterKey) {
       console.warn(`[Offline Bank] Could not map "${chapClean}" to a template. Falling back to dynamic mock generation.`);
@@ -1471,9 +1518,17 @@ export function getOfflineQuestions(
       const list: UnifiedQuestion[] = [];
       const seen = new Set<string>();
       const currentTemplates = subjectDB[chapterKey] || [];
+      
+      if (currentTemplates.length === 0) return list;
 
-      for (let i = 0; i < currentTemplates.length; i++) {
-        const template = currentTemplates[i];
+      let failsafe = 0;
+      let templateIdx = 0;
+
+      while (list.length < count && failsafe < count * 10) {
+        failsafe++;
+        const template = currentTemplates[templateIdx % currentTemplates.length];
+        templateIdx++;
+        
         const result = template(difficulty);
 
         const text = result.question_text.toLowerCase();
@@ -1527,8 +1582,8 @@ export function getOfflineQuestions(
         const newCorrectKey = ['A', 'B', 'C', 'D'][correctOptIndex] as 'A' | 'B' | 'C' | 'D';
 
         list.push({
-          id: `offline-${chapterKey}-${Date.now()}-${i}-${Math.floor(Math.random() * 1000)}`,
-          question_id: `offline-${chapterKey}-${Date.now()}-${i}-${Math.floor(Math.random() * 1000)}`,
+          id: `offline-${chapterKey}-${Date.now()}-${templateIdx}-${Math.floor(Math.random() * 1000)}`,
+          question_id: `offline-${chapterKey}-${Date.now()}-${templateIdx}-${Math.floor(Math.random() * 1000)}`,
           node_id: chapter,
           type: "MCQ",
           exam_type: "JEE",
