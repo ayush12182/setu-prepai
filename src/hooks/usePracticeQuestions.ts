@@ -647,25 +647,30 @@ export const usePracticeQuestions = () => {
     examType: string = 'JEE_MAINS'
   ): Promise<SimilarQuestion[] | null> => {
     try {
-      // Direct query from DB to avoid AI generation overhead
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('chapter_id', chapterId)
-        .neq('id', originalQuestionId)
-        .limit(5);
+      // The edge function already does a direct DB query using the service role to bypass RLS.
+      // It does NOT use AI.
+      const { data, error: fnError } = await supabase.functions.invoke('get-similar-questions', {
+        body: {
+          chapterId,
+          conceptTested,
+          originalQuestionId,
+          difficulty,
+          examType,
+          count: 5
+        }
+      });
 
-      if (error) throw error;
+      if (fnError) throw fnError;
+      if (data?.error) throw new Error(data.error);
 
-      if (!data || data.length === 0) {
+      if (!data?.questions || data.questions.length === 0) {
         console.warn('[getSimilarQuestions] No similar questions found in DB for chapter:', chapterId);
         return null;
       }
 
-      return data.map((q: any) => {
-        const mapped = mapQuestionBankToInterface(q);
-        return shuffleQuestionOptions(mapped) as unknown as SimilarQuestion;
-      });
+      return (data.questions as SimilarQuestion[]).map(q =>
+        shuffleQuestionOptions(q as any) as unknown as SimilarQuestion
+      );
     } catch (err) {
       console.error('[getSimilarQuestions] Failed:', err);
       return null;
