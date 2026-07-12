@@ -49,8 +49,8 @@ function normalizeMarkdownContent(text: string): string {
 
   // 1d. SEPARATE INLINE HEADINGS (e.g. "### 3. Normal Force: The normal force...")
   // If an entire paragraph is squashed into an h3 because of a missing newline after the title.
-  // We look for a heading, some text, a colon, and then a capital letter, and split it.
-  normalized = normalized.replace(/^(#{1,6}\s+[^:\n]+:)\s+([A-Z\*\$])/gm, '$1\n\n$2');
+  // We look for a heading, some text, a colon, and then a character, and split it.
+  normalized = normalized.replace(/^(#{1,6}\s+[^:\n]+:)\s+([A-Za-z0-9\*\$])/gm, '$1\n\n$2');
 
   // --- 2. Math Normalization ---
   // Fix malformed block delimiters (e.g., \$$ to $$)
